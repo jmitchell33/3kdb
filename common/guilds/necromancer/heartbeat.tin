@@ -1,0 +1,15 @@
+#nop - heartbeat actions
+
+#var iprime_round 1;
+
+#alias {_guild_heartbeat} {
+    #NOP -- Actions to be attempted only 1x/round;
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #if {$mip[round] > 2 && $mip[round] < 6} {
+            #if {$strategy[spirithowl] && $my[necromancer][spirit-howl]} {spirithowl;#var my[necromancer][spirit-howl] 0;};
+            #if {$strategy[iprime] && $iprime_round && $my[necromancer][invoke-prime] > 0} {#var iprime_round 0;ipc;#delay 10 {#var iprime_round 1;};};
+        };
+    };
+};
+
+

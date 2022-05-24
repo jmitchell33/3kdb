@@ -1,0 +1,83 @@
+#class {priest_actions} {kill}
+#class {priest_actions} {open}
+
+#act {%w moans to you: Braaaainnnnnsssss!$} {
+    #format wineCustomer {%l} {%1};
+    createbw wine;
+    give wine to $wineCustomer;
+};
+
+#act {^Acolyte has no mana stored.$} {
+    #var my[acolyte][mana] 0;
+}
+
+#act {^The blades stop swirling and shimmer into nothingness.$} {
+    #var my[effects][blade] OFF;
+}
+
+#act {^You exercise your lore in the summonings to call forth a blade barrier.$} {
+    #var my[effects][blade] ON;
+}
+
+#act {^The golden glow around you fades away.$} {
+    glight on
+};
+
+#act {^The cobalt aura shimmers away. You feel less charismatic.$} {
+    #var my[effects][bene] OFF;
+};
+
+#act {^You enshroud Yourself in a shimmering cobalt aura.$} {
+    #var my[effects][bene] ON;
+};
+
+#act {^The divinely bright aura settles around you. You feel} {
+    #var my[effects][bless] ON;
+};
+
+#act {^You feel altogether slower as the divine blessing fades away.$} {
+    #var my[effects][bless] OFF;
+}
+
+#act {%w tugs on your sleeve persistently.}{
+    #format {mytarget}{%l}{%1};
+    !radiance $mytarget;
+};
+
+#act {%w pulls your leg!}{
+    #format {mytarget}{%l}{%1};
+    !invigorate $mytarget;
+};
+
+#act {You feel yourself slow back down to normal speed.}{
+    #var my[effects][haste] OFF;
+}
+
+#act {Wise and powerful %*, hasten my reflexes and quicken my body}{
+    #var my[effects][haste] ON;
+}
+
+#act {HASTE!}{
+    #var my[effects][haste] ON;
+}
+
+#act {You are already affected by a haste spell}{
+    #var my[effects][haste] ON;
+}
+
+#act {Suddenly, a High Guard arrives from Solaris' side to}{
+    #var {my[effects][psummon][present]}{ON};
+}
+#act {You have already summoned help.}{
+    #var {my[effects][psummon][present]}{ON};
+}
+
+#act {Suddenly, High Guard grows to mammoth size!}{
+    #var {my[effects][psummon][growth]}{ON};
+}
+#act {Animal Growth has already been cast on High Guard.}{
+    #var {my[effects][psummon][growth]}{ON};
+}
+
+
+#class {priest_actions} {close}

@@ -1,0 +1,35 @@
+#class guild_miphp kill;
+#class guild_miphp open;
+
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+	#if {$my[defs][ab] == 1}						{#var ab_string <ACA><fff>AB*<088>} 				{#var ab_string {}};
+	#if {$my[defs][blink] == 1}	{#if $defs[blink]	{#var blink_string <ACA><fff>B*<088>} 				{#var blink_string B*}} 			 {#var blink_string {}};
+	#if {$my[defs][mb] == 1}	{#if $defs[mb]		{#var mb_string <ACA><fff>MB*<088>}   				{#var mb_string MB*}}   			 {#var mb_string {}};
+	#if {$my[defs][hr] == 1}	{#if $defs[hr]		{#var hr_string <ACA><fff>HR*<088>}					{#var hr_string HR*}} 				 {#var hr_string {}};
+	#if {$my[defs][rf] == 1}	{#if $defs[rf]		{#var rf_string <ACA><fff>RF*<088>}					{#var rf_string RF*}} 				 {#var rf_string {}};
+	#if {$my[defs][cs] == 1}	{#if $defs[cs]		{#var cs_string <ACA><fff>CS*<088>}					{#var cs_string CS*}} 				 {#var cs_string {}};
+	#if {$my[defs][m] == 1}	    {#if $defs[m]		{#var masque_string <ACA><fff>M*<088>}				{#var masque_string M*}} 			 {#var masque_string {}};
+	#if {$my[defs][ag] > 0}		{#if $defs[ag]		{#var ag_string <ACA><fff>AG:$my[defs][ag]*<088>}	{#var ag_string AG:$my[defs][ag]*}} {#var ag_string {}};
+	#if {$my[defs][d] > 0}		{#if $defs[d]		{#var d_string <ACA><fff>D:$my[defs][d]*<088>}		{#var d_string D:$my[defs][d]*}} 	{#var d_string {}};
+	#if {$my[defs][fr] > 0}		{#if $defs[fr]		{#var fr_string <ACA><fff>FR:$my[defs][fr]*<088>}	{#var fr_string FR:$my[defs][fr]*}} {#var fr_string {}};
+	#if {$my[defs][v] > 0}		{#if $defs[v]		{#var v_string <ACA><fff>V:$my[defs][v]*<088>}		{#var v_string V:$my[defs][v]*}} 	 {#var v_string {}};
+	#if {$my[defs][o] > 0}		{#if $defs[om]		{#var o_string <ACA><fff>O:$my[defs][o]*<088>}		{#var o_string O:$my[defs][o]*}} 	 {#var o_string {}};
+	#if {$my[defs][pe] > 0}		{#if $defs[pe]		{#var pe_string <ACA><fff>PE:$my[defs][pe]*<088>}	{#var pe_string PE:$my[defs][pe]*}} {#var pe_string {}};
+	#if {$my[defs][pg] > 0}		{#if $defs[pg]		{#var pg_string <ACA><fff>PG:$my[defs][pg]*<088>}	{#var pg_string PG:$my[defs][pg]*}} {#var pg_string {}};
+	#if {$my[defs][pn] > 0}		{#if $defs[pn]		{#var pn_string <ACA><fff>PN:$my[defs][pn]*<088>}	{#var pn_string PN:$my[defs][pn]*}} {#var pn_string {}};
+	#if {$my[defs][pf] > 0}		{#if $defs[pf]		{#var pf_string <ACA><fff>PF:$my[defs][pf]*<088>}	{#var pf_string PF:$my[defs][pf]*}} {#var pf_string {}};
+	#if {$my[defs][ph] > 0}		{#if $defs[ph]		{#var ph_string <ACA><fff>PH:$my[defs][ph]*<088>}	{#var ph_string PH:$my[defs][ph]*}} {#var ph_string {}};
+	#if {$my[defs][hs] > 0}		{#if $defs[hs]		{#var hs_string <ACA><fff>HS:$my[defs][hs]*<088>}	{#var hs_string HS:$my[defs][hs]*}} {#var hs_string {}};
+	#if {$my[defs][es] > 0}		{#if $defs[es]		{#var es_string <ACA><fff>ES:$my[defs][es]*<088>}	{#var es_string ES:$my[defs][es]*}} {#var es_string {}};
+	#if {$my[defs][ra] > 0}							{#var ra_string <088>RA:$my[defs][ra]*<088>}		{#var ra_string {}};
+	
+	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $hr_string $fr_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
+	#replace prot_string  { } {};
+	#replace prot_string  {*} { };
+
+	#if {$my[song][rounds] > 0} {#var song_string <FFF><bbb>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
+}
+
+#class guild_miphp close;

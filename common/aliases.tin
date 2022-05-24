@@ -1,0 +1,102 @@
+#class {default_aliases} {kill}
+#class {default_aliases} {open}
+
+#alias {debug} {#debug all on};
+#alias {debugoff} {#debug all off};
+
+
+
+#alias strategy {
+    #format temp {%u} {%1};
+    #switch {"$strategy[%1]"} {
+        #case {"0"} {
+            #showme <caa>----  <fff> $temp HAS BEEN TOGGLED ON  <caa>  ----<088>;
+            #var strategy[%1] 1;
+        };
+        #case {"1"} {
+            #showme <caa>----  <fff> $temp HAS BEEN TOGGLED OFF  <caa> ----<088>;
+            #var strategy[%1] 0;
+        };
+        #default {
+            #showme <caa>----  <fff> STRATEGY NOT FOUND, CHECK SPELLING  <caa> ----<088>;
+        };
+    };
+    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
+};
+
+#alias add-strategy {
+
+    #list actionStack indexate name;
+    #list actionStack filter {} {%1};
+
+    #list test1 add {{{name} {newpower} {active} {1}}};
+    #list test1 indexate name;
+    #list test1 find {{newpower}} {tempRes};
+    #showme $tempRes;
+
+    #showme <caa>----  <fff> %1 has been added and toggled ON  <caa>  ----<088>;
+
+    #list strategy add {{{name} {%1} {active} {1}}};
+    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
+};
+
+#alias rem-strategy {
+    #showme <caa>----  <fff> %1 is no longer a strategy  <caa>  ----<088>;
+    #unvar newList;
+
+    #NOP #foreach $strategy[%*] {;
+#NOP         #if ;
+   #nop };
+    #var strategy[%1] 1;
+    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
+};
+
+#var actions_stacked 0;
+
+#alias do_action {
+    #foreach $actionStack[%*] action {
+        $action[action];
+    };
+    #list actionStack clear;
+    #var actions_stacked 0;
+};
+
+#alias add_action {
+    #var tmp %1;
+    #var action_found 0;
+    #foreach $actionStack[%*] action {
+        #regexp {"$tmp[name]"} {"$action[name]"} {
+            #var action_found 1;
+        };
+    };
+    #delay 0.2 {
+        #if !$action_found {
+            #list actionStack add {%1};
+        }
+    };
+};
+
+#alias remove_action {
+    #var tmp %1;
+    #list actionStack indexate name;
+    #list actionStack filter {} {%1};
+    #if {&actionStack[] > 0} {#var actions_stacked 1;} {#var actions_stacked 0;};
+};
+
+#var beepon 1;
+#alias {beep} {#if {$beepon == 1} { #bell; }};
+#alias {beepon} {#var beepon 1;#show Beep on.;};
+#alias {beepoff} {#var beepon 0;#show Beep off.;};
+
+#alias {grep} {#grep {%1} {}};
+
+#ALIAS {ld} {
+    #class global open;
+    #map get roomvnum curvnum;
+    #var strategy $strategy;
+    #class global close;
+    #class global write chars/$user/vars.tin;
+    #delay 1 {#end};
+};
+
+#class {default_aliases} {close}

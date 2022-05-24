@@ -1,0 +1,36 @@
+#class {autoassemble} {open}
+
+#var {craft[quality]} {{1}{legendary}{2}{superior}{3}{good}{4}{average}{5}{poor}{6}{crude}{7}{worthless}};
+
+#act {%1 Of %2 %s\|%s%3%s\|%s%4%s\|%s%5%s\|%s%6%s\|%s%7%s\|%s%8%s\|%s%9%s\|%s%10%s\|}
+{
+	#var craft[num] 0;
+	#var {craft[quantity]} {%4;%5;%6;%7;%8;%9;%10};
+	#replace {$craft[quantity]} { } {};
+	#format {craft[type]} {%l} {%2};
+	#if {"%1" == "Essence"} {#var craft[shape] essence;assembler};
+	#if {"%1" == "Fragment"} {#var craft[shape] fragment;assembler};
+};
+
+#alias {assembler} {
+	#foreach {$craft[quantity]} {craftcount} 
+	{
+		#math {craft[num]} {$craft[num] + 1};
+		#if {$craftcount >= 5} {
+			#while {$craftcount >= 5}
+			{
+				#5 unstash $craft[quality][$craft[num]] $craft[shape] of $craft[type];
+				#math {craftcount} {$craftcount - 5};
+				assemble $craft[shape] of $craft[type];
+				stash all
+			};
+		}
+		
+	}
+};
+
+#alias {killassembler} {
+    #class {autoassemble} {kill}
+};
+
+#class {autoassemble} {close}

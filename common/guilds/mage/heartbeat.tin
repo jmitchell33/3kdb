@@ -1,0 +1,175 @@
+#class {mage_heartbeat} {kill}
+#class {mage_heartbeat} {open}
+
+#var dismiss_toggle 0;
+#var pref_summon 0;
+
+#act {^-M-_%* [summons] \(%d\%\).$} {
+	#if $update_summons {
+		#math num_summons {$num_summons + 1};
+		#foreach {$hp_summon_types} {summon} {
+			#regexp {%1} {$summon} {
+				#list active_summons add {{ {name}{$summon} {health}{%2} {count}{1} {avg_dmg}{$summon_damage[$summon][avg_dmg]} {accuracy}{$summon_damage[$summon][accuracy]} }};
+				#if {"$summon" != "$preferred_summon" && !$dismiss_toggle && $pref_summon} {
+					say $summon, begone;
+					ms7;
+					#var dismiss_toggle 1;
+				};
+			};
+		};
+	};
+} {1};
+
+#act {^-M-_%* [summons] \(%d\%\) \{%d\}.$} {
+	#if $update_summons {
+		#math num_summons {$num_summons + %3};
+		#foreach {$hp_summon_types} {summon} {
+			#regexp {%1} {$summon} {
+				#list active_summons add {{{name} {$summon} {health}{%2} {count}{%3} {avg_dmg}{$summon_damage[$summon][avg_dmg]} {accuracy}{$summon_damage[$summon][accuracy]} }};
+				#if {"$summon" != "$preferred_summon" && !$dismiss_toggle && $pref_summon} {
+					say $summon, begone;
+					ms7;
+					#var dismiss_toggle 1;
+				};
+			};
+		};
+	};
+} {1};
+
+#act {^-M-_%* [$summon_string] \(%d\%\) \{%d\}.$} {
+	#if $update_summons {
+		#math num_summons {$num_summons + %3};
+		#foreach {$hp_summon_types} {summon} {
+			#regexp {%1} {$summon} {
+				#list active_summons add {{{name} {$summon} {health}{%2} {count}{%3}}};
+				#if {"$summon" != "$preferred_summon" && !$dismiss_toggle && $pref_summon} {
+					say $summon, begone;
+					ms7;
+					#var dismiss_toggle 1;
+				};
+			};
+		};
+	};
+} {1};
+
+#alias {_update_summons} {
+	#var ms7_toggle 1;
+	#var update_summons 1;
+	#var num_summons 0;
+	#unvar active_summons;
+	#var dismiss_toggle 0;
+	look;
+	#delay 2 {#var update_summons 0;};
+	#if {$my[immersion[rounds] > 0} {
+		#delay 10 {#var ms7_toggle 0};
+	} {
+		#delay 3 {#var ms7_toggle 0};
+	};
+}
+
+#ticker summons {#if {!$idle_flag && $summoner} {_update_summons}} 60;
+
+#alias {_guild_heartbeat} {
+	#if !$idle_flag {
+		#if $defs[MB] {#if !$my[prots][MB] {cast mindblank} {#nop}};
+		#if $defs[PA] {#if !$my[prots][PA] {cast prismatic aura} {#nop}};
+		#if $defs[PS] {#if !$my[prots][PS] {cast prismatic sphere} {#nop}};
+		#if $defs[A]  {#if !$my[prots][A]  {cast armor} {#nop}};
+		#if $defs[MG] {#if !$my[prots][MG] {cast major globe} {#nop}};
+		#if $defs[M]  {#if !$my[prots][M]  {cast mantle} {#nop}};
+		#if $defs[mg] {#if !$my[prots][mg] {cast minor globe} {#nop}};
+		#if $defs[ms] {#if !$my[prots][MS] {cast magnificent shield} {#nop}};
+		#if $defs[SS] {#if !$my[prots][SS] {cast stoneskin} {#nop}};
+		#if $defs[rs] {#if !$my[prots][RS] {cast rhino skin} {#nop}};
+		#if $defs[pe] {#if !$my[prots][PE] {cast protection from evil} {#nop}};
+		#if $defs[pg] {#if !$my[prots][PG] {cast protection from good} {#nop}};
+		#if $defs[shield] {#if !$my[prots][S] {cast shield} {#nop}};
+		#if $defs[blink] {#if !$my[prots][B] {cast blink} {#nop}};
+
+		#if !$deeppocket {#if {$my[sp][current] > 500} {cast extension 3;cast deeppockets}};
+	} {#NOP;};
+
+	#if {!$idle_flag && $mip[round] == 0} {
+		#if {!$studying && $hpbar_mc < 99} {
+			study spellbook;
+		};
+	};
+
+	#NOP -- Heartbeat actions that should only be attempted once per round;
+    #if {!$idle_flag && $action_round < $mip[round]} {
+
+		#if {$mip[round] < 3} {
+			#NOP -- Try to cast slow if in the beginning of a fight;
+			#if $strategy[slow] {
+				cast slow;
+			};
+		};
+
+        
+        #if {$my[golem][current] && $golem_toggle && $strategy[golem]} {create_golem};
+        
+		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
+        #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
+        #if {$my[super][current] && $my[gp1][current] > $monitors[saturation-corpse]} {cast explosive release};
+        #if {$my[gem] < 80 && !$go_fetch} {#var go_fetch 1;ffetch gem};
+
+        #if {$strategy[slow] && $mob[slow] < 1} {
+            cast slow;
+        };
+        
+        #if {$strategy[edrain] && $mob[edrain] < 1} {
+            cast energy drain;
+        };
+
+        #if {$strategy[atrophy] && $mob[atrophy] < 1} {
+            cast mystic atrophy;
+        };
+
+        #if {$toggle_spelltap && $strategy[spelltap] && $sp_percent > 70} {
+            #var toggle_spelltap 0;
+            cast spell tap never;
+        };
+
+        #if {!$toggle_spelltap && $strategy[spelltap] && $sp_percent < 30} {
+            #var toggle_spelltap 1;
+            cast spell tap always;
+        };
+
+        #if {!$self_haste && $sp_percent > 30 && $strategy[haste]} {
+            cast haste;
+            #var self_haste 1;
+        };
+
+        #if {!$golem_haste && "$my[summon][golem]" != "0" && $strategy[haste]} {
+            cast haste on golem;
+        };
+
+        #NOP turn ash off if using MI;
+        #if {$my[immersion][rounds] > 0 && $ash > 0} {
+            ash off;
+        };
+
+        #if {$summoner} {
+            #if {!$summons_haste && $sp_percent > 30} {
+                cast haste on summons;
+            };
+            #if {$num_summons < $summons_desired && !$ms7_toggle} {
+                #var ms7_toggle 1;
+                ms7;
+                #NOP -- #math summons_short {13 - $num_summons};
+                #NOP -- #math summon_sp_required {455 * $summons_short};
+                #NOP -- #math summon_attempts {($my[sp][current] - $summon_sp_minimum) / 455 };
+                #NOP -- #loop 1 $summon_attempts i {
+                #NOP --     #math summon_delay {$i * 2};
+                #NOP --     #delay {$summon_delay} {ms7};
+                #NOP -- };
+            };
+            #if {$my[immersion][rounds] > 0 && $immersion_casts} {
+                #if !$summons_haste {cast haste on summons;};
+                #if {$num_summons < $summons_desired && !$ms7_toggle} {_update_summons;};
+            };
+        };
+    };
+};
+
+#class {mage_heartbeat} {close}

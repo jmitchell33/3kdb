@@ -1,0 +1,72 @@
+#class {mage_aliases} {kill}
+#class {mage_aliases} {open}
+
+#NOP --- MAGE SUMMONING ALIASES;
+#alias {create_golem} {
+    examine materials;
+    #action {^There's bits of the following materials remaining:$} {
+        #action {^  {\w+}} {#unaction {^  {\w+}};cast create golem %%%1;} {2};
+        #var golem_toggle 0;
+    };
+    #delay 2 {say golem, you are now in group golem/assist always/stfu/ibc}
+};
+
+#alias {str_party} {
+    members;
+    #delay 2 {#foreach $party[member][%*] member {cast giant strength $member[name-lower]};};
+};
+
+#NOP --- MAGE DEFENSE ALIASES;
+#alias {clear_align} {#var defs[pe] 0;#var defs[pg] 0};
+#alias {clear_prots} {#unvar defs};
+
+#alias {check_extension} {
+    #if {$my[sp][current] > 500} {
+        cast extension 3;
+    }
+};
+
+#alias gc_ss {cast greater contingency as stoneskin#cast stoneskin;};
+#alias gc_mg {cast greater contingency as major globe#cast major globe;};
+#alias gc_shield {cast greater contingency as shield#cast magnificent shield;};
+#alias gc_armor {cast greater contingency as armor#cast armor;};
+#alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;};
+#alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;};
+
+
+#alias {prots_mb} {check_extension;cast mindblank;#var defs[MB] 1;echo_prots_mb};
+#alias {prots_pa} {check_extension;cast prismatic aura;#var defs[PA] 1;echo_prots_pa};
+#alias {prots_ps} {check_extension;cast prismatic sphere;#var defs[PS] 1;echo_prots_ps};
+#alias {prots_MG} {check_extension;cast major globe;#var defs[MG] 1;echo_prots_MG};
+#alias {prots_mg} {check_extension;cast minor globe;#var defs[mg] 1;echo_prots_mg};
+#alias {prots_ms} {check_extension;cast magnificent shield;#var defs[ms] 1;echo_prots_ms};
+#alias {prots_pfe} {check_extension;cast protection from evil;clear_align;#var defs[pe] 1;echo_prots_pfe};
+#alias {prots_pfg} {check_extension;cast protection from good;clear_align;#var defs[pg] 1;echo_prots_pfg};
+#alias {prots_rs} {check_extension;cast rhino skin;clear_align;#var defs[rs] 1;echo_prots_rs};
+#alias {prots_ss} {check_extension;cast stoneskin;#var defs[SS] 1;echo_prots_ss};
+#alias {prots_shield} {check_extension;cast shield;#var defs[shield] 1;echo_prots_shield};
+#alias {prots_armor} {check_extension;cast armor;#var defs[A] 1;echo_prots_armor};
+#alias {prots_blink} {check_extension;cast blink;#var defs[blink] 1;echo_prots_blink};
+
+#NOP ---THIS SECTION IS FOR FORMATTING FOR SPELL/ETC MAINTENANCE
+#alias {echo_divider1} {#echo {========================================================}};
+#alias {echo_clear_prots} {#echo {--------------- CLEARING DEFENSE VARIABLES --------------}};
+#alias {echo_divider2} {#echo {+++++++++++++++++++++++++++++++++++++++++++++++++++++++++}};
+#alias {echo_prots_header} {#echo {+++++++++++++++  ACTIVE DEFENSES INCLUDE:  ++++++++++++++}};
+#alias {echo_prots_mb} {#echo {+++++++++++++++  MIND BLANK               ++++++++++++++}};
+#alias {echo_prots_pa} {#echo {+++++++++++++++  PRISMATIC AURA           ++++++++++++++}};
+#alias {echo_prots_ps} {#echo {+++++++++++++++  PRISMATIC SPHERE         ++++++++++++++}};
+#alias {echo_prots_MG} {#echo {+++++++++++++++  MAJOR GLOBE              ++++++++++++++}};
+#alias {echo_prots_mg} {#echo {+++++++++++++++  MINOR GLOBE              ++++++++++++++}};
+#alias {echo_prots_ms} {#echo {+++++++++++++++  MAGNIFICENT SHIELD       ++++++++++++++}};
+#alias {echo_prots_rs} {#echo {+++++++++++++++  RHINO SKIN                ++++++++++++++}};
+#alias {echo_prots_ss} {#echo {+++++++++++++++  STONE SKIN                ++++++++++++++}};
+#alias {echo_prots_pfe} {#echo {+++++++++++++++  PROTECTION FROM EVIL      ++++++++++++++}};
+#alias {echo_prots_pfg} {#echo {+++++++++++++++  PROTECTION FROM GOOD      ++++++++++++++}};
+#alias {echo_prots_blink} {#echo {+++++++++++++++  BLINK                     ++++++++++++++}};
+#alias {echo_prots_armor} {#echo {+++++++++++++++  ARMOR                      ++++++++++++++}};
+#alias {echo_prots_shield} {#echo {+++++++++++++++  SHIELD                      ++++++++++++++}};
+
+
+
+#class {mage_aliases} {close}

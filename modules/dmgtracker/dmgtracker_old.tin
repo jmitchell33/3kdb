@@ -1,0 +1,143 @@
+#class {dmgtracker} {kill}
+#class {dmgtracker} {open}
+
+#var big_game_hunter 0;
+#var assassin 0;
+#var tactician 0;
+#var magician 0;
+
+#var cmbt[curr] 0;
+#var cmbt[avg] 0;
+#var cmbt[rnd] 0;
+#var cmbt[ravg] 0;
+#var cmbt[high] 0;
+#var cmbt[dmg] 0;
+
+#var golem_dmg[curr] 0;
+#var golem_dmg[avg] 0;
+#var golem_dmg[rnd] 0;
+#var golem_dmg[ravg] 0;
+#var golem_dmg[high] 0;
+#var golem_dmg[dmg] 0;
+
+#var spell_dmg[curr] 0;
+#var spell_dmg[avg] 0;
+#var spell_dmg[rnd] 0;
+#var spell_dmg[ravg] 0;
+#var spell_dmg[dmg] 0;
+#var spell_dmg[high] 0;
+
+#var dmgt[curr] 0;
+#var dmgt[avg] 0;
+#var dmgt[rnd] 0;
+#var dmgt[ravg] 0;
+#var dmgt[high] 0;
+#var dmgt[dmg] 0;
+
+#NOP -- Toggles for profession boosts;
+#act {^Your crazed ambition overflows!$} {#var big_game_hunter 1;};
+#act {^Your wild ambition takes a back seat to prudence.$} {#var big_game_hunter 0;};
+
+#ACTION {^[%d] %* {mind warp|sunspear|incinerate|frostbite}%*} {
+    #var incombat 1;
+    #math {spell_dmg[ravg]} {($spell_dmg[ravg] + %1) / 2};
+    #var spell_dmg[curr] %1;
+    #math spell_dmg[dmg] {$spell_dmg[dmg] + %1};
+    #math spell_dmg[rnd] {$spell_dmg[rnd] + 1};
+    #math spell_dmg[avg] {$spell_dmg[dmg] / $spell_dmg[rnd]};
+    #math new_best {$spell_dmg[curr] > $spell_dmg[high]};
+    #if $new_best {#var spell_dmg[high] $spell_dmg[curr];#SHOWME NEW BEST SPELL DMG: $spell_dmg[high];};
+
+    #math spell_dmg[%3][dmg] {$spell_dmg[%3][dmg] + $spell_dmg[dmg]};
+    #math spell_dmg[%3][rnd] {$spell_dmg[%3][rnd] + 1};
+    #math spell_dmg[%3][avg] {$spell_dmg[%3][dmg] / $spell_dmg[%3][rnd]};
+
+    #math new_best {$spell_dmg[curr] > $spell_dmg[%3][high]};
+    #if $new_best {#var spell_dmg[%3][high] $spell_dmg[curr]};
+    
+} {2};
+    
+#act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
+    #var incombat 1;
+
+    #math {cmbt[ravg]} {($cmbt[ravg] + %3) / 2};
+    #var cmbt[curr] %5;
+    #math cmbt[dmg] {$cmbt[dmg] + %5};
+    #math cmbt[rnd] {$cmbt[rnd] + 1};
+    #math {cmbt[avg]} {$cmbt[dmg] / $cmbt[rnd]};
+
+    #math cmbt[hits] {$cmbt[hits] + %3};
+    #math cmbt[avg_hits] {$cmbt[hits] / $cmbt[rnd]};
+
+    #math new_best {$cmbt[curr] > $cmbt[high]};
+    #if $new_best {#var cmbt[high] $cmbt[curr];#showme NEW BEST ROUND: $cmbt[high];};
+} {2};
+
+#act {{^El Jefe (.*) hit for (\d+) damage.$}} {
+    #var incombat 1;
+    #math {golem_dmg[ravg]} {($golem_dmg[ravg] + %3) / 2};
+    #var golem_dmg[curr] %3;#math golem_dmg[dmg] {$golem_dmg[dmg] + %3};
+    #math golem_dmg[rnd] {$golem_dmg[rnd] + 1};
+    #math {golem_dmg[avg]} {$golem_dmg[dmg] / $golem_dmg[rnd]};
+
+    #math new_best {$golem_dmg[curr] > $golem_dmg[high]};
+    #if $new_best {#var golem_dmg[high] $golem_dmg[curr]};
+} {2};
+    
+#act {^Your blow was deflected. (.*)$} {
+    #var incombat 1;
+    #var cmbt[curr] 0;
+    #math cmbt[rnd] {$cmbt[rnd] + 1};
+    #math {cmbt[avg]} {$cmbt[dmg] / $cmbt[rnd]};
+} {2};
+
+#act {{^(.*) hits you for (\d+) damage\!$}} {
+    #var incombat 1;
+    #math {dmgt[ravg]} {($dmgt[ravg] + %3) / 2};
+    #var dmgt[curr] %3;
+    #math dmgt[dmg] {$dmgt[dmg] + %3};
+    #math dmgt[rnd] {$dmgt[rnd] + 1};
+    #math {dmgt[avg]} {$dmgt[dmg] / $dmgt[rnd]};
+} {2};
+    
+#alias {dstats} {
+    #show {\nAverage damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.};
+    #show {\Best damage : $cmbt[high] damage};
+    #if {$guild == "mage"} {
+        #show {\nAverage Spell damage : $spell_dmg[avg] over $spell_dmg[rnd] rounds.  Total: $spell_dmg[dmg] damage.};
+        #show {\High Spell damage : $spell_dmg[high]};
+        #show {\nAverage Golem damage : $golem_dmg[avg] over $golem_dmg[rnd] rounds.  Total: $golem_dmg[dmg] damage.};
+        #show {\High Golem damage : $golem_dmg[high]};
+    }
+    #show {Damage taken   : $dmgt[avg] over $dmgt[rnd] rounds.  Total: $dmgt[dmg] damage.\n};
+
+    #math {dog[avg]} {$dog[dmg] / $dog[rnd]};
+    #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
+    #nop showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
+};
+#alias {ds} {dstats};
+
+#alias {dreset} {
+    #var {spell_dmg[dmg]} 0;
+    #var {spell_dmg[rnd]} 0;
+    #var {spell_dmg[high]} 0;
+    #var {golem_dmg[dmg]} 0;
+    #var {golem_dmg[rnd]} 0;
+    #var {golem_dmg[high]} 0;
+    #var {cmbt[hits]} 0;
+    #var {cmbt[dmg]} 0;
+    #var {cmbt[rnd]} 0;
+    #var {cmbt[high]} 0;
+    #var {dmgt[dmg]} 0;
+    #var {dmgt[rnd]} 0;
+    #var {dmgt[high]} 0;
+    #var dog[rnd] 0;
+    #var dog[dmg] 0;
+};
+
+register_module {dmgtracker};
+register_module_info {dmgtracker} {
+    ds;
+};
+
+#class {dmgtracker} {close}

@@ -1,0 +1,25 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Westersea Sewer};
+
+#var check_room 0;
+
+#var bot_message_1 '----  WSEA JELLIES    ----';
+
+#showme $bot_message_1;
+
+#alias .pre_fight_check {#nop;};
+
+.pre_bot_check;
+
+#var {botpath} {e;e;w;n;s;w;w;w;n;s;w;n;w;e;s;w;w;n;s;s;n;e;e;s;w;e;n;e;s;d;s;s;n;se;nw;ne;sw;e;e;e;w;w;w;n;u;n;e;e};
+
+#act {^-M-_{A massive ochre jelly}%*.$} {
+	#if {"%1" == "A massive ochre jelly"} {@botSetMobActions{jelly};};
+	.check_monster;
+} {2};
+
+#class {bot} {close}
+
+#read common/bot/generic.tin

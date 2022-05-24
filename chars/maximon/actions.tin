@@ -1,0 +1,74 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#var corpse_delay 1;
+
+#ACTION {^Owie. That hurt!} {
+	#if !$corpse_delay {
+		#var corpse_delay 1;
+		corpse_select;
+		#delay {4} {offer corpse;offer corpse};
+		#delay {4} {#var corpse_delay 0};
+	};
+} {1};
+
+
+#action {^%1 gives you an air-five!$} {#format {heal_target} {%l} {%1};radiance $heal_target};
+#action {^%1 gives you a high-five!$} {#format {heal_target} {%l} {%1};invigorate $heal_target};
+
+#action {^Out of nowhere a crazed hockey fan leaps towards the Cup.} {offer corpse};
+
+#action {^The %1 falls to the ground.$} {
+    #if $vorpal[donate] {
+        #var vorpal[item] 1;
+        #format vorpal[item_name] {%l} {%1};
+        get $vorpal[item_name];
+        .pause;
+    };
+};
+
+#alias vorpal_donate {
+    #path save forward path;
+    #path get position pos;
+    #if {"$area" == "Section Z"} {
+        pause game;
+        #map goto 24785;
+        #map get roomvnum donate_go_back;
+        go priest_box;
+        #3 {donate limb};
+        #3 {donate head};
+        #map run $donate_go_back;
+        #path load $path;
+        #path goto $pos;
+        play;
+        unpause game;
+    } {
+        #map get roomvnum donate_go_back;
+        go priest_box;
+        #3 {donate limb};
+        #3 {donate head};
+        #map run $donate_go_back;
+        #path load $path;
+        #path goto $pos;
+    };
+    #var bot[paused] 0;
+    #var vorpal[item] 0;
+}
+
+#act {killing blow} {
+    corpse_trig;
+    #var rounds_fought $mip[round];
+    #showme {--- Fight Stats ---};
+    #showme {--- ----------- ---};
+    #showme {--- Killed :: $enemy[name] };
+    #showme {--- Avg. GXP :: $average_fight_gxp };
+    #showme {--- Rounds :: $rounds_fought };
+    #delay .2 {#var total_fight_gxp 0};
+}
+
+#NOP --- GENERAL MISC;
+#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
+
+
+
+#class {player_actions} {close}

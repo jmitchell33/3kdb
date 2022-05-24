@@ -1,0 +1,66 @@
+#alias {eval} {
+    .stop;
+    .enableEval;
+    exa %1;
+};
+
+/* caught armour eval values */
+#var isBreakable 0;
+
+/* setup actions for catching eval */
+#alias {.enableEval} {
+
+    #act {^The (\w+) is in (\w+) condition\.$} {.endDescCap;#var isBreakable 1;};
+
+    #nop start capturing everything...;
+    #act {%%%0} { #SHOW OUTPUT; };
+
+    .evalPrompt;
+};
+
+#alias {.disableEval} {
+    #unact {^>$};
+    #unact {%%%0};
+    #show eval disabled;
+};
+
+#alias {.endDescCap} {
+    #unact {%%%0};
+    #show end desc cap;
+};
+
+#alias {.evalPrompt} {
+    #act {^>$} {#show eval prompt.;.disableEval}
+};
+
+/*
+*Frosted helmet of Aylin (worn on head)
+Magnificently crafted, this steel helmet has an icy shimmer to it.
+Legend has it that this helmet was worn by the paladin Aylin in his
+battles against the Mordon.  You feel a compelling urge to rub this
+helmet for good luck.
+This item is bound to you.
+The helmet is in perfect condition.
+It has a magical glow about it.
+This armor provides special defense against melee attacks.
+This armor has the following resistances:
+30 edged, 30 blunt, 3 ice, 20 electric, 15 energy, 15 radiation
+This looks like it will wear out in sixty-nine weeks and five days.
+ This armor has: The mark of Zorbaine < ice reforged to defense (lots) >
+It doesn't look too heavy.
+*/
+
+/* 
+*A purple bead necklace {armoured} (worn around neck)
+   This necklace set with heavily armoured spherical purple beads is a
+Bouvier family heirloom!
+The amulet is in perfect condition.
+It has a magical glow about it.
+This armor provides special defense against melee attacks.
+This armor has the following resistances:
+20 edged, 20 blunt, 20 fire, 6 ice, 5 acid, 5 electric, 1 mind, 1 energy, 1 poison, 1 radiation
+This looks the same as when you put it on.
+You must be level 10 to wear this.
+ This armor has: The mark of Zorbaine < ice reforged to defense (some) >
+It looks light.
+*/

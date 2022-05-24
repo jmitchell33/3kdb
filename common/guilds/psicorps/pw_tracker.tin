@@ -1,0 +1,31 @@
+#class {psicorps_pw_tracker} {kill}
+#class {psicorps_pw_tracker} {open}
+
+#alias {reset_pw_tracking} {
+    #var pw[hit_count] 0;
+    #var pw[pen_count] 0;
+};
+
+#alias {start_pw_tracking} {
+    #act {^You strike} {
+        #math {pw[hit_count]} {$pw[hit_count] + 1};
+    };
+
+    #act {^You drive your attack past} {
+        #buffer get temp -1;
+        #if {{$temp} == {You strike %*}}
+        {
+            #math {pw[pen_count]} {$pw[pen_count] + 1};
+            #showme MATCHED penetrate via psiwield;
+        };
+    };
+};
+
+#alias {stop_pw_tracking} {
+    #unact {^You strike};
+    #unact {^You drive your attack past};
+};
+
+reset_pw_tracking;
+
+#class {psicorps_pw_tracker} {close}

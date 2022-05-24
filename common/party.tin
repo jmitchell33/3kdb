@@ -1,0 +1,246 @@
+#class common_party kill
+#class common_party open
+
+#action {^You are already assisting %w.$} {
+    #var addItem 1;
+    #format temp {%l} {%1};
+    #foreach $cassist[member][%*] member {
+        #if {"$member[name]" == "%1"} {
+            #var addItem 0;
+        };
+    };
+    #if $addItem {
+        #var cassist[member][%1][name] %1;
+        #var cassist[member][%1][name-lower] $temp;
+        #var cassist[member][%1][active] 1;
+    } {
+        #var cassist[member][%1][active] 1;
+    };
+};
+
+#action {^You are now assisting %w.$} {
+    #var addItem 1;
+    #format temp {%l} {%1};
+    #foreach $cassist[member][%*] member {
+        #if {"$member[name]" == "%1"} {
+            #var addItem 0;
+        };
+    };
+    #if $addItem {
+        #var cassist[member][%1][name] %1;
+        #var cassist[member][%1][name-lower] $temp;
+        #var cassist[member][%1][active] 1;
+    } {
+        #var cassist[member][%1][active] 1;
+    };
+};
+
+#action {^Cleared.$} {
+    #foreach $cassist[member][%*] member {
+        #var cassist[member][%1][active] 0;
+    };
+};
+
+#action {^You've declared your dislike for %w...$} {
+    #foreach $cassist[member][%*] member {
+        #if {"$member[name]" == "%1"} {
+            #var cassist[member][%1][active] 0;
+        };
+    };
+};
+
+#alias {members} {
+    #action {%w%s%w%s[%*/%*] [%*/%*]%s%d%s%d%s%d} {
+        #if {"%%1" != "Name"} {
+            #format party[member][%%1][name-lower] {%l} {%%1};
+            #var party[member][%%1][name] %%1;
+            #var party[member][%%1][kills] 0;
+        };
+    };
+    #send {members};
+    #delay 2 {#unaction {%w%s%w%s[%*/%*] [%*/%*]%s%d%s%d%s%d}};
+}
+
+#NOP -- 3kdb reporting stuff;
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w corpses} {
+    #if {"%2" == "bot"} {
+        #if {!$idle_flag && $bot[active]} {#delay .2 {ptell $corpse_string};};
+    };
+    #if {"%2" == "$user"} {
+        #if {!$idle_flag} {#delay .2 {ptell $corpse_string};};
+    };
+} {2};
+
+#NOP -- ROOM VNUM REPORTING;
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w vnum} {
+    #if {"%2" == "$user" && !$idle_flag} {
+        #map get roomvnum temp_vnum;
+        ptell My current vnum is $temp_vnum;
+    };
+};
+
+#NOP -- CORPSE SHARING AND REPORTING;
+#var gimme_corpses 1;
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w corpses {[-a-zA-Z]*}} {
+    #if {"%2" == "$user"} {
+        #if {!$idle_flag && $gimme_corpses} { 
+            #if {"%3" == "gimme-coffin"} {
+                #var gimme_corpses 0;
+                ptell Attempting to unwrap 10 corpses;
+                #10 unwrap;
+                #delay .1 {i};
+                #delay 4 {#var gimme_corpses 1};
+            };
+            #if {"%3" == "gimme-freezer"} {
+                #var gimme_corpses 0;
+                ptell Attempting to deslab 10 corpses;
+                #10 deslab;
+                #delay .1 {i};
+                #delay 4 {#var gimme_corpses 1};
+            };
+            #if {"%3" == "gimme-cooler"} {
+                #var gimme_corpses 0;
+                ptell Attempting to uncooler 10 corpses;
+                #10 uncooler corpse;
+                #delay .1 {examine cooler};
+                #delay 4 {#var gimme_corpses 1};
+            };
+        };
+    };
+    #if {"%2" == "bot"} {
+        #if {!$idle_flag && $bot[active] && $gimme_corpses} {
+            #if {"%3" == "gimme-coffin"} {
+                #var gimme_corpses 0;
+                ptell Attempting to unwrap 10 corpses;
+                #10 unwrap;
+                #delay .1 {i};
+                #delay 4 {#var gimme_corpses 1};
+            };
+            #if {"%3" == "gimme-freezer"} {
+                #var gimme_corpses 0;
+                ptell Attempting to deslab 10 corpses;
+                #10 deslab;
+                #delay .1 {i};
+                #delay 4 {#var gimme_corpses 1};
+            };
+            #if {"%3" == "gimme-cooler"} {
+                #var gimme_corpses 0;
+                ptell Attempting to uncooler 10 corpses;
+                #10 uncooler corpse;
+                #delay .1 {examine cooler};
+                #delay 4 {#var gimme_corpses 1};
+            };
+        };
+    };
+} {1};
+
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot status} {
+    #if {$bot[active] && !$idle_flag} {
+        #format {bot[report-time]} {%T} {};
+        #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
+        #if {$bot[delta-time] > 3600} {
+            #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
+            #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
+            thousandsFormatNumber bot[delta-rate];
+            #var xp_rate_str $bot[delta-rate] ($bot[delta-time] Hrs);
+        } {
+            #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
+            #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
+            thousandsFormatNumber bot[delta-rate];
+            #var xp_rate_str $bot[delta-rate] ($bot[delta-time] mins);
+        };
+        #if {!$idle_flag && $bot[active]} {
+            #var temp_xp $bot[stats][xp];
+            thousandsFormatNumber temp_xp;
+            ptell Progress: $bot_current_room/$bot_total_rooms ($bot_progress%) Mobs Killed: $bot[stats][mobs]  XP Gained: $temp_xp  XP Rate/Hr: $xp_rate_str;
+        };
+    };
+} {1};
+
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot standings} {
+    #if {$bot[active] && !$idle_flag} {
+        #var total_kills 0;
+        #var other_kills 0;
+        #var other_member 0;
+        ptell --------------- CURRENT BOT STANDINGS ---------------;
+        #format {temp_name} {%-25s} {------    Name};
+        #format {temp_kills} {%+27s} {Kills    ------};
+        ptell $temp_name $temp_kills;
+
+        #foreach $party[member][%*] idx {
+            #if {"$idx[name]" == ""} {
+                #math other_kills {$other_kills + $idx[kills]};
+                #var other_member 1;
+            };
+            #math total_kills {$total_kills + $idx[kills]};
+        };
+
+        #foreach $party[member][%*] idx {
+            #if {"$idx[name]" != ""} {
+                #format {temp_name} {%-25s} {------    $idx[name]};
+                #format {temp_kills} {%+27s} {$idx[kills]    ------};
+                ptell $temp_name $temp_kills;
+            };
+        };
+
+
+        #if {$other_member} {
+            #format {temp_name} {%-25s} {------    Unassigned};
+            #format {temp_kills} {%+27s} {$other_kills    ------};
+            ptell $temp_name $temp_kills;
+        };
+
+        #format {temp_name} {%-25s} {------    Total};
+        #format {temp_kills} {%+27s} {$total_kills    ------};
+        ptell $temp_name $temp_kills;
+        ptell -----------------------------------------------------;
+    }
+} {1};
+
+#alias {reset_standings} {
+    #unvar party;
+    members;
+};
+
+
+#action {%w dealt the killing blow to %*.} {
+    #math party[member][%1][kills] {$party[member][%1][kills] + 1};
+} {5};
+
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot path-find} {
+    #if {!$idle_flag && $bot[active]} {
+        #unvar tempPath;
+        #unvar botPath;
+        #path get position position;
+        #math position {$position - 1};
+        #path save forward tempPath;
+        #list tempPath create {$tempPath};
+        #var botPath {Path to find me is: };
+        #foreach {$tempPath[+1..$position]} {dir} {#cat botPath {$dir;}};
+        #delay .2 {ptell ${botPath}};
+    };
+} {1};
+
+#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot help} {
+    #if {!$idle_flag && $bot[active]} {
+        #delay .2 {
+            ptell ---------------------------------------------------;
+            ptell -----            3kdb Bot Helpers             -----;
+            ptell -----                                         -----;
+            ptell -----     status: XP Report & Progress Report -----;
+            ptell -----  standings: Who's puttin in the work?   -----;
+            ptell -----  path-find: Directions to find leader   -----;
+            ptell -----    corpses: Report corpse count         -----;
+            ptell -----       Add "gimme-x" to attempt to       -----;
+            ptell -----       deliver 10 corpses, such as:      -----;
+            ptell -----         corpses gimme-coffin            -----;
+            ptell -----         corpses gimme-freezer           -----;
+            ptell -----         corpses gimme-cooler            -----;
+            ptell -----                                         -----;
+            ptell ---------------------------------------------------;
+        };
+    };
+} {1};
+
+
+#class common_party close

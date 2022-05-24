@@ -1,0 +1,198 @@
+#class {transmuter} {kill}
+#class {transmuter} {open}
+
+#NOP -----------------------------------------------------------;
+#NOP -----------------------------------------------------------;
+#NOP -----           Oscar's Deluxe Transmuter            ------;
+#NOP -----------------------------------------------------------;
+#NOP -----------------------------------------------------------;
+
+#NOP        syntax example: transmute_burn consolidate;
+
+#NOP        Valid parameters include:;
+#NOP        consolidate           -Consolidate satchel until Superior (not guaranteed pxp);
+#NOP        consolidate-leg       -Consolidate satchel until Legendary (not guaranteed pxp);
+
+#NOP        train                 -Consolidate components until Superior (that provide pxp);
+#NOP        train-leg             -Consolidate components until Legendary (that provide pxp);
+
+
+#var transmuter[uses] 0;
+#action {Profession #1 : Transmuter%s\(Level %d\)%s\[%*\]} {#var transmuter[level] %2};
+
+#alias satchel_retrieve_xmute {
+    #var items_required %1;
+    #var item_quality %2;
+    #var item %3;
+    #var items_available %4;
+    
+    #math items_required {$items_required * 1};
+    #math sets_available {$items_available / $items_required};
+
+    #if {$sets_available >= 1} {
+        #loop 1 $sets_available index {
+            #if {"$item_quality" == "worthless"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to average;
+            };
+            #if {"$item_quality" == "crude"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to average;
+            };
+            #if {"$item_quality" == "poor"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to average;
+            };
+            #if {"$item_quality" == "average"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to good;
+            };
+            #if {"$item_quality" == "good"} {
+                #3 {unstash $item_quality $item};
+                transmute 3 $item quality to superior;
+            };
+            #if {"$item_quality" == "superior"} {
+                #4 {unstash $item_quality $item};
+                transmute 4 $item quality to legendary;
+            };
+        };
+    };
+};
+
+
+#alias transmute_burn {
+    #var transmute_count 0;
+    #action {Pfffzzzt!  You transmute:} {#math transmute_count {$transmute_count + 1}};
+
+    #delay 2 {
+        #if {"%1" == ""} {
+            #showme {<ddd>    No parameters were provided, please provide a valid parameter such as:  <088>};
+            #showme {<ddd>     transmute_burn consolidate  <088>};
+            #showme {                                                                                         };
+            #showme {<ddd>     Valid parameters include:                                                  <088>  };
+            #showme {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp)          <088>  };
+            #showme {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp)          <088>  };
+
+            #showme {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp)     <088>  };
+            #showme {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp)     <088>  };
+        } {
+            #send profs;
+            #showme {<ccf>  -------------------------------------------    <088>  };
+            #showme {<ccf>  -------    TRANSMUTING MATERIALS    -------    <088>  };
+            #showme {<ccf>  -------------------------------------------    <088>  };
+            update_satchel;
+            #delay 4 {
+                #switch {"%1"} {
+                    #case {"consolidate"} {
+                        #foreach $satchel[data][%*] index {
+                            #if {$satchel[level] >= $index[min-level]} {
+                                #foreach $craft[satchel][%*] satchel_item {
+                                    #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                    };
+                                };
+                            };
+                        };
+                        #delay 4 {
+                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
+                            #unaction {Pfffzzzt!  You transmute:};
+                        };
+                    };
+                    #case {"consolidate-leg"} {
+                        #foreach $satchel[data][%*] index {
+                            #if {$transmuter[level] >= $index[min-level]} {                                
+                                #foreach $craft[satchel][%*] satchel_item {
+                                    #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                        #if {$satchel_item[superior] >= 4} {satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];};
+                                    };
+                                };
+                            };
+                        };
+                        #delay 4 {
+                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
+                            #unaction {Pfffzzzt!  You transmute:};
+                        };
+                    };
+                    #case {"train"} {
+                        #foreach $satchel[data][%*] index {
+                            #if {$transmuter[level] >= $index[min-level] && $transmuter[level] <= $index[max-level]} {                                
+                                #foreach $craft[satchel][%*] satchel_item {
+                                    #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                    };
+                                };
+                            };
+                        };
+                        #delay 4 {
+                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS  <ccf>  -------    <088>  };
+                            #unaction {Pfffzzzt!  You transmute:};
+                        };
+                    };
+                    #case {"train-leg"} {
+                        #foreach $satchel[data][%*] index {
+                            #if {$transmuter[level] >= $index[min-level] && $transmuter[level] <= $index[max-level]} {                                
+                                #foreach $craft[satchel][%*] satchel_item {
+                                    #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                        #if {$satchel_item[superior] >= 4} {satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];};
+                                    };
+                                };
+                            };
+                        };
+                        #delay 4 {
+                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS <ccf>   -------    <088>  };
+                            #unaction {Pfffzzzt!  You transmute:};
+                        };
+                    };
+                    #default {
+                        #showme {<ccf>  -------    <faa>No match found, did you mispell %1?         <ccf>  -------    <088>  };
+                    };
+                }
+                stash all;
+            };
+        };
+    };
+};
+
+#alias transmute_ug {
+    #if {"%1" == "poor"} {
+        #2 unstash poor %2;
+        transmute 2 %2 quality to average;
+        stash all;
+    };
+    #if {"%1" == "average"} {
+        #2 unstash average %2;
+        transmute 2 %2 quality to good;
+        stash all;
+    };
+    #if {"%1" == "good"} {
+        #3 unstash good %2;
+        transmute 3 %2 quality to superior;
+        stash all;
+    };
+    #if {"%1" == "superior"} {
+        #4 unstash superior %2;
+        transmute 4 %2 quality to legendary;
+        stash all;
+    };
+};
+
+
+#class transmuter {close}

@@ -1,0 +1,100 @@
+#class {mipcapture} {open};
+
+/* This file ONLY does the MIP message capturing, putting stats into variables, and calling the 
+associated aliases related to each mip message, which are generally handles in their respective files. */
+
+#NOP ***** Set MIP ID Code **********
+#VAR {mip} {}
+#VAR {mip[Version]} {2.01.1}
+#VAR {mip[id]} {}
+#LOOP {1} {5} {i} {
+	#MATH {temp[digit]} {1d10 - 1};
+	#VAR {mip[id]} {$mip[id]$temp[digit]}
+}
+#UNVAR {temp[digit]}
+
+#NOP ***** Tell MUD to send MIP *************
+#DELAY {2} {
+	#SEND 3klient $mip[id]~~Tin$mip[Version];
+	#SEND 3klient LINEFEED on;
+	#SEND 3klient HAA off
+}
+
+#NOP ***** Extract Raw Data *********
+#ACTION {~{\#K\%$mip[id](.{3})(.{3})(.*)}} {
+    
+    #if {$mipdebug} {
+        #show MIP: %3: %4;
+    };
+    
+	#VAR {mip[charcount]} {0};
+	#VAR {mip[out]} {};
+	#VAR {mip[overflow]} {};
+	#VAR {mip[source]} {%0};
+	#MATH {mip[%3][length]} {%2 - 3};
+	#VAR {mip[%3][data]} {%4};
+	#REPLACE {mip[%3][data]} {"} {'};
+	#PARSE {$mip[%3][data]} {i} {
+		#MATH {mip[charcount]} {$mip[charcount] + 1};
+		#VAR {mip[delta]} {$mip[%3][length]};
+		#IF {"${mip[char2]}${mip[char1]}${i}" == "x7B"} {#MATH {mip[delta]} {$mip[delta] + 3}};
+		#IF {"${mip[char2]}${mip[char1]}${i}" == "x7D"} {#MATH {mip[delta]} {$mip[delta] + 3}};
+		#IF {"$i" == ";"} {#MATH {mip[delta]} {$mip[delta] + 1}};
+		#IF {$mip[charcount] <= $mip[delta]} {
+			#VAR {mip[%3][length]} {$mip[delta]};
+			#VAR {mip[out]} {${mip[out]}${i}};
+		} {
+			#REGEXP {$mip[%3][data]} {^{.{$mip[delta]}}{.*}} {#VAR {mip[overflow]} &2} {};
+			#BREAK;
+		};
+		#VAR {mip[char2]} {$mip[char1]};
+		#VAR {mip[char1]} {$i}
+	};
+	#VAR {mip[%3][data]} {$mip[out]};
+	.mipProcessFlag {%3} {$mip[out]};
+	#IF {"${mip[overflow]}" != ""} {#SHOWME {${mip[overflow]}}};
+
+	#IF {"$mip[echo]" != "on"} {
+		#LINE GAG
+	}
+} {2};
+
+#NOP ***** Individual Data Sections *****
+#ALIAS {.mipProcessFlag} {
+	#SWITCH {"%1"} {
+		#CASE {"AAC"} {#VAR {session[reboot]} {%2}}; #NOP Reboot Time;
+		#CASE {"AAF"} {#VAR {session[uptime]} {%2}}; #NOP Uptime;
+		#CASE {"BAE"} {#VAR {session[lag]} {%2}}; #NOP Mud Lag;
+        
+		#CASE {"BBC"} {#FORMAT {my[hp][name]} {%s} {%2};_update_status}; #NOP Hit Point Mask;
+		#CASE {"BBD"} {#FORMAT {my[sp][name]} {%s} {%2};_update_status}; #NOP Spell Point Mask;
+		#CASE {"BBA"} {#FORMAT {my[gp1][name]} {%s} {%2};_update_status}; #NOP Guild Point1 Mask;
+		#CASE {"BBB"} {#FORMAT {my[gp2][name]} {%s} {%2};_update_status}; #NOP Guild Point2 Mask;
+		#CASE {"FFF"} {.mipProcessFFF {%2};_update_status}; #NOP Combined Stats Data;
+
+		#CASE {"BAD"} {.mipProcessBAD {%2};update_room}; #NOP Room Description;
+		#CASE {"DDD"} {.mipProcessDDD {%2};update_room}; #NOP Room Exits;
+		#CASE {"HAB"} {.mipProcessHAB {%2};update_room}; #NOP Item Actions;
+		#CASE {"HAA"} {#show room items mip... %2;update_room}; #NOP Room Items;
+		#CASE {"AAA"} {#NOP failed guild actions maybe - this shows when bards cast a spell and there is no target};
+        
+		#CASE {"CAA"} {.mipProcessCAA {%2}}; #NOP Chat Messages;
+		#CASE {"BAB"} {.mipProcessBAB {%2}}; #NOP 2 Way Communications;
+		#CASE {"BAC"} {#show special MIP text: %2;}; #NOP Special Textstring;
+
+#nop		#CASE {"AAB"} {#NOP Image};
+#nop		#CASE {"AAD"} {#NOP Music};
+#nop		#CASE {"AAG"} {#NOP AVI movie};
+#nop		#CASE {"AAH"} {#NOP Download Media};
+#nop		#CASE {"BAA"} {#NOP Special Textstring;#showme {%2} {-2}};
+#nop		#CASE {"BAF"} {#NOP Send Edit};
+#nop		#CASE {"CAP"} {#NOP Window Caption Text;#FORMAT {temp} {%h} {%2};#showme {$temp} {-2}};
+#nop		#CASE {"CCF"} {#NOP Send File Line};
+#nop		#CASE {"CDF"} {#NOP Send File Begin};
+#nop		#CASE {"CEF"} {#NOP Send File End};
+
+		#DEFAULT {#showme <148>UNHANDLED MIP: %0<088>;} #NOP Every other non-handled flag;
+	}
+}
+
+#class {mipcapture} {close};

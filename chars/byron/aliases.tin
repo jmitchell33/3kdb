@@ -1,0 +1,51 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#alias k {
+    #if $strategy[backstab] {
+        cast mystic venom on redaxe;
+        hide in shadows;
+        backstab %1 %2;
+    };
+    kill %1 %2;
+    #if $strategy[cloud] {#delay 2 {cast noxious cloud}};
+    #if $strategy[vortex] {#delay 5 {cast lightning vortex}};
+}
+
+#alias {.mob_kill_action} {
+    #if {$strategy[rainbow] || $strategy[hammer]} {
+        #if !$my[defs][hr] {cast harmonic regeneration}
+    };
+    #if $strategy[backstab] {
+        cast mystic venom on redaxe;
+        hide in shadows;
+        backstab $mob[target];
+    };
+    kill $mob[target];
+    #if $strategy[cloud] {#delay 2 {cast noxious cloud}};
+    #if $strategy[vortex] {#delay 5 {cast lightning vortex}};
+    #if $strategy[enrage] {enrage};
+    #if $strategy[epowers] {
+        #if $my[eternal][fry] {(fry;};
+        #if ${my[eternal][energy well]} {(energy well;} {#if ${my[eternal][shred]} {(shred;};};
+    };
+    #if $strategy[lucanus] {
+        #if $lucanus_ring {push diamond;#var lucanus_ring 0;};
+        #if $lucanus_amulet {push symbol;#var lucanus_amulet 0;};
+    };
+    #if $darkness {wear ring of darkness};
+}
+
+
+#alias {_login} {watch mywho;playcult;cult join;first impression;c floating disc};
+
+#NOP ---MISC;
+#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box;golem give all to byron;put all in box};
+#alias {bag_all %1} {get all from disc;#loop 1 %1 i {put all in bag $i}};
+
+
+#class {player_aliases} {close}

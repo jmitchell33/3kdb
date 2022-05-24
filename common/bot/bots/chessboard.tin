@@ -1,0 +1,34 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Chessboard};
+#var check_room 0;
+
+#var bot_message_1 '---- CHESSBOARD STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {bot[path]} {w;w;w;n;n;n;n;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;n;n;n;e;e;e}
+
+#list botmobs clear;
+#list botmobs add {{{long} {Angry War Elephant} {target}{elephant}}};
+#list botmobs add {{{long} {Angry Horse}{target}{horse}}};
+#list botmobs add {{{long} {A Refugee}{target}{refugee}}};
+#list botmobs add {{{long} {A War Correspondent}{target}{correspondent}}};
+#list botmobs add {{{long} {Red Cross Medic}{target}{medic}}};
+#list botmobs add {{{long} {Red Charioteer} {target} {human}}};
+#list botmobs add {{{long} {Red Counsellor} {target} {human}}};
+#list botmobs add {{{long} {Red Foot Soldier} {target} {human}}};
+#list botmobs add {{{long} {Red Horseman} {target} {human}}};
+#list botmobs add {{{long} {Red King} {target} {human}}};
+#list botmobs add {{{long} {Red Priest} {target} {human}}};
+#list botmobs add {{{long} {White Charioteer} {target} {human}}};
+#list botmobs add {{{long} {White Counsellor} {target} {human}}};
+#list botmobs add {{{long} {White Foot Soldier} {target} {human}}};
+#list botmobs add {{{long} {White Horseman} {target} {human}}};
+#list botmobs add {{{long} {White King} {target} {human}}};
+#list botmobs add {{{long} {White Priest} {target} {human}}};
+
+#var bot[mobs] $botmobs;
+#class {bot} {close}
+#read common/bot/generic.tin;

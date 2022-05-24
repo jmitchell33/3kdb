@@ -1,0 +1,47 @@
+#class {area_cycle} {open}
+
+#showme {Basic area-cycling -- type cycler}
+
+#var REPEAT_CYCLE_AT_END 1;
+
+#var currStep 1;
+#var cycleStepsList {
+	{1}{mk;go hotel;-hotelbot;..}
+	{2}{out;out;w;s;e;e;n;w;w;n;n;w;w;w;mch;go carn;enter;-carnbot;..}
+	{3}{map carn;go chess;-cb;..}
+	{4}{go smurfs;s;-smurfbot;..}
+};
+
+#alias {cycle} {
+	#var cycleCurrent 0;
+	cycleProceed;
+};
+
+#alias cycleProceed {
+	#list cycleStepsList {size} cycleLength;
+	#if {$currStep > $cycleLength} {
+		#show END OF LIST;
+		#if {$REPEAT_CYCLE_AT_END == 1} {
+			#var currStep 1;
+		};
+	};
+	
+	#if {$currStep <= $cycleLength} {
+		#show proceed, step: $currStep, action: $cycleStepsList[$currStep];
+		$cycleStepsList[$currStep];
+		#math currStep {$currStep + 1};
+	};
+};
+
+
+#act {You curl up into a little ball and fall asleep.} {
+	cycleProceed;
+}
+
+#act {There is no reason to 'zz' here.} {
+	cycleProceed;
+}
+
+#alias {kcyc} {.stop;#class {area_cycle} {kill}}
+
+#class {area_cycle} {close}

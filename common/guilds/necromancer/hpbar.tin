@@ -1,0 +1,248 @@
+#class {necro_hpbar} {kill}
+#class {necro_hpbar} {open}
+
+/* Collect HP Bar line */
+#ACTION {{^(\S:|)((HP|SP|NP|E|HSN|HSN%|Status|Cr|Corpses|Exp|TG|Moon|Planes|Reag|$|Memory)\[.*\].*$)}}
+{
+    #line gag;
+    handler_necro_hpbar {%3};
+};
+
+
+
+/* Pass one HPBar section data at a time to the appropriate parser */
+#ALIAS {handler_necro_hpbar}
+{
+    #NOP %1;
+    #REGEXP {%1} {{\s*(\S+)\[([^\]]*)\]\s*(.*)$}}
+    {   
+        #IF {&{_guild}[minions][&2] > 0} {handler_necro_hpbar_Undead {&3};};
+        #ELSE {
+            #if {"&2" == "$"} {
+                handler_necro_hpbar_AU {&3};
+            } {
+                handler_necro_hpbar_&2 {&3};
+            };
+        };
+
+        #IF {"&4" != ""}
+        {
+            handler_necro_hpbar {&4};
+        };
+    };
+};
+
+/* Coins */
+#ALIAS {handler_necro_hpbar_AU}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)(\D)}}
+    {
+        #VAR {my[coins]} {&2};
+    };
+};
+
+/* HP and HP+ */
+#ALIAS {handler_necro_hpbar_HP}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)(\((\d+)\)|)\/(\d+)(\|(\d+)%\|(\d+)|)($)}}
+    {
+        #VAR {my[hp][current]}                     {&2};
+        #VAR {my[hp][max]}                         {&5};
+        #VAR {my[necromancer][hpfuse][current]}    {&4};
+        #VAR {my[necromancer][hp][%]}              {&7};
+        #VAR {my[necromancer][hp][delta]}          {&8};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_SP}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)(\((\d+)\)|)\/(\d+)}}
+    {
+        #VAR {my[sp][current]}                    {&2};
+        #VAR {my[sp][max]}                        {&5};
+        #VAR {my[necromancer][spfuse][current]}   {&4};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_NP}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)\/(\d+)\|(\d+)c}}
+    {
+        #VAR {my[gp1][current]}                   {&2};
+        #VAR {my[gp1][max]}                       {&3};
+        #VAR {my[corpse][held][current]}          {&4};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_Corpses}
+{
+    #NOP %1;
+    #VAR {my[corpse][held][current]} {%1};
+};
+
+#ALIAS {handler_necro_hpbar_E}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(.*):(.*)}}
+    {
+        #VAR {opponent[name]}                     {&2};
+        #VAR {opponent[status]}                   {&3};
+		#format opponent[name-lower] {%l}         {$opponent[name]};
+
+    };
+};
+
+#ALIAS {handler_necro_hpbar_HSN}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)(\((\d+)\)|)\|(\d+)(\((\d+)\)|)\|(\d+)\|(\d+)\|(.*)}}
+    {
+        #VAR {my[hp][current]}                    {&2};
+        #VAR {my[necromancer][hpfuse]}            {&4};
+        #VAR {my[sp][current]}                    {&5};
+        #VAR {my[necromancer][spfuse]}            {&7};
+        #VAR {my[gp1][current]}                   {&8};
+        #VAR {my[corpse][held][current]}          {&9};
+        #VAR {opponent[status]}                   {&10};
+    };
+};
+
+/* HSN%[100|100|100|0|none] */
+#ALIAS {handler_necro_hpbar_HSN%}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)(\((\d+)\)|)\|(\d+)(\((\d+)\)|)\|(\d+)\|(\d+)\|(.*)}}
+    {
+        #VAR {my[hp][perc]}                       {&2};
+        #VAR {my[necromancer][hpfuse]}            {&4};
+        #VAR {my[sp][perc]}                       {&5};
+        #VAR {my[necromancer][spfuse]}            {&7};
+        #VAR {my[gp1][perc]}                      {&8};
+        #VAR {my[corpse][held][current]}          {&9};
+        #VAR {opponent[status]}                   {&10};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_Status}
+{
+    #NOP %1;
+    #REGEXP {%1} {{w(\d+)%\|p(.*)\|v(.*)\|r(\d+)%}}
+    {
+        #VAR {my[necromancer][worth]}             {&2};
+        #VAR {my[necromancer][protection]}        {&3};
+        #VAR {my[necromancer][veil]}              {&4};
+        #VAR {my[gp2][current]}                   {&5};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_Exp}
+{
+    #NOP %1;
+};
+
+/* TG[2|6] */
+/* TG[2|3/80%] */
+#ALIAS {handler_necro_hpbar_TG}
+{
+    #NOP %1;
+    #VAR {my[necromancer][glamors][active]} {};
+    #REGEXP {%1} {{(\d+)\|(\d+)(\/(\d+)%|)}}
+    {
+        #VAR {my[necromancer][teleports][current]} {&2};
+        #VAR {my[necromancer][glamors][current]}   {&3};
+        #VAR {my[necromancer][glamors][active]}    {&4};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_Cr}
+{
+    #NOP %1;
+    #REGEXP {%1} {{(\d+)%}}
+    {
+        #VAR {my[necromancer][progress]} {&2};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_Undead}
+{
+    #NOP %1;
+    #REGEXP {%1} {{((\d+)%\/(\d+)c|none)(\/(\d+)c|)}}
+    {
+        #VAR {my[necromancer][undead][hp]} {&3};
+        #VAR {my[corpse][minion][current]} {&4};
+        #VAR {my[corpse][coffin][current]} {&6};
+    };
+};
+
+/* Moon[--O-->] */
+#ALIAS {handler_necro_hpbar_Moon}
+{
+    #NOP %1;
+};
+
+/* Planes[--<)++] */
+#ALIAS {handler_necro_hpbar_Planes}
+{
+    #NOP %1;
+};
+
+/* Reag[g999 b5 w999 r999 m999 p999 n999] */
+#ALIAS {handler_necro_hpbar_Reag}
+{
+    #NOP %1;
+    #VAR {_reagent[names]}
+    {
+        {g} {ginseng}
+        {b} {bloodmoss}
+        {w} {spider web}
+        {r} {goldenrod}
+        {m} {mandrake}
+        {p} {black pearl}
+        {n} {pine needles}
+    };
+
+    #REGEXP {%1} {{^((\w)(\d+)\s?|)((\w)(\d+)\s?|)((\w)(\d+)\s?|)((\w)(\d+)\s?|)((\w)(\d+)\s?|)((\w)(\d+)\s?|)((\w)(\d+)\s?|)($)}}
+    {
+        #IF {"&3" != ""}  {#VAR {my[necromancer][reagent][$_reagent[names][&3]]}  {&4}};
+        #IF {"&6" != ""}  {#VAR {my[necromancer][reagent][$_reagent[names][&6]]}  {&7}};
+        #IF {"&9" != ""}  {#VAR {my[necromancer][reagent][$_reagent[names][&9]]}  {&10}};
+        #IF {"&12" != ""} {#VAR {my[necromancer][reagent][$_reagent[names][&12]]} {&13}};
+        #IF {"&15" != ""} {#VAR {my[necromancer][reagent][$_reagent[names][&15]]} {&16}};
+        #IF {"&18" != ""} {#VAR {my[necromancer][reagent][$_reagent[names][&18]]} {&19}};
+        #IF {"&21" != ""} {#VAR {my[necromancer][reagent][$_reagent[names][&21]]} {&22}};
+    };
+    #UNVAR {_reagent};
+};
+
+/* Memory[drt0 pro9 lig10] */
+#ALIAS {handler_necro_hpbar_Memory}
+{
+    #NOP %1;
+    #VAR {_power[names]}
+    {
+        {drt} {create dart}  {pro} {protection}  {lig} {create light} 
+        {tud} {turn undead}  {rtr} {rope trick}  {drm} {dream}       
+        {chi} {chill}        {wil} {will}        {bit} {bite}         
+        {ssh} {shapeshift}   {gra} {grasp}       {cha} {charm}
+        {dra} {drain}        {fri} {fright}      {scy} {scythe}       
+        {clu} {clutch}       {ser} {serenity}    {dev} {devour}      
+        {alt} {alter}        {rab} {rabies}      {soo} {soothe}
+        {cor} {corrode}      {whe} {whelm}       {psi} {psibleed}
+        {sle} {sleep}    
+    };
+
+    #REGEXP {%1} {{^(\w{3})(\d+)( (\w{3})(\d+)|)( (\w{3})(\d+)|)( (\w{3})(\d+)|)($)}}
+    {
+        #VAR {my[necromancer][power][$_power[names][&2]]} {&3};
+        #IF {"&5" != ""}  {#VAR {my[necromancer][power][$_power[names][&5]]}  {&6}};
+        #IF {"&8" != ""}  {#VAR {my[necromancer][power][$_power[names][&8]]}  {&9}};
+        #IF {"&11" != ""} {#VAR {my[necromancer][power][$_power[names][&11]]} {&12}};
+    };
+    #UNVAR {_power};
+};
+
+#class {necro_hpbar} {close}

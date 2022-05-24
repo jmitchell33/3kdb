@@ -1,0 +1,95 @@
+#class {bot} {open}
+#var {areaname} {Dragon Realms}
+
+#var {botpath} {sw;w;w;n;n;w;s;s;n;w;s;s;e;s;n;w;n;w;n;w;n;w;s;s;w;s;s;e;n;s;s;e;n;s;e;s;e;n;s;e;e;e;e;e;e;n;e;e;s;w;e;s;w;s;w;s;s;e;n;s;w;n;w;n;n;e;w;s;s;w;w;s;e;e;w;w;n;w;s;w;w;n;e;w;w;s;n;n;e;n;e;s;n;w;s;w;n;w;n;w;n;e;e;s;e;e;e;e;e;e;e;n;e;e;n;s;e;s;e;e;e;n;e;n;s;e;s;w;e;e;e;e;n;s;w;w;w;n;w;w;s;w;w;n;n;e;s;n;e;n;s;w;n;n;s;w;w;s;n;n;s;e;n;n;n;w;s;n;w;n;n;e;e;s;w;e;e;s;n;n;s;e;s;s;w;e;n;n;e;s;n;n;w;e;s;e;n;e;e;e;s;n;w;w;w;s;w;w;w;w;n;w;w;w;n;e;w;n;w;n;n;e;s;n;w;s;w;s;s;e;w;n;n;w;w;n;e;e;w;w;s;w;n;w;w;s;e;w;w;n;s;s;e;s;n;w;s;w;e;s;e;e;e;e;e;e;e;s;e;w;n;w;w;w;w;w;w;s;w;w;n;w;s;w;w;e;n;s;e;s;w;s;n;w;w;e;s;w;s;e;w;s;e;s;s;e;s;n;w;n;w;e;n;w;n}
+
+#nop botpath works up until this point, blocked:
+/*
+w;s;w;w;e;n;s;e;s;w
+s;n;w;w;e;s;w;s;e;w;s;e;s;s;e;s;
+n;w;n;w;e;n;w;n;w;};
+*/
+
+#var loop 0;
+
+#alias .pre_fight_check {#nop;};
+
+#var findDragons {(topaz|quartz|ruby|emerald|diamond|opal|sapphire|jade|amethyst|pearl)};
+#list gotScales {create};
+
+#nop can hack ignoring existing scales with ie.: #list {gotScales} {add} {quartz};
+
+#if {{$guild} == {knight}} {
+    ktrig bury corpse/get scale/smuggle scale;
+};
+
+#act {{^-M-_((A|An) (tiny|small|medium|large|enormous) $findDragons dragon)( \[(scratched|wounded|dying)\])?( \[[0-9]*%\])?( !*attacking ([A-z]+)!)*( \{([0-9]+)\})?\.$}} {
+    #var _got 0;
+    #foreach {*gotScales[%*]} {idx} {
+        #var _scale $gotScales[$idx];
+        #if {"$_scale" == "%5"} {
+            #var _got 1;
+        };
+    };
+
+    #if {$_got == 0} {
+        #var mobname dragon;
+        .check_monster
+    } {
+        #show Skipping dragon color: %5.;
+    }
+} {2};
+
+#act {You cannot get past the dragon guards.} {
+    .pause;zz;
+    k guard;
+};
+
+#act {{^You smuggle away: A scale from the hide of a dragon \((\w+)\)}} { 
+    addscale %2;
+};
+
+#alias {scales} {
+    #show Got scales:\n;
+    #foreach {*gotScales[%*]} {idx} {
+        #var _scale $gotScales[$idx];
+        #show $_scale;
+    };
+}
+
+#alias {addscale} {
+    #list {gotScales} {add} {%1};
+    #show <129>Added scale to list: %1<088>;
+}
+
+#nop load already gotten scales:
+#act {{^> A scale from the hide of a dragon \((\w+)\)$}} {
+    addscale %2;
+};
+smuggle;
+#delay {2} { #unact {{^> A scale from the hide of a dragon \((\w+)\)$}} };
+
+#nop pickup scales on ground that we don't have;
+#act {{^A scale from the hide of a dragon \((\w+)\)$}} {
+    #show scale... %5;
+    #var _got 0;
+    #foreach {*gotScales[%*]} {idx} {
+        #var _scale $gotScales[$idx];
+        #if {"$_scale" == "%5"} {
+            #var _got 1;
+        };
+    };
+
+    #if {$_got == 0} {
+        get scale;smuggle scale;
+    } {};
+}
+
+#show \n<139>Dragon Realms / Dragon Shell Armor bot loaded.<088>;
+#show Use 'scale' to see current scales.;
+#show Use 'addscale <color>' to add to the list, and the bot will ignore those dragons.
+#show Anytime you 'smuggle scale' it will automatically add this scale color to the list.\n;
+
+#class {bot} {close}
+
+#read common/bot/generic.tin

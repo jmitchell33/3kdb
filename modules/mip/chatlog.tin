@@ -1,0 +1,180 @@
+#class {mipchatlog} {open}
+
+
+#VAR ignoreEmotes {small %* sighs;pauses for a moment;finishes his performance with a bow.;cracks his knuckles and gets ready to play for;performs a rather incomprehensible action on the corpse.;wounds close rapidly.;whinnies as;rubs its head on;face as he pats him on the neck.;That hurt!;cries 'OW;takes a deep breath;takes a breath;ceases his performance;briefly closes his eyes;wraps his arms around;bows and bids you;reaches into a small pouch and draws forth a small pearl, black as the darkest night.; appears slightly drained.; spirit of the beast leaves your body, slightly weakening you.;is afk:;malicious attacks fade.;fills his glass with water from his pitcher.;drinks from his glass of water.;fills her glass with water from her pitcher.;drinks from her glass of water.;grovels shamelessly};
+#VAR ignoreMisc {Gen-Notify;All gold divvied;GOLD divvy called by};
+#NOP -- Get system user name to log to;
+#script {sysUser} {whoami};#var sysUser $sysUser[1];
+
+#NOP ***** Broadcast Communication (Chat/Shout) *****
+#ALIAS {.mipProcessCAA} {
+	#REGEX {%1} {{(.*)\~(.*)\~(.*)\~(.*)}} {
+		#var {mip[enomm]} {};
+		#var {mip[comm][command]}	{&2};
+		#var {mip[comm][line]}		{&3};
+		#var {mip[comm][source]}	{&4};
+		#var {mip[comm][data]}		{&5};
+
+		#var ignore 0;
+		#foreach {$ignoreMisc} {item} {
+			#if {"&5" == "%*$item%*"} {
+				#var ignore 1;
+			};
+		};
+
+		#if !$ignore {
+			#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+			#format {datestamp} {%t} {%Y-%m-%d.log};
+
+
+			#NOP Ansify lines;
+			#var {commcol} {<178>};
+			#switch {"$mip[comm][line]"} {
+				#case {"ADMIN"}		    {#var {commcol} {<158>}};
+				#case {"Auction"}	    {#var {commcol} {<cba>}};
+				#case {"Bear"}		    {#var {commcol} {<168>}};
+				#case {"Bloodname"}	    {#var {commcol} {<138>}};
+				#case {"Clan Spol"}	    {#var {commcol} {<AAF><fff>}};
+				#case {"Com"}		    {#var {commcol} {<128>}};
+				#case {"Council"}	    {#var {commcol} {<108>}};
+				#case {"Eternal Main"}	{#var {commcol} {<168>}};
+				#case {"Events"}	    {#var {commcol} {<168>}};
+				#case {"Falcon"}	    {#var {commcol} {<128>}};
+				#case {"High Mortal"}	{#var {commcol} {<aff>}};
+				#case {"JuggAnnounce"}	{#var {commcol} {<118>}};
+				#case {"JuggMissiles"}	{#var {commcol} {<118>}};
+				#case {"JuggNewbie"}	{#var {commcol} {<258>}};
+				#case {"Cult Game"}	    {#var {commcol} {<ace>}};
+				#case {"Main"}		    {#var {commcol} {<118>}};
+				#case {"Newbie"}	    {#var {commcol} {<aca>}};
+				#case {"Party"}		    {#var {commcol} {<ADA><fff>}};
+				#case {"Shout"}		    {#var {commcol} {<bbb>}};
+				#case {"Whine"}		    {#var {commcol} {<118>}};
+				#case {"Wolf"}		    {#var {commcol} {<228>}};
+				#default		        {#var {commcol} {<178>}};
+			};
+			
+			#var {mip[comm][cdata]} {$mip[comm][data]};
+			#replace {mip[comm][cdata]} {:} {:<099>};
+			#replace {mip[comm][cdata]} {]} {]<099>};
+			#NOP -- try #sub here;
+			#var {mip[comm][cdata]} {$commcol$mip[comm][cdata]<099>};
+
+			#line log {logs/$sysUser/$datestamp} {$timestamp\};
+			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
+			
+			update_chat $mip[comm][cdata];
+		};
+	}
+}
+
+
+#NOP ***** 2 Way Communication (Tell/Emote) *****
+#ALIAS {.mipProcessBAB} {
+	#REGEX {%1} {{(.*)\~(.*)\~(.*)}} {
+		#IF {"&3" != "0"} {
+			#var mip[comm][data]	{&4};
+			#var mip[comm][source]	{&3};
+			#var mip[comm][line]	{Tell};
+
+			#NOP Revert ^^ back to ~;
+			#REPLACE {mip[comm][data]} {\^\^} {~};
+
+            #var ignore 0;
+            #foreach {$ignoreEmotes} {iem} {
+                #if {"&4" == "%*$iem%*"} {
+                    #var ignore 1;
+                }
+            };
+
+            #if {!$ignore} {
+                #var mip[comm][command]	{tell $mip[comm][source]};
+                #format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+                #format {datestamp} {%t} {%Y-%m-%d.log};
+                #format {timestamp_save} {%t} {[%H:%M] };
+                #IF {"&2" == "x"} {
+                    #NOP Message to another player;
+                    #var mip[comm][twoway] {to};
+                    #line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+                    #line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
+					update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
+                } {
+                    #NOP Message from another player;
+                    #var mip[comm][twoway] {from};
+                        #line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+                        #line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+						update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+                        #bell;
+                }
+            } {
+				#NOP;
+            };
+		};
+	};
+};
+
+#var chat[max] 100;
+#var chat[offset] 0;
+#var chat[page] 1;
+#var chat[scroll] page;
+
+
+#ALIAS {draw_chat} {
+	#math chat[start]	{$chat[rows]};
+	#math chat[end]		{$chat[offset] + 1};
+	#if {"$draw[chat][active]" == "on"} {
+		#line sub var #line sub esc #draw green rounded box 1 1 $chat[height] $chat[right] $chat[log][-$chat[start]..-$chat[end]]
+	};
+};
+
+#ALIAS {update_chat} {
+	#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+	#if {&chat[log][] >= $chat[max]} {
+		#list chat[log] del 1
+	};
+	#NOP remove esc chars;
+	#var chat[text] %0;
+	#replace {chat[text]} {\\x7B} {\uFF5B};
+	#replace {chat[text]} {\\x7D} {\uFF5D};
+	#list chat[log] ins -1 {${timestamp}$chat[text]};
+	draw_chat;
+};
+
+#ALIAS {chatup} {
+	#if {"$chat[scroll]" == "page"} {
+		#if {$chat[rows]*{$chat[page]+1} <= $chat[max] &&
+		     $chat[rows]*{$chat[page]+1} <= &chat[log][]} {
+			#math chat[page] {$chat[page] + 1};
+			#math chat[offset] {$chat[page] * $chat[rows] - $chat[rows]};
+			draw_chat;
+		};
+	}; #elseif {"$chat[scroll]" == "line"} {
+		#if {$chat[offset] <= $chat[max] &&
+		     $chat[offset] <= &chat[log][]} {
+			#math chat[offset] {$chat[offset] + 1};
+			draw_chat;
+		};
+	};
+};
+
+#ALIAS {chatdown} {
+	#if {"$chat[scroll]" == "page"} {
+		#if {$chat[page] > 1} {
+			#math chat[page] {$chat[page] - 1};
+			#math chat[offset] {$chat[page] * $chat[rows] - $chat[rows]};
+			draw_chat
+		}
+	}; #elseif {"$chat[scroll]" == "line"} {
+		#if {$chat[offset] > 0} {
+			#math chat[offset] {$chat[offset] - 1};
+			draw_chat
+		}
+	}
+}
+#ALIAS {chatend} {
+	#var chat[page] 1;
+	#var chat[offset] 0;
+	draw_chat
+}
+
+#class {mipchatlog} {close}

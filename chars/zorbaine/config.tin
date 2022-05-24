@@ -1,0 +1,94 @@
+#class {player_config} {kill}
+#class {player_config} {open}
+
+#ALIAS {postload}
+{
+     #map flag static on;
+     #map flag vtmap on;
+     #map flag unicodegraphics on;
+     #map flag terrain on;
+     #map flag direction on;
+     #delay {1} {hp}
+};
+
+#NOP -- Bot Config;
+#var mob_kill_action 1;
+#alias {.pre_fight_check} {#nop};
+
+
+#alias {.pre_bot_check} {
+	echo_divider1;
+	echo_divider2;
+
+     #if {"$area" == "Dundee Swamp"} {
+          echo_reflex_header;
+          #NOP enter any reflexes you want to set here for combat
+          reflex combat;
+
+          #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+          #alias {.pre_fight_check} {
+              #NOP -- what do you before every fight...
+          };
+     };
+
+     #if {"$area" == "Night of Colour"} {
+          echo_reflex_header;
+          #NOP enter any reflexes you want to set here for combat
+          reflex combat;
+
+          #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+          #alias {.pre_fight_check} {
+              #NOP -- what do you before every fight...
+          };
+     };
+
+     #if {"$area" == "Treehouse"} {
+        echo_reflex_header;
+          #NOP enter any reflexes you want to set here for combat
+          reflex combat;
+
+          #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+          #alias {.pre_fight_check} {
+              #NOP -- what do you before every fight...
+          };
+     };
+
+
+     #if {"$area" == "Rimalkin Cave"}   {
+         echo_reflex_header;
+          #NOP enter any reflexes you want to set here for combat
+          reflex combat;
+
+          #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+          #alias {.pre_fight_check} {
+              #NOP -- what do you before every fight...
+          };
+     };
+
+     #if {"$area" == "The Kayos Wars"} {
+         echo_reflex_header;
+          #NOP enter any reflexes you want to set here for combat
+          reflex combat;
+
+          #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+          #alias {.pre_fight_check} {
+              #NOP -- what do you before every fight...
+          };
+     };
+
+     #if {"$area" == "Hotel Transylvania"} {
+        echo_reflex_header;
+          #NOP enter any reflexes you want to set here for combat
+          reflex combat;
+
+          #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+          #alias {.pre_fight_check} {
+              #NOP -- what do you before every fight...
+          };
+     };
+
+	echo_divider2;
+}
+
+
+#class {player_config} {close}

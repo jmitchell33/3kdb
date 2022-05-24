@@ -1,0 +1,77 @@
+#class {gentech_aliases} {kill}
+#class {gentech_aliases} {open}
+
+#NOP --- GENTECH POWERS
+#var timeslide_available 0;
+#var timeslide_able 0;
+
+
+#action {Your cloning was a success!} {=call;=afollow on;=akill on};
+#action {^Timescan %*[Likelihood of Flux: &1\%]$} {#var reset_time %1;#math time {reset_time * 40}say Time until reset: $time};
+
+
+#action {[[ Timeslide circuits overpowered.  Recovery time needed. ]]} {say timeslide (personal) on cooldown.} {6};
+
+#NOP -- Repair, stab, and tactical yourself or another;
+#alias gt-repair {
+	#unvar tempRep;
+	#var tempRep %0;
+    #if &{tempRep} {
+        #format tempRep {%l} {$tempRep};
+        repair $tempRep;
+        repair $tempRep;
+        stabilize $tempRep;
+        tactical $tempRep;
+    } {
+        repair;
+        repair;
+        stabilize;
+        tactical;
+    };
+};
+
+#NOP --- Check and report time to reset;
+#alias timescan {
+	#send {timescan clear};
+	#send {timescan set};
+	#send {timescan query};
+	#line oneshot #action {Timescan %* [Likelihood of Flux: %d.%d%]} {
+		#var temp %%2.%%3;
+		#showme temp is $temp;
+		#format reset_progress {%f} {40 * $temp / 100};
+		#math time_to_reset {40 - $reset_progress * 1.00};
+		#format time_to_reset {%.5s} {$time_to_reset};
+		say $time_to_reset minutes until reset (assuming a 40 minute timer);
+	};
+};
+
+#NOP ---  Alias to check if you can timeslide
+#alias check_slide {
+	#if {$my[hp][current] > 300} {#var timeslide_able 1} {#var timeslide_able 0;say Hit points are currently too low to timeslide.;};
+	#if {$my[sp][current] > 200} {#var timeslide_able 1} {#var timeslide_able 0;say Spell points are currently too low to timeslide.;};
+	#if {$my[cpc][current] > 1000} {#var timeslide_able 1} {#var timeslide_able 0;say CPC is currently too low to timeslide.;};
+	#if {$my[gp1][current] > 2250} {#var timeslide_able 1} {#var timeslide_able 0;say PU is currently too low to timeslide.;};
+};
+
+#NOP ---  Alias to run to CPC and transfer a desired amount.  Useful for tiny gentech before gaining the conduit experiment.
+#alias {fill_cpc %1} {#map get roomvnum go_back;#delay 1 {go cpc;transfer %1;go $go_back;#unvar go_back}};
+
+#NOP --- Alias to run to infirmary and then go back to the previous room after being healed.  Useful for tiny gentech.
+#alias {heal_up} {#var heal_up 1;#map get roomvnum go_back;go gentech_infirmary;admit myself};
+#action {^You feel completely healed and repaired.} {#if $heal_up {go $go_back;#var heal_up 0;}};
+
+#NOP --- GENTECH DEFENSE SHIELDS.  This alias checks if all shields are enabled before beginning combat.
+#alias {shields} {
+	#act {^Ferrous DNA : [     On     ]} {#var edna 1};
+	#act {^Energy Field: [ On-Adaptive]} {#var efield 1};
+	#act {^Life Support: [     On     ]} {#var lsupp 1};
+	gs;
+	#delay 1 {
+		#if {!$edna} {edna};
+		#if {!$efield} {efield};
+		#if {!$lsupp} {efield enhanced};
+	};
+};
+#act {%s[[ Energy Field Collapse Imminent. ]]%s} {efield;efield};
+
+#class {gentech_aliases} {close}

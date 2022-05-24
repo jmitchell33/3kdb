@@ -1,0 +1,14 @@
+#class {miphp} {open}
+
+#alias {_player_miphp} {
+
+	#list temp clear;
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NP:$gp1/$gp1_max E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NP:$my[gp1][graph]  E:$enemy[graph]};
+	#list temp add {Status[w$my[necromancer][worth]%|p$my[necromancer][protection]|v$my[necromancer][veil]|r$my[gp2][current]%] Cr[$my[necromancer][progress]%] TG[$my[necromancer][teleports][current]|$my[necromancer][glamors][current]$my[necromancer][glamors][active]] $[$my[coins]]};
+	#list temp add {Alter: $my[necromancer][power][alter] Maim: $my[necromancer][power][maim] Rabies: $my[necromancer][power][rabies] Prime: $my[necromancer][invoke-prime]/2};
+
+	#var hpbar[prompt] $temp;
+};
+
+#class {miphp} {close}

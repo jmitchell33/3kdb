@@ -1,0 +1,241 @@
+#class {player_config} {kill}
+#class {player_config} {open}
+
+#ALIAS {postload}
+{
+     #map flag static on;
+     #map flag vtmap on;
+     #map flag unicodegraphics on;
+     #map flag terrain on;
+     #map flag direction on;
+     #delay {1} {hp}
+};
+
+#NOP -- Bot Config;
+#var mob_kill_action 1;
+#alias {.pre_fight_check} {#nop};
+
+#alias {.pre_bot_check} {
+     #NOP -- Kill-Em-All, Reflex, Spell, Song Settings based on area name here;
+     #NOP -- Songs aren't added in the initial alias so you're not singing and blocking all your spells from casting;
+     #NOP -- Add songs via the aliases before you kick off the stepper;
+
+     #switch {"$area"} {
+          #case {"Section Z"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #var kill_em_all 0;
+               echo_prots_header;
+               prots_pfe;prots_blink;prots_hs;prots_pfc;prots_pfh;prots_mb;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 300;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+                    #var defs[pf] 1;
+                    #var defs[ph] 1;
+                    #var defs[mb] 1;
+                    #var defs[pe] 1;
+               };
+          };
+          #case {"Turkey Farm"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #var kill_em_all 0;
+               echo_prots_header;
+               prots_pfg;prots_blink;prots_hs;prots_pfc;prots_pfh;prots_mb;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 200;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+                    #var defs[pf] 1;
+                    #var defs[ph] 1;
+                    #var defs[mb] 1;
+                    #var defs[pg] 1;
+               };
+          };
+
+          #case {"Dundee Swamp"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #NOP -- Turn on kill-em-all;
+               #var kill_em_all 1;
+               echo_prots_header;
+               prots_pfn;prots_blink;prots_hs;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 200;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[pn] 1;
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+               };
+          };
+
+          #case {"Night of Colour"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #NOP -- Turn off kill-em-all;
+               #var kill_em_all 0;
+               echo_prots_header;
+               prots_pfg;prots_pfe;prots_blink;prots_hs;prots_pfc;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 200;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[pg] 1;
+                    #var defs[pe] 1;
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+                    #var defs[pf] 1;
+               };
+          };
+
+          #case {"Treehouse"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #NOP -- Turn off kill-em-all;
+               #var kill_em_all 0;
+               echo_prots_header;
+               prots_pfn;prots_blink;prots_hs;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 200;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[pn] 1;
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+               };
+          };
+
+
+          #case {"Rimalkin Cave"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               kill_em_all;
+               echo_prots_header;
+               prots_pfn;prots_blink;prots_hs;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 200;reflex_ma 400;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[pn] 1;
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+               };
+          };
+
+          #case {"The Kayos Wars"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #nop - Turn on kill-em-all;
+               #var kill_em_all 1;
+
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               echo_reflex_header;
+               reflex_critic 200;reflex_ow 200;reflex_ma 400;
+               reflex combat;
+               echo_divider2;
+
+               #alias {.pre_fight_check} {
+                    #var defs[es] 1;
+                    #var defs[blink] 1;
+                    #var defs[pn] 1;
+               };
+          };
+
+          #case {"Hotel Transylvania"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #nop - Turn off kill-em-all;
+               #var kill_em_all 0;
+
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               echo_reflex_header;
+               reflex_critic 200;reflex_ow 200;reflex_ma 400;
+               echo_divider2;
+
+               #alias {.pre_fight_check} {
+                    #var defs[es] 1;
+                    #var defs[blink] 1;
+                    #var defs[pe] 1;
+               };
+          };
+          
+          #case {"Mahjong"} {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #var kill_em_all 0;
+               echo_prots_header;
+               prots_pfe;prots_pfg;prots_pfn;prots_blink;prots_hs;prots_pfc;prots_pfh;prots_mb;
+               echo_reflex_header;
+               reflex_critic $dmg_spell_sp;reflex_ow 300;
+               reflex combat;
+
+               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
+               #alias {.pre_fight_check} {
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+                    #var defs[pf] 1;
+                    #var defs[ph] 1;
+                    #var defs[mb] 1;
+                    #var defs[pe] 1;
+                    #var defs[pg] 1;
+                    #var defs[pn] 1;
+               };
+          };
+
+          #default {
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               #nop - Turn off kill-em-all;
+               #var kill_em_all 0;
+
+               echo_divider1;
+               clear_prots;reflex_clear;
+               echo_divider2;
+               echo_reflex_header;
+               reflex_critic 200;reflex_ow 200;reflex_ma 400;
+               echo_divider2;
+
+               #alias {.pre_fight_check} {
+                    #var defs[es] 1;
+                    #var defs[blink] 1;
+                    #var defs[hs] 1;
+               };
+          };
+     };
+	echo_divider2;
+};
+
+
+#class {player_config} {close}

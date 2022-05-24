@@ -1,0 +1,35 @@
+#class {map} {open};
+
+#alias {loadmap} {
+    #read modules/map/mapper.tin;
+    #read modules/map/maphelper.tin;
+	#map goto $curvnum;
+	#map flag static on;
+};
+
+#alias {oldmap} {
+    #map destroy;
+    #map read common/map/3k_map.tin;
+	#map goto $curvnum;
+	#map flag static on;
+};
+
+#alias {killmap} {
+    #class {mapper} {kill};
+    #class {maphelper} {kill};
+    #class {drawmap} {kill};
+    undrawmap;
+};
+
+#alias {hidemap} {
+    #class {drawmap} {kill};
+    #alias {mapupdate_draw} { #nop overwritten/handled by personal draw.tin; };
+    #unsplit;
+};
+
+register_module {map};
+register_module_info {map} {
+    #show Module info for map...;
+};
+
+#class {map} {close};

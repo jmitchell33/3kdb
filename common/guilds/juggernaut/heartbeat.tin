@@ -1,0 +1,41 @@
+#class {guild_heartbeat} {kill}
+#class {guild_heartbeat} {open}
+
+#alias {_guild_heartbeat} {
+	#if !$idle_flag {
+		#if {"$ammo_buy" == "on" && $ammo_len > 0} {
+			#if {$ammo[1] < 100} {
+				#send !truck ammo vbuy $weapon_type $ammo_type 1 $ammo_buy_amount
+			}; #elseif {$ammo[2] < 100} {
+				#send !truck ammo vbuy $weapon_type $ammo_type 2 $ammo_buy_amount
+			}; #elseif {$ammo[3] < 100} {
+				#send !truck ammo vbuy $weapon_type $ammo_type 3 $ammo_buy_amount
+			}; #elseif {$ammo[4] < 100} {
+				#send !truck ammo vbuy $weapon_type $ammo_type 4 $ammo_buy_amount
+			}; #elseif {$ammo[5] < 100} {
+				#send !truck ammo vbuy $weapon_type $ammo_type 5 $ammo_buy_amount
+			}
+		};
+		#if {$shp > 0 && $shp < 9} {dismiss};
+		#if {"$saf" == "No"} {support assault fire};
+		#if {$my[gp1][current] < 60} {stimheal};
+		#if {$my[gp1][current] < 50} {stimheal};
+		#if {$my[gp1][current] < 40} {stimheal};
+		#if {$my[gp1][current] < 30} {stimheal};
+		#if {$my[gp1][current] < 20} {stimheal};
+		#if {$my[gp1][current] < 25} {#bell};
+		#if {$my[gp1][current] < 95 && $my[sp][current] > 50} {
+			#if {$my[gp2][current] > 70} {#send !dissipate};
+			#send !transpose max;
+		};
+		#if {$reset >= 95} {
+			#if {$clan > 0} {
+				#send !frenzy
+			}; #elseif {$nukes > 0 && $mip[round]} {
+				fire $nukes
+			}
+		}
+	} {#NOP;};
+};
+
+#class {guild_heartbeat} {close}

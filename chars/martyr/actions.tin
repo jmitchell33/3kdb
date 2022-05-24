@@ -1,0 +1,42 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#NOP --- GENTECH POWERS;
+#var timeslide_available 0;
+#var timeslide_able 0;
+#act {^The bright sphere of energy around you distorts momentarily.$} {#ECHO {-----+++++   ENERGY LEAK   +++++------}};
+#act {Your cloning was a success!} {=call;=afollow on;=akill on};
+#act {^Timescan %*[Likelihood of Flux: &1\%]$} {#var reset_time %1;#math time {reset_time * 40}say Time until reset: $time};
+#act {%s[[ Energy Field Collapse Imminent. ]]%s} {efield;efield};
+
+
+#var corpse_delay 0;
+
+#ACTION {^Owie. That hurt!} {
+	#if !$corpse_delay {
+		#var corpse_delay 1;
+		corpse_select;
+		#delay {4} {recharge;reclaim;recharge;reclaim;#var corpse_delay 0};
+	};
+} {1};
+
+#action {^Out of nowhere a crazed hockey fan leaps towards the Cup.} {recharge;reclaim};
+
+
+#NOP -------------------------------- ACTIONS TO SUPPORT OTHER PLAYERS ---------------------------------------;
+
+#function check_slide {
+	#if {$my[hp][current] > 300} {#var timeslide_able 1} {#var timeslide_able 0};
+	#if {$my[sp][current] > 200} {#var timeslide_able 1} {#var timeslide_able 0};
+	#if {$my[cpc][current] > 1000} {#var timeslide_able 1} {#var timeslide_able 0};
+	#if {$my[gp1][current] > 1600} {#var timeslide_able 1} {#var timeslide_able 0};
+};
+
+#ACTION {[[ Timeslide circuits overpowered.  Recovery time needed. ]]} {say timeslide (personal) on cooldown.} {6};
+
+#ACTION {%1 offers to guard} {accept} {6};
+
+#ACTION {^Nix pokes you with a cattle prod.} {timeslide emergency} {6};
+#ACTION {^Nix gives you a low-five!} {timeslide} {6};
+
+#class {player_actions} {close}

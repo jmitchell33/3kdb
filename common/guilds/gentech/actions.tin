@@ -1,0 +1,23 @@
+#class {gentech_actions} {kill}
+#class {gentech_actions} {open}
+
+
+#NOP --- CAPTURE THE GENTECH ATTACKS FOR HPBAR;
+#ACT {^[%1] [%2] [%3] [%4] [%5]$} {
+    #var my[attacks][melee] %1;
+    #var my[attacks][ionbeam] %2;
+    #var my[attacks][ddb] %3;
+    #var my[attacks][synthorg] %4;
+    #var my[attacks][synergy] %5;
+};
+
+#GAG {^[%1] [%2] [%3] [%4] [%5]$};
+
+#NOP --- GENTECH POWERS;
+#act {^The bright sphere of energy around you distorts momentarily.$} {#ECHO {-----+++++   ENERGY LEAK   +++++------}};
+#act {Your cloning was a success!} {=call;=afollow on;=akill on};
+#act {^Timescan %*[Likelihood of Flux: &1\%]$} {#var reset_time %1;#math time {reset_time * 40}say Time until reset: $time};
+#act {[[ Timeslide circuits overpowered.  Recovery time needed. ]]} {say timeslide (personal) on cooldown.} {6}
+#act {%s[[ Energy Field Collapse Imminent. ]]%s} {efield;efield};
+
+#class {gentech_actions} {close}

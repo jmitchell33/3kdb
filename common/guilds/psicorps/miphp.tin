@@ -1,0 +1,18 @@
+#class guild_miphp kill
+#class guild_miphp open
+
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+    #list temp clear;
+	#format {hpbar_gxp} {%g}   {$gxp[total-gxp]};
+
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Psi:$gp1/$gp1_max  Stam:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Psi:$my[gp1][graph] Stam:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {<fff>Powers: $powers_string};
+	#list temp add {<fff>Total GXP: $hpbar_gxp ($gxp[avg-gxp-per-round]/rnd | Tour Max: $gxp[round-max]/rnd)  Last Fight: $gxp[last-fight-mob] ($gxp[last-fight-per-round]/rnd)};
+
+	#var hpbar[prompt] $temp;
+};
+
+#class guild_miphp close

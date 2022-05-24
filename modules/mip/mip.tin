@@ -1,0 +1,59 @@
+#CLASS {mip} {kill}
+#CLASS {mip} {open}
+
+#alias {mipon} {
+    #read modules/mip/capture.tin;
+    #read modules/mip/chatlog.tin;
+    #read modules/mip/room.tin;
+    #read modules/mip/stats.tin;
+    #read chars/$user/miphp.tin;
+};
+
+#alias {mipoff} {
+    #class {miphp} {kill};
+    #class {mipcapture} {kill};
+    #class {miproom} {kill};
+    #class {mipchatlog} {kill};
+    #class {mipstats} {kill};
+};
+
+#alias {mipreload} {
+    mipoff;
+    mipon;
+};
+
+#var mipdebug 0;
+#alias mipdebug {
+    #var mipdebug 1;
+}
+#alias mipdebugoff {
+    #var mipdebug 0;
+}
+
+#alias {maproomoff} {
+    #class global open;
+    #var draw[room] off;
+    #var draw[map] off;
+    #var draw[canvas] off;
+    #var draw[status] on;
+    #class global close;
+    #class global write chars/$user/vars.tin;
+    init_screen;
+    draw_all;
+    #class {draw} {kill};
+    #show Map and room details off.;
+}
+
+#alias {maproomon} {
+    #class global open;
+    #var draw[room] on;
+    #var draw[map] on;
+    #var draw[canvas] on;
+    #var draw[status] off;
+    #class global close;
+    #class global write chars/$user/vars.tin;
+    #read common/draw.tin;
+    #show Map and room details on.;
+}
+
+#CLASS {mip} {close}

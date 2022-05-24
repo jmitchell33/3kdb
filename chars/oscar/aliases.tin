@@ -1,0 +1,110 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#list {temp} create {};
+
+#ACTION {^%d:You will cast %w should your %w ever} {
+     #list temp set %1 {%2};
+};
+
+#alias corpse_trig {
+  cast spell tap on corpse;
+  slab;
+  wrap;
+  cast corpse blast;
+  #if $divvy {share gold} {get coins};
+  get all;
+  stash all;
+  fuse 50;
+  #if $bags {
+       #loop 1 10 i {
+            smuggle remove sack;
+            keep sack;
+            put all in sack;
+       };
+       #10 {smuggle sack};
+  };
+  #if $strategy[anchor] {
+       cast dispel magic;
+  };
+  study spellbook;
+  
+};
+
+#alias summon_str {
+     #loop 1 13 i {c giant strength on $summon_string $i};
+     c giant strength golem;
+     c giant strength oscar;
+     c giant strength giant;
+};
+
+#alias summon_buff {
+     cast haste on summons;
+}
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#alias {setup_defense} {
+     clear_c;
+     clear_gc;
+     setup_c;
+     setup_gc;
+     #delay 2 {prots_ss};
+     #delay 4 {prots_MG};
+     #delay 6 {prots_ms};
+     #delay 8 {prots_armor};
+     #delay 10 {prots_ps};
+     #delay 12 {cast mantle};
+     #delay 14 {prots_pfe};
+}
+
+#alias {setup_c} {
+     cast contingency as prot_evil#cast protection from evil;
+}
+
+#alias {setup_gc} {
+     cast greater contingency as stoneskin#cast stoneskin;
+     cast greater contingency as major globe#cast major globe;     
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as armor#cast armor;
+     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+};
+
+#alias {clear_c} {
+     #10 {cast remove contingency as 1};
+}
+
+#alias {clear_gc} {
+     #10 {cast remove greater contingency as 1};
+}
+
+#alias ms7 {
+     #var summoner 1;
+     cast monster summoning 7 as $summon_string;
+};
+
+#alias {check_beads} {
+     #math hp_overmax_max {$my[hp][max] * 5};
+     #math hp_overmax_shortfall {$hp_overmax_max - $my[hp][current]};
+     #math grasps_needed {$hp_overmax_shortfall / 33};
+
+     #math sp_threshold {$my[sp][max] * .20};
+     #math sp_extra {$my[sp][current] - $sp_threshold};
+     #math grasps_possible {$sp_extra / 100};
+
+     #if {$grasps_needed < $grasps_possible} {
+          #var grasp_beads $grasps_needed;
+     } {
+          #var grasp_beads $grasps_possible;
+     };
+
+     #$grasp_beads {grasp beads};
+}
+
+#NOP ---MISC
+#alias {bag_all %1} {#loop 1 %1 i {put all in bag $i}};
+
+#class {player_aliases} {close}

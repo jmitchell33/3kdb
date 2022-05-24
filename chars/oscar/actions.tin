@@ -1,0 +1,43 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#ACTION {dealt the killing blow to} {
+    #if !$bot[active] {
+        corpse_trig;
+    };
+    #if {$hpbar_mc < 80} {
+        #foreach $cassist[member][%*] member {
+            #if $member[active] {
+                cassist -$member[name-lower];
+            };
+        };
+        #delay 20 {
+            #foreach $cassist[member][%*] member {
+                #if !$member[active] {
+                    cassist $member[name-lower];
+                };
+            };  
+        };
+        study spellbook;
+    };
+    #var mob[slow] 0;
+    #var mob[edrain] 0;
+    #var mob[atrophy] 0;
+} {2};
+
+#NOP --- Oscar specific actions;
+#action {^Owie. That hurt!$} {#15 grasp beads};
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {cast spell tap on corpse;cast corpse blast};
+
+#NOP -- Summon specific actions;
+#action {That is not here or it is uninteresting. (materials?)} {ffetch materials;#delay 4 {#var golem_toggle 1};};
+
+#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
+#action {^With great magical precision you tap directly into the rivers of magical} {    
+    str_party;
+};
+
+#NOP -- General Misc;
+#ACTION {%w gives you a low-five!} {#format {lower} {%l} {%1};cast giant strength $lower} {6};
+
+#class {player_actions} {close}

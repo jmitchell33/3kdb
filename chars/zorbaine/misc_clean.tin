@@ -1,0 +1,322 @@
+#act {Your victory leaves you wiser in the ways of honourable combat.} {out;efh;mount};
+
+#alias {bu2} {mc;go kn;enter;n;quickbuy;n;quickbuy;e;quickbuy;w;s;buy boost;s;out;go whore;fork over 10000;enter;go savon};
+
+#alias {esquire_act_on} {
+#act {^An esquire arrives.} {esq goshop weaponry};
+	eqsuire_act_off;
+};
+#alias {esquire_act_off} {
+	#unact {^An esquire arrives.};
+}
+
+#alias {esqget} {ce;esq goshop weaponsmith;esquire_act_on;};
+
+#alias {isleth2} {climb out;jump across;e;e;d;d;e;e;ex basin;get dagger;cut hand;enter;e;map isleth};
+#alias {gfdf} { 
+	get flask;
+	drink flask;
+	dispose flask;
+};
+#nop embalm and get corpses;
+#act {Sock romps about with you} {#20 egc;};
+#nop defend someone when they beg me:;
+#act {{^-S-_(From afar, )?(\w+) begs you\.}} {#format defendTarget {%l} {%2};#show target $defendTarget;#send defend $defendTarget};
+
+#act {{Wasp redirects (.*) attacks against Zorbaine to himself\.}} {remove shield;mf;deflect off;brawl on;pp};
+
+#alias {pcmds} {
+	#show --- PLAYER COMMAND ---;
+	#show beep - #10 preserve remains;get preservation;
+	#show romp - #20 embalm remains;get corpse;
+	#show beg - defend target;
+};
+
+/* auto-accept resurrections */
+#act {{"accept" or "refuse" this chance quickly, for pressing matters}} {accept;};
+
+/* rest after death */
+#act {{begins to recede from the room, seeping quietly into nothingness.}} {rest;#delay {10} {st;st;st;};};
+
+/* Auto-pull ropes/teleports */
+#act {{Pull the rope, and you will be teleported to her.}} {pull rope;};
+
+/* Follow george weathermay */
+#alias {fg} {follow george;};
+#alias {eg} {exa george;};
+
+/* re-wield weapon in tacos */
+#act {{^The melting cheese finally evaporates from Zorbaine\.}} {wield $wielded;mf;};
+
+#nop Auto-truce members when entering room in carnegie hall;
+#act {{An angry audience member attacking you!}} {tr};
+
+/* equipment */
+#gag {^Breastplate :  None};
+#gag {^Shield      :  None};
+#gag {^Greaves     :  None};
+
+#nop Auto-loading item gags;
+
+#nop Misc knight gags;
+#gag {{^(\w+) munches contentedly on the oats in the feed bag\.}};
+#gag {{^(\w+) is fully rested, and stops grazing\.}};
+#gag {{^(\w+) grows bored and begins to munch on the oats in the feed bag\.}};
+#gag {^Your esquire returns from his errand\.};
+
+#nop Skills/professions gags;
+#gag {^You burp\.};
+#gag {^You hiccup\.};
+#gag {^You feel unbalanced\.};
+#gag {^You feel drunk\.};
+#gag {^Your alcohol fueled strength surges through you\!};
+#gag {^Your alcohol fueled strength dissipates\.  Buuurp  \.};
+#gag {^You feel a sudden wave of alcohol induced fury overcome you\!};
+#gag {^You stumble forward unexpectedly and strike with surprising alcohol fueled strength\!};
+#gag {^You drunkenly hurl a spell with maximum effectiveness\!};
+
+#nop Tacticitian emotes;
+#gag {^You press your advantage on your outsmarted foe!\!};
+#gag {^Your great speed allows you to attack again\!};
+#gag {^You outfox your opponent and take advantage of it\!};
+#gag {^You press your advantage on your outsmarted foe\!};
+#gag {^Your tactical advantage ends\.};
+#gag {{^You gain (\d+) pxp for Tactician\.}};
+
+#nop Buckler of Eternia;
+#gag {^The star on your buckler flashes like a};
+#gag {^The star on your buckler begins to glow with a};
+
+#nop Valyn's Maul;
+#gag {^The {radiant|energized|bright|azure|electric|comet-like} {trailing|tracing|ghosting|shadow|shade|image} of the {hammer|war mace|mace|warhammer|maul} {strikes|effects|makes|works|exacts|earns|gains|causes} {another|an extra|an additional|a second|a surprise} {hit|attack|wound|blow}!};
+#nop shans bracers;
+#gag {^The bracers flare brightly and your form wavers slightly!};
+#nop disposing items;
+#gag {^Your good deed is noted for future reference\.};
+#nop crelevere recharges;
+#gag {^You feel a strange pulse of energy from the ring\.};
+#nop death blow;
+#gag {{^You killed a (.*)\!}};
+
+#gag {{^You drive your attack past (.*) resistances!}};
+
+#gag {Autosave\.};
+#gag {^Saving crafting status\.};
+#gag {^There is no coins here\.};
+
+#gag {^You feel uneasy carrying Deacern's Amulet\.};
+
+#nop mantis swamp follow;
+#act {leaves into the wormhole.} {#if {!$entered_wormhole}{enter wormhole;#var entered_wormhole 1;#del {6} {#var entered_wormhole 0}}};
+
+#nop Hell cow king eq removal curse 
+#act {^The Cow King brushes you, and electricity arcs from him to you!} {get all;wear all;wield {$wielded}}
+
+#nop Land2 wind specials
+#act {The Wind gusts and blows you into the wall!} {#7 {staunch}};
+
+#nop substitute hell dirs for something more manageable ('reload' to unsub);
+#alias {helldirs} {
+	#sub {yonder} {ne};
+	#sub {overhere} {s};
+	#sub {anotherway} {sw};
+	#sub {overthere} {n};
+	#sub {thisway} {se};
+	#sub {thatway} {nw};
+
+	#alias {ne} {yonder};
+	#alias {s} {overhere};
+	#alias {sw} {anotherway};
+	#alias {n} {overthere};
+	#alias {se} {thisway};
+	#alias {nw} {thatway};
+
+	#show Hell directions substituted. Go!
+};
+
+#nop corpse helpers;
+#alias {corpseme} {#15 buy 5;wrap all;#var hascoffincorpse 1;#var hascorpse 1};
+#alias {corpsebox} {#15 gb corpse;wrap all;#var hascoffincorpse 1;#var hascorpse 1};
+
+#nop bot helpers;
+#alias {boton} {#var botting 1;dogon;safemodeon};
+
+#nop westersea church sequence;
+#alias {wchurch} {#4 turn left;#3 turn centre;#5 turn right;push explosion;push boulder;push orb;push vase};
+
+
+#nop Script Helpers (put these somewhere else?);
+#nop respond to cheesy taco unwield curse;
+#nop #act {^As you hit Grated Cheese, melted cheese splatters all over you\!} {w;rest;};
+#nop #act {^Grated Cheese melts all over you, coating you in BURNING} {w;rest;};
+#nop #act {^The taco drips melting cheese all over you, coating you in BURNING} {e;rest;};
+#nop #act {^As you hit Cheesy Taco, melted cheese splatters all over you\!} {e;rest;};
+
+#alias {whorenight} {
+	#delay {6000} {
+		.stop;curtain;out;w;s;s;s;s;e;s;s;s;s;e;e;s;s;s;w;w;s;s;s;e;e;e;e;d;d;d;w;w;map whore;go smurf;s;-smurfbot;..;
+		#delay {6000} {.stop;go pol;crt;-polbot;..}
+	};
+	idlebot;
+	safemodeoff;
+	#show Whore night bot activated.;
+};
+
+#alias {polnight} {
+        #delay {6000} {
+                .stop;go smurf;s;-smurfbot;..;
+                #delay {6000} {.stop;go kn;enter;unkeep all;pb all;out;home;gb all;guild;enter;pb all;out;home;
+                        #delay {4} {ld};
+                };
+        };
+        idlebot;
+        safemodeoff;
+        #show PoL night bot activated.;
+};
+
+#alias {aegisnight} {
+	#delay {6000} {
+		.stop;go smurf;s;-smurfbot;..;
+                #delay {6000} {.stop;go kn;enter;unkeep all;pb all;out;home;gb all;guild;enter;pb all;out;home;
+                        #delay {4} {ld};
+                };
+	};
+	idlebot;
+	safemodeoff;
+	#show Aegis night bot activated.;
+};
+
+#nop Manual macros/dirs;
+#nop ravenloft carriage to myrra/pledge of valyn;
+#alias {c-myr} {enter;enter;e;e;e;e;sw;w;d;crack;n};
+#alias {myr-c} {s;crack;climb;e;ne;w;w;w;s;w;search organ;w;s;e;e;d;w;n;e;u;e;sw;nw;w;carriage;say return};
+
+#alias {de-gh} {out;s;w;door;w;out;s;e;climb;climb;climb;w;n};
+#alias {gh-ca} {s;w;w;s;e;e;d;w;n;e;u;e;sw;nw;w;carriage;say return};
+
+#nop death beast / Precious Stone:;
+#alias {fan-pstone} {e;e;e;s;e;s;s;s;e;s;e;buy pizza;w;n;w;n;n;n;w;n;w;w;w;portal;w;w;w;w;w;w;w;n;n;n;e;e;enter;s;w;enter maze;w;w;n;w;get flower;e;e;n;e;n;w;n;n;w;n;w;w;s;e;s;s;give food to padrin;n;n;w;n;e;e;s;e;s;s;e;s;w;s;w;s;e;e;out;e;open doors;s;s;e;flick switch;n;d;e;e;give flower to miranda;w;w;u;pull torch;south;w;get scroll;s;s;u;enter painting;sw;sw;e;se}
+
+#act {You attack Ghoti} {wstrat {#13 s};rstrat n};
+#act {You attack Delundar} {wstrat {#16 s};rstrat n};
+#act {You atack Alaren} {alarentstrat};
+
+#alias {.z} {.stop};
+#alias {.wh} {go whore;-whorebot;..;ak ..};
+#alias {.po} {go pol3;-polbot;..;ak ..};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#alias {partyon} {#var party 1;#show Party mode enabled.;corpseoff};
+#alias {partyoff} {#var party 0;#var partyLeader "zorbaine";#show Party mode disabled.;corpseon;};
+#alias {partyleader} {#var partyLeader %1;#show Party leader set to "%1".};
+
+
+#nop enables a mode where the bot won't start attacking new mobs until resources are above optimal level (to avoid trucing), ie. for leading in parties;
+#alias {safemodeon} {#var safemode 1;#show Safe mode on.;};
+#alias {safemodeon2} {#var safemode 2;#show Safe mode on, extra safe.;};
+#alias {safemodeoff} {#var safemode 0;#show Safe mode off;};
+
+#alias {botdelayon} {#var botdelay 1;#show Bot delay on.;};
+#alias {botdelayoff} {#var botdelay 0;#show Bot delay off.;};
+
+
+#nop WIMPY STRATEGY:;
+
+#nop Wimpy Strategy script - setup what to do when fighting certain areas or mob;
+#var wimpystratenabled 0;
+#var wimpystrat "";
+#var readystratenabled 0;
+#var readystrat "";
+
+#nop Set a general wimpy strategy;
+#alias {wstrat} {
+	#show WSTRAT: %0;
+	#if {"%0" == ""} {
+		#show Wimpy strat currently set to: $wimpystrat;
+	} {
+		#var wimpystratenabled 1;
+		#var wimpystrat %0;
+		#show Wimpy strategy set to: <139>%0<088>;
+	}
+};
+
+#nop What to do when we're "ready" again;
+#alias {rstrat} {
+	#if {"%0" != ""} {
+		#show Ready strat currently set to: $readystrat;
+	} {
+		#var readystratenabled 1;
+		#var readystrat %0;
+		#show Ready strategy set to: <129>%0<088>;
+	}
+};
+
+#alias {wimpystrat} {
+	#show  ----- <119>EXECUTING WIMPY STRATEGY! <099> -----;
+	$wimpystrat;
+	rest;
+};
+
+#nop Disable wimpy strategy;
+#alias {soff} {stratoff};
+#alias {stratoff} {
+	#var wimpystratenabled 0;
+	#var wimptstrat 0;
+	#var readystrat 0;
+	#show Wimpy strategy cleared.;
+};
+
+#alias {forcewimpy} {
+    #show Forcing wimpy on low stamina enabled.;
+    #if {$wimpystratenabled == 1} { 
+		#show Wimpy strategy: $wimpystrat; 
+	} { #show No wimpy strategy set; };
+    #var FORCE_WIMPY_ON_LOW_STAMINA 1;
+};
+#alias {forcewimpyoff} {
+    #show Forcing wimpy on low stamina disabled.;
+    #var FORCE_WIMPY_ON_LOW_STAMINA 0
+};
+
+
+
+#nop SPECIFIC STRATEGIES:;
+
+#nop Puppy Mill strategy;
+#alias {puppystrat} {	
+	#var wimpystratenabled 1;
+	#var wimpystrat {
+		#map get roomvnum lastvnum;
+		w;s;rest;
+	};
+	#show Puppy wimpy strategy enabled: <139>$wimpystrat<088>;
+};
+
+#nop King Alaren / Arovia strategy;
+#alias {alarenstrat} {	
+	#var wimpystratenabled 1;
+	#var wimpystrat {
+		e;rest;
+		#delay {2} {
+			#15 hamstring;nw;
+			#delay {2} {
+				tr;rest;
+			};
+		};
+	};
+	#show Alaren wimpy strategy enabled: <139>$wimpystrat<088>;
+};

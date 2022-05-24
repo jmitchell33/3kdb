@@ -1,0 +1,28 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#var corpse_delay 0;
+
+#NOP --- Nix specific actions;
+#ACTION {{%1 appears out of nowhere\.}} {pt CHECK MYSTIC EYES - MOB SPAWN!!!};
+#ACTION {{A flash of energy emanates from Shansabyk's body\.}} {pt Shansabitch down a life!!};
+#ACTION {Hurinteon the Grand Master Mage (Deadly!!!) appears out of nowhere.} {view 1 study hurinteon;kill hurinteon};
+
+#ACTION {{The coffin is full!}} {
+    slab corpse;
+	coins from corpse;
+    dirge;
+};
+
+#ACTION {The Abysmal Blade (enchanted): Ok.} {smuggle blade};	
+#act {^The World of Serinth Board containing } {#map goto 16722};
+
+#act {There are no corpses in the freezer!}{unwrap;pd};
+#act {There is no reason to 'deslab' here.} {unwrap;pd};
+
+#act {The melting cheese finally evaporates from Nix.} {wield axe};
+#act {%1 offers to guard} {accept};
+#act {You are already attacking} {#delay {2} cast noxious cloud};
+
+
+#class {player_actions} {close}

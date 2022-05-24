@@ -1,0 +1,222 @@
+#class {corpse_manager} {kill}
+#class {corpse_manager} {open}
+
+#NOP -- GENERAL CORPSE MANAGEMENT TRACKING FOR HPBAR;
+#var corpse_check 0;
+#var corpses[inventory] 0;
+#var corpses[smuggle] 0;
+#var corpses[cooler] 0;
+#var corpses[coffin] 0;
+#var corpses[freezer] 0;
+#var corpses[servant] 0;
+
+
+#NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
+#alias {i} {
+	#var corpse_check 1;
+	#var corpses[inventory] 0;
+	#send i;
+	#delay 2 {#var corpse_check 0;};
+};
+
+#NOP -- Donate your corpses to the morgue and then go back/resuming botting;
+#alias dcoffin {
+    .pause;
+    #map get roomvnum donate_go_back;
+    #path save forward path;
+    #path get position pos;
+	go morgue;
+    donate coffin;donate all;
+    #map run $donate_go_back;
+    #path load $path;
+    #path goto $pos;
+    #var bot[paused] 0;
+};
+
+#alias cooler_rotate {
+	#%1 {deslab;get corpse;cooler corpse};
+};
+
+#NOP -- $corpse_string is a generic string to be inserted in your hpbar - added to the ticker for the tickhp;
+#alias {_update_corpse_string} {
+	#NOP -- If any of them happen to go negative, set to 0;
+	#if {$corpses[coffin] < 0} {#var corpses[coffin] 0;};
+	#if {$corpses[inventory] < 0} {#var corpses[inventory] 0;};
+	#if {$corpses[smuggle] < 0} {#var corpses[smuggle] 0;};
+	#if {$corpses[freezer]  < 0} {#var corpses[freezer] 0;};
+	#if {$corpses[cooler] < 0} {#var corpses[cooler] 0;};
+	#if {$corpses[servant] < 0} {#var corpses[servant] 0;};
+	#math corpses[total] {$corpses[coffin] + $corpses[inventory] + $corpses[smuggle] + $corpses[freezer] + $corpses[cooler] + $corpses[servant]};
+	#delay 0.1 {
+		#var corpse_string Corpses: $corpses[total] (C: $corpses[coffin];
+		#if {$corpses[inventory] > 0} {#var corpse_string $corpse_string I: $corpses[inventory];};
+		#if {$corpses[smuggle] > 0} {#var corpse_string $corpse_string S: $corpses[smuggle];};
+		#if {$corpses[freezer] > 0} {#var corpse_string $corpse_string F: $corpses[freezer];};
+		#if {$corpses[cooler] > 0} {#var corpse_string $corpse_string Clr: $corpses[cooler];};
+		#if {$corpses[servant] > 0} {#var corpse_string $corpse_string Srv: $corpses[servant];};
+		#var corpse_string {$corpse_string )};
+	};
+};
+
+#NOP -- Corpse use order is:  Coffin -> Freezer -> Cooler -> Inventory -> Smuggle;
+#alias corpse_select {
+	#if {$corpses[smuggle] && !$corpses[inventory] && !$corpses[coffin] && !$corpses[freezer]} {
+		smuggle remove corpse;drop corpse;
+	};
+	#if $corpses[coffin] {
+		unwrap;
+	} {
+		#if $corpses[freezer] {
+			deslab;
+		} {
+			#if $corpses[cooler] {
+				uncooler corpse;
+			} {
+				unkeep corpse;drop corpse;
+			};
+		};
+	};
+};
+
+#alias check_box {
+	#var box_name %1;
+	#act {^-i-A colossal box (empty).$} {
+		#var corpses[$box_name] 0;
+	};
+	#act {^-i-A colossal box (contains %d items).$} {
+		#var corpses[$box_name] %%1;
+	};
+	#delay .1 {#unact {^-i-A colossal box (contains %d items).$}};
+	#delay .1 {#unact {^-i-A colossal box (empty).$}};
+};
+
+#NOP -- SOL Crypt Boxes;
+#alias check_crypts {
+	go sol_crypt1;
+	#delay 1 {check_box sol_crypt1;look};
+	#delay 3 {
+		go sol_crypt2;
+		#delay 1 {check_box sol_crypt2;look};
+	};
+}
+
+#NOP -- Inventory overrides.  These actions update the count when you check inventory;
+#act {%*Death's Freezer%*\(%d corpses\)} {
+	#var inventory[freezer] 1;
+	#if $corpse_check {
+		#if {%3 != $corpses[freezer]} {
+			#var corpses[freezer] %3;
+		};
+	};
+};
+
+          
+#action {%*An enchanted coffin%*\(%d %w\) %*.$} {
+	#var inventory[coffin] 1;
+	#if $corpse_check {
+		#if {%3 != $corpses[coffin]} {
+			#var corpses[coffin] %3;
+		};
+	};
+};
+
+
+#action {%*Coffin%s\[%s%d\/%s%d|%*%\|%s%dc]%*} {
+	#var inventory[coffin] 1;
+	#if $corpse_check {
+		#if {%9 != $corpses[coffin]} {
+			#var corpses[coffin] %9;
+		};
+	};
+};
+
+#NOP -- Corpse Management COFFIN / FREEZER;
+#NOP -- Coffin wrapping gives the same message if you wrap 1 or 50, so we need to check inventory after wrapping for a correct count
+#var check_coffin 1;
+#act {the coffin's protective hold!$} {
+	#if $check_coffin {
+		#var check_coffin 0;
+		#delay 0.5 {i;#var check_coffin 1;};
+	};
+};
+#act {^The coffin expels} {#line gag;#echo {<169>Coffin: -1 corpse};#math {corpses[coffin]} {$corpses[coffin] - 1};};
+#act {There are no corpses in the coffin!} {#var corpses[coffin] 0;};
+
+#act {frame causing it to get sucked in!$} {#line gag;#echo {<169>Freezer: +1 corpse};#math {corpses[freezer]} {$corpses[freezer] + 1};};
+#act {^You shake the frame and out drops} {#line gag;#echo {<169>Freezer: -1 corpse};#math {corpses[freezer]} {$corpses[freezer] - 1};};
+#act {^There are no corpses in the freezer!$} {#var corpses[freezer] 0};
+
+#NOP -- Corpse Management Tech Ultra-Cooler
+#act {^You activate the Ultra-Cooler to retrieve the %*.$} {#math {corpses[cooler]} {$corpses[cooler] - 1};};
+#act {^You place the %* into the Ultra-Cooler and seal the lid$} {#math {corpses[cooler]} {$corpses[cooler] + 1};};
+#act {^There is no more room in the Ultra-Cooler} {#var corpses[cooler] 50;};
+#act {^The cooler does not contain a corpse.$} {#var corpses[cooler] 0;};
+
+#act {^The Tech Ultra-Cooler. It is large and oblong. The top of it is made} {
+	#var inventory[cooler] 1;
+	#var corpses[cooler] 0;
+	#action {{^(.*)(corpse|remains)(.*)}} {
+		#math corpses[cooler] {$corpses[cooler] + 1};
+	};
+	#delay 2 {
+		#unaction {{^(.*)(corpse|remains)(.*)}};
+	};
+	
+};
+
+#NOP -- Corpse Management INVENTORY;
+#act {^You drop %* corpse%*.$} {#math {corpses[inventory]} {$corpses[inventory] - 1};};
+#act {^~%* corpse%*: Taken.} {#math {corpses[inventory]} {$corpses[inventory] + 1};};
+#act {^%* corpse%*: Ok.$} {#math {corpses[inventory]} {$corpses[inventory] + 1};};
+#act {^%s%d ~%* corpse%*.$} {#math {corpses[inventory]} {$corpses[inventory] + %2};};
+#act {%*Encumberance%s\[%s%d\/%s%d|%*%\|%s%dc]%*} {
+	#if $corpse_check {
+		#if {%9 != $corpses[inventory]} {
+			#var corpses[inventory] %9;
+		};
+	};
+	#var inventory[encumberance] %7;
+};
+
+#NOP -- Corpse Management SMUGGLE;
+#act {^Items you are currently smuggling (%*):} {
+	#var corpses[smuggle] 0;
+	#action {{^>(.*)(corpse|remains)(.*)}} {
+		#math corpses[smuggle] {$corpses[smuggle] + 1};
+	};
+	#delay 4 {
+		#unaction {{^>(.*)(The|a preserved|an embalmed)(.*)(corpse|remains)(.*)}}
+	};
+	
+};
+#action {%*Smuggling%s\[%s%d\/%s%d|%*%\|%s%dc]%*} {
+	#if $corpse_check {
+		#if {%9 != $corpses[smuggle]} {
+			#var corpses[smuggle] %9;
+		};
+	};
+};
+
+#NOP -- Corpse Management PRIEST SERVANT;
+#act {%* swirls slowly and reveals that it is carrying:$} {
+	#var corpses[servant] 0;
+	#act {^%s%d\)%* corpse%*.$} {#math {corpses[servant]} {$corpses[servant] + 1};};
+	#delay 4 {#unact {^%s%d\)%* corpse%*.$}};
+	
+}
+#act {^You take %* corpse %* from ElBefe.$} {#math {corpses[servant]} {$corpses[servant] - 1};};
+
+#act {^> %* corpse%*} {#math {corpses[smuggle]} {$corpses[smuggle] + 1}};
+#act {^You smuggle away: ~%* corpse%*} {
+	#math {corpses[smuggle]} {$corpses[smuggle] + 1};
+	#math {corpses[inventory]} {$corpses[inventory] - 1};
+	
+};
+
+#act {^You unsmuggle: %* corpse%*} {
+	#math {corpses[smuggle]} {$corpses[smuggle] - 1};
+	#math {corpses[inventory]} {$corpses[inventory] + 1};
+	
+};
+
+#class {corpse_manager} {close}

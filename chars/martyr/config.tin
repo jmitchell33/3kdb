@@ -1,0 +1,28 @@
+#class {player_config} {kill}
+#class {player_config} {open}
+
+#ALIAS {postload} {
+     #map flag static on;
+     #map flag vtmap on;
+     #map flag unicodegraphics on;
+     #map flag terrain on;
+     #map flag direction on;
+     #delay {1} {hp}
+};
+
+#NOP -- Bot Config;
+#alias {.pre_fight_check} {
+    repair;
+    repair;
+    tactical;
+    stabilize;
+    #if {$my[efield] < 5} {
+        efield;
+        efield enhanced;
+    };
+};
+
+#alias {.pre_bot_check} {#NOP};
+
+
+#class {player_config} {close}

@@ -1,0 +1,18 @@
+#class {guild_actions} {kill}
+#class {guild_actions} {open}
+
+
+#NOP -- Disable ammo_buy for energy mounts;
+#act {^That gun is full already.} {
+	#var ammo_buy off
+}
+
+#act {After your discount, it will cost %1 coins.} {
+	#if {"$ammo_donate" == "on"} {
+		#send !give %1 coins to cl;
+		#send !truck vault
+	}
+}
+
+
+#class {guild_actions} {close}

@@ -1,0 +1,46 @@
+#class sii_gxp_tracker kill
+#class sii_gxp_tracker open
+
+#list sii_skills clear;
+#list sii_skills add {{{name} {utilization} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {collection} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {reformation} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {stability} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {resilience} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {physicality} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {potency} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {discipline} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {expiration} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+
+
+#gag {Skill            Lvl    Current      Required%*};
+#gag {%*Gen'Doru Antiochus Kir'lai Lava Mite%*};
+#gag {%sGeneral Skills%*};
+#gag {%sBrood Skills%*};
+#gag {%sCombat Skills%*};
+#gag {%w%s%d%s|%*|%*|%s\(%*%\)};
+
+#action {%w%s%d%s|%*|%*|%s\(%*%\)} {
+    #var skill_name %1;
+    #var skill_progress %8;
+    #foreach $sii_skills[%*] skill {
+        #if {"$skill_name" == "$skill[name]"} {
+            #math skill_increase {$skill_progress - $skill[progress]};
+            #if {$skill_increase > 0.00} {
+                #list sii_skills index name;
+                #list sii_skills find $skill_name tmpIndex;
+                #var tmpItem {{name} {$skill_name} {progress} {$skill_progress} {progress_history} {} {rounds_since_last} {0}};
+                #var sii_skills[+$tmpIndex] $tmpItem;
+                #showme SKILL ADVANCE: $skill_name advanced by $skill_increase in $skill[rounds_since_last] rounds;
+            } {
+                #list sii_skills index name;
+                #list sii_skills find $skill_name tmpIndex;
+                #math tmpRounds {$skill[rounds_since_last] + 1};
+                #var tmpItem {{name} {$skill_name} {progress} {$skill[progress]} {progress_history} {} {rounds_since_last} {$tmpRounds}};
+                #var sii_skills[+$tmpIndex] $tmpItem;
+            };
+        };
+    };
+};
+
+#class sii_gxp_tracker close

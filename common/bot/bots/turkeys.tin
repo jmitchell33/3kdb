@@ -1,0 +1,24 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Turkey Farm};
+#var check_room 0;
+
+#var bot_message_1 '----  TURKEY FARM  ----';
+#showme $bot_message_1;
+
+#var {bot[path]} {n;e;e;n;w;w;n;e;e;n;w;w;n;e;e;exit;enter;n;e;e;n;w;w;n;e;e;n;w;w;n;e;e;exit;enter;n;e;e;n;w;w;n;e;e;n;w;w;n;e;e;s;s;w;w;s;s;s;out};
+
+#list botmobs clear;
+#list botmobs add {{{long} {A plump turkey pecking the ground} {target} {turkey}}};
+#list botmobs add {{{long} {A fat turkey waddling around} {target} {turkey}}};
+#list botmobs add {{{long} {An undead turkey shuffling around} {target} {turkey}}};
+#list botmobs add {{{long} {A slim turkey fighting for scraps} {target} {turkey}}};
+#list botmobs add {{{long} {A baby turkey} {target} {turkey}}};
+#var bot[mobs] $botmobs;
+
+#act {-M-_An undead turkey shuffling around%*} {#path walk} {1};
+#act {-M-_An HUGE molted undead turkey%*} {#path walk} {1};
+
+#class {bot} {close}
+#read common/bot/generic.tin;

@@ -1,0 +1,44 @@
+#class {jugger_hpbar} {kill}
+#class {jugger_hpbar} {open}
+
+
+#NOP Jugger HP Bar Configuration;
+#NOP hp set HP:[$HP$] SP:[$SP$] S:[$STIM$%] HE:[$HEAT$%] HT:[$HITS$] M/C:[$NUKES$/$MNUKES$][$CP$/$MCP$][$RESET$%] G:$GXP$%$N$Ammo:[$AMMO$] SHP:[$SHP$] SNL:[$SNL$] SM:[$SMD$] SA:[$SMF$] SD:[$SAF$] E:$STATUS$;
+
+#act {HP:\[{\d+}/{\d+}\] SP:\[{\d+}/{\d+}\] S:\[{\d+}\%\] HE:\[{\d+}\%\] HT:\[{\d+}\] M/C:\[{\d+}/{\d+}\]\[{\d+}/{\d+}\]\[{\d+}\%\] G:{[\d\.]+}\%} {
+    #line gag;
+	#var {my[hp][current]}		{%1};
+	#var {my[hp][max]}		{%2};
+	#var {my[sp][current]}		{%3};
+	#var {my[sp][max]}		{%4};
+	#var {my[gp1][current]}		{%5};
+	#var {my[gp2][current]}		{%6};
+	#var {hits}		{%7};
+	#var {nukes}		{%8};
+	#var {nukes_max}	{%9};
+	#var {clan}		{%10};
+	#var {clan_max}		{%11};
+	#var {reset}		{%12};
+	#var {gxp}		{%13};
+    
+    #format {nukes}		{%+2s} {$nukes};
+	#format {reset}		{%+2s} {$reset};
+};
+
+#act {{^Ammo:\[(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?\] SHP:\[\s*(\d+)\] SNL:\[([\d\.]*)\] SM:\[(\w+)\] SA:\[(\w+)\] SD:\[(\w+)\] E:([\d\w]+)?\%?}} {
+    #line gag;
+	#var {ammo[1]}	{%2};
+	#var {ammo[2]}	{%3};
+	#var {ammo[3]}	{%4};
+	#var {ammo[4]}	{%5};
+	#var {ammo[5]}	{%6};
+	#var {shp}	{%7};
+	#var {snl}	{%8};
+	#var {smd}	{%9};
+	#var {saf}	{%10};
+	#var {sdf}	{%11};
+	#var {ehealth}	{%12};
+	#format {ammo_len} {%L} {$ammo};
+};
+
+#class {jugger_hpbar} {close}

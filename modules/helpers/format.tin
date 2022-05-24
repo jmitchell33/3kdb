@@ -1,0 +1,19 @@
+#alias {thousandsFormatNumber} {
+  #var thousandsNumberToFormat ${%1};
+  #var thousandsNumberToFormatVar %1;
+  #var thousandsFormattedNumber {};
+  #foreach {1000;1000000;1000000000} {thousandsTmp} {
+    #math thousandsNumMod $thousandsNumberToFormat / $thousandsTmp * 1.00;
+    #if {$thousandsNumMod > 1} {
+      #switch {$thousandsTmp} {
+        #case 1000 #var thousandsFormattedNumber {${thousandsNumMod}K};
+        #case 1000000 #var thousandsFormattedNumber {${thousandsNumMod}M};
+        #case 1000000000 #var thousandsFormattedNumber {${thousandsNumMod}B};
+      };
+    };
+  };
+  #if {"$thousandsFormattedNumber" == ""} {#var thousandsFormattedNumber $thousandsNumberToFormat};
+  #var $thousandsNumberToFormatVar $thousandsFormattedNumber;
+  #var thousandsFormattedNumber {};
+  #var thousandsNumberToFormatVar {};
+};

@@ -1,0 +1,94 @@
+#class {eternal} {kill}
+#class {eternal} {open}
+
+#var eternal 1;
+
+#alias {_update_eternal_status} {
+	#if {$my[eternal][heal]} {#format {heal_string} {<bfa>HEAL<088>}} {#format {heal_string} {<faa>HEAL<088>}};
+	#if {$my[eternal][energy well]} {#format {ewell_string} {<bfa>EWELL<088>}} {#format {ewell_string} {<faa>EWELL<088>}};
+	#if {$my[eternal][shred]} {#format {shred_string} {<bfa>SHRED<088>}} {#format {shred_string} {<faa>SHRED<088>}};
+	#if {$my[eternal][duplicate creature]} {#format {dupec_string} {<bfa>DUPE-C<088>}} {#format {dupec_string} {<faa>DUPE-C<088>}};
+	#if {$my[eternal][enlarge]} {#format {enlarge_string} {<bfa>ENLARGE<088>}} {#format {enlarge_string} {<faa>ENLARGE<088>}};
+	#if {$my[eternal][fry]} {#format {fry_string} {<bfa>FRY<088>}} {#format {fry_string} {<faa>FRY<088>}};
+	#if {$my[eternal][protection]} {#format {protection_string} {<bfa>PROT<088>}} {#format {protection_string} {<faa>PROT<088>}};
+	#var eternal_string {<fff>Eternal: $ewell_string $heal_string $shred_string $dupec_string $enlarge_string $fry_string $protection_string<088>};
+};
+
+#alias {update_eternal_power} {
+	#var found_power 0;
+	#format temp {%p} {%1};
+	#foreach $eternalList index {
+		#regexp {"%1"} {"$eternalList[$index][power]"} {
+			#var found_power 1;
+			#list eternalList delete $index;
+			#list eternalList add {{{key} {$temp} {power} {%1} {level} {%2} {nrg} {%3} {max_cd} {%4} {cur_cd} {%5}}};
+		}
+	};
+	#if !$found_power {
+		#list eternalList add {{{key} {$temp} {power} {%1} {level} {%2} {nrg} {%3} {max_cd} {%4} {cur_cd} {%5}}};
+	};
+	#switch {"$temp"} {
+		#case {"energy well"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+		#case {"heal"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+		#case {"shred"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+		#case {"duplicate creature"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+		#case {"enlarge"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+		#case {"fry"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+		#case {"protection"} {
+			update_eternal_delay {$temp} %5 %2;
+		};
+	};
+};	
+
+#alias update_eternal_delay {
+	#var temp %2;
+	#regexp {$temp} {RDY} {#var my[eternal][%1] 1} {
+		#var my[eternal][%1] 0;
+		#if {%3 > 0} {
+			#regexp {$temp} {s} {#replace temp {s} {};#undelay {%1};#delay {%1} {#var my[eternal][%1] 1} {$temp};};
+			#regexp {$temp} {m} {#replace temp {m} {};#math temp {$temp * 60};#undelay {%1};#delay {%1} {#var my[eternal][%1] 1} {$temp};};
+			#regexp {$temp} {h} {#replace temp {h} {};#math temp {$temp * 60 * 60};#undelay {%1};#delay {%1} {#var my[eternal][%1] 1} {$temp};};
+		};
+	};
+};
+
+#action {{  ([0-9]+?)/([0-9]+?) ([A-Za-z0-9_ ]*?):([\r\n\t ]*?)([0-9].+?)([\r\n\t ]*?)([[A-Za-z0-9.]+)([\r\n\t ]*?)([[A-Za-z0-9.]+)}} {update_eternal_power {%4} %2 %6 %8 %10};
+
+#action {A shimmering ball of energy appears magically when you snap your fingers.} {
+	#var my[eternal][energy well] 0;
+	#delay 2 {(powers};
+};
+
+#action {^$user_cap bathes you in the healing powers of the outer planes.$} {
+	#var my[eternal][heal] 0;
+	#delay 2 {(powers};
+};
+
+#action {^You tear apart %* defenses!$} {
+	#var my[eternal][shred] 0;
+	#delay 2 {(powers};
+};
+
+#action {^Energy flashes down from the sky, frying %*!$} {
+	#var my[eternal][fry] 0;
+	#delay 2 {(powers};
+};
+
+#action {^You notice that %1 has come into view.} {
+	#if {!$idle_flag} {ctell %1 has reset.}
+	update_eternal_status;
+};
+
+#class {eternal} {close}

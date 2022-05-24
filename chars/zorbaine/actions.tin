@@ -1,0 +1,45 @@
+#act {3Kingdoms welcomes you back from linkdeath} {
+    load;
+};
+
+#act {^\[PARTY\] Sock: go %1} {%1};
+#act {^\[PARTY\] Ser: go %1} {%1};
+#act {^\[PARTY\] Martyr: go %1} {%1};
+#act {^\[PARTY\] Byron: go %1} {%1};
+
+#nop auto-buy at least three lottery tickets;
+#act {\$\$Lottery:\$\$ A lottery has been created for} {#show \n\n%0\n\n;#3 {lottery buy;y};lottery check};
+
+/* Auto-hold talisman for +alignment when it recharges */
+#act {Your talisman grows warm} {#10 hold talisman};
+
+/* auto-accept priest res */
+#act {"accept" or "refuse" this chance quickly, for pressing matters} {accept};
+
+/* Temp fix to refresh stats until _heartbeat is fixed */
+#act {The power of your battlecry already flows through you} {hp};
+
+#act {Zorbaine's Esquire leaves} {esq l};
+
+#nop Auto-focus after joust win;
+#act {{as Zorbaine unhorses him\.}} { mf; };
+
+#act {{A (.+) (\w+) dragon \(dragon\)}} {
+	#if {$autospork == 1} {
+		#var dragon[name] %2;
+		#var dragon[color] %3;
+		#if {"%3" == "quartz"} {
+			#if {"$my[wielding]" != "wv"} {
+				unwield;
+				#send wield wv;
+				#var my[wielding] wv;
+			};
+		} {
+			#if {"$my[wielding]" != "spork"} {
+				unwield;
+				#send wield spork;
+				#var my[wielding] spork;
+			};
+		};
+	};
+};

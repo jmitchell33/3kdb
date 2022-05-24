@@ -1,0 +1,22 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Treehouse};
+#var check_room 0;
+
+#var bot_message_1 '---- TREEHOUSE STEPPER ----';
+#var bot_message_2 '---- SMALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {n;w;w;w;ne;ne;n;n;nw;sw;n;sw;n;nw;w;e;ne;n;u;{pick fruit;get seed;d};s;ne;u;{pick fruit;get seed;d};sw;s;u;{pick fruit;get seed;d};n;se;u;{pick fruit;get seed;d};nw;sw;se;s;ne;s;sw;nw;nw;nw;ne;ne;ne;ne;se;ne;sw;s;n;se;nw;nw;ne;ne;e;e;se;se;sw;nw;se;s;n;sw;sw;s;s;s;s;s;s;s;e;e;e;nw;nw;n;n;ne;se;n;se;n;ne;e;w;nw;n;u;{pick fruit;get seed;d};s;nw;u;{pick fruit;get seed;d};se;sw;u;{pick fruit;get seed;d};ne;s;u;{pick fruit;get seed;d};n;se;sw;s;nw;s;nw;sw;s;s;se;se;w;w;w;s}
+#var bot[path] $botpath;
+
+#list botmobs clear;
+#list botmobs add {{{long} {A Root Warrior} {target} {warrior}}};
+#list botmobs add {{{long} {An Earthen Spirit} {target} {spirit}}};
+#list botmobs add {{{long} {A Guardian Branch} {target} {guardian}}};
+#list botmobs add {{{long} {Tree Guardian} {target} {guardian}}};
+#var bot[mobs] $botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin;

@@ -1,0 +1,65 @@
+#class {common_hpbar} {kill}
+#class {common_hpbar} {open}
+
+#alias {_update_status} {
+    _update_health;
+};
+
+#alias {tickhp} {
+    #TICKER {update_status} {
+        #math {idle} {$idle + 1};
+		#math {deadManTimeLeft} {$deadManTimeLeft - 1};
+        _update_idle;
+    } {1};
+    #TICKER {heartbeat} {
+        _player_miphp;
+        _player_heartbeat;
+        _guild_heartbeat;
+		_common_heartbeat;
+		_update_corpse_string;
+		#var action_round $mip[round];
+		#if {$eternal} {_update_eternal_status};
+		#if {$guild_miphp} {_guild_miphp};
+		#if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
+		#if {"$draw[caption][active]" == "on"} { draw_caption };
+    } {2};
+};
+
+#alias {_update_idle} {
+	#math   {idle_hr}       {$idle / 3600};
+	#math   {idle_min}      {$idle % 3600 / 60};
+	#math   {idle_sec}      {$idle % 60};
+	#if     {$idle_hr < 10} {#var idle_hr  0$idle_hr};
+	#if     {$idle_min < 10}{#var idle_min 0$idle_min};
+	#if     {$idle_sec < 10}{#var idle_sec 0$idle_sec};
+	#format {idle_cap}      {%+4s}  {<268>[<128>$idle_hr<268>:<128>$idle_min<268>:<128>$idle_sec<268>]<088>};
+
+	#math   {deadManTimeLeft_hr}       {$deadManTimeLeft / 3600};
+	#math   {deadManTimeLeft_min}      {$deadManTimeLeft % 3600 / 60};
+	#math   {deadManTimeLeft_sec}      {$deadManTimeLeft % 60};
+	#if     {$deadManTimeLeft_hr < 10} {#var deadManTimeLeft_hr  0$deadManTimeLeft_hr};
+	#if     {$deadManTimeLeft_min < 10}{#var deadManTimeLeft_min 0$deadManTimeLeft_min};
+	#if     {$deadManTimeLeft_sec < 10}{#var deadManTimeLeft_sec 0$deadManTimeLeft_sec};
+	#format {deadManTimeLeft_cap}      {%+4s}  {<268>[<128>$deadManTimeLeft_hr<268>:<128>$deadManTimeLeft_min<268>:<128>$deadManTimeLeft_sec<268>]<088>};
+}
+
+#alias {_update_health} {
+    #var	{my[hp][graph]}		{@graph{$my[hp][current];${my[hp][max]}}};
+	#var	{my[sp][graph]}		{@graph{$my[sp][current];$my[sp][max]}};
+	#var	{my[gp1][graph]}	{@graph{$my[gp1][current];$my[gp1][max]}};
+	#var	{my[gp2][graph]}	{@graph{$my[gp2][current];$my[gp2][max]}};
+	#var	{enemy[graph]}		{@graph{$enemy[hp];100}};
+	#format {hp}			{%+4s} {$my[hp][current]};
+	#format {hp_max}		{%+4s} {$my[hp][max]};
+	#format {sp}			{%+4s} {$my[sp][current]};
+	#format {sp_max}		{%+4s} {$my[sp][max]};
+	#format {gp1}			{%+4s} {$my[gp1][current]};
+	#format {gp1_max}		{%+4s} {$my[gp1][max]};
+	#format {gp2}			{%+4s} {$my[gp2][current]};
+	#format {gp2_max}		{%+4s} {$my[gp2][max]};
+	#format {ehealth}		{%+7s} {$enemy[hp]%%};
+};
+
+
+
+#class {common_hpbar} {close}

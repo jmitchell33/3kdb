@@ -1,0 +1,29 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Westersea Slum};
+#var check_room 0;
+
+
+#var bot_message_1 '---- WESTERSEA SLUM STEPPER ----';
+#var bot_message_2 '----       ALL TARGETS       ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {in;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;s;s;w;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;e;e;e;e;e;e;e;e;s;w;w;s;w;w;w;w;w;w;w;w;e;e;ne;e;e;e;e;e;e;w;w;w;w;w;w;w;w;n;n;e;n;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;out};
+
+#act {^-M-_{A blackened Awgwa|An Awgwa leader|A corrupted Awgwa|Shady leader|Tough looking brigand|Mischievous ruffian}} {	
+	#var foundtimes 1;
+    #regex {%2} {7B{[0-9]+}} {#var foundtimes &1;};
+    #var mobname_long %1;
+
+  	#if {"%1" == "An Awgwa leader"} {@botSetMobActions{leader};};
+    #if {"%1" == "A blackened Awgwa"} {@botSetMobActions{awgwa};};
+    #if {"%1" == "A corrupted Awgwa"} {@botSetMobActions{awgwa};};
+    #if {"%1" == "Shady leader"} {@botSetMobActions{leader};};
+    #if {"%1" == "Tough looking brigand"} {@botSetMobActions{brigand};};
+    #if {"%1" == "Mischievous ruffian"} {@botSetMobActions{ruffian};};
+	.check_monster
+ }
+
+#class {bot} {close}
+#read common/bot/generic.tin

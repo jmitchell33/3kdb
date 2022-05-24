@@ -1,0 +1,59 @@
+#class {miproom} {open};
+
+#ALIAS {.mipProcessBAD} {
+    #VAR {room[name]} {%1};
+};
+
+#ALIAS {.mipProcessDDD} {
+    #var exitStr %1;
+    #replace exitStr {~} { };
+    #var {room[exits]} {%1};
+};
+
+#NOP ***** Room Nouns Handling *****;
+#ALIAS {.mipProcessHAB} {
+	#REGEX {%1} {{(.*)\~(.*)\~(.*)\~(.*)}} {
+		#list {nouns} {fin} {&3} {noun_index};
+		#if {$noun_index == 0} {
+			#list {nouns} {add} {&3};
+			#if {"$autosearch" == "on"} {
+				exa &3 in room;
+				search &3 in room;
+			}
+		}
+	}
+}
+
+#list {nouns} {create};
+
+#alias update_room {
+    #if {"$draw[room]" == "on"} { draw_room };
+};
+
+
+#NOP List all Roomnotes for 'go' alias
+#alias {notelist} {
+	#map list {roomnote} {{\w+}} {variable} {noterooms};
+	#foreach {*noterooms[]} {room} {#map get {roomnote} {notes[$room]} {$room}};
+	#list notes sort;
+	#var notes
+}
+
+#NOP Search Room Nouns (built by MIP)
+#alias {sra} {
+	#ungag {^>$};
+	#var noun_cnt &{nouns[]};
+	#loop 1 &{nouns[]} cnt {
+		exa $nouns[$cnt];
+		search $nouns[$cnt]
+	};
+	#delay 0.5 {
+		#if {$noun_cnt < &{nouns[]}} {
+			#echo {<128>New items found!  Search again!<088>}
+		};
+		#gag {^>$} {1};
+	}
+}
+
+
+#class {miproom} {close};

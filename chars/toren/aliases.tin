@@ -1,0 +1,145 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#alias sz_study {pause game;qtrance teleport/w/w/w/w/w/d/sw/sw/se/s/u/nw/nw/path/sw/sw/w;.study;qtrance e/ne/ne/path/se/se/d/n/nw/ne/ne/u/e/e/e/e/e/teleport 1;play;unpause game;};
+#alias sz_reagents {pause game;qtrance teleport/w/w/w/w/w/u/w/w/w;topup;#delay 6 {qtrance e/e/e/d/e/e/e/e/e/teleport 1;play;unpause game;};}
+
+#alias track_gxp {
+    #var gxp_rounds 0;
+    #if $tracking_gxp {
+        #showme ----- NO LONGER TRACKING GXP -----;
+        #send {repeat combat/off};
+        #var tracking_gxp 0;
+        #unact { |  Next Circle:[%*]};
+        #unact {%*>-=-=-=-=-=-=-=-=-=-<*> Toren, Servant of the Bear <*>=-=-=-=-=-=-=-=-=-=-<%*};
+        #unact {%*>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-<%*};
+    } {
+        #showme ----- NOW TRACKING GXP -----;
+        #send {repeat combat/gs};
+        #list gxp_tracker clear;
+        #unvar old_gxp;
+        #unvar new_gxp;
+        #act {%*>-=-=-=-=-=-=-=-=-=-<*> Toren, Servant of the Bear <*>=-=-=-=-=-=-=-=-=-=-<%*} {
+            #line gag;
+            #gag { |%*|};
+        };
+        #act {%*>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-<%*} {
+            #line gag;
+            #ungag { |%*|};
+        };
+        #act { |  Next Circle:[%*]} {
+            #var tracking_gxp 1;
+            #if {$gxp_rounds == 0} {#var old_gxp %%1;#var gxp_rounds 1;} {
+                #var new_gxp %%1;
+                #math gxp_rounds {$gxp_rounds + 1};
+                #if {$old_gxp != $new_gxp} {
+                    #list gxp_tracker add {{{old_gxp} {$old_gxp} {new_gxp} {$new_gxp} {rounds} {$gxp_rounds}}};
+                    #var gxp_rounds 0;
+                };
+            };
+        };
+    };
+};
+
+#alias gxp_stats {
+    #var gxp_stats[avg] 0;
+    #var gxp_stats[rounds] 0;
+    #var gxp_stats[increases] 0;
+    #foreach $gxp_tracker[%*] round {
+        #math gxp_stats[increases] {$gxp_stats[increases] + 1};
+        #math gxp_stats[rounds] {$gxp_stats[rounds] + $round[rounds]}
+    };
+    #math gxp_stats[avg_rounds_for_increase] {1.00 * $gxp_stats[rounds] / $gxp_stats[increases]};
+    #showme {Each Increase Took On Average $gxp_stats[avg_rounds_for_increase] rounds};
+};
+
+#alias {corpse_trig} {
+    #if $check_death {
+        #NOP -- do nothing
+    } {
+        #if {$inventory[freezer] && $corpses[freezer] < 50} {
+            slab remains;
+            wrap remains;
+        } {
+            wrap remains;
+            preserve remains;
+            get preservation;
+            get all;
+        };
+    };
+};
+
+#alias corpse_dump2 {
+    #path save forward path;
+    #path get position pos;
+    go sol_crypt2;
+    unkeep all preservation;
+    #30 {put preservation in box};
+    #map run $go_back;
+};
+
+#alias .check_death {
+    #if $actions_stacked {
+        do_action;
+    } {
+        #if {$inventory[freezer] && $corpses[freezer] < 50} {
+            slab remains;
+            slab remains;
+        };
+        #if {$inventory[coffin] && $corpses[coffin] < 28} {
+            get remains;
+            wrap remains;
+            get remains;
+            wrap remains;
+        };
+        #if {$inventory[encumberance] > 95} {
+            #delay 1 {slab all;absorb;absorb;get all;.bot};
+        } {
+            #delay 1 {slab all;preserve remains;preserve remains;gather;get all;put all in buckler;.bot};
+        };
+    };
+}
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#alias {.mob_kill_action} {
+    #var stats[starting-gp] $my[gp1][current];
+    kill $mob[target];
+    #if $strategy[rabies] {rabies};
+    #if $strategy[maim] {maim};
+    #if $strategy[call] {call};
+    #if $strategy[undead] {=kill $mob[target]};
+};
+
+#NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
+#alias {set_ticker} {#ticker {con} {#if !$idle_flag {con 100} {#nop}} {90}};
+
+#alias {go_donate} {
+    #map get roomvnum donate_go_back;
+    #path save forward path;
+    #path get position pos;
+    go necro_box;
+    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
+    #if {$bot[corpse-run]} {
+        go sol_crypt2;
+        unkeep all preservation;
+        put all in box;
+        go sol_crypt1;
+        put all in box;
+    } {
+        go morgue;
+        donate coffin;donate all;
+        go necro_corpse;
+        store all;
+    };
+    #map run $donate_go_back;
+    #path load $path;
+    #path goto $pos;
+    #var bot[paused] 0;
+};
+#alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
+
+
+#class {player_aliases} {close}

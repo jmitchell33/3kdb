@@ -1,0 +1,440 @@
+#class {maphelper} {open}
+
+#alias {maphelp} {
+	#show mapsave/mapload - save/load from map/3k_map.tin;
+	#show map <roomname> - set map at roomname;
+	#show infoPane - get current room info;
+	#show mapexit <exit> <command> - tell the exit dir to execute command;
+	#show mapname <name> - rename current room;
+	#show mapnote <note> - set current room note;
+	#show mapsym <char> - set the current rooms symbol;
+	#show mapgo <num> - Move the map to room #;
+	#show mapdig <dir> [new]- makes an exit in dir, new argument leads to new room;
+	#show mapdelete <exit> - deletes the exit (unlinks and deletes the room);
+	#show mapunlink <exit> - unlinks the exit from the room it points to;
+	#show maplink <exit> <room#> - link exit to a room;
+	#show mapinsert <room#> - insert a room	?;
+	#show mapm <dir> - move the map in dir;
+	#show maparea <name> - set area name for the current room;
+	#show areamapped <area> - show which rooms are mapped in this area;
+};
+
+#alias {go} {
+	#if $bot[active] {#showme {Bot Paused!};.pause};
+	#map get roomvnum go_back;
+	#var roomfound 0;
+	#foreach $speedruns[%*] index {
+        #regexp {"%1"} {"$index[name]"} {
+			#var roomfound 1;
+            #showme {Found room %1 - here we go!};
+			#map run $index[vnum];
+        }
+    };
+	#if !$roomfound {#showme {Unable to find %1}};
+};
+
+#alias {go-note} {
+	#map run {{roomnote} {%0%*}};
+};
+
+#alias {go_back} {#map run $go_back};
+
+#alias {mapgo} {
+	#var roomfound 0;
+	#foreach $speedruns[%*] index {
+        #regexp {"%1"} {"$index[name]"} {
+			#var roomfound 1;
+            #showme {Found room %1 - teleporting map there!};
+			#map go $index[vnum];
+        };
+    };
+	#if !$roomfound {#showme {Unable to find %1}};
+};
+
+#alias {infoPane} {#map info};
+
+#alias {mapbackup} {
+	#unvar filename;
+	#format time %t {%m-%d-%y};
+	#var filename common/map/3k_shared_$time.tin;
+	#map write $filename;
+};
+
+#alias {mapsave} { #map write common/map/3k_shared.map force;#show Map saved.;};
+#alias {mapload} { #map read common/map/3k_shared.map;#show Map loaded.;};
+
+
+/* Modify/extend the map helpers: */
+#alias {mapf} {#map flag %1 %2};
+#alias {mapexit} {#map exit {%1} {COMMAND} {%2};#show Map exit created. %2 will lead %1.;mapsave;};
+#alias {mapname} {#map name %1;#show Map room named: %1;mapsave;};
+#alias {mapdig} {
+	#map get roomvnum mapCurrentVnum;
+	#map dig {%1} new;
+	#show New exit and room created: %1;
+	%1;
+	#show Reverse dir: %1;
+	#map link {%2} {$mapCurrentVnum};
+	mapsave;
+};
+
+#alias {mapvnum} {#map get roomvnum curvnum;#show Map vnum $curvnum set to \$curvnum.;};
+#alias {maplm} {#map landmark {%0} {$curvnum};#show Map landmark created for room $curvnum: %0};
+
+#alias {mapsym} {#map set roomsymbol %1;#show Map symbol set to: %1;mapsave;};
+#alias {mapnote} {#map set roomnote %0;#show Room note set to: %0;mapsave;};
+#alias {mapdelete} {#map delete {%1};#show Exit deleted: %1;mapsave;};
+#alias {mapunlink} {#map unlink {%0};#show Exit unlinked: %0;mapsave};
+#alias {maplink} {#map link {%1} {%2};#show Map linked: %1 will lead to %2;mapsave};
+#alias {mapinsert} {#map insert {%1};#show Room inserted: %1;,mapsave};
+#alias {mapm} {#map move %0};
+#alias {maparea} {#map set areaname %0;mapsave};
+
+
+#alias {mapfind} {
+	#show <129>Desc matches<088>;
+	#map list {roomdesc} {%i%*%0%*};
+	#show \n;
+	#show <129>Name matches:<088>;
+	#map list {roomname} {%i%*%0%*};
+	#show \n;
+	#show <129>Note matches:<088>;
+	#map list {roomnote} {%i%*%0%*};
+};
+
+#alias {mappath} {
+	#map find %0;
+	#path show;
+};
+
+#alias {mapicons} {🌀⛰️🏔️⛵🚢🌊🌻🌼🌷🌱🌲🌳🌴🌵🌾};
+
+
+/* Area Specific Actions */
+#NOP Section Z
+#ACTION {^Just a reminder, your continue code for Section %d is %w}
+{
+    #variable {sectionz[%1]} {%2}
+}
+
+/* Transports */
+#NOP Abyss
+#act {Abyssmal Portal (s,portal)} {#map goto 5159} {1}
+
+#NOP Android
+#act {BING! The button light goes off and the elevator doors open.} {enter elevator}
+#act {The elevator jerks to a halt and the doors open.} {out}
+#act {The elevator is already here. How about you enter it?} {enter elevator}
+
+#NOP Ao
+#act {** The Docks of Ao ** (se)} {#map goto 15463} {1}
+
+#NOP Ascended
+#act {Arid environment (sw,n,s,e,climb)} {#map goto 16718} {1}
+
+#NOP Ashridge Acres
+#act {AREA NAME: Ashridge Acres} {
+	#map get {roomvnum} {ashridge_room};
+	#map goto 22486
+} {4}
+
+#NOP Calvin and Hobbes
+#act {^on the snow calls to you, and you dread another day at school.} {#map goto 23824}
+#act {^and eagerly await the freedom of the afternoon.} {#map goto 23814}
+
+#NOP Chaos TV
+#act {AREA NAME: Simpsons [Doh]} {
+	#if {"$area" != "Simpsons"} {
+		#var {area} {Simpsons};
+		#map get {roomvnum} {tvroom};
+		#map goto 8315;
+	}
+} {4}
+
+#act {AREA NAME: Simpsons Expansion [Lostar]} {
+	#var {area} {Simpsons};
+} {4}
+
+#act {AREA NAME: Simpsons Expansion [Frank]} {
+	#var {area} {Simpsons Expansion};
+	#map get {roomvnum} {tvroom};
+	#map goto 8227
+} {4}
+#act {^   You dive cleanly through the computer screen!} {
+	#map goto $tvroom
+}
+
+#NOP Death
+#act {^You die.$} {.pause;#map goto 6247}
+
+#NOP Death Taco
+#act {^You shoot through a graceful arc, and feel weightless for the} {#map goto {roomnote} roaches}
+
+#NOP Dragon Realms
+#act {^You have to retreat against the onslaught of fire!} {#map move vortex}
+
+#NOP Einstein
+#act {^Standing on the bench, you relax and the stagedive through the rift} {#map goto 7039}
+
+#NOP Funkytown
+#act {^The intense gravity of the sun pulls the coaster to its surface where you} {#map goto 17497}
+
+#NOP Global Merc Training Theatre
+#act {^You have exited the simulation, thank you for playing.} {#map goto 15144}
+
+#NOP Good Humor Truck
+#act {^You enter the truck with one thing on your mind} {#map goto 25241}
+
+#NOP Greenhouse
+#act {^You embrace the plant and lose yourself among the vines.} {
+	#map get {roomvnum} {greenhouse_room};
+	#map goto 22315
+}
+#act {^You follow the trail away from the field.} {
+	#map goto $greenhouse_room
+}
+
+#NOP Kayos Portal
+#act {^You leap into the unknown!} {
+	#map get {roomvnum} {num};
+	#if {$num == 10278} {
+		#map goto $plungeroom
+	} {
+		#var plungeroom $num;
+		#map goto 10278
+	}
+}
+#act {^You touch the beacon, and a friendly ship belonging to The Vigilant swings by.} {#map goto 10278}
+
+#NOP Kyoto
+#act {^=S=A Poorly-lit Street} {
+	#var kyoto yes
+}
+#act {^=I= A large sign.} {
+	#if {"$kyoto" == "yes"} {
+		#map goto 25904;
+		#var kyoto no
+	}
+}
+
+#NOP Lost City
+#act {^With a final THUD, you fly out into a pile of metal!} {#map goto 24299}
+#act {^With a bit of difficulty you make your way back up the shaft} {#map goto 24297}
+
+#NOP The Lost Village of Willothorn
+#act {^You swim for your life for the surface and end up back where} {#map goto 14087}
+
+#NOP Necromancers
+#act {^You tumble down the river and find yourself on a rocky bank inside} {#map goto 7613}
+
+#NOP Night of Colour
+#act {^The balloon softly touches down, basket bumps lightly.} {exit}
+#act {^You step out of the basket, into forest.} {
+	#map get {roomarea} {area};
+	#if {"$area" == "Night of Colour"} {
+		#map goto 16359
+	} {
+		#map goto  16530
+	}
+}
+#act {^You step out of the basket, into chaos.} {
+	#map get {roomarea} {area};
+	#if {"$area" == "Night of Colour"} {
+		#map goto 16307
+	} {
+		#map goto 16527
+	}
+}
+
+#NOP Overlands
+#act {^After an unknown amount of time, you wake up and find yourself on} {#map goto 26024}
+#act {^=S=At an underground lake} {
+	#var overlands_raft yes
+}
+#act {^=I= A wooden sign.} {
+	#if {"$overlands_raft" == "yes"} {
+		#map goto 26022;
+		#var overlands_raft no
+	}
+}
+
+#NOP PG
+#act {^You eat the hamburger and your environment changes!} {
+	#map get {roomvnum} {pg_room};
+	#map goto 22330
+}
+#act {^As you exit the joint you seem to reappear back in CHAOS!} {
+	#map goto $pg_room
+}
+
+#NOP Phantom Ship
+#act {^The ship finally reaches a small cove where it gradually} {#map goto 25844}
+
+#NOP The Princess Bride
+#act {^At last, the Cliffs of Insanity tower above you!} {#map goto 23763}
+#act {^At last, the shore of Florin!} {#map goto 23737}
+
+#NOP Puddle
+#act {^You sink deep into the mud puddle!  The mud presses in on you from all} {
+	#map get {roomvnum} {puddle_room};
+	#map goto 22485
+}
+
+#NOP Ravenloft Castle
+#act {^You warily step out onto the cold, damp ground.} {#map goto 20756}
+#act {^You then step out of the coach and find yourself back} {#map goto 4631}
+
+#NOP Sausage Dimensions
+#act {^The frankfurter SMACKS you so hard you wake up somewhere else!} {#map goto 17561}
+
+#NOP Science Shuttle
+#act {^The captain announces: Welcome to Midway Space Station.$} {exit}
+#act {^The captain announces: Welcome to Houston Transport Center.$} {exit}
+
+#NOP Serinth
+#act {^The World of Serinth Board containing } {#map goto 16722}
+
+#NOP Starcraft:Broodwar
+#act {^Door number: 3, Access Code: %1$} {#var starcraft_code %1}
+
+#NOP Xaxis
+#act {^Welcome to Xaxis!} {#map goto 15875}
+#act {^Here we are folks. Welcome to the Isle of Equinity!} {#map goto 15913}
+
+#NOP Wayhaven Ferry
+#act {^The ferryman says: Well, here you are.} {#map goto 7354}
+
+
+/* Blocked Exits */
+#act {^You cannot go } {
+	#if {$mapstatic} {
+		#map undo
+	}
+}
+#act {^You cannot get it up.} {
+	#if {$mapstatic} {
+		#map undo
+	}
+}
+
+#NOP ** GUILDS **
+#NOP Juggernauts
+#act {^The room is locked.} {#map undo}
+#act {^Dirk says: This area is for Wolves not } {#map undo}
+#act {^Harlow says: You are not allowed here please turn around and leave at once} {#map undo}
+#act {^Only members of clan jade falcon can go this way.} {#map undo}
+
+#NOP Bards
+#act {^You can't go there!} {#map undo}
+
+#NOP ** AREAS **
+#NOP Abbey
+#act {^A feeling of fear and dread washes over you, preventing you from going} {#map undo}
+#act {^A feeling of dread washes over you, preventing you from going any further east.} {#map undo}
+
+#NOP Body Mansion
+#act {^You bump into a locked door.} {#map undo}
+
+#NOP Calvin and Hobbes
+#act {^Calvin defends his fort!} {#map undo}
+#act {^Hobbes will not let you into G.R.O.S.S. headquarters!} {#map undo}
+
+#NOP Carnegie
+#act {^Woody Allen says: You're going to have to wait for security!} {#map undo}
+#act {^Mel Brooks blocks the exit.} {#map undo}
+#act {^Jay-Z says: You're going to have to wait for security!} {#map undo}
+#act {^Jay-Z says: Where do you think you're going?} {#map undo}
+#act {^Jay-Z stops you leaving.} {#map undo}
+#act {^Jay-Z blocks the exit.} {#map undo}
+#act {^Trixie Hilton blocks the exit.} {#map undo}
+
+#NOP Chaos Cinemaplex
+#act {^The movie usher asks for your movie ticket. When you fail to come up with} {#map undo}
+
+#NOP Cove of the Three (Lost Soul)
+#act {^A magical force pushes you back, and you hear a voice} {#map undo}
+
+#NOP Crystal Stairway
+#act {^The Warrior will not let you invade her home any further.} {#map undo}
+#act {^The warrior will not let you pass.} {#map undo}
+
+#NOP Detroit
+#act {^Officer yells: Get him, he must be stealing something!!!!} {#map undo}
+
+#NOP Dundee
+#act {^The foliage in this part of the swamp is extremely thick and will take} {#map undo}
+
+#NOP Dragon Realms
+#act {^You cannot get past the dragon guards.} {#map undo}
+
+#NOP Elven Woods
+#act {^The elf {pushes|shoves} you back, refusing to let you pass{!|.}} {#map undo}
+
+#NOP Fallout Shelter
+#act {^Core Guard jumps in your way, blocking your path!} {#map undo}
+
+#NOP Ice Fishing
+#act {^You are unable to climb the bank here.  It is very steep, and with all} {#map undo}
+#act {^You can't go through a solid wall.  Try going around the shack, and} {#map undo}
+
+#NOP Ice Mountains (Verbeeg)
+#act {^The magical barrier is impenetrable.$} {#map undo}
+#act {^The cryohydra snaps one of its heads at you as you try and approach} {#map undo}
+
+#NOP Land
+#act {^You are caught like a fly in a spider web, burning and twisting as} {#map undo}
+
+#NOP Longshadow
+#act {^The drawbridge is currently upright denying you access to the castle.} {#map undo}
+
+#NOP Mage Tower
+#act {^The guard blocks your passage.} {#map undo}
+
+#NOP Night of Colour
+#act {^Impediment slaps you back, thorns tearing.} {#map undo}
+#act {^Serrated sword extended, Bulwark stops your progress.} {#map undo}
+
+#NOP The Princess Bride
+#act {^The guard won't allow you to pass!} {#map undo}
+
+#NOP Rabbit Fields
+#act {^The rabbit prevents you from going that way.} {#map undo}
+
+#NOP Ravenloft
+#act {^You try to go down, but suddenly feel more terrified than} {#map undo}
+#act {^The trees move together and bar your path!} {#map undo}
+#act {^A deathly chill blows from the south, blasting into} {#map undo}
+#act {^Four dragons swoop down from the rafters and attack, blocking the way west!} {#map undo}
+
+#NOP Rocky Hill
+#act {^Waving their rusty scimitars and growling loudly, the jackalmen} {#map undo}
+
+#NOP Section Z
+#act {^The %1 will not let you pass!} {#map undo}
+#act {^The portal %w is electrified and ZAPS you!} {#map undo}
+
+#NOP Simpsons
+#act {^   The Guard stops you and says: Aww no...you can't go in there.} {#map undo}
+
+#NOP SolChem
+#act {^The gang member shoves you back.} {#map undo}
+
+#NOP Tao Te Cheng
+#act {^Your understanding fails you and you cannot flee!!} {#map undo}
+
+#NOP Theatre of Souls
+#act {^A closed door blocks your way.} {#map undo}
+
+#NOP Tomb of Kingn Alaren
+#act {^The skeletal royal guard steps in front of you barring your progress.} {#map undo}
+#act {^The skeletal guard steps in front of you barring your progress.} {#map undo}
+
+#NOP Underdark
+#act {^The {drow|guard} prevents you from going that way.} {#map undo}
+#act {^The troll will not let you pass.} {#map undo}
+
+#NOP Whorehouse
+#act {^Doh shoves you backwards with a scowl.} {#map undo}
+#act {^Your feet are mired in the bird poop, you can't seem to move!!} {#map undo}
+
+#class {maphelper} {close}

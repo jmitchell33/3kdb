@@ -1,0 +1,140 @@
+#class mage_defense_tracker kill
+#class mage_defense_tracker open
+
+#var defense_tracker[blink][name] Blink;
+#var defense_tracker[prot-evil][name] Protection from Evil;
+#var defense_tracker[prot-good][name] Protection from Good;
+#var defense_tracker[major-globe][name] Major Globe;
+#var defense_tracker[magnificent-shield][name] Magnificent Shield;
+#var defense_tracker[stoneskin][name] Stoneskin;
+#var defense_tracker[prismatic-sphere][name] Prismatic Sphere;
+#var defense_tracker[prismatic-aura][name] Prismatic Aura;
+#var defense_tracker[mantle][name] Mantle;
+#var defense_tracker[armor][name] Armor;
+#var defense_tracker[total][name] Total;
+
+#alias clear_defense_tracker {
+    #var defense_tracker[blink][casts] 0;
+    #var defense_tracker[prot-evil][casts] 0;
+    #var defense_tracker[prot-good][casts] 0;
+    #var defense_tracker[major-globe][casts] 0;
+    #var defense_tracker[magnificent-shield][casts] 0;
+    #var defense_tracker[stoneskin][casts] 0;
+    #var defense_tracker[prismatic-sphere][casts] 0;
+    #var defense_tracker[prismatic-aura][casts] 0;
+    #var defense_tracker[mantle][casts] 0;
+    #var defense_tracker[armor][casts] 0;
+    #var defense_tracker[total][casts] 0;
+
+    #var defense_tracker[blink][blocks] 0;
+    #var defense_tracker[prot-evil][blocks] 0;
+    #var defense_tracker[prot-good][blocks] 0;
+    #var defense_tracker[major-globe][blocks] 0;
+    #var defense_tracker[magnificent-shield][blocks] 0;
+    #var defense_tracker[stoneskin][blocks] 0;
+    #var defense_tracker[prismatic-sphere][blocks] 0;
+    #var defense_tracker[prismatic-aura][blocks] 0;
+    #var defense_tracker[mantle][blocks] 0;
+    #var defense_tracker[armor][blocks] 0;
+    #var defense_tracker[total][blocks] 0;
+};
+
+clear_defense_tracker;
+
+#alias {formatDefense} {
+    #var defense_name %1;
+    #var cast_count %2;
+    #var block_count %3;
+
+    #math {block_percent} {100.0*$block_count/$defense_tracker[total][blocks]};
+    #math {cast_percent} {100.0*$cast_count/$defense_tracker[total][casts]};
+    #math {block_per_cast} {1.0 * $block_count / $cast_count};
+    
+    #format $block_percent {%f} {$block_percent};
+    #format $cast_percent {%f} {$cast_percent};
+    #format $block_per_cast {%f} {$block_per_cast};
+
+    #if {"$defense_name" == "Total"} {
+        #format result {<acf>-----<faa> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast};
+    } {
+        #format result {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast};
+    };
+    #showme $result;
+};
+
+#alias {defense_summary} {
+    #format header1 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {Defense Type} {# of} {% of} {# of} {% of} {Blocks/};
+    #format header2 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {} {Casts} {Casts} {Blocks} {Blocks} {Cast};
+    #format header3 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {} {} {} {} {} {};
+    #showme $header1;
+    #showme $header2;
+    #showme $header3;
+
+    #foreach $defense_tracker[%*] index {
+        formatDefense {$index[name]} {$index[casts]} {$index[blocks]}
+    };
+};
+
+#alias {defense_update_cast} {
+    #line gag;
+    #math defense_tracker[%1][casts] {$defense_tracker[%1][casts] + 1};
+    #math defense_tracker[total][casts] {$defense_tracker[total][casts] + 1};
+};
+
+#alias {defense_update_block} {
+    #line gag;
+    #math defense_tracker[%1][blocks] {$defense_tracker[%1][blocks] + 1};
+    #math defense_tracker[total][blocks] {$defense_tracker[total][blocks] + 1};
+};
+
+#action {^You wave your hands and an invisible barrier surrounds and helps protect} {
+    defense_update_cast armor;
+};
+#action {Your armor spell absorbs the whole of the attack!} {
+    defense_update_block armor;
+};
+
+#action {Your skin begins to harden, yet it doesn't seem to affect your movements!} {
+    defense_update_cast stoneskin;
+};
+#action {glances off your stoneskin!} {
+    defense_update_block stoneskin;
+};
+
+#action {You feel safer as the major globe surrounds and protects you.} {
+    defense_update_cast major-globe;
+};
+#action {Your Major Globe absorbs} {
+    defense_update_block major-globe
+};
+
+#action {shimmering field of grey} {
+    defense_update_cast mantle;
+};
+#action {mantle flashes briefly} {
+    defense_update_block mantle;
+};
+
+#action {A shimmering field of light expands from you and surrounds you in a} {
+    defense_update_cast prismatic-sphere;
+};
+#action {Your prismatic sphere flashes briefly!} {
+    defense_update_block prismatic-sphere;
+};
+
+#action {You wave your hands and a transparent shield of force surrounds you.} {
+    defense_update_cast magnificent-shield;
+};
+#action {Your improved shield spell absorbs the whole of the attack!} {
+    defense_update_block magnificent-shield;
+};
+
+#action {You cast protection from evil on yourself.} {
+    defense_update_cast prot-evil;
+};
+#action {Your Protection from Evil has blocked the assault} {
+    defense_update_block prot-evil;
+};
+
+
+#class mage_defense_tracker close

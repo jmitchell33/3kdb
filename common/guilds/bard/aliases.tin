@@ -1,0 +1,133 @@
+#class {bard_aliases} {kill}
+#class {bard_aliases} {open}
+
+
+#NOP -- General Bard helper aliases;
+
+#NOP -- This alias is meant for the Angel's Fountain in wayhaven;
+#alias {fillwater} {
+	go water1;
+	#delay 2 {
+		#loop 1 20 i {give glass $i to $user;
+			give pitcher $i to $user;
+			fill glass;
+			fill pitcher;
+		};
+		#5 {drink fountain};
+	};
+};
+
+#NOP ---THIS SECTION IS FOR SONG ALIASES;
+#alias {clear_prots} {#var defs 0};
+#alias {vamp} {perform vampire};
+#alias {it %1} {perform invigorating tune for %1};
+#alias {pd} {cease;perform dirge};
+#alias {ag} {perform amazing grace};
+#alias {om} {perform o muse};
+#alias {rd} {cast focus the rainbow;perform rainbow of death};
+#alias {lotb} {perform leader of the band};
+#alias {itf} {perform into the fire;#delay 3 cease;};
+#alias {es} {empowered strikes;#var defs[es] 1};
+
+#alias {ham_bot} {
+	#if $strategy[hammer] {
+		#SHOWME <efa>------------------- HAMMER NO LONGER SMASHING FACE -------------------<088>;
+		unwield hammer;
+		wield redaxe;
+		wear shield;
+		#var strategy[hammer] 0;
+		#var defs[hr] 0;
+	} {
+		#SHOWME <efa>------------------- HAMMER WILL BEGIN SMASHING FACE -------------------<088>;
+		unwield redaxe;
+		remove shield;
+		wield rod;
+		wield hammer;
+		#var strategy[hammer] 1;
+		#var defs[hr] 1;
+	};
+};
+
+#alias {rod_bot} {
+	#if $strategy[rainbow] {
+		#SHOWME <efa>------------------- RAINBOW OF DEATH DISABLED -------------------<088>;
+		#var strategy[rainbow] 0;
+		#var defs[hr] 0;
+		#var defs[fr] 0;
+	} {
+		#SHOWME <efa>------------------- RAINBOW OF DEATH ACTIVATED  -------------------<088>;
+		#var strategy[rainbow] 1;
+		#var defs[hr] 1;
+		#var defs[fr] 1;
+	};
+};
+
+
+#alias {blades} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast blade dance};
+#alias {critic} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast caustic critic};
+#alias {ebolt} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast energy bolt};
+#alias {rod} {perform rainbow of death;cast focus the rainbow};
+
+#NOP -- QUICK ALIASES FOR SETTING UP DEFENSES;
+#alias {prots_spells} {prots_blink;prots_pfe;prots_pfg;prots_pfn;prots_pfc;prots_pfh;prots_mb;prots_hs;};
+#alias {prots_songs} {prots_grace;prots_muse;};
+
+#alias {prots_pfe} {cast protection from evil;#var defs[pe] 1;echo_prots_pfe};
+#alias {prots_pfg} {cast protection from good;#var defs[pg] 1;echo_prots_pfg};
+#alias {prots_pfn} {cast protection from neutral;#var defs[pn] 1;echo_prots_pfn};
+#alias {prots_pfc} {cast protection from frost;#var defs[pf] 1;echo_prots_pfc};
+#alias {prots_pfh} {cast protection from heat;#var defs[ph] 1;echo_prots_pfh};
+#alias {prots_mb} {cast mind blank;#var defs[mb] 1;echo_prots_mb};
+#alias {prots_hs} {cast hardened skin;#var defs[hs] 1;echo_prots_hs};
+#alias {prots_blink} {cast blink;#var defs[blink] 1;echo_prots_blink};
+#alias {prots_hr} {#var defs[hr] 1;echo_prots_hr};
+#alias {prots_grace} {perform amazing grace;#var defs[ag] 1;echo_prots_grace};
+#alias {prots_muse} {perform o muse;#var defs[om] 1;echo_prots_muse};
+
+#alias {reflex_clear} {reflex clear;echo_reflex_clear};
+#alias {reflex_critic %1} {reflex add sp >%1 cast caustic critic;echo_reflex_critic %1};
+#alias {reflex_ow %1} {reflex add gp1 <%1 ow;echo_reflex_ow %1};
+#alias {reflex_ma %1} {reflex add gp1 >%1 martial assault;echo_reflex_ma %1};
+
+
+#NOP ---THIS SECTION IS FOR FORMATTING FOR SPELL/SONG MAINTENANCE;
+#alias {echo_divider1} {#echo {========================================================}};
+#alias {echo_clear_prots} {#echo {--------------- CLEARING DEFENSE VARIABLES --------------}};
+#alias {echo_divider2} {#echo {+++++++++++++++++++++++++++++++++++++++++++++++++++++++++}};
+#alias {echo_prots_header} {#echo {+++++++++++++++  ACTIVE DEFENSES INCLUDE:  ++++++++++++++}};
+#alias {echo_prots_pfe} {#echo {+++++++++++++++  PROTECTION FROM EVIL      ++++++++++++++}};
+#alias {echo_prots_pfg} {#echo {+++++++++++++++  PROTECTION FROM GOOD      ++++++++++++++}};
+#alias {echo_prots_pfn} {#echo {+++++++++++++++  PROTECTION FROM NEUTRAL   ++++++++++++++}};
+
+#alias {echo_prots_pfh} {#echo {+++++++++++++++  PROTECTION FROM HEAT      ++++++++++++++}};
+#alias {echo_prots_pfc} {#echo {+++++++++++++++  PROTECTION FROM COLD      ++++++++++++++}};
+#alias {echo_prots_mb} {#echo {+++++++++++++++  MIND BLANK                ++++++++++++++}};
+#alias {echo_prots_hs}  {#echo {+++++++++++++++  HARDENED SKIN             ++++++++++++++}};
+
+#alias {echo_prots_hr} {#echo {+++++++++++++++  HARMONIC REGENERATION     ++++++++++++++}};
+#alias {echo_prots_blink} {#echo {+++++++++++++++  BLINK                     ++++++++++++++}};
+#alias {echo_prots_grace} {#echo {+++++++++++++++  AMAZING GRACE             ++++++++++++++}};
+#alias {echo_prots_muse} {#echo {+++++++++++++++  O'MUSE                    ++++++++++++++}};
+
+
+#alias {echo_reflex_clear}     {#echo {---------------  CLEARING REFLEX ACTIONS      --------------}};
+#alias {echo_reflex_header}    {#echo {+++++++++++++++  REFLEX ACTIONS INCLUDE:      ++++++++++++++}};
+#alias {echo_reflex_critic %1} {#echo {+++++++++++++++  CAUSTIC CRITIC  (>%1 sp)     ++++++++++++++}};
+#alias {echo_reflex_ow %1}  {#echo {+++++++++++++++  DIRGE CORPSE    (<%1 karma)  ++++++++++++++}};
+#alias {echo_reflex_ma %1}     {#echo {+++++++++++++++  MARTIAL ASSAULT (>%1 karma)  ++++++++++++++}};
+
+#NOP ---Song Buffs;
+#alias {buffup} {
+	#math buff_delay_1 {41*2};
+	#math buff_delay_2 {79*2};
+	#math buff_delay_3 {138*2};
+	#math buff_delay_4 {160*2};
+
+	perform son of man for %1;
+	#delay $buff_delay_1 {perform memory for %1};
+	#delay $buff_delay_2 {perform let it be for %1};
+	#delay $buff_delay_3 {perform naked sunday for %1};
+	#delay $buff_delay_4 {perform hero for %1};
+}
+
+#class {bard_aliases} {close}

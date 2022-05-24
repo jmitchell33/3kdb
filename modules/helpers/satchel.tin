@@ -1,0 +1,51 @@
+#class helpers open
+
+#action {%1%s\|%s%2%s\|%s%3%s\|%s%4%s\|%s%5%s\|%s%6%s\|%s%7%s\|%s%8%s\|%s%9%s\|} {
+    #format {lower} {%l} {%1};
+    #format {satchel_total} {%p} {%2};
+    #format {satchel_legendary} {%p} {%3};
+    #format {satchel_superior} {%p} {%4};
+    #format {satchel_good} {%p} {%5};
+    #format {satchel_average} {%p} {%6};
+    #format {satchel_poor} {%p} {%7};
+    #format {satchel_crude} {%p} {%8};
+    #format {satchel_worthless} {%p} {%9};
+    
+    #list temp_satchel add {{
+        {name} {$lower}
+        {total} {$satchel_total}
+        {legendary} {$satchel_legendary}
+        {superior} {$satchel_superior}
+        {good} {$satchel_good}
+        {average} {$satchel_average}
+        {poor} {$satchel_poor}
+        {crude} {$satchel_crude}
+        {worthless} {$satchel_worthless}
+    }};
+};
+
+#alias update_satchel {
+    #list temp_satchel clear;
+    #send {stashlist};
+    #delay 1 {#var craft[satchel] $temp_satchel;};
+};
+
+#alias unstash_2 {
+    #showme {<ccf>  -------------------------------------------    <088>  };
+    #showme {<ccf>  -----   <fff>UNSTASHING Lvl <faa>%1<fff> MATERIALS<ccf>   -----    <088>  };
+    #showme {<ccf>  -------------------------------------------    <088>  };
+    update_satchel;
+    #delay 2 {
+        #foreach $satchel[data][%*] index {
+            #if {%1 >= $index[min-level] && %1 <= $index[max-level]} {                                
+                #foreach $craft[satchel][%*] satchel_item {
+                    #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
+                        unstash2 all $satchel_item[name];
+                    };
+                };
+            };
+        };
+    };
+};
+
+#class helpers close

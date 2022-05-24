@@ -1,0 +1,101 @@
+#class {psicorps_actions} {kill}
+#class {psicorps_actions} {open}
+
+#NOP --- PSICORPS ACTIONS;
+
+#NOP -- GXP Tracking;
+#var gxp[total-kills] 0;
+#var gxp[total-rounds] 0;
+#var gxp[total-gxp] 0;
+
+
+#action {^- Tour Number : %d %*} {
+	#var psi_tour_base 5;
+	#var psi_tour %1;
+	#math gxp[tour] {$psi_tour/$psi_tour_base * $psi_tour_base};
+	#foreach $psi_gxp[%*] index {#if {$index[tour] == $gxp[tour]} {#var gxp[round-max] $index[max_gxp_per_round];}};
+} {1};
+
+#alias gs_powers {
+	#unvar gs_powers;
+	#unvar combat;
+	#list gs_powers clear;
+	#var powers_added {Added the following powers: };
+	#send gs;
+	#delay 3 {
+		#foreach $psi_powers[%*] psi_power {
+			#format power1 {%l} {$psi_power[power]};
+			#foreach $gs_powers power {
+				#format power2 {%l} {$power};
+				#if {"$power1" == "$power2"} {
+					#cat powers_added {$power2, };
+					addp $psi_power[key];
+				};
+			};	
+		};
+		#showme $powers_added;
+	};
+};
+
+#act {^- T%d: %* %s-$} {
+	#var temp %2;
+	#replace temp {, } {;};
+	#list gs_powers add {$temp};
+};
+
+
+#act {^GXP Awarded from %*: %d} {
+	#var gxp[last-fight-mob] %1;
+	#var gxp[last-fight] %2;
+	#math gxp[total-kills] {$gxp[total-kills] + 1};
+	#math gxp[total-gxp] {$gxp[total-gxp] + %2};
+	#math gxp[total-rounds] {$gxp[total-rounds] + $last_fight_rounds};
+	#math gxp[avg-gxp-per-round] {$gxp[total-gxp] / $gxp[total-rounds]};
+	
+	#math gxp[last-fight-per-round] {$gxp[last-fight] / $last_fight_rounds};
+	#showme LAST FIGHT GXP: $gxp[last-fight-per-round] per rnd from $gxp[last-fight-mob];
+	#showme TOTAL GXP: $gxp[total-gxp] ($gxp[avg-gxp-per-round] per round);
+
+	#var mob[demoralize] 0;
+} {1};
+
+#NOP --- See power stats;
+#substitute {Psychometabolism} {Psychometabolism [Str]};
+#substitute {Psychoportation} {Psychoportation [Dex]};
+#substitute {Psychokinesis} {Psychokinesis [Con]};
+#substitute {Metacreativity} {Metacreativity [Int]};
+#substitute {Clairsentience} {Clairsentience [Wis]};
+#substitute {Telepathy} {Telepathy [Cha]};
+
+#NOP ---- Healing;
+
+#sub {^{A blue light engulfs your body as you use psionic energy to repair damage|to your cells.}$} {
+	<159>%0<900>
+};
+
+#NOP ---- Implants;
+
+#act {^Implant: Shutdown complete.} {#var my[powers] = []};
+
+#NOP ---- Damage type
+
+#act {^%1 melee attacks do %2 damage.$} {
+	#regex {%2} {{(mostly )?slashing}} {#var _adapt_body edged};
+	#regex {%2} {{(mostly )?crushing}} {#var _adapt_body blunt};
+	#regex {%2} {{(mostly )?fire}} {#var _adapt_body fire};
+	#regex {%2} {{(mostly )?ice}} {#var _adapt_body ice};
+	#regex {%2} {{(mostly )?acid}} {#var _adapt_body acid};
+	#regex {%2} {{(mostly )?electric}}	{#var _adapt_body electric};
+	#regex {%2} {{(mostly )?mental}} {#var _adapt_body mind};
+	#regex {%2} {{(mostly )?energy}} {#var _adapt_body energy};
+	#regex {%2} {{(mostly )?poison}} {#var _adapt_body poison};
+	#regex {%2} {{(mostly )?radiation}}	{#var _adapt_body radiation}; 
+};
+
+#NOP ---- Offense
+
+#act {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1};
+#act {^You demoralize} {#var mob[demoralize] 1};
+#act {^That target cannot be re-demoralized.} {#var mob[demoralize] 1};
+
+#class {psicorps_actions} {close}

@@ -1,0 +1,24 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Westersea Sewer};
+
+#var check_room 0;
+
+#var bot_message_1 '----  WSEA CUBES    ----';
+#var bot_message_2 '----  ALL TARGETS   ----';
+
+#showme $bot_message_1;
+#showme $bot_message_2;
+
+#var {botpath} {e;e;w;n;s;w;w;w;n;s;w;n;w;e;s;w;w;n;s;s;n;e;e;s;w;e;n;e;s;d;s;s;n;se;nw;ne;sw;e;e;e;w;w;w;n;u;n;e;e};
+#var bot[path] $botpath;
+
+#list botmobs clear;
+#list botmobs add {{{long} {A small gelatinous cube} {target} {cube}}};
+#list botmobs add {{{long} {A gigantic gelatinous cube} {target} {cube}}};
+#list botmobs add {{{long} {A massive ochre jelly} {target} {jelly}}};
+#var bot[mobs] $botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin;

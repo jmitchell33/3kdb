@@ -1,0 +1,90 @@
+#class {tacos} {open};
+
+#nop Aliases;
+#alias {distaco} {
+    #7 dispose shell;
+    #7 dispose sauce;
+    #7 dispose meat;
+    #7 dispose cream;
+    #7 dispose tomatoes;
+    #7 dispose lettuce;
+    #7 dispose cheese;
+};
+
+#nop Death Taco strategy;
+#var tacoTarget "";
+
+#act {You try to grab a taco shell, but they all wriggle away from your grasp} {e;ak {get all;grab lettuce};grab lettuce};
+#act {You try to grab some lettuce, but it shrinks away from your hand} {e;ak {get all;grab tomatoes};grab tomatoes};
+#act {You try to grab some tomatoes but they quiver like jello and slime away} {e;ak {get all;grab cheese};grab cheese};
+#act {You try to grab a handful of cheese, but it slips away from you.} {s;ak {get all;grab meat};grab meat};
+#act {You try to grab some meat, but it creeps away from your grasp} {w;ak {get all;grab cream};grab cream};
+#act {You try to grab a scoop of the sour cream, but it quivers away from you.} {w;ak {get all;grab guacamole};grab guacamole};
+#act {You try to grab a scoop of the guacamole, but it quivers away from you.} {w;ak {get all;grab sauce};grab sauce};
+#act {You try to grab a packet of hot sauce, but it crinkles away from you.} {w;#show \nReady for a fight!};
+
+#alias {grab} {
+	#send {grab %1};
+	#var tacoTarget %1;
+	#show taco target set: $tacoTarget;
+	#if {"%1" == "shell"} {wstrat e;rstrat w};
+	#elseif {"%1" == "lettuce"} {wstrat e;rstrat w};
+	#elseif {"%1" == "meat"} {wstrat n;rstrat s};
+	#elseif {"%1" == "cheese"} {wstrat w;rstrat e};
+	#elseif {"%1" == "tomatoes"} {wstrat w;rstrat e};
+	#elseif {"%1" == "cream"} {wstrat e;rstrat w};
+	#elseif {"%1" == "guacamole"} {wstrat e;rstrat w};
+};
+
+#alias {assemble} {
+	#send {assemble %0}
+	#var killing taco;
+}
+
+#act {You plummet, and SLAM into the ground!} {w;w};
+#act {The taco squirts guacamole all over you, coating you with a slick} {#5 resist;st};
+#act {You FREEZE from the cold guacamole coating you} {#7 resist;wear all;wield $wielded;pp;st;tr;wstrat e;w;#delay {1} {wear all;pp}};
+#act {The melting cheese sizzles on your flesh and makes your fingers sticky} {#7 resist;wield $wielded;#delay {4} {mmc};#4 st};
+#act {The taco suddenly opens up, revealing its moist, gristly meaty} {#5 resist;st};
+#act {A jagged fragment of the taco shell breaks off and IMPALES you} {#5 resist;st};
+#act {The taco SPRAYS vinegary hot sauce all over everybody} {#5 resist;wield $wielded;st};
+#act {As you reach to grab some of the shredded lettuce, it pulls away from} {wstrat w;rstrat e};
+#act {You carefully assemble a DEATH TACO (tm) from} {wstrat e;rstrat {w;w;w}};
+#act {You plummet, and SLAM into the ground!} {w;w};
+
+#alias _enableCheeseStrat {
+	#act {The melting cheese sizzles on your flesh and makes your fingers sticky} {
+		#7 resist;wield $wielded;mmc;pp;w;
+		#unact {The melting cheese sizzles on your flesh and makes your fingers sticky};
+		#if {"$killing" == "taco"} {
+			e;rest;
+			#act {The melting cheese finally evaporates from} {
+				wield $wielded;wear all;pp;mmc;w;
+                #unact {The melting cheese finally evaporates from};
+                _enableCheeseStrat;
+			};
+		};
+		#elseif {"$killing" == "cheese"} {
+			w;rest;
+			#act {The melting cheese finally evaporates from} {
+				wield $wielded;wear all;pp;mmc;e;
+                #unact {The melting cheese finally evaporates from};
+                _enableCheeseStrat;
+			};
+		};
+	};
+}
+
+#nop _enableCheeseStrat;
+
+#act {^{Death Taco (.*) you}} {staunch};
+
+#alias {tacostop} {
+	#class {tacos} {kill};
+}
+
+#show Taco bot loaded. 'grab shell' to start.;
+
+#alias killtaco {#class {tacos} {kill}};
+
+#class {tacos} {close};

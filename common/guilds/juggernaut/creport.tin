@@ -1,0 +1,49 @@
+#class {jugg_report} {kill}
+#class {jugg_report} {open}
+
+#nop #act {{\[([\w\s\Q/(\\\)\'\,-<\E\{\}\.]+)\] \[(\s*)(\d+)\] \[(\s*)(\d+)\]}};
+#act {[%1] [%2] [%3] $} {
+	#format {cr_class} {%p} {%2};
+	#format {cr_rnds} {%p} {%3};
+	#if {$cr_rnds == 0} {
+		#var {cr_hr} {Undefined}
+	} {
+		#math {cr_hr} {1.0*${cr_class}/${cr_rnds}*1800*.8};
+		#format {cr_hr} {%d} {${cr_hr}};
+		#format {cr_hr} {%g} {${cr_hr}}
+	};
+	#math {cr_class_tot} {${cr_class_tot} + ${cr_class}};
+	#math {cr_rnds_tot} {${cr_rnds_tot} + ${cr_rnds}};
+	#math {cr_count} {${cr_count} + 1};
+	#format {cr_hr} {%+14s} {<078>${cr_hr}<088>};
+	#var {cr_str} { [<078>%1<088>] [<078>%2<088>] [<138>%3<088>] [$cr_hr]};
+	#line gag;
+	#echo {$cr_str}
+};
+#substitute { .--------------------------. .------------. .----.}
+	    {<038> .-------------------------. .------------. .----. .--------------.<088>};
+#substitute {   Monster\'s Name                  Class      Rnds}
+	    {    Monster's Name                Class      Rnds      Exp/Hour};
+#act {^  Current Enemy: } {
+	#math	{cr_avg_class}	{1.0*${cr_class_tot}/${cr_count}};
+	#format	{cr_avg_class}	{%d}	{${cr_avg_class}};
+	#math	{cr_avg_rnds}	{1.0*${cr_rnds_tot}/${cr_count}};
+	#format	{cr_avg_rnds}	{%d}	{${cr_avg_rnds}};
+	#math 	{cr_avg_hr}	{1.0*${cr_class_tot}/${cr_rnds_tot}*1800*.8};
+	#format	{cr_avg_hr}	{%d}	{${cr_avg_hr}};
+	#format	{cr_avg_hr}	{%g}	{${cr_avg_hr}};
+	#NOP #math	{cr_avg_xp} 	{${cr_avg_hr}*.8};
+	#var	cr_class_tot	0;
+	#var	cr_rnds_tot	0;
+	#var	cr_count	0;
+	#format	{cr_avg_class}	{%+32s}	{${cr_avg_class}};
+	#format	{cr_avg_rnds}	{%+7s}	{${cr_avg_rnds}};
+	#format	{cr_avg_hr}	{%+17s}	{${cr_avg_hr}};
+	#format	{cr_avg_xp}	{%d}	{${cr_avg_xp}};
+	#format	{cr_avg_xp}	{%+64s}	{${cr_avg_xp}};
+	#var	{cr_str}	{  Average:${cr_avg_class}${cr_avg_rnds}${cr_avg_hr}};
+	#showme {${cr_str}};
+	#NOP #showme {${cr_avg_xp}}
+};
+
+#class {jugg_report} {close}

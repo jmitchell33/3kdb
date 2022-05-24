@@ -1,0 +1,19 @@
+#class {bot} {open}
+
+#var {areaname} {Westersea Sewer}
+#var {botpath} {w;w;w;w;sw;se;s;se;s;w;w;w;w;nw;w;w;nw;w;w;w;nw;w;w;sw;ne;n;nw;se;s;e;e;se;e;e;e;ne;ne;e;e;e;e;ne;w;w;nw;w;nw;n;e;nw;ne;e;w;w;w;w;w;w;sw;sw;e;e;se;e;w;nw;w;w;w;w;nw;n;w;w;w;e;e;e;s;se;se;w;w;sw;sw;e;w;w;w;w;w;e;e;e;e;ne;ne;e;e;nw;e;e;ne;ne;e;e;e;e;e;sw;se;w;s;se;e;se;e;e;e;e;e;e;}
+
+#act {^-M-_{A large black snake|A furry spider|A small cockroach|An oddly glowing rat|An irradiated crocodile|A medium sized glowing rat}}
+ {
+  #if {"A large black snake"=="%1"} {#var mobname snake};
+  #if {"A furry spider"=="%1"} {#var mobname spider};
+  #if {"An oddly glowing rat"=="%1"} {#var mobname rat};
+  #if {"An irradiated crocodile"=="%1"} {#var mobname crocodile};
+  #if {"A medium sized glowing rat"=="%1"} {#var mobname rat};
+  #if {"A small cockroach"=="%1"} {#var mobname cockroach};
+  .check_monster
+ }
+
+#class {bot} {close}
+
+#read common/bot/generic.tin

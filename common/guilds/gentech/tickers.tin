@@ -1,0 +1,18 @@
+#class {gentech_tickers} {kill}
+#class {gentech_tickers} {open}
+
+#NOP -- Random ticker to keep you unidle / gaining gxp.  Will not fire if deadmans is tripped
+#alias {select_random_action} {
+	#switch {1d6} {
+		#case 1 coins;
+		#case 2 coins;
+		#case 3 rcost;
+		#case 4 gs;
+		#case 5 gwho;
+		#case 6 eq;
+	}	
+};
+#alias {set_ticker} {#ticker {noise} {#if !$idle_flag {select_random_action} {#nop}} {240}};
+
+
+#class {gentech_tickers} {close}

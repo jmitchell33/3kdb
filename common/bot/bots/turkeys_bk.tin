@@ -1,0 +1,26 @@
+#class {bot} {open}
+
+#var {area} {Turkey Farm}
+#var check_room 0;
+
+
+#var bot_message_1 '---- TURKEY FARM STEPPER ----';
+#var bot_message_2 '----     ALL TARGETS       ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#alias .pre_fight_check {#nop;};
+
+.pre_bot_check;
+
+#VAR {botpath} {n;e;e;n;w;w;n;e;e;n;w;w;n;e;e;exit;enter;n;e;e;n;w;w;n;e;e;n;w;w;n;e;e;exit;enter;n;e;e;n;w;w;n;e;e;n;w;w;n;e;e;s;s;w;w;s;s;s;out}
+
+#act {-M-_%*{turkey}%*} {
+    #var foundtimes 1;
+	#regex {%2} {7B{[0-9]+}} {#var foundtimes &1;};
+    #var mobname_long %1;
+	@botSetMobActions{turkey;$foundtimes};
+	.check_monster;
+} {2};
+
+#class {bot} {close}
+#read common/bot/generic.tin

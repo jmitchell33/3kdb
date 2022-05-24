@@ -1,0 +1,135 @@
+#class {botlist} {kill}
+#class {botlist} {open}
+
+#ALIAS {-%1} {
+    #NOP -- Set the beginning xp value;
+    #var bot[alias] %1;
+
+    #macro {1} {
+        #map run $bot[start_vnum];
+        #delay 2 {
+            #read common/bot/bots/$bot[file].tin;
+            bot_xp;
+            .pre_bot_check;
+            ..;
+        };
+    };
+
+    #macro {2} {
+        #map goto $bot[start_vnum];
+        #delay .5 {
+            #read common/bot/bots/$bot[file].tin;
+            bot_xp;
+            .pre_bot_check;
+            ..;
+        };
+    };
+
+    #macro {3} {
+        #read common/bot/bots/$bot[file].tin;
+        bot_xp;
+        .pre_bot_check;
+        ..;
+    };
+
+    #NOP -- Get the bot info from the list and verify if you're in the correct room to start the bot;
+    #map get roomvnum curvnum;
+
+    #foreach $botlist[%*] index {
+        #if {"${bot[alias]}" == "$index[alias]"} {
+            #var bot[loop] $index[loop];
+            #var bot[playercheck] $index[playercheck];
+            #var bot[start_vnum] $index[start_vnum];
+            #var bot[file] $index[file];
+        };
+    };
+
+    #delay .2 {#if {$curvnum == $bot[start_vnum]} {
+        #read common/bot/bots/$bot[file].tin;
+        bot_xp;
+        .pre_bot_check;
+        ..;
+        #unmacro {1};
+        #unmacro {2};
+        #unmacro {3};
+    } {
+        #showme <dfa>--- YOU ARE NOT IN THE CORRECT START ROOM ---;
+        #showme <dfa>   Press (1) If you are not in the correct room, and would like to run there.;
+        #showme <dfa>   Press (2) If you are in the correct room, but the map needs to be relocated.;
+        #showme <dfa>   Press (3) To STFU and run the bot.;
+        #showme <dfa>--- These options expire in 5 seconds ---;
+    };
+
+    #delay 5 {
+        #unmacro {1};
+        #unmacro {2};
+        #unmacro {3};
+    };};
+};
+
+#alias format_botlist {
+    #format {bot_name} {%-25s} {%1};
+    #format {bot_desc} {%-30s} {%2};
+    #showme $bot_name $bot_desc;
+};
+
+#alias botlist {
+    #var tempflag 0;
+    #var number &botlist[];
+    #showme {<ccf>  -------     CURRENT BOTS ($number)    -------    <088>  };
+    #showme {<ccf>  ---------------------------------------    <088>  };
+    #showme {<ccf>  -------   <faa>-alias <fff>to load a bot<ccf>  -------    <088>  };
+    #showme {<ccf>  ---------------------------------------    <088>  };
+    #list botlist index desc;
+    #list botlist sort;
+    #showme {<ccf>     Alias                Description        <088>  };
+    #foreach $botlist[%*] index {
+        format_botlist {     $index[alias]} {$index[desc]};
+    };
+};
+
+#list botlist clear;
+#list botlist add {{{file} {android} {alias} {android} {desc} {Androids} {start_vnum} {5223} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {abyss} {alias} {abyss} {desc} {Abyss (Built for lvls 150+)} {start_vnum} {} {loop} {1} {playercheck} {0}}};
+#list botlist add {{{file} {aegis} {alias} {aegis} {desc} {Aegis Global: Lvls 1-6} {start_vnum} {2476} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {aegis1} {alias} {aegis1} {desc} {Aegis Global: Lvl 1} {start_vnum} {2476} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {aegis2} {alias} {aegis2} {desc} {Aegis Global: Lvl 2} {start_vnum} {2511} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {sectionz} {alias} {sectionz} {desc} {Section Z Long Path} {start_vnum} {24787} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {sectionz-fast} {alias} {sectionz-fast} {desc} {Section Z Fast Path} {start_vnum} {24787} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {sectionz-20} {alias} {sectionz-20} {desc} {Section Z Sec 20 Start} {start_vnum} {} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {sectionz-40} {alias} {sectionz-40} {desc} {Section Z Sec 40 Start} {start_vnum} {} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {mahjong} {alias} {mahjong} {desc} {Mahjong} {start_vnum} {1900} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {treehouse} {alias} {treehouse} {desc} {Treehouse - All Mobs} {start_vnum} {25462} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {treehouse-easy} {alias} {treehouse-easy} {desc} {Treehouse - Only Smaller Mobs} {start_vnum} {25462} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {whores} {alias} {whores} {desc} {Whorehouse} {start_vnum} {2084} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {catacombs} {alias} {catacombs} {desc} {Catacombs} {start_vnum} {7996} {loop} {1} {area} {playercheck} {1}}};
+#list botlist add {{{file} {catacombs} {alias} {catacombs2} {desc} {Catacombs v2.0} {start_vnum} {20967} {loop} {1} {area} {playercheck} {1}}};
+#list botlist add {{{file} {chessboard} {alias} {chessboard} {desc} {Chessboard} {start_vnum} {1209} {loop} {1} {playercheck} {0}}};
+#list botlist add {{{file} {pol} {alias} {pol} {desc} {Portal of Life} {start_vnum} {6746} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {pol} {alias} {pol2} {desc} {Portal of Life v2.0} {start_vnum} {6747} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {pol} {alias} {pol3} {desc} {Portal of Life v3.0} {start_vnum} {6748} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {rimalkins} {alias} {rimalkins} {desc} {Rimalkins} {start_vnum} {1601} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {hoteltrans} {alias} {hoteltrans} {desc} {Hotel Transylvania} {start_vnum} {1850} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {hoteltrans2} {alias} {hoteltrans2} {desc} {Hotel Transylvania - Basement} {start_vnum} {26417} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {angels} {alias} {angels} {desc} {Tree of Life} {start_vnum} {24584} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {angels} {alias} {angels2} {desc} {Tree of Life v2.0} {start_vnum} {24606} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {dundee1} {alias} {dundee1} {desc} {Dundee Swamps: 1} {start_vnum} {3115} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {dundee4} {alias} {dundee4} {desc} {Dundee Swamps: 4} {start_vnum} {3211} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {dundee8} {alias} {dundee8} {desc} {Dundee Swamps: 8} {start_vnum} {10446} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {dundee63} {alias} {dundee63} {desc} {Dundee Swamps: 6 -> 3} {start_vnum} {3486} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {dundee64} {alias} {dundee64} {desc} {Dundee Swamps: 6 -> 4} {start_vnum} {3486} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {dundee65} {alias} {dundee65} {desc} {Dundee Swamps: 6 -> 5} {start_vnum} {3486} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {dundee87} {alias} {dundee87} {desc} {Dundee Swamps: 8 -> 7} {start_vnum} {10446} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {kayos} {alias} {kayos} {desc} {Kayos Wars} {start_vnum} {10279} {loop} {1} {playercheck} {0}}};
+#list botlist add {{{file} {findtv} {alias} {findtv} {desc} {Chaos TV Finder} {start_vnum} {196} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {colors} {alias} {colors} {desc} {NOC 2.0 - Normal} {start_vnum} {16530} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {colors_high} {alias} {colors-high} {desc} {NOC 2.0 - High Value Targets} {start_vnum} {16530} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {colors_safe} {alias} {colors-safe} {desc} {NOC 2.0 - Safe Mode / No hitarounds} {start_vnum} {16530} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {sewers} {alias} {sewers} {desc} {Chaos Sewers} {start_vnum} {18906} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {zelligars} {alias} {zelligars} {desc} {Zelligars Castle} {start_vnum} {6558} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {simpsons-plant} {alias} {simpsons-plant} {desc} {Simpsons Power Plant} {start_vnum} {8227} {loop} {0} {playercheck} {1}}};
+#list botlist add {{{file} {crystals1} {alias} {crystals1} {desc} {Crystals Level 1} {start_vnum} {10812} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {crystals4} {alias} {crystals4} {desc} {Crystals Level 4} {start_vnum} {11643} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {icyblue} {alias} {icyblue} {desc} {Icy Blue} {start_vnum} {23844} {loop} {0} {playercheck} {0}}};
+
+#class {botlist} {close}

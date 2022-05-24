@@ -1,0 +1,31 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#alias {ktrig %1} {#act {dealt the killing blow} %1};
+#alias {corpse_trig} {
+    study corpse;
+    wa;
+    divvy coins;
+    meditate;
+    #var mob[palmed] 0;
+    #var mob[pressured] 0;
+};
+
+#alias {_player_deadmanActions} {
+    .stop;
+};
+
+#ALIAS {postload}
+{
+     #map flag static on;
+     #map flag vtmap on;
+     #map flag unicodegraphics on;
+     #map flag terrain on;
+     #map flag direction on;
+     #delay {1} {hp}
+}
+
+
+#NOP ---MISC
+
+#class {player_aliases} {close}

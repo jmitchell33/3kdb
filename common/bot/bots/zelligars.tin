@@ -1,0 +1,23 @@
+#class {bot} {open}
+#var {areaname} {Zelligars Castle}
+#var check_room 0;
+
+#var bot_message_1 '---- ZELLIGAR STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {n;n;e;w;w;n;nw;e;e;s;n;w;n;e;e;e;w;s;s;{search shelf;get gloves;n};n;w;w;w;s;{get key;n};e;e;e;s;s;e;e;e;n;n;e;e;n;n;w;w;s;s;s;e;e;e;n;n;n;n;w;w;w;w;s;s;s;s;{unlock door;open door;west;get key;east};n;n;n;n;e;e;e;e;s;s;s;s;w;w;w;s;w;w;w;n;n;w;n;e;n;s;w;s;w;n;{unlock door;open door;w};w;s;s;sw;w;w;w;n;nw;e;e;e;e;n;ne;e;e;e;w;w;w;sw;nw;nw;w;e;sw;e;se;w;w;s;w;se;e;e;e;s;ne;n;n;e;e;s;s;w;se;s;e;s;s};
+#var bot[path] $botpath;
+
+#list botmobs clear;
+#list botmobs add {{{long} {Glass Golem} {target} {golem}}};
+#list botmobs add {{{long} {Clay Golem} {target} {golem}}};
+#list botmobs add {{{long} {Flesh Golem} {target} {golem}}};
+#list botmobs add {{{long} {Straw Golem} {target} {golem}}};
+#list botmobs add {{{long} {Mud Golem}   {target} {golem}}};
+#list botmobs add {{{long} {Stone Golem} {target} {golem}}};
+#list botmobs add {{{long} {Steel Golem} {target} {golem}}};
+#var bot[mobs] $botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin;

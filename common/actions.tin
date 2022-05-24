@@ -1,0 +1,88 @@
+#class {default_actions} {kill}
+#class {default_actions} {open}
+
+#var my[hmheal][self] 1;
+#var my[hmheal][others] 1;
+
+
+#NOP -- This is to ignore necromancers killing their undead horde of summons;
+#action {Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
+
+
+#action {^You lift the drink to your mouth, but in your stomach} {#var my[drunk] 1};
+#action {^You drink the wine and feel healed.$} {#var my[drunk] 0};
+
+#action {The effects of the%*blue capsule fade away.}{#if !$idle_flag {eat blue};};
+#action {The effects of the%*orange capsule fade away.}{#if !$idle_flag {eat orange};};
+
+#action {%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
+#action {^The daemon hisses: Dost thou choose to graft with me %w?} {#format {graft} {%l} {%1};#if {"$user" == "$graft"} {say yes}};
+#action {^%1 begins to follow %2\.$} {#format {follower} {%l} {%1};#if {"$user" == "$follower"} {#format {following} {%n} {%2}}};
+#action {^You stop following %1} {#unvar following};
+#action {^%1 leaves %2\.$} {
+    #if {"%1" == "$following"} {
+        #format {follow_target} {%l} {%1};
+        #local follow_dir %2;
+        #switch {"$follow_dir"} {
+            #case {"north"}     {#map move n};
+            #case {"northeast"} {#map move ne};
+            #case {"northwest"} {#map move nw};
+            #case {"south"}     {#map move s};
+            #case {"southeast"} {#map move se};
+            #case {"southwest"} {#map move sw};
+            #case {"east"}      {#map move e};
+            #case {"west"}      {#map move w};
+            #case {"down"}      {#map move d};
+            #case {"up"}        {#map move u};
+            #default            {#map move $follow_dir};
+        };
+    }
+}; 
+
+
+#act {{(\w+) taps you on the shoulder\.}} { 
+    #if !$idle_flag {
+        #format followtarget {%l} {%2}; 
+        follow $followtarget;
+        cassist $followtarget;
+    };
+};
+
+#act {{From afar, (\w+) stares at you in (\w+) Jesus Christ pose\.}} {
+    #if !$idle_flag {
+        #format healtarget {%l} {%2}; 
+        hmheal $healtarget;
+    };
+};
+
+#act {{(\w+) stares at you in (\w+) Jesus Christ pose\.}} { 
+    #if !$idle_flag {
+        #format healtarget {%l} {%2}; 
+        hmheal $healtarget;
+    };
+};
+
+#act {You call forth high mortal energies to heal yourself!} {
+    #var my[hmheal][self] 0;
+    #delay hmheal-self {#var my[hmheal][self] 1} {3600};
+};
+
+#act {{(\w+) says, 'Greetings, Comrade!' to you.$}} { 
+    #if !$idle_flag {
+        #10 corpse_select
+    };
+};
+
+
+#NOP -- Skill Training;
+#act {^To do so, type: tskill %1$} {tskill %1};
+
+
+#NOP -- Mob Life Counting;
+#act {^Beloch falters slightly but shakes off the assault.} {
+    #showme -------------------------------------------------;
+    #showme ---------        BELOCH LIFE DOWN         -------;
+    #showme -------------------------------------------------;
+};
+
+#class {default_actions} {close}

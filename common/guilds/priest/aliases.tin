@@ -1,0 +1,39 @@
+#class {priest_aliases} {kill}
+#class {priest_aliases} {open}
+
+#alias {bless_party} {
+    members;
+    #delay 2 {#foreach $party[member][%*] member {bless $member[name-lower]};};
+};
+
+
+#alias {gxp_reset} {
+    #var total_gxp 0;
+    #var average_total_gxp 0;
+    #var total_fight_gxp 0;
+    #var average_fight_gxp 0;
+    #var total_rounds 0;
+}
+
+#alias {fftouch} {
+    #unvar ftouches;
+    #var ftTemp %0;
+    #replace ftTemp { } {;};
+    #list create ftouches $ftTemp;
+    ftouch %1;
+};
+
+#act {^You make %* light as a feather!$} {
+    #list ftouches get 5 ftouchItem;
+    ftouch $ftouchItem;
+    #list ftouches delete 1;
+};
+
+#act {%* cannot be lightened any more.$} {
+    #list ftouches get 1 ftouchItem;
+    ftouch $ftouchItem;
+    #list ftouches delete 1;
+};
+
+
+#class {priest_aliases} {close}

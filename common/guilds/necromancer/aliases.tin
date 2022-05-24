@@ -1,0 +1,146 @@
+#NOP --- ALIASES
+#class {guild_aliases} {kill}
+#class {guild_aliases} {open}
+
+#NOP Evaluate a calculation;
+#FUNCTION {fEval}
+{
+  #MATH {result} {%1};
+};
+
+#alias {topup} {
+    go necro_reagent;
+    #action {%sginseng:%d%sblack pearls:%d%sspider web:%d%sgoldenrod:%d} {
+        #math ginseng {999 - %%2};
+        #math black_pearls {999 - %%4};
+        #math spider_web {999 - %%6};
+        #math goldenrod {999 - %%8};
+    };
+    #action {%smandrake:%d%spine needles:%d%snightshade:%d%sbloodmoss:%d} {
+        #math mandrake {999 - %%2};
+        #math pine_needles {999 - %%4};
+        #math nightshade {999 - %%6};
+        #math bloodmoss {999 - %%8};
+    };
+    gs;
+    #showme {<dfa>-------- Restocking Reagents --------<088>};
+    #delay .5 {
+        #if $ginseng {buy $ginseng ginseng;};
+        #if $black_pearls {buy $black_pearls black pearls;};
+        #if $spider_web {buy $spider_web spider web;};
+        #if $goldenrod {buy $goldenrod goldenrod;};
+        #if $mandrake {buy $mandrake mandrake;};
+        #if $pine_needles {buy $pine_needles pine needles;};
+        #if $nightshade {buy $nightshade nightshade;};
+    };
+    
+    #delay 1 {
+        #unaction {%sginseng:%d%sblack pearls:%d%sspider web:%d%sgoldenrod:%d};
+        #unaction {%smandrake:%d%spine needles:%d%snightshade:%d%sbloodmoss:%d};
+    };
+}
+
+
+#ALIAS {power}
+{
+    #NOP %1;
+    #UNVAR {my[necromancer][power]};
+    #ACTION {^{\s+(.+?)\(\d+\):\s+(\d+)\s+\d+(\s+(.+?)\(\d+\):\s+(\d+).*|)}}
+    {
+        #VAR {my[necromancer][power][%%2]} {%%3};
+        #VAR {my[necromancer][power][%%5]} {%%6};
+        #IF {$my[necromancer][power][di/nocturnum] > 0}
+        {
+            #VAR {my[necromancer][power][diurnum]} {$my[necromancer][power][di/nocturnum]};
+        };
+    };
+    #SEND {!power};
+};
+
+#ALIAS {powers}
+{
+    #NOP %1;
+    #UNVAR {my[necromancer][power]};
+    #ACTION {^{\s+(.+?)\(\d+\):\s+(\d+)\s+\d+(\s+(.+?)\(\d+\):\s+(\d+).*|)}}
+    {
+        #VAR {my[necromancer][power][%%2]} {%%3};
+        #VAR {my[necromancer][power][%%5]} {%%6};
+        #IF {$my[necromancer][power][di/nocturnum] > 0}
+        {
+            #VAR {my[necromancer][power][diurnum]} {$my[necromancer][power][di/nocturnum]};
+        };
+    };
+    #SEND {!powers};
+};
+
+#ALIAS {.studyPower}
+{
+    #NOP %1;
+    #IF {%2 > 100}
+    {
+        #SEND {!study %1 100};
+        .studyPower {%1} {@fEval{%2-100}};
+    };
+    #ELSE
+    {
+        #SEND {!study %1 %2};
+    };
+};
+
+#ALIAS {.study}
+{
+    #NOP %1;
+    #IF {"%0" == "default"}
+    {
+        #VAR {my[necromancer][powerdefaults]} {$my[necromancer][power]};
+        #ECHO {Necromancer power defaults set:};
+        #VAR {my[necromancer][powerdefaults]};
+    };
+    #ELSEIF {"%0" != ""}
+    {
+        #ECHO {.study                   - study missing powers};
+        #ECHO {.study default           - set the default powers};
+        #ECHO {.study <power> <amount>  - Study that power the given number of times};
+    };
+    #ELSE
+    {
+        #IF {"$my[necromancer][powerdefaults]" == ""}
+        {
+            .study help
+        };
+        #ELSE
+        {
+            #FOREACH {*my[necromancer][powerdefaults][]} {_necStudy[power]}
+            {
+                #IF {"$my[necromancer][power][$_necStudy[power]]" == ""}
+                {
+                    #VAR {_necStudy[count]} {$my[necromancer][powerdefaults][$_necStudy[power]]};
+                };
+                #ELSE
+                {
+                    #MATH {_necStudy[count]} {$my[necromancer][powerdefaults][$_necStudy[power]] - $my[necromancer][power][$_necStudy[power]]};
+                };
+                #VAR {_necStudy[$_necStudy[count]][$_necStudy[power]]} {};
+            };
+            #UNVAR {_necStudy[count]};
+            #UNVAR {_necStudy[power]};
+            #UNVAR {_necStudy[0]};
+            #IF {&_necStudy[] > 0}
+            {
+                #FOREACH {*_necStudy[]} {v}
+                {
+                    #WHILE {"*_necStudy[$v][-1]" != ""}
+                    {
+                        .studyPower {*_necStudy[$v][-1]} {$v};
+                        #UNVAR {_necStudy[$v][-1]};
+                    };
+                };
+            };
+        };
+        #UNVAR {_necStudy};
+    };  
+};
+
+
+
+#class {guild_aliases} {close}

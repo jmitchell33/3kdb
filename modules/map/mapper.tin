@@ -1,0 +1,351 @@
+#class {mapper} {open}
+
+#map read common/map/3k_shared.map;
+
+/* Move Event */
+#alias {mapupdate} {
+	#map {get} {ROOMVNUM} {roomvnum};
+	#map {get} {ROOMAREA} {roomarea};
+	#map {get} {ROOMNAME} {roomname};
+	#map {get} {ROOMDESC} {roomdesc};
+	#format {roomname_len}	{%L} {$roomname};
+	#format {roomvnum_len}	{%L} {$roomvnum};
+	#format {roomarea_len}	{%L} {$roomarea};
+	#format {roomdesc_len}	{%L} {$roomdesc};
+#NOP	#math {name_len} {42-$roomvnum_len-3};
+#NOP	#format {name_trunc} {%.${name_len}s} {$roomname};
+#NOP	#unvar area_mapped;
+#NOP	#map list {} {} {} {$roomarea} {variable} {area_mapped};
+#NOP	#var {room_cnt} {&area_mapped[]};
+}
+
+#event {MAP UPDATED VTMAP} {
+	#delay {0.05} {mapupdate}
+}
+
+#event {MAP ENTER ROOM} {
+	#if {"$mapping" == "on"} {
+		mapupdate;
+	}
+}
+
+#event {MAP EXIT ROOM} {
+	#list nouns clear
+}
+
+/* Map Follow on Following Others */
+#act {%1 leaves %2\.} {
+	#var following %1;
+	#var foldir %2;
+
+	#switch {"$foldir"} {
+		#case {"north"}	{#var foldir n};
+		#case {"south"}	{#var foldir s};
+		#case {"east"}	{#var foldir e};
+		#case {"west"}	{#var foldir w};
+		#case {"down"}	{#var foldir d};
+		#case {"up"}	{#var foldir u};
+	}
+}
+
+#act {%1 leaves following %2} {
+	#format {follower} {%l} {%1};
+	#if {%2 == "$following"} {
+		#map move $foldir
+	}
+} {4};
+
+/* Data Grab Trigger */
+#var longcap off;
+#var finding_here off;
+
+#function cartcheck {
+	#format cart {%.40s} {%0};
+	#if {"$cart" == "                                        " || "$cart" == ""} {
+		#return 1
+	} {
+		#return 0
+	};
+};
+
+#NOP Room Short with Exits;
+#act {{\-R\-_(.*) \((.*)\)\s*\-R\-_}} {
+	#var room %2;
+	#var exits %3;
+	#if {"$mapping" == "on"} {
+		#if {"$finding_here" == "off"} {
+			#replace exits {,} {;};
+			#foreach {$exits} {eachexit} {#map dig $eachexit};
+			#map get {roomexit} {rexit};
+			#foreach {$rexit} {eachexit} {
+				#map at {$eachexit} {
+					#map get {roomarea} {eacharea};
+					#if {"$eacharea" == ""} {
+						#NOP #map set {roomcolor} {<118>};
+					};
+				};
+			};
+		};
+		#if {$roomname_len == 0} {
+			#map set roomname {%2 (%3)};
+		};
+		#if {$roomarea_len == 0} {
+			#map set roomarea {$area};
+			#map set roomcolor;
+		};
+		#if {$roomdesc_len == 0 || "$finding_here" == "on"} {
+			#var longcap on;
+			#unvar long;
+			#act {%%1} {
+				#var long {${long}%%1 };
+				#NOP #if {@cartcheck{%%1}} {
+				#NOP 		#nop
+				#NOP 	} {
+				#NOP 		#var long {${long}%%1 }
+				#NOP }
+			} {2}
+		};
+		#delay 0 mapupdate;
+	};
+	#if {"$finding_here" == "on"} {
+		#var longcap on;
+		#unvar long;
+		#act {%%1} {
+			#var long {${long}%%1 };
+			#NOP #if {@cartcheck{%%1}} {
+			#NOP 		#nop
+			#NOP 	} {
+			#NOP 		#var long {${long}%%1 }
+			#NOP }
+		} {2}
+	};
+};
+
+#NOP Room Short with No Exits, Lowered Priority;
+#act {\-R\-_%1%s\-R\-_} {
+	#var room %1;
+	#if {"$mapping" == "on"} {
+		#if {$roomname_len == 0} {
+			#map set roomname {%1};
+		};
+		#if {$roomarea_len == 0} {
+			#map set roomarea {$area};
+			#map set roomcolor;
+		};
+		#if {$roomdesc_len == 0 || "$finding_here" == "on"} {
+			#var longcap on;
+			#unvar long;
+			#act {%%1} {
+				#if {@cartcheck{%%1}} {
+						#nop;
+					} {
+						#var long {${long}%%1 };
+				}
+			} {2}
+		};
+		#map get {roomvnum} {gonum};
+		#map goto $gonum;
+	};
+	#if {"$finding_here" == "on"} {
+		#var longcap on;
+		#unvar long;
+		#act {%%1} {
+			#if {@cartcheck{%%1}} {
+					#nop;
+				} {
+					#var long {${long}%%1 };
+			}
+		} {2}
+	};
+} {6}
+
+#act {\-X\-_{.*}} {
+	#if {"$longcap" == "on"} {
+		#var longcap off;
+		#unact {%%1};
+		#if {"$finding_here" == "off"} {
+			#map set roomdesc {$long}
+		}
+	}
+} {1}
+
+#act {AREA NAME: %1 [%2]} {
+	#var area %1
+}
+
+
+/* Aliases */
+#NOP count the # of rooms mapped
+#NOP #alias {area_mapped %1} {
+#NOP 	#unvar area_mapped;
+#NOP 	#map list {} {} {} {%1} {variable} {area_mapped};
+#NOP 	#showme {&area_mapped[] rooms mapped.};
+#NOP }
+
+#NOP Color rooms that have no area set (unexplored)
+#alias nacolor {
+	#loop 1 20000 {cnt} {
+		#map at {$cnt} {
+			#map get {roomarea} {cntarea};
+			#NOP #if {"$cntarea" == ""} {#map set roomcolor <118>}
+		}
+	};
+	#map get {roomvnum} {gonum};
+	#map goto $gonum;
+}
+
+
+#alias {findhere} {
+	#unvar findroom;
+	#var finding_here on;
+	
+	rating;
+	#send !brief off yes;
+	#var find_count 1;
+
+	look;
+	#delay 2 {
+		#var findexits $exits;
+		#replace findexits {,} {;};
+		#map list {roomarea} {$area} {roomname} {$room%*} {roomexits} {$findexits} {roomdesc} {$long} {variable} {findroom[$find_count]};
+		#if {&findroom[$find_count][] == 0} {
+			#map list {roomname} {$room%*} {roomexits} {$findexits} {roomdesc} {$long} {variable} {findroom[$find_count]};
+		};
+		#if {&findroom[$find_count][] == 0} {
+			#map list {roomname} {$room%*} {roomexits} {$findexits} {variable} {findroom[$find_count]};
+		};
+		#if {&findroom[$find_count][] == 1} {
+			#map goto *findroom[$find_count][1..1];
+			#var finding_here off;
+			#send !brief on yes;
+			#showme <dfa>----------------------------------------------------<088>;
+			#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
+			#showme <dfa>----------------------------------------------------<088>;
+		} {
+			#loop 1 &findroom[$find_count][] index #map at *findroom[$find_count][+$index] #map get roomexits findroom[$find_count][+$index][exits];
+			#showme <dfa>Turn $find_count: There are &findroom[$find_count][] possible rooms.;
+			#showme <dfa>Choose an exit by typing findhere2 <exit>;
+			#showme <dfa>Example:  findhere2 e, findhere2 n;
+		};
+	};
+};
+
+#alias {findhere2 %1} {
+	#NOP -- Reduce the list by only those with the exit you took;
+	#if {"%1" == "n" || "%1" == "w" || "%1" == "e" || "%1" == "s" || "%1" == "nw" || "%1" == "ne" || "%1" == "sw" || "%1" == "se" || "%1" == "u" || "%1" == "d"} {
+		#list findpath add {%1};
+		#send {%1};
+		#unvar tempVnums;
+		#unvar tempList;
+		
+		#loop &findroom[$find_count][] 1 index {
+			#loop &findroom[$find_count][+$index][exits][] 1 subIndex {
+				#if {"*findroom[$find_count][+$index][exits][+$subIndex]" == "%1"} {
+					#NOP -- Add the potential new rooms after taking the selected exit to a new list;
+					#list tempVnums add $findroom[$find_count][+$index][exits][+$subIndex];
+				};
+			};
+		};
+		#math find_count {$find_count + 1};
+		
+		#if {&tempVnums[] > 0} {
+			#if {&tempVnums[] == 1} {
+				#map goto $tempVnums[1];
+				#var finding_here off;
+				#send !brief on yes;
+				#showme <dfa>----------------------------------------------------<088>;
+				#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
+				#showme <dfa>----------------------------------------------------<088>;
+			} {
+				#loop &tempVnums[] 1 index {
+					#var tempIdx $tempVnums[+$index];
+					#map at $tempVnums[+$index] #map get roomexits tempList[$tempIdx][exits];
+				};
+			};
+		} {
+			#showme <eaa>----------------------------------------------------<088>;			
+			#showme <eaa>      Sorry, we were not able to find your room.<088>;
+			#showme <eaa>       Start the process again with 'findhere'<088>;
+			#showme <eaa>----------------------------------------------------<088>;
+		};
+		#var findroom[$find_count] $tempList;
+		
+		#showme <dfa>Turn $find_count:  There are &findroom[$find_count][] possible rooms.<088>;
+		#showme <dfa>Choose an exit by typing findhere2 <exit><088>;
+		#showme <dfa>Example:  findhere2 e, findhere2 n<088>;
+	} {
+		#showme <eaa>----------------------------------------------------<088>;			
+		#showme <eaa>   Invalid direction input.  Please enter any of:<088>;
+		#showme <eaa>       n, e, w, s, nw, ne, se, sw, u, d<088>;
+		#showme <eaa>----------------------------------------------------<088>;
+	}
+};
+
+
+#alias {mapsearch} {
+	#show <129>Name matches:<088>;
+	#map list {%i%*%0%*};
+	#show \n;
+	#show <129>Note matches:<088>;
+	#map list {} {} {} {} {%i%*%0%*};
+}
+
+#alias {mapon} {
+	#send !brief off yes;
+	#map flag static off;
+	#var mapstatic 1;
+	#var mapping on;
+}
+#alias {mapoff}{
+	#send !brief on yes;
+	#map flag static on;
+	#unvar mapstatic;
+	#unvar mapping;
+}
+#map flag static on;
+#unvar mapstatic;
+
+#NOP Link rooms with a void insert
+#alias voidlink {
+	#var dir %1;
+	#var dest_num %2;
+	#map link $dir $dest_num both;
+	#map insert $dir void
+}
+
+/* Highmortal Portals Toggles */
+#alias hmavoid {
+	#map at 148 {#map exitflag {portal road} avoid on};
+	#map at 148 {#map exitflag {portal eforest} avoid on};
+	#map at 148 {#map exitflag {portal wforest} avoid on};
+	#map at 148 {#map exitflag {efor} avoid on};
+	#map at 148 {#map exitflag {portal desert} avoid on};
+	#map at 148 {#map exitflag {portal ice} avoid on};
+}
+
+#alias hmfollow {
+	#map at 148 {#map exitflag {portal road} avoid off};
+	#map at 148 {#map exitflag {portal eforest} avoid off};
+	#map at 148 {#map exitflag {portal wforest} avoid off};
+	#map at 148 {#map exitflag {efor} avoid off};
+	#map at 148 {#map exitflag {portal desert} avoid off};
+	#map at 148 {#map exitflag {portal ice} avoid off};
+}
+
+
+
+
+/* Blocked Exits */
+#act {^You cannot go } {
+	#if {$mapstatic} {
+		#map undo
+	}
+}
+#act {^You cannot get it up.} {
+	#if {$mapstatic} {
+		#map undo
+	}
+}
+
+
+#class {mapper} {close}

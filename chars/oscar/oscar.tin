@@ -1,0 +1,36 @@
+#NOP - 3k Session;
+
+#SESSION {3k - Oscar} {3k.org} {3000};
+
+#conf pack 1;
+#conf color on;
+
+#read chars/oscar/vars.tin;
+
+/* Set player specific variables */
+#var guild mage;
+#var user oscar;
+#var user_cap Oscar;
+#var vaf_numbers 0;
+
+/* load common */
+#read common/index.tin;
+#read modules/helpers/helpers.tin;
+
+/* load specific modules for this character */
+#read modules/corpsemanager/corpsemanager.tin;
+#read modules/professions/transmuter.tin;
+
+/* load guild */
+#read common/guilds/$guild/index.tin;
+#read common/guilds/eternal/eternal.tin;
+
+/* load character-specific */
+#read chars/$user/actions.tin;
+#read chars/$user/aliases.tin;
+#read chars/$user/heartbeat.tin;
+#read chars/$user/tickers.tin;
+#read chars/$user/config.tin;
+
+
+#alias {reload} {#kill all;#show \n;#read chars/oscar/oscar.tin;};

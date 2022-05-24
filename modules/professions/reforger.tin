@@ -1,0 +1,41 @@
+#class {reforger} {open}
+
+#var reforger 1;
+#act {You can currently reforge %d items.} {#var my[reforger] %1};
+
+#alias {refk} {
+	buy knife;
+	reforge knife with little from edged to critical;
+	dispose knife;
+};
+
+#alias refk2 {
+	remove shield;
+	wear shield;
+	drop forge;
+	ref shroud fire;
+	get forge;
+	keep forge;
+};
+
+#alias refk1 {
+	drop forge;
+	unkeep knife;
+	refk;
+	get forge;
+	keep forge;
+};
+
+#alias {ref} {
+	reforge %1 with loads from %2 to defense;
+	reforge %1 with lots from %2 to defense;
+    reforge %1 with some from %2 to defense;
+    reforge %1 with little from %2 to defense;
+};
+
+register_module {reforger};
+register_module_info {reforger} {
+    #show Module info for reforger todo.;
+};
+
+#class {reforger} {close}

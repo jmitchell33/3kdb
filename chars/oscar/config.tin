@@ -1,0 +1,56 @@
+#class {player_config} {kill}
+#class {player_config} {open}
+
+#ALIAS {postload}
+{
+     #map flag static on;
+     #map flag vtmap on;
+     #map flag unicodegraphics on;
+     #map flag terrain on;
+     #map flag direction on;
+     #delay {1} {hp;(powers;i;smuggle}
+};
+
+#NOP -- Bot Config;
+#var mob_kill_action 1;
+#alias {.pre_fight_check} {#nop};
+
+#alias {.pre_bot_check} {
+    #if {"$area" == "Whorehouse" || "$area" == "Catacombs"} {
+         #var strategy[slow] 0;
+    } else {
+         #var strategy[slow] 1;
+    };
+
+    #var defs[SS] 1;
+    #var defs[MG] 1;
+    #var defs[A] 1;
+    #var defs[MB] 1;
+    #var defs[ms] 1;
+    #var defs[M] 1;
+    #var defs[PS] 1;
+};
+
+#alias {.mob_kill_action} {
+     #var mob[slow] 0;
+     #var mob[atrophy] 0;
+     #var mob[edrain] 0;
+     #if $golem_tank {
+          #delay 1 {say golem, kill $mob[target];cast slow $mob[target];};
+          #delay 2 {say golem, defend me};
+     } {
+          kill $mob[target];
+          #if $strategy[slow] {cast slow $mob[target]};
+     };
+     #if $strategy[anchor] {
+          cast anchor;
+     };
+};
+
+#alias {.check_death} {
+     #var bot[paused] 1;
+     corpse_trig;
+};
+
+
+#class {player_config} {close}

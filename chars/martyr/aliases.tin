@@ -1,0 +1,25 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#alias {_player_deadmanActions} {
+    .pause;
+} {1};
+
+#alias {corpse_trig} {
+    gt-repair;
+    fuse 500;
+};
+
+#alias .mob_kill_action {
+    kill $mob[target];
+    #if $strategy[epowers] {
+        #if $my[eternal][fry] {(fry;};
+        #if ${my[eternal][energy well]} {(energy well;} {#if ${my[eternal][shred]} {(shred;};};
+    };
+    #if $strategy[lucanus] {
+        #if $lucanus_ring {push diamond;#var lucanus_ring 0;};
+        #if $lucanus_amulet {push symbol;#var lucanus_amulet 0;};
+    };
+};
+
+#class {player_aliases} {close}

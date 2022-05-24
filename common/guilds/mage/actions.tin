@@ -1,0 +1,109 @@
+#class {mage_actions} {kill}
+#class {mage_actions} {open}
+
+#NOP --- MOB STATUS TRACKING;
+#ACTION {%w seems to speed up...$} {#var mob[slow] 0} {1};
+#ACTION {^You raise your arms and suddenly %* is moving much slower!$} {#var mob[slow] 1} {1};
+#ACTION {%w is already slowed.$} {#var mob[slow] 1} {1};
+#ACTION {^That creature cannot be affected} {#var mob[slow] 2;#var mob[edrain] 2;} {1};
+#ACTION {^You reach out to touch %* with your glowing hand and miss!$} {#var mob[edrain] 0;} {1};
+#ACTION {^You cannot drain that creature again.$} {#var mob[edrain] 1;} {1};
+#ACTION {^This spell doesn't work on the undead.$} {#var mob[edrain] 2;} {1};
+#ACTION {You scream a power word at %*!$} {
+    #line oneshot #ACTION {%* stumbles dazed and confused!$} {#var mob[pws] 1;};
+    #line oneshot #ACTION {%* is unaffected by your spell!$} {#var mob[pws] 0;};
+};
+#action {They are already stunned!$} {
+    #var mob[pws] 1;
+};
+
+
+#ACTION {^You begin speaking in soft low tones, slowly uttering forth the syllables} {#var mob[atrophy] 1} {1};
+#ACTION {^A %* is immune to this spell.$} {#var mob[atrophy] 2} {1};
+
+#NOP --- MAINTENANCE ACTIONS;
+#ACTION {Your deeppocket begins to fade} {#var deeppocket 0} {1};
+#ACTION {^You reinforce the magic within your deeppocket.$} {#var deeppocket 1} {1};
+#ACTION {^You already have a deeppockets spell functioning.$} {#var deeppocket 1} {1};
+#ACTION {^You feel slower as the haste wears off.$} {#var self_haste 0} {1};
+#ACTION {^You raise your arms and suddenly %w is moving much faster!$} {#var summons_haste 1 {1}}
+
+#ACTION {----*> Your prismatic_aura greater contingency has dissipated!<*----} {
+    cast greater contingency as prismatic_aura#cast prismatic aura
+} {1};
+#ACTION {----*> Your prismatic_aura contingency has dissipated!<*----} {
+    cast contingency as prismatic_aura#cast prismatic aura
+} {1};
+#ACTION {----*> Your stoneskin greater contingency has dissipated!<*----} {
+    cast greater contingency as stoneskin#cast stoneskin
+} {1};
+#ACTION {----*> Your stoneskin contingency has dissipated!<*----} {
+    cast contingency as stoneskin#cast stoneskin
+} {1};
+#ACTION {----*> Your blink greater contingency has dissipated!<*----} {
+    cast greater contingency as blink#cast blink
+} {1};
+#ACTION {----*> Your blink contingency has dissipated!<*----} {
+    cast contingency as blink#cast blink
+} {1};
+#ACTION {----*> Your major_globe greater contingency has dissipated!<*----} {
+    cast greater contingency as major_globe#cast major globe
+} {1};
+#ACTION {----*> Your major_globe contingency has dissipated!<*----} {
+    cast contingency as major_globe#cast major globe
+} {1};
+
+#NOP --- MAGE ACTIONS;
+#ACTION {^You are no longer allowing your SP to be healed.} {#var ash 0} {1};
+#ACTION {^You are now allowing your SP to be healed from local} {#var ash 1} {1};
+#ACTION {^You are now allowing your SP to be healed from any source} {#var ash 2} {1};
+
+#ACTION {^You will cast spell tap every round in combat.$} {#var spelltap 1} {1};
+#ACTION {^You will not cast spell tap every round in combat.$} {#var spelltap 0} {1};
+
+#ACTION {^%* darts out of the room.$} {#var go_fetch 1} {1};
+#ACTION {^%* darts into the room.$} {#var go_fetch 0;keep materials} {1};
+
+#action {^You wave your hands and anchor yourself to the spot!$} {#var my[anchor] 1;};
+#action {^Your anchor has been dispelled!$} {#var my[anchor] 0;};
+
+#action {^You sit down and begin to carefully go over the spells in your tome.$} {#var studying 1;};
+#action {^Having absorbed all you can, you carefully close your spellbook.$} {#var studying 0;#var hpbar_mc 100;};
+
+#NOP --- SUMMONING ACTIONS;
+
+#var golemTypes {Straw;Wood;Flesh;Clay;Stone;Rope;Iron;Crystal};
+
+#ACTION {^You throw your golem construction materials to the ground and} {
+    say all, you are now in group summons/assist always;
+    #if $golem_tank {
+        say golem, defend me
+    };
+} {1};
+
+#ACTION {%* dealt the killing blow to {Flesh|Clay|Stone|Crystal|Diamond|Straw|Rope|Iron|Wood} golem.$} {#var golem_toggle 1} {1};
+#ACTION {^The golem shudders for a moment, then falls to the ground in a heap.$} {#var golem_toggle 1} {1};
+
+#ACTION {%w is already hasted.$} {
+    #foreach $golemTypes {golem} {
+        #if {"%1" == "$golem"} {
+            #var golem_haste 1;
+        };
+    };
+} {1};
+
+#ACTION {^El Jefe %* seems to slow down...$} {
+    #var golem_haste 0;
+} {1};
+
+
+#ACTION {^There is no reason to 'ffetch' here.$} {#if {$toggle_find_familiar} {#var toggle_find_familiar 0;#delay 4 {cast find familiar;#var toggle_find_familiar 1;};};} {1};
+#ACTION {^You don't have any basic construction materials for a %*!} {
+    ffetch materials;
+    #delay 5 {keep materials;create_golem};
+} {1};
+
+#ACTION {^You wave your hands calling forth summoning magics and draw} {say all, you are now in group summons/assist always} {1};
+#ACTION {^A %* seems to slow down...$} {#var summons_haste 0} {1};
+
+#class {mage_actions} {close}

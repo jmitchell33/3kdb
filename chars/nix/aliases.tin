@@ -1,0 +1,101 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#alias {_player_deadmanActions} {
+    .pause;
+    clear_prots;
+};
+
+#NOP ---THIS SECTION IS FOR BARD SPECIFIC ALIASES
+#alias {{hh}} {cast healing hands};
+#alias {{karma}} {unwrap corpse;dirge};
+#alias {boost} {
+        perform hero for %1;
+        #delay {114} {perform memory for %1};
+        #delay {192} {perform let it be for %1};
+        #delay {310} {perform naked sunday for %1};
+        #delay {352} {perform son of man for %1};
+};
+
+#NOP ---MISC;
+#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box;golem give all to byron;put all in box};
+#alias {bag_all %1} {get all from disc;#loop 1 %1 i {put all in bag $i}};
+
+
+
+#NOP -- THIS SECTION IS FOR OTHER ALIASES
+
+#alias {map} {
+	#var roomfound 0;
+	#foreach $speedruns[%*] index {
+        #regexp {"%1"} {"$index[name]"} {
+			#var roomfound 1;
+            #showme {Found room %1 - teleporting map there!};
+			#map go $index[vnum];
+        };
+    };
+	#if !$roomfound {#showme {Unable to find %1}};
+};
+
+
+#alias {k} {
+        #var killing 1;
+        kill %1;
+};
+#alias {gxp_rate} {
+        #math {gxp_avg} {$gxp_total / $gxp_rounds};
+        #math {gxp_time} {((($g2n / $gxp_avg) * 2) / 60) / 60};
+        #math {gxp_hour} {$gxp_avg * 1800};
+        #showme {Total gxp earned is: $gxp_total.  Gxp per round is: $gxp_avg  Total rounds: $gxp_rounds};                                   
+        #showme {Average time to glevel: $gxp_time hours.  Current gxp/hr: $gxp_hour}                                                        
+        };
+
+#alias {heals} {
+        cast mystic guardian at hp/500/(heal;
+        setpanic hmheal at 1500;
+        reflex add hp 4800 cast healing hands
+};
+
+#alias {dmgoff} {reflex remove sp >400};
+#alias {es} {empowered strikes};
+
+#alias {dmg_stats} {
+        #math {cmbt[avg]} {$cmbt[dmg] / $cmbt[rnd]};
+        #math {dog[avg]} {$dog[dmg] / $dog[rnd]};
+        #showme {Average damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.};
+        #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
+        #showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
+        };
+
+#alias {dmg_reset} {#var {cmbt[dmg]} 0;#var {cmbt[rnd]} 0;#var dog[dmg] 0;#var dog[rnd] 0;};
+
+#act {^You hit %1 times for %2 damage.$} {#math cmbt[dmg] {$cmbt[dmg] + %2};#math cmbt[rnd] {$cmbt[rnd] + 1};};
+
+#act {^Ripley hit %1. \{%2\}} {#math dog[dmg] {$dog[dmg] + %2};#math dog[rnd] {$dog[rnd] + 1};};
+
+#alias {shankey} {
+        search bed;
+        pull lever;
+        search dresser;
+        open drawer;
+        get key;
+        keep key
+};
+
+#alias {forgeknife} {
+        buy knife;
+        reforge knife little edged critical;
+        dispose knife;
+};
+
+#alias {defense} {
+	prots_grace;
+	prots_muse;
+	prots_hs;
+	prots_blink;
+};
+
+#alias {zell1} {sr shelf;take gloves;n;n;w;w;w;s;get key from pool;drop gloves;n;e;e;e;s;s;e;e;e;n;e;e;e;n;n;n;n;w;w;w;w;s;s;s;s;unlock door;open door;w;take key;e;n;n;n;n;e;e;e;e;s;s;s;s;w;w;w;s;w;w;w;n;n;w;w;n;unlock door;open door;w;w;s;s;sw;w;w;w;n;nw;e;e;e;e;n;ne;e;e;e;n};
+#alias {zell2} {s;w;w;w;sw;s;w;w;w;w;se;s;e;e;e;ne;n;n;e;e;e;s;w;s;se;s;e;s;s;out;map zell}
+
+#class {player_aliases} {close}

@@ -1,0 +1,18 @@
+#class {player_heartbeat} {kill}
+#class {player_heartbeat} {open}
+
+#var bot_toggle 1;
+#alias {_player_heartbeat} {
+    #if {$bot_toggle && $my[gp1][current] < 100} {
+        #var bot_toggle 0;
+        .pause;
+        #showme BOT STOPPING LOW PSI;
+    };
+    #if {!$bot_toggle && $my[gp1][current] > 500} {
+        #var bot_toggle 1;
+        ..;
+        #SHOWME BOT RESUMING PSI TODO BIEN;
+    };
+};
+
+#class {player_heartbeat} {close}

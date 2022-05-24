@@ -1,0 +1,135 @@
+#class {mage_summoner} kill
+#class {mage_summoner} open
+
+
+#alias formatSummonSelect {
+    #format result {<acf>-----<fff> %+33s    <acf>-----<088>} {%1};
+    #showme $result;
+};
+
+#alias formatCurrentPref {
+    #format result {<acf>-----<faa> %+5s %+20s %+8s  <acf>-----<088>} {} {$preferred_summon} {};
+    #showme $result;
+};
+
+#alias ms7 {
+    cast monster summoning 7 as $summon_string;
+};
+
+#alias clear_macros {
+    #unmacro 0;
+    #unmacro 1;
+    #unmacro 2;
+    #unmacro 3;
+    #unmacro 4;
+    #unmacro 5;
+    #unmacro 6;
+    #unmacro 7;
+    #unmacro 8;
+    #unmacro 9;
+};
+
+#alias {summon_select} {
+    #format result {<acf>-----<fff> %+15s %+15s  <acf>-----<088>} {%1} {};
+    #format line {<acf>------------------------------------------------<088>};
+
+    #showme $line;
+    formatSummonSelect {      SUMMONER!         };
+    formatSummonSelect { Select Your Monster    };
+    formatSummonSelect {};
+    #showme            {<acf>-----<fff>      Current Preference is:          <acf>-----<088>};
+    formatCurrentPref;
+    formatSummonSelect {};
+    formatSummonSelect {-1-   10-Headed Hydra            };
+    formatSummonSelect {-2-   8-headed Pyro-hydra (fire) };
+    formatSummonSelect {-3-   Gorgon                     };
+    formatSummonSelect {-4-   Roper                      };
+    formatSummonSelect {-5-   Fire Lizard                };
+    formatSummonSelect {      (fire)                     };
+    formatSummonSelect {-6-   Umber Hulk                 };
+    formatSummonSelect {-7-   Spectre                    };
+    formatSummonSelect {      (mind, -stat specials)     };
+    formatSummonSelect {-8-   Mummy                      };
+    formatSummonSelect {-9-   Night Hag                  };
+    formatSummonSelect {};
+    formatSummonSelect {-0-   Cancel Select Update };
+    #showme $line;
+
+    #macro {0} {
+        formatSummonSelect {Selection Aborted};
+        clear_macros;
+    };
+
+    #macro {1} {
+        #var preferred_summon 10-Headed Hydra;
+        #var summon_string 10-headed hydra;
+        formatSummonSelect {10-Headed Hydra selected};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {2} {
+        #var preferred_summon 8-headed Pyro-hydra;
+        #var summon_string 8-headed pyro-hydra;
+        #echo {--------  8-headed Pyro-hydra selected --------};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {3} {
+        #var preferred_summon Gorgon;
+        #var summon_string gorgon;
+        #echo {--------  Gorgon selected --------};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {4} {
+        #var preferred_summon Roper;
+        #var summon_string roper;
+        #echo {--------  Roper selected --------};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {5} {
+        #var preferred_summon Fire Lizard;
+        #var summon_string fire lizard;
+        #echo {--------  Fire Lizard selected --------};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {6} {
+        #var preferred_summon Umber Hulk;
+        #var summon_string hulk;
+        #echo {--------  Umber Hulk selected --------};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {7} {
+        #var preferred_summon Spectre;
+        #var summon_string spectre;
+        #echo {--------  Spectre selected --------};
+        clear_macros;
+        ms7;
+    };
+
+    #macro {8} {
+        #var preferred_summon Mummy;
+        #var summon_string mummy;
+        #echo {--------  Mummy selected --------};
+        clear_macros;
+        ms7;
+    };
+    #macro {9} {
+        #var preferred_summon Night Hag;
+        #var summon_string hag;
+        #echo {--------  Night Hag selected --------};
+        clear_macros;
+        ms7;
+    };
+};
+
+#class {mage_summoner} close

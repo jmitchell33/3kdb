@@ -1,0 +1,15 @@
+#class {miphp} {kill}
+#class {miphp} {open}
+
+#alias {_player_miphp} {
+
+	#list temp clear;
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Mana:$gp1/$gp1_max  Piety:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Mana:$my[gp1][graph] Piety:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {BARK: $my[effects][barkskin] HASTE: $my[effects][haste] PROT: $my[effects][protection] VEST: $my[effects][vestment]};
+	#list temp add {G2N: $my[g2n]% Gxp/Rnd: $my[round_gxp] ($average_total_gxp Avg. / $total_rounds Rounds)};
+
+	#var hpbar[prompt] $temp;
+}
+
+#class {miphp} {close}

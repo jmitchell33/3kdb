@@ -1,0 +1,153 @@
+#NOP - Pstats format
+#class {pstats} kill
+#class {pstats} open
+
+#var pstatsCols 30;
+#list kstats_mobs_killed create {};
+
+#alias {pstatsColPrint} {
+  #format pstatsCol1Length {%L} {%1};
+  #format pstatsCol2Length {%L} {%3};
+  #math pstatsCol1Length $pstatsCols - $pstatsCol1Length;
+  #math pstatsCol2Length $pstatsCols - $pstatsCol2Length;
+  #echo {%1<070>%+${pstatsCol1Length}s<070> || %3<070>%+${pstatsCol2Length}s} {%2} {%4};
+};
+
+#alias {pstatsFormatNumber} {
+  #var pstatsNumberToFormat ${%1};
+  #var pstatsNumberToFormatVar %1;
+  #var pstatsFormattedNumber {};
+  #foreach {1000;1000000;1000000000} {pstatsTmp} {
+    #math pstatsNumMod $pstatsNumberToFormat / $pstatsTmp * 1.00;
+    #if {$pstatsNumMod > 1} {
+      #switch {$pstatsTmp} {
+        #case 1000 #var pstatsFormattedNumber {${pstatsNumMod}<070>K};
+        #case 1000000 #var pstatsFormattedNumber {${pstatsNumMod}<170>M};
+        #case 1000000000 #var pstatsFormattedNumber {${pstatsNumMod}<120>B};
+      };
+    };
+  };
+  #if {"$pstatsFormattedNumber" == ""} {#var pstatsFormattedNumber $pstatsNumberToFormat};
+  #var $pstatsNumberToFormatVar $pstatsFormattedNumber;
+  #var pstatsFormattedNumber {};
+  #var pstatsNumberToFormatVar {};
+};
+
+#alias {pstatsHeaderPrint} {
+  #var pstatsHeaderString %0;
+  #var pstatsHeader {<100>-<260>-<060>[<160>[<170> ${pstatsHeaderString} <160>]<060>]<260>-<100>-};
+  #format pstatsHeaderLength {%L} {$pstatsHeader};
+  #math pstatsHeaderMid (($pstatsCols *2)+$pstatsHeaderLength)/2;
+  #echo {%+${pstatsHeaderMid}s} {$pstatsHeader};
+
+};
+
+#action {^Player stats for this login:} {
+  pstatsHeaderPrint Player Stats since Clear;
+  #echo {};
+  #line gag;
+};
+
+#action {^Damage Taken:%s%d$} {
+  #var pstatsDamageTaken %2;
+  #line gag;
+};
+
+#action {^Combat Rounds:%s%d$} {
+  #var pstatsCRounds %2;
+  #line gag;
+  pstatsFormatNumber pstatsDamageTaken;
+  pstatsColPrint {<110>Damage Taken<070>:} {<130>${pstatsDamageTaken}} {<130>Combat Rounds<070>:} {<120>$pstatsCRounds};
+};
+
+#action {^Overall Combat Rounds:%s%d$} {#line gag;};
+
+#action {^XP Gained:%s%d%sGXP Gained :%s%d$} {
+  #var pstatsXpGained %2;
+  #var pstatsGxpGained %5;
+  #var ksXP %2;
+  #var ksGXP %5;
+  #math {averageGxpPerRound} {($pstatsGxpGained / $pstatsCRounds) * 1.00};
+  #math {gxpGlvlIndicated} {$averageGxpPerRound * 2};
+  pstatsColPrint {GXP Per Round:} {$averageGxpPerRound} {GXP GL Rate:} {$gxpGlvlIndicated};
+  pstatsFormatNumber pstatsXpGained;
+  pstatsFormatNumber pstatsGxpGained;
+  pstatsColPrint {XP Gained:} {$pstatsXpGained} {GXP Gained:} {$pstatsGxpGained};
+  #line gag;
+};
+
+#action {^XP Per Hour:%s%d%sGXP Per Hour:%s%d$} {
+  #var pstatsXpRate %2;
+  #var pstatsGxpRate %5;
+  #var ksXpRate %2;
+  #var ksGxpRate %5;
+  pstatsFormatNumber pstatsXpRate;
+  pstatsFormatNumber pstatsGxpRate;
+  pstatsColPrint {XP Per Hour:} {$mob[target] $pstatsXpRate} {GXP Per Hour:} {$pstatsGxpRate};
+  #line gag;
+};
+
+#action {^Total Kills:%s%d%sXP Per Kill:%s{[0-9.]+}} {
+  #var pstatsTotalKills %2;
+  #var pstatsXpPerKill %5;
+  #line gag;
+};
+
+#action {^%sGXP Per Kill:%s{[0-9.]+}} {
+  #var pstatsGxpPerKill %3;
+  pstatsFormatNumber pstatsXpPerKill;
+  pstatsFormatNumber pstatsGxpPerKill;
+  pstatsColPrint {XP Per Kill:} {$pstatsXpPerKill} {GXP Per Kill:} {$pstatsGxpPerKill};
+  #line gag;
+};
+
+#action {^Top %d kills:} {
+  #line gag;
+  #echo {};
+  pstatsHeaderPrint Top %1 Kills;
+  #action {^%s%d%s: %+} {
+    #var pstatsMobClass %%2;
+    #var pstatsMobName %%4;
+    #format pstatsMobName {%.${pstatsCols}s} {$pstatsMobName};
+    pstatsFormatNumber pstatsMobClass;
+    pstatsColPrint {} {<170>$pstatsMobName} {<060>$pstatsMobClass} {};
+    #line gag;
+  };
+};
+
+#action {^Last %d kills:} {
+  #unaction {^%s%d%s: %+};
+};
+
+#action {^Last %d kills:} {
+  #line gag;
+  #echo {};
+  pstatsHeaderPrint Last %1 Kills;
+  #action {^%s%d%s: %+} {
+    #var pstatsMobClass %%2;
+    #var pstatsMobName %%4;
+    #format pstatsMobName {%.${pstatsCols}s} {$pstatsMobName};
+    pstatsFormatNumber pstatsMobClass;
+    pstatsColPrint {} {<170>$pstatsMobName} {<060>$pstatsMobClass} {};
+    #line gag;
+  };
+};
+
+#action {^Rooms Explored: %d} {
+  #echo {};
+  #unaction {^%s%d%s: %+};
+  pstatsColPrint {<100>Rooms Explored:} {%1} {<100>Kills:} {$pstatsTotalKills};
+  #line gag;
+};
+
+
+#alias {kstats_add_mob} {
+	(cstats;
+	#math xp_per_rnd { $ksXP / $pstatsCRounds};
+	#math gxp_per_rnd { $ksGXP / $pstatsCRounds};
+	#var logname stats/xp_stats_$area;
+	#line log $logname {Name: $mobname_long  Rounds: $pstatsCRounds XP: $ksXP Per Rnd: $xp_per_rnd  Per Hr: $pstatsXpRate GXP: $ksGXP  Per Rnd: $gxp_per_rnd  Per Hr: $pstatsGxpRate };
+	(csclear;
+}
+
+#class {pstats} close

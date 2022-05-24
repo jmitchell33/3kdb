@@ -1,0 +1,24 @@
+#class {jugger_aliases} {kill}
+#class {jugger_aliases} {open}
+
+#alias {stimheal} {
+	#if {$corpses[inventory] > 10} {
+		#math {corpses[inventory]} {$corpses[inventory] - 1}
+	}; #elseif {$corpses[truck] > 0} {
+		#send !get corpse from cl;
+		#math {corpses[truck]} {$corpses[truck] -1}
+	}; #elseif {$corpses[cooler] > 0} {
+		#send !uncooler corpse
+	}; #else {
+		#if {"$bot" == "on"} {
+			.stop;
+		};
+		#bell
+	};
+	#send !fdeener
+}
+
+#NOP Fire all nukes at current stepper mob or current enemy
+#alias ff {fire $nukes}
+
+#class {jugger_aliases} {close}

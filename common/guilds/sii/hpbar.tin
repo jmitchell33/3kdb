@@ -1,0 +1,25 @@
+#class {guild_hpbar} kill
+#class {guild_hpbar} open
+
+
+#act {^HP:%d\/%d %d.%d \(%w\) SP:%d\/%d FO:%d\/%d} {
+    #line gag;
+    #math total_gxp {$total_gxp + $my[gxp][round]};
+    #math my[gxp][round_avg] {$total_gxp / $total_rounds};
+};
+
+#act {^GL:%* Brood:%d CON:%d\/%d %d} {
+    #line gag;
+    #var my[brood] %2;
+};
+
+#act {^Bst: %d \(%*\) SH: %w BR: %d Roots: %d PE: %d EN} {
+    #line gag;
+    #var my[boost] %1;
+    #var my[shield] %3;
+    #var my[bloodrush] %4;
+    #var my[roots][current] %5;
+    #var my[perceptions][current] %6;
+};
+
+#class {guild_hpbar} close

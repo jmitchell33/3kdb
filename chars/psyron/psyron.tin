@@ -1,0 +1,36 @@
+#NOP - 3k Session
+
+#SESSION {3k - Psyron} {3k.org} {3000}
+
+#conf pack 1;
+#conf color on;
+#conf {repeat enter} on;
+
+#NOP -- Set player specific variables;
+
+#var guild psicorps;
+#var user psyron;
+#read chars/$user/vars.tin;
+#var mob_kill_action 1;
+
+#NOP -- Load Common;
+
+#read common/index.tin;
+#read common/bot/bots.tin;
+#read modules/corpsemanager/corpsemanager.tin;
+#read modules/professions/reforger.tin;
+#read modules/helpers/helpers.tin;
+
+#NOP -- load guild;
+#read common/guilds/$guild/index.tin;
+
+#NOP -- load character-specific;
+#read chars/$user/actions.tin;
+#read chars/$user/aliases.tin;
+#read chars/$user/config.tin;
+#read chars/$user/heartbeat.tin;
+#read chars/$user/private.tin;
+#read chars/$user/vars.tin;
+
+
+#alias {reload} {#kill all;#show \n;#read chars/psyron/psyron.tin;};

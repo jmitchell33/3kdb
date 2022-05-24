@@ -1,0 +1,55 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Mantis Swamp};
+
+#var check_room 0;
+
+#var bot_message_1 '---- MANTIS    STEPPER ----';
+#var bot_message_2 '----    ALL TARGETS    ----';
+
+#alias .pre_fight_check {#nop;};
+
+#if {{$guild} == {bard}} {
+	.pre_bot_check;
+    
+	#alias .pre_fight_check {
+        #var defs[pn] 1;
+        #var defs[blink] 1;
+        #var defs[es] 1;
+    }
+};
+
+#if {{$guild} == {gentech}} {
+	#alias .pre_fight_check {
+        repair;
+		repair;
+		tactical;
+    }
+};
+
+#if {{$guild} == {mage}} {
+	#alias .pre_fight_check {
+        #var defs[MG] 1;
+    }
+};
+
+#if {{$guild} == {knight}} {
+	#alias .pre_fight_check {
+        #if {$my[strain][current] > 100} {
+            #show STRAIN HIGH, RESTING.;
+            .pause;
+            rest;
+            #delay {30} {..};
+        }
+    }
+};
+
+
+#var {botpath} {s;sw;s;s;sw;se;nw;ne;n;n;ne;n;e;se;s;s;w;e;s;s;s;n;n;e;w;n;n;n;e;s;s;n;e;push branch;s;s;e;w;n;n;nw;w;n;w;nw;w};
+
+#act {-M-_%* Praying Mantis%*.$} {@botSetMobActions{mantis;1;};.check_monster;} {2};
+
+#class {bot} {close}
+
+#read common/bot/generic.tin

@@ -1,0 +1,16 @@
+#class {guild_heartbeat} {kill}
+#class {guild_heartbeat} {open}
+
+#alias {_guild_heartbeat} {
+	#if {$mip[round] == 1} {
+		#var mob[palm] 0;
+		#var mob[pressure] 0;
+	};
+	#if {!$idle_flag && $action_round < $mip[round]} {
+
+		#if {$strategy[palm] && !$mob[palm] && $my[monk][ae][current] > 0} {palm};
+		#if {$strategy[pressure] && !$mob[pressure]} {pressure};
+    };
+};
+
+#class {guild_heartbeat} {close}

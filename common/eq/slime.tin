@@ -1,0 +1,40 @@
+#class xmas_slime kill
+#class xmas_slime open
+
+#var slime[light] 0;
+#var slime_corpse 1;
+
+#act {\~\{S\}\~ Health:%d/%d Slime:%d/%d P:%* Fullness:%d% Happy:%d% XP:%*} {
+    #var slime[health][current] %1;
+    #var slime[health][max] %2;
+    #var slime[slime][current] %3;
+    #var slime[slime][max] %4;
+    #var slime[power] %5;
+    #var slime[fullness][current] %6;
+    #var slime[fullness][max] 100;
+    #var slime[happy][current] %7;
+    #var slime[xp] %8;
+
+    #if {$slime[fullness][current] < 50 && $slime_corpse} {
+        #var slime_corpse 0;
+        unwrap;
+        #delay 3 {slime feed remains;wrap all};
+    };
+    #if {$slime[slime][current] > 75 && !$slime[light]} {
+        slime light;
+    };
+};
+
+#act {%w rumbles as it crunches through %* happily. Tasty stuff!} {
+    #var slime_corpse 1;
+};
+
+#act {You nudge %w which grumblingly replies with an eerie shine.} {
+    #var slime[light] 1;
+};
+
+#act {%w gooey form stops glowing.} {
+    #var slime[light] 0;   
+};
+
+#class xmas_slime close

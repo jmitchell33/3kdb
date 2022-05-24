@@ -1,0 +1,34 @@
+#class {guild_actions} {kill}
+#class {guild_actions} {open}
+
+#NOP --------------------------------------- NECROMANCER SPECIFIC ACTIONS ------------------------------------------;
+#act {///The protective spirits break away from your body, fading into nothingness.$} {#if !$idle_flag {protection}};
+
+
+#NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
+#act {^You charge forward and close your jaws on %*} {#var opponent[effects][rabies] 1};
+#act {%* has overcome the effects of your rabies.$} {#var opponent[effects][rabies] 0;rabies;};
+#act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1};
+
+#NOP --------------------------------------- NECROMANCER STATUS TRACKING  ------------------------------------------;
+#act {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1};
+#act {You are already altered into beast form master.}{#var my[necromancer][altered] 1};
+#act {You return to your normal were form.}{#var my[necromancer][altered] 1};
+#act {You alter back to your normal, human form.}{#var my[necromancer][altered] 0};
+#act {You can only alter your form into beast form master.}{#var my[necromancer][altered] 0};
+#act {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;}
+#act {Before the repowering, you attempt a last minute scribe2 of:} {
+    #var my[necromancer][invoke-prime] 2;
+    #var my[necromancer][spirit-howl] 1;
+    #var my[necromancer][maim] 2;
+    #var my[necromancer][diurnum] 1;
+    #var my[necromancer][nocturnum] 1;
+};
+#act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
+
+#NOP --------------------------------------- NECROMANCER SUPPORT ACTIONS  ------------------------------------------;
+#ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};daemon graft $lower}} {6};
+#ACTION {%w goes 'Breakin the law! Breakin the law!' at you.} {#if !$idle_flag {qtrance preserve remains>50;qtrance preserve remains>50}} {6};
+#ACTION {You see a shadowy form escape from %w and disappear!} {#SHOWME DAEMON GRAFT LEFT %1};
+
+#class {guild_actions} {close}

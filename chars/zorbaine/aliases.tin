@@ -1,0 +1,480 @@
+#alias {load} {
+    deadman 30;
+    mipon;
+    loadmap;
+    postload;
+    #read common/draw.tin;
+};
+
+
+#alias {_player_deadmanActions} {
+    .stop;
+    #unact {%*};
+    #delay {450} {#show \nPLAYER DEADMAN DISCONNECTING.\n;ld};
+};
+
+#alias .x {
+    #var incombat 0;
+}
+
+#alias dbg {
+    #show VARS:
+    #show incombat: $incombat;
+    #show botting: $bot[active];
+    #show killing: $killing;
+}
+
+
+#NOP bot shortcuts;
+#alias {.rb} {-rimalkins;scaler 150};
+#alias {.hb} {-hotelbot;scaler 130};
+    
+
+#ALIAS {brun}
+{
+	w;
+	home;
+	guild;
+	enter;
+	n;
+	n;
+	n;
+	quickbuy;
+	e;
+	quickbuy;
+	w;
+	s;
+	buy boost;
+	s;
+	out;
+	mk;
+	go gh1;
+	k drow;
+	wear all;
+	pp;
+	hone lance;
+	wield lance;
+	mmc;
+}
+{6};
+
+#alias {ex} {examine %0;search %0;};
+#alias {exr} {examine %0 in room;search %0 in room};
+#alias {exg} {exa %0 on ground;search %0 on ground};
+
+#nop Get coffin from morgue and fill it;
+#alias {coffin} {acquire;#5 buy 2;#5 wrap corpse;};
+
+#alias {mw} {mywho};
+#alias {mem} {members};
+#alias {r} {reply};
+#alias {rco} {rcost};
+#alias {skq} {skillquests};
+#alias {mxp} {massxp};
+
+#alias {us} {unkeep %0;smuggle %0};
+
+#alias {dd} {drink %0;dispose %0};
+
+#alias {wp} {wear all;pp};
+
+#alias {sr} {sra};
+
+#nop bury a corpse when in need (ie. out of inventory or coffin, etc);
+#alias {buryCorpseForRegen} {
+    #if {$corpses[inventory] ==  0} {
+        #if {$corpses[smuggle] > 0} {
+            smuggle remove corpse;
+            bury corpse;
+        } {
+            #if {$corpses[coffin] > 0} {
+                unwrap;
+                bury corpse;
+            } {
+                #show NO CORPSES;
+            }
+        }
+    } {
+        bury corpse;
+    };
+    #delay {1} {#ungag {There is no corpse here.}};
+};
+
+
+#alias {burycorpse} {
+    #show BURYCORPSE;
+    #gag {There is no corpse here.};
+    #if {$corpses[inventory] ==  0} {
+        #if {$corpses[smuggle] > 0} {
+            smuggle remove corpse;
+            bury corpse;
+            get corpse;
+        } {
+            #if {$corpses[coffin] > 0} {
+                unwrap;
+                bury corpse;
+                get corpse;
+            } {
+                bury corpse;
+                get corpse;
+            }
+        }
+    } {
+        bury corpse;
+        get corpse;
+    };
+    #delay {1} {#ungag {There is no corpse here.}};
+};
+
+
+/* -- repeat commands -- */
+#var repeatCommand 0;
+#var repeatInCombat 0;
+#alias {rpt} {
+    #show repeat: %0;
+    #var repeatCommand %0;
+    #ticker {repeat} {$repeatCommand} {2};
+};
+
+#alias {rptoff} {#unticker {repeat}};
+
+#nop /* repeat commands every round */;
+#alias {rpc} {
+    #if {"%0" != ""} {
+        #show Repeating in combat: %0;
+        #var repeatInCombat %0;
+    } {
+        #show Repeat currently set to: $repeatInCombat;
+    }
+}
+#alias {rpcoff} {
+    #var repeatInCombat 0;
+    #show Repeat in combat off.\n;
+}
+
+#var delayRepeat 0;
+#var delayRepeatDelay 0;
+#alias {dr} { 
+    #if {"%0" != ""} {
+        #show Repeating '%2' with a delay of %1;
+        #var delayRepeat %2;
+        #var delayRepeatDelay %1;
+        _doDr;
+        #alias {doRepeatDelay};
+    } {
+        #show Repeat currently set to: $delayRepeat;
+    }
+};
+#alias {_doDr} {
+    #if {"$delayRepeat" != "0"} {
+        $delayRepeat;
+        #delay {$delayRepeatDelay} {_doDr};
+    };
+};
+#alias {dro} {#var delayRepeat 0;#var delayRepeatDelay 0;#show Delay repeat cleared.};
+
+#alias {dr1} {
+    #var delayRepeat {che;map chess;-cb};
+    #var delayRepeatDelay 2500;
+    #show Chess bot delay repeat at 2500s set.;
+};
+
+
+
+/* MAPPER ALIASES */
+#alias {mh} {maphelp};
+#alias {mk} {#map goto knights};
+#alias {mg} {#map goto gentech};
+#alias {mc} {#map goto cot};
+#alias {mch} {#map goto chaos};
+
+
+
+/* PROFESSIONS */
+#alias {reftrain} {
+    keep all;
+    get helmet from box;
+    get amulet from box;
+    get armour from box;
+    get cloak from box;
+    get gloves from box;
+    get boots from box;
+    get shield from box;
+    get other from box;
+    get ring from box;
+    get ring from box;
+    out;
+    mk;
+    go reforge;
+    rfall;
+    go kn;
+    enter;
+    pp;
+};
+
+
+
+
+
+
+
+#alias {.rest} {
+    #4 tr;
+    .pause;
+    rest;
+    #delay {40} {..};
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*----------------------*/
+
+
+#CLASS {ZORBAINE_ALIASES} OPEN
+
+#ALIAS {.s}
+{
+	.stop;
+	soff;
+	aoff
+}
+{6}
+
+#ALIAS {aa}
+{
+	#showme adding alias %1 %2;
+	;
+	#class {ZORBAINE_ALIASES} {open};
+	#alias {%1} {%2};
+	#class {ZORBAINE_ALIASES} {close};
+	sa
+}
+{6}
+
+#ALIAS {ar}
+{
+	arepair all
+}
+{6}
+
+#ALIAS {bew}
+{
+	break east wall
+}
+{6}
+
+#ALIAS {bnw}
+{
+	break north wall
+}
+{6}
+
+#ALIAS {fc}
+{
+	ce;
+	esq goshop tack carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot;
+	#delay {3} {ge;#12 give carrot to almodo;send away}
+}
+{6}
+
+#ALIAS {fcc}
+{
+	ce;
+	esq goshop tack carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot;
+	#delay {2} {ge;#15 give carrot to almodo;send away}
+}
+{6}
+
+#ALIAS {gh}
+{
+	ce;
+	esq fetch horse;
+	horse follow;
+	mount;
+	mch;
+	send away
+}
+{6}
+
+#ALIAS {is}
+{
+	impale head on stake
+}
+{6}
+
+#ALIAS {mmc}
+{
+	method charge
+}
+{6}
+
+#ALIAS {ms}
+{
+	mountstats
+}
+{6}
+
+#ALIAS {ph}
+{
+	#200 pet horse
+}
+{6}
+
+#ALIAS {pl}
+{
+	push
+}
+{6}
+
+#ALIAS {rcb}
+{
+	#delay {4000} {-cb;rcb}
+}
+{6}
+
+#ALIAS {rp}
+{
+	#25 rescue puppy
+}
+{6}
+
+#ALIAS {rr}
+{
+	#delay 4800 {-cb;rr;efm;sb}
+}
+{6}
+
+#ALIAS {sb}
+{
+	keep bag;
+	get bag from horse;
+	dispose bag;
+	unkeep bag;
+	give bag to horse
+}
+{6}
+
+#ALIAS {skn}
+{
+	sknights
+}
+{6}
+
+
+#alias {.=} {#var repeatCommand %0;#show Repeat command set to: %0};
+#alias {.} {#if{"$repeatCommand" != "0"} {$repeatCommand};};
+
+
+#nop #alias {rally %1} {
+	#var whitelist_player;
+	#class {Player_Whitelist} {open};
+	#format {whitelist_player} {%n} {%1};
+	#act {-P-_%%*$whitelist_player%%*} {#nop;} {1};
+	#unvar {whitelist_player};
+	#class {Player_Whitelist} {close};
+	\rally %1;
+};
+
+#nop custom souls:;
+#alias {lerp} {#send emoteto %0 lerps you.};
+#alias {drabbit} {#send emoteto %0 yells 'Drabbits!' at you.};
+
+
+
+/* ---- Parties ---- */
+#var partying 0;
+#alias {mem} {members};
+#alias {pk} {partykills};
+#alias {partyon} {#var partying 1;#show Party mode enabled.};
+#alias {partyoff} {#var partying 0;#show Party mode disabled.};
+
+
+
+#nop Get coffin from morgue and fill it;
+#alias {coffin} {acquire;#5 buy 2;#5 wrap corpse;};
+
+/* box stuff */
+#alias {lh} {list helmet};
+#alias {la} {list amulet};
+#alias {lar} {list armour};
+#alias {lbp} {list breastplate};
+#alias {lc} {list cloak};
+#alias {lg} {list gloves};
+#alias {lg} {list gloves};
+#alias {lgr} {list greaves};
+#alias {lb} {list boots};
+#alias {lr} {list ring};
+#alias {lo} {list other};
+#alias {lm} {list misc};
+#alias {lw} {list weapon};
+#alias {ls} {list shield};
+#alias {lsh} {list shield};
+#alias {gb} {get %0 from box};
+#alias {pb} {put %0 in box};
+#alias {upb} {unkeep %0;put %0 in box};
+
+/* toggle beep on or off */
+#alias {`} { #if {$beepon == 1} {#var beepon 0;@show{Beep off}} {#var beepon 1;@show{Beep on}} };
+
+#alias {sm} {smuggle};
+#alias {smr} {smuggle remove %0};
+
+/* cheat: get +ac from defense mode, preparing, then back to offense without re-preparing */
+#alias {defo} {md;pp;#delay {4} {mmc;bcc}};
+#alias {md} {stance def;method melee};
+#alias {bcc} {battlecry Battlecrymenow.;hp};
+
+
+
+
+#alias {c} {ctell %0};	
+#alias {cw} {cwho -O};
+#alias {cwo} {cwho -o};
+
+#alias {ww} {who wiz};
+
+#alias {r} {reply %0};
+
+#alias {x} {examine %0;search %0;};
+
+
+#alias {gc} {get coins};
+#alias {dg} {divvy gold};
+#alias {ud} {unlock door;open door};
+
+#alias {gdf} {get flask;drink flask;dispose flask};
+
+#alias {pb} {put %0 in box};
+#alias {gb} {get %0 from box};
+
+#alias {id} {identify %0};
+
+#alias {msk} {mskills};
+#alias {rco} {rcost};
+#alias {mxp} {massxp};
+
+#alias {wield %0} {#var wielded %0;#send {wield %0}};
+
+#alias {dn} {dungeons};
+#alias {ql} {questlist};
+
+
+
+
+/* ------------------------------------ */
+#CLASS {ZORBAINE_ALIASES} CLOSE

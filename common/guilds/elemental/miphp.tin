@@ -1,0 +1,16 @@
+#class guild_miphp kill;
+#class guild_miphp open;
+
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+	#var gline_vars {G2N: $my[g2n]  B: $my[blasts]/$my[reset]%};
+	#list temp clear;
+
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NRG:$gp1/$gp1_max($my[emit][level])  C:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NRG:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {$gline_vars};
+	#var hpbar[prompt] $temp;
+};
+
+#class guild_miphp close;

@@ -1,0 +1,37 @@
+#class {golem_master} {kill}
+#class {golem_master} {open}
+
+#NOP -- Aliases and triggers to build golems;
+
+#alias {build_golem %1} {#var golem %1;#var golem-head 0;#var golem-limbs 0;#var golem-torso 0;ktrig golemize corpse head/wrap/get all};
+#action {^You quickly set to work and deftly remove the head from corpse.$} {
+	#var golem-head 1;ktrig golemize corpse torso/wrap/get all} {6};
+#action {^You quickly set to work and deftly remove the torso from corpse.$} {
+	#var golem-torso 1;ktrig golemize corpse limbs/wrap/get all} {6};
+#action {^You quickly set to work and deftly remove the limbs from corpse.$} {
+	#var golem-limbs 1;golem build $golem;ktrig wrap all/get all/put all in disc} {5};
+#action {^Your golem Charlie has expired.$} {build_golem companion} {4};
+#action {^Your golem Chizzit has expired.$} {build_golem explorer} {4};
+
+/* @register_module{golem_master};
+@register_module_info{golem_master;{
+    #show {--------------------------------------------------};
+    #show {--------   GOLEM MASTER MODULE LOADED    ---------};
+    #show {----                                          ----};
+    #show {---- Aliases                                  ----};
+    #show {----   build_golem %1                         ----};
+    #show {----      %1 may be any of:                   ----};
+    #show {----         packmule                         ----};
+    #show {----         explorer                         ----};
+    #show {----         party                            ----};
+    #show {----         companion                        ----};
+    #show {----                                          ----};
+    #show {----  Golems will be automagically rebuilt    ----};
+    #show {----  when they expire.                       ----};
+    #show {--------------------------------------------------};
+    #show {--------------------------------------------------};
+}};
+
+*/
+
+#class {golem_master} {close}

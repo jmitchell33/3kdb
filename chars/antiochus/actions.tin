@@ -1,0 +1,19 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#var corpse_delay 0;
+
+#ACTION {^Owie. That hurt!} {
+	#if !$corpse_delay {
+		#var corpse_delay 1;
+		corpse_select;
+		#delay {4} {collect dna from corpse;collect dna from corpse};
+		#delay {4} {#var corpse_delay 0};
+	}
+} {1};
+
+
+#NOP --- GENERAL MISC;
+#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
+
+#class {player_actions} {close}

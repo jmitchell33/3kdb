@@ -1,0 +1,24 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Aegis Global};
+#var check_room 0;
+
+
+#var bot_message_1 '---- AEGIS LVL 1 STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {e;e;s;e;e;s;w;s;w;n;w;s;e;s;e;s;e;n;e;s;e;e;n;w;s;w;n;n;e;e;n;w;n;w;n;e;e;w;w;s;e;s;e;s;w;w;s;s;e;e;n;w;s;w;n;w;s;w;n;w;n;w;n;e;s;e;n;e;n;w;w;n;w;w}
+#var bot[path] $botpath;
+
+#list botmobs clear;
+#list botmobs add {{long} {Putrid zombie} {target} {zombie}};
+#list botmobs add {{long} {Shambling zombie} {target} {zombie}};
+#list botmobs add {{long} {One-armed zombie} {target} {zombie}};
+#list botmobs add {{long} {Aegis Sentry Model 60-FT} {target} {sentry}};
+
+#var bot[mobs] #botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin
