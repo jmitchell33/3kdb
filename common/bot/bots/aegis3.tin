@@ -1,0 +1,20 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var check_room 0;
+
+#var bot_message_1 '---- AEGIS LVL 3 STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {w;s;e;w;n;w;s;n;n;n;w;s;s;n;s;n;w;w;e;e;n;w;w;e;e;n;w;w;e;e;e;n;w;w;e;e;e;e;w;w;n;e;e;w;w;w;w;e;e;s;s;e;s;s;n;n;e;s;s;n;n;e;s;s;n;n;e;s;s;n;n;e;s;s;s;e;e;w;w;w;w;e;e;s;w;e;n;n;e;e;w;w;n;e;e;w;w;n;e;e;w;w;w;n;w;n;s;e;n;e;w;s;e;e;e;w;w;w;s;w;w;w;w;s;s;s;e;e};
+#var bot[path] $botpath;
+
+#list botmobs clear;	
+#list botmobs add {{{long} {Charred zombie} {target} {zombie}}};
+#list botmobs add {{{long} {Severely burnt zombie} {target} {zombie}}};
+#list botmobs add {{{long} {Aegis Sentry Model 64-CC} {target} {sentry}}};
+#list bot[mobs] $botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin

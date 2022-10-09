@@ -4,7 +4,11 @@
 #alias {_player_heartbeat} {
     #if {!$idle_flag && $action_round < $mip[round]} {
         #if {$corpses[coffin] < 15 && $dmg_on} {reflex remove gp1 >250;#var dmg_on 0};
-
+        #if {$corpses[total] > 20 && $strategy[assault] && $my[gp1][current] > $karma_heal} {
+            martial assault;
+            martial assault;
+            martial assault;
+        };
         #if {$mip[round] > 2 && $mip[round] < 6} {
             #if $strategy[cloud] {#delay 2 {cast noxious cloud}};
             #if $strategy[vortex] {#delay 5 {cast lightning vortex}};

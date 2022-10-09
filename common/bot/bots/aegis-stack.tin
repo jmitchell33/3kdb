@@ -1,0 +1,242 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#showme ---- AEGIS GLOBAL STACKER ----;
+#showme ----  ALL LEVELS   ----;
+
+#NOP -- Tickers to rotate mobs you're attacking;
+#ticker mob1 {kill robot 1;kill zombie 1} 10;
+#ticker mob2 {kill robot 2;kill zombie 2} 20;
+#ticker mob3 {kill robot 3;kill zombie 3} 30;
+
+#var {botpath} {e;s;e;n;s;e;e;s;w;s;w;w;n;e;s;s;e;s;e;n;e;s;e;e;n;w;s;w;n;n;e;e;n;w;n;w;n;e;e;d;w;n;e;w;w;s;w;w;n;w;w;w;e;s;e;w;s;w;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;e;s;e;e;e;e;e;e;s;w;s;w;n;w;w;w;s;e;n;e;d;w;s;e;w;n;w;s;n;n;n;w;s;w;w;e;e;n;w;w;e;e;n;w;w;e;e;e;n;n;w;w;e;e;e;e;w;w;s;w;w;e;e;e;e;w;w;s;e;s;s;n;n;e;s;s;n;n;e;e;e;s;s;s;s;w;e;n;e;e;w;w;n;n;e;e;w;w;n;e;e;w;w;w;n;n;e;w;s;e;d;e;e;n;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;n;n;n;n;n;n;n;n;w;w;d;e;e;n;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;n;n;n;n;n;n;n;n;w;w;d;e;e;n;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;n;n;n;n;n;n;n;n;w;w;u;u;u;w;s;w;w;w;w;s;s;s;e;e;u;w;n;n;e;n;e;n;e;e;u;w;s;s;s;w;s;w;w;n;n;n;w;n;w;w}
+#var bot[path] $botpath;
+
+#var mob_count 0;
+#var mob_count_desired 3;
+#var bot[active] 1;
+#var bot[paused] 0;
+#var bot[walk] 1;
+
+#var bot[stats][mobs] 0;
+#var bot[stats][xp] 0;
+#var bot[stats][gxp] 0;
+#var bot[stats][coins] 0;
+#var bot[stats][loop][mobs] 0;
+#var bot[stats][loop][xp] 0;
+#var bot[stats][loop][gxp] 0;
+#var bot[stats][loop][coins] 0;
+#var temp_xp 0;
+#var temp_coins 0;
+
+#format {bot[start-time]} {%T} {};
+
+#NOP -- Read in the whitelist of players or followers to ignore;
+#read common/bot/whitelist.tin;
+
+#NOP -- pre_bot check is loaded via the char/user/config.tin;
+.pre_bot_check;
+#path load $bot[path];
+
+
+#alias bot_report {
+    #var bot_loop_xp $bot[stats][loop][xp];
+    #var bot_xp $bot[stats][xp];
+    #var bot_loop_coins $bot[stats][loop][coins];
+    #var bot_coins $bot[stats][coins];
+
+    thousandsFormatNumber bot_loop_xp;
+    thousandsFormatNumber bot_xp;
+    thousandsFormatNumber bot_loop_coins;
+    thousandsFormatNumber bot_coins;
+    
+    #format loop1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][loop][mobs]};
+    #format loop2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_loop_xp};
+    #format loop3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_loop_coins};
+    
+    #format total1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][mobs]};
+    #format total2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_xp};
+    #format total3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_coins};
+    
+    #showme <BBB><aad>---------------------------------------------------<088>;
+    #showme <BBB><aad>--------------     Current Loop     ---------------<088>;
+    #showme $loop1;
+    #showme $loop2;
+    #showme $loop3;
+    #showme <BBB><aad>---------------------------------------------------<088>;
+    #showme <BBB><aad>--------------     Total Run        ---------------<088>;
+    #showme $total1;
+    #showme $total2;
+    #showme $total3;
+    #showme <BBB><aad>---------------------------------------------------<088>;
+    #showme <BBB><aad>---------------------------------------------------<088>;
+};
+
+#alias bot_xp {
+    #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
+    #math bot[stats][mobs] {$bot[stats][mobs] + 1};
+    #action {^You have %* total xp.$} {
+        #format temp_xp {%d} {%%1};
+        #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
+            #math fight_xp {$temp_xp - $my[xp]};
+            #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
+            #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
+            #format my[xp] {%d} {%%1};
+        } {
+            #format my[xp] {%d} {%%1};
+        };
+        #unaction {^You have %* total xp.$};
+    };
+    xp;
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+};
+
+#alias bot_coins {
+    #action {^You are carrying %d coins in loose change.$} {
+        #var temp_coins %%1;
+        #if {$my[coins] > 0 && "$temp_coins" != "$my[coins]"} {
+            #math fight_coins {$temp_coins - $my[coins]};
+            #math bot[stats][coins] {$bot[stats][coins] + $fight_coins};
+            #math bot[stats][loop][coins] {$bot[stats][loop][coins] + $fight_coins};
+            #format my[coins] {%d} {%%1};
+        } {
+            #format my[coins] {%d} {%%1};
+        };
+        #unaction {^You are carrying %d coins in loose change.$};
+    };
+    coins;
+};
+
+
+/* kill the bot */
+#alias {.stop} {
+    #unvar bot;
+    #unalias {..};
+    #unalias {.onPrompt};
+    #unact {^>$};
+    #class {bot} {kill};
+    #class {xbot} {kill};
+    #show Bot killed.;
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+};
+
+#alias .pause {
+    #var bot[paused] 1;
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+};
+
+#act {{^-M-_(.*)( \{([0-9]+)\})?}} {
+    #var foundtimes 1;
+    #regex {%2} {7B{[0-9]+}} {#var foundtimes &1};
+    #undelay bot_kick;
+    #math mob_count {$mob_count + $foundtimes};
+    #showme mob count is $mob_count;
+} {2};
+
+
+#NOP -- starts or continues the bot after it's loaded;
+#alias {..} {
+    #NOP -- If the next direction is down and we  still have mobs, don't walk.
+    #class tempList CREATE $bot[path];
+    #path get POSITION tempPosition;
+    #list tempList GET $tempPosition tempDirection;
+
+    #class {xbot} {open};
+	#var bot[paused] 0;
+
+    #act {{^-R-_(.*)-R-_}} { 
+        #var room_short %%1;
+        #var room_item 0;
+        .onRoom;
+    } {1};
+
+	#alias {.onRoom} {
+        #var mob_count 0;
+        .prompt;
+	};
+
+    #alias {.prompt} {
+        #act {^>$} {.onPrompt} {1};
+    };
+
+	#alias {.onPrompt} {
+        #showme mob count is $mob_count and desired count is $mob_count_desired;
+        #if {$mob_count >= $mob_count_desired} {
+            .stop_prompt;
+            .pre_fight_check;
+            kill robot;
+            kill zombie;
+            #unact {{^-R-_(.*)-R-_}};
+        } {
+            #if {"$tempDirection" != "d"} {#var bot[walk] 1;#delay 2 {#path walk;};};
+        };
+    };
+
+    #alias {.stop_prompt} {#unact {^>$};#var bot[walk] 0;#if {"$draw[status][active]" == "on"} {draw_status};};
+    
+	glance;
+
+	#class {xbot} {close};
+};
+
+#alias {.bot} {#if {$bot[paused] == 0} {..}};
+
+#action {{(.*) (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {
+    #echo {----- BOT REGISTERED KILL -----};
+    #math mob_count {$mob_count - 1};
+    
+    bot_xp;
+    bot_coins;
+    #var bot[aggro-mob] 0;
+    #if !$idle_flag {
+        #if {$mob_count == 0} {
+            #if $actions_stacked {
+                do_action;
+                #delay 2 {
+                    corpse_trig;
+                    .bot;
+                };
+            } {
+                corpse_trig;
+                .bot;
+            };
+        }
+    };
+} {1};
+
+#NOP -- If you're not in combat and not walking, then begin walking;
+#ticker {bot_ticker} {
+    #if !$bot[paused] {
+        #if {$bot[active] && !$idle_flag && !$bot[walk] && $mip[round] < 1} {
+            #delay {bot_kick} {#if {!$bot[walk] && $mip[round] < 1} {#showme BOT STUCK RESUMING IN 3 SECONDS;.bot}} {3};
+        };
+    };
+} {5};
+
+
+/* Bot end actions... */
+#act {#END OF PATH} {
+    #show \nBot finished.;
+    #format {bot[report-time]} {%T} {};
+    #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
+    #if {$bot[delta-time] > 3600} {
+        #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
+        #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
+        thousandsFormatNumber bot[delta-rate];
+        #var xp_rate_str $bot[delta-rate]/hr ($bot[delta-time] Hrs);
+    } {
+        #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
+        #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
+        thousandsFormatNumber bot[delta-rate];
+        #var xp_rate_str $bot[delta-rate]/hr ($bot[delta-time] mins);
+    };
+    #var temp_xp $bot[stats][xp];
+    thousandsFormatNumber temp_xp;
+    ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
+    #show Coins Earned: $bot[stats][coins];
+    .stop;
+};
+
+
+#class {bot} {close}
+

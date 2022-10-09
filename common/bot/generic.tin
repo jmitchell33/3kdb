@@ -11,9 +11,13 @@
 #var bot[stats][mobs] 0;
 #var bot[stats][xp] 0;
 #var bot[stats][gxp] 0;
+#var bot[stats][coins] 0;
 #var bot[stats][loop][mobs] 0;
 #var bot[stats][loop][xp] 0;
 #var bot[stats][loop][gxp] 0;
+#var bot[stats][loop][coins] 0;
+#var temp_xp 0;
+#var temp_coins 0;
 
 #format {bot[start-time]} {%T} {};
 
@@ -43,45 +47,96 @@
 #alias bot_report {
     #var bot_loop_xp $bot[stats][loop][xp];
     #var bot_xp $bot[stats][xp];
+    #var bot_loop_coins $bot[stats][loop][coins];
+    #var bot_coins $bot[stats][coins];
 
     thousandsFormatNumber bot_loop_xp;
     thousandsFormatNumber bot_xp;
+    thousandsFormatNumber bot_loop_coins;
+    thousandsFormatNumber bot_coins;
     
-    #format loop1 {%+20s %-20s} {<DDD><aad>          Mobs Killed: $bot[stats][loop][mobs]};
-    #format loop2 {%+20s %-20s} {<DDD><aad>            XP Gained: $bot_loop_xp};
+    #format loop1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][loop][mobs]};
+    #format loop2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_loop_xp};
+    #format loop3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_loop_coins};
     
-    #format total1 {%+20s %-20s} {<DDD><aad>          Mobs Killed: $bot[stats][mobs]};
-    #format total2 {%+20s %-20s} {<DDD><aad>            XP Gained: $bot_xp};
+    #format total1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][mobs]};
+    #format total2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_xp};
+    #format total3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_coins};
     
-    #showme <DDD><aad>---------------------------------------------------<088>;
-    #showme <DDD><aad>--------------     Current Loop     ---------------<088>;
+    #showme <BBB><aad>---------------------------------------------------<088>;
+    #showme <BBB><aad>--------------     Current Loop     ---------------<088>;
     #showme $loop1;
     #showme $loop2;
-    #showme <DDD><aad>---------------------------------------------------<088>;
-    #showme <DDD><aad>--------------     Total Run        ---------------<088>;
+    #showme $loop3;
+    #showme <BBB><aad>---------------------------------------------------<088>;
+    #showme <BBB><aad>--------------     Total Run        ---------------<088>;
     #showme $total1;
     #showme $total2;
-    #showme <DDD><aad>---------------------------------------------------<088>;
-    #showme <DDD><aad>---------------------------------------------------<088>;
+    #showme $total3;
+    #showme <BBB><aad>---------------------------------------------------<088>;
+    #showme <BBB><aad>---------------------------------------------------<088>;
 };
 
 #alias bot_xp {
-    #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
-    #math bot[stats][mobs] {$bot[stats][mobs] + 1};
-    #action {^You have %* total xp.$} {
-        #format temp_xp {%d} {%%1};
-        #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
-            #math fight_xp {$temp_xp - $my[xp]};
-            #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
-            #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
-            #format my[xp] {%d} {%%1};
-        } {
-            #format my[xp] {%d} {%%1};
+    #if {"%1" == "start"} {
+        #action {^You have %* total xp.$} {
+            #format temp_xp {%d} {%%1};
+            #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
+                #math fight_xp {$temp_xp - $my[xp]};
+                #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
+                #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
+                #format my[xp] {%d} {%%1};
+            } {
+                #format my[xp] {%d} {%%1};
+            };
+            #unaction {^You have %* total xp.$};
         };
-        #unaction {^You have %* total xp.$};
+        xp;
+        #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+    } {
+        #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
+        #math bot[stats][mobs] {$bot[stats][mobs] + 1};
+        #action {^You have %* total xp.$} {
+            #format temp_xp {%d} {%%1};
+            #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
+                #if {$temp_xp > $my[xp]} {
+                    #math fight_xp {$temp_xp - $my[xp]};
+                    #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
+                    #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
+                    #format my[xp] {%d} {%%1};
+                } {
+                    #NOP -- If current xp is less than total xp (spent it on stats or died) update my[xp] to reflect the new baseline;
+                    #format my[xp] {%d} {%%1}; 
+                }
+            } {
+                #format my[xp] {%d} {%%1};
+            };
+            #unaction {^You have %* total xp.$};
+        };
+        xp;
+        #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
     };
-    xp;
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+};
+
+#alias bot_coins {
+    #action {^You are carrying %d coins in loose change.$} {
+        #var temp_coins %%1;
+        #if {$my[coins] > 0 && "$temp_coins" != "$my[coins]"} {
+            #if {$temp_coins > $my[coins]} {
+                #math fight_coins {$temp_coins - $my[coins]};
+                #math bot[stats][coins] {$bot[stats][coins] + $fight_coins};
+                #math bot[stats][loop][coins] {$bot[stats][loop][coins] + $fight_coins};
+                #format my[coins] {%d} {%%1};
+            } {
+                #NOP -- If current coins are less than starting coins, we'll update the new baseline;
+                #format my[coins] {%d} {%%1}; 
+            };
+        } {
+            #format my[coins] {%d} {%%1};
+        };
+        #unaction {^You are carrying %d coins in loose change.$};
+    };
+    coins;
 };
 
 #alias playercheck {
@@ -107,37 +162,49 @@
 };
 
 #alias .pause {
+    #undelay bot_kick;
     #var bot[paused] 1;
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
-#act {{^-M-_(.*)( \[(.*)\])*( \[[0-9]*%\])?( (.*)attacking(.*))?([\r\n\t ]*?)?( \{([0-9]+)\})?( \{([A-Za-z]+)\})?}} {
-    #var foundtimes 1;
-    #var mob[long] %1;
+#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars"} {
+    #act {^-M-_%*} {
+        #var bot[foundmob] 1;
+        #var mob[target] mob;
+        .mob_kill_action;
+        kill mob;
+    } {2};
+} {
+    #act {{^-M-_(.*)( \[(.*)\])*( \[[0-9]*%\])?( (.*)attacking(.*))?([\r\n\t ]*?)?( \{([0-9]+)\})?( \{([A-Za-z]+)\})?}} {
+        #var foundtimes 1;
+        #var mob[long] %1;
 
-    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
+        #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
 
-    #replace mob[long] {.} {};
-    #replace mob[long] {-M-_} {};
-    #replace mob[long] { \[%*\]} {};
-    #replace mob[long] { attacking%*!} {};
-    #replace mob[long] { !attacking%*!} {};
-    #replace mob[long] { attacking} {};
+        #replace mob[long] {.} {};
+        #replace mob[long] {-M-_} {};
+        #replace mob[long] { \[%*\]} {};
+        #replace mob[long] { attacking%*!} {};
+        #replace mob[long] { !attacking%*!} {};
+        #replace mob[long] { attacking} {};
+        #replace mob[long] { \(crying\)} {};
+        #replace mob[long] { \(demoralized\)} {};
 
-    #regex {%2} {7B{[0-9]+}} {#var foundtimes &1;#replace mob[long] { \\x7B%*} {};};
-    #regex {%2} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
+        #regex {%2} {7B{[0-9]+}} {#var foundtimes &1;#replace mob[long] { \\x7B%*} {};};
+        #regex {%2} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
 
-    #format {mob[long]} {%p} {$mob[long]};
+        #format {mob[long]} {%p} {$mob[long]};
 
-    #foreach $botmobs[%*] botmob {
-        #regexp {"$mob[long]"} {"$botmob[long]"} {
-            #undelay bot_kick;
-            #var bot[foundmob] 1;
-            #var mob[target] $botmob[target];
-            #var mob[foundtimes] $foundtimes;
+        #foreach $botmobs[%*] botmob {
+            #regexp {"$mob[long]"} {"$botmob[long]"} {
+                #undelay bot_kick;
+                #var bot[foundmob] 1;
+                #var mob[target] $botmob[target];
+                #var mob[foundtimes] $foundtimes;
+            };
         };
-    };
-} {2};
+    } {2};
+};
 
 
 
@@ -194,7 +261,7 @@
         #if {$bot[foundplayer]} {
             .stop_prompt;
             #var bot[walk] 1;
-            #path walk;
+            #delay .1 {#path walk;};
         } {
             #if {$collector[items]} {
                 get all;
@@ -221,7 +288,7 @@
                             .check_room;
                         } {
                             #var bot[walk] 1;
-                            #path walk;
+                            #delay .1 {#path walk;};
                         };
                 };
             };
@@ -245,6 +312,7 @@
         .bot;
     } {
         bot_xp;
+        bot_coins;
         #var bot[foundmob] 0;
         #var bot[aggro-mob] 0;
         #if !$idle_flag {
@@ -272,8 +340,10 @@
 
 #NOP -- If you're not in combat and not walking, then begin walking;
 #ticker {bot_ticker} {
-    #if {$bot[active] && !$bot[paused] && !$idle_flag && !$bot[walk] && $mip[round] < 1} {
-        #delay {bot_kick} {#if {!$bot[walk] && $mip[round] < 1} {#showme BOT STUCK RESUMING IN 3 SECONDS;.bot}} {3};
+    #if !$bot[paused] {
+        #if {$bot[active] && !$idle_flag && !$bot[walk] && $mip[round] < 1} {
+            #delay {bot_kick} {#if {!$bot[walk] && $mip[round] < 1} {#showme BOT STUCK RESUMING IN 3 SECONDS;.bot}} {3};
+        };
     };
 } {5};
 
@@ -306,11 +376,17 @@
             #var temp_xp $bot[stats][xp];
             thousandsFormatNumber temp_xp;
             ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
-            .stop;
+            #show Coins Earned: $bot[stats][coins];
+            #if {&{botcycle[]} > 1} {
+                nextarea
+            } {
+                .stop;
+            };
         } {
             #if $bot[stats][loop][mobs] {
                 #var bot[stats][loop][mobs] 0;
                 #var bot[stats][loop][xp] 0;
+                #var bot[stats][loop][coins] 0;
                 #show \nLooping bot...;
                 #path load $bot[path];
                 .bot;
@@ -332,7 +408,12 @@
                 #var temp_xp $bot[stats][xp];
                 thousandsFormatNumber temp_xp;
                 ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
-                .stop;
+                #show Coins Earned: $bot[stats][coins];
+                #if {&{botcycle[]} > 1} {
+                    nextarea
+                } {
+                    .stop;
+                };
             }
         };
     };

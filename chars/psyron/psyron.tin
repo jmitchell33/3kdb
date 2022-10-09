@@ -2,16 +2,15 @@
 
 #SESSION {3k - Psyron} {3k.org} {3000}
 
-#conf pack 1;
-#conf color on;
-#conf {repeat enter} on;
-
 #NOP -- Set player specific variables;
 
 #var guild psicorps;
 #var user psyron;
 #read chars/$user/vars.tin;
 #var mob_kill_action 1;
+
+#var pe_regen 3;
+#var stam_regen 2;
 
 #NOP -- Load Common;
 
@@ -21,16 +20,5 @@
 #read modules/professions/reforger.tin;
 #read modules/helpers/helpers.tin;
 
-#NOP -- load guild;
-#read common/guilds/$guild/index.tin;
-
-#NOP -- load character-specific;
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-#read chars/$user/private.tin;
-#read chars/$user/vars.tin;
-
-
-#alias {reload} {#kill all;#show \n;#read chars/psyron/psyron.tin;};
+#NOP -- load guilds and character-specific settings;
+reload;

@@ -1,54 +1,20 @@
 #class {default_aliases} {kill}
 #class {default_aliases} {open}
 
-#alias {debug} {#debug all on};
-#alias {debugoff} {#debug all off};
+#alias {debug} {#debug all on;#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
+#alias {debugoff} {#debug all off;#UNEVENT {SEND OUTPUT};};
 
-
-
-#alias strategy {
-    #format temp {%u} {%1};
-    #switch {"$strategy[%1]"} {
-        #case {"0"} {
-            #showme <caa>----  <fff> $temp HAS BEEN TOGGLED ON  <caa>  ----<088>;
-            #var strategy[%1] 1;
-        };
-        #case {"1"} {
-            #showme <caa>----  <fff> $temp HAS BEEN TOGGLED OFF  <caa> ----<088>;
-            #var strategy[%1] 0;
-        };
-        #default {
-            #showme <caa>----  <fff> STRATEGY NOT FOUND, CHECK SPELLING  <caa> ----<088>;
-        };
-    };
-    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
-};
-
-#alias add-strategy {
-
-    #list actionStack indexate name;
-    #list actionStack filter {} {%1};
-
-    #list test1 add {{{name} {newpower} {active} {1}}};
-    #list test1 indexate name;
-    #list test1 find {{newpower}} {tempRes};
-    #showme $tempRes;
-
-    #showme <caa>----  <fff> %1 has been added and toggled ON  <caa>  ----<088>;
-
-    #list strategy add {{{name} {%1} {active} {1}}};
-    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
-};
-
-#alias rem-strategy {
-    #showme <caa>----  <fff> %1 is no longer a strategy  <caa>  ----<088>;
-    #unvar newList;
-
-    #NOP #foreach $strategy[%*] {;
-#NOP         #if ;
-   #nop };
-    #var strategy[%1] 1;
-    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
+#alias reload {
+    #class player_%* kill;
+    #class guild_%* kill;
+    #read chars/$user/actions.tin;
+    #read chars/$user/aliases.tin;
+    #read chars/$user/config.tin;
+    #read chars/$user/heartbeat.tin;
+    #read chars/$user/private.tin;
+    #read chars/$user/vars.tin;
+    #read common/guilds/$guild/index.tin;
+    #read common/guilds/eternal/eternal.tin;
 };
 
 #var actions_stacked 0;
@@ -97,6 +63,64 @@
     #class global close;
     #class global write chars/$user/vars.tin;
     #delay 1 {#end};
+};
+
+#alias {go_donate1} {
+    #var bot[paused] 1;
+    #map get roomvnum donate_go_back;
+    #path save forward path;
+    #path get position pos;
+    go house_box;
+    keep all corpse;
+    keep all preservation;
+    put all in box;
+    go morgue;
+    unkeep all corpse;unkeep all preservation;donate coffin;donate all;unwrap all;get all;donate all;
+    #if {"$guild" == "necromancer"} {
+        go necro_corpse;
+        store all;
+    };
+    go bank;deposit all;
+    #map run $donate_go_back;
+    #path load $path;
+    #path goto $pos;
+    #var bot[paused] 0;
+};
+
+#alias {sell_catacombs} {
+    #list add items slicer;
+    #list add items chainmail;
+    #list add items bone sword;
+    #list add items leather armor;
+    #list add items silver platemail;
+    #list add items ragged cloak;
+    stash all;
+    keep all component;
+    go shop2;
+    #line oneshot #action {%* says: You do not have a %*.$} {
+        #list items filter {} {%%2};
+    };
+    #16 sell chainmail;
+    go shop4;
+    #16 sell chainmail;
+    go shop5;
+    #16 sell chainmail;
+    go shop6;
+    #16 sell chainmail;
+    go shop7;
+    #16 sell chainmail;
+    go shop8;
+    #16 sell chainmail;
+    go shop10;
+};
+
+#alias {sell_whores} {
+    stash all;
+    keep all component;
+    #loop 1 10 i {
+        go shop$i;
+        #16 {sell yeast;sell skoal;sell bitch boots;sell bitch blade;sell whips;sell purple heart;sell bitch plate;sell pimp shells;sell pimp gun;sell slickness;sell voucher;sell dermal plating}
+    };
 };
 
 #class {default_aliases} {close}

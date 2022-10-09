@@ -12,14 +12,17 @@
         _update_idle;
     } {1};
     #TICKER {heartbeat} {
-        _player_miphp;
-        _player_heartbeat;
-        _guild_heartbeat;
-		_common_heartbeat;
-		_update_corpse_string;
+		#if !$idle_flag {
+			_player_miphp;
+			_player_heartbeat;
+			_guild_heartbeat;
+			_common_heartbeat;
+			_update_corpse_string;
+			#if {$eternal} {_update_eternal_status};
+			#if {$guild_miphp} {_guild_miphp};
+		};
+		
 		#var action_round $mip[round];
-		#if {$eternal} {_update_eternal_status};
-		#if {$guild_miphp} {_guild_miphp};
 		#if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
 		#if {"$draw[caption][active]" == "on"} { draw_caption };
     } {2};

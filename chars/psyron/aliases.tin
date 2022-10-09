@@ -14,22 +14,19 @@
 }
 
 #alias {.mob_kill_action} {
-    examine $mob[target];
     kill $mob[target];
-    #if $darkness {wear ring of darkness};
-}
+};
 
 #NOP ---MISC;
 #alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box;golem give all to byron;put all in box};
 #alias {bag_all %1} {get all from disc;#loop 1 %1 i {put all in bag $i}};
 
-
 #alias corpse_trig {
-  #if {$darkness} {remove ring of darkness};  
   get coins from corpse;
-  #if $spoon {eat corpse} {wrap corpse};
-  
-  #if {$combat[pf]} {actuate psychofeedback int for con};
+  #if $spoon {eat corpse} {
+    slab corpse;
+    wrap corpse;
+  };
 
   #if $bags {
     #loop 1 20 i {
@@ -44,20 +41,22 @@
       get all from corpse;
       eat green;eat blue;eat orange;
   };
-  #if {"$area" == "Westersea Thugs" || "$area" == "Westersea Sewer"} {
-    get lockbox from corpse;
-    sm lockbox;
-  };
-  #if {$pickle_farming} {
-    smr jug;drink jug;sm jug;
-    #if {"$area" == "sewer" || "$area" == "icyblue"} {
-      get ring from corpse;
-      get bag from corpse;
-    };
-  };
+
   #if {$aoe_immo} {
     immolate all;
-  };
+  };  
+};
+
+#alias .check_death {
+    .pause;
+	#delay 1 {corpse_trig;get all;stash all;keep all component;psi_donate};
+	#delay 3 {..};
+};
+
+#alias {psi_donate} {
+  #var psi_donate 1;
+  #map get roomvnum donate_go_back;
+  fold reality;
 };
 
 #alias {refill_apump} {

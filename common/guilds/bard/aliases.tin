@@ -1,5 +1,5 @@
-#class {bard_aliases} {kill}
-#class {bard_aliases} {open}
+#class {guild_aliases} {kill}
+#class {guild_aliases} {open}
 
 
 #NOP -- General Bard helper aliases;
@@ -70,7 +70,7 @@
 
 #NOP -- QUICK ALIASES FOR SETTING UP DEFENSES;
 #alias {prots_spells} {prots_blink;prots_pfe;prots_pfg;prots_pfn;prots_pfc;prots_pfh;prots_mb;prots_hs;};
-#alias {prots_songs} {prots_grace;prots_muse;};
+#alias {prots_songs} {#var defs[ag] 1;#var defs[om] 1;};
 
 #alias {prots_pfe} {cast protection from evil;#var defs[pe] 1;echo_prots_pfe};
 #alias {prots_pfg} {cast protection from good;#var defs[pg] 1;echo_prots_pfg};
@@ -88,6 +88,7 @@
 #alias {reflex_critic %1} {reflex add sp >%1 cast caustic critic;echo_reflex_critic %1};
 #alias {reflex_ow %1} {reflex add gp1 <%1 ow;echo_reflex_ow %1};
 #alias {reflex_ma %1} {reflex add gp1 >%1 martial assault;echo_reflex_ma %1};
+#alias {reflex_soothe %1} {reflex add sp <%1 soothe;echo_reflex_soothe %1};
 
 
 #NOP ---THIS SECTION IS FOR FORMATTING FOR SPELL/SONG MAINTENANCE;
@@ -115,6 +116,7 @@
 #alias {echo_reflex_critic %1} {#echo {+++++++++++++++  CAUSTIC CRITIC  (>%1 sp)     ++++++++++++++}};
 #alias {echo_reflex_ow %1}  {#echo {+++++++++++++++  DIRGE CORPSE    (<%1 karma)  ++++++++++++++}};
 #alias {echo_reflex_ma %1}     {#echo {+++++++++++++++  MARTIAL ASSAULT (>%1 karma)  ++++++++++++++}};
+#alias {echo_reflex_soothe %1}     {#echo {+++++++++++++++  SOOTHE (<%1 sp)  ++++++++++++++}};
 
 #NOP ---Song Buffs;
 #alias {buffup} {
@@ -130,4 +132,4 @@
 	#delay $buff_delay_4 {perform hero for %1};
 }
 
-#class {bard_aliases} {close}
+#class {guild_aliases} {close}

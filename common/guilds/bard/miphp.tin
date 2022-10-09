@@ -12,6 +12,7 @@
 	#if {$my[defs][cs] == 1}	{#if $defs[cs]		{#var cs_string <ACA><fff>CS*<088>}					{#var cs_string CS*}} 				 {#var cs_string {}};
 	#if {$my[defs][m] == 1}	    {#if $defs[m]		{#var masque_string <ACA><fff>M*<088>}				{#var masque_string M*}} 			 {#var masque_string {}};
 	#if {$my[defs][ag] > 0}		{#if $defs[ag]		{#var ag_string <ACA><fff>AG:$my[defs][ag]*<088>}	{#var ag_string AG:$my[defs][ag]*}} {#var ag_string {}};
+	#if {$my[defs][r] > 0}		{#if $defs[r]		{#var r_string <ACA><fff>R:$my[defs][r]*<088>}		{#var r_string R:$my[defs][r]*}} {#var r_string {}};
 	#if {$my[defs][d] > 0}		{#if $defs[d]		{#var d_string <ACA><fff>D:$my[defs][d]*<088>}		{#var d_string D:$my[defs][d]*}} 	{#var d_string {}};
 	#if {$my[defs][fr] > 0}		{#if $defs[fr]		{#var fr_string <ACA><fff>FR:$my[defs][fr]*<088>}	{#var fr_string FR:$my[defs][fr]*}} {#var fr_string {}};
 	#if {$my[defs][v] > 0}		{#if $defs[v]		{#var v_string <ACA><fff>V:$my[defs][v]*<088>}		{#var v_string V:$my[defs][v]*}} 	 {#var v_string {}};
@@ -25,11 +26,11 @@
 	#if {$my[defs][es] > 0}		{#if $defs[es]		{#var es_string <ACA><fff>ES:$my[defs][es]*<088>}	{#var es_string ES:$my[defs][es]*}} {#var es_string {}};
 	#if {$my[defs][ra] > 0}							{#var ra_string <088>RA:$my[defs][ra]*<088>}		{#var ra_string {}};
 	
-	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $hr_string $fr_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
+	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $hr_string $fr_string $r_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
 	#replace prot_string  { } {};
 	#replace prot_string  {*} { };
 
-	#if {$my[song][rounds] > 0} {#var song_string <FFF><bbb>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
+	#if {$my[song][rounds] > 0} {#var song_string <CCC><dae>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
 }
 
 #class guild_miphp close;

@@ -23,6 +23,31 @@
 } {1};
 
 
+#action {You feel a sudden wave of alcohol induced fury overcome you!} {
+	#var drunken_master 1;
+};
+
+#action {Your alcohol fueled strength dissipates.  Buuurp  .} {
+	#var drunken_master 0;
+};
+
+#NOP -- Charge stuff while Sholitia is gone;
+#act {Sholitia appears out of nowhere!} {cease;};
+#act {Sholitia utters a word of mystical power. She vanishes from sight,} {
+	#var defs[pg] 1;
+	#var defs[blink] 1;
+	#var defs[hs] 1;
+	#var defs[ag] 1;
+	#var defs[o] 1;
+	#var defs[es] 1;
+	cast blink;
+	#if {$my[defs][ag] < 100} {perform amazing grace;} {
+		#if {$my[defs][o] < 100} {perform o muse;} {
+			perform leader of the band;
+		};
+	};
+};
+
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 

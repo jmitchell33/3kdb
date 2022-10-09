@@ -6,12 +6,15 @@
     #if {!$idle_flag && $action_round < $mip[round]} {
 
         #if {$mip[round] > 2 && $mip[round] < 6} {
-            #if $strategy[epowers] {
+            #if {$darkness && !$room_darkness} {
+                extinguish torch;
+            };
+            #if {$strategy[epowers] && $bot[active]} {
                 #if ${my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
                 #if $my[eternal][fry] {(fry;};
             };
             
-            #if $strategy[lucanus] {
+            #if {$strategy[lucanus] && $bot[active]} {
                 #if $lucanus_ring {push diamond};
                 #if $lucanus_amulet {push symbol};
             };

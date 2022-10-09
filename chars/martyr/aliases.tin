@@ -8,18 +8,21 @@
 #alias {corpse_trig} {
     gt-repair;
     fuse 500;
+    #if {&genbuddy[] >0} {
+        #foreach $genbuddy buddy {
+            gt-repair $buddy;
+        };
+    };
+};
+
+#alias k {
+    gt-repair;
+    kill %0;
 };
 
 #alias .mob_kill_action {
     kill $mob[target];
-    #if $strategy[epowers] {
-        #if $my[eternal][fry] {(fry;};
-        #if ${my[eternal][energy well]} {(energy well;} {#if ${my[eternal][shred]} {(shred;};};
-    };
-    #if $strategy[lucanus] {
-        #if $lucanus_ring {push diamond;#var lucanus_ring 0;};
-        #if $lucanus_amulet {push symbol;#var lucanus_amulet 0;};
-    };
+    #if $darkness {extinguish torch};
 };
 
 #class {player_aliases} {close}

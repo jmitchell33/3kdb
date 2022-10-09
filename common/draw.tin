@@ -12,6 +12,7 @@
 #var draw[caption][active] on;
 #var draw[hpbar][active] on;
 #var draw[room][active] on;
+#var draw[mobile][active] 0;
 
 #list status_data clear;
 #list caption_data clear;
@@ -31,15 +32,24 @@
     #screen get cols screen[width];
 
     #NOP -- If the screen width is less than 100, we can assume it's mobile so we'll draw differently;
+    #NOP -- The map will reduce by 5 rows and the status window will be larger so items like;
+    #NOP -- corpses don't get cutoff.;
+
+    #if {$screen[width] < 100} {
+        #var draw[mobile][active] 1;
+    };
 
     #format chat[rows] {%d} {$screen[height] * $draw[chat][size]};
     #math chat[height] {$chat[rows] + 1};
     #math chat[rows] {$chat[rows] - 1};
     
-
     #format map[width] {%d} {$map[widthperc] * $screen[width]};
     #format map[height] {%d} {$draw[map][size] * $screen[height]};
     #math map[left] {$screen[width] - $map[width]};
+
+    #if {$draw[mobile][active]} {
+        #math map[height] {$map[height] - 4};
+    };
 
     #if {"$draw[map][active]" == "on"} {
         #if {"$draw[map][position]" == "top"} {
@@ -65,6 +75,10 @@
         #var hpbar[height] 0;
     };
 
+    #if {$draw[mobile][active]} {
+        #math hpbar[height] {$hpbar[height] + 1};
+    };
+
     #if {"$draw[chat][active]" == "on"} {
         #math chat[height] {$chat[rows] + 1};
         #if {"$draw[map][active]" == "on" && "$draw[map][position]" == "top"} {
@@ -87,12 +101,22 @@
         #var caption[bottom] 0;
     };
 
+    #if {$draw[mobile][active]} {
+        #math caption[height] {$caption[height] + 2};
+        #math caption[bottom] {$caption[top] + $caption[height]};
+    };
+
     #NOP -- The status report goes right below the caption;
     #if {"$draw[status][active]" == "on"} {
         #math status[height] {&status_data[] + 1};
         #math status[top] {$caption[bottom] + 1};
         #math status[bottom] {$status[top] + $status[height]};
         #var status[left] $map[left];
+    };
+
+    #if {$draw[mobile][active]} {
+        #math status[height] {$status[height] + 2};
+        #math status[bottom] {$status[top] + $status[height]};
     };
 
     #NOP -- The strategy report goes right below the status and uses the remaining space;
@@ -104,6 +128,11 @@
     } {
         #var strat[top] 0;
         #var strat[bottom] 0;
+    };
+
+    #if {$draw[mobile][active]} {
+        #math strat[height] {$strat[height] + 2};
+        #math strat[bottom] {$strat[top] + $strat[height]};
     };
 
     #NOP -- Clear any previous drawings;
@@ -289,6 +318,7 @@
 #NOP /* -- MAP -- */
 #alias init_map {
     #if {"$draw[map][active]" == "on"} {
+        #draw {tile} $map[top]-1 -$map[width] $map[bottom]+1 -1 {};
         #map offset $map[top] -$map[width]+2 $map[bottom]-1 -2;
         #map flag vtmap on;
         #if {"$draw[room][active]" == "on"} {

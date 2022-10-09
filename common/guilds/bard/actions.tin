@@ -1,5 +1,5 @@
-#class {bard_actions} {kill}
-#class {bard_actions} {open}
+#class {guild_actions} {kill}
+#class {guild_actions} {open}
 
 #NOP --------------------------------------- BARD SPECIFIC ACTIONS ------------------------------------------;
 #ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};it $lower};} {6};
@@ -39,9 +39,10 @@
 #NOP -- MOB STATUS TRACKERS;
 #action {You wave your hands around, make swooshing and farting sounds,} {#var mob[noxious-cloud] 1;} {6};
 #action {You clasp your hands together, speak forth magical energies, and draw upon} {#var mob[lightning-vortex] 1;} {6};
+#action {^The noxious cloud fades away.$} {#if !$idle_flag {cast noxious cloud}};
 
 #action {You may only have one of these at a time!} {#var mob[lightning-vortex] 1;} {6};
 #action {Not more than one per room.} {#var mob[noxious-cloud] 1;} {6};
 
 
-#class {bard_actions} {close}
+#class {guild_actions} {close}

@@ -1,16 +1,6 @@
 #class {player_config} {kill}
 #class {player_config} {open}
 
-#ALIAS {postload}
-{
-     #map flag static on;
-     #map flag vtmap on;
-     #map flag unicodegraphics on;
-     #map flag terrain on;
-     #map flag direction on;
-     #delay {1} {hp;(powers;i;smuggle}
-};
-
 #NOP -- Bot Config;
 #var mob_kill_action 1;
 #alias {.pre_fight_check} {#nop};
@@ -48,8 +38,9 @@
 };
 
 #alias {.check_death} {
-     #var bot[paused] 1;
+     .pause;
      corpse_trig;
+     #if !$idle_flag {#delay 2 {..}};
 };
 
 

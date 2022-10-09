@@ -1,3 +1,19 @@
+#action {- Dungeon                   : Boot# Can Reset   ID/With} {
+    #list dungeons clear;
+    #act {- %*    %d :  %d %*  \[%d\]} {
+        #var dungeon_seconds 0;
+        #list dungeons add {{{name} {%%1} {scaler} {%%2} {Boot #} {%%3} {timer} {%%4}}};
+        #regex {%%4} {%dH} {#math dungeon_seconds {$dungeon_seconds + (&1 * 60 * 60)}};
+        #regex {%%4} {%dM} {#math dungeon_seconds {$dungeon_seconds + (&1 * 60)}};
+        #regex {%%4} {%dS} {#math dungeon_seconds {$dungeon_seconds + &1}};
+        #regex {%%1} {%*Banshee's Lair%*} {
+            #if {$banshee_run} {
+                #showme i should do something here;
+            };
+        };
+    };
+};
+
 #alias {3kdb dungeons} {
     #showme {<FAB><fff>---------------------------------------------<088>};
     #showme {<FAB><fff>---------      DUNGEON NOTES        ---------<088>};

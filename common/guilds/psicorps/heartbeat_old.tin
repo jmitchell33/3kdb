@@ -1,5 +1,5 @@
-#class {psicorps_heartbeat} {kill}
-#class {psicorps_heartbeat} {open}
+#class {guild_heartbeat} {kill}
+#class {guild_heartbeat} {open}
 
 #var use_body_fuel 0;
 #var use_chain 0;
@@ -276,52 +276,39 @@
     };
   };
 
-  #nop -- Demoralize;
-  #if {!$hbp} {
-    #list gs_powers FIND {Demoralize} {found_dm};
-    #if {$found_dm && !$mob[demoralize]} {
-      demoralize;
-    };
-  };
-
   #nop -- GP1 healing;
 
   #if {!$hbp} {
-    #nop -- If you dont have biofuel, only convert is available;
+    #if {$combat[Bfuel]} {
+    #nop -- Convert calcs;
+
     #var {sp_to_psi_ratio} {0.2};
+    #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
+    
+    #nop -- Body fuel calcs;
+
     #var {hp_to_psi_ratio} {0.36};
     #var {max_hp_to_spend_ratio} {0.15};
-    #if {$combat[Bfuel]} {
-      #nop -- Convert calcs;
-      #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
-      
-      #nop -- Body fuel calcs;
-      #math {max_hp_to_spend} {$my[hp][max] * $max_hp_to_spend_ratio};
-      #math {hp_to_spend} {$psi_missing / $hp_to_psi_ratio};
-      #if {$hp_to_spend > $max_hp_to_spend} {
-        #var {hp_to_spend} {$max_hp_to_spend};
-      };
 
-      #math {safe_hp_threshold} {1 - $max_hp_to_spend_ratio};
-      #math {can_safely_use_body_fuel} {$my[hp][current] / $my[hp][max] >= $safe_hp_threshold};
+    #math {max_hp_to_spend} {$my[hp][max] * $max_hp_to_spend_ratio};
+    #math {hp_to_spend} {$psi_missing / $hp_to_psi_ratio};
+    #if {$hp_to_spend > $max_hp_to_spend} {
+      #var {hp_to_spend} {$max_hp_to_spend};
+    };
 
-      #nop -- Pick GP1 heal power;
+    #math {safe_hp_threshold} {1 - $max_hp_to_spend_ratio};
+    #math {can_safely_use_body_fuel} {$my[hp][current] / $my[hp][max] >= $safe_hp_threshold};
 
-      #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
-        @use_power{convert};
-      };
-      #elseif {$can_safely_use_body_fuel && $use_body_fuel} {
-        @use_power{body fuel $hp_to_spend};
-      };
-    } {
-      #nop -- Convert calcs;
-      #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
+    #nop -- Pick GP1 heal power;
 
-      #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
-        @use_power{convert};
-      };
+    #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
+      @use_power{convert};
+    };
+    #elseif {$can_safely_use_body_fuel && $use_body_fuel} {
+      @use_power{body fuel $hp_to_spend};
+    };
     };
   };
 };
 
-#class {psicorps_heartbeat} {close}
+#class {guild_heartbeat} {close}

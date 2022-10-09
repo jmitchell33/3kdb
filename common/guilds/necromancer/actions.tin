@@ -3,7 +3,12 @@
 
 #NOP --------------------------------------- NECROMANCER SPECIFIC ACTIONS ------------------------------------------;
 #act {///The protective spirits break away from your body, fading into nothingness.$} {#if !$idle_flag {protection}};
-
+#action {Necromantic energy flows into your bear totem.} {
+    #if {$bot[active] && $auto_study} {
+        .pause;
+        add_action {{{name} {go_study} {action} {#delay 2 {go_study};#delay 10 {..};}}};
+    };
+} {1};
 
 #NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
 #act {^You charge forward and close your jaws on %*} {#var opponent[effects][rabies] 1};
@@ -25,6 +30,17 @@
     #var my[necromancer][nocturnum] 1;
 };
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
+
+
+#NOP ----- The moon has x stages;
+#NOP A new moon hangs in the dark sky.;
+#NOP A waxing crescent moon hangs in the dark sky.;
+#NOP A half moon hangs in the dark sky.  128 secs;
+#NOP A waxing gibbous moon hangs in the dark sky. 278 secs;
+#NOP A full moon hangs in the dark sky. 428 secs;
+#NOP A waning gibbous moon hangs in the dark sky. 578 secs;
+#NOP A half moon hangs in the dark sky. 728 secs;
+#act {A waning crescent moon hangs in the dark sky.} {#var my[necromancer][moon]};
 
 #NOP --------------------------------------- NECROMANCER SUPPORT ACTIONS  ------------------------------------------;
 #ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};daemon graft $lower}} {6};

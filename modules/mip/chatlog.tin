@@ -1,10 +1,15 @@
 #class {mipchatlog} {open}
 
 
-#VAR ignoreEmotes {small %* sighs;pauses for a moment;finishes his performance with a bow.;cracks his knuckles and gets ready to play for;performs a rather incomprehensible action on the corpse.;wounds close rapidly.;whinnies as;rubs its head on;face as he pats him on the neck.;That hurt!;cries 'OW;takes a deep breath;takes a breath;ceases his performance;briefly closes his eyes;wraps his arms around;bows and bids you;reaches into a small pouch and draws forth a small pearl, black as the darkest night.; appears slightly drained.; spirit of the beast leaves your body, slightly weakening you.;is afk:;malicious attacks fade.;fills his glass with water from his pitcher.;drinks from his glass of water.;fills her glass with water from her pitcher.;drinks from her glass of water.;grovels shamelessly};
-#VAR ignoreMisc {Gen-Notify;All gold divvied;GOLD divvy called by};
+#VAR ignoreEmotes {small %* sighs;pauses for a moment;finishes his performance with a bow.;cracks his knuckles and gets ready to play for;performs a rather incomprehensible action on the corpse.;wounds close rapidly.;whinnies as;rubs its head on;face as he pats him on the neck.;That hurt!;cries 'OW;takes a deep breath;takes a breath;ceases his performance;briefly closes his eyes;wraps his arms around;bows and bids you;reaches into a small pouch and draws forth a small pearl, black as the darkest night.; appears slightly drained.; spirit of the beast leaves your body, slightly weakening you.;is afk:;malicious attacks fade.;fills his glass with water from his pitcher.;drinks from his glass of water.;fills her glass with water from her pitcher.;drinks from her glass of water.;grovels shamelessly;collects %* coins, then hands you %*.};
+#VAR ignoreMisc {Gen-Notify;All gold divvied;GOLD divvy called by;Path to find me is:};
 #NOP -- Get system user name to log to;
 #script {sysUser} {whoami};#var sysUser $sysUser[1];
+
+#function ansiStrip {
+    #line strip #var {_ansi_strip} {%0};
+    #return $_ansi_strip
+};
 
 #NOP ***** Broadcast Communication (Chat/Shout) *****
 #ALIAS {.mipProcessCAA} {
@@ -13,7 +18,7 @@
 		#var {mip[comm][command]}	{&2};
 		#var {mip[comm][line]}		{&3};
 		#var {mip[comm][source]}	{&4};
-		#var {mip[comm][data]}		{&5};
+		#var {mip[comm][data]}		{@ansiStrip{&5}};
 
 		#var ignore 0;
 		#foreach {$ignoreMisc} {item} {
@@ -73,7 +78,7 @@
 #ALIAS {.mipProcessBAB} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)}} {
 		#IF {"&3" != "0"} {
-			#var mip[comm][data]	{&4};
+			#var mip[comm][data]	{@ansiStrip{&4}};
 			#var mip[comm][source]	{&3};
 			#var mip[comm][line]	{Tell};
 
@@ -162,12 +167,12 @@
 		#if {$chat[page] > 1} {
 			#math chat[page] {$chat[page] - 1};
 			#math chat[offset] {$chat[page] * $chat[rows] - $chat[rows]};
-			draw_chat
+			draw_chat;
 		}
 	}; #elseif {"$chat[scroll]" == "line"} {
 		#if {$chat[offset] > 0} {
 			#math chat[offset] {$chat[offset] - 1};
-			draw_chat
+			draw_chat;
 		}
 	}
 }

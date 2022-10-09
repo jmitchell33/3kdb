@@ -5,9 +5,15 @@
     .pause;
 };
 
+#alias corpse_trig {
+    fuse 500;
+    i;
+};
+
 #alias k {
     #if $strategy[backstab] {
         cast mystic venom on redaxe;
+        cast mystic venom on runesword;
         hide in shadows;
         backstab %1 %2;
     };
@@ -29,15 +35,6 @@
     #if $strategy[cloud] {#delay 2 {cast noxious cloud}};
     #if $strategy[vortex] {#delay 5 {cast lightning vortex}};
     #if $strategy[enrage] {enrage};
-    #if $strategy[epowers] {
-        #if $my[eternal][fry] {(fry;};
-        #if ${my[eternal][energy well]} {(energy well;} {#if ${my[eternal][shred]} {(shred;};};
-    };
-    #if $strategy[lucanus] {
-        #if $lucanus_ring {push diamond;#var lucanus_ring 0;};
-        #if $lucanus_amulet {push symbol;#var lucanus_amulet 0;};
-    };
-    #if $darkness {wear ring of darkness};
 }
 
 

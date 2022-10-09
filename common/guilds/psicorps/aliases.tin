@@ -1,7 +1,19 @@
-#class {psicorps_aliases} {kill}
-#class {psicorps_aliases} {open}
+#class {guild_aliases} {kill}
+#class {guild_aliases} {open}
 
 #NOP --- PSICORPS ALIASES
+
+#alias {track_regen} {
+  #ACTION { HP  \(%d/%d\):} {#var hp_cur %%1;#math gp_round {gp_round + 1};#math hp_change {$hp_cur - $hp_last};#list hp_stats add {       HP : $hp_change};#var hp_last %%1;};
+  #ACTION { SP  \(%d/%d\):} {#var sp_cur %%1;#math sp_change {$sp_cur - $sp_last};#list hp_stats add {       SP  : $sp_change};#var sp_last %%1;};
+  #ACTION { GP1 \(%d/%d\):} {#var gp1_cur %%1;#math gp1_change {$gp1_cur - $gp1_last};#list gp_stats add {      GP1 : $gp1_change};#var gp1_last %%1;};
+  #ACTION { GP2 \(%d/%d\):} {#var gp2_cur %%1;#math gp2_change {$gp2_cur - $gp2_last};#list gp_stats add {      GP2 : $gp2_change};#var gp2_last %%1;};
+};
+
+#alias {track_regen_reset} {
+  #list gp_stats clear;
+  #list hp_stats clear;
+};
 
 #alias {addp} {
   #var combat[%1] 1;
@@ -68,7 +80,7 @@
   @show_power{Ac5;astral construct 5};
   @show_power{bc;biocurrent};
   @show_power{BC;greater biocurrent};
-  @show_power{CG;conductive grasp};
+  @show_power{Cg;conductive grasp};
   @show_power{rpain;recall pain};
   @show_power{ragony;recall agony};
 
@@ -81,4 +93,4 @@
   #showme ----------------;
 };
 
-#class {psicorps_aliases} {close}
+#class {guild_aliases} {close}

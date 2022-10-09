@@ -1,47 +1,122 @@
-#class {area_cycle} {open}
+#class {botcycle} {open}
 
-#showme {Basic area-cycling -- type cycler}
+#var cycle 0
 
-#var REPEAT_CYCLE_AT_END 1;
+#alias {ba} {
+	#list {botcycle} {add} {%1};
+	botdraw
+}
 
-#var currStep 1;
-#var cycleStepsList {
-	{1}{mk;go hotel;-hotelbot;..}
-	{2}{out;out;w;s;e;e;n;w;w;n;n;w;w;w;mch;go carn;enter;-carnbot;..}
-	{3}{map carn;go chess;-cb;..}
-	{4}{go smurfs;s;-smurfbot;..}
+#alias {br} {
+	#list {botcycle} {del} {%1};
+	#if {%1 < $cycle} {
+		#math {cycle} {$cycle - 1}
+	};
+	botdraw
+}
+
+#alias {thisarea} {
+	#list {botcycle} {get} {$cycle} {currentarea};
+	go $currentarea;
+	#delay {1} {-$currentarea};
+	#delay {2} {..}
+}
+
+#alias {nextarea} {
+	#if {$cycle < &{botcycle[]}} {
+		#math cycle {$cycle+1}
+	} {
+		#var cycle 1
+	};
+	#list {botcycle} {get} {$cycle} {currentarea};
+	#delay {1} {-$currentarea};
+	#delay {2} {..};
+	#delay {3} {br $cycle};
 };
+
+#alias {botclear} {
+	#var botcycle {};
+	#var cycle 0
+}
+
+#alias {bcy} {
+	#echo {<228> +-------------------+}<088>;
+	#echo {<228> |<138>    Area Cycler    <228>|<088>};
+	#echo {<228> +-------------------+}<088>;
+	#if {&{botcycle[]} == 0} {
+		#echo {<228> |<178>  No areas loaded  <228>|<088>};
+		#echo {<228> +-------------------+}<088>
+	} {
+		#var cnt 0;
+		#while {$cnt < &{botcycle[]}} {
+			#math {cnt} {$cnt + 1};
+			#if {$cnt == $cycle} {
+				#format {cntnum} {%+4s} {<128>$cnt\.<088>};
+				#format {area_display} {%-12s} {<128>$botcycle[$cnt]<088>}
+			} {
+				#format {cntnum} {%+4s} {<178>$cnt\.<088>};
+				#format {area_display} {%-12s} {<148>$botcycle[$cnt]<088>}
+			};
+			#echo { <228>| $cntnum $area_display <228>|<088>};
+		};
+		#echo { <228>+-------------------+}<088>
+	}
+}
+
+#alias {botdraw} {
+	#if {"$draw[canvas]" == "on"} {
+	#NOP Clear previous drawing;
+	#screen clear square $chat[height]+$caption[height]+1 -$canvas[width]+1 -$status[height]-2 -1;
+
+	#if {&{botcycle[]} == 0} {
+		#var botareas {
+			<178>            No areas loaded<088>
+		};
+		#var botheight 1;
+	} {
+			#var botheight &{botcycle[]};
+			#var botareas {};
+			#var cnt 0;
+			#while {$cnt < &{botcycle[]}} {
+				#math {cnt} {$cnt + 1};
+				#if {$cnt == $cycle} {
+					#format {cntnum} {%+4s} {<128>$cnt.<088>};
+					#format {area_display} {%-12s} {<128>$botcycle[$cnt]<088>}
+				} {
+					#format {cntnum} {%+4s} {<178>$cnt.<088>};
+					#format {area_display} {%-12s} {<148>$botcycle[$cnt]<088>}
+				};
+				#if {$cnt == 1} {
+					#var botareas {$cntnum $area_display}
+				} {
+					#var botareas {$botareas\n$cntnum $area_display}
+				}
+			}
+		};
+		#draw green rounded box $chat[height]+$caption[height]+2 -$canvas[width]+2 $chat[height]+$caption[height]+4 -3 {
+			<138>              Area Cycler    <088>
+		};
+		#draw green rounded box $chat[height]+$caption[height]+4 -$canvas[width]+2 $chat[height]+$caption[height]+5+$botheight -3 {
+			$botareas
+		};
+		#showme {<228>\u251C} $chat[height]+$caption[height]+4 -$canvas[width]+2;
+		#showme {<228>\u2524} $chat[height]+$caption[height]+4 -3
+	}
+}
 
 #alias {cycle} {
-	#var cycleCurrent 0;
-	cycleProceed;
-};
-
-#alias cycleProceed {
-	#list cycleStepsList {size} cycleLength;
-	#if {$currStep > $cycleLength} {
-		#show END OF LIST;
-		#if {$REPEAT_CYCLE_AT_END == 1} {
-			#var currStep 1;
-		};
-	};
-	
-	#if {$currStep <= $cycleLength} {
-		#show proceed, step: $currStep, action: $cycleStepsList[$currStep];
-		$cycleStepsList[$currStep];
-		#math currStep {$currStep + 1};
-	};
-};
-
-
-#act {You curl up into a little ball and fall asleep.} {
-	cycleProceed;
+	#var cycle %1
 }
 
-#act {There is no reason to 'zz' here.} {
-	cycleProceed;
+#event {VARIABLE UPDATE cycle} {
+	#delay 0 botdraw
 }
 
-#alias {kcyc} {.stop;#class {area_cycle} {kill}}
 
-#class {area_cycle} {close}
+#event {VARIABLE UPDATE botcycle} {
+	#delay 0 botdraw
+}
+
+#alias {ba-necro}	{ba {whores;catacombs2;banshees13;whorehouse;catacombs2;banshees13;}};
+
+#class {botcycle} {close}

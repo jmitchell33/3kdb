@@ -273,6 +273,13 @@
 		#showme <dfa>Turn $find_count:  There are &findroom[$find_count][] possible rooms.<088>;
 		#showme <dfa>Choose an exit by typing findhere2 <exit><088>;
 		#showme <dfa>Example:  findhere2 e, findhere2 n<088>;
+		#showme <dfa> Current room matches:;
+		#loop &tempVnums[] 1 index {
+			#var tempIdx $tempVnums[+$index];
+			#map at $tempVnums[+$index] #map get roomvnum displayVnum;
+			#map at $tempVnums[+$index] #map get roomname displayName;
+			#showme <dfa> Name: $displayName  Vnum: $displayVnum;
+		};
 	} {
 		#showme <eaa>----------------------------------------------------<088>;			
 		#showme <eaa>   Invalid direction input.  Please enter any of:<088>;

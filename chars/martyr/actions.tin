@@ -16,7 +16,14 @@
 	#if !$corpse_delay {
 		#var corpse_delay 1;
 		corpse_select;
-		#delay {4} {recharge;reclaim;recharge;reclaim;#var corpse_delay 0};
+		#delay {4} {
+			#if {$my[gp1][current] > 4000} {
+				slab all;wrap all;
+			} {
+				recharge;reclaim;recharge;reclaim;
+			};
+			#var corpse_delay 0;
+		};
 	};
 } {1};
 
@@ -38,5 +45,8 @@
 
 #ACTION {^Nix pokes you with a cattle prod.} {timeslide emergency} {6};
 #ACTION {^Nix gives you a low-five!} {timeslide} {6};
+#ACTION {%* points %* and yells: OI!!! NUTTER!!!!!.} {autokill} {6};
+#action {%w quacks at you.} {#format temp {%l} {%1};powerfeed $temp};
+
 
 #class {player_actions} {close}

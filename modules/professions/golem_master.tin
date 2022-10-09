@@ -13,6 +13,20 @@
 #action {^Your golem Charlie has expired.$} {build_golem companion} {4};
 #action {^Your golem Chizzit has expired.$} {build_golem explorer} {4};
 
+#var fill_golem 0;
+#alias {fill_golem} {
+    #var fill_golem 1;
+    unkeep preservation;
+    give preservation to golem;
+    #act {You unkeep %*} {
+        #if $fill_golem {
+            unkeep preservation;
+            give preservation to golem;
+        };
+    };
+    #line oneshot #act {Golem can't carry that much more.} {#var fill_golem 0;#unact {You unkeep %*};golem inventory;i;};
+};
+
 /* @register_module{golem_master};
 @register_module_info{golem_master;{
     #show {--------------------------------------------------};

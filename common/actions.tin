@@ -15,6 +15,7 @@
 #action {The effects of the%*blue capsule fade away.}{#if !$idle_flag {eat blue};};
 #action {The effects of the%*orange capsule fade away.}{#if !$idle_flag {eat orange};};
 
+#NOP #action {Zosimus says: There, it is done, push your hand into the rump of the beast} {push hand into cows rump};
 #action {%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
 #action {^The daemon hisses: Dost thou choose to graft with me %w?} {#format {graft} {%l} {%1};#if {"$user" == "$graft"} {say yes}};
 #action {^%1 begins to follow %2\.$} {#format {follower} {%l} {%1};#if {"$user" == "$follower"} {#format {following} {%n} {%2}}};
@@ -39,6 +40,8 @@
     }
 }; 
 
+#action {It turns dark.} {#var room_darkness 1;};
+#action {You can see again.} {#var room_darkness 0;};
 
 #act {{(\w+) taps you on the shoulder\.}} { 
     #if !$idle_flag {

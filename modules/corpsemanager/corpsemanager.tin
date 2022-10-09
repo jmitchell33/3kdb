@@ -9,6 +9,7 @@
 #var corpses[coffin] 0;
 #var corpses[freezer] 0;
 #var corpses[servant] 0;
+#var corpses[golem] 0;
 
 
 #NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
@@ -33,6 +34,23 @@
     #var bot[paused] 0;
 };
 
+#alias dcoffin1 {
+    .pause;
+    #map get roomvnum donate_go_back;
+    #path save forward path;
+    #path get position pos;
+	go morgue;
+    donate coffin;donate all;
+	deslab all;
+	#${corpses[cooler]} uncooler corpse;
+	#10 {wrap all;donate coffin};
+	#5 {get all;donate all};
+    #map run $donate_go_back;
+    #path load $path;
+    #path goto $pos;
+    #var bot[paused] 0;
+};
+
 #alias cooler_rotate {
 	#%1 {deslab;get corpse;cooler corpse};
 };
@@ -46,7 +64,8 @@
 	#if {$corpses[freezer]  < 0} {#var corpses[freezer] 0;};
 	#if {$corpses[cooler] < 0} {#var corpses[cooler] 0;};
 	#if {$corpses[servant] < 0} {#var corpses[servant] 0;};
-	#math corpses[total] {$corpses[coffin] + $corpses[inventory] + $corpses[smuggle] + $corpses[freezer] + $corpses[cooler] + $corpses[servant]};
+	#if {$corpses[golem] < 0} {#var corpses[golem] 0;};
+	#math corpses[total] {$corpses[coffin] + $corpses[inventory] + $corpses[smuggle] + $corpses[freezer] + $corpses[cooler] + $corpses[servant] + $corpses[golem]};
 	#delay 0.1 {
 		#var corpse_string Corpses: $corpses[total] (C: $corpses[coffin];
 		#if {$corpses[inventory] > 0} {#var corpse_string $corpse_string I: $corpses[inventory];};
@@ -54,13 +73,14 @@
 		#if {$corpses[freezer] > 0} {#var corpse_string $corpse_string F: $corpses[freezer];};
 		#if {$corpses[cooler] > 0} {#var corpse_string $corpse_string Clr: $corpses[cooler];};
 		#if {$corpses[servant] > 0} {#var corpse_string $corpse_string Srv: $corpses[servant];};
+		#if {$corpses[golem] > 0} {#var corpse_string $corpse_string Gol: $corpses[golem];};
 		#var corpse_string {$corpse_string )};
 	};
 };
 
-#NOP -- Corpse use order is:  Coffin -> Freezer -> Cooler -> Inventory -> Smuggle;
+#NOP -- Corpse use order is:  Coffin -> Freezer -> Cooler -> Golem/Servant -> Inventory -> Smuggle
 #alias corpse_select {
-	#if {$corpses[smuggle] && !$corpses[inventory] && !$corpses[coffin] && !$corpses[freezer]} {
+	#if {$corpses[smuggle] && !$corpses[inventory] && !$corpses[coffin] && !$corpses[freezer] && !$corpses[golem] && !$corpses[servant]} {
 		smuggle remove corpse;drop corpse;
 	};
 	#if $corpses[coffin] {
@@ -72,7 +92,15 @@
 			#if $corpses[cooler] {
 				uncooler corpse;
 			} {
-				unkeep corpse;drop corpse;
+				#if {$corpses[golem] || $corpses[servant]} {
+					#if $corpses[golem] {
+						golem drop corpse;
+					} {
+						#NOP -- I forget
+					}
+				} {
+					unkeep corpse;drop corpse;
+				};
 			};
 		};
 	};
@@ -131,7 +159,7 @@
 };
 
 #NOP -- Corpse Management COFFIN / FREEZER;
-#NOP -- Coffin wrapping gives the same message if you wrap 1 or 50, so we need to check inventory after wrapping for a correct count
+#NOP -- Coffin wrapping gives the same message if you wrap 1 or 50, so we need to check inventory after wrapping for a correct count;
 #var check_coffin 1;
 #act {the coffin's protective hold!$} {
 	#if $check_coffin {
@@ -146,7 +174,38 @@
 #act {^You shake the frame and out drops} {#line gag;#echo {<169>Freezer: -1 corpse};#math {corpses[freezer]} {$corpses[freezer] - 1};};
 #act {^There are no corpses in the freezer!$} {#var corpses[freezer] 0};
 
-#NOP -- Corpse Management Tech Ultra-Cooler
+#NOP -- Corpse Management Golem;
+#action {The command is: inventory} {
+	#var corpses[golem] 0;
+	#action {{(.*) corpse (.*)( \{([0-9]+)\})?}} {
+		#var foundtimes 1;
+		#regex {%%3} {7B{[0-9]+}} {#var foundtimes &1;};
+		#math corpses[golem] {$corpses[golem] + $foundtimes};
+	};
+	#action {{(.*) remains (.*)( \{([0-9]+)\})?}} {
+		#var foundtimes 1;
+		#regex {%%3} {7B{[0-9]+}} {#var foundtimes &1;};
+		#math corpses[golem] {$corpses[golem] + $foundtimes};
+	};
+} {5};
+
+#action {Your packmule gives you %*corpse%*.} {
+	#math corpses[golem] {$corpses[golem] - 1};
+	#math corpses[inventory] {$corpses[inventory] + 1};
+} {5};
+
+#action {Your packmule gives you %*remains%*.} {
+	#math corpses[golem] {$corpses[golem] - 1};
+	#math corpses[inventory] {$corpses[inventory] + 1};
+} {5};
+
+#action {Estimated Capacity: %*} {
+	#unaction {{(.*) corpse (.*)( \{([0-9]+)\})?}};
+	#unaction {{(.*) remains (.*)( \{([0-9]+)\})?}}
+	_update_corpse_string;
+};
+
+#NOP -- Corpse Management Tech Ultra-Cooler;
 #act {^You activate the Ultra-Cooler to retrieve the %*.$} {#math {corpses[cooler]} {$corpses[cooler] - 1};};
 #act {^You place the %* into the Ultra-Cooler and seal the lid$} {#math {corpses[cooler]} {$corpses[cooler] + 1};};
 #act {^There is no more room in the Ultra-Cooler} {#var corpses[cooler] 50;};

@@ -1,5 +1,5 @@
-#class {psicorps_heartbeat} {kill}
-#class {psicorps_heartbeat} {open}
+#class {guild_heartbeat} {kill}
+#class {guild_heartbeat} {open}
 
 #var use_body_fuel 0;
 #var use_chain 0;
@@ -10,6 +10,37 @@
 #var _DEBUG_HB 0;
 
 #NOP -- Power helpers;
+
+
+#alias {gp_round_maintenance} {
+  #var pe_per_round 0;
+  #var stam_per_round 0;
+  #var maintenance_check $powers_string;
+  #replace maintenance_check { } {;};
+  #list maintenance_check create $maintenance_check;
+  #foreach $maintenance_check power {
+    #list psi_powers indexate key;
+    #list psi_powers find {$power} {power_index};
+    #if {$power_index} {
+      #math pe_per_round {$pe_per_round + $psi_powers[$power_index][psi_maint]};
+      #math stam_per_round {$stam_per_round + $psi_powers[$power_index][stam_maint]};
+    };
+  };
+  #math pe_burn_rate {$pe_regen - $pe_per_round};
+  #math stam_burn_rate {$stam_regen - $stam_per_round};
+  #if {$pe_burn_rate < 0} {
+    #var pe_burn_string <dcc>=== PE $pe_burn_rate ($pe_per_round/rnd) =<088>;
+  } {
+    #var pe_burn_string <dfb>=== PE +$pe_burn_rate ($pe_per_round/rnd) =<088>;
+  };
+
+  #if {$stam_burn_rate < 0} {
+    #var stam_burn_string <dcc>= Stam $stam_burn_rate ($stam_per_round/rnd) === <088>;
+  } {
+    #var stam_burn_string <dfb>= Stam +$stam_burn_rate ($stam_per_round/rnd) === <088>;
+  };
+  #var gp_round_maintenance_string ${pe_burn_string}${stam_burn_string};
+};
 
 /* 
  %1 - power short name
@@ -106,8 +137,19 @@
     #if {"%0" == "$power[power]"} {
       #if {$power[combat]} {
         #if {$mip[round] > 0 && !$hbp} {
-          #if {$my[gp1][current] >= $power[psi]} {
-            #if {$my[gp2][current] >= $power[stam]} {
+          #NOP -- Only use the power if we have at least 10 rounds of maintenance cost;
+          #var psi_maint 1;
+          #var stam_maint 1;
+          #if $power[psi_maint] {
+            #math psi_maint {$power[psi_maint] * 10};
+            #if {$my[gp1][current] <= $psi_maint} {#var psi_maint 0;};
+          };
+          #if $power[stam_maint] {
+            #math stam_maint {$power[stam_maint] * 10};
+            #if {$my[gp2][current] <= $stam_maint} {#var stam_maint 0;};
+          };
+          #if {$my[gp1][current] >= $power[psi] && $psi_maint} {
+            #if {$my[gp2][current] >= $power[stam] && $stam_maint} {
               #var hbp 1;
               %0;
               #show <069>==> %0<900>;
@@ -208,7 +250,12 @@
     @use_power{chain body adjustment, body adjustment};
   };
   #elseif {$should_use_body_adjustment} {
-    @use_power{body adjustment};
+    #list gs_powers FIND {Body Adjustment} {found_ba};
+    #list gs_powers FIND {Greater Body Adjustment} {found_gba};
+    #list gs_powers FIND {Lesser Body Adjustment} {found_lba};
+    #if $found_ba {@use_power{body adjustment}};
+    #if $found_gba {@use_power{greater body adjustment}};
+    #if $found_lba {@use_power{lesser body adjustment}};
   };
 
   #nop -- Defense;
@@ -242,7 +289,7 @@
   @check_power{Ac4;astral construct 4};
   @check_power{Ac5;astral construct 5};
   @check_power{bc;biocurrent};
-  @check_power{CG;conductive grasp};
+  @check_power{Cg;conductive grasp};
 
   #nop --- Recall pain;
 
@@ -276,39 +323,53 @@
     };
   };
 
+  #nop -- Demoralize;
+  #if {!$hbp} {
+    #list gs_powers FIND {Demoralize} {found_dm};
+    #if {$found_dm && !$mob[demoralize] && $mip[round] > 0} {
+      @use_power{demoralize};
+    };
+  };
+
   #nop -- GP1 healing;
 
   #if {!$hbp} {
-    #if {$combat[Bfuel]} {
-    #nop -- Convert calcs;
-
+    #nop -- If you dont have biofuel, only convert is available;
     #var {sp_to_psi_ratio} {0.2};
-    #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
-    
-    #nop -- Body fuel calcs;
-
     #var {hp_to_psi_ratio} {0.36};
     #var {max_hp_to_spend_ratio} {0.15};
+    #if {$combat[Bfuel]} {
+      #nop -- Convert calcs;
+      #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
+      
+      #nop -- Body fuel calcs;
+      #math {max_hp_to_spend} {$my[hp][max] * $max_hp_to_spend_ratio};
+      #math {hp_to_spend} {$psi_missing / $hp_to_psi_ratio};
+      #if {$hp_to_spend > $max_hp_to_spend} {
+        #var {hp_to_spend} {$max_hp_to_spend};
+      };
 
-    #math {max_hp_to_spend} {$my[hp][max] * $max_hp_to_spend_ratio};
-    #math {hp_to_spend} {$psi_missing / $hp_to_psi_ratio};
-    #if {$hp_to_spend > $max_hp_to_spend} {
-      #var {hp_to_spend} {$max_hp_to_spend};
-    };
+      #math {safe_hp_threshold} {1 - $max_hp_to_spend_ratio};
+      #math {can_safely_use_body_fuel} {$my[hp][current] / $my[hp][max] >= $safe_hp_threshold};
 
-    #math {safe_hp_threshold} {1 - $max_hp_to_spend_ratio};
-    #math {can_safely_use_body_fuel} {$my[hp][current] / $my[hp][max] >= $safe_hp_threshold};
+      #nop -- Pick GP1 heal power;
 
-    #nop -- Pick GP1 heal power;
+      #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
+        @use_power{convert};
+      };
+      #elseif {$can_safely_use_body_fuel && $use_body_fuel} {
+        @use_power{body fuel $hp_to_spend};
+      };
+    } {
+      #nop -- Convert calcs;
+      #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
 
-    #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
-      @use_power{convert};
-    };
-    #elseif {$can_safely_use_body_fuel && $use_body_fuel} {
-      @use_power{body fuel $hp_to_spend};
-    };
+      #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
+        @use_power{convert};
+      };
     };
   };
+  gp_round_maintenance;
 };
 
-#class {psicorps_heartbeat} {close}
+#class {guild_heartbeat} {close}

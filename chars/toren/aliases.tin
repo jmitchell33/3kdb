@@ -66,6 +66,7 @@
             get preservation;
             get all;
         };
+        fuse 200;
     };
 };
 
@@ -79,6 +80,7 @@
 };
 
 #alias .check_death {
+    #if $darkness {light torch};
     #if $actions_stacked {
         do_action;
     } {
@@ -98,7 +100,8 @@
             #delay 1 {slab all;preserve remains;preserve remains;gather;get all;put all in buckler;.bot};
         };
     };
-}
+    fuse 200;
+};
 
 #alias {_player_deadmanActions} {
     .pause;
@@ -111,6 +114,7 @@
     #if $strategy[maim] {maim};
     #if $strategy[call] {call};
     #if $strategy[undead] {=kill $mob[target]};
+    #if $darkness {extinguish torch};
 };
 
 #NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
@@ -139,6 +143,55 @@
     #path goto $pos;
     #var bot[paused] 0;
 };
+
+#alias {go_donate2} {
+    #map get roomvnum donate_go_back;
+    #path save forward path;
+    #path get position pos;
+    keep all preservation;
+    keep all component;
+    go necro_box;
+    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
+    #map run $donate_go_back;
+    #path load $path;
+    #path goto $pos;
+    #var bot[paused] 0;
+};
+
+
+#alias {go_study} {
+    powers;gs;
+    #map get roomvnum study_go_back;
+    #path save forward path;
+    #path get position pos;
+    #if $auto_study_teleport {
+        teleport;
+        mapgo necro_rr;
+        go necro_were;
+    } {
+        go necro_were;
+    };
+    #delay 2 {.study};
+    #delay 3 {go necro_reagent};
+    #delay 4 {topup};
+    #delay 6 {#if {$my[coins] < 25} {go bank;withdraw 25000}};
+    #delay 8 {
+        #if $auto_study_teleport {
+            teleport 1;
+            #map goto $study_go_back;
+        } {
+            #map run $study_go_back;
+        };
+        #path load $path;
+        #path goto $pos;
+        powers;gs;
+    };
+};
+
+#alias {necro_reset} {
+
+};
+
 #alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
 
 

@@ -1,0 +1,46 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Mahjong};
+#var check_room 0;
+
+
+#var bot_message_1 '---- PANDAEMONIUM STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {n;w;n;e;w;n;w;n;n;w;nw;n;ne;e;se;s;nw;n;w;ne;d};
+#var bot[path] $botpath;
+
+#sub {\{blood-soaked\}} {blood-soaked};
+#sub {\{empowered\}} {empowered};
+#sub {\{hellfire\}} {hellfire};
+#sub {\{strong\}} {strong};
+
+
+#list botmobs clear;
+#list botmobs add {{{long} {A huge demon} {target} {demon}}};
+#list botmobs add {{{long} {Daemon guard} {target} {guard}}};
+#list botmobs add {{{long} {Dagon} {target} {dagon}}};
+#list botmobs add {{{long} {Kardaak} {target} {kardaak}}};
+#list botmobs add {{{long} {A Hellhound} {target} {hellhound}}};
+#list botmobs add {{{long} {Orus} {target} {orus}}};
+#list botmobs add {{{long} {Black Guard} {target} {guard}}};
+#list botmobs add {{{long} {Lucifer} {target} {lucifer}}};
+
+
+#action {As you move further down the tunnel to the %w, you notice an} {
+    #map undo;
+    #path move backward;
+    kill guard;
+};
+
+
+
+
+
+
+#var bot[mobs] $botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin
