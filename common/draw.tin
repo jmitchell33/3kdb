@@ -35,21 +35,17 @@
     #NOP -- The map will reduce by 5 rows and the status window will be larger so items like;
     #NOP -- corpses don't get cutoff.;
 
-    #if {$screen[width] < 100} {
-        #var draw[mobile][active] 1;
-    };
+    #if {$screen[width] < 100} {#var draw[mobile][active] 1;};
 
     #format chat[rows] {%d} {$screen[height] * $draw[chat][size]};
     #math chat[height] {$chat[rows] + 1};
     #math chat[rows] {$chat[rows] - 1};
     
     #format map[width] {%d} {$map[widthperc] * $screen[width]};
-    #format map[height] {%d} {$draw[map][size] * $screen[height]};
     #math map[left] {$screen[width] - $map[width]};
 
-    #if {$draw[mobile][active]} {
-        #math map[height] {$map[height] - 4};
-    };
+   
+    #format map[height] {%d} {$draw[map][size] * $screen[height]};
 
     #if {"$draw[map][active]" == "on"} {
         #if {"$draw[map][position]" == "top"} {
@@ -75,10 +71,6 @@
         #var hpbar[height] 0;
     };
 
-    #if {$draw[mobile][active]} {
-        #math hpbar[height] {$hpbar[height] + 1};
-    };
-
     #if {"$draw[chat][active]" == "on"} {
         #math chat[height] {$chat[rows] + 1};
         #if {"$draw[map][active]" == "on" && "$draw[map][position]" == "top"} {
@@ -94,17 +86,14 @@
     #if {"$draw[caption][active]" == "on"} {
         #math caption[height] {&caption_data[] + 1};
         #math caption[top] {$map[bottom] + 2};
-        #var caption[left] $map[left];
         #math caption[bottom] {$caption[top] + $caption[height]};
+        #var caption[left] $map[left];
     } {
         #var caption[top] 0;
         #var caption[bottom] 0;
     };
 
-    #if {$draw[mobile][active]} {
-        #math caption[height] {$caption[height] + 2};
-        #math caption[bottom] {$caption[top] + $caption[height]};
-    };
+    
 
     #NOP -- The status report goes right below the caption;
     #if {"$draw[status][active]" == "on"} {
@@ -114,10 +103,7 @@
         #var status[left] $map[left];
     };
 
-    #if {$draw[mobile][active]} {
-        #math status[height] {$status[height] + 2};
-        #math status[bottom] {$status[top] + $status[height]};
-    };
+    
 
     #NOP -- The strategy report goes right below the status and uses the remaining space;
     #if {"$draw[strategy][active]" == "on"} {
@@ -130,10 +116,6 @@
         #var strat[bottom] 0;
     };
 
-    #if {$draw[mobile][active]} {
-        #math strat[height] {$strat[height] + 2};
-        #math strat[bottom] {$strat[top] + $strat[height]};
-    };
 
     #NOP -- Clear any previous drawings;
     #screen clear split;
@@ -190,7 +172,7 @@
     #loop 1 $hpbar[height] index {
         #var prompt $hpbar[prompt][+$index];
         #math hpbar_line {$hpbar[top] + $index - 1};
-        #draw {<eeb>} {tile} $hpbar_line $hpbar[left] $hpbar_line -1 {$prompt};
+        #draw {<eeb>} {tile} $hpbar_line $hpbar[left] $hpbar_line -1 ${prompt};
     };
 };
 
@@ -206,9 +188,9 @@
     #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
     #if {$idle_sec > $deadmanIdleTimeout} {
-        #draw red rounded box $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[1..$caption[height]];
+        #draw red rounded box $caption[top] $caption[left]+1 $caption[bottom] -1 ${caption_data[1..$caption[height]]};
     } {
-        #draw green rounded box $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[1..$caption[height]];
+        #draw green rounded box $caption[top] $caption[left]+1 $caption[bottom] -1 ${caption_data[1..$caption[height]]};
     };
 
     #math tempVar {&caption_data[] + 1};
@@ -277,9 +259,9 @@
     #draw {<dda>} {tile} $status[top] $status[left]+1 $status[bottom] -1 {};
 
     #if {$idle_sec > $deadmanIdleTimeout} {
-        #draw red rounded box $status[top] $status[left]+1 $status[bottom] -1 $status_data[1..$status[height]];
+        #draw red rounded box $status[top] $status[left]+1 $status[bottom] -1 ${status_data[1..$status[height]]};
     } {
-        #draw green rounded box $status[top] $status[left]+1 $status[bottom] -1 $status_data[1..$status[height]];
+        #draw green rounded box $status[top] $status[left]+1 $status[bottom] -1 ${status_data[1..$status[height]]};
     };
 
     #if {$status[height] != $tempVar} {init_screen};
@@ -311,7 +293,7 @@
     #NOP -- Clear old drawings;
     #draw {<dda>} {tile} $strat[top] $strat[left]+1 $strat[bottom] -1 {};
 
-    #draw green rounded box $strat[top] $strat[left]+1 $strat[bottom] -1 $strategy_data[1..$strat[height]];
+    #draw green rounded box $strat[top] $strat[left]+1 $strat[bottom] -1 ${strategy_data[1..$strat[height]]};
 
 };
 
@@ -340,7 +322,7 @@
     #map get roomname roomMapNameStr;
     #map get roomnote roomMapNoteStr;
 
-    #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: $roomMapNoteStr};
+    #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: ${roomMapNoteStr}};
 };
 
 #alias draw-map-side {
