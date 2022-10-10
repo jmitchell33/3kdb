@@ -6,7 +6,7 @@
 * chars: Individual character settings.
 * common: Settings shared across all characters/global stuff.
 * modules: Individual script packages that do specific things, that specific characters can choose to utilize.
-
+* logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... you would create a folder called logs/jerry
 
 **How does this all work?**
 The name.tin file (byron.tin for example) is where you set the guild and select all of the 'addons' that player has.  Using Byron as an example:
