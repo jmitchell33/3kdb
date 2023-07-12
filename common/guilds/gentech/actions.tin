@@ -2,6 +2,23 @@
 #class {gentech_actions} {open}
 
 
+#var cbs_delay 1;
+#ACTION {%w eeps at you.} {#if !$idle_flag {
+    #if $cbs_delay {#var cbs_delay 0;cbs;#delay 1 {#var cbs_delay 1};};
+    };
+} {6};
+
+#alias grav_well {smuggle remove inducer;charge inducer;grav;smuggle inducer;};
+
+#action {With a brilliant flash of blue light, the energy field collapses.} {grav_well} {2};
+
+#action {[>      Reclamation Complete.     <]} {recharge};
+
+#action {[[ Time flux waves detected at: %* ]]} {
+    #format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+    #var caption_data[4-reset] {%1 RESET AT $timestamp};
+} {1};
+
 #NOP --- CAPTURE THE GENTECH ATTACKS FOR HPBAR;
 #ACT {^[%1] [%2] [%3] [%4] [%5]$} {
     #var my[attacks][melee] %1;

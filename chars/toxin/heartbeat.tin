@@ -1,0 +1,13 @@
+#class {player_heartbeat} {kill}
+#class {player_heartbeat} {open}
+
+#var perform_dirge 1;
+
+#alias {_player_heartbeat} {
+    #NOP -- These actions will only be attemped once per round;
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #NOP;
+    };
+};
+
+#class {player_heartbeat} {close}

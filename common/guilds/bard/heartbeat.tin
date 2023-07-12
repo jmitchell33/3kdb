@@ -19,88 +19,11 @@
 		
 		#if {$my[defs][ag] > 0} {#NOP} {#if {$defs[ag]} {perform amazing grace} {#nop}};
 		#if {$my[defs][o] > 0}  {#NOP} {#if {$defs[om]}  {perform o muse} {#nop}};
-		
-
-		#if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
-			#if {$strategy[rainbow]} {
-				#var actions_stacked 1;
-				add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
-			};
-			#if {$strategy[hammer]} {
-				#var actions_stacked 1;
-				add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
-			};
-		};
-
-		#if {$my[gp1][current] < $karma_use_corpse_between_songs && $actions_stacked} {
-			remove_action corpse-between-songs;
-		};
 
 		#NOP -- actions that should only be attempted once per round;
 		#if {$action_round < $mip[round] && $mip[round] > 0} {
 			#if {$my[song][rounds] > 1} {#NOP;} {#if $actions_stacked {do_action};};
-			#if {$blink_count > 20} {
-				#var actions_stacked 1;
-				add_action {{{name} {blink} {action} {cast blink}}};
-			};
 			#if {$my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {cast harmonic regeneration} {#nop}};
-			#NOP --- The song bots shouldn't attempt to keep rolling if we're near using a corpse;
-			#if {$my[gp1][current] > $karma_heal} {
-				#if {$strategy[rainbow]} {
-					#if {$my[song][rounds] > 1} {#NOP;} {
-						#if {!$actions_stacked} {
-							#if $resume_song {perform rainbow of death}
-						} {
-							do_action
-						};
-					};
-					#if !$my[defs][fr] {cast focus the rainbow};
-				};
-
-				#if {$strategy[hammer]} {
-					#if {$my[song][rounds] > 1} {
-						#NOP;
-					} {
-						#if {$my[gp2][current] > 20} {
-							#if {$mip[round] > 10} {
-								#if {!$actions_stacked} {
-									#if {$resume_song} {
-										#NOP unwield redaxe;
-										#NOP remove shield;
-										#NOP wield hammer;
-										perform hammer smashed face
-									};
-								} {
-									do_action;
-								};
-								
-							} {
-								#if !$my[defs][fr] {cast focus the rainbow};
-								#if {!$actions_stacked} {
-									#if {$resume_song} {
-										#NOP unwield hammer;
-										#NOP wield redaxe;
-										perform rainbow of death;
-									};
-								} {
-									do_action;
-								};
-							};
-						} {
-							#if !$my[defs][fr] {cast focus the rainbow};
-							#if {!$actions_stacked} {
-								#if {$resume_song} {
-									#NOP unwield hammer;
-									#NOP wield redaxe;
-									perform rainbow of death;
-								};
-							} {
-								do_action;
-							};
-						};
-					};
-				};
-			};
 		};
 	};	
 };

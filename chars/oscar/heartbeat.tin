@@ -25,12 +25,12 @@
             .pause;
         };
         #if {($my[sp][current] < $sp_min || $my[gp1][current] > $monitors[saturation-stop]) && $corpses[total] < 5 && !$bot_toggle && $bot[active]} {
-            ptell {Stopping:  SP: $my[sp][current] Saturation: $my[gp1][current] Mental Cognition: $hpbar_mc};
+            #send {ptell Stopping:  SP: $my[sp][current] Saturation: $my[gp1][current] Mental Cognition: $hpbar_mc};
             #var bot_toggle 1;
             .pause;
         };
         #if {($my[sp][current] > $sp_threshold && $my[gp1][current] < $monitors[saturation-start] && $hpbar_mc > $mc_threshold) && $bot_toggle && $bot[active]} {
-            ptell Resuming:  SP: $my[sp][current] Saturation: $my[gp1][current] Mental Cognition: $hpbar_mc;
+            #send {ptell Resuming:  SP: $my[sp][current] Saturation: $my[gp1][current] Mental Cognition: $hpbar_mc};
             #var bot_toggle 0;
             ..;
         };
@@ -61,7 +61,7 @@
             #delay 180 {ash on;ash;};
         };
 
-        #if {$my[sp][current] < $sp_min && $my[eternal][heal]} {
+        #if {$my[sp][current] < $sp_min && $my[eternal][heal] && !$my[immersion][active]} {
             (heal oscar;
         };
     };

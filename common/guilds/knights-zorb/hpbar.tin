@@ -1,0 +1,179 @@
+#class {knight_hpbar} {kill}
+#class {knight_hpbar} {open}
+
+
+/*
+HP:5265/5265 | SP:1662/1664 | STM:1921/2490 | STN:19%(1) | SW:100.0% | Off Charge
+PPD(Y) Stud(Y) Batt(n) Braw(n) Dodg(Y) Defl(Y) Shie(Y) Endu(Y) Parr(Y) |
+[WPN:Superb] [LIGHT:n(0%)] [LF:476] [MOB:bleeding]
+*/
+
+
+#function {colscale}
+{
+    #switch {10 * %1 / %2}
+    {
+        #case {0} {#return <119>};
+        #case {1} {#return <119>};
+        #case {2} {#return <119>};
+        #case {3} {#return <139>};
+        #case {4} {#return <139>};
+        #case {5} {#return <139>};
+        #case {6} {#return <139>};
+        #case {7} {#return <169>};
+        #case {8} {#return <169>};
+        #case {9} {#return <169>};
+        #default  {#return <129>};
+    };
+}
+
+#function {secondwindcolscale}
+{
+    #if {%1 < 50} {#return <119>;} {
+   		#if {%1 < 75} {#return <139>;} {
+    		#if {%1 < 90} {#return <169>;} {
+	    		#return <129>;
+	    	}
+    	}
+    };
+}
+
+#function {evalMobStatus}
+{
+	#if  {"%1" == "perfect"} {#return 100};
+	#elseif {"%1" == "scratched"} {#return 80};
+	#elseif {"%1" == "bruises"} {#return 60};
+	#elseif {"%1" == "bleeding"} {#return 40};
+	#elseif {"%1" == "emergency"} {#return 20};
+	#elseif {"%1" == "Death"} {#return 10};
+	#else {#return %1};
+}
+
+#function {gettarget}
+{
+	#if { $incombat == 1 && "$killing" == "-""} { 
+		#return <119>(unknown)<088>; 
+	} { 
+		#if { $truced == 1 } { 
+			#return <139>$killing<088>;
+		} { 
+			#if {"$killing" == "-"} {
+				#return $killing;
+			} {
+				#return $killing;
+			}
+		};
+	};
+}
+
+#var hpbar[label] <088>;
+#var hpbar[points_full] <129>;
+#var hpbar[points_high] <169>;
+#var hpbar[points_med] <139>;
+#var hpbar[points_low] <119>;
+#var my[hp][last] 0;
+
+#action {{HP:(\d+)/(\d+) \| SP:(\d+)/(\d+) \| STM:(\d+)/(\d+) \| STN:(\d+)%\((\d+)\) \| SW:(\d+[.]\d+)% \| (Neu|Off|Def) (Melee|Focus|Standard|Charge|Flurry)}} 
+{	
+	#var my[hp][color] @colscale{%2;%3};
+	#var my[sp][color] @colscale{%4;%5};
+
+    #var my[stam][color] @colscale{%6;%7};
+    #var my[gp1][color] @colscale{%6;%7};
+
+    #var my[strain][color] @colscale{{100 - %8}{200}};
+    #var my[gp2][color] @colscale{{100 - %8}{200}};
+
+	#var my[hp][current] %2;
+	#var my[hp][max] %3;
+    #math my[hp][diff] (%3 - %2);
+
+	#var my[sp][current] %4;
+	#var my[sp][max] %5;
+	#math my[sp][diff] {%5 - %4};
+    
+	#var my[stam][last] $my[stam][current];
+	#var my[stam][current] %6;
+	#var my[stam][max] %7;
+	#math my[stam][diff] {%7 - %6};
+	#math my[stam][delta] {$my[stam][current] - $my[stam][last]};
+
+	#var my[gp1][last] $my[gp1][current];
+	#var my[gp1][current] %6;
+	#var my[gp1][max] %7;
+	#math my[gp1][diff] {%7 - %6};
+	#math my[gp1][delta] {$my[gp1][current] - $my[gp1][last]};
+
+	#var my[strain][current] %8;
+	#var my[strain][max] 200;
+	#math my[strain][diff] {200 - %8};
+	#var my[strain][intensity] %9;
+
+	#var my[gp2][current] %8;
+	#var my[gp2][max] 200;
+	#math my[gp2][diff] {200 - %8};
+	#var my[gp2][intensity] %9;
+    
+	#var my[secondwind][current] %10;
+	#var my[secondwind][max] 100;
+	#var my[secondwind][color] @secondwindcolscale{%10;100};
+	#var my[stance][current] %11;
+	#var my[method][current] %12;
+
+	#format {hpbar[hpmsg]} {%sHP:%s%s%s/%s%s} {$hpbar[label]} {$my[hp][color]} {$my[hp][current]} {$hpbar[label]} {$hpbar[points_full]} {$my[hp][max]};
+	#format {hpbar[spmsg]} {%sSP:%s%s%s/%s%s%s} {$hpbar[label]} {$my[sp][color]} {$my[sp][current]} {$hpbar[label]} {$hpbar[points_full]} {$my[sp][max]} {$hpbar[label]};
+	#format {hpbar[stammsg]} {%sStam:%s%s%s/%s%s(%s)} {$hpbar[label]} {$my[stam][color]} {$my[stam][current]} {$hpbar[label]} {$hpbar[points_full]} {$my[stam][max]} {$my[stam][delta]};
+	#format {hpbar[strainmsg]} {%sStn:%s%s<088>%%%} {$hpbar[label]} {$my[strain][color]} {$my[strain][current]};
+	#format {hpbar[swmsg]} {%sSw:%s%s%s} {$hpbar[label]} {$my[secondwind][color]} {$my[secondwind][current]} {$hpbar[label]};
+	#format {hpbar[targetmsg]} {%sT:%s} {$hpbar[label]} {$killing};
+
+	#format {prompt1} {%s %s %s %s %s %s %s} {$hpbar[hpmsg]} {$hpbar[spmsg]} {$hpbar[stammsg]} {$hpbar[strainmsg]} {$hpbar[swmsg]} {$hpbar[emsg]} {$hpbar[targetmsg]};
+};
+
+#action {{^PPD\((Y|n)\).+$}}
+{
+	#regexp {%1} {{PPD\((Y|n|-)\)}} {#var my[prepared] {&2};};
+	#regexp {%1} {{Stud\((Y|n|-)\)}} {#var my[study] {&2};};
+	#regexp {%1} {{Batt\((Y|n|-)\)}} {#var my[battlecry] {&2};};
+	#regexp {%1} {{Braw\((Y|n|-)\)}} {#var my[brawl] {&2};};
+	#regexp {%1} {{Dodg\((Y|n|-)\)}} {#var my[dodge] {&2};};
+	#regexp {%1} {{Defl\((Y|n|-)\)}} {#var my[deflect] {&2};};
+	#regexp {%1} {{Shie\((Y|n|-)\)}} {#var my[shieldblock] {&2};};
+	#regexp {%1} {{Endu\((Y|n|-)\)}} {#var my[endure] {&2};};
+	#regexp {%1} {{Parr\((Y|n|-)\)}} {#var my[parry] {&2};};
+	#regexp {%1} {{STM: (\d+)\/(\d+)}} {
+		#var my[mnt][stm][cur] &2;
+		#var my[mnt][stm][max] &3;
+		#var my[mnt][stm][clr] @colscale{$my[mnt][stm][cur];$my[mnt][stm][max]};
+		};
+
+	#format {prompt2} {%s%s %s %s} {<088>} {%1} {$my[stance][current]} {$my[method][current]};
+
+	#nop replace {prompt2} {(Y)} {(<120>Y<088>)};
+	#nop replace {prompt2} {(n)} {(<110>N<088>)};
+	#nop replace {prompt2} {$my[mnt][stm][cur]/$my[mnt][stm][max]} {$my[mnt][stm][clr]$my[mnt][stm][cur]<088>/<120>$my[mnt][stm][max]<088>};
+};
+
+#action {{\[WPN:(.*)\] \[LIGHT:(Y|n)\((\d+)%\)\] \[LF:(\d+)\] \[MOB:(.*)\]}}
+{
+	#regexp {%1} {{\[EXN:([-]?\d+)\]}} {#var my[experience][tolevel] {&2};};
+	#regexp {%1} {{\[GXN:([-]?\d+)\]}} {#var my[gxp][tolevel] {&2};};
+	#regexp {%1} {{\[WPN:(.*)\]}} {#var my[weapon] {&2};};
+	#regexp {%1} {{\[LIGHT:(Y|n)\((\d+)%\)\]}} {#var my[badge_light] {&2};};
+	#regexp {%1} {{\[LF:(\d+)\]}} {#var my[lastfight] {&2};};
+	#regexp {%1} {{\[MOB:(.*)\]}} {#var opponent[status] {&2};};
+	
+	#format {hpbar[corpsemsg]} {%s☠:\[%s\]} {$hpbar[label]} {$corpses[total]};
+	#format {hpbar[emsg]} {%sE:%s%s%s} {$hpbar[label]} <169> {$opponent[status]};
+
+	#format {hpbar[deadman]} {%sDeadman:\[%s\]} {$hpbar[label]} {$deadmanIdleTimeout};
+
+	#format {prompt3} {%s%s %s %s} {<088>} {%1} {$hpbar[corpsemsg]} {};
+};
+
+#nop #prompt {{HP:(\d+)/(\d+) \| SP:(\d+)/(\d+) \| STM:(\d+)/(\d+) \| STN:(\d+)%\((\d+)\) \| SW:(\d+[.]\d+)% \| (Neu|Off|Def) (Melee|Focus|Standard|Charge|Flurry)}} {${prompt1} } {-4};
+#nop #prompt {{^PPD\((Y|n)\).+$}} {${prompt2}} {-3};
+#nop #prompt {{\[WPN:(.*)\] \[LIGHT:(Y|n)\((\d+)%\)\] \[LF:(\d+)\] \[MOB:(.*)\]}} {${prompt3}} {-2};
+
+
+#class {knight_hpbar} {close};

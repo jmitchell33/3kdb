@@ -203,7 +203,14 @@
 };
 
 
-#action {%w dealt the killing blow to %*.} {
+#action {[PARTY] {%w}: nofollow: %*} {
+    #format followInviter {%l} {%1};
+    #if {"$following" == "$followInviter"} {%2};
+} {1};
+
+#action {^%w dealt the killing blow to %*.} {
+    mob_status_clear;
+    #if !$idle_flag {corpse_trig};
     #math party[member][%1][kills] {$party[member][%1][kills] + 1};
 } {5};
 

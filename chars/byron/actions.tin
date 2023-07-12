@@ -5,7 +5,6 @@
 
 #action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {
 	#if {$my[song][rounds] > 1} {
-		#var actions_stacked 1;
 		#var randNumber @rnd{1;200};
 		add_action {{{name} {$randNumber} {action} {perform dirge} {priority} {3}}};
 	} {
@@ -34,18 +33,7 @@
 #NOP -- Charge stuff while Sholitia is gone;
 #act {Sholitia appears out of nowhere!} {cease;};
 #act {Sholitia utters a word of mystical power. She vanishes from sight,} {
-	#var defs[pg] 1;
-	#var defs[blink] 1;
-	#var defs[hs] 1;
-	#var defs[ag] 1;
-	#var defs[o] 1;
-	#var defs[es] 1;
-	cast blink;
-	#if {$my[defs][ag] < 100} {perform amazing grace;} {
-		#if {$my[defs][o] < 100} {perform o muse;} {
-			perform leader of the band;
-		};
-	};
+	#NOP;
 };
 
 #NOP --- GENERAL MISC;

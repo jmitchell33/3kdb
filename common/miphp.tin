@@ -18,15 +18,28 @@
 			_guild_heartbeat;
 			_common_heartbeat;
 			_update_corpse_string;
+			_update_fight_status;
+			_strategy_heartbeat;
 			#if {$eternal} {_update_eternal_status};
 			#if {$guild_miphp} {_guild_miphp};
 		};
 		
 		#var action_round $mip[round];
-		#if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
-		#if {"$draw[caption][active]" == "on"} { draw_caption };
+		#if {"$draw[hpbar][active]" == "on"} {draw_hpbar};
+		#if {"$draw[caption][active]" == "on"} {draw_caption};
+		#if {"$draw[ticker][active]" == "on"} {draw_ticker};
     } {2};
 };
+
+#alias {_update_fight_status} {
+	#var mob_string[name] $enemy[name];
+	#var mob_string[round] $mip[round];
+	#var mob_string[affects] {};
+	#if $mob[enrage] {#cat mob_string[affects] {Enraged}};
+	#if $mob[noxious-cloud] {#cat mob_string[affects] {Nox. Cloud}};
+	#var fight_string \n<ffb>Round $mip[round] vs. $enemy[name]<088>;
+};
+
 
 #alias {_update_idle} {
 	#math   {idle_hr}       {$idle / 3600};

@@ -38,12 +38,17 @@
   #format bardEvalType1Len {%L} {%1};
   #format bardEvalType2Len {%L} {%2};
   #math bardEvalType1fmt $bardEval[cols] - $bardEvalType1Len;
-  #math bardEvalType2fmt $bardEval[cols] - $bardEvalType2Len;
-  #echo {$bardEval[%1]%1<170>%+${bardEvalType1fmt}s<100> | $bardEval[%2]%2<170>%+${bardEvalType2fmt}s} {$bardEval[$bardEval[mob][%1]] <170>\/ 10} {$bardEval[$bardEval[mob][%2]] <170>\/ 10};
+  #echo {$bardEval[%1]%1<170>%+${bardEvalType1fmt}s<100> | $bardEval[%2]%2<170>%+${bardEvalType2fmt}s} {$bardEval[$bardEval[mob][%1]] <170>\/ 10} {$bardEval[$bardEval[mob][%2]] <170>\/ 10};  #math bardEvalType2fmt $bardEval[cols] - $bardEvalType2Len;
+  #send {say %1 $bardEval[$bardEval[mob][%1]] / 10  |  %2 $bardEval[$bardEval[mob][%2]] / 10};
+};
+
+#action {^You focus in on the thought waves of %*.} {
+  #var bardEval[name] %1;
 };
 
 #action {^      - D E F E N S I V E   E V A L U A T I O N -} {
-  #var bardEval[mob] {}
+  #var bardEval[mob] {};
+  #var bardEval[mob][name] $bardEval[name];
 };
 
 #action {^{Edged|Blunt|Fire|Ice|Acid|Electric|Mind|Energy|Poison|Radiation}%s: {Poor|Fair|Decent|Average|Great|Superb|Outstanding|Heroic|Godly|Legendary|Immune}} {
@@ -52,11 +57,25 @@
 };
 
 #action {^This %+ is best defended against} {
+  #NOP -- Report the Mob Eval to the room;
+  #send {say ----------- $bardEval[mob][name] Evaluation -----------};
   bardEvalPrint {Edged} {Electric};
   bardEvalPrint {Blunt} {Mind};
   bardEvalPrint {Fire} {Energy};
   bardEvalPrint {Ice} {Poison};
   bardEvalPrint {Acid} {Radiation};
+  
+
+  #NOP #send {say Edged      : $bardEval[mob][Edged]};
+  #NOP #send {say Blunt      : $bardEval[mob][Blunt]};
+  #NOP #send {say Fire       : $bardEval[mob][Fire]};
+  #NOP #send {say Ice        : $bardEval[mob][Ice]};
+  #NOP #send {say Acid       : $bardEval[mob][Acid]};
+  #NOP #send {say Electric   : $bardEval[mob][Electric]};
+  #NOP #send {say Mind       : $bardEval[mob][Mind]};
+  #NOP #send {say Energy     : $bardEval[mob][Energy]};
+  #NOP #send {say Poison     : $bardEval[mob][Poison]};
+  #NOP #send {say Radiation  : $bardEval[mob][Radiation]};    
 };
 
 #class {eval} close

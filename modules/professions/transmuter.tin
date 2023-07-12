@@ -43,18 +43,33 @@
                 #2 {unstash $item_quality $item};
                 transmute 2 $item quality to average;
             };
+
             #if {"$item_quality" == "average"} {
-                #2 {unstash $item_quality $item};
-                transmute 2 $item quality to good;
+                #3 {unstash $item_quality $item};
+                transmute 3 $item quality to good;
             };
             #if {"$item_quality" == "good"} {
-                #3 {unstash $item_quality $item};
-                transmute 3 $item quality to superior;
+                #4 {unstash $item_quality $item};
+                transmute 4 $item quality to superior;
             };
             #if {"$item_quality" == "superior"} {
-                #4 {unstash $item_quality $item};
-                transmute 4 $item quality to legendary;
+                #5 {unstash $item_quality $item};
+                transmute 5 $item quality to legendary;
             };
+
+            #NOP -- Above Level xxx the transmute ratio drops by 1 for average and above;
+         #NOP   #if {"$item_quality" == "average"} {
+         #NOP       #2 {unstash $item_quality $item};
+         #NOP       transmute 2 $item quality to good;
+         #NOP   };
+         #NOP   #if {"$item_quality" == "good"} {
+         #NOP       #3 {unstash $item_quality $item};
+         #NOP       transmute 3 $item quality to superior;
+         #NOP   };
+         #NOP   #if {"$item_quality" == "superior"} {
+         #NOP       #4 {unstash $item_quality $item};
+         #NOP       transmute 4 $item quality to legendary;
+         #NOP   };
         };
     };
 };
@@ -62,9 +77,8 @@
 
 #alias transmute_burn {
     #var transmute_count 0;
-    #action {Pfffzzzt!  You transmute:} {#math transmute_count {$transmute_count + 1}};
-
-    #delay 2 {
+    #action {Pfffzzzt!  You transmute:} {#math transmute_count {$transmute_count + 1};};
+    #delay .5 {
         #if {"%1" == ""} {
             #showme {<ddd>    No parameters were provided, please provide a valid parameter such as:  <088>};
             #showme {<ddd>     transmute_burn consolidate  <088>};
@@ -124,14 +138,21 @@
                     };
                     #case {"train"} {
                         #foreach $satchel[data][%*] index {
-                            #if {$transmuter[level] >= $index[min-level] && $transmuter[level] <= $index[max-level]} {                                
+                            #if {$transmuter[level] >= $index[min-level] && $transmuter[level] < $index[max-level]} {
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
                                         #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
                                         #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
                                         #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
-                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
-                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                        #if {$satchel_item[average] >= 3} {satchel_retrieve_xmute 3 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 4} {satchel_retrieve_xmute 4 good {$satchel_item[name]} $satchel_item[good];};
+
+                                        #NOP -- Above Level xxx the transmute ratio drops by 1 for average and above;
+                                        #NOP #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #NOP #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #NOP #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #NOP #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #NOP #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
                                     };
                                 };
                             };
@@ -177,20 +198,38 @@
         transmute 2 %2 quality to average;
         stash all;
     };
-    #if {"%1" == "average"} {
-        #2 unstash average %2;
-        transmute 2 %2 quality to good;
-        stash all;
-    };
-    #if {"%1" == "good"} {
-        #3 unstash good %2;
-        transmute 3 %2 quality to superior;
-        stash all;
-    };
-    #if {"%1" == "superior"} {
-        #4 unstash superior %2;
-        transmute 4 %2 quality to legendary;
-        stash all;
+    #if {$transmuter[level] >= 50} {
+        #if {"%1" == "average"} {
+            #2 unstash average %2;
+            transmute 2 %2 quality to good;
+            stash all;
+        };
+        #if {"%1" == "good"} {
+            #3 unstash good %2;
+            transmute 3 %2 quality to superior;
+            stash all;
+        };
+        #if {"%1" == "superior"} {
+            #4 unstash superior %2;
+            transmute 4 %2 quality to legendary;
+            stash all;
+        };
+    } {
+        #if {"%1" == "average"} {
+            #2 unstash average %2;
+            transmute 2 %2 quality to good;
+            stash all;
+        };
+        #if {"%1" == "good"} {
+            #4 unstash good %2;
+            transmute 4 %2 quality to superior;
+            stash all;
+        };
+        #if {"%1" == "superior"} {
+            #5 unstash superior %2;
+            transmute 5 %2 quality to legendary;
+            stash all;
+        };
     };
 };
 

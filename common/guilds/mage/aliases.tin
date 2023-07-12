@@ -4,12 +4,15 @@
 #NOP --- MAGE SUMMONING ALIASES;
 #alias {create_golem} {
     examine materials;
-    #action {^There's bits of the following materials remaining:$} {
-        #action {^  {\w+}} {#unaction {^  {\w+}};cast create golem %%%1;} {2};
+    #if {&golemList[]} {
+        cast create golem $golemList[1];
+        #list golemList delete 1;
         #var golem_toggle 0;
+        #delay 2 {say golem, you are now in group golem/assist always/stfu/ibc};
     };
-    #delay 2 {say golem, you are now in group golem/assist always/stfu/ibc}
 };
+
+#NOP The last of your Golem Materials has been used up.
 
 #alias {str_party} {
     members;

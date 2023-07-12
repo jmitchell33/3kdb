@@ -2,16 +2,21 @@
 #class {player_heartbeat} {open}
 
 #var bot_toggle 1;
+#var blood_plate_toggle 1;
 #alias {_player_heartbeat} {
-    #if {$bot_toggle && $my[gp1][current] < 100} {
+    #if {$bot[active] && $bot_toggle && $my[gp1][current] < 100} {
         #var bot_toggle 0;
         .pause;
         #showme BOT STOPPING LOW PSI;
     };
-    #if {!$bot_toggle && $my[gp1][current] > 500} {
+    #if {$bot[active] && !$bot_toggle && $my[gp1][current] > 500} {
         #var bot_toggle 1;
         ..;
         #SHOWME BOT RESUMING PSI TODO BIEN;
+    };
+    #if {$corpses[total] > 0 && $blood_plate[status] < 100 && $blood_plate_toggle} {
+        corpse_select;
+        #var blood_plate_toggle 0;
     };
 };
 

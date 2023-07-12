@@ -1,0 +1,29 @@
+#class player_status kill
+#class player_status open
+
+#alias status_coins {
+    #action {^You are carrying %d coins in loose change.$} {
+        #format my[coins] {%d} {%%1};
+        #unaction {^You are carrying %d coins in loose change.$};
+    };
+    coins;
+};
+
+#alias status_export {
+    #class global open;
+    #map get roomvnum curvnum;
+    #var strategy $strategy;
+    #class global close;
+    #class global write chars/$user/vars.tin;
+};
+
+#NOP Export user status every 10 mins;
+#ticker status_ticker {status_export;} {600};
+
+
+
+#action {As the energies swirl around you, you feel heartier and more robust.} {
+    #var my[status][laugh] 1;
+} {1};
+
+#class player_status close

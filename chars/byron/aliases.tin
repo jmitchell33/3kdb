@@ -11,30 +11,47 @@
 };
 
 #alias k {
-    #if $strategy[backstab] {
-        cast mystic venom on redaxe;
-        cast mystic venom on runesword;
+    checkStrategy {backstab} {
+        #if {"$wielded" == "The Rod of Lordly Might"} {
+            touch reaper rune;
+            cast mystic venom on rod of lordly might;
+        } {
+            cast mystic venom on redaxe;
+            cast mystic venom on sword;
+        };
         hide in shadows;
-        backstab %1 %2;
+        backstab %0;
+        touch crown rune;
     };
-    kill %1 %2;
-    #if $strategy[cloud] {#delay 2 {cast noxious cloud}};
-    #if $strategy[vortex] {#delay 5 {cast lightning vortex}};
+    kill %0;
+    
 }
 
 #alias {.mob_kill_action} {
-    #if {$strategy[rainbow] || $strategy[hammer]} {
-        #if !$my[defs][hr] {cast harmonic regeneration}
-    };
-    #if $strategy[backstab] {
+    checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
+
+    checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
+
+    checkStrategy {backstab} {
         cast mystic venom on redaxe;
+        cast mystic venom on sword;
         hide in shadows;
         backstab $mob[target];
     };
-    kill $mob[target];
-    #if $strategy[cloud] {#delay 2 {cast noxious cloud}};
-    #if $strategy[vortex] {#delay 5 {cast lightning vortex}};
-    #if $strategy[enrage] {enrage};
+    
+    #NOP -- Kill the room if we're in SZ;
+    #if {"$area" == "Section Z"} {
+        kill balangool;
+        kill balangool 2;
+        kill balangool 3;
+    } {
+        kill $mob[target];
+    };
+    
+
+    checkStrategy {cloud} {#delay 2 {cast noxious cloud}};
+    checkStrategy {vortex} {#delay 5 {cast lightning vortex}};
+    checkStrategy {enrage} {enrage};
 }
 
 

@@ -29,10 +29,22 @@
 
 #var dmgt[curr] 0;
 #var dmgt[avg] 0;
-#var dmgt[rnd] 0;
+#var dmgt[count] 0;
 #var dmgt[ravg] 0;
 #var dmgt[high] 0;
 #var dmgt[dmg] 0;
+
+#var cmbt[fury][curr] 0;
+#var cmbt[fury][dmg] 0;
+#var cmbt[fury][rnd] 0;
+#var cmbt[fury][avg] 0;
+#var cmbt[fury][high] 0;
+
+#var cmbt[lucanus][curr] 0;
+#var cmbt[lucanus][dmg] 0;
+#var cmbt[lucanus][rnd] 0;
+#var cmbt[lucanus][avg] 0;
+#var cmbt[lucanus][high] 0;
 
 #NOP -- Toggles for profession boosts;
 #act {^Your crazed ambition overflows!$} {#var big_game_hunter 1;};
@@ -56,9 +68,50 @@
     #if $new_best {#var spell_dmg[%3][high] $spell_dmg[curr]};
     
 } {2};
+
+#NOP -- Damage modifier captures;
+#action {^You bash %* with your shield%*} {
+    #var cmbt[affects][shield_bash] 1;
+};
+
+#action {^With iron will, you finally guide the deadly spell toward its target!$} {
+    #var cmbt[affects][iprime] 1;
+};
+
+#alias dmg_mod_reset {
+    #var cmbt[affects][shield_bash] 0;
+    #var cmbt[affects][iprime] 0;
+};
     
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
     #var incombat 1;
+
+    #if {$cmbt[affects][iprime]} {
+        #var cmbt[iprime][curr] %5;
+        #math cmbt[iprime][dmg] {$cmbt[iprime][dmg] + %5};
+        #math cmbt[iprime][rnd] {$cmbt[iprime][rnd] + 1};
+        #math cmbt[iprime][avg] {$cmbt[iprime][dmg] / $cmbt[iprime][rnd]};
+        
+        #if {$cmbt[iprime][curr] > $cmbt[iprime][high]} {#var cmbt[iprime][high] $cmbt[iprime][curr];#showme NEW BEST IPRIME ROUND: $cmbt[iprime][high];};
+    };
+
+    #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
+        #var cmbt[fury][curr] %5;
+        #math cmbt[fury][dmg] {$cmbt[fury][dmg] + %5};
+        #math cmbt[fury][rnd] {$cmbt[fury][rnd] + 1};
+        #math cmbt[fury][avg] {$cmbt[fury][dmg] / $cmbt[fury][rnd]};
+        
+        #if {$cmbt[fury][curr] > $cmbt[fury][high]} {#var cmbt[fury][high] $cmbt[fury][curr];#showme NEW BEST FURY ROUND: $cmbt[fury][high];};
+    };
+
+    #if {$mob[lucanus_ring]} {
+        #var cmbt[lucanus][curr] %5;
+        #math cmbt[lucanus][dmg] {$cmbt[lucanus][dmg] + %5};
+        #math cmbt[lucanus][rnd] {$cmbt[lucanus][rnd] + 1};
+        #math cmbt[lucanus][avg] {$cmbt[lucanus][dmg] / $cmbt[lucanus][rnd]};
+        
+        #if {$cmbt[lucanus][curr] > $cmbt[lucanus][high]} {#var cmbt[lucanus][high] $cmbt[lucanus][curr];#showme NEW BEST LUCANUS ROUND: $cmbt[lucanus][high];};
+    };
 
     #math {cmbt[ravg]} {($cmbt[ravg] + %3) / 2};
     #var cmbt[curr] %5;
@@ -71,6 +124,19 @@
 
     #math new_best {$cmbt[curr] > $cmbt[high]};
     #if $new_best {#var cmbt[high] $cmbt[curr];#showme NEW BEST ROUND: $cmbt[high];};
+
+    #if {$cmbt[freq][%3][count] > 0} {
+        #math cmbt[freq][%3][count] {$cmbt[freq][%3][count] + 1};
+        #math cmbt[freq][%3][dmg] {$cmbt[freq][%3][dmg] + %5};
+        #math cmbt[freq][%3][avg] {$cmbt[freq][%3][dmg] / $cmbt[freq][%3][count]};
+    } {
+        #var cmbt[freq][%3][name] %3;
+        #var cmbt[freq][%3][count] 1;
+        #var cmbt[freq][%3][dmg] %5;
+        #var cmbt[freq][%3][avg] %5;
+    };
+
+    dmg_mod_reset;
 } {2};
 
 #act {{^El Jefe (.*) hit for (\d+) damage.$}} {
@@ -96,41 +162,104 @@
     #math {dmgt[ravg]} {($dmgt[ravg] + %3) / 2};
     #var dmgt[curr] %3;
     #math dmgt[dmg] {$dmgt[dmg] + %3};
-    #math dmgt[rnd] {$dmgt[rnd] + 1};
-    #math {dmgt[avg]} {$dmgt[dmg] / $dmgt[rnd]};
+    #math dmgt[count] {$dmgt[count] + 1};
+    #math {dmgt[avg]} {$dmgt[dmg] / $dmgt[count]};
 } {2};
-    
+
+
+
 #alias {dstats} {
-    #show {\nAverage damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.};
-    #show {\Best damage : $cmbt[high] damage};
-    #if {$guild == "mage"} {
+
+    #show {------- TOTAL DAMAGE -------};
+    #show {Average Damage : @formatThousands{$cmbt[avg]} over @formatThousands{$cmbt[rnd]} rounds.  Total: @formatThousands{$cmbt[dmg]} damage.};
+    #show {Best Round     : @formatThousands{$cmbt[high]}};
+    #if {"$guild" == "mage"} {
         #show {\nAverage Spell damage : $spell_dmg[avg] over $spell_dmg[rnd] rounds.  Total: $spell_dmg[dmg] damage.};
         #show {\High Spell damage : $spell_dmg[high]};
         #show {\nAverage Golem damage : $golem_dmg[avg] over $golem_dmg[rnd] rounds.  Total: $golem_dmg[dmg] damage.};
         #show {\High Golem damage : $golem_dmg[high]};
-    }
-    #show {Damage taken   : $dmgt[avg] over $dmgt[rnd] rounds.  Total: $dmgt[dmg] damage.\n};
+    };
+    #if {"$guild" == "necromancer" && ($cmbt[fury][rnd] > 0 || $cmbt[iprime][rnd] > 0)} {
+        #show {\n<ecb>------- NECRO SPECIFIC -------<088>};
+        #if {$cmbt[fury][rnd]} {
+            #show {\n------- FURY DAMAGE -------};
+            #show {Average Damage : @formatThousands{$cmbt[fury][avg]} over @formatThousands{$cmbt[fury][rnd]} rounds.  Total: @formatThousands{$cmbt[fury][dmg]} damage.};
+            #show {Best Round     : @formatThousands{$cmbt[fury][high]}};
+        };
+
+        #if {$cmbt[iprime][rnd]} {
+            #show {\n------- IPRIME DAMAGE -------};
+            #show {Average Damage : @formatThousands{$cmbt[iprime][avg]} over @formatThousands{$cmbt[iprime][rnd]} rounds.  Total: @formatThousands{$cmbt[iprime][dmg]} damage.};
+            #show {Best Round     : @formatThousands{$cmbt[iprime][high]}};
+        };
+    };
+    
+    #if {$cmbt[lucanus][rnd]} {
+        #show {\n------- LUCANUS DAMAGE -------};
+        #show {Average Damage : @formatThousands{$cmbt[lucanus][avg]} over @formatThousands{$cmbt[lucanus][rnd]} rounds.  Total: @formatThousands{$cmbt[lucanus][dmg]} damage.};
+        #show {Best Round     : @formatThousands{$cmbt[lucanus][high]}};
+    };
+
+    #show {\n------- DAMAGE BY # OF HTIS -------};
+    #foreach $cmbt[freq][%*] item {
+        #showme {$item[name] hits : @formatThousands{$item[avg]} Avg. achieved $item[count] times};
+    };
+
+    #show {\nDamage taken   : @formatThousands{$dmgt[avg]} over @formatThousands{$dmgt[count]} hits.  Total: @formatThousands{$dmgt[dmg]} damage.\n};
 
     #math {dog[avg]} {$dog[dmg] / $dog[rnd]};
     #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
     #nop showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
 };
-#alias {ds} {dstats};
+
+#NOP #ticker dmg_stats {    #var caption_data[dmg] {\n Average damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.\n Best damage : $cmbt[high] damage};} 2;
 
 #alias {dreset} {
-    #var {spell_dmg[dmg]} 0;
-    #var {spell_dmg[rnd]} 0;
-    #var {spell_dmg[high]} 0;
-    #var {golem_dmg[dmg]} 0;
-    #var {golem_dmg[rnd]} 0;
-    #var {golem_dmg[high]} 0;
-    #var {cmbt[hits]} 0;
-    #var {cmbt[dmg]} 0;
-    #var {cmbt[rnd]} 0;
-    #var {cmbt[high]} 0;
-    #var {dmgt[dmg]} 0;
-    #var {dmgt[rnd]} 0;
-    #var {dmgt[high]} 0;
+    #var cmbt[curr] 0;
+    #var cmbt[avg] 0;
+    #var cmbt[rnd] 0;
+    #var cmbt[ravg] 0;
+    #var cmbt[high] 0;
+    #var cmbt[dmg] 0;
+
+    #var golem_dmg[curr] 0;
+    #var golem_dmg[avg] 0;
+    #var golem_dmg[rnd] 0;
+    #var golem_dmg[ravg] 0;
+    #var golem_dmg[high] 0;
+    #var golem_dmg[dmg] 0;
+
+    #var spell_dmg[curr] 0;
+    #var spell_dmg[avg] 0;
+    #var spell_dmg[rnd] 0;
+    #var spell_dmg[ravg] 0;
+    #var spell_dmg[dmg] 0;
+    #var spell_dmg[high] 0;
+
+    #var dmgt[curr] 0;
+    #var dmgt[avg] 0;
+    #var dmgt[count] 0;
+    #var dmgt[ravg] 0;
+    #var dmgt[high] 0;
+    #var dmgt[dmg] 0;
+
+    #var cmbt[fury][curr] 0;
+    #var cmbt[fury][dmg] 0;
+    #var cmbt[fury][rnd] 0;
+    #var cmbt[fury][avg] 0;
+    #var cmbt[fury][high] 0;
+
+    #var cmbt[iprime][curr] 0;
+    #var cmbt[iprime][dmg] 0;
+    #var cmbt[iprime][rnd] 0;
+    #var cmbt[iprime][avg] 0;
+    #var cmbt[iprime][high] 0;
+
+    #var cmbt[lucanus][curr] 0;
+    #var cmbt[lucanus][dmg] 0;
+    #var cmbt[lucanus][rnd] 0;
+    #var cmbt[lucanus][avg] 0;
+    #var cmbt[lucanus][high] 0;
     #var dog[rnd] 0;
     #var dog[dmg] 0;
 };

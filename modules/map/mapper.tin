@@ -34,25 +34,13 @@
 }
 
 /* Map Follow on Following Others */
-#act {%1 leaves %2\.} {
-	#var following %1;
-	#var foldir %2;
-
-	#switch {"$foldir"} {
-		#case {"north"}	{#var foldir n};
-		#case {"south"}	{#var foldir s};
-		#case {"east"}	{#var foldir e};
-		#case {"west"}	{#var foldir w};
-		#case {"down"}	{#var foldir d};
-		#case {"up"}	{#var foldir u};
-	}
-}
 
 #act {%1 leaves following %2} {
 	#format {follower} {%l} {%1};
-	#if {%2 == "$following"} {
+	#if {"$follower" == "$user"} {
+		#format {following} {%l} {%2};
 		#map move $foldir
-	}
+	};
 } {4};
 
 /* Data Grab Trigger */
@@ -345,12 +333,12 @@
 /* Blocked Exits */
 #act {^You cannot go } {
 	#if {$mapstatic} {
-		#map undo
+		mapUndo
 	}
 }
 #act {^You cannot get it up.} {
 	#if {$mapstatic} {
-		#map undo
+		mapUndo
 	}
 }
 

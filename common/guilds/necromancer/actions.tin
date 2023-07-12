@@ -1,12 +1,14 @@
 #class {guild_actions} {kill}
 #class {guild_actions} {open}
 
+#list dgraft clear;
+
 #NOP --------------------------------------- NECROMANCER SPECIFIC ACTIONS ------------------------------------------;
-#act {///The protective spirits break away from your body, fading into nothingness.$} {#if !$idle_flag {protection}};
+#action {%*The protective spirits break away from your body, fading into nothingness.$} {#if !$idle_flag {protection}};
 #action {Necromantic energy flows into your bear totem.} {
     #if {$bot[active] && $auto_study} {
         .pause;
-        add_action {{{name} {go_study} {action} {#delay 2 {go_study};#delay 10 {..};}}};
+        add_action {{{name} {go_study} {action} {#delay 2 {go_study};}}};
     };
 } {1};
 
@@ -43,7 +45,7 @@
 #act {A waning crescent moon hangs in the dark sky.} {#var my[necromancer][moon]};
 
 #NOP --------------------------------------- NECROMANCER SUPPORT ACTIONS  ------------------------------------------;
-#ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};daemon graft $lower}} {6};
+#ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};daemon graft $lower;#list dgraft add $lower}} {6};
 #ACTION {%w goes 'Breakin the law! Breakin the law!' at you.} {#if !$idle_flag {qtrance preserve remains>50;qtrance preserve remains>50}} {6};
 #ACTION {You see a shadowy form escape from %w and disappear!} {#SHOWME DAEMON GRAFT LEFT %1};
 

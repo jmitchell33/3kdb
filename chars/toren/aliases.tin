@@ -53,6 +53,7 @@
     #showme {Each Increase Took On Average $gxp_stats[avg_rounds_for_increase] rounds};
 };
 
+
 #alias {corpse_trig} {
     #if $check_death {
         #NOP -- do nothing
@@ -62,12 +63,16 @@
             wrap remains;
         } {
             wrap remains;
-            preserve remains;
-            get preservation;
+            preserve_remains;
             get all;
         };
         fuse 200;
+        keep all preservation;
     };
+};
+
+#alias pg {
+    qtrance preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation/preserve gemino/get preservation/get preservation
 };
 
 #alias corpse_dump2 {
@@ -97,19 +102,20 @@
         #if {$inventory[encumberance] > 95} {
             #delay 1 {slab all;absorb;absorb;get all;.bot};
         } {
-            #delay 1 {slab all;preserve remains;preserve remains;gather;get all;put all in buckler;.bot};
+            #delay 1 {slab all;preserve_remains;preserve_remains;gather;get all;put all in buckler;.bot};
         };
     };
     fuse 200;
 };
 
 #alias {_player_deadmanActions} {
-    .pause;
+    #if $bot[active] {.pause};
 };
 
 #alias {.mob_kill_action} {
     #var stats[starting-gp] $my[gp1][current];
     kill $mob[target];
+    #if $strategy[snare] {snare $mob[target]};
     #if $strategy[rabies] {rabies};
     #if $strategy[maim] {maim};
     #if $strategy[call] {call};
@@ -118,7 +124,7 @@
 };
 
 #NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
-#alias {set_ticker} {#ticker {con} {#if !$idle_flag {con 100} {#nop}} {90}};
+#alias {set_ticker} {#NOP;};
 
 #alias {go_donate} {
     #map get roomvnum donate_go_back;
@@ -139,6 +145,7 @@
         store all;
     };
     #map run $donate_go_back;
+    #path destroy;
     #path load $path;
     #path goto $pos;
     #var bot[paused] 0;
@@ -153,6 +160,7 @@
     go necro_box;
     donate all;donate all from bag;donate all from bag 2;donate all from buckler;
     #map run $donate_go_back;
+    #path destroy;
     #path load $path;
     #path goto $pos;
     #var bot[paused] 0;
@@ -182,9 +190,18 @@
         } {
             #map run $study_go_back;
         };
+        #path destroy;
         #path load $path;
         #path goto $pos;
         powers;gs;
+    };
+    #delay 10 {
+        #if $bot[active] {
+            #var bot[paused] 0;
+            ..;
+        } {
+            #NOP;
+        };
     };
 };
 

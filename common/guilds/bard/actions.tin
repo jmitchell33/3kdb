@@ -1,40 +1,60 @@
 #class {guild_actions} {kill}
 #class {guild_actions} {open}
 
+#NOP --------------------------------------- BARD SINGUP BOT ACTIONS ------------------------------------------;
+#action {^%w expresses %* feelings about you rocking the mud.} {
+    #send {say DAMN RIGHT BARDS ROCK THE MUD!!!};
+    #send {say Currently on rotation in the jukebox include:};
+    #send {say hero --> +con boost and takes 56 rounds to perform};
+    #send {say son of man --> +str/wis boost and takes 40 rounds to perform};
+    #send {say memory --> +int boost and takes 38 rounds to perform};
+    #send {say let it be --> +wis boost and takes 59 rounds to perform};
+    #send {say naked sunday --> +str/int/wis boost and takes 20 rounds to perform};
+    #send {say 'say select <song>' to select a tune!};
+    #send {say Bonus depends on glvl and luck, and the best way to create luck is with coin!};
+    #action {^%w says: select %*} {
+        #var song_selected 1;
+        #if {$song_selected} {
+            #send {say $songLower is currently playing for $playerLower};
+            #send {say Try again in ${my[song][completion]} seconds.};
+        } {
+            #format playerLower {%l} {%%1};
+            #format songLower {%l} {%%2};
+            perform $songLower for $playerLower;
+        };
+    };
+};
+
+
 #NOP --------------------------------------- BARD SPECIFIC ACTIONS ------------------------------------------;
 #ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};it $lower};} {6};
 #ACTION {%w eeps at you.} {#if !$idle_flag {#format {lower} {%l} {%1};defend $lower};} {6};
 #ACTION {%w grovels shamelessly before you.} {#if !$idle_flag {#format {lower} {%l} {%1};soothe $lower};} {6};
 #action {%w acks at you.} {#if !$idle_flag {heartening laugh};} {6};
+#action {%w brandishes %w weapon before you.} {#if !$idle_flag {identify ROOM};} {6};
 
 
 #NOP --- Use corpses/perform actions between songs so you're more karma efficient;
 #action {{^You finish your performance with a bow.$|^You lose your song.$|^You cease your performance of %*.$}} {
+    #var song_selected 0;
+    #var my[song][rounds] 0;
     #if {$actions_stacked && $mip[round] > 0} {
         do_action;
-    }
+    };
 } {1};
-
-
-#NOP -- Count the number of blinks so we can recast before it's going to drop;
-#ACTION {You blink out just as the attack strikes!} {#math blink_count {$blink_count + 1};} {1};
-#ACTION {^As you complete the spell you begin phasing in and out of view!$} {
-    #var blink_count 0 
-} {1};
-
-
 
 
 #NOP --- BARD DEFENSIVE SONGS AND SPELLS;
-#ACTION {^The magic of your song, 'Amazing Grace', is fading.$} {#if {$defs[ag] && !$idle_flag} {ag}} {6};
-#ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {$defs[om] && !$idle_flag} {perform o muse}} {6};
+#ACTION {You feel your ability to Blink receding.} {cast blink};
+#ACTION {^You are no longer blinking.$} {#if {$defs[blink] && !$idle_flag} {cast blink}} {6}
 #ACTION {^Your hardened skin is beginning to relax.$} {#if {$defs[hs] && !$idle_flag} {cast hardened skin}} {6};
 #ACTION {^Your protection from evil is beginning to fade.$} {#if {$defs[pe] && !$idle_flag} {cast protection from evil}} {6};
 #ACTION {^Your protection from neutral is beginning to fade.$} {#if {$defs[pn] && !$idle_flag} {cast protection from neutral}} {6};
 #ACTION {^Your protection from good is beginning to fade.$} {#if {$defs[pg] && !$idle_flag} {cast protection from good}} {6};
 #ACTION {^Your protection from heat is beginning to fade.$} {#if {$defs[ph] && !$idle_flag} {cast protection from heat}} {6};
 #ACTION {^Your protection from frost is beginning to fade.$} {#if {$defs[pf] && !$idle_flag} {cast protection from frost}} {6};
-#ACTION {^You are no longer blinking.$} {#if {$defs[blink] && !$idle_flag} {cast blink}} {6}
+#ACTION {^The magic of your song, 'Amazing Grace', is fading.$} {#if {$defs[ag] && !$idle_flag} {ag}} {6};
+#ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {$defs[om] && !$idle_flag} {perform o muse}} {6};
 
 #NOP -- MOB STATUS TRACKERS;
 #action {You wave your hands around, make swooshing and farting sounds,} {#var mob[noxious-cloud] 1;} {6};
@@ -43,6 +63,21 @@
 
 #action {You may only have one of these at a time!} {#var mob[lightning-vortex] 1;} {6};
 #action {Not more than one per room.} {#var mob[noxious-cloud] 1;} {6};
+#action {That creature is already enraged.} {#var mob[enrage] 1;} {6};
+
+#NOP -- Bard Stat Screen Modifications;
+#action {^-= Monetary gifts  : %d coins                                      =-} {#var my[guild][donate_coins] %1} {2};
+#action {^-= Item gift value : %d coins                                     =-} {
+    #var my[guild][donate_items] %1;
+    #math my[guild][donate_total] {$my[guild][donate_coins] + $my[guild][donate_items]};
+} {2};
+
+
+#alias mob_status_clear {
+    #var mob[lightning-vortex] 0;
+    #var mob[noxious-cloud] 0;
+    #var mob[enrage] 0;
+};
 
 
 #class {guild_actions} {close}

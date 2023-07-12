@@ -1,0 +1,890 @@
+#NOP --- MELEE DAMAGE TRACKER
+
+#class {damage_tracker} {kill}
+#class {damage_tracker} {open}
+
+#NOP --- turn off brief since we cant capture the emotes if theyre gagged;
+#send {cbrief off};
+
+#NOP -- Initialize Damage Counter Variables;
+    #var dc[round_start] $total_rounds;
+    #var round_max_damage 0;
+    #var round_max_melee_damage 0;
+    #var round_max_melee_damage 0;
+    #var called_shot 0;
+    #VAR dc_aggregate 0;
+    #VAR dc[round_count] 0;
+    #VAR dc[mob_dodges][count] 0;
+    #VAR dc[total][count] 0;
+    #VAR dc[total][deflected][count] 0;
+    #VAR dc[total][ineffective][count] 0;
+    #VAR dc[total][bobble][count] 0;
+    #VAR dc[total][missed][count] 0;
+    #VAR dc[total][tickled][count] 0;
+    #VAR dc[total][grazed][count] 0;
+    #VAR dc[total][hit][count] 0;
+    #VAR dc[total][hit_hard][count] 0;
+    #VAR dc[total][hit_vhard][count] 0;
+    #VAR dc[total][mighty][count] 0;
+    #VAR dc[total][bonecrush][count] 0;
+    #VAR dc[total][pulverized][count] 0;
+    #VAR dc[total][trounced][count] 0;
+    #VAR dc[total][pummeled][count] 0;
+    #VAR dc[total][massacred][count] 0;
+    #VAR dc[total][annihilated][count] 0;
+    #VAR dc[total][devastated][count] 0;
+    #VAR dc[total][destroyed][count] 0;
+    #VAR dc[total][amassacred][count] 0;
+    #VAR dc[total][thrashed][count] 0;
+    #VAR dc[total][demolished][count] 0;
+    #VAR dc[total][exterminated][count] 0;
+    #VAR dc[total][obliterated][count] 0;
+    #VAR dc[total][eradicated][count] 0;
+    #VAR dc[total][decimated][count] 0;
+    #VAR dc[total][rented_mule][count] 0;
+    #VAR dc[total][exsanguinated][count] 0;
+    #VAR dc[total][atomized][count] 0;
+    #VAR dc[total][step_child][count] 0;
+    #VAR dc[total][dropkick][count] 0;
+    #VAR dc[round][deflected][count] 0;
+    #VAR dc[round][ineffective][count] 0;
+    #VAR dc[round][bobble][count] 0;
+    #VAR dc[round][missed][count] 0;
+    #VAR dc[round][tickled][count] 0;
+    #VAR dc[round][grazed][count] 0;
+    #VAR dc[round][hit][count] 0;
+    #VAR dc[round][hit_hard][count] 0;
+    #VAR dc[round][hit_vhard][count] 0;
+    #VAR dc[round][mighty][count] 0;
+    #VAR dc[round][bonecrush][count] 0;
+    #VAR dc[round][pulverized][count] 0;
+    #VAR dc[round][trounced][count] 0;
+    #VAR dc[round][pummeled][count] 0;
+    #VAR dc[round][massacred][count] 0;
+    #VAR dc[round][annihilated][count] 0;
+    #VAR dc[round][devastated][count] 0;
+    #VAR dc[round][destroyed][count] 0;
+    #VAR dc[round][amassacred][count] 0;
+    #VAR dc[round][thrashed][count] 0;
+    #VAR dc[round][demolished][count] 0;
+    #VAR dc[round][exterminated][count] 0;
+    #VAR dc[round][obliterated][count] 0;
+    #VAR dc[round][eradicated][count] 0;
+    #VAR dc[round][decimated][count] 0;
+    #VAR dc[round][rented_mule][count] 0;
+    #VAR dc[round][exsanguinated][count] 0;
+    #VAR dc[round][atomized][count] 0;
+    #VAR dc[round][step_child][count] 0;
+    #VAR dc[round][dropkick][count] 0;
+    #VAR dc[called_shot][deflected][count] 0;
+    #VAR dc[called_shot][ineffective][count] 0;
+    #VAR dc[called_shot][bobble][count] 0;
+    #VAR dc[called_shot][missed][count] 0;
+    #VAR dc[called_shot][tickled][count] 0;
+    #VAR dc[called_shot][grazed][count] 0;
+    #VAR dc[called_shot][hit][count] 0;
+    #VAR dc[called_shot][hit_hard][count] 0;
+    #VAR dc[called_shot][hit_vhard][count] 0;
+    #VAR dc[called_shot][mighty][count] 0;
+    #VAR dc[called_shot][bonecrush][count] 0;
+    #VAR dc[called_shot][pulverized][count] 0;
+    #VAR dc[called_shot][trounced][count] 0;
+    #VAR dc[called_shot][pummeled][count] 0;
+    #VAR dc[called_shot][massacred][count] 0;
+    #VAR dc[called_shot][annihilated][count] 0;
+    #VAR dc[called_shot][devastated][count] 0;
+    #VAR dc[called_shot][destroyed][count] 0;
+    #VAR dc[called_shot][amassacred][count] 0;
+    #VAR dc[called_shot][thrashed][count] 0;
+    #VAR dc[called_shot][demolished][count] 0;
+    #VAR dc[called_shot][exterminated][count] 0;
+    #VAR dc[called_shot][obliterated][count] 0;
+    #VAR dc[called_shot][eradicated][count] 0;
+    #VAR dc[called_shot][decimated][count] 0;
+    #VAR dc[called_shot][rented_mule][count] 0;
+    #VAR dc[called_shot][exsanguinated][count] 0;
+    #VAR dc[called_shot][atomized][count] 0;
+    #VAR dc[called_shot][step_child][count] 0;
+    #VAR dc[called_shot][dropkick][count] 0;
+
+    #var dc[mob_dodges][text] Mob Dodges;
+    #VAR dc[total][text] Total;
+    #VAR dc[total_misses][text] Total Misses;
+    #VAR dc[total_hits][text] Total Hits;
+    #VAR dc[deflected][text] Deflected;
+    #VAR dc[ineffective][text] Ineffective;
+    #VAR dc[bobble][text] Bobble;
+    #VAR dc[missed][text] Missed;
+    #VAR dc[tickled][text] Tickled;
+    #VAR dc[grazed][text] Grazed;
+    #VAR dc[hit][text] Hit;
+    #VAR dc[hit_hard][text] Hit Hard;
+    #VAR dc[hit_vhard][text] Hit V. Hard;
+    #VAR dc[mighty][text] Mighty Blow;
+    #VAR dc[bonecrush][text] Bonecrush;
+    #VAR dc[pulverized][text] Pulverized;
+    #VAR dc[trounced][text] Trounced;
+    #VAR dc[pummeled][text] Pummeled;
+    #VAR dc[massacred][text] Massacred;
+    #VAR dc[annihilated][text] Annihilated;
+    #VAR dc[devastated][text] Devastated;
+    #VAR dc[destroyed][text] Destroyed;
+    #VAR dc[amassacred][text] Abs. Massacred;
+    #VAR dc[thrashed][text] Thrashed;
+    #VAR dc[demolished][text] Demolished;
+    #VAR dc[exterminated][text] Exterminated;
+    #VAR dc[obliterated][text] Obliterated;
+    #VAR dc[eradicated][text] Eradicated;
+    #VAR dc[decimated][text] Decimated;
+    #VAR dc[rented_mule][text] Rented Mule;
+    #VAR dc[exsanguinated][text] Exsanguinated;
+    #VAR dc[atomized][text] Atomized;
+    #VAR dc[step_child][text] Step-Child;
+    #VAR dc[dropkick][text] Dropkicked;
+
+    #VAR dc[mob_dodges][min_dmg] 0;
+    #VAR dc[deflected][min_dmg] 0;
+    #VAR dc[ineffective][min_dmg] 0;
+    #VAR dc[bobble][min_dmg] 0;
+    #VAR dc[missed][min_dmg] 0;
+    #VAR dc[tickled][min_dmg] 1;
+    #VAR dc[grazed][min_dmg] 2;
+    #VAR dc[hit][min_dmg] 3;
+    #VAR dc[hit_hard][min_dmg] 10;
+    #VAR dc[hit_vhard][min_dmg] 20;
+    #VAR dc[mighty][min_dmg] 30;
+    #VAR dc[bonecrush][min_dmg] 55;
+    #VAR dc[pulverized][min_dmg] 65;
+    #VAR dc[trounced][min_dmg] 110;
+    #VAR dc[pummeled][min_dmg] 160;
+    #VAR dc[massacred][min_dmg] 210;
+    #VAR dc[annihilated][min_dmg] 260;
+    #VAR dc[devastated][min_dmg] 325;
+    #VAR dc[destroyed][min_dmg] 390;
+    #VAR dc[amassacred][min_dmg] 450;
+    #VAR dc[thrashed][min_dmg] 600;
+    #VAR dc[demolished][min_dmg] 700;
+    #VAR dc[exterminated][min_dmg] 900;
+    #VAR dc[obliterated][min_dmg] 1100;
+    #VAR dc[eradicated][min_dmg] 1500;
+    #VAR dc[decimated][min_dmg] 1750;
+    #VAR dc[rented_mule][min_dmg] 2000;
+    #VAR dc[exsanguinated][min_dmg] 2500;
+    #VAR dc[atomized][min_dmg] 3000;
+    #VAR dc[step_child][min_dmg] 4000;
+    #VAR dc[dropkick][min_dmg] 5000;
+
+    #VAR dc[mob_dodges][max_dmg] 0;
+    #VAR dc[deflected][max_dmg] 0;
+    #VAR dc[ineffective][max_dmg] 0;
+    #VAR dc[bobble][max_dmg] 0;
+    #VAR dc[missed][max_dmg] 0;
+    #VAR dc[tickled][max_dmg] 1;
+    #VAR dc[grazed][max_dmg] 3;
+    #VAR dc[hit][max_dmg] 10;
+    #VAR dc[hit_hard][max_dmg] 20;
+    #VAR dc[hit_vhard][max_dmg] 30;
+    #VAR dc[mighty][max_dmg] 55;
+    #VAR dc[bonecrush][max_dmg] 65;
+    #VAR dc[pulverized][max_dmg] 110;
+    #VAR dc[trounced][max_dmg] 160;
+    #VAR dc[pummeled][max_dmg] 210;
+    #VAR dc[massacred][max_dmg] 260;
+    #VAR dc[annihilated][max_dmg] 325;
+    #VAR dc[devastated][max_dmg] 390;
+    #VAR dc[destroyed][max_dmg] 450;
+    #VAR dc[amassacred][max_dmg] 550;
+    #VAR dc[thrashed][max_dmg] 700;
+    #VAR dc[demolished][max_dmg] 800;
+    #VAR dc[exterminated][max_dmg] 1000;
+    #VAR dc[obliterated][max_dmg] 1400;
+    #VAR dc[eradicated][max_dmg] 1700;
+    #VAR dc[decimated][max_dmg] 1900;
+    #VAR dc[rented_mule][max_dmg] 2300;
+    #VAR dc[exsanguinated][max_dmg] 2800;
+    #VAR dc[atomized][max_dmg] 4000;
+    #VAR dc[step_child][max_dmg] 5000;
+    #VAR dc[dropkick][max_dmg] 6000;
+
+#alias {dmg_stats_clear} {
+    #showme {<acf>----------------------------------------------------------};
+    #showme {<acf>----------------  <faa>DAMAGE TRACKER CLEARED  <acf>----------------};
+    #showme {<acf>----------------------------------------------------------};
+    dmg_melee_round_clear;
+    dmg_melee_total_clear;
+    #VAR dc[numbers_dmg] 0;
+    #VAR dc[total][count] 0;
+    #var dc[total][attempts] 0;
+    #var dc[total_hits] 0;
+    #VAR dc_aggregate 0;
+    #VAR dc[round_count] 0;
+    #VAR dc[mob_dodges][count] 0;
+    #VAR dc[numbers_dmg_total] 0;
+    #VAR total_melee_damage 0;
+    #VAR total_non_melee_damage 0;
+    #VAR round_max_melee_damage 0;
+    #VAR round_max_non_melee_damage 0;
+    #VAR round_max_damage 0;
+
+    #var dc[called_shot][miss] 0;
+    #var dc[called_shot][hits] 0;
+    #var dc[called_shot][attempts] 0;
+};
+
+#alias {dmg_melee_round_clear} {
+    #VAR dc[round][deflected][count] 0;
+    #VAR dc[round][ineffective][count] 0;
+    #VAR dc[round][bobble][count] 0;
+    #VAR dc[round][missed][count] 0;
+    #VAR dc[round][tickled][count] 0;
+    #VAR dc[round][grazed][count] 0;
+    #VAR dc[round][hit][count] 0;
+    #VAR dc[round][hit_hard][count] 0;
+    #VAR dc[round][hit_vhard][count] 0;
+    #VAR dc[round][mighty][count] 0;
+    #VAR dc[round][bonecrush][count] 0;
+    #VAR dc[round][pulverized][count] 0;
+    #VAR dc[round][trounced][count] 0;
+    #VAR dc[round][pummeled][count] 0;
+    #VAR dc[round][massacred][count] 0;
+    #VAR dc[round][annihilated][count] 0;
+    #VAR dc[round][devastated][count] 0;
+    #VAR dc[round][destroyed][count] 0;
+    #VAR dc[round][amassacred][count] 0;
+    #VAR dc[round][thrashed][count] 0;
+    #VAR dc[round][demolished][count] 0;
+    #VAR dc[round][exterminated][count] 0;
+    #VAR dc[round][obliterated][count] 0;
+    #VAR dc[round][eradicated][count] 0;
+    #VAR dc[round][decimated][count] 0;
+    #VAR dc[round][rented_mule][count] 0;
+    #VAR dc[round][exsanguinated][count] 0;
+    #VAR dc[round][atomized][count] 0;
+    #VAR dc[round][step_child][count] 0;
+    #VAR dc[round][dropkick][count] 0;
+};
+
+#alias {dmg_melee_total_clear} {
+    #VAR dc[total][deflected][count] 0;
+    #VAR dc[total][ineffective][count] 0;
+    #VAR dc[total][bobble][count] 0;
+    #VAR dc[total][missed][count] 0;
+    #VAR dc[total][tickled][count] 0;
+    #VAR dc[total][grazed][count] 0;
+    #VAR dc[total][hit][count] 0;
+    #VAR dc[total][hit_hard][count] 0;
+    #VAR dc[total][hit_vhard][count] 0;
+    #VAR dc[total][mighty][count] 0;
+    #VAR dc[total][bonecrush][count] 0;
+    #VAR dc[total][pulverized][count] 0;
+    #VAR dc[total][trounced][count] 0;
+    #VAR dc[total][pummeled][count] 0;
+    #VAR dc[total][massacred][count] 0;
+    #VAR dc[total][annihilated][count] 0;
+    #VAR dc[total][devastated][count] 0;
+    #VAR dc[total][destroyed][count] 0;
+    #VAR dc[total][amassacred][count] 0;
+    #VAR dc[total][thrashed][count] 0;
+    #VAR dc[total][demolished][count] 0;
+    #VAR dc[total][exterminated][count] 0;
+    #VAR dc[total][obliterated][count] 0;
+    #VAR dc[total][eradicated][count] 0;
+    #VAR dc[total][decimated][count] 0;
+    #VAR dc[total][rented_mule][count] 0;
+    #VAR dc[total][exsanguinated][count] 0;
+    #VAR dc[total][atomized][count] 0;
+    #VAR dc[total][step_child][count] 0;
+    #VAR dc[total][dropkick][count] 0;
+
+    #VAR dc[called_shot][deflected][count] 0;
+    #VAR dc[called_shot][ineffective][count] 0;
+    #VAR dc[called_shot][bobble][count] 0;
+    #VAR dc[called_shot][missed][count] 0;
+    #VAR dc[called_shot][tickled][count] 0;
+    #VAR dc[called_shot][grazed][count] 0;
+    #VAR dc[called_shot][hit][count] 0;
+    #VAR dc[called_shot][hit_hard][count] 0;
+    #VAR dc[called_shot][hit_vhard][count] 0;
+    #VAR dc[called_shot][mighty][count] 0;
+    #VAR dc[called_shot][bonecrush][count] 0;
+    #VAR dc[called_shot][pulverized][count] 0;
+    #VAR dc[called_shot][trounced][count] 0;
+    #VAR dc[called_shot][pummeled][count] 0;
+    #VAR dc[called_shot][massacred][count] 0;
+    #VAR dc[called_shot][annihilated][count] 0;
+    #VAR dc[called_shot][devastated][count] 0;
+    #VAR dc[called_shot][destroyed][count] 0;
+    #VAR dc[called_shot][amassacred][count] 0;
+    #VAR dc[called_shot][thrashed][count] 0;
+    #VAR dc[called_shot][demolished][count] 0;
+    #VAR dc[called_shot][exterminated][count] 0;
+    #VAR dc[called_shot][obliterated][count] 0;
+    #VAR dc[called_shot][eradicated][count] 0;
+    #VAR dc[called_shot][decimated][count] 0;
+    #VAR dc[called_shot][rented_mule][count] 0;
+    #VAR dc[called_shot][exsanguinated][count] 0;
+    #VAR dc[called_shot][atomized][count] 0;
+    #VAR dc[called_shot][step_child][count] 0;
+    #VAR dc[called_shot][dropkick][count] 0;
+};
+
+#function {formatColumn} {
+    #line quiet #var dmg_count %1;
+    #var dmg_total %2;
+    #var dmg_text %3;
+    #var dmg_min %4;
+    #var dmg_max %5;
+    #math {dmg_percent} {100.0*$dmg_count/$dmg_total};
+    #format $dmg_percent {%f} {$dmg_percent};
+    #format result {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {$dmg_text} {$dmg_percent} {$dmg_min} {$dmg_max} {};
+    #showme $result;
+    #return #NOP;
+};
+
+#function {calcTotalDmg} {
+    #var dmg_count %1;
+    #var dmg_amount %2;
+    #line quiet #math result {$dmg_count * $dmg_amount};
+};
+
+
+#alias {calcDmgStats} {
+    #math {dc[total_misses][count]} {$dc[total][deflected][count] + $dc[total][ineffective][count] + $dc[total][bobble][count] + $dc[total][missed][count]};
+    #math {dc[total_hits][count]} {$dc[total][attempts] - $dc[total_misses][count]};
+
+    #math {round_melee_damage} {
+        @calcTotalDmg{$dc[round][tickled][count];$dc[tickled][min_dmg]} +
+        @calcTotalDmg{$dc[round][grazed][count];$dc[grazed][min_dmg]} +
+        @calcTotalDmg{$dc[round][hit][count];$dc[hit][min_dmg]} +
+        @calcTotalDmg{$dc[round][hit_hard][count];$dc[hit_hard][min_dmg]} +
+        @calcTotalDmg{$dc[round][hit_vhard][count];$dc[hit_vhard][min_dmg]} +
+        @calcTotalDmg{$dc[round][mighty][count];$dc[mighty][min_dmg]} +
+        @calcTotalDmg{$dc[round][bonecrush][count];$dc[bonecrush][min_dmg]} +
+        @calcTotalDmg{$dc[round][pulverized][count];$dc[pulverized][min_dmg]} +
+        @calcTotalDmg{$dc[round][trounced][count];$dc[trounced][min_dmg]} +
+        @calcTotalDmg{$dc[round][pummeled][count];$dc[pummeled][min_dmg]} +
+        @calcTotalDmg{$dc[round][massacred][count];$dc[massacred][min_dmg]} +
+        @calcTotalDmg{$dc[round][annihilated][count];$dc[annihilated][min_dmg]} +
+        @calcTotalDmg{$dc[round][devastated][count];$dc[devastated][min_dmg]} +
+        @calcTotalDmg{$dc[round][destroyed][count];$dc[destroyed][min_dmg]} +
+        @calcTotalDmg{$dc[round][amassacred][count];$dc[amassacred][min_dmg]} +
+        @calcTotalDmg{$dc[round][thrashed][count];$dc[thrashed][min_dmg]} +
+        @calcTotalDmg{$dc[round][demolished][count];$dc[demolished][min_dmg]} +
+        @calcTotalDmg{$dc[round][exterminated][count];$dc[exterminated][min_dmg]} +
+        @calcTotalDmg{$dc[round][obliterated][count];$dc[obliterated][min_dmg]} +
+        @calcTotalDmg{$dc[round][eradicated][count];$dc[eradicated][min_dmg]} +
+        @calcTotalDmg{$dc[round][decimated][count];$dc[decimated][min_dmg]} +
+        @calcTotalDmg{$dc[round][rented_mule][count];$dc[rented_mule][min_dmg]} +
+        @calcTotalDmg{$dc[round][exsanguinated][count];$dc[exsanguinated][min_dmg]} +
+        @calcTotalDmg{$dc[round][atomized][count];$dc[atomized][min_dmg]} +
+        @calcTotalDmg{$dc[round][step_child][count];$dc[step_child][min_dmg]} +
+        @calcTotalDmg{$dc[round][dropkick][count];$dc[dropkick][min_dmg]}
+    };
+
+    #math {total_melee_damage} {
+        @calcTotalDmg{$dc[total][tickled][count];$dc[tickled][min_dmg]} +
+        @calcTotalDmg{$dc[total][grazed][count];$dc[grazed][min_dmg]} +
+        @calcTotalDmg{$dc[total][hit][count];$dc[hit][min_dmg]} +
+        @calcTotalDmg{$dc[total][hit_hard][count];$dc[hit_hard][min_dmg]} +
+        @calcTotalDmg{$dc[total][hit_vhard][count];$dc[hit_vhard][min_dmg]} +
+        @calcTotalDmg{$dc[total][mighty][count];$dc[mighty][min_dmg]} +
+        @calcTotalDmg{$dc[total][bonecrush][count];$dc[bonecrush][min_dmg]} +
+        @calcTotalDmg{$dc[total][pulverized][count];$dc[pulverized][min_dmg]} +
+        @calcTotalDmg{$dc[total][trounced][count];$dc[trounced][min_dmg]} +
+        @calcTotalDmg{$dc[total][pummeled][count];$dc[pummeled][min_dmg]} +
+        @calcTotalDmg{$dc[total][massacred][count];$dc[massacred][min_dmg]} +
+        @calcTotalDmg{$dc[total][annihilated][count];$dc[annihilated][min_dmg]} +
+        @calcTotalDmg{$dc[total][devastated][count];$dc[devastated][min_dmg]} +
+        @calcTotalDmg{$dc[total][destroyed][count];$dc[destroyed][min_dmg]} +
+        @calcTotalDmg{$dc[total][amassacred][count];$dc[amassacred][min_dmg]} +
+        @calcTotalDmg{$dc[total][thrashed][count];$dc[thrashed][min_dmg]} +
+        @calcTotalDmg{$dc[total][demolished][count];$dc[demolished][min_dmg]} +
+        @calcTotalDmg{$dc[total][exterminated][count];$dc[exterminated][min_dmg]} +
+        @calcTotalDmg{$dc[total][obliterated][count];$dc[obliterated][min_dmg]} +
+        @calcTotalDmg{$dc[total][eradicated][count];$dc[eradicated][min_dmg]} +
+        @calcTotalDmg{$dc[total][decimated][count];$dc[decimated][min_dmg]} +
+        @calcTotalDmg{$dc[total][rented_mule][count];$dc[rented_mule][min_dmg]} +
+        @calcTotalDmg{$dc[total][exsanguinated][count];$dc[exsanguinated][min_dmg]} +
+        @calcTotalDmg{$dc[total][atomized][count];$dc[atomized][min_dmg]} +
+        @calcTotalDmg{$dc[total][step_child][count];$dc[step_child][min_dmg]} +
+        @calcTotalDmg{$dc[total][dropkick][count];$dc[dropkick][min_dmg]}
+    };
+
+    #math {round_wavg_melee_damage} {
+        $round_melee_damage / $dc[total_hits][count]
+    };
+
+    #math {total_wavg_melee_damage} {
+        $total_melee_damage / $dc[total_hits][count]
+    };
+
+    #math {round_non_melee_damage} {
+        $dc[numbers_dmg] - $round_melee_damage
+    };
+
+    #math {total_non_melee_damage} {
+        $dc[numbers_dmg_total] - $total_melee_damage
+    };
+    
+    #var round_non_melee_damage @max{$round_non_melee_damage;0};
+    #var total_non_melee_damage @max{$total_non_melee_damage;0};
+
+    #math dc[round_count] {
+        $total_rounds - $dc[round_start]
+    };
+
+    #math {avg_melee_damage} {
+        $total_melee_damage / $dc[round_count]
+    };
+
+    #math {avg_non_melee_damage} {
+        $total_non_melee_damage / $dc[round_count]
+    };
+
+    #math {avg_total_damage} {
+        $dc[numbers_dmg_total] / $dc[round_count]
+    };
+
+    #NOP - Update maximum round damage totals;
+        #if {$round_max_melee_damage < $round_melee_damage} {
+            #var round_max_melee_damage $round_melee_damage;
+        };
+
+        #if {$round_max_non_melee_damage < $round_non_melee_damage} {
+            #var round_max_non_melee_damage $round_non_melee_damage;
+        };
+        
+        #if {$round_max_damage < $dc[numbers_dmg]} {
+            #var round_max_damage $dc[numbers_dmg];
+        };
+
+    #math {accuracy} {
+        100.0 * $dc[total_hits][count] / $dc[total][attempts]
+    };
+
+    #math dc[avg_attacks_per_round] {
+        $dc[total][attempts] / $dc[round_count] * 1.00
+    };
+
+    #math dc[avg_dmg_per_round] {
+        $dc[avg_attacks_per_round] * $total_wavg_melee_damage
+    };
+
+    #format $accuracy {%f} {$accuracy};
+
+    #math {total_cs_damage} {
+        @calcTotalDmg{$dc[called_shot][tickled][count];$dc[tickled][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][grazed][count];$dc[grazed][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][hit][count];$dc[hit][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][hit_hard][count];$dc[hit_hard][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][hit_vhard][count];$dc[hit_vhard][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][mighty][count];$dc[mighty][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][bonecrush][count];$dc[bonecrush][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][pulverized][count];$dc[pulverized][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][trounced][count];$dc[trounced][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][pummeled][count];$dc[pummeled][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][massacred][count];$dc[massacred][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][annihilated][count];$dc[annihilated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][devastated][count];$dc[devastated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][destroyed][count];$dc[destroyed][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][amassacred][count];$dc[amassacred][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][thrashed][count];$dc[thrashed][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][demolished][count];$dc[demolished][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][exterminated][count];$dc[exterminated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][obliterated][count];$dc[obliterated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][eradicated][count];$dc[eradicated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][decimated][count];$dc[decimated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][rented_mule][count];$dc[rented_mule][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][exsanguinated][count];$dc[exsanguinated][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][atomized][count];$dc[atomized][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][step_child][count];$dc[step_child][min_dmg]} +
+        @calcTotalDmg{$dc[called_shot][dropkick][count];$dc[dropkick][min_dmg]}
+    };
+
+    #math {round_wavg_cs_damage} {
+        $total_cs_damage / $dc[called_shot][attempts]
+    };
+
+    #format round_wavg_cs_damage {%g} {$round_wavg_cs_damage};
+    #math cs_accuracy {$dc[called_shot][hits] / $dc[called_shot][attempts] * 100 * 1.0};
+};
+
+#alias reportList {
+    #var tempCategory %1;
+    #if {"%2" == ""} {
+        #var tempFilter 0;
+    } {
+        #format tempFilter {%f} {%2};
+        #math tempFilter {$tempFilter / 100 * $dc[total][attempts]};
+        #format tempFilter {%d} {$tempFilter};
+    };
+    
+    #if {$dc[${tempCategory}][deflected][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][deflected][count];$dc[${tempCategory}][attempts];$dc[deflected][text];$dc[deflected][min_dmg];$dc[deflected][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][ineffective][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][ineffective][count];$dc[${tempCategory}][attempts];$dc[ineffective][text];$dc[ineffective][min_dmg];$dc[ineffective][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][bobble][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][bobble][count];$dc[${tempCategory}][attempts];$dc[bobble][text];$dc[bobble][min_dmg];$dc[bobble][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][missed][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][missed][count];$dc[${tempCategory}][attempts];$dc[missed][text];$dc[missed][min_dmg];$dc[missed][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][tickled][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][tickled][count];$dc[${tempCategory}][attempts];$dc[tickled][text];$dc[tickled][min_dmg];$dc[tickled][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][grazed][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][grazed][count];$dc[${tempCategory}][attempts];$dc[grazed][text];$dc[grazed][min_dmg];$dc[grazed][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][hit][count] > $tempFilter} {
+        @formatColumn{$dc[hit][count];$dc[${tempCategory}][attempts];$dc[hit][text];$dc[hit][min_dmg];$dc[hit][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][hit_hard][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][hit_hard][count];$dc[${tempCategory}][attempts];$dc[hit_hard][text];$dc[hit_hard][min_dmg];$dc[hit_hard][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][hit_vhard][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][hit_vhard][count];$dc[${tempCategory}][attempts];$dc[hit_vhard][text];$dc[hit_vhard][min_dmg];$dc[hit_vhard][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][mighty][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][mighty][count];$dc[${tempCategory}][attempts];$dc[mighty][text];$dc[mighty][min_dmg];$dc[mighty][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][bonecrush][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][bonecrush][count];$dc[${tempCategory}][attempts];$dc[bonecrush][text];$dc[bonecrush][min_dmg];$dc[bonecrush][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][pulverized][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][pulverized][count];$dc[${tempCategory}][attempts];$dc[pulverized][text];$dc[pulverized][min_dmg];$dc[pulverized][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][trounced][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][trounced][count];$dc[${tempCategory}][attempts];$dc[trounced][text];$dc[trounced][min_dmg];$dc[trounced][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][pummeled][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][pummeled][count];$dc[${tempCategory}][attempts];$dc[pummeled][text];$dc[pummeled][min_dmg];$dc[pummeled][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][massacred][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][massacred][count];$dc[${tempCategory}][attempts];$dc[massacred][text];$dc[massacred][min_dmg];$dc[massacred][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][annihilated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][annihilated][count];$dc[${tempCategory}][attempts];$dc[annihilated][text];$dc[annihilated][min_dmg];$dc[annihilated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][devastated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][devastated][count];$dc[${tempCategory}][attempts];$dc[devastated][text];$dc[devastated][min_dmg];$dc[devastated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][destroyed][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][destroyed][count];$dc[${tempCategory}][attempts];$dc[destroyed][text];$dc[destroyed][min_dmg];$dc[destroyed][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][amassacred][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][amassacred][count];$dc[${tempCategory}][attempts];$dc[amassacred][text];$dc[amassacred][min_dmg];$dc[amassacred][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][thrashed][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][thrashed][count];$dc[${tempCategory}][attempts];$dc[thrashed][text];$dc[thrashed][min_dmg];$dc[thrashed][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][demolished][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][demolished][count];$dc[${tempCategory}][attempts];$dc[demolished][text];$dc[demolished][min_dmg];$dc[demolished][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][exterminated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][exterminated][count];$dc[${tempCategory}][attempts];$dc[exterminated][text];$dc[exterminated][min_dmg];$dc[exterminated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][obliterated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][obliterated][count];$dc[${tempCategory}][attempts];$dc[obliterated][text];$dc[obliterated][min_dmg];$dc[obliterated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][eradicated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][eradicated][count];$dc[${tempCategory}][attempts];$dc[eradicated][text];$dc[eradicated][min_dmg];$dc[eradicated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][decimated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][decimated][count];$dc[${tempCategory}][attempts];$dc[decimated][text];$dc[decimated][min_dmg];$dc[decimated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][rented_mule][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][rented_mule][count];$dc[${tempCategory}][attempts];$dc[rented_mule][text];$dc[rented_mule][min_dmg];$dc[rented_mule][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][exsanguinated][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][exsanguinated][count];$dc[${tempCategory}][attempts];$dc[exsanguinated][text];$dc[exsanguinated][min_dmg];$dc[exsanguinated][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][atomized][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][atomized][count];$dc[${tempCategory}][attempts];$dc[atomized][text];$dc[atomized][min_dmg];$dc[atomized][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][step_child][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][step_child][count];$dc[${tempCategory}][attempts];$dc[step_child][text];$dc[step_child][min_dmg];$dc[step_child][max_dmg]};
+    };
+    #if {$dc[${tempCategory}][dropkick][count] > $tempFilter} {
+        @formatColumn{$dc[${tempCategory}][dropkick][count];$dc[${tempCategory}][attempts];$dc[dropkick][text];$dc[dropkick][min_dmg];$dc[dropkick][max_dmg]};
+    };
+    #showme {<acf>---------------------------------------------------------}
+};
+
+#alias {dmg_stats} {
+    calcDmgStats;
+    
+    #format dc[avg_dmg_per_round] {%d} {$dc[avg_dmg_per_round]};
+    #format dc[avg_dmg_per_round] {%g} {$dc[avg_dmg_per_round]};
+    #format dc[total][attempts] {%g} {$dc[total][attempts]};
+    #format dc[total_misses][count] {%g} {$dc[total_misses][count]};
+    #format total_wavg_melee_damage {%g} {$total_wavg_melee_damage};    
+    
+
+    #var total_attacks_text Total Attacks;
+    #var header_percent_1 % of;
+    #var header_percent_2 Total;
+    #var header_wavg_dmg_1 Wavg;
+    #var header_wavg_dmg_2 Dmg;
+    #var header_min_dmg_1 Min;
+    #var header_min_dmg_2 Dmg;
+    #var header_max_dmg_1 Max;
+    #var header_max_dmg_2 Dmg;
+    
+    #showme {<acf>------------------  <faa>3k DAMAGE TRACKER  <acf>------------------};
+    #format dmg_header_line_1 {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {} {$header_percent_1} {$header_min_dmg_1} {$header_max_dmg_1} {$header_wavg_dmg_1};
+    #format dmg_header_line_2 {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {} {$header_percent_2} {$header_min_dmg_2} {$header_max_dmg_2} {$header_wavg_dmg_2};
+
+    #showme $dmg_header_line_1;
+    #showme $dmg_header_line_2;
+
+
+    #format sample_size {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {$total_attacks_text} {$dc[total][attempts]} {----} {----} {} ;
+    #format dmg_summary {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {$dc[total_hits][text]} {$accuracy} {----} {----} {$total_wavg_melee_damage};
+    #format per_round_summary {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {Avg Attacks/Rnd} {$dc[avg_attacks_per_round]} {----} {----} {$dc[avg_dmg_per_round]};
+
+    #showme $dmg_summary;
+    @formatColumn{$dc[total_misses][count];$dc[total][attempts];$dc[total_misses][text];{----};{----}};
+
+    #showme $sample_size;
+    #showme $per_round_summary;
+    
+    #showme {<acf>---------------------------------------------------------};
+    #showme {<acf>-----                   <faa> TOTALS                     <acf>-----};
+    reportList total;
+    
+    #if {$dc[called_shot][attempts] > 0} {
+        #showme {<acf>-----              <faa> CALLED SHOT                     <acf>-----};
+        #format cs_header {<acf>-----<fff> %+15s %+6s %+4s %+8s %+6s   <acf>-----} {Total Hits} {$dc[called_shot][attempts]} {} {Avg. Hit} {$round_wavg_cs_damage} ;
+        #format cs_header1 {<acf>-----<fff> %+15s %+6s %+21s  <acf>-----} {Accuracy} {${cs_accuracy}%} {};
+        #showme $cs_header;
+        #showme $cs_header1;
+         
+        reportList called_shot;
+    };
+};
+
+#alias {dmg_stats_top} {
+    calcDmgStats;
+    
+    #format dc[avg_dmg_per_round] {%d} {$dc[avg_dmg_per_round]};
+    #format dc[avg_dmg_per_round] {%g} {$dc[avg_dmg_per_round]};
+    #format dc[total][attempts] {%g} {$dc[total][attempts]};
+    #format dc[total_misses][count] {%g} {$dc[total_misses][count]};
+    #format total_wavg_melee_damage {%g} {$total_wavg_melee_damage};    
+    
+
+    #var total_attacks_text Total Attacks;
+    #var header_percent_1 % of;
+    #var header_percent_2 Total;
+    #var header_wavg_dmg_1 Wavg;
+    #var header_wavg_dmg_2 Dmg;
+    #var header_min_dmg_1 Min;
+    #var header_min_dmg_2 Dmg;
+    #var header_max_dmg_1 Max;
+    #var header_max_dmg_2 Dmg;
+    
+    #showme {<acf>------------------  <faa>3k DAMAGE TRACKER  <acf>------------------};
+    #format dmg_header_line_1 {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {} {$header_percent_1} {$header_min_dmg_1} {$header_max_dmg_1} {$header_wavg_dmg_1};
+    #format dmg_header_line_2 {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {} {$header_percent_2} {$header_min_dmg_2} {$header_max_dmg_2} {$header_wavg_dmg_2};
+
+    #showme $dmg_header_line_1;
+    #showme $dmg_header_line_2;
+
+
+    #format sample_size {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {$total_attacks_text} {$dc[total][attempts]} {----} {----} {} ;
+    #format dmg_summary {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {$dc[total_hits][text]} {$accuracy} {----} {----} {$total_wavg_melee_damage};
+    #format per_round_summary {<acf>-----<fff> %+15s %+6s %+6s %+6s %+6s   <acf>-----} {Avg Attacks/Rnd} {$dc[avg_attacks_per_round]} {----} {----} {$dc[avg_dmg_per_round]};
+
+    #showme $dmg_summary;
+    @formatColumn{$dc[total_misses][count];$dc[total][attempts];$dc[total_misses][text];{----};{----}};
+
+    #showme $sample_size;
+    #showme $per_round_summary;
+    
+    #showme {<acf>---------------------------------------------------------};
+    #showme {<acf>-----                   <faa> TOTALS                     <acf>-----};
+    reportList total 10;
+    
+    #if {$dc[called_shot][attempts] > 0} {
+        #showme {<acf>-----              <faa> CALLED SHOT                     <acf>-----};
+        #format cs_header {<acf>-----<fff> %+15s %+6s %+4s %+8s %+6s   <acf>-----} {Total Hits} {$dc[called_shot][attempts]} {} {Avg. Hit} {$round_wavg_cs_damage} ;
+        #format cs_header1 {<acf>-----<fff> %+15s %+6s %+21s  <acf>-----} {Accuracy} {${cs_accuracy}%} {};
+        #showme $cs_header;
+        #showme $cs_header1;
+         
+        reportList called_shot;
+    };
+};
+
+#NOP -- NUMBERS CAPTURE;
+#ACTION {^You hit %1 times for %2 damage.$} {
+    #var roundhits %1; 
+    #var dc[numbers_dmg] %2;
+
+    #math mobrounds {$mobrounds + 1};
+    #math dc[numbers_dmg_total] {$dc[numbers_dmg_total] + %2};
+    #math dc[round_count] {$dc[round_count] + 1};
+    calcDmgStats;
+    round_dmg_summary;
+};
+
+#function {formatRoundSummary} {
+    #var text_line_title %1;
+    #var number_damage_total %2;
+    #var number_damage_average %3;
+    #var number_damage_maximum %4;
+    #var number_damage_delta %5;
+
+    #format result {<acf>-----<fff> %+15s %+6s ( %+6s / rnd)   Max: %+6s   <acf>-----} {$text_line_title} {$number_damage_total} {$number_damage_average} {$number_damage_maximum};
+    #return #NOP;
+};
+
+
+#alias {round_dmg_summary} {
+    #var line_1_title Melee Dmg:;
+    #var line_2_title Other Dmg:;
+    #var line_3_title Total Dmg:;
+    #var line_4_total_rounds Total Rounds:;
+    #var line_4_accuracy Melee Accuracy:;
+
+    #math melee_delta {$round_melee_damage - $avg_melee_damage};
+    #math other_delta {$round_non_melee_damage - $avg_non_melee_damage};
+    #math total_delta {$dc[numbers_dmg] - $avg_total_damage};
+
+    #format {str_round_melee_damage} {%g} {$round_melee_damage};
+    #format {str_avg_melee_damage} {%g} {$avg_melee_damage};
+    #format {str_round_max_melee_damage} {%g} {$round_max_melee_damage};
+    #format {str_round_non_melee_damage} {%g} {$round_non_melee_damage};
+    #format {str_avg_non_melee_damage} {%g} {$avg_non_melee_damage};
+    #format {str_round_max_non_melee_damage} {%g} {$round_max_non_melee_damage};
+    #format {str_total_dmg} {%g} {$dc[numbers_dmg]};
+    #format {str_avg_total_damage} {%g} {$avg_total_damage};
+    #format {str_round_max_damage} {%g} {$round_max_damage};
+    
+
+    #if {"$draw[caption][active]" == "on"} {
+        #var caption_data[3] {\nMelee: $str_round_melee_damage (Avg: $str_avg_melee_damage Max: $str_round_max_melee_damage )};
+        #cat caption_data[3] {\nOther: $str_round_non_melee_damage (Avg: $str_avg_non_melee_damage Max: $str_round_max_non_melee_damage )};
+        #cat caption_data[3] {\nTotal: $str_total_dmg (Avg: $str_avg_total_damage Max: $str_round_max_damage )};
+    } {
+        @formatRoundSummary{$line_1_title; $round_melee_damage; $avg_melee_damage; $round_max_melee_damage; $melee_delta};
+        @formatRoundSummary{$line_2_title; $round_non_melee_damage; $avg_non_melee_damage; $round_max_non_melee_damage; $other_delta};
+        @formatRoundSummary{$line_3_title; $dc[numbers_dmg]; $avg_total_damage; $round_max_damage; $total_delta};
+        #format totals {<acf>-----<fff> %+15s %+6s %+12s %+6s <acf>-----} {$line_4_total_rounds} {$dc[round_count]} {$line_4_accuracy} {$accuracy};
+    };
+
+
+    dmg_melee_round_clear;
+};
+
+
+#NOP -- Bard Called Shot Catch;
+#action {With remarkable skill and aim you drive your weapon into a poorly defended} {
+    #var called_shot 1;
+    #math dc[called_shot][hits] {$dc[called_shot][hits] + 1};
+    #math dc[called_shot][attempts] {$dc[called_shot][attempts] + 1};
+};
+
+#action {You target a weak spot on %* but miss your mark!} {
+    #var called_shot 0;
+    #math dc[called_shot][miss] {$dc[called_shot][miss] + 1};
+    #math dc[called_shot][attempts] {$dc[called_shot][attempts] + 1};
+};
+
+#NOP -- MELEE EMOTES;
+#ACTION {^Your blow was deflected.$} {dmgRecord deflected};
+#ACTION {^Your strike was ineffective.$} {dmgRecord ineffective};
+#ACTION {^You bobble your swing.$} {dmgRecord bobble};
+#ACTION {^You missed %1.$} {dmgRecord missed};
+#ACTION {^You tickled %1 in the stomach.$} {dmgRecord tickled};
+#ACTION {^You grazed %1.$} {dmgRecord grazed};
+#ACTION {^You hit %1.} {dmgRecord hit};
+#ACTION {^You hit %1 hard.$} {dmgRecord hit_hard};
+#ACTION {^You hit %1 very hard.$} {dmgRecord hit_vhard};
+#ACTION {^You struck %1 a mighty blow.$} {dmgRecord mighty};
+#ACTION {^You smashed %1 with a bone crushing sound.$} {dmgRecord bonecrush};
+#ACTION {^You pulverized %1 with a powerful attack.$} {dmgRecord pulverized};
+#ACTION {^You trounced %1 up and down.$} {dmgRecord trounced};
+#ACTION {^You pummeled %1 into small fragments.$} {dmgRecord pummeled};
+#ACTION {^You massacred %1 into tiny fragments.$} {dmgRecord massacred};
+#ACTION {^You utterly annihilated %1.$} {dmgRecord annihilated};
+#ACTION {^You completely devastated %1 with awesome force.$} {dmgRecord devastated};
+#ACTION {^You destroyed %1.$} {dmgRecord destroyed};
+#ACTION {^You absolutely massacred %1.$} {dmgRecord amassacred};
+#ACTION {^You thrashed %1 completely.$} {dmgRecord thrashed};
+#ACTION {^You demolished %1.$} {dmgRecord demolished};
+#ACTION {^You nearly exterminated %1.$} {dmgRecord exterminated};
+#ACTION {^You obliterated %1.$} {dmgRecord obliterated};
+#ACTION {^You eradicated %1.$} {dmgRecord eradicated};
+#ACTION {^You decimated %1.} {dmgRecord decimated};
+#ACTION {^You beat %1 like a rented mule.$} {dmgRecord rented_mule};
+#ACTION {^You exsanguinated %1.$} {dmgRecord exsanguinated};
+#ACTION {^You atomized %1.$} {dmgRecord atomized};
+#ACTION {^You beat %1 like a red-headed step child.$} {dmgRecord step_child};
+#ACTION {^You drop-kicked %1.$} {dmgRecord dropkick};
+
+
+#alias dmgRecord {
+    #var dmgCategory %0;
+    #if $called_shot {
+        #math {dc[called_shot][${dmgCategory}][count]} {$dc[called_shot][${dmgCategory}][count] +1};
+        #var called_shot 0;
+    };
+    #math {dc[round][${dmgCategory}][count]} {$dc[round][${dmgCategory}][count] +1};
+    #math {dc[total][${dmgCategory}][count]} {$dc[total][${dmgCategory}][count] +1};
+    #math {dc[total][attempts]} {$dc[total][attempts] +1};
+};
+
+#NOP -- MOB Dodges;
+
+#NOP -- Event Mobs;
+#ACTION {^%* phases into the ethereal realm and your attack passes right through!$} {#math {dc[mob_dodges][count]} {$dc[mob_dodges][count] +1};#math {dc[total][attempts]} {$dc[total][attempts] +1}};
+#ACTION {^%* deftly slips away from your attack!$} {#math {dc[mob_dodges][count]} {$dc[mob_dodges][count] +1};#math {dc[total][attempts]} {$dc[total][attempts] +1}};
+
+
+#var gag_dmg 0;
+#alias gag_dmg {
+    #if $gag_dmg {
+        #echo <bfa> --- MELEE EMOTES NO LONGER GAGGED ---<088>;
+        #class dmg_gag kill;
+    } {
+        #echo <bfa> --- MELEE EMOTES NOW GAGGED ---<088>;
+        #var gag_dmg 1;
+        #class dmg_gag open;
+        #GAG {^Your blow was deflected.$};
+        #GAG {^Your strike was ineffective.$};
+        #GAG {^You bobble your swing.$};
+        #GAG {^You missed %%1.$};
+        #GAG {^You tickled %%1 in the stomach.$};
+        #GAG {^You grazed %%1.$};
+        #GAG {^You hit %%1.};
+        #GAG {^You hit %%1 hard.$};
+        #GAG {^You hit %%1 very hard.$};
+        #GAG {^You struck %%1 a mighty blow.$};
+        #GAG {^You smashed %%1 with a bone crushing sound.$};
+        #GAG {^You pulverized %%1 with a powerful attack.$};
+        #GAG {^You trounced %%1 up and down.$};
+        #GAG {^You pummeled %%1 into small fragments.$};
+        #GAG {^You massacred %%1 into tiny fragments.$};
+        #GAG {^You utterly annihilated %%1.$};
+        #GAG {^You completely devastated %%1 with awesome force.$};
+        #GAG {^You destroyed %%1.$};
+        #GAG {^You absolutely massacred %%1.$};
+        #GAG {^You thrashed %%1 completely.$};
+        #GAG {^You demolished %%1.$};
+        #GAG {^You nearly exterminated %%1.$};
+        #GAG {^You obliterated %%1.$};
+        #GAG {^You eradicated %%1.$};
+        #GAG {^You decimated %%1.};
+        #GAG {^You beat %%1 like a rented mule.$};
+        #GAG {^You exsanguinated %%1.$};
+        #GAG {^You atomized %%1.$};
+        #GAG {^You beat %%1 like a red-headed step child.$};
+        #GAG {^You drop-kicked %%1.$};
+        #class dmg_gag close;
+    };
+};
+
+#class {damage_tracker} {close}

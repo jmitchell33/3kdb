@@ -1,22 +1,235 @@
 #alias common_strategy kill;
 #class common_strategy open;
 
+#NOP -- Set some variables for multi-round actions
+#var iprime_round 1;
+
+
+#alias formatStrategy {
+    #format result {<acf>-----<fff> %+15s  %s<088>} {%1} {%2};
+    #showme $result;
+};
+
+
+#alias strategy-list {
+    formatStrategy {Name} {Desc};
+    #foreach $strategyList[%*] item {
+        formatStrategy {$item[name]} {$item[description]};
+    };
+    #showme \n<bab>strategy<088> <bcc>name<088> to add or remove a strategy;
+};
+
+
 #alias strategy {
-    #format temp {%u} {%1};
-    #switch {"$strategy[%1]"} {
-        #case {"0"} {
-            #showme <caa>----  <fff> $temp HAS BEEN TOGGLED ON  <caa>  ----<088>;
-            #var strategy[%1] 1;
+    #list {strategyList} {find} {%0} {tempListIndex};
+    #var tempList $strategyList[+$tempListIndex];
+    #if {&tempList[] > 0} {
+        #NOP -- If the strategyActive list exists, check if the selected strategy is a member and toggle it;
+        #NOP -- Otherwise, if there is no strategyActive list, we add it;
+        #if {&strategyActive[] > 0} {
+            #list strategyActive indexate name;
+            #list {strategyActive} {find} {%0} {strategyExists};
+            #if {$strategyExists} {
+                #showme <caa>----  <fff> %0 is now an <baa>inactive<088> <fff>strategy <caa>  ----<088>;
+                #list strategyActive filter {} {%0};
+            } {
+                #list strategyActive add {{{name} {$tempList[name]} {active} {1}}};
+                #showme <caa>----  <fff> %0 is now an <bfd>active<088> <fff>strategy  <caa>  ----<088>;
+            };
+        } {
+            #list strategyActive add {{{name} {$tempList[name]} {active} {1}}};
+            #showme <caa>----  <fff> %0 is now an <bfd>active<088> <fff>strategy  <caa>  ----<088>;
         };
-        #case {"1"} {
-            #showme <caa>----  <fff> $temp HAS BEEN TOGGLED OFF  <caa> ----<088>;
-            #var strategy[%1] 0;
-        };
-        #default {
-            #showme <caa>----  <fff> STRATEGY NOT FOUND, CHECK SPELLING  <caa> ----<088>;
-        };
+    } {
+        #showme <caa>----  <fff> %0 not found in Strategy List.  <caa>  ----<088>;
+        #showme <caa>----  <fff> 'strategy-list' will show a list of available strategies  <caa>  ----<088>;
     };
     #if {"$draw[strategy][active]" == "on"} {draw_strategy};
 };
 
-#class common_strategy kill;
+#alias strategies {
+    #showme {<ffb>   Active Strategies   <088>};
+    #var inactiveStrats <ffb>   Inactive Strategies   <088>;
+    #foreach $strategyActive[%*] item {
+        #showme {<efe>   $item[name]   <088>};
+    };
+    #foreach $strategyList item {
+        #var inactiveStrategies ${strategyList};
+        #list inactiveStrategies indexate name;
+        #foreach $strategyActive[%*] active {
+            #list inactiveStrategies filter {} {$active[name]};
+        };
+    };
+    #if {&inactiveStrategies[] > 0} {
+        #showme {\n<ffb>   Inactive Strategies   <088>};
+        #foreach $inactiveStrategies[%*] index {
+            #if {"$index[guild]" == "all" || "$index[guild]" == "$guild"} {
+                #showme {<cba>   $index[name]   <088>};
+            };
+        };
+    };
+    #showme \n<bab>strategy<088> <bcc>name<088> to add or remove a strategy;
+    #showme <bab>strategy-list<088> to see available strategies;
+};
+
+
+#list strategyList clear;
+#list strategyList add {{{guild} {all} {name} {lucanus} {active} {0} {guild} {all} {description} {Automatically uses amulet and ring}}};
+#list strategyList add {{{guild} {all} {name} {epowers} {active} {0} {guild} {all} {description} {Automatically use fry, shred, ewell}}};
+#list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {guild} {all} {description} {Automatically use owl rune}}};
+#list strategyList add {{{guild} {bard} {name} {backstab}  {active} {0} {guild} {bard} {description} {Backstab}}};
+#list strategyList add {{{guild} {bard} {name} {hammer}  {active} {0} {guild} {bard} {description} {Hammer Smashed Face}}};
+#list strategyList add {{{guild} {bard} {name} {rainbow} {active} {0} {guild} {bard} {description} {Rainbow of Death}}};
+#list strategyList add {{{guild} {bard} {name} {cloud}   {active} {0} {guild} {bard} {description} {Noxious Cloud}}};
+#list strategyList add {{{guild} {bard} {name} {vortex}  {active} {0} {guild} {bard} {description} {Lightning Vortex}}};
+#list strategyList add {{{guild} {bard} {name} {assault} {active} {0} {guild} {bard} {description} {Martial Assault}}};
+#list strategyList add {{{guild} {bard} {name} {enrage}  {active} {0} {guild} {bard} {description} {Enrage}}};
+#list strategyList add {{{guild} {necromancer} {name} {snare}  {active} {0} {guild} {necromancer} {description} {Snare}}};
+#list strategyList add {{{guild} {necromancer} {name} {call}  {active} {0} {guild} {necromancer} {description} {Call Familiar}}};
+#list strategyList add {{{guild} {necromancer} {name} {maim}  {active} {0} {guild} {necromancer} {description} {Maim}}};
+#list strategyList add {{{guild} {necromancer} {name} {rabies}  {active} {0} {guild} {necromancer} {description} {Rabies}}};
+#list strategyList add {{{guild} {necromancer} {name} {fury}  {active} {0} {guild} {necromancer} {description} {Fury}}};
+#list strategyList add {{{guild} {necromancer} {name} {spirithowl}  {active} {0} {guild} {necromancer} {description} {Spirithowl}}};
+#list strategyList add {{{guild} {necromancer} {name} {diurnum}  {active} {0} {guild} {necromancer} {description} {Diurnum}}};
+#list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {guild} {necromancer} {description} {Invoke Prime}}};
+#list strategyList indexate name;
+
+
+#alias checkStrategy {
+    #if {&strategyActive[] > 0} {
+        #foreach $strategyActive[%*] item {
+            #if {"$item[name]" == "%1"} {
+                %2;
+            };
+        };
+    };
+};
+
+#alias _strategy_necro {
+    #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
+        checkStrategy {iprime} {#var iprime_round 0;ip1;#delay 10 {#var iprime_round 1}};
+    };
+
+    #if {$my[necromancer][spirit-howl]} {
+        checkStrategy {spirithowl} {spirithowl;#var my[necromancer][spirit-howl] 0;};
+    };
+    #if {$my[necromancer][diurnum]} {
+        checkStrategy {diurnum} {diurnum prime;#var my[necromancer][diurnum] 0;};
+    };
+
+    checkStrategy {snare} {snare;};
+    checkStrategy {rabies} {rabies;};
+    checkStrategy {call} {call;};
+    checkStrategy {maim} {maim;};
+    checkStrategy {fury} {fury prime;};
+};
+
+#alias _strategy_bard {
+    checkStrategy {assault} {
+        #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
+            martial assault;
+            martial assault;
+            martial assault;
+        };
+    };
+
+    #NOP -- Bard Song-Bot Strategies;
+    #if {$mip[round] > 1} {
+            
+        #NOP --- If we're above the level we should use a corpse, remove the action to use the corpse;
+        #if {$my[gp1][current] > $karma_use_corpse_between_songs && $actions_stacked} {remove_action corpse-between-songs;};
+
+        #NOP --- The song bots shouldn't attempt to keep rolling if we're near using a corpse;
+        checkStrategy {rainbow} {
+            #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
+            #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
+                add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+            };
+
+            #if {$my[gp1][current] > $karma_heal} {
+                #if {$my[song][rounds] > 1} {#NOP;} {
+                    #if {!$actions_stacked} {
+                        #if $resume_song {perform rainbow of death}
+                    } {
+                        do_action
+                    };
+                };
+                #if !$my[defs][fr] {cast focus the rainbow};
+            };
+        };
+
+        checkStrategy {hammer} {
+            #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
+            #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
+                add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+            };
+            #if {$my[gp1][current] > $karma_heal} {
+                #if {$my[song][rounds] > 1} {#NOP;} {
+                    #if {$my[gp2][current] > 20} {
+                        #if {$mip[round] > 10} {
+                            #if {!$actions_stacked} {
+                                #if {$resume_song} {
+                                    perform hammer smashed face
+                                };
+                            } {
+                                do_action;
+                            };
+                            
+                        } {
+                            #if !$my[defs][fr] {cast focus the rainbow};
+                            #if {!$actions_stacked} {
+                                #if {$resume_song} {
+                                    perform rainbow of death;
+                                };
+                            } {
+                                do_action;
+                            };
+                        };
+                    } {
+                        #if !$my[defs][fr] {cast focus the rainbow};
+                        #if {!$actions_stacked} {
+                            #if {$resume_song} {
+                                perform rainbow of death;
+                            };
+                        } {
+                            do_action;
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
+
+#alias _strategy_heartbeat {
+    #if {!$idle_flag && $action_round < $mip[round]} {
+
+        #NOP -- Actions to perform only in the beginning of the fight;
+        #if {$mip[round] > 2 && $mip[round] < 6} {
+            checkStrategy {epowers} {
+                #if ${my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
+                #if $my[eternal][fry] {(fry;};
+            };
+
+            checkStrategy {lucanus} {
+                #if $lucanus_ring {push diamond};
+                #if $lucanus_amulet {push symbol};
+            };
+
+            #if {$rolm[owl]} {checkStrategy {rolm} {touch owl rune}};
+
+            #if {"$guild" == "necromancer"} {_strategy_necro};
+            
+            #if {"$guild" == "bard"} {
+                checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
+                checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
+                checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
+            };
+        };
+
+        #NOP -- Actions to perform at any time in the fight;
+        #if {"$guild" == "bard"} {_strategy_bard};
+    };
+};
+
+#class common_strategy close;

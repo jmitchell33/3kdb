@@ -1,0 +1,165 @@
+#alias common_corpse kill;
+#class common_corpse open;
+
+#alias formatItem {
+    #format result {<acf>%+10s  %s<088>} {%1} {%2};
+    #showme $result;
+};
+
+
+#alias corpse_trigs {
+    formatItem {Action} {Desc};
+    #foreach $corpseActions[%*] item {
+        formatItem {$item[action]} {$item[description]};
+    };
+    #showme \n<bab>corpsetrig<088> <bcc>action<088> to add or remove an item from the corpse trigger;
+};
+
+
+#alias corpsetrig {
+    #if {"%0" != ""} {
+        #list {corpseList} {find} {%0} {tempListIndex};
+        #var tempList $corpseList[+$tempListIndex];
+        #if {&tempList[] > 0} {
+            #NOP -- If the corpseActions list exists, check if the selected action is a member and toggle it;
+            #NOP -- Otherwise, if there is no corpseActions list, we add it;
+            #if {&corpseActions[] > 0} {
+                #list corpseActions indexate name;
+                #list {corpseActions} {find} {%0} {itemExists};
+                #if {$itemExists} {
+                    #showme <caa>----  <fff> %0 has been <baa>removed<088> from <fff>corpse_trig <caa>  ----<088>;
+                    #list corpseActions filter {} {%0};
+                } {
+                    #list corpseActions add {{{priority} {&corpseActions[]} {name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
+                    #showme <caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>;
+                };
+            } {
+                #list corpseActions add {{{priority} {&corpseActions[]} {name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
+                #showme <caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>;
+            };
+        } {
+            #showme <caa>----  <fff> %0 not found in corpsetrig List.  <caa>  ----<088>;
+            #showme <caa>----  <fff> %0 has been added as an action.  <caa>  ----<088>;
+            #list corpseActions add {{{priority} {&corpseActions[]} {name} {%0} {action} {%0} {active} {1}}};
+        };
+    } {
+        #showme {<ffb>   Current Corpse Trigger Actions   <088>\n};
+        #if {&corpseActions[] > 0} {
+            #list corpseActions indexate priority;
+            #list corpseActions order;
+            formatItem {Priority:} {Name};
+            #foreach $corpseActions[%*] item {
+                formatItem {<afc>$item[priority]:} {<efe>$item[name]<088>};
+            };
+            #showme \n<bab>corpsetrig++<088> <bcc>name<088> to <efc>increase<088> an action's priority;
+            #showme <bab>corpsetrig--<088> <bcc>name<088> to <fac>decrease<088> an action's priority;
+            #showme \n<bab>corpsetrig<088> <bcc>name<088> to add or remove an action;
+            #showme <bab>corpsetrig-all<088> to see available actions;
+        } {
+            #showme There are currently no actions added to corpse_trig;
+            #showme \n<bab>corpsetrig<088> <bcc>name<088> to add or remove an action;
+            #showme <bab>corpsetrig-all<088> to see available actions;
+            #showme If the action doesn't exist, it will be added;
+        };
+    };
+};
+
+
+#alias corpsetrig++ {
+    #if {"%0" != ""} {
+        #list corpseActions indexate name;
+        #list corpseActions find {%0} {foundItem};
+        #if {$corpseActions[$foundItem][priority] > 0} {
+            #loop 1 &corpseActions[] item {
+                #if {"$corpseActions[$item][name]" != "%0"} {
+                    #math corpseActions[$item][priority] {$corpseActions[$foundItem][priority] + 1};
+                } {
+                    #math corpseActions[$foundItem][priority] {$corpseActions[$foundItem][priority] - 1};
+                };
+            };
+            #showme <efc>$foundItem[name] priority has been increased by 1<088>;
+        } {
+            #showme <bba>$foundItem[name] priority is already the first item to trigger<088>;
+        };
+    } {
+        #showme {<fac>  No corpsetrig name provided.<088>};
+    };
+};
+
+
+#alias corpsetrig-- {
+    #if {"%0" != ""} {
+        #list corpseActions indexate name;
+        #list corpseActions find {%0} {foundItem};
+        #if {$foundItem != &corpseActions[]} {
+            #loop 1 &corpseActions[] item {
+                #if {"$corpseActions[$item][name]" != "%0"} {
+                    #math corpseActions[$item][priority] {$corpseActions[$foundItem][priority] - 1};
+                } {
+                    #math corpseActions[$foundItem][priority] {$corpseActions[$foundItem][priority] + 1};
+                };
+            };
+            #showme <efc>corpseActions[$foundItem][name] priority has been increased by 1<088>;
+        } {
+            #showme <bba>corpseActions[$foundItem][name] priority is already the last item<088>;
+        };
+    } {
+        #showme {<fac>  No corpsetrig name provided.<088>};
+    };
+};
+
+
+#alias {corpsetrig-all} {
+    #showme {\n<ffb>   Current Corpse Trigger Actions   <088>};
+    #if {&corpseActions[] > 0} {
+        #list corpseActions indexate priority;
+        #foreach $corpseActions[%*] item {
+            #showme {   <afc>$item[priority]: <efe> $item[name]   <088>};
+        };
+    } {
+        #showme {<fac>             None              <088>};
+    };
+    #foreach $corpseList item {
+        #var inactiveItems ${corpseList};
+        #list inactiveItems indexate name;
+        #foreach $corpseActions[%*] active {
+            #list inactiveItems filter {} {$active[action]};
+        };
+    };
+    #if {&inactiveItems[] > 0} {
+        #showme {\n<ffb>   Available Options   <088>};
+        formatItem {Name} {Description};
+        #foreach $inactiveItems[%*] index {
+            #if {"$index[guild]" == "all" || "$index[guild]" == "$guild"} {
+                formatItem {$index[name]} {<cba>$index[description]<088>};
+            };
+        };
+    };
+    #showme \n<bab>corpsetrig<088> <bcc>action<088> to add or remove an actions;
+    #showme <bab>corpsetrig show<088> to see available actions;
+    #showme If the action doesn't exist, it will be added;
+};
+
+
+#list corpseList clear;
+#list corpseList add {{{priority} {1} {name} {aoe} {guild} {all} {action} {immolate corpse} {active} {0} {description} {AOE Armor: Immolate Corpse}}};
+#list corpseList add {{{priority} {1} {name} {divvy} {guild} {all} {action} {divvy gold} {active} {0} {description} {Divvy gold}}};
+#list corpseList add {{{priority} {1} {name} {pause} {guild} {all} {action} {#delay 2 {#NOP}} {active} {0} {description} {2 Second Pause}}};
+#list corpseList add {{{priority} {1} {name} {dirge} {guild} {bard} {action} {perform dirge}  {active} {0} {description} {Bard: Perform Dirge}}};
+#list corpseList add {{{priority} {1} {name} {edrain} {guild} {elemental} {action} {evoke energy drain}  {active} {0} {description} {Elemental: Energy Drain}}};
+#list corpseList add {{{priority} {1} {name} {preserve} {guild} {necromancer} {action} {qtrance preserve remains/get remains}  {active} {0} {description} {Necro: Preserve Remains}}};
+#list corpseList indexate name;
+
+
+#NOP  #alias corpse_trig {    ;
+#NOP      #if {&corpseActions[] > 0} {    ;
+#NOP          #foreach $corpseActions[%*] item {    ;
+#NOP              #if {"$item[action]" == "%1"} {    ;
+#NOP                  %1;    ;
+#NOP              };    ;
+#NOP          };    ;
+#NOP      };    ;
+#NOP  };    ;
+
+
+#class common_corpse close;

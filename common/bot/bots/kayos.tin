@@ -5,37 +5,87 @@
 #show $bot_message_1;#show $bot_message_2;
 
 #var check_death 1;
+
+#NOP -- Clear old kayos variables and check inventory to see if there are any keys/cells;
 #var kayos[key] 0;
 #var kayos[cell] 0;
+#var kayos[bunker] {};
+#var kayos_bunker 1;
+#var kayos[ship] 0;
+#send {i};
 
 #var {bot[path]} {e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;s;s;s;s;s;s;s};
-#var {bunker_path} {enter bunker;n;w;e;e;n;{grab cell;s};w;s;{out;#path load $bot[path];#path goto {$resume_path}}};
-#var {spaceship_path} {e;e;e;e;e;{open briefcase;touch beacon;.stop}};
+#var {bunker_path} {enter bunker/n/w/e/e/n/grab cell;s/w/s/out/#map go ${kayos[bunker][${kayos_bunker}]};#math kayos_bunker {$kayos_bunker + 1}/..};
+#var {spaceship_path} {e/e/e/e/e/open briefcase;touch beacon/.stop};
 
 #act {^An intricate digital key: Ok.$} {#math kayos[key] {$kayos[key]+1}};
 #act {^key: Taken.$} {#math kayos[key] {$kayos[key]+1}};
 #act {^You grab the power cell from the locker.$} {#math kayos[cell] {$kayos[cell] + 1}};
 
+#NOP -- When the bot completes the main field, loop the 3 bunkers and then the spaceship;
+#act {^------- BOT COMPLETE -----} {
+    #showme KAYOS EVENT BOT COMPLETE;
+    #delay 2 {
+        #if {$kayos_bunker == 1} {
+            .pause;
+            #map run $kayos[bunker][1];
+            #delay 3 {
+                #var bot[step] 1;
+                #var bot[steps] $bunker_path;
+                #list bot[steps] explode {/};
+                unlock bunker;
+                ..;
+            };
+        };
+        #if {$kayos_bunker == 2} {
+            .pause;
+            #map run $kayos[bunker][2];
+            #delay 3 {
+                #var bot[step] 1;
+                #var bot[steps] $bunker_path;
+                #list bot[steps] explode {/};
+                unlock bunker;
+                ..;
+            }
+        };
+        #if {$kayos_bunker == 3} {
+            .pause;
+            #map run $kayos[bunker][3];
+            #delay 3 {
+                #var bot[step] 1;
+                #var bot[steps] $bunker_path;
+                #list bot[steps] explode {/};
+                unlock bunker;
+                ..;
+            };
+        };
+        #if {$kayos_bunker == 4} {
+            .pause;
+            #map run $kayos[ship];
+            #3 insert cell;
+            #delay 3 {
+                #var bot[step] 1;
+                #var bot[steps] $spaceship_path;
+                #list bot[steps] explode {/};
+                teleport;
+                ..;
+            }
+        };
+    };
+} {1};
+
 #act {%d%*An intricate digital key.$} {
     #var tempVar %2;
     #replace tempVar { } {};
     #replace tempVar {*} {};
-    #if {$kayos[key] > 0}  {
-        #math kayos[key] {$kayos[key] + $tempVar};
-    } {
-        #var kayos[key] $tempVar;
-    };
+    #var kayos[key] $tempVar;
 } {6};
 
 #act {%d%*A dark mass of energy.$} {
     #var tempVar %2;
     #replace tempVar { } {};
     #replace tempVar {*} {};
-    #if {$kayos[cell] > 0}  {
-        #math kayos[cell] {$kayos[cell] + $tempVar};
-    } {
-        #var kayos[cell] $tempVar;
-    };
+    #var kayos[cell] $tempVar;
 } {6};
 
 
@@ -78,26 +128,28 @@
 #var bot[mobs] $botmobs;
 
 #act {^-i-A squat bunker.$} {
-	#regex {$room_short} {enter} {#nop;} {
-        #if {$kayos[key] > 0 && !$bot[foundmob]} {
-            #path save position {resume_path};
-            #path load bunker_path;
-            #math {kayos[key]} {$kayos[key] - 1};
-            unlock bunker;
-	    };
+    #map get roomvnum bunkerVnum;
+    #if {&kayos[bunker][] == 0} {
+        #var kayos[bunker][1] $bunkerVnum;
+    } {
+        #if {$kayos[bunker][1] == $bunkerVnum} {#NOP} {
+            #if {&kayos[bunker][] == 1} {
+                #var kayos[bunker][2] $bunkerVnum;
+            } {
+                #if {{$kayos[bunker][1] == $bunkerVnum} || {$kayos[bunker][2] == $bunkerVnum}} {#NOP} {
+                    #var kayos[bunker][3] $bunkerVnum;
+                };
+            };
+        };
     };
 };
 
 #act {^-i-A scorch-marked landing pad.$} {
-    #if {$kayos[cell] == 3} {
-            #3 insert cell;
-            #path load spaceship_path;
-            teleport;
-    };
+    #map get roomvnum kayos[ship];
 };
 
 #act {^-i-An intricate digital key%*$} {get key;};
-#act {You cannot go} {..};
+#act {You cannot go} {mapUndo};
 
 #class {bot} {close}
 #read common/bot/generic.tin;

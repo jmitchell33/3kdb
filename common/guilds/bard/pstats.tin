@@ -5,6 +5,29 @@
 #var pstatsCols 30;
 #list kstats_mobs_killed create {};
 
+
+#NOP -- Add a bit more details/data points;
+#alias {pstats} {
+	#send {pstats};
+	#line oneshot #action {^Combat Rounds:%*} {
+		#format pstatCombatRounds {%d} %%1;
+    #format pstatsCRounds {%g} %%1;
+    #format pstatsCRounds {%d} $pstatsCRounds;
+    pstatsFormatNumber pstatsDamageTaken;
+    pstatsColPrint {<110>Damage Taken<070>:} {<130>${pstatsDamageTaken}} {<130>Combat Rounds<070>:} {<120>$pstatsCRounds};
+    #Line gag;
+	};
+	#line oneshot #action {^Pstat Time : %*} {
+		#var pstatTotalRounds @timeToRounds{%%1};
+		#math pstatCombatPercent {$pstatCombatRounds / $pstatTotalRounds * 100.00};
+		#format pstatCombatRounds {%g} $pstatCombatRounds;
+		#format pstatTotalRounds {%g} $pstatTotalRounds;
+		#showme <dfb>You have been in combat ${pstatCombatRounds} out of ${pstatTotalRounds} possible rounds (${pstatCombatPercent}%)<088>;
+    #Line gag;
+	};
+};
+
+
 #alias {pstatsColPrint} {
   #format pstatsCol1Length {%L} {%1};
   #format pstatsCol2Length {%L} {%3};
@@ -48,25 +71,26 @@
   #line gag;
 };
 
-#action {^Damage Taken:%s%d$} {
-  #var pstatsDamageTaken %2;
+#action {^Damage Taken:%*} {
+  #format pstatsDamageTaken {%g} %1;
+  #format pstatsDamageTaken {%d} $pstatsDamageTaken;
   #line gag;
 };
 
-#action {^Combat Rounds:%s%d$} {
-  #var pstatsCRounds %2;
+
+#action {^Overall Combat Rounds:%*} {
   #line gag;
-  pstatsFormatNumber pstatsDamageTaken;
-  pstatsColPrint {<110>Damage Taken<070>:} {<130>${pstatsDamageTaken}} {<130>Combat Rounds<070>:} {<120>$pstatsCRounds};
 };
 
-#action {^Overall Combat Rounds:%s%d$} {#line gag;};
+#action {^XP Gained:%*} {
+  #format pstatsXpGained {%g} {%1};
+  #var ksXP $pstatsXpGained;
+  #line gag;
+};
 
-#action {^XP Gained:%s%d%sGXP Gained :%s%d$} {
-  #var pstatsXpGained %2;
-  #var pstatsGxpGained %5;
-  #var ksXP %2;
-  #var ksGXP %5;
+#action {^GXP Gained:%*} {
+  #format pstatsGxpGained {%g} %1;
+  #var ksGXP $pstatsGxpGained;
   #math {averageGxpPerRound} {($pstatsGxpGained / $pstatsCRounds) * 1.00};
   #math {gxpGlvlIndicated} {$averageGxpPerRound * 2};
   pstatsColPrint {GXP Per Round:} {$averageGxpPerRound} {GXP GL Rate:} {$gxpGlvlIndicated};
@@ -76,27 +100,32 @@
   #line gag;
 };
 
-#action {^XP Per Hour:%s%d%sGXP Per Hour:%s%d$} {
-  #var pstatsXpRate %2;
-  #var pstatsGxpRate %5;
-  #var ksXpRate %2;
-  #var ksGxpRate %5;
+
+#action {^XP Per Hour:%*} {
+  #format pstatsXpRate {%g} {%1};
+  #line gag;
+};
+
+#action {^GXP Per Hour:%*} {
+  #format pstatsGxpRate {%g} {%1};
   pstatsFormatNumber pstatsXpRate;
   pstatsFormatNumber pstatsGxpRate;
-  pstatsColPrint {XP Per Hour:} {$mob[target] $pstatsXpRate} {GXP Per Hour:} {$pstatsGxpRate};
+  pstatsColPrint {XP Per Hour:} {$pstatsXpRate} {GXP Per Hour:} {$pstatsGxpRate};
+  #line gag;
+}
+
+#action {^Total Kills:%*} {
+  #format pstatsTotalKills {%g} {%1};
   #line gag;
 };
 
-#action {^Total Kills:%s%d%sXP Per Kill:%s{[0-9.]+}} {
-  #var pstatsTotalKills %2;
-  #var pstatsXpPerKill %5;
+#action {^XP Per Kill:%*} {
+  #format pstatsXpPerKill {%g} {%1};
   #line gag;
 };
 
-#action {^%sGXP Per Kill:%s{[0-9.]+}} {
-  #var pstatsGxpPerKill %3;
-  pstatsFormatNumber pstatsXpPerKill;
-  pstatsFormatNumber pstatsGxpPerKill;
+#action {^GXP Per Kill:%*} {
+  #format pstatsGxpPerKill {%g} {%1};
   pstatsColPrint {XP Per Kill:} {$pstatsXpPerKill} {GXP Per Kill:} {$pstatsGxpPerKill};
   #line gag;
 };

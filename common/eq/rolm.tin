@@ -1,6 +1,23 @@
 #class rolm kill
 #class rolm open
 
-#action {Upon the %*, the owl rune glows brightly again.$} {#if !$idle_flag {touch owl rune};};
+#var rolm[owl] 1;
+#var rolm[raven] 1;
+
+#action {Upon the %*, the owl rune glows brightly again.$} {#var rolm[owl] 1;};
+#action {Upon the %*, the raven rune glows brightly again.$} {#var rolm[raven] 1;};
+#action {Upon the %*, the cairn rune glows brightly again.$} {#var rolm[cairn] 1;};
+
+#action {You touch the Owl rune on the artifact and hear a soft *click*} {#var rolm[owl] 0;};
+#action {You touch the Raven rune on the artifact and hear a soft *click*} {#var rolm[raven] 0;};
+#action {You touch the Cairn rune on the artifact and hear a soft *click*} {#var rolm[cairn] 0;};
+
+#action {Beneath you, the earth begins to shudder and crack apart, exposing a} {
+#NOP    The dark soil quietly births a fresh corpse through its cold surface.;
+#NOP    ...followed quickly by a second, ripe carcass that rises up.;
+#nop    ...and yet finally a third.;
+} {2};
+
+#action {Warming in your grasp, %* twinkling points of} {#var rolm[charges] @word_to_number{%1}};
 
 #class rolm close

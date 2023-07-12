@@ -2,12 +2,18 @@
 #class {player_actions} {open}
 
 #var corpse_delay 0;
+#var mask 0;
 
 #ACTION {^Owie. That hurt!} {
 	#if !$corpse_delay {
 		#var corpse_delay 1;
 		corpse_select;
-		#delay {2} {qtrance preserve remains/preserve remains/absorb/absorb;#var corpse_delay 0};
+		#if $mask {
+			trace glyph;
+			#delay {2} {qtrance preserve remains/preserve remains/absorb/absorb/trace glyph;#var corpse_delay 0};
+		} {
+			qtrance preserve remains/absorb;#var corpse_delay 0;
+		};
 	};
 } {1};
 

@@ -6,7 +6,7 @@
 
 #alias {_player_heartbeat} {
 	#if {!$idle_flag} {
-		#if {$make_con && $my[necromancer][worth] < 125} {con 100;#var make_con 0;#delay 4 {#var make_con 1}};
+		#if {$make_con && $my[necromancer][worth] < 115} {con 100;#var make_con 0;#delay 4 {#var make_con 1}};
 		#if {$party_actions && $mip[round] == 1} {
 			#if $strategy[fury] {fury};
 			#if $strategy[rabies] {alter hybrid;rabies};
@@ -19,10 +19,8 @@
 			#if {$my[necromancer][power][alter] < 50} {
 				.pause;
 				#if {"$area" == "Banshee's Lair"} {
-					#var actions_stacked 1;
 					add_action {{{name} {study-alter} {action} {teleport;form;path;sw;sw;w;#delay 2 {.study};#delay 4 {e;ne;ne;path;portal;teleport 1};#delay 6 {..};}}};
 				} {
-					#var actions_stacked 1;
 					add_action {{{name} {study-alter} {action} {go necro_were;#delay 2 {.study};#delay 4 {#map run $go_back};#delay 6 {..};}}};
 				};
 			};
@@ -36,7 +34,6 @@
 			#if {$inventory[encumberance] > 90 || "$inventory[encumberance]" == "XX"} {
 				#if $auto_donate {
 					.pause;
-					#var actions_stacked 1;
 					add_action {{{name} {go-donate} {action} {go_donate2}}};
 				};
 			}

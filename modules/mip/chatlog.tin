@@ -1,17 +1,112 @@
 #class {mipchatlog} {open}
 
+#NOP -- Discord Message Sending;
+#NOP -- Update the below with the webhook URL for each particular discord channel;
+#NOP -- Set these variables in the user/player variables;
+#NOP -- #var webhook[url][general] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][tells] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][clan] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][guild] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][party] https://discord.com/api/webhooks/long_token;
 
-#VAR ignoreEmotes {small %* sighs;pauses for a moment;finishes his performance with a bow.;cracks his knuckles and gets ready to play for;performs a rather incomprehensible action on the corpse.;wounds close rapidly.;whinnies as;rubs its head on;face as he pats him on the neck.;That hurt!;cries 'OW;takes a deep breath;takes a breath;ceases his performance;briefly closes his eyes;wraps his arms around;bows and bids you;reaches into a small pouch and draws forth a small pearl, black as the darkest night.; appears slightly drained.; spirit of the beast leaves your body, slightly weakening you.;is afk:;malicious attacks fade.;fills his glass with water from his pitcher.;drinks from his glass of water.;fills her glass with water from her pitcher.;drinks from her glass of water.;grovels shamelessly;collects %* coins, then hands you %*.};
+
+#NOP -- Variables for the chat categories;
+#var chatCategory general;
+#var chat[general] {};
+#var chat[tells] {};
+#var chat[clan] {};
+#var chat[guild] {};
+#var chat[high_mortal] {};
+#var chat[party] {};
+
+#var chat[unread][general] 0;
+#var chat[unread][tells] 0;
+#var chat[unread][clan] 0;
+#var chat[unread][guild] 0;
+#var chat[unread][high_mortal] 0;
+#var chat[unread][party] 0;
+
+
+#alias postChatCategory {
+	#var chat[${chatCategory}] ${discordText};
+	#if {&chat[${chatCategory}][] >= $chat[max]} {
+		#list chat[${chatCategory}] del 1;
+	};
+	#list chat[${chatCategory}] ins -1 ${discordText};
+	#math chat[unread][${chatCategory}] {$chat[unread][${chatCategory}] + 1};
+};
+
+#alias postDiscord {
+	#NOP -- first paramater is webook destination, second is payload;
+	#var payload @sanitizePayload{%0};
+
+	#NOP -- Update scripts/discordPost.py to where the python file is located, this depends on the root that;
+	#NOP -- tintin is being called from;	
+	#script {python3 scripts/discordPost.py $webhook[url][general] $payload};
+	#if {"$discordChannel" != "$webhook[url][general]"} {
+		#script {python3 scripts/discordPost.py $discordChannel $payload};
+	};
+};
+
+
+#VAR ignoreEmotes {small %* sighs;pauses for a moment;finishes his performance with a bow.;cracks his knuckles and gets ready to play for;performs a rather incomprehensible action on the corpse.;wounds close rapidly.;whinnies as;rubs its head on;face as he pats him on the neck.;That hurt!;cries 'OW;takes a deep breath;takes a breath;ceases his performance;briefly closes his eyes;wraps his arms around;bows and bids you;reaches into a small pouch and draws forth a small pearl, black as the darkest night.; appears slightly drained.; spirit of the beast leaves your body, slightly weakening you.;is afk:;malicious attacks fade.;fills his glass with water from his pitcher.;drinks from his glass of water.;fills her glass with water from her pitcher.;drinks from her glass of water.;grovels shamelessly;collects %* coins, then hands you %*.;shell of energy flickers slighty around %*};
 #VAR ignoreMisc {Gen-Notify;All gold divvied;GOLD divvy called by;Path to find me is:};
+
 #NOP -- Get system user name to log to;
 #script {sysUser} {whoami};#var sysUser $sysUser[1];
 
+#function sanitizePayload {
+	#NOP -- Function to remove potentially problematic characters from the payload;
+	#NOP -- Maybe we can replace these with char or ascii representations to pass the desired character;
+	#var tempString %0;
+	#replace tempString {#} {};
+	#replace tempString {$} {};
+	#replace tempString {*} {};
+	#replace tempString {;} {};
+	#replace tempString {"} {};
+	#replace tempString {`} {};
+	#replace tempString {'} {};
+	#replace tempString {"} {};
+	#replace tempString {\} {};
+	#replace tempString {/} {};
+	#replace tempString {(} {[};
+	#replace tempString {)} {]};
+	#replace tempString {-} {_};
+	#replace tempString {<} {[};
+	#replace tempString {>} {]};
+	#replace tempString {&} { and };
+	#replace tempString {|} { or };
+    #line strip #var {_santized_payload} {$tempString};
+    #return $_santized_payload;
+};
+
 #function ansiStrip {
-    #line strip #var {_ansi_strip} {%0};
-    #return $_ansi_strip
+    #line strip #var tempString {%0};
+    #replace {tempString} {;} {\;};
+    #return {$tempString}
+};
+
+#alias filterSpam {
+	#foreach $ignoreMisc {item} {#list chat[general] filter {} {%*${item}%*};#list chat[tell] filter {} {%*${item}%*};};
+	#foreach $ignoreEmotes {item} {#list chat[general] filter {} {%*${item}%*};#list chat[tell] filter {} {%*${item}%*};};
 };
 
 #NOP ***** Broadcast Communication (Chat/Shout) *****
+#ALIAS {.mipProcessCAAgag} 
+{
+	#var mipgag 0;
+
+	#NOP Party Divvy gag;
+        #REGEX {%0} {[PARTY] GOLD divvy called by } {#var mipgag 1};
+        #REGEX {%0} {[PARTY] All gold divvied, total: } {#var mipgag 1};
+
+	#NOP Gentech Notify Line;
+	#NOP #REGEX {%0} {gnotify~Notify~%w~[Gen-Nofity]: } {#var mipgag 1};
+
+	#IF {$mipgag == 0} {.mipProcessCAA %0}
+}
+
 #ALIAS {.mipProcessCAA} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)\~(.*)}} {
 		#var {mip[enomm]} {};
@@ -20,142 +115,377 @@
 		#var {mip[comm][source]}	{&4};
 		#var {mip[comm][data]}		{@ansiStrip{&5}};
 
-		#var ignore 0;
-		#foreach {$ignoreMisc} {item} {
-			#if {"&5" == "%*$item%*"} {
-				#var ignore 1;
-			};
+		#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+		#format {datestamp} {%t} {%Y-%m-%d.log};
+
+		#NOP Ansify lines;
+		#var {commcol} {<178>};
+		#switch {"$mip[comm][line]"} {
+			#case {"ADMIN"}            {#var {commcol} {<158>}};
+            #case {"Alpha"}            {#var {commcol} {<168>}};
+            #case {"Angel"}            {#var {commcol} {<168>}};
+			#case {"Bard 30"}			{#var {commcol} {<ddd>}};
+			#case {"Bard 50"}			{#var {commcol} {<ddd>}};
+			#case {"Bard 70"}			{#var {commcol} {<ddd>}};
+			#case {"Bard Admin"}		{#var {commcol} {<ddd>}};
+			#case {"Bard Elder"}		{#var {commcol} {<ddd>}};
+			#case {"Bard Gallant"}		{#var {commcol} {<ddd>}};
+			#case {"Bard Leader"}		{#var {commcol} {<ddd>}};
+			#case {"Bard Main"}			{#var {commcol} {<ddd>}};
+			#case {"Bard Mystic"}		{#var {commcol} {<ddd>}};
+            #case {"Announce"}        {#var {commcol} {<168>}};
+            #case {"Auction"}        {#var {commcol} {<108>}};
+            #case {"Bear"}            {#var {commcol} {<168>}};
+            #case {"Bloodname"}        {#var {commcol} {<218>}};
+            #case {"Breed"}            {#var {commcol} {<158>}};
+            #case {"BreedOOC"}        {#var {commcol} {<258>}};
+            #case {"BS Announce"}        {#var {commcol} {<168>}};
+            #case {"BS Tell"}        {#var {commcol} {<128>}};
+            #case {"Clan Cad"}        {#var {commcol} {<158>}};
+			#case {"Clan Spol"}	    {#var {commcol} {<158>}};
+            #case {"Com"}            {#var {commcol} {<128>}};
+            #case {"Council"}        {#var {commcol} {<108>}};
+			#case {"Cult Game"}	    {#var {commcol} {<ace>}};
+            #case {"Cyborg Com"}        {#var {commcol} {<138>}};
+            #case {"Cyborg Death"}        {#var {commcol} {<218>}};
+            #case {"Cyborg Guild"}        {#var {commcol} {<228>}};
+            #case {"Cyborg Notify"}        {#var {commcol} {<268>}};
+            #case {"Cyborg Syndicate"}    {#var {commcol} {<128>}};
+            #case {"Eternal Main"}        {#var {commcol} {<168>}};
+            #case {"Events"}        {#var {commcol} {<168>}};
+            #case {"Explorer"}        {#var {commcol} {<178>}};
+            #case {"Falcon"}        {#var {commcol} {<128>}};
+            #case {"Fcom"}            {#var {commcol} {<268>}};
+            #case {"Gamers"}        {#var {commcol} {<268>}};
+			#case {"Gjugg"}            {#var {commcol} {<118>}};
+            #case {"High Mortal"}        {#var {commcol} {<108>}};
+            #case {"Jedi"}            {#var {commcol} {<158>}};
+            #case {"JEDI"}            {#var {commcol} {<128>}};
+            #case {"JuggAnnounce"}        {#var {commcol} {<118>}};
+            #case {"JuggMissiles"}        {#var {commcol} {<118>}};
+            #case {"JuggNewbie"}        {#var {commcol} {<258>}};
+            #case {"Knight Announce"}    {#var {commcol} {<168>}};
+            #case {"Knight Main"}        {#var {commcol} {<168>}};
+            #case {"Lich"}            {#var {commcol} {<158>}};
+            #case {"Loremaster"}        {#var {commcol} {<274>}};
+            #case {"Lottery"}        {#var {commcol} {<178>}};
+            #case {"Main"}            {#var {commcol} {<118>}};
+            #case {"Monk"}            {#var {commcol} {<238>}};
+            #case {"Ncom"}            {#var {commcol} {<268>}};
+            #case {"Newbie"}        {#var {commcol} {<138>}};
+            #case {"Notify"}        {#var {commcol} {<168>}};
+            #case {"Party"}            {#var {commcol} {<128>}};
+            #case {"Poll"}            {#var {commcol} {<178>}};
+            #case {"Professions"}        {#var {commcol} {<178>}};
+            #case {"Psi Main"}        {#var {commcol} {<168>}};
+			#case {"RG Admin"}        {#var {commcol} {<168>}};
+            #case {"Shout"}            {#var {commcol} {<178>}};
+            #case {"Slime Chat"}        {#var {commcol} {<128>}};
+            #case {"Time"}            {#var {commcol} {<168>}};
+            #case {"Whine"}            {#var {commcol} {<118>}};
+            #case {"Wolf"}            {#var {commcol} {<228>}};
+            #case {"Zilch_shout"}        {#var {commcol} {<168>}};
+			#default		        {#var {commcol} {<178>}};
 		};
 
-		#if !$ignore {
-			#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
-			#format {datestamp} {%t} {%Y-%m-%d.log};
-
-
-			#NOP Ansify lines;
-			#var {commcol} {<178>};
-			#switch {"$mip[comm][line]"} {
-				#case {"ADMIN"}		    {#var {commcol} {<158>}};
-				#case {"Auction"}	    {#var {commcol} {<cba>}};
-				#case {"Bear"}		    {#var {commcol} {<168>}};
-				#case {"Bloodname"}	    {#var {commcol} {<138>}};
-				#case {"Clan Spol"}	    {#var {commcol} {<AAF><fff>}};
-				#case {"Com"}		    {#var {commcol} {<128>}};
-				#case {"Council"}	    {#var {commcol} {<108>}};
-				#case {"Eternal Main"}	{#var {commcol} {<168>}};
-				#case {"Events"}	    {#var {commcol} {<168>}};
-				#case {"Falcon"}	    {#var {commcol} {<128>}};
-				#case {"High Mortal"}	{#var {commcol} {<aff>}};
-				#case {"JuggAnnounce"}	{#var {commcol} {<118>}};
-				#case {"JuggMissiles"}	{#var {commcol} {<118>}};
-				#case {"JuggNewbie"}	{#var {commcol} {<258>}};
-				#case {"Cult Game"}	    {#var {commcol} {<ace>}};
-				#case {"Main"}		    {#var {commcol} {<118>}};
-				#case {"Newbie"}	    {#var {commcol} {<aca>}};
-				#case {"Party"}		    {#var {commcol} {<ADA><fff>}};
-				#case {"Shout"}		    {#var {commcol} {<bbb>}};
-				#case {"Whine"}		    {#var {commcol} {<118>}};
-				#case {"Wolf"}		    {#var {commcol} {<228>}};
-				#default		        {#var {commcol} {<178>}};
-			};
 			
-			#var {mip[comm][cdata]} {$mip[comm][data]};
-			#replace {mip[comm][cdata]} {:} {:<099>};
-			#replace {mip[comm][cdata]} {]} {]<099>};
-			#NOP -- try #sub here;
-			#var {mip[comm][cdata]} {$commcol$mip[comm][cdata]<099>};
 
-			#line log {logs/$sysUser/$datestamp} {$timestamp\};
-			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
+		#NOP Direct to the webhook channel we want;
+		#var discordChannel $webhook[url][general];
+		#switch {"$mip[comm][line]"} {
+			#case {"ADMIN"}         {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"Alpha"}         {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"Angel"}         {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard 30"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard 50"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard 70"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard Admin"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard Elder"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard Gallant"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard Leader"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard Main"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bard Mystic"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bear"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Bloodname"}	    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Breed"}         {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"BreedOOC"}      {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Com"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Council"}	    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Eternal Main"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Falcon"}	    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Gjugg"}         {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Jedi"}          {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"JEDI"}          {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"JuggNewbie"}	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Knight Announce"} {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"Knight Main"}   {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"Lich"}          {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+            #case {"Loremaster"}    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Main"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Monk"}          {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Psi Main"}      {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"RG Admin"}      {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Time"}          {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Whine"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Wolf"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
+
+			#case {"Clan Cad"}      {#var discordChannel $webhook[url][clan];#var chatCategory clan};  
+			#case {"Clan Spol"}	    {#var discordChannel $webhook[url][clan];#var chatCategory clan};
+
+			#case {"High Mortal"}	{#var discordChannel $webhook[url][high_mortal];#var chatCategory high_mortal};
 			
-			update_chat $mip[comm][cdata];
+			#case {"Party"}         {#var discordChannel $webhook[url][party];#var chatCategory party};
+			#default		        {#var discordChannel $webhook[url][general];#var chatCategory general};
 		};
+		
+		#var {mip[comm][cdata]} {$mip[comm][data]};
+		#replace {mip[comm][cdata]} {:} {:<099>};
+		#replace {mip[comm][cdata]} {]} {]<099>};
+		#NOP -- try #sub here;
+		#var {mip[comm][cdata]} {$commcol$mip[comm][cdata]<099>};
+
+		#line log {logs/$sysUser/$datestamp} {$timestamp\};
+		#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
+		
+		update_chat $mip[comm][cdata];
 	}
 }
 
 
 #NOP ***** 2 Way Communication (Tell/Emote) *****
+#ALIAS {.mipProcessBABgag} {
+	#var mipgag 0;
+	#var tempString %0;
+
+	#NOP Duplicate 'from' soul;
+	#REGEX {$tempString} {~you~} {#var mipgag 1};
+
+
+	#NOP Add cases for tells/emotes to gag from monitor, such as mob emotes;
+
+	#NOP Player specific gags;
+	#NOP Byron crying OW;
+	#REGEX {$tempString} {~Byron~cries 'OW!!'} {#var mipgag 1};
+	#REGEX {$tempString} {~Owie.~That hurt!} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~pokes %w in the ribs} {#var mipgag 1};
+
+	#NOP Guilds and Areass;
+	#NOP Bards;
+	#REGEX {$tempString} {~%w~cracks %w knuckles and gets ready to play for %*.} {#var mipgag 1};
+	#REGEX {$tempString} {~ceases %w performance.} {#var mipgag 1};
+	#REGEX {$tempString} {~takes a deep breath.} {#var mipgag 1};
+	#REGEX {$tempString} {~takes a breath.} {#var mipgag 1};
+	#REGEX {$tempString} {~pauses for a moment...} {#var mipgag 1};
+	#REGEX {$tempString} {~ceases %w performance.} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~finishes %w performance with a bow.} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~takes a deep breath and prepares to perform a song for you.%s} {#var mipgag 1};
+	#REGEX {$tempString} {~Great~cheer fills you, it's almost overwhelming!} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~smiles happily.} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~takes a deep breath and prepares to perform a song for %w.} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~sings soulfully} {#var mipgag 1};
+
+	#NOP Bladesingers;
+	#REGEX {$tempString} {~Corath~} {#var mipgag 1};
+	#REGEX {$tempString} {~Amarul~} {#var mipgag 1};
+
+	#NOP Breed;
+	#REGEX {$tempString} {looks visibly weaker!} {#var mipgag 1};
+	#REGEX {$tempString} {looks more vulnerable!} {#var mipgag 1};
+
+	#NOP Changelings;
+	#REGEX {$tempString} {~The~%*'s wounds close rapidly.} {#var mipgag 1};
+	#REGEX {$tempString} {~The~%* performs a rather incomprehensible action on the corpse.} {#var mipgag 1};
+	#REGEX {$tempString} {~The~small wolf sighs.} {#var mipgag 1};
+
+	#NOP Cove of the Three (Lost Soul);
+	#REGEX {$tempString} {~~You try to clasp onto the diamond spectacle, but your hands fall right through!} {#var mipgag 1};
+	#REGEX {$tempString} {~~Bursts of %w colored energy shoot off from the spectacle.} {#var mipgag 1};
+	#REGEX {$tempString} {~~The diamond-spectacle spins and turns on an unseen axis.} {#var mipgag 1};
+	#REGEX {$tempString} {~~The diamond-shaped spectacle changes color.} {#var mipgag 1};
+
+	#NOP Carina's Observatory;
+	#REGEX {$tempString} {~~Carina looks up at you as if to say something, but shrugs it off.} {#var mipgag 1};
+
+	#NOP Duke Nukem;
+	#REGEX {$tempString} {~~As you land upon the rooftop, you see your ship crash into a building in the} {#var mipgag 1};
+	#REGEX {$tempString} {~~You break the fan, revealing an exit!} {#var mipgag 1};
+	#REGEX {$tempString} {~~You see the assault trooper and taunt him, WHO'S YOUR DADDY!!??} {#var mipgag 1};
+	#REGEX {$tempString} {~~The room shakes.......And a piece of the wall is blown away!} {#var mipgag 1};
+
+	#NOP Dundee;
+	#REGEX {$tempString} {~A~shiver runs through you as you successfully fight off an infection.} {#var mipgag 1};
+	#REGEX {$tempString} {~Your~head throbs briefly as you successfully fight off an infection.} {#var mipgag 1};
+	#REGEX {$tempString} {~Your~temperature spikes as you successfully fight off an infection.} {#var mipgag 1};
+	#REGEX {$tempString} {~Your~palms begin to sweat as you successfully fight off an infection.} {#var mipgag 1};
+	#REGEX {$tempString} {~Your~neck aches slightly as you successfully fight off an infection.} {#var mipgag 1};
+
+	#NOP Hell Cows;
+	#REGEX {$tempString} {~A~cow falls, but the herd continues on!} {#var mipgag 1};
+	#REGEX {$tempString} {~The~lonesome cow topples to the ground, the herd finally slain.} {#var mipgag 1};
+
+	#NOP Knights;
+	#REGEX {$tempString} {~Bela~} {#var mipgag 1};
+
+	#NOP Necromancer;
+	#REGEX {$tempString} {~The~spirit of the beast leaves your body, slightly weakening you.} {#var mipgag 1};
+	#REGEX {$tempString} {~%w~appears slightly drained.} {#var mipgag 1};
+
+	#NOP Party Divvy;
+	#REGEX {$tempString} {[PARTY] GOLD divvy called by } {#var mipgag 1};
+	#REGEX {$tempString} {[PARTY] All gold divvied, total: } {#var mipgag 1};
+
+	#NOP Sii;
+	#REGEX {$tempString} {~Your~malicious attacks fade} {#var mipgag 1};
+	#REGEX {$tempString} {~The~corpse explodes as a small vicious lizard-like creature bursts forth!} {#var mipgag 1};
+
+	#NOP Tomb of King Alaren;
+	#REGEX {$tempString} {~With~a mighty heave you shoulder charge into the eastern wall.} {#var mipgag 1};
+	#REGEX {$tempString} {~~With a slow rumble the wall finally crumbles, filling the room in a cloud of} {#var mipgag 1};
+	#REGEX {$tempString} {~His~service to his King complete, the guard clatters to the floor, the dark magic} {#var mipgag 1};
+	#REGEX {$tempString} {~The~skeletal royal guard steps in front of you barring your progress.} {#var mipgag 1};
+	#REGEX {$tempString} {~Harakir~slumps to the floor, defeated, perhaps now his soul will find} {#var mipgag 1};
+	#REGEX {$tempString} {~With~a few swings of your } {#var mipgag 1};
+	#REGEX {$tempString} {~With~a mighty heave you push the [stone|golden] lid sliding it back from the coffin} {#var mipgag 1};
+	#REGEX {$tempString} {~Turning~to leave you hear Mircarla's sultry voice calling you back} {#var mipgag 1};
+	#REGEX {$tempString} {~Caught~unaware by her turn of pace as you attack, you} {#var mipgag 1};
+	#REGEX {$tempString} {~Before~your very eyes you stare in amazement as Mircarla} {#var mipgag 1};
+	#REGEX {$tempString} {~Her~meal completed, she clambers off you licking her now ruby red lips} {#var mipgag 1};
+	#REGEX {$tempString} {~Mircarla~sighs, the last of her energy expended as she slumps to the floor} {#var mipgag 1};
+	#REGEX {$tempString} {~Sumaren~crumples to the ground, destroyed, perhaps at last his soul will find} {#var mipgag 1};
+	#REGEX {$tempString} {~Someone~has already pushed the lid open, there's no need to push it again.} {#var mipgag 1};
+	#REGEX {$tempString} {~Straining~with all your might you give the ring a mighty heave, at first} {#var mipgag 1};
+	#REGEX {$tempString} {~Reaching~out, you give the gates a firm push. With an echoing screech the} {#var mipgag 1};
+	#REGEX {$tempString} {~Alaren~begins to slowly lose cohesion, glowing ever brighter until, suddenly} {#var mipgag 1};
+	#REGEX {$tempString} {~The~skeletal guard steps in front of you barring your progress.} {#var mipgag 1};
+
+	#NOP Wrapping with no corpse in room;
+	#REGEX {$tempString} {~%w~wraps %w arms around %w.} {#var mipgag 1};
+
+	#NOP Zelligar's Headband;
+	#REGEX {$tempString} { stumbles in confusion as the headband hypnotizes } {#var mipgag 1};
+
+	#IF {$mipgag == 0} {.mipProcessBAB %0}
+}
+
 #ALIAS {.mipProcessBAB} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)}} {
 		#IF {"&3" != "0"} {
+			#var discordChannel $webhook[url][tells];
+			#var chatCategory tells;
 			#var mip[comm][data]	{@ansiStrip{&4}};
 			#var mip[comm][source]	{&3};
 			#var mip[comm][line]	{Tell};
 
 			#NOP Revert ^^ back to ~;
 			#REPLACE {mip[comm][data]} {\^\^} {~};
-
-            #var ignore 0;
-            #foreach {$ignoreEmotes} {iem} {
-                #if {"&4" == "%*$iem%*"} {
-                    #var ignore 1;
-                }
-            };
-
-            #if {!$ignore} {
-                #var mip[comm][command]	{tell $mip[comm][source]};
-                #format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
-                #format {datestamp} {%t} {%Y-%m-%d.log};
-                #format {timestamp_save} {%t} {[%H:%M] };
-                #IF {"&2" == "x"} {
-                    #NOP Message to another player;
-                    #var mip[comm][twoway] {to};
-                    #line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-                    #line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
-					update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
-                } {
-                    #NOP Message from another player;
-                    #var mip[comm][twoway] {from};
-                        #line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-                        #line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
-						update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
-                        #bell;
-                }
-            } {
-				#NOP;
-            };
+            
+			#var mip[comm][command]	{tell $mip[comm][source]};
+			#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+			#format {datestamp} {%t} {%Y-%m-%d.log};
+			#format {timestamp_save} {%t} {[%H:%M] };
+			#IF {"&2" == "x"} {
+				#NOP Message to another player;
+				#var mip[comm][twoway] {to};
+				#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+				#line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
+				update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
+			} {
+				#NOP Message from another player;
+				#var mip[comm][twoway] {from};
+					#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+					#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+					update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+					#bell;
+			}
 		};
 	};
 };
 
-#var chat[max] 100;
+#var chat[max] 30;
 #var chat[offset] 0;
 #var chat[page] 1;
 #var chat[scroll] page;
 
+#alias read_all {
+	#var chat[unread][general] 0;
+	#var chat[unread][tells] 0;
+	#var chat[unread][clan] 0;
+	#var chat[unread][guild] 0;
+	#var chat[unread][high_mortal] 0;
+	#var chat[unread][party] 0;
+};
+
+#function formatHeader {
+	#var result <088><dab>[<fcc> %0 <dab>]<088>;
+	#return $result;
+};
+
+
+#alias updateChatCategory {
+	#switch {"$chatCategory"} {
+		#case {"party"} {#var partyString @formatHeader{PARTY}};
+		#case {"tells"} {#var tellsString @formatHeader{TELLS}};
+		#case {"clan"} {#var clanString @formatHeader{CLAN}};
+		#case {"guild"} {#var guildString @formatHeader{GUILD}};
+		#case {"high_mortal"} {#var hmString @formatHeader{HM}};
+	};
+	#delay {clearCategory} {#var chatCategory {};draw_chat} {4};
+};
+
+#alias .messages {
+	#NOP -- Show the last 5 messages received in each category;
+	#if {$chat[unread][clan] > 0} {
+	};
+};
+
+#alias {clearChatHeader} {
+	#var partyString <dbe>PARTY<088>;
+	#var tellsString <dbe>TELLS<088>;
+	#var clanString <dbe>CLAN<088>;
+	#var guildString <dbe>GUILD<088>;
+	#var hmString <dbe>HM<088>;
+};
 
 #ALIAS {draw_chat} {
 	#math chat[start]	{$chat[rows]};
 	#math chat[end]		{$chat[offset] + 1};
+	filterSpam;
+	updateChatCategory;
 	#if {"$draw[chat][active]" == "on"} {
-		#line sub var #line sub esc #draw green rounded box 1 1 $chat[height] $chat[right] $chat[log][-$chat[start]..-$chat[end]]
+		#line sub var #line sub esc #draw blue left right side 2 1 $chat[height]-1 $chat[right] $chat[general][-$chat[start]..-$chat[end]];
+		#draw blue calign jeweled line 1 1 1 $map[left]  {    $tellsString    $partyString    $clanString    $guildString    $hmString    };
 	};
 };
 
+
 #ALIAS {update_chat} {
 	#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
-	#if {&chat[log][] >= $chat[max]} {
-		#list chat[log] del 1
+	#if {&chat[general][] >= $chat[max]} {
+		#list chat[general] del 1;
 	};
 	#NOP remove esc chars;
 	#var chat[text] %0;
 	#replace {chat[text]} {\\x7B} {\uFF5B};
 	#replace {chat[text]} {\\x7D} {\uFF5D};
-	#list chat[log] ins -1 {${timestamp}$chat[text]};
+	
+	#list chat[general] ins -1 {${timestamp}$chat[text]};
+	#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+	#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+	#if {"$chatCategory" != "general"} {postChatCategory};
 	draw_chat;
 };
 
 #ALIAS {chatup} {
 	#if {"$chat[scroll]" == "page"} {
 		#if {$chat[rows]*{$chat[page]+1} <= $chat[max] &&
-		     $chat[rows]*{$chat[page]+1} <= &chat[log][]} {
+		     $chat[rows]*{$chat[page]+1} <= &chat[general][]} {
 			#math chat[page] {$chat[page] + 1};
 			#math chat[offset] {$chat[page] * $chat[rows] - $chat[rows]};
 			draw_chat;
 		};
 	}; #elseif {"$chat[scroll]" == "line"} {
 		#if {$chat[offset] <= $chat[max] &&
-		     $chat[offset] <= &chat[log][]} {
+		     $chat[offset] <= &chat[general][]} {
 			#math chat[offset] {$chat[offset] + 1};
 			draw_chat;
 		};

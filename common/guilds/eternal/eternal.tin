@@ -14,6 +14,23 @@
 	#var eternal_string {<fff>Eternal: $ewell_string $heal_string $shred_string $dupec_string $enlarge_string $fry_string $protection_string<088>};
 };
 
+
+#NOP -- Add a bit more details/data points to the cstats;
+#alias {(cstats} {
+	#send {!(cstats};
+	#line oneshot #action {^Combat Rounds:%*} {
+		#format cstatCombatRounds {%d} %%1;
+	};
+	#line oneshot #action {^Total Time Spent online : %*} {
+		#var cstatTotalRounds @timeToRounds{%%1};
+		#math cstatCombatPercent {$cstatCombatRounds / $cstatTotalRounds * 100.00};
+		#format cstatCombatRounds {%g} $cstatCombatRounds;
+		#format cstatTotalRounds {%g} $cstatTotalRounds;
+		#showme <dfb>You have been in combat ${cstatCombatRounds} out of ${cstatTotalRounds} possible rounds (${cstatCombatPercent}%)<088>;
+	};
+};
+
+
 #alias {update_eternal_power} {
 	#var found_power 0;
 	#format temp {%p} {%1};
@@ -69,6 +86,11 @@
 #action {A shimmering ball of energy appears magically when you snap your fingers.} {
 	#var my[eternal][energy well] 0;
 	#delay 2 {(powers};
+};
+
+#action {In a remarkable feat of cheating, you attack again!} {
+	#var my[eternal][quicken] 0;
+	#delay 180 {$my[eternal][quicken] 1};
 };
 
 #action {^$user_cap bathes you in the healing powers of the outer planes.$} {

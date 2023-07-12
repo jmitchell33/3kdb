@@ -1,0 +1,33 @@
+#class hm_status kill;
+#class hm_status open;
+
+#act {%s Charm %s You may use now%*.} {#var my[hm][charm] 1;} {2};
+#act {%s Flee %s You may use now%*.} {#var my[hm][flee] 1;} {2};
+#act {%s Uncurse %s You may use now%*.} {#var my[hm][uncurse] 1;} {2};
+#act {%s Rejuvenate %s You may use now%*.} {#var my[hm][rejuvenate] 1;} {2};
+#act {%s Summon %s You may summon at this time%*.} {#var my[hm][summon] 1;} {2};
+#act {%s Blast %s You may blast a foe at this time%*.} {#var my[hm][blast] 1;#undelay hmblast;} {2};
+#act {%s Blast %s You must wait %d min\(s\) to blast a foe.} {
+    #math temp {%3 * 60};
+    #var my[hm][blast] 0;
+    #undelay hmblast;
+    #delay {hmblast} {#var my[hm][blast] 1;} {$temp};
+} {2};
+#act {%s Heal %s You may heal yourself at this time%*.} {#var my[hm][heal] 1;#undelay hmheal;} {2};
+#act {%s Heal %s You must wait %d min\(s\) to heal yourself.} {
+    #math temp {%3 * 60};
+    #var my[hm][heal] 0;
+    #undelay hmheal;
+    #delay hmheal {#var my[hm][heal] 1} {$temp};
+} {2};
+#act {%s You may heal another at this time%*.} {#var my[hm][heal_other] 1;} {2};
+#act {%s You must wait %d min\(s\) to heal another.} {
+    #var my[hm][heal_other] 0;
+    #math temp {%3 * 60};
+    #var my[hm][heal_other] 0;
+    #undelay hmheal_other;
+    #delay hmheal_other {#var my[hm][heal_other] 1} {$temp};
+} {2};
+#act {%s Shield %s You may shield yourself at this time%*.} {#var my[hm][shield] 1;} {2};
+
+#class hm_status close;

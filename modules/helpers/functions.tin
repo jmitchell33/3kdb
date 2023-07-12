@@ -1,0 +1,113 @@
+#class helpers open;
+
+#function {rnd} {#math {result} {1 d (%2 - %1 + 1) + %1 - 1}}
+#function {min} {#if {%1 < %2} {#return %1} {#return %2}};
+#function {max} {#if {%1 > %2} {#return %1} {#return %2}};
+#function formatThousands {#format result {%g} {%0};};
+#function lowerText {#format result {%l} {%0};#return $result};
+
+#function timeToRounds {
+	#var timeWeeks 0;
+	#var timeDays 0;
+	#var timeHrs 0;
+	#var timeMins 0;
+	#var timeSecs 0;
+	#regex {%0} {%d week{|s}} {
+		#format timeWeeks {%d} &1;
+	};
+	#regex {%0} {%d day{|s}} {
+		#format timeDays {%d} &1;
+	};
+	#regex {%0} {%d hr{|s}} {
+		#format timeHrs {%d} &1;
+	};
+	#regex {%0} {%d min{|s}} {
+		#format timeMins {%d} &1;
+	};
+	#regex {%0} {%d sec{|s}} {
+		#format timeSecs {%d} &1;
+	};
+	#math result {(($timeWeeks * 86400 * 7) + ($timeDays * 86400) + ($timeHrs * 3600) + ($timeMins * 60) + $timeSecs) / 2};
+};
+
+#function {graph} {
+	#regex {%1} {\d} {
+		#math per {100.0*%1/%2};
+		#format {per} {%d} {$per};
+		#if {$per > 100} {#var graph {<006>   $per%%   <088>}};
+		#if {$per == 100} {#var graph {<008><AFA>   $per%%   <088>}};
+		#if {$per < 100} {#var graph {<008><AEA>    $per%%  <088> }};
+		#if {$per < 90}	{#var graph {<008><BEA>    $per%% <070>  <088>}};
+		#if {$per < 80} {#var graph {<008><BDA>    $per%%<070>   <088>}};
+		#if {$per < 70} {#var graph {<008><CDA>    $per<070>%%   <088>}};
+		#if {$per < 60} {
+			#format {per_1} {%.1s} {$per};
+			#format {per_2} {%r} {$per};
+			#format {per_2} {%.1s} {$per_2};
+			#var graph {<008><DCA>    ${per_1}<070>${per_2}%%   <088>}};
+		#if {$per < 50} {#var graph {<008><DBA>    <070>$per%%   <088>}};
+		#if {$per < 40} {#var graph {<008><EBA>   <070> $per%%   <088>}};
+		#if {$per < 30} {#var graph {<008><EAA>  <070>  $per%%   <088>}};
+		#if {$per < 20} {#var graph {<008><FAA> <070>   $per%%   <088>}};
+		#if {$per < 10} {#var graph {<070>     $per%%   <088>}}
+	} {
+		#format {var} {%.3s} {%1};
+		#if {"$var" == "bet" || "$var" == "hea"} {
+			#var graph {<006>          <088>}
+		}; #elseif {"$var" == "per"} {
+			#var graph {<008><AFA>          <088>}
+		}; #elseif {"$var" == "bru"} {
+			#var graph {<008><BEA>        <088>  }
+		}; #elseif {"$var" == "ble"} {
+			#var graph {<008><DBA>    <088>      }
+		}; #elseif {"$var" == "eme" || "$var" == "alm"} {
+			#var graph {<008><FAA> <088>         }
+		}; #else {
+			#var graph {          }
+		}
+	};
+
+	#return $graph;
+};
+
+#function {word_to_number} {
+	#showme param is %0;
+    #VAR tmp {%0};
+    #REPLACE tmp {ten} {10};
+    #REPLACE tmp {eleven} {11};
+    #REPLACE tmp {twelve} {12};
+    #REPLACE tmp {thirteen} {13};
+    #REPLACE tmp {fourteen} {14};
+    #REPLACE tmp {fifteen} {15};
+    #REPLACE tmp {sixteen} {16};
+    #REPLACE tmp {seventeen} {17};
+    #REPLACE tmp {eighteen} {18};
+    #REPLACE tmp {nineteen} {19};
+    #REPLACE tmp {ty-} {};
+    #REPLACE tmp {twenty} {20};
+    #REPLACE tmp {thirty} {30};
+    #REPLACE tmp {fourty} {30};
+    #REPLACE tmp {fifty} {50};
+    #REPLACE tmp {sixty} {60};
+    #REPLACE tmp {seventy} {70};
+    #REPLACE tmp {eighty} {80};
+    #REPLACE tmp {ninety} {90};
+    #REPLACE tmp {twen} {2};
+    #REPLACE tmp {thir} {3};
+    #REPLACE tmp {fif} {5};
+    #REPLACE tmp {eigh} {8};
+    #REPLACE tmp {one} {1};
+    #REPLACE tmp {two} {2};
+    #REPLACE tmp {three} {3};
+    #REPLACE tmp {four} {4};
+    #REPLACE tmp {five} {5};
+    #REPLACE tmp {six} {6};
+    #REPLACE tmp {seven} {7};
+    #REPLACE tmp {eight} {8};
+    #REPLACE tmp {nine} {9};
+    #REPLACE tmp {{[a-z]}} {};
+    #REPLACE tmp { } {};
+	#return $tmp;
+};
+
+#class helpers close;

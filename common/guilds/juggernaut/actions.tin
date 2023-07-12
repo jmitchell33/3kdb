@@ -7,6 +7,11 @@
 	#var ammo_buy off
 }
 
+#action {%* failed to acquire a lock.} {
+	#math mounts[no_lock] {$mounts[no_lock] + 1};
+	#math mounts[no_rounds] {$mounts[no_lock] / $total_rounds * 100};
+};
+
 #act {After your discount, it will cost %1 coins.} {
 	#if {"$ammo_donate" == "on"} {
 		#send !give %1 coins to cl;
@@ -14,5 +19,6 @@
 	}
 }
 
+#act {There is no reason to 'frenzy' here.} {#var frenzy 0;};
 
 #class {guild_actions} {close}

@@ -14,150 +14,38 @@
      #var defs[es] 1;
      #var defs[blink] 1;
 
-     #switch {"$area"} {
-          #case {"Section Z"} {
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               #var kill_em_all 0;
-               echo_prots_header;
-               prots_pfe;prots_blink;prots_hs;prots_pfc;prots_pfh;prots_mb;
-               echo_reflex_header;
-               reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-               reflex start;
+     echo_divider1;
+     clear_prots;reflex_clear;
+     echo_divider2;
+     #nop - Turn off kill-em-all;
+     #var kill_em_all 0;
 
-               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
-               #alias {.pre_fight_check} {
-                    #var defs[blink] 1;
-                    #var defs[hs] 1;
-                    #var defs[pf] 1;
-                    #var defs[ph] 1;
-                    #var defs[mb] 1;
-                    #var defs[pe] 1;
-                    #var defs[ag] 1;
-                    #var defs[om] 1;
-                    #var defs[es] 1;
-               };
-          };
-          #case {"Turkey Farm"} {
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               #var kill_em_all 0;
-               echo_prots_header;
-               prots_pfg;prots_blink;prots_hs;prots_pfc;prots_pfh;prots_mb;
-               echo_reflex_header;
-               reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-               reflex start;
+     echo_divider1;
+     clear_prots;reflex_clear;
+     echo_divider2;
+     echo_reflex_header;
+     reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
+     reflex_ma 700;reflex_ma 700;
+     reflex combat;
+     
+     echo_divider2;
 
-               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
-               #alias {.pre_fight_check} {
-                    #var defs[blink] 1;
-                    #var defs[hs] 1;
-                    #var defs[pf] 1;
-                    #var defs[ph] 1;
-                    #var defs[mb] 1;
-                    #var defs[pg] 1;
-                    #var defs[es] 1;
-               };
-          };
+     #NOP -- Rotate mobs if in Section Z;
+     #if {"$area" == "Section Z"} {
+          #class bot open;
+          #ticker gool1 {#if !$idle_flag {kill balangool}} 10;
+          #ticker gool2 {#if !$idle_flag {kill balangool 2}} 20;
+          #ticker gool3 {#if !$idle_flag {kill balangool 3}} 30;
+          #class bot close;
+     };
 
-          #case {"Night of Colour"} {
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               #NOP -- Turn off kill-em-all;
-               #var kill_em_all 0;
-               echo_prots_header;
-               prots_pfg;prots_pfe;prots_blink;prots_hs;prots_pfc;
-               echo_reflex_header;
-               reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-               reflex start;
-
-               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
-               #alias {.pre_fight_check} {
-                    #var defs[pg] 1;
-                    #var defs[pe] 1;
-                    #var defs[blink] 1;
-                    #var defs[hs] 1;
-                    #var defs[pf] 1;
-                    #var defs[es] 1;
-               };
-          };
-
-          #case {"Treehouse"} {
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               #NOP -- Turn off kill-em-all;
-               #var kill_em_all 0;
-               echo_prots_header;
-               prots_pfn;prots_blink;prots_hs;
-               echo_reflex_header;
-               reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-               reflex start;
-
-               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
-               #alias {.pre_fight_check} {
-                    #var defs[ag] 1;
-                    #var defs[om] 1;
-                    #var defs[pn] 1;
-                    #var defs[blink] 1;
-                    #var defs[hs] 1;
-                    #var defs[es] 1;
-               };
-          };
-          
-          #case {"Mahjong"} {
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               #var kill_em_all 0;
-               echo_prots_header;
-               prots_pfe;prots_pfg;prots_pfn;prots_blink;prots_hs;prots_pfc;prots_pfh;prots_mb;
-               echo_reflex_header;
-               reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-               reflex start;
-
-               #NOP -- Update what happens before every fight and will be re-activated post deadmans;
-               #alias {.pre_fight_check} {
-                    #var defs[blink] 1;
-                    #var defs[hs] 1;
-                    #var defs[pf] 1;
-                    #var defs[ph] 1;
-                    #var defs[mb] 1;
-                    #var defs[pe] 1;
-                    #var defs[pg] 1;
-                    #var defs[pn] 1;
-                    #var defs[ag] 1;
-                    #var defs[om] 1;
-                    #var defs[es] 1;
-               };
-          };
-
-          #default {
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               #nop - Turn off kill-em-all;
-               #var kill_em_all 0;
-
-               echo_divider1;
-               clear_prots;reflex_clear;
-               echo_divider2;
-               echo_reflex_header;
-               reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-               echo_divider2;
-
-               #alias {.pre_fight_check} {
-                    #var defs[es] 1;
-                    #var defs[blink] 1;
-                    #var defs[hs] 1;
-                    #var defs[pe] 1;
-                    #var defs[pg] 1;
-                    #var defs[pn] 1;
-               };
-          };
+     #alias {.pre_fight_check} {
+          #var defs[es] 1;
+          #var defs[blink] 1;
+          #var defs[hs] 1;
+          #var defs[pe] 1;
+          #var defs[pg] 1;
+          #var defs[pn] 1;
      };
      echo_divider2;
 };

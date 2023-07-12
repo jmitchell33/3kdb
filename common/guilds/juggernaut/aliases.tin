@@ -1,6 +1,19 @@
 #class {jugger_aliases} {kill}
 #class {jugger_aliases} {open}
 
+#alias reset_tracking {
+	#unvar my[gxp];
+	#var total_rounds 0;
+	#var mounts[no_lock] 0;
+};
+
+#alias support_defense {
+	support reset;
+	support defend;
+	#75 support upgrade repair;
+	#75 support upgrade armor;
+};
+
 #alias {stimheal} {
 	#if {$corpses[inventory] > 10} {
 		#math {corpses[inventory]} {$corpses[inventory] - 1}

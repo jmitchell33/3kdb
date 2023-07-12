@@ -1,0 +1,23 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Starcraft 2};
+#var check_room 0;
+
+
+#var bot_message_1 '---- STARCRAFT 2 STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {botpath} {e;e;n;n;w;w;n;n;n;w;w;s;s;e;e;s;e;e;s;s;w;w};
+#var bot[path] $botpath;
+
+#list botmobs clear;
+#list botmobs add {{{long} {Terran Marine} {target} {terran}}};
+#list botmobs add {{{long} {Terran Firebat} {target} {terran}}};
+#list botmobs add {{{long} {Terran SCV} {target} {terran}}};
+#var bot[mobs] $botmobs;
+
+
+#class {bot} {close}
+#read common/bot/generic.tin

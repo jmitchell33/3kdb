@@ -1,0 +1,18 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var check_room 0;
+
+#var bot_message_1 '----  SOPEM BOT   ----';
+#showme $bot_message_1;
+
+#var {bot[path]} {w;n;n;n;n;n;n;{#send {ptell nofollow: pull brick;east};#delay 4 {pull brick;e}};e;s;n;w;{#send {ptell nofollow: pull lever;west};#delay 4 {pull lever;w}};{#send {ptell nofollow: push brick;west};#delay 4 {push brick;w}};w;n;n;n;s;s;s;e;{#send {ptell nofollow: pull lever;east};#delay 4 {pull lever;e}};ne;e;e;n;s;w;w;sw;s;s;s;s;s;s;e};
+
+#list botmobs clear;
+#list botmobs add {{{long} {Skeletal Warrior} {target} {skeleton}}};
+#list botmobs add {{{long} {Skeletal Warrior \(elite\)} {target} {skeleton}}};
+#list botmobs add {{{long} {Dorthinick Autuick the Death Knight \(extremely deadly\)} {target} {knight}}};
+#var bot[mobs] $botmobs;
+
+#class {bot} {close}
+#read common/bot/generic.tin;

@@ -46,7 +46,17 @@
 		#CASE {"K"} {#NOP Mob Fighting;.mipProcessFFFK {%2}};
 		#CASE {"L"} {#NOP Mob Health;#VAR {enemy[hp]} {%2}};
 		#CASE {"M"} {#NOP Mob Image File};
-		#CASE {"N"} {#NOP Combat Round Counter;#VAR {mip[round]} {%2};#var temp %2;#if {$mip[round] > 0} {#var last_fight_rounds %2};#if !$total_rounds {#var total_rounds 1} {#MATH total_rounds {$total_rounds + 1}}};
+		#CASE {"N"} {
+			#VAR {mip[round]} {%2};
+			#if {$mip[round] > 0} {
+				#var last_fight_rounds %2
+			};
+			
+			#NOP Combat Round Counter;
+			#if !$total_rounds {#var total_rounds 1} {
+				#MATH total_rounds {$total_rounds + 1}
+			};
+		};
 		#DEFAULT {#NOP Every other non-handled flag}
 	}
 }
@@ -187,16 +197,26 @@
 
 #ALIAS {.mipProcessGlineJuggernaut} {
 	#IF {%1 == 1} {
-		#REGEX {$mip[gline][1]} {Ammo:\[%d/%d/%d/%d/%d\] <yGxp: %d.%d\%> Hits: \[%d\] <cCoffin: %d/%d} {
-			#VAR {ammo[1]}			{&1};
-			#VAR {ammo[2]}			{&2};
-			#VAR {ammo[3]}			{&3};
-			#VAR {ammo[4]}			{&4};
-			#VAR {ammo[5]}			{&5};
-			#VAR {gxp}			{&6.&7};
-			#VAR {hits}			{&8};
-			#VAR {corpses[coffin]}		{&9};
-			#VAR {corpses[coffinsize]}	{&10}
+		#REGEX {$mip[gline][1]} {Ammo:\[%*\] <yGxp: %d.%d\%> Hits: \[%d\] <cCoffin: %d/%d} {
+			#if $my[gxp][best] {#NOP} {#var my[gxp][best] 0;};
+			#var my[gxp][last] $my[gxp][current];
+			#regex {&1} {{%d/}*} {
+				#VAR {ammo[1]}			{&1};
+				#VAR {ammo[2]}			{&2};
+				#VAR {ammo[3]}			{&3};
+				#VAR {ammo[4]}			{&4};
+				#VAR {ammo[5]}			{&5};
+			};
+			
+			#VAR {my[gxp][current]}			{&2.&3};
+			#VAR {gxp}			{&2.&3};
+			#VAR {hits}			{&4};
+			#VAR {corpses[coffin]}		{&5};
+			#VAR {corpses[coffinsize]}	{&6};
+			#math my[gxp][change] {$my[gxp][current] - $my[gxp][last]};
+			#if $my[gxp][total_gained] {#math my[gxp][total_gained] {$my[gxp][total_gained] + $my[gxp][change]}} {#var my[gxp][total_gained] $my[gxp][change]};
+			#math my[gxp][average] {$my[gxp][total_gained] / $total_rounds};
+			#if {$my[gxp][change] > $my[gxp][best]} {#var my[gxp][best] $my[gxp][change]};
 		}
 	}; #ELSEIF {%1 == 2} {
 		#REGEX {$mip[gline][2]} {Nukes: \[%d/%d\]> Reset: \[%d\%\]} {
@@ -224,6 +244,11 @@
 		#REGEX {$mip[gline][1]} {Sprk:%d/%d}	{
 			#VAR {my[necromancer][glamors][current]}	{&1};
 			#VAR {my[necromancer][glamors][max]}		{&2};
+		};
+		#REGEX {$mip[gline][1]} {furious}	{
+			#VAR {my[necromancer][glamors][furious]} 1;
+		} {
+			#VAR {my[necromancer][glamors][furious]} 0;
 		};
 		#REGEX {$mip[gline][1]} {Prot:%wX}	{#VAR {my[prot]}		{&1}};
 		#REGEX {$mip[gline][1]} {Circle:%d}	{#VAR {my[gxp]}			{&1}};
@@ -268,8 +293,8 @@
 		#REGEX {$mip[gline][1]} { R:%d}		{#VAR {my[defs][r]}			{&1}}	{#var {my[defs][r]}		{0}};
 		#REGEX {$mip[gline][1]} { AG:%d}	{#VAR {my[defs][ag]}		{&1}}	{#var {my[defs][ag]}	{0}};
 		#REGEX {$mip[gline][1]} { ES:%d}	{#VAR {my[defs][es]}		{&1}}	{#var {my[defs][es]}	{0}};
+		#REGEX {$mip[gline][1]} { B:%d}		{#VAR {my[defs][blink]}		 {&1}}	{#var {my[defs][blink]} {0}};
 		#REGEX {$mip[gline][1]} { HR}		{#VAR {my[defs][hr]}		{1}}   {#var {my[defs][hr]}    {0}};
-		#REGEX {$mip[gline][1]} { B}		{#VAR {my[defs][blink]}		 {1}}	{#var {my[defs][blink]} {0}};
 		#REGEX {$mip[gline][1]} { MB}		{#VAR {my[defs][mb]}		 {1}}	{#var {my[defs][mb]}    {0}};
 		#REGEX {$mip[gline][1]} { AB}		{#VAR {my[defs][ab]}		 {1}}	{#var {my[defs][ab]}    {0}};
 		#REGEX {$mip[gline][1]} { RF}		{#VAR {my[defs][rf]}		 {1}}	{#var {my[defs][rf]}    {0}};
@@ -287,9 +312,10 @@
 					#var song_match 1;
 					#var my[song][title] &1;
 					#var my[song][rounds] &2;
+					#math my[song][completion] {$my[song][rounds] * 2};
 				};
 			};
-			#if !$song_match {#unvar my[song]};
+			#if !$song_match {#unvar my[song][title];#var my[song][rounds] 0;};
 		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};

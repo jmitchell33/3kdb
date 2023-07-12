@@ -1,20 +1,22 @@
 #CLASS draw {kill}
 #CLASS draw {open}
 
-
+#unvar draw[index];
+#var draw[index][caption] 1;
 #var draw[chat][active] on;
 #var draw[chat][size] .3;
 #var draw[map][active] on;
 #var draw[map][position] top;
 #var draw[map][size] .3;
-#var draw[status][active] on;
-#var draw[strategy][active] on;
-#var draw[caption][active] on;
 #var draw[hpbar][active] on;
 #var draw[room][active] on;
+#var draw[ticker][active] on;
+#var draw[caption][active] on;
 #var draw[mobile][active] 0;
+#var draw[status][active] on;
+#var draw[strategy][active] on;
 
-#list status_data clear;
+#list bot_data clear;
 #list caption_data clear;
 #list strategy_data clear;
 
@@ -71,54 +73,37 @@
         #var hpbar[height] 0;
     };
 
+    #NOP -- Ticker goes right under the chatlog;
+
     #if {"$draw[chat][active]" == "on"} {
         #math chat[height] {$chat[rows] + 1};
+        #math ticker[top] {$chat[height]};
+        #math ticker[bottom] {$ticker[top] + 3};
         #if {"$draw[map][active]" == "on" && "$draw[map][position]" == "top"} {
-            #math {chat[right]} {-$map[width]-1}
+            #math {chat[right]} {-$map[width]-1};
+            #var ticker[right] $chat[right];
         } {
-            #var chat[right] -1
+            #var chat[right] -1;
+            #var ticker[right] -1;
         }
     } {
+        #var ticker[top] 1;
+        #var ticker[bottom] 3;
         #var chat[height] 0
     };
 
     #NOP -- The caption goes right below the map;
     #if {"$draw[caption][active]" == "on"} {
-        #math caption[height] {&caption_data[] + 1};
         #math caption[top] {$map[bottom] + 2};
-        #math caption[bottom] {$caption[top] + $caption[height]};
+        #math caption[bottom] {-3 - $hpbar[height]};
         #var caption[left] $map[left];
     } {
         #var caption[top] 0;
         #var caption[bottom] 0;
     };
 
-    
-
-    #NOP -- The status report goes right below the caption;
-    #if {"$draw[status][active]" == "on"} {
-        #math status[height] {&status_data[] + 1};
-        #math status[top] {$caption[bottom] + 1};
-        #math status[bottom] {$status[top] + $status[height]};
-        #var status[left] $map[left];
-    };
-
-    
-
-    #NOP -- The strategy report goes right below the status and uses the remaining space;
-    #if {"$draw[strategy][active]" == "on"} {
-        #math strat[top] {$status[bottom] + 1};
-        #math strat[height] {$screen[height] - $chat[height] - $map[height] - $caption[height] - $status[height]};
-        #math strat[bottom] {$strat[top] + $strat[height]};
-        #var strat[left] $map[left];
-    } {
-        #var strat[top] 0;
-        #var strat[bottom] 0;
-    };
-
-
     #NOP -- Clear any previous drawings;
-    #screen clear split;
+    #screen clear all;
     #buffer end;
 
     #NOP -- If there is the chat window, split the # of rows required to display it;
@@ -127,6 +112,9 @@
     } {
         #var split[top] 0;
     };
+
+    #NOP -- If there is a ticker, then adjust the split;
+    #if {"$draw[ticker][active]" == "on"} {#math split[top] {$split[top] + 3}};
     
     #math 	split[bottom]	{$hpbar[height] + 1};
     #var    split[left]     0;
@@ -150,8 +138,6 @@
     #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
     #if {"$draw[chat][active]" == "on"} { draw_chat };
     #if {"$draw[caption][active]" == "on"} { draw_caption };
-    #if {"$draw[status][active]" == "on"} { draw_status };
-    #if {"$draw[strategy][active]" == "on"} { draw_strategy };
     #if {"$draw[room][active]" == "on"} { draw_room };
 };
 
@@ -176,36 +162,56 @@
     };
 };
 
-#NOP /* -- CAPTION (Idle timer, Corpses, etc) -- */
+#NOP /* -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) -- */
 #alias draw_caption {
-
-    #list caption_data clear;
-    #list caption_data add {Idle: $idle_cap  <eaa>Deadmans: $deadManTimeLeft_cap};
-    #list caption_data add {$corpse_string};
-    #list caption_data add {$eternal_string};
-
     #nop -- Clear any old drawings;
     #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
-    #if {$idle_sec > $deadmanIdleTimeout} {
-        #draw red rounded box $caption[top] $caption[left]+1 $caption[bottom] -1 ${caption_data[1..$caption[height]]};
+    #if {&caption_data[]} {
+        #list caption_data set $draw[index][caption] {$corpse_string \n $eternal_string};
     } {
-        #draw green rounded box $caption[top] $caption[left]+1 $caption[bottom] -1 ${caption_data[1..$caption[height]]};
+        #list caption_data create {$corpse_string \n $eternal_string};
     };
-
-    #math tempVar {&caption_data[] + 1};
-
-    #if {$caption[height] != $tempVar} {init_screen};
+    
+    #if {$idle_sec > $deadmanIdleTimeout} {
+        #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
+    } {
+        #draw calign grid <ccc> tubed box $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
+    };
 };
+
+#NOP /* -- TICKER (Idle timer, Deadman, Current Round etc) -- */
+#alias draw_ticker {
+    #if {&ticker_data[]} {
+        #list ticker_data set 1 {Idle: $idle_cap  <eaa>Deadman: $deadManTimeLeft_cap $fight_string};
+    } {
+        #list ticker_data create {Idle: $idle_cap  <eaa>Deadman: $deadManTimeLeft_cap $fight_string};
+    };
+    
+    #if {$idle_sec > $deadmanIdleTimeout} {
+        #draw calign grid red jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
+    } {
+        #draw calign grid blue jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
+    };
+};
+
 
 #NOP /* -- Bot status -- */
 #alias draw_status {
-
-    #list status_data clear;
+    #if {$draw[index][bot]} {
+        #NOP -- If the stored index is greater than those existing, reset it;
+        #if {$draw[index][bot] > &caption_data[]} {
+            #math draw[index][bot] {&caption_data[] + 1};
+            #list caption_data insert $draw[index][bot] {};
+        };
+    } {
+        #math draw[index][bot] {&caption_data[] + 1};
+        #list caption_data insert $draw[index][bot] {};
+    };
 
     #if $bot[active] {
-        #path get length bot_total_rooms;
-        #path get position bot_current_room;
+        #var bot_total_rooms &bot[steps][];
+        #var bot_current_room $bot[step];
 
         #math bot_current_room {$bot_current_room - 1};
         #math bot_progress {100 * $bot_current_room / $bot_total_rooms};
@@ -229,72 +235,48 @@
         thousandsFormatNumber temp_xp;
 
         #if $bot[paused] {
-            #list status_data add {<088>Bot Status  : <DAA><aaa> PAUSED <088>  $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+            #var bot_string {\n <088>Bot Status:<DAA><aaa> 🖐 <088>};
         } {
-            #list status_data add {<088>Bot Status  : <ACA><fff> ACTIVE <088>  $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+            #var bot_string {\n Bot Status:<ACA><fff> ▶ <088>};
         };
 
         #if $bot[playercheck] {
-            #list status_data add {Playercheck : <ACA><fff>   ON   <088>};
+            #cat bot_string {<ACA><fff> ✔ <088>};
         } {
-            #list status_data add {Playercheck : <DAA><aaa>  OFF   <088>};
+            #cat bot_string {<DAA><aaa> ✔ <088>};
         };
 
-        #list status_data add {Mobs Killed: $bot[stats][mobs]  XP Gained: $temp_xp  XP Rate/Hr: $xp_rate_str};
+        #cat bot_string {\n Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+
+        #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
 
     } {
-        #list status_data add {<088>Bot: <fff>OFF<088>};
+        #var bot_string {\n <088>Bot: <fff>OFF<088>};
     };
 
-    #NOP - Update the size of the drawing based on the number of lines;
-    #if {&status_data[] < $status[height]} {
-        #math status[height] {&status_data[] + 1};
-        #math status[bottom] {$status[top] + $status[height]};
-    };
-
-    #math tempVar {&status_data[] + 1};
-    
-
-    #nop -- Clear any old drawings;
-    #draw {<dda>} {tile} $status[top] $status[left]+1 $status[bottom] -1 {};
-
-    #if {$idle_sec > $deadmanIdleTimeout} {
-        #draw red rounded box $status[top] $status[left]+1 $status[bottom] -1 ${status_data[1..$status[height]]};
-    } {
-        #draw green rounded box $status[top] $status[left]+1 $status[bottom] -1 ${status_data[1..$status[height]]};
-    };
-
-    #if {$status[height] != $tempVar} {init_screen};
+    #list caption_data set $draw[index][bot] $bot_string;
 };
 
 #alias draw_strategy {
-
-    #list strategy_data clear;
-    #list strategy_data add {<bef>Strategy:<088>};
-
-    #foreach *strategy[] index {
-        #format strat_name {%-15s} {$index};
-        #format strat_name {%n} {$strat_name};
-        #if {$strategy[$index]} {
-            #list strategy_data add {$strat_name : <afa>ON<088>};
-        } {
-            #list strategy_data add {$strat_name : <eaa>OFF<088>};
+    #if {$draw[index][strategy]} {
+        #NOP -- If the stored index is greater than those existing, reset it;
+        #if {$draw[index][strategy] > &caption_data[]} {
+            #math draw[index][strategy] {&caption_data[] + 1};
+            #list caption_data insert $draw[index][strategy] {};
         };
+    } {
+        #math draw[index][strategy] {&caption_data[] + 1};
+        #list caption_data insert $draw[index][strategy] {};
     };
 
-    #NOP - If there are less strategies than rows left, reduce the height.  Otherwise strategies will be listed;
-    #NOP - until you reach the hpbar;
+    #var strategy_string {\n <bef>Strategy:<088>};
 
-    #if {&strategy_data[] < $strat[height]} {
-        #math strat[height] {&strategy_data[] + 1};
-        #math strat[bottom] {$strat[top] + $strat[height]};
+    #foreach $strategyActive[%*] index {
+        #format strat_name {%n} {$index[name]};
+        #cat strategy_string { <afa>$strat_name<088>};
     };
 
-    #NOP -- Clear old drawings;
-    #draw {<dda>} {tile} $strat[top] $strat[left]+1 $strat[bottom] -1 {};
-
-    #draw green rounded box $strat[top] $strat[left]+1 $strat[bottom] -1 ${strategy_data[1..$strat[height]]};
-
+    #list caption_data set $draw[index][strategy] $strategy_string;
 };
 
 #NOP /* -- MAP -- */
@@ -304,9 +286,9 @@
         #map offset $map[top] -$map[width]+2 $map[bottom]-1 -2;
         #map flag vtmap on;
         #if {"$draw[room][active]" == "on"} {
-            #draw green rounded box $map[top]-1 -$map[width] $map[bottom]+1 -1;
+            #draw <ccc> tubed box $map[top]-1 -$map[width] $map[bottom]+1 -1;
         } {
-            #draw green rounded box $map[top]-1 -$map[width] $map[bottom] -1;
+            #draw <ccc> tubed box $map[top]-1 -$map[width] $map[bottom] -1;
         };
     } {
         #map flag vtmap off
@@ -337,11 +319,7 @@
     draw_all
 };
 
-#EVENT {SCREEN RESIZE}
-{
-    init_screen;
-    draw_all;
-}
+#EVENT {SCREEN RESIZE} {#delay 3 {init_screen};};
 
 #NOP /* kick off */;
 init_screen;

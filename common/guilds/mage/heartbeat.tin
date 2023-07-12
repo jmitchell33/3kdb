@@ -111,7 +111,7 @@
 		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
         #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
         #if {$my[super][current] && $my[gp1][current] > $monitors[saturation-corpse]} {cast explosive release};
-        #if {$my[gem] < 80 && !$go_fetch} {#var go_fetch 1;ffetch gem};
+        #if {$my[gem] < 80 && !$go_fetch} {#if $ffetch_coins {#var go_fetch 1;ffetch gem};};
 
         #if {$strategy[slow] && $mob[slow] < 1} {
             cast slow;

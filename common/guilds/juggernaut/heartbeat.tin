@@ -1,6 +1,8 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
+#var frenzy 1;
+
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
 		#if {"$ammo_buy" == "on" && $ammo_len > 0} {
@@ -17,7 +19,7 @@
 			}
 		};
 		#if {$shp > 0 && $shp < 9} {dismiss};
-		#if {"$saf" == "No"} {support assault fire};
+		#NOP #if {"$saf" == "No"} {support assault fire};
 		#if {$my[gp1][current] < 60} {stimheal};
 		#if {$my[gp1][current] < 50} {stimheal};
 		#if {$my[gp1][current] < 40} {stimheal};
@@ -29,7 +31,7 @@
 			#send !transpose max;
 		};
 		#if {$reset >= 95} {
-			#if {$clan > 0} {
+			#if {$clan > 0 && $frenzy} {
 				#send !frenzy
 			}; #elseif {$nukes > 0 && $mip[round]} {
 				fire $nukes

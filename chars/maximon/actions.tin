@@ -1,22 +1,20 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
-#var corpse_delay 1;
-
-#ACTION {^Owie. That hurt!} {
-	#if !$corpse_delay {
-		#var corpse_delay 1;
-		corpse_select;
-		#delay {4} {offer corpse;offer corpse};
-		#delay {4} {#var corpse_delay 0};
-	};
-} {1};
-
+#var corpse_confirm 1;
 
 #action {^%1 gives you an air-five!$} {#format {heal_target} {%l} {%1};radiance $heal_target};
 #action {^%1 gives you a high-five!$} {#format {heal_target} {%l} {%1};invigorate $heal_target};
 
 #action {^Out of nowhere a crazed hockey fan leaps towards the Cup.} {offer corpse};
+
+#action {There is no corpse here to offer up to %*.} {
+    #if $corpse_confirm {
+        #var corpse_confirm 0;
+        i;
+        #delay 60 {corpse_confirm 1};
+    };
+};
 
 #action {^The %1 falls to the ground.$} {
     #if $vorpal[donate] {
@@ -64,7 +62,7 @@
     #showme {--- Avg. GXP :: $average_fight_gxp };
     #showme {--- Rounds :: $rounds_fought };
     #delay .2 {#var total_fight_gxp 0};
-}
+} {1};
 
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};

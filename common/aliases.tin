@@ -4,6 +4,16 @@
 #alias {debug} {#debug all on;#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
 #alias {debugoff} {#debug all off;#UNEVENT {SEND OUTPUT};};
 
+#NOP #alias corpse_trig {     ;
+#NOP     #foreach corpseActions ;
+#NOP }; ;
+
+
+#NOP -- Generic QOL improvements;
+#alias {exa} {#send {!examine %0};#send {!search %0};};
+#alias {th} {#send {!tellhist}};
+#alias {cwho1} {#send {!cwho -O}};
+
 #alias reload {
     #class player_%* kill;
     #class guild_%* kill;
@@ -30,6 +40,7 @@
 #alias add_action {
     #var tmp %1;
     #var action_found 0;
+    #var actions_stacked 1;
     #foreach $actionStack[%*] action {
         #regexp {"$tmp[name]"} {"$action[name]"} {
             #var action_found 1;
@@ -44,9 +55,11 @@
 
 #alias remove_action {
     #var tmp %1;
-    #list actionStack indexate name;
-    #list actionStack filter {} {%1};
-    #if {&actionStack[] > 0} {#var actions_stacked 1;} {#var actions_stacked 0;};
+    #if {&actionStack[] > 0} {
+        #list actionStack indexate name;
+        #list actionStack filter {} {%1};
+        #if {&actionStack[] > 0} {#var actions_stacked 1;} {#var actions_stacked 0;};
+    };
 };
 
 #var beepon 1;
@@ -59,7 +72,7 @@
 #ALIAS {ld} {
     #class global open;
     #map get roomvnum curvnum;
-    #var strategy $strategy;
+    #var strategyActive ${strategyActive};
     #class global close;
     #class global write chars/$user/vars.tin;
     #delay 1 {#end};
@@ -114,12 +127,58 @@
     go shop10;
 };
 
+#alias {sell_banshee} {
+    stash all;
+    keep all component;
+    go shop2;
+    #16 {sell bow;sell bracers};
+    go shop4;
+    #16 {sell bow;sell bracers};
+    go shop5;
+    #16 {sell bow;sell bracers};
+    go shop6;
+    #16 {sell bow;sell bracers};
+    go shop7;
+    #16 {sell bow;sell bracers};
+    go shop8;
+    #16 {sell bow;sell bracers};
+    go shop10;
+};
+
+
 #alias {sell_whores} {
     stash all;
     keep all component;
     #loop 1 10 i {
         go shop$i;
         #16 {sell yeast;sell skoal;sell bitch boots;sell bitch blade;sell whips;sell purple heart;sell bitch plate;sell pimp shells;sell pimp gun;sell slickness;sell voucher;sell dermal plating}
+    };
+};
+
+#alias {stashlist} {
+    #if {"%1" == ""} {
+        #send stashlist;
+    };
+    #if {"%1" == "assemble"} {
+        #read modules/crafting/assemble.tin;
+        #send stashlist;
+        #delay 2 {killassembler};
+    };
+};
+
+#alias .rep {
+    #if { "%0" == "" }
+    {
+        reps;
+    };
+    #else
+    {
+        #highlight {%%i%0%%*\|%%*} {<338>};reps;
+
+        #delay {2} 
+        {
+                #unhighlight {%%i%0%%*\|%%*} {<338>};
+        } {1};
     };
 };
 

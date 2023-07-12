@@ -9,7 +9,9 @@
 * logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... you would create a folder called logs/jerry
 
 **How does this all work?**
-The name.tin file (byron.tin for example) is where you set the guild and select all of the 'addons' that player has.  Using Byron as an example:
+The name.tin file (byron.tin for example) is where you set the guild and select all of the 'addons' that player has.  
+Using Byron as an example:
+
     *#var guild bard;
     #var user byron;
     #read chars/$user/vars.tin;
@@ -49,7 +51,7 @@ A few notes on mudside defaults are assumed for each guild.
 
 
 **COMMITTING / ADDING STUFF:**
-* If you want to add new things, it should assume that you would generally be working within a custom module you might be building, over time, or contributing to an existing one. So work within only that /modules/\<module\> folder. Otherwise, you are also free to add to the common guild-, eq-, an area-specific scripts in the /common/\<type\>/\<script\>.tin file. That's all fine, but please make some of your changes known or at least make sense for use as a global, non-conflicting thing. Will try to put together a more custom forum for changes, but for now can also open an Issue / Feature Request or Pull request if you want, before adding global changes. 
+* If you want to add new things, it should assume that you would generally be working within a custom module you might be building, over time, or contributing to an existing one. So work within only that /modules/\<module\> folder. Otherwise, you are also free to add to the common guild-, eq-, and area-specific scripts in the /common/\<type\>/\<script\>.tin file. That's all fine, but please make some of your changes known or at least make sense for use as a global, non-conflicting thing. Will try to put together a more custom forum for changes, but for now can also open an Issue / Feature Request or Pull request if you want, before adding global changes. 
 
 **TIPS:**
 * If you want to edit code locally and auto-send to server on saving, use VSCode and install "SFTP" plugin, then CTRL+SHIFT+P > SFTP: Config, and enter this, replacing with your server login info

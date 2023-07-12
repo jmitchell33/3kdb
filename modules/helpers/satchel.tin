@@ -1,15 +1,16 @@
 #class helpers open
 
-#action {%1%s\|%s%2%s\|%s%3%s\|%s%4%s\|%s%5%s\|%s%6%s\|%s%7%s\|%s%8%s\|%s%9%s\|} {
+#action {%1|%2|%3|%4|%5|%6|%7|%8|%9|} {
     #format {lower} {%l} {%1};
-    #format {satchel_total} {%p} {%2};
-    #format {satchel_legendary} {%p} {%3};
-    #format {satchel_superior} {%p} {%4};
-    #format {satchel_good} {%p} {%5};
-    #format {satchel_average} {%p} {%6};
-    #format {satchel_poor} {%p} {%7};
-    #format {satchel_crude} {%p} {%8};
-    #format {satchel_worthless} {%p} {%9};
+    #format {lower} {%p} {$lower};
+    #math {satchel_total} {%2};
+    #math {satchel_legendary} {%3};
+    #math {satchel_superior} {%4};
+    #math {satchel_good} {%5};
+    #math {satchel_average} {%6};
+    #math {satchel_poor} {%7};
+    #math {satchel_crude} {%8};
+    #math {satchel_worthless} {%9};
     
     #list temp_satchel add {{
         {name} {$lower}

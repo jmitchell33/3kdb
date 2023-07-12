@@ -79,5 +79,40 @@
     #var {my[effects][psummon][growth]}{ON};
 }
 
+#NOP -- hmonitor healing
+#var hmonitor_hp_heal 1;
+#var hmonitor_sp_heal 1;
+#var hmonitor_hp_percent .9;
+#var hmonitor_sp_percent .9;
+
+#alias hp_monitor {
+    #math hmonitor_hp_percent {%1 * .01};
+};
+
+#alias sp_monitor {
+    #math hmonitor_sp_percent {%1 * .01};
+};
+
+#action {Status of %w: %d\/%d hp  %d\/%d sp} {
+    #line gag;
+    #format {lower} {%l} {%1};
+    #math hmonitor[hp][current] %2;
+    #math hmonitor[hp][max] %3;
+    #math hmonitor[hp][percent] {$hmonitor[hp][current] / $hmonitor[hp][max]};
+    #math hmonitor[sp][current] %4;
+    #math hmonitor[sp][max] %5;
+    #math hmonitor[sp][percent] {$hmonitor[sp][current] / $hmonitor[sp][max]};
+    #if {$hmonitor[hp][percent] < $hmonitor_hp_percent} {
+        #if $hmonitor_hp_heal {#var hmonitor_hp_heal 0;invigorate $lower;#delay .5 {#var hmonitor_hp_heal 1;}};
+    };
+    #if {$hmonitor[sp][percent] < $hmonitor_sp_percent} {
+        #if $hmonitor_sp_heal {#var hmonitor_sp_heal 0;radiance $lower;#delay .5 {#var hmonitor_sp_heal 1;}};
+    };
+
+    #math caption_hmonitor_hp_percent {$hmonitor_hp_percent * 100};
+    #math caption_hmonitor_sp_percent {$hmonitor_sp_percent * 100};
+    #var caption_hmonitor {<dab>Hmonitor: <088> <bec>Toxin<088> <cfb>HP: $hmonitor[hp][current] / $hmonitor[hp][max] ($caption_hmonitor_hp_percent%)<088> <aee>SP: $hmonitor[sp][current]/$hmonitor[sp][max] ($caption_hmonitor_sp_percent%)};
+    #var caption_data[hmonitor] {\n ${caption_hmonitor}};
+} {1};
 
 #class {priest_actions} {close}

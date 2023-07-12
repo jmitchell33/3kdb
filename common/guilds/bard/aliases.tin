@@ -31,6 +31,7 @@
 
 #alias {ham_bot} {
 	#if $strategy[hammer] {
+		strategy hammer;
 		#SHOWME <efa>------------------- HAMMER NO LONGER SMASHING FACE -------------------<088>;
 		unwield hammer;
 		wield redaxe;
@@ -39,6 +40,7 @@
 		#var defs[hr] 0;
 	} {
 		#SHOWME <efa>------------------- HAMMER WILL BEGIN SMASHING FACE -------------------<088>;
+		strategy hammer;
 		unwield redaxe;
 		remove shield;
 		wield rod;
@@ -50,11 +52,13 @@
 
 #alias {rod_bot} {
 	#if $strategy[rainbow] {
+		strategy rainbow;
 		#SHOWME <efa>------------------- RAINBOW OF DEATH DISABLED -------------------<088>;
 		#var strategy[rainbow] 0;
 		#var defs[hr] 0;
 		#var defs[fr] 0;
 	} {
+		strategy rainbow;
 		#SHOWME <efa>------------------- RAINBOW OF DEATH ACTIVATED  -------------------<088>;
 		#var strategy[rainbow] 1;
 		#var defs[hr] 1;
@@ -64,13 +68,22 @@
 
 
 #alias {blades} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast blade dance};
+#alias {fires} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast fire storm};
 #alias {critic} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast caustic critic};
 #alias {ebolt} {reflex remove sp >$dmg_spell_sp;reflex add sp >$dmg_spell_sp cast energy bolt};
 #alias {rod} {perform rainbow of death;cast focus the rainbow};
 
 #NOP -- QUICK ALIASES FOR SETTING UP DEFENSES;
 #alias {prots_spells} {prots_blink;prots_pfe;prots_pfg;prots_pfn;prots_pfc;prots_pfh;prots_mb;prots_hs;};
-#alias {prots_songs} {#var defs[ag] 1;#var defs[om] 1;};
+#alias {prots_songs} {
+	#if {$defs[ag] || $defs[om]} {
+		#echo {<edb>---  DEFENSIVE SONGS OFF  ---<088>};
+		#var defs[ag] 0;#var defs[om] 0;
+	} {
+		#echo {<dea>---  DEFENSIVE SONGS ON  ---<088>};
+		#var defs[ag] 1;#var defs[om] 1;
+	};
+};
 
 #alias {prots_pfe} {cast protection from evil;#var defs[pe] 1;echo_prots_pfe};
 #alias {prots_pfg} {cast protection from good;#var defs[pg] 1;echo_prots_pfg};

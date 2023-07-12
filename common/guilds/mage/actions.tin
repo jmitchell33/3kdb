@@ -1,6 +1,9 @@
 #class {mage_actions} {kill}
 #class {mage_actions} {open}
 
+#var ffetch_coins 1;
+#var my[immersion][active] 0;
+
 #NOP --- MOB STATUS TRACKING;
 #ACTION {%w seems to speed up...$} {#var mob[slow] 0} {1};
 #ACTION {^You raise your arms and suddenly %* is moving much slower!$} {#var mob[slow] 1} {1};
@@ -28,6 +31,7 @@
 #ACTION {^You feel slower as the haste wears off.$} {#var self_haste 0} {1};
 #ACTION {^You raise your arms and suddenly %w is moving much faster!$} {#var summons_haste 1 {1}}
 #ACTION {^Your immersion has expired.$} {#var my[immersion][active] 0;} {2};
+#action {^There is darkness as a Orb of Light goes dark.$} {cast light} {2};
 
 #ACTION {----*> Your prismatic_aura greater contingency has dissipated!<*----} {
     cast greater contingency as prismatic_aura#cast prismatic aura
@@ -93,15 +97,21 @@
     };
 } {1};
 
+#act {There's bits of the following materials remaining:} {
+    #line oneshot #action {%* crystal} {#var golemList %%0;#list golemList explode {  };};
+};
+
 #ACTION {^El Jefe %* seems to slow down...$} {
     #var golem_haste 0;
 } {1};
 
-
+#ACTION {Señor Meow-meow the fluffy persian cat says: I did not have enough coins.} {#var ffetch_coins 0};
 #ACTION {^There is no reason to 'ffetch' here.$} {#if {$toggle_find_familiar} {#var toggle_find_familiar 0;#delay 4 {cast find familiar;#var toggle_find_familiar 1;};};} {1};
 #ACTION {^You don't have any basic construction materials for a %*!} {
-    ffetch materials;
-    #delay 5 {keep materials;create_golem};
+    #if $ffetch_coins {
+        ffetch materials;
+        #delay 5 {keep materials;create_golem};
+    };
 } {1};
 
 #ACTION {^You wave your hands calling forth summoning magics and draw} {say all, you are now in group summons/assist always} {1};

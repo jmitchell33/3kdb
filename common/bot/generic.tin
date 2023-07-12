@@ -26,7 +26,9 @@
 
 #NOP -- pre_bot check is loaded via the char/user/config.tin;
 .pre_bot_check;
-#path load $bot[path];
+#var bot[step] 1;
+#var bot[steps] $bot[path];
+#list bot[steps] explode {;};
 
 #if $check_death {
         #showme {<ffe>------ CHECKDEATH IS ACTIVE --------<088>};
@@ -80,17 +82,11 @@
 #alias bot_xp {
     #if {"%1" == "start"} {
         #action {^You have %* total xp.$} {
-            #format temp_xp {%d} {%%1};
-            #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
-                #math fight_xp {$temp_xp - $my[xp]};
-                #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
-                #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
-                #format my[xp] {%d} {%%1};
-            } {
-                #format my[xp] {%d} {%%1};
-            };
+            #math bot[stats][xp] 0;
+            #math bot[stats][loop][xp] 0;
+            #format my[xp] {%d} {%%1};
             #unaction {^You have %* total xp.$};
-        };
+        } {2};
         xp;
         #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
     } {
@@ -149,8 +145,38 @@
     };
 };
 
+#alias {.resume} {
+    #macro {1} {
+        #ticker checkResume {#if {$roomvnum == $bot[start_vnum]} {#unticker checkResume;..}} .1;
+        #map run $bot[start_vnum];
+        #delay 2 {
+            .pre_bot_check;
+            #local i 1;
+            #action {{^-R-_(.*)-R-_}} {#if {$i <= ${bot[step]}} {$bot[steps][${i}];#math i {$i + 1};} {#unaction {{^-R-_(.*)-R-_}};..}};
+        };
+    };
+
+    #macro {2} {
+        #showme <dfa>--- RESUMSE REQUEST CANCELLED ---;
+        #unmacro 1;
+        #unmacro 2;
+    };
+
+    #showme <dfa>--- ATTEMPTING TO RESUME BOT FROM LAST POINT ---;
+    #showme <dfa>   The map must be sync'd if so:;
+    #showme <dfa>   Press (1) to resume the bot;
+    #showme <dfa>   Press (2) to cancel;
+    #showme <dfa>--- This option will expire in 5 seconds ---;
+    
+    #delay 5 {
+        #unmacro 1;
+        #unmacro 2;
+    };
+};
+
 /* kill the bot */
 #alias {.stop} {
+    #var lastBot $bot;
     #unvar bot;
     #unalias {..};
     #unalias {.onPrompt};
@@ -162,18 +188,31 @@
 };
 
 #alias .pause {
+    #var lastBot $bot;
     #undelay bot_kick;
     #var bot[paused] 1;
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
-#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars"} {
-    #act {^-M-_%*} {
-        #var bot[foundmob] 1;
-        #var mob[target] mob;
-        .mob_kill_action;
-        kill mob;
-    } {2};
+#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Turkey Farm" || "$area" == "Starcraft 2"} {
+    #if {"$area" == "Starcraft 2"} {
+        #act {^-M-_%*} {
+            #var bot[foundmob] 1;
+            #var mob[target] mob;
+            .mob_kill_action;
+            peer human;
+            kill human;
+        } {2};
+        #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
+        #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
+    } {
+        #act {^-M-_%*} {
+            #var bot[foundmob] 1;
+            #var mob[target] mob;
+            .mob_kill_action;
+            kill mob;
+        } {2};
+    }
 } {
     #act {{^-M-_(.*)( \[(.*)\])*( \[[0-9]*%\])?( (.*)attacking(.*))?([\r\n\t ]*?)?( \{([0-9]+)\})?( \{([A-Za-z]+)\})?}} {
         #var foundtimes 1;
@@ -206,30 +245,41 @@
     } {2};
 };
 
-
-
 #act {^{-i-|-w-|-a-|-o-}%*.$} {
-    #var item_number 1;
-    #var item_long %2;
+    #if {$bot[active] && !$bot[paused] && $bot[walk]} {
+        #var item_number 1;
+        #var item_long %2;
 
-    #replace item_long {.} {};
-    #replace item_long { \[%*\]} {};
+        #replace item_long {.} {};
+        #replace item_long { \[%*\]} {};
 
-    #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
-    #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
+        #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
+        #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
 
-    #foreach $item_grab_list[%*] item {
-        #regexp {"$item_long"} {$item[long]} {
-            #$item_number get $item[target];
-            #if {"$guild" == "bard"} {
-                identify $item[target];
+        #foreach $item_grab_list[%*] item {
+            #regexp {"$item_long"} {$item[long]} {
+                #$item_number get $item[target];
+                #if {"$guild" == "bard"} {
+                    identify $item[target];
+                };
+                #if {"$guild" == "priest"} {
+                    recognize $item[target];
+                };
+                #if {"$item[target]" == "bag"} {
+                    #loop 2 20 i {put bag in bag $i};
+                };
             };
-            #if {"$guild" == "priest"} {
-                recognize $item[target];
-            };
-            #if {"$item[target]" == "bag"} {
-                #loop 2 20 i {put bag in bag $i};
-            }
+        };
+    };
+};
+
+#alias .botStep {
+    #if !$bot[paused] {
+        #if {$bot[step] > &bot[steps][]} {
+            #showme {------- BOT COMPLETE -----};
+        } {
+            $bot[steps][${bot[step]}];
+            #math bot[step] {$bot[step] + 1};
         };
     };
 };
@@ -261,7 +311,7 @@
         #if {$bot[foundplayer]} {
             .stop_prompt;
             #var bot[walk] 1;
-            #delay .1 {#path walk;};
+            #delay .1 {.botStep};
         } {
             #if {$collector[items]} {
                 get all;
@@ -284,18 +334,18 @@
                     #var bot[foundobject] 0;
                 } {
                     .stop_prompt;
-                        #if {$check_room} {
-                            .check_room;
-                        } {
-                            #var bot[walk] 1;
-                            #delay .1 {#path walk;};
-                        };
+                    #if {$check_room} {
+                        .check_room;
+                    } {
+                        #var bot[walk] 1;
+                        #delay .1 {.botStep};
+                    };
                 };
             };
         };
     };
 
-    #alias {.stop_prompt} {#unact {^>$};#var bot[walk] 0;#if {"$draw[status][active]" == "on"} {draw_status};};
+    #alias {.stop_prompt} {#map get roomvnum bot[curVnum];#unact {^>$};#var bot[walk] 0;#if {"$draw[status][active]" == "on"} {draw_status};};
     
 	glance;
 
@@ -356,7 +406,8 @@
 
 
 /* Bot end actions... */
-#act {#END OF PATH} {
+#act {^------- BOT COMPLETE -----$} {
+    #showme BOT HAS COMPLETED LOOP ENTERED;
     #if !$bot[paused] {
         #if {!$bot[loop]} {
             #show \nBot finished.;
@@ -388,7 +439,7 @@
                 #var bot[stats][loop][xp] 0;
                 #var bot[stats][loop][coins] 0;
                 #show \nLooping bot...;
-                #path load $bot[path];
+                #var bot[step] 1;
                 .bot;
             } {
                 #show \nBot finished.;
@@ -417,7 +468,7 @@
             }
         };
     };
-};
+} {2};
 
 
 #class {bot} {close}
