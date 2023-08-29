@@ -20,13 +20,6 @@
 #var chat[high_mortal] {};
 #var chat[party] {};
 
-#var chat[unread][general] 0;
-#var chat[unread][tells] 0;
-#var chat[unread][clan] 0;
-#var chat[unread][guild] 0;
-#var chat[unread][high_mortal] 0;
-#var chat[unread][party] 0;
-
 
 #alias postChatCategory {
 	#var chat[${chatCategory}] ${discordText};
@@ -102,7 +95,7 @@
         #REGEX {%0} {[PARTY] All gold divvied, total: } {#var mipgag 1};
 
 	#NOP Gentech Notify Line;
-	#NOP #REGEX {%0} {gnotify~Notify~%w~[Gen-Nofity]: } {#var mipgag 1};
+	#NOP #REGEX {%0} {gnotify~Notify~%*~[Gen-Nofity]: } {#var mipgag 1};
 
 	#IF {$mipgag == 0} {.mipProcessCAA %0}
 }
@@ -267,22 +260,22 @@
 	#NOP Byron crying OW;
 	#REGEX {$tempString} {~Byron~cries 'OW!!'} {#var mipgag 1};
 	#REGEX {$tempString} {~Owie.~That hurt!} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~pokes %w in the ribs} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~pokes %* in the ribs} {#var mipgag 1};
 
 	#NOP Guilds and Areass;
 	#NOP Bards;
-	#REGEX {$tempString} {~%w~cracks %w knuckles and gets ready to play for %*.} {#var mipgag 1};
-	#REGEX {$tempString} {~ceases %w performance.} {#var mipgag 1};
-	#REGEX {$tempString} {~takes a deep breath.} {#var mipgag 1};
-	#REGEX {$tempString} {~takes a breath.} {#var mipgag 1};
-	#REGEX {$tempString} {~pauses for a moment...} {#var mipgag 1};
-	#REGEX {$tempString} {~ceases %w performance.} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~finishes %w performance with a bow.} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~takes a deep breath and prepares to perform a song for you.%s} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~cracks %* knuckles and gets ready to play for %*.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*ceases %* performance.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*takes a deep breath.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*takes a breath.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*pauses for a moment...} {#var mipgag 1};
+	#REGEX {$tempString} {~%*ceases %* performance.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~finishes %* performance with a bow.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~takes a deep breath and prepares to perform a song for you.%s} {#var mipgag 1};
 	#REGEX {$tempString} {~Great~cheer fills you, it's almost overwhelming!} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~smiles happily.} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~takes a deep breath and prepares to perform a song for %w.} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~sings soulfully} {#var mipgag 1};
+	#REGEX {$tempString} {~%*smiles happily.} {#var mipgag 1};
+	#REGEX {$tempString} {~takes a deep breath and prepares to perform a song for %*.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*sings soulfully} {#var mipgag 1};
 
 	#NOP Bladesingers;
 	#REGEX {$tempString} {~Corath~} {#var mipgag 1};
@@ -299,7 +292,7 @@
 
 	#NOP Cove of the Three (Lost Soul);
 	#REGEX {$tempString} {~~You try to clasp onto the diamond spectacle, but your hands fall right through!} {#var mipgag 1};
-	#REGEX {$tempString} {~~Bursts of %w colored energy shoot off from the spectacle.} {#var mipgag 1};
+	#REGEX {$tempString} {~~Bursts of %* colored energy shoot off from the spectacle.} {#var mipgag 1};
 	#REGEX {$tempString} {~~The diamond-spectacle spins and turns on an unseen axis.} {#var mipgag 1};
 	#REGEX {$tempString} {~~The diamond-shaped spectacle changes color.} {#var mipgag 1};
 
@@ -328,7 +321,7 @@
 
 	#NOP Necromancer;
 	#REGEX {$tempString} {~The~spirit of the beast leaves your body, slightly weakening you.} {#var mipgag 1};
-	#REGEX {$tempString} {~%w~appears slightly drained.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~appears slightly drained.} {#var mipgag 1};
 
 	#NOP Party Divvy;
 	#REGEX {$tempString} {[PARTY] GOLD divvy called by } {#var mipgag 1};
@@ -359,12 +352,12 @@
 	#REGEX {$tempString} {~The~skeletal guard steps in front of you barring your progress.} {#var mipgag 1};
 
 	#NOP Wrapping with no corpse in room;
-	#REGEX {$tempString} {~%w~wraps %w arms around %w.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~wraps %* arms around %*.} {#var mipgag 1};
 
 	#NOP Zelligar's Headband;
 	#REGEX {$tempString} { stumbles in confusion as the headband hypnotizes } {#var mipgag 1};
 
-	#IF {$mipgag == 0} {.mipProcessBAB %0}
+	#IF {$mipgag == 0} {.mipProcessBAB %0;};
 }
 
 #ALIAS {.mipProcessBAB} {
@@ -406,7 +399,14 @@
 #var chat[page] 1;
 #var chat[scroll] page;
 
-#alias read_all {
+
+#function formatHeader {
+	#var result <088><dab>[<fcc> %0 <dab>]<088>;
+	#return $result;
+};
+
+
+#alias .messagesMarkRead {
 	#var chat[unread][general] 0;
 	#var chat[unread][tells] 0;
 	#var chat[unread][clan] 0;
@@ -415,11 +415,7 @@
 	#var chat[unread][party] 0;
 };
 
-#function formatHeader {
-	#var result <088><dab>[<fcc> %0 <dab>]<088>;
-	#return $result;
-};
-
+.messagesMarkRead;
 
 #alias updateChatCategory {
 	#switch {"$chatCategory"} {
@@ -435,7 +431,11 @@
 #alias .messages {
 	#NOP -- Show the last 5 messages received in each category;
 	#if {$chat[unread][clan] > 0} {
+		#showme <efc>-----    CLAN    -----;
 	};
+
+	
+	.messagesMarkRead;
 };
 
 #alias {clearChatHeader} {

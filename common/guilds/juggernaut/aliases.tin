@@ -1,17 +1,55 @@
 #class {jugger_aliases} {kill}
 #class {jugger_aliases} {open}
 
+#alias jugg_report {
+	#math mounts[percent] {100 * $mounts[no_lock] / $total_rounds};
+	#math mounts[hits] {$total_rounds - $mounts[no_lock]};
+	#math mounts[crit_percent] {100 * $mounts[crit] / $mounts[hits]};
+	#format str_total_rounds {%g} {$total_rounds};
+	#showme {<cbd>--------  <088>🤖  <dfa>JUGG REPORT<088> (<ecb>$str_total_rounds rounds<088>)  🤖  <cbd>--------<088>};
+	#showme {<cbd>--------       Average Gxp/Rnd : $my[gxp][average]    <cbd>--------<088>};
+	#showme {<cbd>--------          Best Gxp Rnd : $my[gxp][best]    <cbd>--------<088>};
+	#showme {<cbd>--------          Total Gained : $my[gxp][total_gained]    <cbd>--------<088>};
+	#showme {<cbd>--------                                   <cbd>--------<088>};
+	#showme {<cbd>--------      <088>🔫  <dfa>MOUNT REPORT  <088>🔫         <cbd>--------<088>};
+	#showme {<cbd>--------          <ddd>$mounts[hits] hits (${mounts[crit_percent]}% crits)<088>       <cbd>--------<088>};
+	#showme {<cbd>--------  <ddd>$mounts[no_lock] failures to lock (${mounts[percent]}% of total)<088> <cbd>--------<088>};
+};
+
 #alias reset_tracking {
 	#unvar my[gxp];
 	#var total_rounds 0;
 	#var mounts[no_lock] 0;
+	#var mounts[crit] 0;
+};
+
+#action {^%sPoints Available:%*} {
+	#format support_points {%d} %2;
+	#math support_secondary_pts {$support_points - 99};
+	#if $support_rebuild {
+		#99 support upgrade $support_primary;
+		#${support_secondary_pts} support upgrade $support_secondary;
+		#var support_rebuild 0;
+		support $support_mode;
+	};
 };
 
 #alias support_defense {
+	#var support_rebuild 1;
+	#var support_primary armor;
+	#var support_secondary repair;
+	#var support_mode defend;
 	support reset;
-	support defend;
-	#75 support upgrade repair;
-	#75 support upgrade armor;
+	support status;
+};
+
+#alias support_offense {
+	#var support_rebuild 1;
+	#var support_primary powerplant;
+	#var support_secondary mount;
+	#var support_mode assault fire;
+	support reset;
+	support status;
 };
 
 #alias {stimheal} {

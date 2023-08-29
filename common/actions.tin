@@ -4,6 +4,19 @@
 #var my[hmheal][self] 1;
 #var my[hmheal][others] 1;
 
+#NOP -- Generic corpse trigger;
+#action {^%w dealt the killing blow to %*.} {
+    mob_status_clear;
+    #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
+    #if !$idle_flag {corpse_trig};
+    #math party[member][%1][kills] {$party[member][%1][kills] + 1};
+} {5};
+
+
+#NOP -- Auto defaults_on - the primary reason for turning this off is to debug things since the mip;
+#NOP -- scripts are so spammy;
+#action {^3Kingdoms welcomes you!} {defaults_on;#delay 2 {#map goto 6220}} {2};
+#action {^3Kingdoms welcomes you back from linkdeath.} {defaults_on} {2}
 
 #NOP -- This is to ignore necromancers killing their undead horde of summons;
 #action {Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
@@ -46,6 +59,14 @@
         remove shield;give knight shield to $user;keep knight shield;wear knight shield;
     };
 };
+
+#NOP -- Toggle that mortiis mask has been worn or removed;
+#action {^Head:         The mask of Gemino Mortis} {#var mask 1} {2};
+#action {^You fit the mask on and your eyes glow dimly green.$} {#var mask 1} {2};
+#action {^You already wear the Mask of Gemino Mortis!} {#var mask 1} {2};
+#action {^As you look through the mask, the eyes flash briefly with a dim, blue light.} {#var mask 1} {2};
+#action {^Your eyes darken as you remove the mask.} {#var mask 0} {2};
+
 
 #action {It turns dark.} {#var room_darkness 1;};
 #action {You can see again.} {#var room_darkness 0;};

@@ -22,12 +22,15 @@
     _player_deadmanActions;
 }
 
+#alias clearChatHeader {#NOP};
+#var chat_delay 1
+
 #event {RECEIVED INPUT} {
     #var idle_flag 0;
     #var idle 0;
     #var deadManTimeLeft $deadmanIdleTimeout;
     #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
-    #if {"$draw[chat][active]" == "on"} {#delay {reDraw} {clearChatHeader;draw_chat} 5};
+    #if $chat_delay {#var chat_delay 0;#delay {reDraw} {clearChatHeader;draw_chat;#var chat_delay 1} 5;};
 } {0};
 
 #class {deadman} {close}

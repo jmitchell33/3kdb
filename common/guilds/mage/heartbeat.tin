@@ -105,44 +105,21 @@
 			};
 		};
 
-        
+		#if {!$self_haste && $sp_percent > 30} {
+			cast haste;
+			#var self_haste 1;
+		};
+
+		#if {!$golem_haste && "$my[summon][golem]" != "0"} {
+			cast haste on golem;
+		};
+
         #if {$my[golem][current] && $golem_toggle && $strategy[golem]} {create_golem};
         
 		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
         #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
         #if {$my[super][current] && $my[gp1][current] > $monitors[saturation-corpse]} {cast explosive release};
         #if {$my[gem] < 80 && !$go_fetch} {#if $ffetch_coins {#var go_fetch 1;ffetch gem};};
-
-        #if {$strategy[slow] && $mob[slow] < 1} {
-            cast slow;
-        };
-        
-        #if {$strategy[edrain] && $mob[edrain] < 1} {
-            cast energy drain;
-        };
-
-        #if {$strategy[atrophy] && $mob[atrophy] < 1} {
-            cast mystic atrophy;
-        };
-
-        #if {$toggle_spelltap && $strategy[spelltap] && $sp_percent > 70} {
-            #var toggle_spelltap 0;
-            cast spell tap never;
-        };
-
-        #if {!$toggle_spelltap && $strategy[spelltap] && $sp_percent < 30} {
-            #var toggle_spelltap 1;
-            cast spell tap always;
-        };
-
-        #if {!$self_haste && $sp_percent > 30 && $strategy[haste]} {
-            cast haste;
-            #var self_haste 1;
-        };
-
-        #if {!$golem_haste && "$my[summon][golem]" != "0" && $strategy[haste]} {
-            cast haste on golem;
-        };
 
         #NOP turn ash off if using MI;
         #if {$my[immersion][rounds] > 0 && $ash > 0} {

@@ -1,8 +1,9 @@
 #class {guild_actions} {kill}
 #class {guild_actions} {open}
 
-#NOP --------------------------------------- BARD SINGUP BOT ACTIONS ------------------------------------------;
+#NOP --------------------------------------- BBB: BEST BARD BOONBOX ------------------------------------------;
 #action {^%w expresses %* feelings about you rocking the mud.} {
+    #format playerLower {%l} {%1};
     #send {say DAMN RIGHT BARDS ROCK THE MUD!!!};
     #send {say Currently on rotation in the jukebox include:};
     #send {say hero --> +con boost and takes 56 rounds to perform};
@@ -13,15 +14,8 @@
     #send {say 'say select <song>' to select a tune!};
     #send {say Bonus depends on glvl and luck, and the best way to create luck is with coin!};
     #action {^%w says: select %*} {
-        #var song_selected 1;
-        #if {$song_selected} {
-            #send {say $songLower is currently playing for $playerLower};
-            #send {say Try again in ${my[song][completion]} seconds.};
-        } {
-            #format playerLower {%l} {%%1};
-            #format songLower {%l} {%%2};
-            perform $songLower for $playerLower;
-        };
+        #format songLower {%l} {%%2};
+        perform $songLower for $playerLower;
     };
 };
 
@@ -71,13 +65,6 @@
     #var my[guild][donate_items] %1;
     #math my[guild][donate_total] {$my[guild][donate_coins] + $my[guild][donate_items]};
 } {2};
-
-
-#alias mob_status_clear {
-    #var mob[lightning-vortex] 0;
-    #var mob[noxious-cloud] 0;
-    #var mob[enrage] 0;
-};
 
 
 #class {guild_actions} {close}

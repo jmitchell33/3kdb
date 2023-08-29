@@ -14,6 +14,35 @@
 #alias {th} {#send {!tellhist}};
 #alias {cwho1} {#send {!cwho -O}};
 
+#NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
+#alias {i} {
+    #if {"$guild" == "necromancer"} {
+        #NOP -- Track decanters for bloodfuse;
+        #var my[necromancer][decanters][empty] 0;
+        #var my[necromancer][decanters][full] 0;
+        #var my[necromancer][decanters][powered] 0;
+        check_chest;
+    };
+	
+    #var inventory_check 1;
+	#var corpse_check 1;
+	#var corpses[inventory] 0;
+	#send i;
+	#delay 2 {#var corpse_check 0;#var inventory_check 0;};
+};
+
+
+#alias {autocollect} {
+    #if $collector[items] {
+        #showme {<ffe>------ ITEM COLLECTOR OFF --------<088>};
+        #var collector[items] 0;
+    } {
+        #showme {<ffe>------ ITEM COLLECTOR ON --------<088>};
+        #var collector[items] 1;
+    };
+};
+
+
 #alias reload {
     #class player_%* kill;
     #class guild_%* kill;

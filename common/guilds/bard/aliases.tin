@@ -20,6 +20,7 @@
 #NOP ---THIS SECTION IS FOR SONG ALIASES;
 #alias {clear_prots} {#var defs 0};
 #alias {vamp} {perform vampire};
+#alias {black} {cease;perform black for %0};
 #alias {it %1} {perform invigorating tune for %1};
 #alias {pd} {cease;perform dirge};
 #alias {ag} {perform amazing grace};
@@ -30,40 +31,29 @@
 #alias {es} {empowered strikes;#var defs[es] 1};
 
 #alias {ham_bot} {
-	#if $strategy[hammer] {
+	checkStrategy {hammer} {
 		strategy hammer;
 		#SHOWME <efa>------------------- HAMMER NO LONGER SMASHING FACE -------------------<088>;
-		unwield hammer;
-		wield redaxe;
-		wear shield;
-		#var strategy[hammer] 0;
 		#var defs[hr] 0;
 	} {
-		#SHOWME <efa>------------------- HAMMER WILL BEGIN SMASHING FACE -------------------<088>;
 		strategy hammer;
-		unwield redaxe;
-		remove shield;
-		wield rod;
-		wield hammer;
-		#var strategy[hammer] 1;
+		#SHOWME <efa>------------------- HAMMER WILL BEGIN SMASHING FACE -------------------<088>;
 		#var defs[hr] 1;
-	};
+	}
 };
 
 #alias {rod_bot} {
-	#if $strategy[rainbow] {
+	checkStrategy {rainbow} {
 		strategy rainbow;
 		#SHOWME <efa>------------------- RAINBOW OF DEATH DISABLED -------------------<088>;
-		#var strategy[rainbow] 0;
 		#var defs[hr] 0;
 		#var defs[fr] 0;
 	} {
 		strategy rainbow;
 		#SHOWME <efa>------------------- RAINBOW OF DEATH ACTIVATED  -------------------<088>;
-		#var strategy[rainbow] 1;
 		#var defs[hr] 1;
 		#var defs[fr] 1;
-	};
+	}
 };
 
 

@@ -208,11 +208,7 @@
     #if {"$following" == "$followInviter"} {%2};
 } {1};
 
-#action {^%w dealt the killing blow to %*.} {
-    mob_status_clear;
-    #if !$idle_flag {corpse_trig};
-    #math party[member][%1][kills] {$party[member][%1][kills] + 1};
-} {5};
+
 
 #act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot path-find} {
     #if {!$idle_flag && $bot[active]} {

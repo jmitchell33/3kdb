@@ -4,6 +4,69 @@
 #var rolm[owl] 1;
 #var rolm[raven] 1;
 
+#NOP -- Easier weapon type or dmg switching;
+#alias {rolm} {
+    #switch {"%0"} {
+        #case {"fire"} {
+            touch dragon rune;
+        };
+        #case {"edged"} {
+            touch reaper rune;
+        };
+        #case {"crushing"} {
+            touch star rune;
+        };
+        #case {"ice"} {
+            touch frost rune;
+        };
+        #case {"acid"} {
+            touch arachne rune;
+        };
+        #case {"mind"} {
+            touch crown rune;
+        };
+        #case {"energy"} {
+            touch comet rune;
+        };
+        #case {"poison"} {
+            touch viper rune;
+        };
+        #case {"radiation"} {
+            touch aurora rune;
+        };
+        #case {"electric"} {
+            touch lightning rune;
+        };
+        #case {"sword"} {
+            touch dragon rune;
+        };
+        #case {"polearm"} {
+            touch reaper rune;
+        };
+        #case {"axe"} {
+            touch frost rune;
+        };
+        #case {"gun"} {
+            touch arachne rune;
+        };
+        #case {"mace"} {
+            touch crown rune;
+        };
+        #case {"flail"} {
+            touch comet rune;
+        };
+        #case {"dagger"} {
+            touch viper rune;
+        };
+        #case {"exotic"} {
+            touch aurora rune;
+        };
+        #case {"lance"} {
+            touch lightning rune;
+        };
+    };
+};
+
 #action {Upon the %*, the owl rune glows brightly again.$} {#var rolm[owl] 1;};
 #action {Upon the %*, the raven rune glows brightly again.$} {#var rolm[raven] 1;};
 #action {Upon the %*, the cairn rune glows brightly again.$} {#var rolm[cairn] 1;};
@@ -19,5 +82,10 @@
 } {2};
 
 #action {Warming in your grasp, %* twinkling points of} {#var rolm[charges] @word_to_number{%1}};
+#NOP Your fate is now sealed to the mighty artifact!
+
+
+#NOP -- Flip to crown/psimace upon first wielding and check charges;
+#action {The grace of an ancient god courses through you.} {touch crown rune;touch diamond rune;};
 
 #class rolm close

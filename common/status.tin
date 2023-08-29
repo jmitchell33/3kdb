@@ -9,10 +9,36 @@
     coins;
 };
 
+
+#alias mob_status_clear {
+    #var mob[lightning-vortex] 0;
+    #var mob[noxious-cloud] 0;
+    #var mob[enrage] 0;
+    #var mob[slow] 0;
+    #var mob[atrophy] 0;
+    #var mob[edrain] 0;
+    #var mob[pws] 0;
+    #var mob[palmed] 0;
+    #var mob[pressured] 0;
+    #var mob[ewell] 0;
+    #var mob[shred] 0;
+    #var mob[lucanus_ring] 0;
+    #var mob[lucanus_amulet] 0;
+    #var mob[demoralize] 0;
+    #var mob[maim] 0;
+
+    #var enemy[last_round] 1;
+    #var enemy[round_change] 0;
+    #var enemy[kill_rate_avg_count] 1;
+    #unvar enemy[kill_rate];
+};
+
+
 #alias status_export {
     #class global open;
     #map get roomvnum curvnum;
     #var strategy $strategy;
+    #var lastBot $lastBot;
     #class global close;
     #class global write chars/$user/vars.tin;
 };

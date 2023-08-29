@@ -7,13 +7,7 @@
 #alias {_player_heartbeat} {
 	#if {!$idle_flag} {
 		#if {$make_con && $my[necromancer][worth] < 115} {con 100;#var make_con 0;#delay 4 {#var make_con 1}};
-		#if {$party_actions && $mip[round] == 1} {
-			#if $strategy[fury] {fury};
-			#if $strategy[rabies] {alter hybrid;rabies};
-			#if $strategy[call] {call};
-			#if $strategy[maim] {alter hybrid;maim};
-			#if $strategy[undead] {=kill $enemy[target]};
-		};
+		
 		#NOP -- Conditions to pause the bot;
 		#if {$auto_pilot && $bot[active] && !$bot[paused]} {
 			#if {$my[necromancer][power][alter] < 50} {

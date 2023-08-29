@@ -5,19 +5,23 @@
 #NOP -- Disable ammo_buy for energy mounts;
 #act {^That gun is full already.} {
 	#var ammo_buy off
-}
+} {2};
 
 #action {%* failed to acquire a lock.} {
 	#math mounts[no_lock] {$mounts[no_lock] + 1};
-	#math mounts[no_rounds] {$mounts[no_lock] / $total_rounds * 100};
-};
+} {2};
+
+
+#action {The computer chirps 'A critical hit was scored!'} {
+	#math mounts[crit] {$mounts[crit] +1};
+} {2};
 
 #act {After your discount, it will cost %1 coins.} {
 	#if {"$ammo_donate" == "on"} {
 		#send !give %1 coins to cl;
 		#send !truck vault
-	}
-}
+	};
+} {2};
 
 #act {There is no reason to 'frenzy' here.} {#var frenzy 0;};
 

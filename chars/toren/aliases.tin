@@ -64,7 +64,7 @@
         } {
             wrap remains;
             preserve_remains;
-            get all;
+            #if $collector[items] {get all};
         };
         fuse 200;
         keep all preservation;
@@ -113,23 +113,41 @@
 };
 
 #alias {.mob_kill_action} {
-    #var stats[starting-gp] $my[gp1][current];
-    kill $mob[target];
-    #if $strategy[snare] {snare $mob[target]};
-    #if $strategy[rabies] {rabies};
-    #if $strategy[maim] {maim};
-    #if $strategy[call] {call};
-    #if $strategy[undead] {=kill $mob[target]};
-    #if $darkness {extinguish torch};
+    #if $bloodlet_area {
+        bloodlet $mob[target];
+        .botStep;
+        #delay 1 {
+            ..;
+        };
+    } {
+        #var stats[starting-gp] $my[gp1][current];
+        kill $mob[target];
+        checkStrategy {snare} {snare $mob[target]};
+        checkStrategy {rabies} {rabies};
+        checkStrategy {scythe} {scythe};
+        #if {$my[necromancer][maim] > 0} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {alter hybrid;maim}}};
+        checkStrategy {call} {call};
+        checkStrategy {undead} {=kill $mob[target]};
+    };
 };
 
 #NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
 #alias {set_ticker} {#NOP;};
 
+#alias {house_donate} {
+    #map get roomvnum donate_go_back;
+    #send {!keep all bound};
+    #send {!keep all equip};
+    #send {!keep all corpse};
+    go house_box;
+    put all in box;
+    get all from buckler;
+    put all in box;
+    #map run $donate_go_back;
+};
+
 #alias {go_donate} {
     #map get roomvnum donate_go_back;
-    #path save forward path;
-    #path get position pos;
     go necro_box;
     donate all;donate all from bag;donate all from bag 2;donate all from buckler;
     #if {$bot[corpse-run]} {
@@ -145,33 +163,21 @@
         store all;
     };
     #map run $donate_go_back;
-    #path destroy;
-    #path load $path;
-    #path goto $pos;
-    #var bot[paused] 0;
 };
 
 #alias {go_donate2} {
     #map get roomvnum donate_go_back;
-    #path save forward path;
-    #path get position pos;
     keep all preservation;
     keep all component;
     go necro_box;
     donate all;donate all from bag;donate all from bag 2;donate all from buckler;
     #map run $donate_go_back;
-    #path destroy;
-    #path load $path;
-    #path goto $pos;
-    #var bot[paused] 0;
 };
 
 
 #alias {go_study} {
     powers;gs;
     #map get roomvnum study_go_back;
-    #path save forward path;
-    #path get position pos;
     #if $auto_study_teleport {
         teleport;
         mapgo necro_rr;
@@ -190,9 +196,6 @@
         } {
             #map run $study_go_back;
         };
-        #path destroy;
-        #path load $path;
-        #path goto $pos;
         powers;gs;
     };
     #delay 10 {
@@ -206,7 +209,7 @@
 };
 
 #alias {necro_reset} {
-
+    #NOP;
 };
 
 #alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};

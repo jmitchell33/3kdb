@@ -1,0 +1,50 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#showme ---- INDUCTOR STEPPER  ----;
+
+#NOP -- mobs are evil, set rolm to angel;
+touch angel rune;
+
+#NOP -- These are the possible paths to inductor depending on color;
+#var {bot[inductor][green]}		{e;e;e;e;n;n;n;w;n;w;s;se;s;w;n;w;s;w;sw;n;w;nw;sw;w;n;e;n;n;w;n;e;n;e;se;n;e;e;se;s;s;nw;sw;w;n};
+#var {bot[inductor][blue]}		{s;s;s;s;e;e;e;n;e;n;w;sw;w;n;e;n;w;n;nw;e;n;ne;nw;n;e;s;e;e;n;e;s;e;s;sw;e;s;s;sw;w;w;ne;nw;n;e};
+#var {bot[inductor][red]}		{w;w;w;w;s;s;s;e;s;e;n;nw;n;e;s;e;n;e;ne;s;e;se;ne;e;s;w;s;s;e;s;w;s;w;nw;s;w;w;nw;n;n;se;ne;e;s};
+#var {bot[inductor][magenta]}	{n;n;n;n;w;w;w;s;w;s;e;ne;e;s;w;s;e;s;se;w;s;sw;se;s;w;n;w;w;s;w;n;w;n;ne;w;n;n;ne;e;e;sw;se;s;w};
+
+/* Call action to call rrotate */
+#action {{^[\s\.oO]{70}}} {#delay {rotate} {rrotate} {0.5}};
+
+/* Brief settings to avoid false rotations from cartography */
+#send !brief on no;
+
+/* Brief settings to avoid map causing false rotate calls */
+#delay {inductor} {#send !brief on no} {1};
+
+#list botmobs add {{{long} {A Jacked Transistor} {target} {transistor}}};
+#list botmobs add {{{long} {A Yoked Resistor} {target} {resistor}}};
+#list botmobs add {{{long} {A Swole Capacitor} {target} {capacitor}}};
+#var bot[mobs] $botmobs;
+
+
+#alias {rrotate} {
+	#NOP Determine current orientation and set color for new rotation;
+	#map at 27662 {#map get roomexits rexits};
+	#switch {*rexits[]} {
+		#case {"{n}"}	{#var rej_color <228>;#var inductor[color] green};
+		#case {"{e}"}	{#var rej_color <148>;#var inductor[color] blue};
+		#case {"{s}"}	{#var rej_color <218>;#var inductor[color] red};
+		#case {"{w}"}	{#var rej_color <258>;#var inductor[color] magenta};
+		#default	{#showme {<142> Error determining area rotation <088>};}
+	};
+
+	#NOP Adjust Inductor Path for rotation;
+    #unvar bot[steps];
+    #list bot[steps] create {$bot[inductor][${inductor[color]}]};
+};
+
+#NOP -- Use the rotate alias to set the initial botpath;
+#delay 3 {rrotate};
+
+#class {bot} {close}
+#read common/bot/generic.tin;

@@ -27,8 +27,7 @@
 #NOP -- pre_bot check is loaded via the char/user/config.tin;
 .pre_bot_check;
 #var bot[step] 1;
-#var bot[steps] $bot[path];
-#list bot[steps] explode {;};
+#list bot[steps] create {$bot[path]};
 
 #if $check_death {
         #showme {<ffe>------ CHECKDEATH IS ACTIVE --------<088>};
@@ -275,7 +274,8 @@
 
 #alias .botStep {
     #if !$bot[paused] {
-        #if {$bot[step] > &bot[steps][]} {
+        #if {$bot[step] >= &bot[steps][]} {
+            $bot[steps][${bot[step]}];
             #showme {------- BOT COMPLETE -----};
         } {
             $bot[steps][${bot[step]}];

@@ -13,14 +13,16 @@
 } {1};
 
 #NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
-#act {^You charge forward and close your jaws on %*} {#var opponent[effects][rabies] 1};
-#act {%* has overcome the effects of your rabies.$} {#var opponent[effects][rabies] 0;rabies;};
-#act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1};
+#act {^You charge forward and close your jaws on %*} {#var opponent[effects][rabies] 1} {2};
+#act {%* has overcome the effects of your rabies.$} {#var opponent[effects][rabies] 0;rabies;} {2};
+#act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1} {2};
+#act {The creature has been permanently maimed!} {#var mob[maim] 1;#math my[necromancer][maim] {$my[necromancer][maim] - 1}} {2};
 
 #NOP --------------------------------------- NECROMANCER STATUS TRACKING  ------------------------------------------;
 #act {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1};
-#act {You are already altered into beast form master.}{#var my[necromancer][altered] 1};
+#act {You are already altered into %* form master.}{#var my[necromancer][altered] 1};
 #act {You return to your normal were form.}{#var my[necromancer][altered] 1};
+#act {You alter into the embodimental spirit of the %*!} {#var my[necromancer][altered] 1};
 #act {You alter back to your normal, human form.}{#var my[necromancer][altered] 0};
 #act {You can only alter your form into beast form master.}{#var my[necromancer][altered] 0};
 #act {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;}
@@ -30,8 +32,47 @@
     #var my[necromancer][maim] 2;
     #var my[necromancer][diurnum] 1;
     #var my[necromancer][nocturnum] 1;
+    #var my[necromancer][bloodfuse] 1;
+    #var my[necromancer][harvest] 1;
+    #var my[necromancer][altered] 0;
 };
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
+
+#NOP -- Tracking Reaper abilities (grim harvest);
+#action {^The celestial blade slashes cleanly through %*} {
+    #var my[necromancer][harvest] 0;
+} {2};
+
+#NOP -- Tracking Vampire abilities (bloodlet/bloodfuse potions);
+#action {A small, very valuable crystal decanter} {
+    #if $inventory_check {#math my[necromancer][decanters][empty] {$my[necromancer][decanters][empty] + 1}};
+} {2};
+
+#action {A small, blood-filled crystal decanter} {
+    #if $inventory_check {#math my[necromancer][decanters][full] {$my[necromancer][decanters][full] + 1}};
+} {2};
+
+#action {A blood-filled crystal decanter \(glowing\)} {
+    #if $inventory_check {#math my[necromancer][decanters][powered] {$my[necromancer][decanters][powered] + 1}};
+} {2};
+
+#action {^You drink the glowing blood, then hurl the decanter to the ground.} {
+    #math my[necromancer][decanters][powered] {$my[necromancer][decanters][powered] - 1};
+    #var my[necromancer][bloodfuse] 0;
+} {2};
+
+
+#NOP -- When using bloodlet, put the decanter in chest;
+#action {You well up your vampiric strength and your eyes burn brightly with} {
+    #math my[necromancer][decanters][full] {$my[necromancer][decanters][full] + 1};
+    #math my[necromancer][decanters][empty] {$my[necromancer][decanters][empty] - 1};
+    qtrance unkeep decanter/retrieve/open chest/put decanter in chest/deliver;
+} {2};
+
+#action {  That decanter already has blood in it master.} {
+    qtrance unkeep decanter/retrieve/open chest/put decanter in chest/deliver;
+    checkStrategy {bloodlet} {bloodlet $enemy[target]};
+} {2};
 
 
 #NOP ----- The moon has x stages;
@@ -48,5 +89,54 @@
 #ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};daemon graft $lower;#list dgraft add $lower}} {6};
 #ACTION {%w goes 'Breakin the law! Breakin the law!' at you.} {#if !$idle_flag {qtrance preserve remains>50;qtrance preserve remains>50}} {6};
 #ACTION {You see a shadowy form escape from %w and disappear!} {#SHOWME DAEMON GRAFT LEFT %1};
+
+
+#NOP ----- Deathsave Calculation/Summary Line ------;
+#var dsave[total][count] 0;
+#var dsave[total][np] 0;
+#var dsave[total][max] 0;
+#var dsave[round][count] 0;
+#var dsave[round][np] 0;
+#var dsave[round][avg] 0;
+#var dsave_report 1;
+
+#act {^Death tells you:} {
+    #line oneshot #action {My favor will cost you %d points of necromancy...} {
+        #math dsave[total][count] {$dsave[total][count] + 1};
+        #math dsave[total][np] {$dsave[total][np] + %%1};
+        #math dsave[total][avg] {$dsave[total][np] / $dsave[total][count]};
+        #math dsave[round][count] {$dsave[round][count] + 1};
+        #math dsave[round][np] {$dsave[round][np] + %%1};
+        #math dsave[round][avg] {$dsave[round][np] / $dsave[round][count]};
+        
+    };
+    #if $dsave_report {
+        #var dsave_report 0;
+        #delay 1 {
+            #format dsave[round][avg] {%g} {$dsave[round][avg]};
+            #format dsave[round][count] {%g} {$dsave[round][count]};
+            #format dsave[round][np] {%g} {$dsave[round][np]};
+            #format dsave[round][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {RND: ${dsave[round][count]}x} {(NP: $dsave[round][np] Avg: $dsave[round][avg])} {<cab>💀<088>};
+            #format dsave[total][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {TOT: @formatThousands{${dsave[total][count]}}x} {(NP: @formatThousands{$dsave[total][np]} Avg: @formatThousands{$dsave[total][avg]})} {<cab>💀<088>};
+            #echo $dsave[round][string];
+            #echo $dsave[total][string];
+            #var dsave[round][avg] 0;
+            #var dsave[round][count] 0;
+            #var dsave[round][np] 0;
+            #var dsave_report 1;
+        };
+    };
+};
+
+
+#NOP -- Teleport helpers;
+#action {Visions of the guild appear first in your mind, then reality...} {mapgo necro_rr};
+
+#NOP #gag {%sYour destiny will wait a bit longer %w.};
+#NOP #gag {%sI can wait for you %w.  I can wait a very long time.};
+#NOP #gag {%sLive onward my son.};
+#NOP #gag {From afar, Death favors you.};
+#NOP #gag {Don't worry my son, I always collect my debts...eventually.};
+
 
 #class {guild_actions} {close}

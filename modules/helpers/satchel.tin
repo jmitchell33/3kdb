@@ -11,7 +11,7 @@
     #math {satchel_poor} {%7};
     #math {satchel_crude} {%8};
     #math {satchel_worthless} {%9};
-    
+
     #list temp_satchel add {{
         {name} {$lower}
         {total} {$satchel_total}
@@ -28,7 +28,7 @@
 #alias update_satchel {
     #list temp_satchel clear;
     #send {stashlist};
-    #delay 1 {#var craft[satchel] $temp_satchel;};
+    #line oneshot #action {You have %d/%d items in your satchel.} {#var craft[satchel] $temp_satchel};
 };
 
 #alias unstash_2 {
