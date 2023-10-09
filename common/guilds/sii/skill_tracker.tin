@@ -11,36 +11,49 @@
 #list sii_skills add {{{name} {potency} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
 #list sii_skills add {{{name} {discipline} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
 #list sii_skills add {{{name} {expiration} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
+#list sii_skills add {{{name} {perception} {progress} {1} {progress_history} {} {rounds_since_last} {0}}};
 
 
 #gag {Skill            Lvl    Current      Required%*};
-#gag {%*Gen'Doru Antiochus Kir'lai Lava Mite%*};
+#gag {%*Gen%* Antiochus%*};
 #gag {%sGeneral Skills%*};
 #gag {%sBrood Skills%*};
 #gag {%sCombat Skills%*};
+#gag {%sMind Skills%*};
 #gag {%w%s%d%s|%*|%*|%s\(%*%\)};
 
+#action {You sense the leader watching over you, and a thought pops into your} {
+    #var update_gxp 1;
+    gs2;
+    #delay 4 update_gxp 0;
+} {2};
+
 #action {%w%s%d%s|%*|%*|%s\(%*%\)} {
-    #var skill_name %1;
-    #var skill_progress %8;
-    #foreach $sii_skills[%*] skill {
-        #if {"$skill_name" == "$skill[name]"} {
-            #math skill_increase {$skill_progress - $skill[progress]};
-            #if {$skill_increase > 0.00} {
-                #list sii_skills index name;
-                #list sii_skills find $skill_name tmpIndex;
-                #var tmpItem {{name} {$skill_name} {progress} {$skill_progress} {progress_history} {} {rounds_since_last} {0}};
-                #var sii_skills[+$tmpIndex] $tmpItem;
-                #showme SKILL ADVANCE: $skill_name advanced by $skill_increase in $skill[rounds_since_last] rounds;
-            } {
-                #list sii_skills index name;
-                #list sii_skills find $skill_name tmpIndex;
-                #math tmpRounds {$skill[rounds_since_last] + 1};
-                #var tmpItem {{name} {$skill_name} {progress} {$skill[progress]} {progress_history} {} {rounds_since_last} {$tmpRounds}};
-                #var sii_skills[+$tmpIndex] $tmpItem;
+    #if $update_gxp {
+        #var skill_name %1;
+        #var skill_progress %8;
+        #foreach $sii_skills[%*] skill {
+            #if {"$skill_name" == "$skill[name]"} {
+                #math skill_increase {$skill_progress - $skill[progress]};
+                #if {$skill_increase > 0.00} {
+                    #list sii_skills index name;
+                    #list sii_skills find $skill_name tmpIndex;
+                    #cat skill[progress_history] {$skill_increase in $skill[rounds_since_last] rounds};
+                    #var tmpItem {{name} {$skill_name} {progress} {$skill_progress} {progress_history} {$skill[progress_history]} {rounds_since_last} {0}};
+                    #var sii_skills[+$tmpIndex] $tmpItem;
+                    #showme SKILL ADVANCE: $skill_name advanced by $skill_increase in $skill[rounds_since_last] rounds;
+                } {
+                    #list sii_skills index name;
+                    #list sii_skills find $skill_name tmpIndex;
+                    #math tmpRounds {$skill[rounds_since_last] + 1};
+                    #var tmpItem {{name} {$skill_name} {progress} {$skill[progress]} {progress_history} {$skill[progress_history]} {rounds_since_last} {$tmpRounds}};
+                    #var sii_skills[+$tmpIndex] $tmpItem;
+                };
             };
         };
     };
 };
+
+gs2;
 
 #class sii_gxp_tracker close

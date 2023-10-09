@@ -91,7 +91,8 @@
 #list strategyList add {{{guild} {necromancer} {name} {harvest}  {active} {0} {description} {Reaper: Grim Harvest}}};
 #list strategyList add {{{guild} {necromancer} {name} {rabies}  {active} {0} {description} {Were: Rabies}}};
 #list strategyList add {{{guild} {necromancer} {name} {fury}  {active} {0} {description} {Were: Fury}}};
-#list strategyList add {{{guild} {necromancer} {name} {spirithowl}  {active} {0} {description} {Spirithowl}}};
+#list strategyList add {{{guild} {necromancer} {name} {bloodarc}  {active} {0} {description} {Lich: Bloodarc}}};
+#list strategyList add {{{guild} {necromancer} {name} {spirithowl}  {active} {0} {description} {Were: Spirithowl}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodlet}  {active} {0} {description} {Vamp: Bloodlet}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodfuse}  {active} {0} {description} {Vamp: Bloodfuse}}};
 #list strategyList add {{{guild} {necromancer} {name} {diurnum}  {active} {0} {description} {Necro: Diurnum}}};
@@ -175,12 +176,16 @@
         #if {$my[necromancer][bloodfuse] && $my[necromancer][decanters][powered] > 0} {
             checkStrategy {bloodfuse} {
                 corpse_select;
-                #if $mask {
+                #if $mask[active] {
                     #send {qatrance cackle;qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
                     } {
                     #send {qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
                 };
             };
+        };
+
+        #if {$my[necromancer][bloodarc]} {
+            checkStrategy {bloodarc} {bloodarc};
         };
         
         #if {$my[necromancer][harvest]} {

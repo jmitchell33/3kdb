@@ -14,6 +14,23 @@
 #alias {th} {#send {!tellhist}};
 #alias {cwho1} {#send {!cwho -O}};
 
+
+#alias {bagall} {
+    #format tmpBagCount {%d} %0;
+    #loop 1 $tmpBagCount tmpBag {
+        put all in bag $tmpBag
+    };
+};
+
+#alias {unbagall} {
+    #format tmpBagCount {%d} %0;
+    drop all;
+    #loop 1 $tmpBagCount tmpBag {
+        get all from bag $tmpBag;drop all
+    };
+};
+
+
 #NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
 #alias {i} {
     #if {"$guild" == "necromancer"} {

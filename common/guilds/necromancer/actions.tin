@@ -35,12 +35,25 @@
     #var my[necromancer][bloodfuse] 1;
     #var my[necromancer][harvest] 1;
     #var my[necromancer][altered] 0;
+    #var my[necromancer][bloodarc] 1;
 };
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
 
 #NOP -- Tracking Reaper abilities (grim harvest);
 #action {^The celestial blade slashes cleanly through %*} {
     #var my[necromancer][harvest] 0;
+} {2};
+
+#NOP -- Tracking Lich abilities (bloodarc);
+#action {^Your eyes burn with an unholy crimson flame.$} {
+    #if {$bot[active]} {.pause};
+    #var my[necromancer][bloodarc_active] 1;
+    #var my[necromancer][bloodarc] 0;
+} {2};
+
+#action {^The energies of the bloodarc crackle quietly as they dissipate into the air.$} {
+    #if {$bot[active]} {#var bot[paused] 0};
+    #var my[necromancer][bloodarc_active] 0;
 } {2};
 
 #NOP -- Tracking Vampire abilities (bloodlet/bloodfuse potions);

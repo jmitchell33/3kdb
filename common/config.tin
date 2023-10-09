@@ -7,6 +7,15 @@
 
 #info env save;
 
+#NOP -- Ticker to set incombat variable;
+#ticker check_combat {
+    #if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
+        #var incombat 0
+    } {
+        #var incombat 1;
+    };
+} {2};
+
 #alias {defaults_on} {
 	mipon;
 	loadmap;

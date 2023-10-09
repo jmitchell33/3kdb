@@ -12,6 +12,11 @@
     #math party[member][%1][kills] {$party[member][%1][kills] + 1};
 } {5};
 
+#NOP -- Auto ask/solve/return missions;
+#act {-M-_%* <?>} {mission ask} {3};
+#act {-M-_%* <!>} {mission return} {3};
+#act {-M-_%* <.>} {#nop} {3};
+
 
 #NOP -- Auto defaults_on - the primary reason for turning this off is to debug things since the mip;
 #NOP -- scripts are so spammy;
@@ -61,11 +66,12 @@
 };
 
 #NOP -- Toggle that mortiis mask has been worn or removed;
-#action {^Head:         The mask of Gemino Mortis} {#var mask 1} {2};
-#action {^You fit the mask on and your eyes glow dimly green.$} {#var mask 1} {2};
-#action {^You already wear the Mask of Gemino Mortis!} {#var mask 1} {2};
-#action {^As you look through the mask, the eyes flash briefly with a dim, blue light.} {#var mask 1} {2};
-#action {^Your eyes darken as you remove the mask.} {#var mask 0} {2};
+#action {^Head:         The mask of Gemino Mortis} {#var equipped[mask] 1} {2};
+#action {helmet   - %*The mask of Gemino Mortis%*} {#var equipped[mask] 1} {2};
+#action {^You fit the mask on and your eyes glow dimly green.$} {#var equipped[mask] 1} {2};
+#action {^You already wear the Mask of Gemino Mortis!} {#var equipped[mask] 1} {2};
+#action {^As you look through the mask, the eyes flash briefly with a dim, blue light.} {#var mask[active] 1} {2};
+#action {^Your eyes darken as you remove the mask.} {#var equipped[mask] 0} {2};
 
 
 #action {It turns dark.} {#var room_darkness 1;};

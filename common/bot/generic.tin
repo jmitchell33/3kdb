@@ -246,31 +246,33 @@
 
 #act {^{-i-|-w-|-a-|-o-}%*.$} {
     #if {$bot[active] && !$bot[paused] && $bot[walk]} {
-        #var item_number 1;
-        #var item_long %2;
+        #if {$collector[items]} {
+            #var item_number 1;
+            #var item_long %2;
 
-        #replace item_long {.} {};
-        #replace item_long { \[%*\]} {};
+            #replace item_long {.} {};
+            #replace item_long { \[%*\]} {};
 
-        #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
-        #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
+            #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
+            #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
 
-        #foreach $item_grab_list[%*] item {
-            #regexp {"$item_long"} {$item[long]} {
-                #$item_number get $item[target];
-                #if {"$guild" == "bard"} {
-                    identify $item[target];
-                };
-                #if {"$guild" == "priest"} {
-                    recognize $item[target];
-                };
-                #if {"$item[target]" == "bag"} {
-                    #loop 2 20 i {put bag in bag $i};
+            #foreach $item_grab_list[%*] item {
+                #regexp {"$item_long"} {$item[long]} {
+                    #$item_number get $item[target];
+                    #if {"$guild" == "bard"} {
+                        identify $item[target];
+                    };
+                    #if {"$guild" == "priest"} {
+                        recognize $item[target];
+                    };
+                    #if {"$item[target]" == "bag"} {
+                        #loop 2 20 i {put bag in bag $i};
+                    };
                 };
             };
         };
     };
-};
+} {2};
 
 #alias .botStep {
     #if !$bot[paused] {
@@ -314,7 +316,7 @@
             #delay .1 {.botStep};
         } {
             #if {$collector[items]} {
-                get all;
+                #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
             };
             #if {$bot[foundmob]} {
                 .stop_prompt;
@@ -391,8 +393,8 @@
 #NOP -- If you're not in combat and not walking, then begin walking;
 #ticker {bot_ticker} {
     #if !$bot[paused] {
-        #if {$bot[active] && !$idle_flag && !$bot[walk] && $mip[round] < 1} {
-            #delay {bot_kick} {#if {!$bot[walk] && $mip[round] < 1} {#showme BOT STUCK RESUMING IN 3 SECONDS;.bot}} {3};
+        #if {$bot[active] && !$idle_flag && !$bot[walk] && !$incombat} {
+            #delay {bot_kick} {#if {!$bot[walk] && !$incombat} {#showme BOT STUCK RESUMING IN 3 SECONDS;.bot}} {3};
         };
     };
 } {5};

@@ -4,6 +4,41 @@
 #var rolm[owl] 1;
 #var rolm[raven] 1;
 
+#alias update_rolm_string {
+    #var rolm_string <fff>ROLM (${rolm[charges]}):;
+    #cat rolm_string { $rolm[type]};
+    #if $rolm[owl] {
+        #cat rolm_string {<bfa>O<088>}
+    } {
+        #cat rolm_string {<faa>O<088>}
+    };
+    #if $rolm[raven] {
+        #cat rolm_string {<bfa>R<088>}
+    } {
+        #cat rolm_string {<faa>R<088>}
+    };
+    #if $rolm[cairn] {
+        #cat rolm_string {<bfa>C<088>}
+    } {
+        #cat rolm_string {<faa>C<088>}
+    };
+
+#NOP    #if {$draw[index][rolm]} {     ;
+#NOP        #NOP -- If the stored index is greater than those existing, reset it;     ;
+#NOP        #if {$draw[index][rolm] > &caption_data[]} {     ;
+#NOP            #math draw[index][rolm] {&caption_data[] + 1};     ;
+#NOP            #list caption_data insert $draw[index][rolm] {};     ;
+#NOP        };     ;
+#NOP    } {     ;
+#NOP        #math draw[index][rolm] {&caption_data[] + 1};     ;
+#NOP        #list caption_data insert $draw[index][rolm] {};     ;
+#NOP    };     ;
+#NOP     ;
+#NOP    #list caption_data set $draw[index][rolm] $rolm_string;     ;
+};
+
+
+
 #NOP -- Easier weapon type or dmg switching;
 #alias {rolm} {
     #switch {"%0"} {
@@ -71,9 +106,20 @@
 #action {Upon the %*, the raven rune glows brightly again.$} {#var rolm[raven] 1;};
 #action {Upon the %*, the cairn rune glows brightly again.$} {#var rolm[cairn] 1;};
 
+#action {You wield DragonBlade.} {#var rolm[type] Sword/Fire;update_rolm_string} {2};
+#action {You wield PsiMace.} {#var rolm[type] Mace/Mind;update_rolm_string} {2};
+#action {You wield AcidSlinger.} {#var rolm[type] Gun/Acid;update_rolm_string} {2};
+#action {You wield VenomClaw.} {#var rolm[type] Dagger/Poison;update_rolm_string} {2};
+#action {You wield PhotonSphere.} {#var rolm[type] Exotic/Radiation;update_rolm_string} {2};
+
 #action {You touch the Owl rune on the artifact and hear a soft *click*} {#var rolm[owl] 0;};
 #action {You touch the Raven rune on the artifact and hear a soft *click*} {#var rolm[raven] 0;};
 #action {You touch the Cairn rune on the artifact and hear a soft *click*} {#var rolm[cairn] 0;};
+
+#NOP Charge math;
+#action {^The %w rune flashes thrice briefly on the artifact.} {#math rolm[charges] {$rolm[charges] - 3};update_rolm_string} {2};
+#action {^The %w rune flashes twice briefly on the artifact.} {#math rolm[charges] {$rolm[charges] - 2};update_rolm_string} {2};
+#action {^The %w rune flashes briefly on the artifact.} {#math rolm[charges] {$rolm[charges] - 1};update_rolm_string} {2};
 
 #action {Beneath you, the earth begins to shudder and crack apart, exposing a} {
 #NOP    The dark soil quietly births a fresh corpse through its cold surface.;
@@ -82,8 +128,11 @@
 } {2};
 
 #action {Warming in your grasp, %* twinkling points of} {#var rolm[charges] @word_to_number{%1}};
+
+#NOP -- use this to store a var when ROLM will reset
 #NOP Your fate is now sealed to the mighty artifact!
 
+#action {^The light fades and you materialize elsewhere....} {rating} {2};
 
 #NOP -- Flip to crown/psimace upon first wielding and check charges;
 #action {The grace of an ancient god courses through you.} {touch crown rune;touch diamond rune;};

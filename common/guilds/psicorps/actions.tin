@@ -3,21 +3,21 @@
 
 #NOP --- PSICORPS ACTIONS;
 #var reality_folded 0;
+#var psi_entrance 52433;
 
 #action {You reach out, tear the fabric of reality and then fold it around yourself.} {
-	#if $psi_donate {
-		#map leave;
-		d;n;e;e;e;ne;put all in box;sw;se;put all in box;
-		fold reality;
-		#map goto $donate_go_back;
-		#var psi_donate 0;
+	#if $reality_folded {
+		#map goto $fold_reality_room;
+		#var reality_folded 0;
 	} {
-		#if $reality_folded {
+		#map get roomvnum fold_reality_room;
+		#var reality_folded 1;
+		#map goto $psi_entrance;
+		#if $psi_donate {
+			d;n;e;e;e;ne;put all in box;sw;se;put all in box;
+			fold reality;
 			#map goto $fold_reality_room;
-			#var reality_folded 0;
-		} {
-			#map get roomvnum fold_reality_room;
-			#var reality_folded 1;
+			#var psi_donate 0;
 		};
 	};
 };

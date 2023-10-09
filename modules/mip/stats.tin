@@ -67,10 +67,12 @@
 		};
 		#CASE {"M"} {#NOP Mob Image File};
 		#CASE {"N"} {
+			#var {mip[last_round]} {$mip[round]};
 			#VAR {mip[round]} {%2};
-			#if {$mip[round] > 0} {
-				#var last_fight_rounds %2
-			};
+			#NOP -- If round is the same or 0, you're no longer in combat;
+			#NOP -- There's also a ticker to check this since this doesn't always fire at the end of a fight if no;
+			#NOP -- new MIP line is received;
+			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {#var incombat 0} {#var incombat 1;#var last_fight_rounds %2};
 			
 			#NOP Combat Round Counter;
 			#if !$total_rounds {#var total_rounds 1} {
@@ -217,7 +219,7 @@
 
 #ALIAS {.mipProcessGlineJuggernaut} {
 	#IF {%1 == 1} {
-		#REGEX {$mip[gline][1]} {Ammo:\[%*\] <yGxp: %d.%d\%> Hits: \[%d\] <cCoffin: %d/%d} {
+		#REGEX {$mip[gline][1]} {Ammo:\[%*\] <yGxp: %d.%d\%> Hits: \[%d\] <cCoffin: {\d+/\d+|N/A}} {
 			#if $my[gxp][best] {#NOP} {#var my[gxp][best] 0;};
 			#var my[gxp][last] $my[gxp][current];
 			#regex {&1} {{%d/}*} {
@@ -240,9 +242,9 @@
 		}
 	}; #ELSEIF {%1 == 2} {
 		#REGEX {$mip[gline][2]} {Nukes: \[%d/%d\]> Reset: \[%d\%\]} {
-			#VAR {nukes}		{&1};
-			#VAR {nukes_max}	{&2};
-			#VAR {reset}		{&3};
+			#format {nukes} {%d}	 {&1};
+			#format {nukes_max} {%d} {&2};
+			#format {reset} {%d} 	 {&3};
 		}
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
@@ -348,7 +350,12 @@
 		#REGEX {$mip[gline][1]} {CL:%d.%d}			{#VAR {my[gxp][g2n]}		{&1.&2}};
 		#REGEX {$mip[gline][1]} {Regen:%w}			{#VAR {my[regen]}			{&1}};
 	}; #ELSEIF {%1 == 2} {
-		#NOP
+		#REGEX {$mip[gline][2]} {Overload:%d.%d (%w)}			{
+			#VAR {my[overload][current]}			{&1.&2};
+			#VAR {my[overload][status]}			    {&3};
+		};
+		#REGEX {$mip[gline][2]} {PC:%w}			{#VAR {my[cloak]}			{&1};};
+		#REGEX {$mip[gline][2]} {PG:%w}			{#VAR {my[ghost]}			{&1};};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};

@@ -35,8 +35,33 @@ Updating mip.tin
             #var webhook[url][party] https://discord.com/api/webhooks/long_token;
 
 
-        B) Inix3k Users - Add the following alias and same webhook URLs to the top of 3k/mip.tin (or a preferred variable location)
-            
+        B) Inix3k Users - Add the following alias, function and same webhook URLs to the top of 3k/mip.tin (or a preferred variable location)
+
+            #function sanitizePayload {
+                #NOP -- Function to remove potentially problematic characters from the payload;
+                #NOP -- Maybe we can replace these with char or ascii representations to pass the desired character;
+                #var tempString %0;
+                #replace tempString {#} {};
+                #replace tempString {$} {};
+                #replace tempString {*} {};
+                #replace tempString {;} {};
+                #replace tempString {"} {};
+                #replace tempString {`} {};
+                #replace tempString {'} {};
+                #replace tempString {"} {};
+                #replace tempString {\} {};
+                #replace tempString {/} {};
+                #replace tempString {(} {[};
+                #replace tempString {)} {]};
+                #replace tempString {-} {_};
+                #replace tempString {<} {[};
+                #replace tempString {>} {]};
+                #replace tempString {&} { and };
+                #replace tempString {|} { or };
+                #line strip #var {_santized_payload} {$tempString};
+                #return $_santized_payload;
+            };
+
             #NOP -- Discord Message Sending;
             #var webhook[url][general] https://discord.com/api/webhooks/long_token;
             #var webhook[url][tells] https://discord.com/api/webhooks/long_token;

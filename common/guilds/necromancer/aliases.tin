@@ -36,13 +36,13 @@
     #delay 2 {
         #if {$corpses[total] >= 10} {
             #if {$corpses[coffin] >= 10} {
-                #if $mask {maskNPc 10} {qtNPc 20};
+                #if $mask[active] {maskNPc 10} {qtNPc 20};
             } {
                 #if {$corpses[freezer] >= 10} {
-                    #if $mask {maskNPf 10} {qtNPf 20};
+                    #if $mask[active] {maskNPf 10} {qtNPf 20};
                 } {
                     #if {$corpses[cooler] >= 10} {
-                        #if $mask {maskNPcl 10} {qtNPcl 20};
+                        #if $mask[active] {maskNPcl 10} {qtNPcl 20};
                     };
                 };
             };
@@ -60,7 +60,7 @@
 
 #alias qtNPc {
     #format tempNP {%d} {%1};
-    #if $mask {#math tempNPabs {$tempNP * 2}} {#var tempNPabs $tempNP};
+    #if $mask[active] {#math tempNPabs {$tempNP * 2}} {#var tempNPabs $tempNP};
     #if {"%1" = ""} {
         #send {qatrance qtrance unwrap>10;;qtrance preserve remains/absorb>20};
     } {
@@ -70,7 +70,7 @@
 
 #alias qtNPf {
     #format tempNP {%d} {%1};
-    #if $mask {#math tempNPabs {$tempNP * 2}} {#var tempNPabs $tempNP};
+    #if $mask[active] {#math tempNPabs {$tempNP * 2}} {#var tempNPabs $tempNP};
     #if {"%1" = ""} {
         #send {qatrance qtrance deslab>10;;qtrance preserve remains/absorb>20};
     } {
@@ -80,7 +80,7 @@
 
 #alias qtNPcl {
     #format tempNP {%d} {%1};
-    #if $mask {#math tempNPabs {$tempNP * 2}} {#var tempNPabs $tempNP};
+    #if $mask[active] {#math tempNPabs {$tempNP * 2}} {#var tempNPabs $tempNP};
     #if {"%1" = ""} {
         #send {qatrance qtrance uncooler corpse>10;;qtrance preserve remains/absorb>20};
     } {

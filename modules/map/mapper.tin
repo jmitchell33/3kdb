@@ -58,18 +58,18 @@
 
 #NOP Room Short with Exits;
 #act {{\-R\-_(.*) \((.*)\)\s*\-R\-_}} {
-	#var room %2;
-	#var exits %3;
+	#var room[name] %2;
+	#var room[exits] %3;
 	#if {"$mapping" == "on"} {
 		#if {"$finding_here" == "off"} {
-			#replace exits {,} {;};
-			#foreach {$exits} {eachexit} {#map dig $eachexit};
+			#replace room[exits] {,} {;};
+			#foreach {$room[exits]} {eachexit} {#map dig $eachexit};
 			#map get {roomexit} {rexit};
 			#foreach {$rexit} {eachexit} {
 				#map at {$eachexit} {
 					#map get {roomarea} {eacharea};
 					#if {"$eacharea" == ""} {
-						#NOP #map set {roomcolor} {<118>};
+						#map set {roomcolor} {<118>};
 					};
 				};
 			};
@@ -81,31 +81,9 @@
 			#map set roomarea {$area};
 			#map set roomcolor;
 		};
-		#if {$roomdesc_len == 0 || "$finding_here" == "on"} {
-			#var longcap on;
-			#unvar long;
-			#act {%%1} {
-				#var long {${long}%%1 };
-				#NOP #if {@cartcheck{%%1}} {
-				#NOP 		#nop
-				#NOP 	} {
-				#NOP 		#var long {${long}%%1 }
-				#NOP }
-			} {2}
-		};
+		#if {$roomdesc_len == 0} {#var longcap on;};
+		#if {"$finding_here" == "on"} {#var longcap on;};
 		#delay 0 mapupdate;
-	};
-	#if {"$finding_here" == "on"} {
-		#var longcap on;
-		#unvar long;
-		#act {%%1} {
-			#var long {${long}%%1 };
-			#NOP #if {@cartcheck{%%1}} {
-			#NOP 		#nop
-			#NOP 	} {
-			#NOP 		#var long {${long}%%1 }
-			#NOP }
-		} {2}
 	};
 };
 
@@ -120,42 +98,34 @@
 			#map set roomarea {$area};
 			#map set roomcolor;
 		};
-		#if {$roomdesc_len == 0 || "$finding_here" == "on"} {
-			#var longcap on;
-			#unvar long;
-			#act {%%1} {
-				#if {@cartcheck{%%1}} {
-						#nop;
-					} {
-						#var long {${long}%%1 };
-				}
-			} {2}
-		};
+		#if {$roomdesc_len == 0} {#var longcap on;};
+		#if {"$finding_here" == "on"} {#var longcap on;};
 		#map get {roomvnum} {gonum};
 		#map goto $gonum;
-	};
-	#if {"$finding_here" == "on"} {
-		#var longcap on;
-		#unvar long;
-		#act {%%1} {
-			#if {@cartcheck{%%1}} {
-					#nop;
-				} {
-					#var long {${long}%%1 };
-			}
-		} {2}
 	};
 } {6}
 
 #act {\-X\-_{.*}} {
 	#if {"$longcap" == "on"} {
 		#var longcap off;
-		#unact {%%1};
 		#if {"$finding_here" == "off"} {
-			#map set roomdesc {$long}
+			#map set roomdesc {$room[long]}
 		}
 	}
-} {1}
+} {1};
+
+#action {^-D-_%*\n%a-D-_$} {
+	#if {"$longcap" == "on"} {
+		#var longcap off;
+		#unvar long;
+		#var long {%1 %2};
+		#if {@cartcheck{${long}}} {
+			#nop
+		} {
+			#var room[long] {${long}};
+		};
+	};
+} {1};
 
 #act {AREA NAME: %1 [%2]} {
 	#var area %1
@@ -193,14 +163,15 @@
 
 	look;
 	#delay 2 {
-		#var findexits $exits;
+		#var findexits $room[exits];
 		#replace findexits {,} {;};
-		#map list {roomarea} {$area} {roomname} {$room%*} {roomexits} {$findexits} {roomdesc} {$long} {variable} {findroom[$find_count]};
+		#replace findexits {~} {;};
+		#map list {roomarea} {$area} {roomname} {$room[name]%*} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
 		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$room%*} {roomexits} {$findexits} {roomdesc} {$long} {variable} {findroom[$find_count]};
+			#map list {roomname} {$room[name]%*} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
 		};
 		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$room%*} {roomexits} {$findexits} {variable} {findroom[$find_count]};
+			#map list {roomname} {$room[name]%*} {roomexits} {$findexits} {variable} {findroom[$find_count]};
 		};
 		#if {&findroom[$find_count][] == 1} {
 			#map goto *findroom[$find_count][1..1];

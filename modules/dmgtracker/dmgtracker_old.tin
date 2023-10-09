@@ -40,6 +40,19 @@
     #echo $dmgSummary
 };
 
+#alias dmgFormatHits {
+    #math tmpPercent {1.00 * $cmbt[category][%1][rnd] / $cmbt[category][total][rnd] * 100};
+    #format dmgName {%n} {%1};
+    #format dmgActive {%d} {$tmpPercent};
+    #echo {<efb>$dmgName - $dmgActive of Rounds<088>};
+    #loop 1 &cmbt[category][%1][freq][] freq {
+        #format dmgAvg {%g} {$cmbt[category][%1][freq][$freq][avg]};
+        #format dmgRounds {%g} {$cmbt[category][%1][freq][$freq][count]};
+        #format dmgSummary {%+12s %+9s %+9s} {$freq} {$dmgAvg} {$dmgRounds};
+        #echo $dmgSummary
+    };
+};
+
 #alias {dreset} {
     #var golem_dmg[curr] 0;
     #var golem_dmg[avg] 0;
@@ -101,7 +114,13 @@
 dreset;
 
 #NOP -- Toggles for necro powers;
-#action {^You grab your enemy with your talons in a clutch of death!$} {#var cmbt[affects][clutch] 1} {2};
+#action {^B:You grab your enemy with your talons in a clutch of death!$} {#var cmbt[affects][clutch] 1} {2};
+#action {^B:You grasp hold of your enemy with the dark touch of death.$} {#var cmbt[affects][grasp] 1} {2};
+#action {^You grab hold of %w with your left talon} {#var cmbt[affects][bloodarc] 1} {2};
+#action {^Scarlet lightning flies from your hand and scorches a massive wound } {#var cmbt[affects][bloodarc] 1} {2};
+#action {^Your eyes burn with a blinding rage that strikes fear into your very} {#var cmbt[affects][bloodarc] 1} {2};
+#action {^You reach back and strike your bony hand outward, toward %*} {#var cmbt[affects][bloodarc] 1} {2};
+#action {^A violet scream erupts from your lips as you strikes forth with a} {#var cmbt[affects][bloodarc] 1} {2};
 
 #NOP -- Toggles for profession boosts;
 #action {^Your crazed ambition overflows!$} {#var cmbt[affects][big_game_hunter] 1} {2};
@@ -175,6 +194,8 @@ dreset;
     #var cmbt[affects][iprime] 0;
     #var cmbt[affects][eradication] 0;
     #var cmbt[affects][clutch] 0;
+    #var cmbt[affects][grasp] 0;
+    #var cmbt[affects][bloodarc] 0;
     #var ewell_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
 };
@@ -227,8 +248,14 @@ dreset;
             #if {$cmbt[affects][bloodfuse]} {
                 dmgTrack bloodfuse $dmgAmount $dmgTimes;
             };
+            #if {$cmbt[affects][bloodarc]} {
+                dmgTrack bloodarc $dmgAmount $dmgTimes;
+            };
             #if {$cmbt[affects][clutch]} {
                 dmgTrack clutch $dmgAmount $dmgTimes;
+            };
+            #if {$cmbt[affects][grasp]} {
+                dmgTrack grasp $dmgAmount $dmgTimes;
             };
             #if {$cmbt[affects][witch_hat]} {
                 dmgTrack WitchHat $dmgAmount $dmgTimes;
@@ -271,11 +298,21 @@ dreset;
     #echo {<faa>$dmgTitle<088>};
     #echo $dmgHeader;
 
-    dmgFormat total;
+    #if {"%0" == "hits"} {
+        dmgFormatHits total;
 
-    #foreach $cmbt[category][%*] item {
-        #if {"$item[name]" != "total" && $item[rnd] > 0} {
-            dmgFormat $item[name];
+        #foreach $cmbt[category][%*] item {
+            #if {"$item[name]" != "total" && $item[rnd] > 0} {
+                dmgFormatHits $item[name];
+            };
+        };
+    } {
+        dmgFormat total;
+
+        #foreach $cmbt[category][%*] item {
+            #if {"$item[name]" != "total" && $item[rnd] > 0} {
+                dmgFormat $item[name];
+            };
         };
     };
     

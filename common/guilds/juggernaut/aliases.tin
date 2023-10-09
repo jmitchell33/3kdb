@@ -6,14 +6,14 @@
 	#math mounts[hits] {$total_rounds - $mounts[no_lock]};
 	#math mounts[crit_percent] {100 * $mounts[crit] / $mounts[hits]};
 	#format str_total_rounds {%g} {$total_rounds};
-	#showme {<cbd>--------  <088>🤖  <dfa>JUGG REPORT<088> (<ecb>$str_total_rounds rounds<088>)  🤖  <cbd>--------<088>};
-	#showme {<cbd>--------       Average Gxp/Rnd : $my[gxp][average]    <cbd>--------<088>};
-	#showme {<cbd>--------          Best Gxp Rnd : $my[gxp][best]    <cbd>--------<088>};
-	#showme {<cbd>--------          Total Gained : $my[gxp][total_gained]    <cbd>--------<088>};
-	#showme {<cbd>--------                                   <cbd>--------<088>};
-	#showme {<cbd>--------      <088>🔫  <dfa>MOUNT REPORT  <088>🔫         <cbd>--------<088>};
-	#showme {<cbd>--------          <ddd>$mounts[hits] hits (${mounts[crit_percent]}% crits)<088>       <cbd>--------<088>};
-	#showme {<cbd>--------  <ddd>$mounts[no_lock] failures to lock (${mounts[percent]}% of total)<088> <cbd>--------<088>};
+	#echo {<cbd>--------  <088>🤖  <dfa>JUGG REPORT<088> (<ecb>$str_total_rounds rounds<088>)  🤖  <cbd>--------<088>};
+	#echo {<cbd>--------       Average Gxp/Rnd : $my[gxp][average]    <cbd>--------<088>};
+	#echo {<cbd>--------          Best Gxp Rnd : $my[gxp][best]    <cbd>--------<088>};
+	#echo {<cbd>--------          Total Gained : $my[gxp][total_gained]    <cbd>--------<088>};
+	#echo {<cbd>--------                                   <cbd>--------<088>};
+	#echo {<cbd>--------      <088>🔫  <dfa>MOUNT REPORT  <088>🔫         <cbd>--------<088>};
+	#echo {<cbd>--------          <ddd>$mounts[hits] hits (${mounts[crit_percent]}% crits)<088>       <cbd>--------<088>};
+	#echo {<cbd>--------  <ddd>$mounts[no_lock] failures to lock (${mounts[percent]}% of total)<088> <cbd>--------<088>};
 };
 
 #alias reset_tracking {
@@ -61,15 +61,43 @@
 	}; #elseif {$corpses[cooler] > 0} {
 		#send !uncooler corpse
 	}; #else {
-		#if {"$bot" == "on"} {
+		#if {$bot[active]} {
 			.stop;
 		};
 		#bell
 	};
 	#send !fdeener
-}
+};
 
-#NOP Fire all nukes at current stepper mob or current enemy
-#alias ff {fire $nukes}
+#NOP -- Alias to donate airdrops to needy friends;
+#alias donateSupport {
+    #list donateSupportList clear;
+    #action {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>} {
+        #action {%w%s %* %d/%d %s %d/%d %s %d% %*} {
+            #format tempStr {%l} {%%%1};
+            #format tempNum {%d} {%%%10};
+            #list donateSupportList add {{{player} {$tempStr} {stim} {$tempNum}}};
+        } {1};
+        #NOP -- Reverse the list for small juggs first, then filter those less than 100 stim and donate to them;
+        #delay 2 {
+            #list donateSupportList reverse;
+            #list donateSupportList indexate stim;
+            #list donateSupportList refine {&0 < 100};
+            #foreach $donateSupportList[%*] index {
+                #showme airdropping $index[player];
+                airdrop $index[player];
+            };
+        };
+    } {1};
+    #line oneshot #action {==============================================================================} {
+        #unaction {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>};
+        #unaction {%w%s %* %d/%d %s %d/%d %s %d% %*};
+    };
+    #send {!juggs2};
+};
+
+
+#NOP Fire all nukes at current stepper mob or current enemy;
+#alias ff {fire $nukes};
 
 #class {jugger_aliases} {close}

@@ -216,6 +216,10 @@
 #action {^You can't go forward while enemies are present.$} {mapUndo};
 #act {^You touch the beacon, and a friendly ship belonging to The Vigilant swings by.} {#map goto 10278}
 
+#NOP Chaos Sewers;
+#action {You lose your footing and wind up flat on your butt!} {mapUndo} {2};
+
+
 
 #NOP Kyoto
 #act {^=S=A Poorly-lit Street} {
@@ -237,6 +241,9 @@
 
 #NOP Necromancers
 #act {^You tumble down the river and find yourself on a rocky bank inside} {#map goto 7613}
+
+#NOP Banshee Lair
+#act {Your mind is filled with the word '%w'.} {#var bansheeword %1} {2};
 
 #NOP Night of Colour
 #act {^The balloon softly touches down, basket bumps lightly.} {exit}
@@ -320,6 +327,7 @@
 	#map undo;
 	#if {$bot[active]} {
 		#math bot[step] {$bot[step] - 1};
+		#delay .5 {look};
 	};
 };
 
