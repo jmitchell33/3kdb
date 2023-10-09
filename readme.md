@@ -1,7 +1,12 @@
-**Welcome**
 Welcome to Byron's Repo.  It is built with a modular approach to plug and play guilds, professions, strategies, etc. while attempting to limit dependencies (although there are quite a few).  The MIP foundation was built by Balthus with bits and pieces stolen from other repos (Inix and Krat).  
 
 Feel free to contact me on 3k if you have any questions or would like to contribute.  Enjoy!
+
+[Balthus:] (https://github.com/Tim-Radcliffe/Tintin-Setup)
+[Inix:] (https://github.com/Inix3K/TinTin/)
+[Krat:] (https://github.com/Krattimus/3k/)
+[Flooby (3scapes)] (https://github.com/daagar/3Steps)
+
 
 **CONNECTING TO 3K / BASIC PLAYING**
 #read chars/name/name.tin  -- For example, to play Byron, I would do #read chars/byron/byron.tin from the 'root' directory.
