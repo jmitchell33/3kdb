@@ -102,6 +102,7 @@
 
 #ALIAS {.mipProcessCAA} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)\~(.*)}} {
+		#var lastData $mip[comm][cdata];
 		#var {mip[enomm]} {};
 		#var {mip[comm][command]}	{&2};
 		#var {mip[comm][line]}		{&3};
@@ -237,10 +238,13 @@
 		#NOP -- try #sub here;
 		#var {mip[comm][cdata]} {$commcol$mip[comm][cdata]<099>};
 
-		#line log {logs/$sysUser/$datestamp} {$timestamp\};
-		#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
-		
-		update_chat $mip[comm][cdata];
+		#NOP if it's the same as the last line, do nothing/prevent spam;
+		#if {"$mip[comm][cdata]" != "$lastData"} {
+			#line log {logs/$sysUser/$datestamp} {$timestamp\};
+			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
+			
+			update_chat $mip[comm][cdata];
+		};
 	}
 }
 
@@ -322,6 +326,8 @@
 	#NOP Necromancer;
 	#REGEX {$tempString} {~The~spirit of the beast leaves your body, slightly weakening you.} {#var mipgag 1};
 	#REGEX {$tempString} {~%*~appears slightly drained.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~lumbering creature staggers for a moment.} {#var mipgag 1};
+	#REGEX {$tempString} {~%*~nightmarish creature moans horribly.} {#var mipgag 1};
 
 	#NOP Party Divvy;
 	#REGEX {$tempString} {[PARTY] GOLD divvy called by } {#var mipgag 1};
@@ -367,6 +373,7 @@
 #ALIAS {.mipProcessBAB} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)}} {
 		#IF {"&3" != "0"} {
+			#var lastData $mip[comm][data];
 			#var discordChannel $webhook[url][tells];
 			#var chatCategory tells;
 			#var mip[comm][data]	{@ansiStrip{&4}};
@@ -380,20 +387,22 @@
 			#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
 			#format {datestamp} {%t} {%Y-%m-%d.log};
 			#format {timestamp_save} {%t} {[%H:%M] };
-			#IF {"&2" == "x"} {
-				#NOP Message to another player;
-				#var mip[comm][twoway] {to};
-				#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-				#line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
-				update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
-			} {
-				#NOP Message from another player;
-				#var mip[comm][twoway] {from};
+			#if {"$mip[comm][data]" != "$lastData"} {
+				#IF {"&2" == "x"} {
+					#NOP Message to another player;
+					#var mip[comm][twoway] {to};
 					#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-					#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
-					update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
-					#bell;
-			}
+					#line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
+					update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
+				} {
+					#NOP Message from another player;
+					#var mip[comm][twoway] {from};
+						#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+						#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+						update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+						#bell;
+				};
+			};
 		};
 	};
 };

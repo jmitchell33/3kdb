@@ -241,11 +241,18 @@
 			#if {$my[gxp][change] > $my[gxp][best]} {#var my[gxp][best] $my[gxp][change]};
 		}
 	}; #ELSEIF {%1 == 2} {
-		#REGEX {$mip[gline][2]} {Nukes: \[%d/%d\]> Reset: \[%d\%\]} {
+		#REGEX {$mip[gline][2]} {Nukes: \[%d/%d\]>} {
 			#format {nukes} {%d}	 {&1};
 			#format {nukes_max} {%d} {&2};
 			#format {reset} {%d} 	 {&3};
-		}
+		};
+		#REGEX {$mip[gline][2]} {Frenzy: \[%d/%d\]>} {
+			#format {clan} {%d}	 {&1};
+			#format {clan_max} {%d} {&2};
+		};
+		#REGEX {$mip[gline][2]} {Reset: \[%d\%\]} {
+			#format {reset} {%d} 	 {&1};
+		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	}
@@ -272,6 +279,13 @@
 		} {
 			#VAR {my[necromancer][glamors][furious]} 0;
 		};
+		#REGEX {$mip[gline][1]} {illuming}	{
+			#VAR {my[necromancer][glamors][illuming]} 1;
+		} {
+			#VAR {my[necromancer][glamors][illuming]} 0;
+		};
+
+
 		#REGEX {$mip[gline][1]} {Prot:%wX}	{#VAR {my[prot]}		{&1}};
 		#REGEX {$mip[gline][1]} {Circle:%d}	{#VAR {my[gxp]}			{&1}};
 	}; #ELSEIF {%1 == 2} {

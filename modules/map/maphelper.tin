@@ -119,12 +119,16 @@
 
 /* Transports */
 #NOP Abyss
-#act {Abyssmal Portal (s,portal)} {#map goto 5159} {1};
+#act {-R-_Abyssmal Portal (s,portal)} {#map goto 5159} {1};
 
 #NOP Alien Ship;
 #act {The jeep comes to a *SCREECHING* halt as you arrive at the HQ!} {
 	out;enter shuttle;
 } {1};
+
+#act {-R-_Reactor Control Console (n)} {
+	#map goto 34704;
+} {2};
 
 #NOP Android
 #act {BING! The button light goes off and the elevator doors open.} {enter elevator}
@@ -132,10 +136,10 @@
 #act {The elevator is already here. How about you enter it?} {enter elevator}
 
 #NOP Ao
-#act {** The Docks of Ao ** (se)} {#map goto 15463} {1}
+#act {-R-_** The Docks of Ao ** (se)} {#map goto 15463} {1}
 
 #NOP Ascended
-#act {Arid environment (sw,n,s,e,climb)} {#map goto 16718} {1}
+#act {-R-_Arid environment (sw,n,s,e,climb)} {#map goto 16718} {1}
 
 #NOP Ashridge Acres
 #act {AREA NAME: Ashridge Acres} {
@@ -170,7 +174,7 @@
 }
 
 #NOP Witch's Hat;
-#act {^You grab the velvet hat and try it on. You disappear in a} {#map goto 28304};
+#act {^You grab the velvet hat and try it on. You disappear in a} {#map goto 44363};
 
 #NOP Death
 #act {^You die.$} {.pause;#map goto 6247}
@@ -212,9 +216,10 @@
 		#map goto 10278
 	}
 };
-#action {^You are unable to penetrate the wall that %* has blocking the exit.$} {mapUndo};
-#action {^You can't go forward while enemies are present.$} {mapUndo};
-#act {^You touch the beacon, and a friendly ship belonging to The Vigilant swings by.} {#map goto 10278}
+#action {^You are unable to penetrate the wall that %* has %*} {mapUndo} {2};
+#action {^The giant wall collapses, unblocking the escape routes.$} {#if $bot[active] {..}} {2};
+#action {^You can't go forward while enemies are present.$} {mapUndo} {2};
+#act {^You touch the beacon, and a friendly ship belonging to The Vigilant swings by.} {#map goto 10278} {2};
 
 #NOP Chaos Sewers;
 #action {You lose your footing and wind up flat on your butt!} {mapUndo} {2};
@@ -222,15 +227,15 @@
 
 
 #NOP Kyoto
-#act {^=S=A Poorly-lit Street} {
+#act {^-R-_A Poorly-lit Street} {
 	#var kyoto yes
-}
-#act {^=I= A large sign.} {
+};
+#act {^-i- A large sign.} {
 	#if {"$kyoto" == "yes"} {
 		#map goto 25904;
 		#var kyoto no
 	}
-}
+};
 
 #NOP Lost City
 #act {^With a final THUD, you fly out into a pile of metal!} {#map goto 24299}
@@ -264,12 +269,14 @@
 	}
 }
 
+
+
 #NOP Overlands
 #act {^After an unknown amount of time, you wake up and find yourself on} {#map goto 26024}
-#act {^=S=At an underground lake} {
+#act {^-R-_At an underground lake} {
 	#var overlands_raft yes
 }
-#act {^=I= A wooden sign.} {
+#act {^-i- A wooden sign.} {
 	#if {"$overlands_raft" == "yes"} {
 		#map goto 26022;
 		#var overlands_raft no
@@ -470,5 +477,30 @@
 #NOP Whorehouse
 #act {^Doh shoves you backwards with a scowl.} {mapUndo}
 #act {^Your feet are mired in the bird poop, you can't seem to move!!} {mapUndo}
+
+#NOP Wayhaven;
+#act {You decide to fly north to Wayhaven, rather than hover above the waves.} {#map goto 7354} {2};
+
+
+#action {You fight against the current but are unable to move!} {mapUndo}
+#action {The weeds tangle up your legs and you are stuck!} {mapUndo}
+#action {You bounce off the energy field. The field shimmers.} {mapUndo}
+#action {You try to go back stage, but the actors keep getting in your way.}  {mapUndo}
+#action {Enforcer says: Where do you think you're going?}  {mapUndo}
+#action {The rabbit is blocking the hole}  {mapUndo}
+#action {^The drow prevents you from going that way} {mapUndo}
+#action {^Azrael gives you a small scratch, reminding you of her guard duty$} {mapUndo}
+#action {^The guard blocks your passage.$} {mapUndo}
+#action {^The blue security field repels your attempts to enter the hall.} {mapUndo}
+#action {^The gate is down, you must raise it first.$} {mapUndo}
+#action {^The guard pushes you back.$} {mapUndo}
+#action {^The guard shoves you back.$} {mapUndo}
+#action {Two gnolls rush out of the cave and block your path!} {mapUndo};
+#action {^The golem shoves you back.$} {mapUndo}
+#action {^Policeman says: No one is allowed outside the city limits.} {mapUndo}
+#action {^The closed security gate blocks your path.} {mapUndo}
+#action {^The door is closed.$} {mapUndo}
+#action {^The knight bars your way west.$} {mapUndo}
+#action {The guard prevents you from going that way.} {mapUndo}
 
 #class {maphelper} {close}

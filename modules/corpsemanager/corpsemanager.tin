@@ -11,6 +11,11 @@
 #var corpses[servant] 0;
 #var corpses[golem] 0;
 
+
+#NOP -- Block certain things from picking up as "corpse";
+#act {There is no corpse in this room master.} {#NOP} {1};
+#act {You must have a corpse to absorb.} {#NOP} {1};
+
 #alias check_corpses {
 	i;
     examine cooler;
@@ -82,12 +87,6 @@
 
 #NOP -- Corpse use order is:  Coffin -> Freezer -> Cooler -> Golem/Servant -> Inventory -> Smuggle;
 #alias corpse_select {
-	#action {That's not being smuggled...} {
-		#var corpses[smuggle] 0;
-		_update_corpse_string;
-	} {2};
-
-	#delay .5 {#unaction {That's not being smuggled...}};
 
 	#if {$corpses[smuggle] && !$corpses[inventory] && !$corpses[coffin] && !$corpses[freezer] && !$corpses[golem] && !$corpses[servant]} {
 		smuggle remove corpse;drop corpse;
@@ -191,15 +190,20 @@
 #NOP -- Corpse Management Golem;
 #action {The command is: inventory} {
 	#var corpses[golem] 0;
+	#var golem_update 1;
 	#action {{(.*) corpse (.*)( \{([0-9]+)\})?}} {
-		#var foundtimes 1;
-		#regex {%%3} {7B{[0-9]+}} {#var foundtimes &1;};
-		#math corpses[golem] {$corpses[golem] + $foundtimes};
+		#if $golem_update {
+			#var foundtimes 1;
+			#regex {%%3} {7B{[0-9]+}} {#var foundtimes &1;};
+			#math corpses[golem] {$corpses[golem] + $foundtimes};
+		};
 	} {2};
 	#action {{(.*) remains (.*)( \{([0-9]+)\})?}} {
-		#var foundtimes 1;
-		#regex {%%3} {7B{[0-9]+}} {#var foundtimes &1;};
-		#math corpses[golem] {$corpses[golem] + $foundtimes};
+		#if $golem_update {
+			#var foundtimes 1;
+			#regex {%%3} {7B{[0-9]+}} {#var foundtimes &1;};
+			#math corpses[golem] {$corpses[golem] + $foundtimes};
+		};
 	} {2};
 } {5};
 
@@ -214,22 +218,24 @@
 } {5};
 
 #action {Estimated Capacity: %*} {
-	#unaction {{(.*) corpse (.*)( \{([0-9]+)\})?}};
-	#unaction {{(.*) remains (.*)( \{([0-9]+)\})?}};
+	#var golem_update 0;
 	_update_corpse_string;
 } {2};
 
 #NOP -- Corpse Management Tech Ultra-Cooler;
-#act {^You activate the Ultra-Cooler to retrieve the %*.$} {#math {corpses[cooler]} {$corpses[cooler] - 1}} {2};
-#act {^You place the %* into the Ultra-Cooler.$} {#math {corpses[cooler]} {$corpses[cooler] + 1};#math {corpses[inventory]} {$corpses[inventory] - 1}} {2};
+#act {^You activate the Ultra-Cooler to retrieve the %*.$} {#math corpses[cooler] {$corpses[cooler] - 1}} {2};
+#act {^You place the %* into the Ultra-Cooler.$} {#math corpses[cooler] {$corpses[cooler] + 1};#math {corpses[inventory]} {$corpses[inventory] - 1}} {2};
 #act {^There is no more room in the Ultra-Cooler$} {#var corpses[cooler] 50} {2};
 #act {^The cooler does not contain a corpse.$} {#var corpses[cooler] 0} {2};
 
 #act {^The Tech Ultra-Cooler. It is large and oblong. The top of it is made} {
 	#var inventory[cooler] 1;
 	#var corpses[cooler] 0;
-	#action {{^(.*)(corpse|remains)(.*)}} {#math corpses[cooler] {$corpses[cooler] + 1}} {2};
-	#delay 2 {#unaction {{^(.*)(corpse|remains)(.*)}}};
+	#var cooler_update 1;
+	#action {{^The (.*)(corpse|remains) of (.*)}} {
+		#if $cooler_update {#math corpses[cooler] {$corpses[cooler] + 1}};
+	} {6};
+	#delay 2 {#var cooler_update 0;};
 } {2};
 
 #NOP -- Corpse Management INVENTORY;
@@ -248,12 +254,13 @@
 
 #NOP -- Corpse Management SMUGGLE;
 #act {^Items you are currently smuggling (%*):} {
+	#var smuggle_update 1;
 	#var corpses[smuggle] 0;
 	#action {{^>(.*)(corpse|remains)(.*)}} {
-		#math corpses[smuggle] {$corpses[smuggle] + 1};
-	} {2};
-	#delay 4 {
-		#unaction {{^>(.*)(The|a preserved|an embalmed)(.*)(corpse|remains)(.*)}};
+		#if $smuggle_update {#math corpses[smuggle] {$corpses[smuggle] + 1}};
+	} {6};
+	#delay 2 {
+		#var smuggle_update 0;
 	};
 	
 } {2};

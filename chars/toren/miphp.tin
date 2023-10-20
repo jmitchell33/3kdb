@@ -37,7 +37,7 @@
 		#var maim_string <faa>-<088>;
 	};
 
-	#if {{$my[necromancer][diurnum] > 0 || $my[necromancer][nocturnum] > 0}} {
+	#if {$my[necromancer][diurnum] > 0 || $my[necromancer][nocturnum] > 0} {
 		#var diurnum_string <bfa>$my[necromancer][diurnum]<088>;
 	} {
 		#var diurnum_string <faa>-<088>;
@@ -49,13 +49,50 @@
 		#var harvest_string <faa>-<088>;
 	};
 
+	#if {$my[necromancer][bloodarc] > 0} {
+		#var bloodarc_string <bfa>$my[necromancer][bloodarc]<088>;
+	} {
+		#var bloodarc_string <faa>-<088>;
+	};
+
+	#if {$my[necromancer][conjure_undead] > 0} {
+		#var conjure_undead_string <bfa>$my[necromancer][conjure_undead]<088>;
+	} {
+		#var conjure_undead_string <faa>-<088>;
+	};
+
+	#if {$my[necromancer][souls] > 0} {
+		#var souls_string <bfa>$my[necromancer][souls]<088>;
+	} {
+		#var souls_string <faa>-<088>;
+	};
+
+	#if {$my[necromancer][soulbind] > 0} {
+		#var soulbind_string <bfa>$my[necromancer][soulbind]<088>;
+	} {
+		#var soulbind_string <faa>-<088>;
+	};
+
+	#if {$my[necromancer][skullfire] > 0} {
+		#var skullfire_string <bfa>$my[necromancer][skullfire]<088>;
+	} {
+		#var skullfire_string <faa>-<088>;
+	};
+
+	#if {$my[necromancer][unholy_ground] > 0} {
+		#var unholy_ground_string <bfa>$my[necromancer][unholy_ground]<088>;
+	} {
+		#var unholy_ground_string <faa>-<088>;
+	};
+
 	#cat bloodfuse_string { (${decanter_powered_string}/${decanter_full_string}/${decanter_empty_string})};
 
 	#list temp clear;
 	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NP:$gp1/$gp1_max E:$ehealth};
 	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NP:$my[gp1][graph]  E:$enemy[graph]};
 	#list temp add {Status[w$my[necromancer][worth]%|p$my[necromancer][protection]|v$my[necromancer][veil]|r$my[gp2][current]%] Cr[$my[necromancer][progress]%] TG[$my[necromancer][teleports][current]|$my[necromancer][glamors][current]$my[necromancer][glamors][active]] $[$my[coins]]};
-	#list temp add {<dda>Prime:$iprime_string/2 <dda>Bfuse:$bloodfuse_string <dda>Maim:$maim_string <dda>Di/Nocturnum:$diurnum_string <dda>GH:$harvest_string };
+	#list temp add {<dda>Prime:$iprime_string/2 <dda>Bfuse:$bloodfuse_string <dda>Maim:$maim_string <dda>Di/Nocturnum:$diurnum_string <dda>GH:$harvest_string <dda>BA:$bloodarc_string };
+	#list temp add {<dda>Souls:$souls_string <dda>Soulbind:$soulbind_string <dda>Skullfire:$skullfire_string <dda>CU:$conjure_undead_string <dda>UG:$unholy_ground_string};
 
 	#var hpbar[prompt] $temp;
 };

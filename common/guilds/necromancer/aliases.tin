@@ -89,6 +89,45 @@
     };
 };
 
+#alias conjureUndead {
+    #loop 1 $my[necromancer][conjure_undead] i {conjure undead;kill undead;rabies undead;corrode undead};
+};
+
+#alias nukeUndead {
+    #var ogEnemy $enemy[name_numbers];
+    #var undeadKilled 0;
+    ktrig OFF;
+    #loop 1 $my[necromancer][conjure_undead] i {conjure undead;kill undead;rabies undead;corrode undead};
+    kill $ogEnemy;
+    unholy ground;
+    #action {%* dealt the killing blow to Undead.} {
+        #math undeadKilled {$undeadKilled + 1};
+    } {1};
+    #delay 10 {
+        #if $mask[active] {#math undeadKilled {$undeadKilled * 2}};
+        #${undeadKilled} qtrance preserve remains/absorb;
+        #unaction {%* dealt the killing blow to Undead.};
+        ktrig ON;
+    };
+};
+
+#alias nukeUndead2 {
+    #var ogEnemy $enemy[name_numbers];
+    #var undeadKilled 0;
+    ktrig OFF;
+    #loop 1 $my[necromancer][conjure_undead] i {conjure undead;kill undead;rabies undead;corrode undead};
+    kill $ogEnemy;
+    #action {%* dealt the killing blow to Undead.} {
+        #math undeadKilled {$undeadKilled + 1};
+    } {1};
+    #delay 10 {
+        #if $mask[active] {#math undeadKilled {$undeadKilled * 2}};
+        #${undeadKilled} qtrance preserve remains/absorb;
+        #unaction {%* dealt the killing blow to Undead.};
+        ktrig ON;
+    };
+};
+
 
 
 #alias {topup} {

@@ -9,11 +9,12 @@
 
 #NOP -- Ticker to set incombat variable;
 #ticker check_combat {
-    #if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
+    #if {$mip[round] == $incombat_last_round || $mip[round] == 0} {
         #var incombat 0
     } {
         #var incombat 1;
     };
+    #var incombat_last_round $mip[round];
 } {2};
 
 #alias {defaults_on} {
