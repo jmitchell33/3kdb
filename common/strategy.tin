@@ -97,6 +97,8 @@
 #list strategyList add {{{guild} {necromancer} {name} {bloodlet}  {active} {0} {description} {Vamp: Bloodlet}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodfuse}  {active} {0} {description} {Vamp: Bloodfuse}}};
 #list strategyList add {{{guild} {necromancer} {name} {illume}  {active} {0} {description} {Pure: Illume}}};
+#list strategyList add {{{guild} {necromancer} {name} {skullfire}  {active} {0} {description} {Pure: Skullfire}}};
+#list strategyList add {{{guild} {necromancer} {name} {corrode}  {active} {0} {description} {Pure: Corrode}}};
 #list strategyList add {{{guild} {necromancer} {name} {diurnum}  {active} {0} {description} {Necro: Diurnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {nocturnum}  {active} {0} {description} {Necro: Nocturnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
@@ -160,6 +162,7 @@
 
     checkStrategy {snare} {snare;};
     checkStrategy {rabies} {rabies;};
+    checkStrategy {corrode} {corrode;};
     checkStrategy {scythe} {scythe;};
     checkStrategy {call} {call;};
     checkStrategy {fury} {fury prime;};
@@ -197,6 +200,10 @@
         
         #if {$my[necromancer][harvest] > 0} {
             checkStrategy {harvest} {harvest};
+        };
+
+        #if {$my[necromancer][skullfire] > 0 && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] > 1} {
+            checkStrategy {skullfire} {skullfire};
         };
 
         #if {$my[necromancer][conjure_undead] > 0} {

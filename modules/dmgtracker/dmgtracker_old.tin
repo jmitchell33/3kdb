@@ -27,6 +27,14 @@
     #if {$cmbt[category][%1][curr] > $cmbt[category][%1][high]} {#var cmbt[category][%1][high] $cmbt[category][%1][curr];#echo {$newBest $dmgDisplay};};
 };
 
+#alias dodgeTrack {
+    #if {$cmbt[dodge][total] > 0} {
+        #math cmbt[dodge][total] {$cmbt[dodge][total] + 1};
+    } {
+        #var cmbt[dodge][total] 1;
+    };
+};
+
 
 #alias dmgFormat {
     #math tmpPercent {1.00 * $cmbt[category][%1][rnd] / $cmbt[category][total][rnd] * 100};
@@ -79,6 +87,7 @@
     #var cmbt[affects][drunken_master] 0;
     #var cmbt[affects][bloodfuse] 0;
     #var cmbt[affects][clutch] 0;
+    #var cmbt[affects][jump] 0;
     #var ewell_round 0;
 
     #var dmgt[curr] 0;
@@ -335,7 +344,15 @@ dreset;
     #nop showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
 };
 
+#NOP Juggernaut Dmg report;
+#action {You jump attack %* for %*. \{%d\}} {
+    #var dmgTimes 1;
+    #var dmgAmount %3;
+    dmgTrack jump $dmgAmount $dmgTimes;
+} {2};
 
+#NOP Mob Dodge Tracking;
+#action {%* deftly slips away from your attack!$} {dodgeTrack};
 
 #NOP #ticker dmg_stats {    #var caption_data[dmg] {\n Average damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.\n Best damage : $cmbt[high] damage};} 2;
 

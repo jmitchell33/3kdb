@@ -332,7 +332,7 @@
 #NOP -- function to also take a step back on the mapper if we undo a map;
 #alias mapUndo {
 	#map undo;
-	#if {$bot[active]} {
+	#if {$bot[active] && !$bot[paused]} {
 		#math bot[step] {$bot[step] - 1};
 		#delay .5 {look};
 	};
@@ -344,17 +344,17 @@
 	#if {$mapstatic} {
 		mapUndo
 	}
-}
+};
 #act {^You cannot get it up.} {
 	#if {$mapstatic} {
 		mapUndo
 	}
-}
+};
 
 
 
-#NOP ** GUILDS **
-#NOP Juggernauts
+#NOP ** GUILDS **;
+#NOP Juggernauts;
 #act {^The room is locked.} {mapUndo}
 #act {^Dirk says: This area is for Wolves not } {mapUndo}
 #act {^Harlow says: You are not allowed here please turn around and leave at once} {mapUndo}

@@ -2,7 +2,8 @@
 
 #var bot_message_1 '---- KAYOS WARS STEPPER ----';
 #var bot_message_2 '---- ALL TARGETS ----';
-#show $bot_message_1;#show $bot_message_2;
+#echo {$bot_message_1};
+#echo {$bot_message_2};
 
 #var check_death 1;
 
@@ -15,7 +16,7 @@
 #send {i};
 
 #var {bot[path]} {e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;s;s;s;s;s;s;s};
-#var {bunker_path} {enter bunker;n;w;e;e;n;{grab cell;s;w;s;out}};
+#var {bunker_path} {enter bunker;n;w;e;e;n;{grab cell;keep cell;s;w;s;out}};
 #var {spaceship_path} {e;e;e;e;e;{open briefcase;touch beacon;.stop}};
 
 #act {^An intricate digital key: Ok.$} {#math kayos[key] {$kayos[key]+1}};
@@ -24,49 +25,50 @@
 
 #NOP -- When the bot completes the main field, loop the 3 bunkers and then the spaceship;
 #act {^------- BOT COMPLETE -----} {
-    #showme KAYOS EVENT BOT COMPLETE;
+    #var checkBunker 0;
+    #var bot[step] 1;
+    .pause;
+    #if {$kayos_bunker == 1} {
+        #echo {MAIN FIELD CLEAR -- ENTERING BUNKERS};
+    };
     #delay 2 {
         #if {$kayos_bunker == 1} {
-            .pause;
             #map run $kayos[bunker][1];
             #delay 3 {
-                #var bot[step] 1;
                 #list bot[steps] create {$bunker_path};
                 unlock bunker;
+                #map goto 22675;
                 ..;
             };
         };
         #if {$kayos_bunker == 2} {
-            .pause;
-            #map goto $kayos[bunker][1];
-            #map run $kayos[bunker][2];
+            #map goto ${kayos[bunker][1]};
+            #delay 1 {#map run $kayos[bunker][2]};
             #delay 3 {
-                #var bot[step] 1;
                 #list bot[steps] create {$bunker_path};
                 unlock bunker;
+                #map goto 22675;
                 ..;
             }
         };
         #if {$kayos_bunker == 3} {
-            .pause;
-            #map goto $kayos[bunker][2];
-            #map run $kayos[bunker][3];
+            #map goto ${kayos[bunker][2]};
+            #delay 1 {#map run $kayos[bunker][3]};
             #delay 3 {
-                #var bot[step] 1;
                 #list bot[steps] create {$bunker_path};
                 unlock bunker;
+                #map goto 22675;
                 ..;
             };
         };
         #if {$kayos_bunker == 4} {
-            .pause;
-            #map goto $kayos[bunker][3];
-            #map run $kayos[ship];
-            #3 insert cell;
+            #map goto ${kayos[bunker][3]};
+            #delay 1 {#map run $kayos[ship]};
             #delay 3 {
-                #var bot[step] 1;
+                #3 insert cell;
                 #list bot[steps] create {$spaceship_path};
                 teleport;
+                #map goto 10382;
                 ..;
             }
         };
@@ -74,23 +76,55 @@
     };
 } {1};
 
+#NOP -- These two are for necromancer inventory, which is of course different than standard;
+#var checkKey 1;
+#act {%+2sAn intricate digital key} {
+    #if {$checkKey && $inventory_check} {
+        #var checkKey 0;
+        #var kayos[key] 1;
+        #delay 1 {#var checkKey 1};
+    } {
+        #math kayos[key] {$kayos[key] + 1};
+    };
+} {5};
+
+#var checkCell 1;
+#act {%+2sA dark mass of energy} {
+    #if {$checkCell && $inventory_check} {
+        #var checkCell 0;
+        #var kayos[cell] 1;
+        #delay 1 {#var checkCell 1};
+    } {
+        #math kayos[cell] {$kayos[cell] + 1};
+    };
+} {5};
+
 #act {%d%*An intricate digital key.$} {
-    #var tempVar %2;
-    #replace tempVar { } {};
-    #replace tempVar {*} {};
-    #var kayos[key] $tempVar;
+    #if $inventory_check {
+        #var tempVar %2;
+        #replace tempVar { } {};
+        #replace tempVar {*} {};
+        #var kayos[key] $tempVar;
+    };
 } {6};
 
 #act {%d%*A dark mass of energy.$} {
-    #var tempVar %2;
-    #replace tempVar { } {};
-    #replace tempVar {*} {};
-    #var kayos[cell] $tempVar;
+    #if $inventory_check {
+        #var tempVar %2;
+        #replace tempVar { } {};
+        #replace tempVar {*} {};
+        #var kayos[cell] $tempVar;
+    };
+    #delay 1 {
+        #if {$kayos[cell] >= 1} {
+            #math kayos_bunker {$kayos[cell] + 1};
+        };
+    };
 } {6};
 
 
 #alias {.check_death} {
-    wrap;slab;get key;grab cell;..
+    wrap;slab;get key;grab cell;keep key;keep cell;..
 };
 
 #list botmobs clear;
@@ -127,28 +161,31 @@
 
 #var bot[mobs] $botmobs;
 
+#var checkBunker 1;
 #act {^-i-A squat bunker.$} {
-    #map get roomvnum bunkerVnum;
-    #if {&kayos[bunker][] == 0} {
-        #var kayos[bunker][1] $bunkerVnum;
-    } {
-        #if {$kayos[bunker][1] == $bunkerVnum} {#NOP} {
-            #if {&kayos[bunker][] == 1} {
-                #var kayos[bunker][2] $bunkerVnum;
-            } {
-                #if {{$kayos[bunker][1] == $bunkerVnum} || {$kayos[bunker][2] == $bunkerVnum}} {#NOP} {
-                    #var kayos[bunker][3] $bunkerVnum;
+    #if $checkBunker {
+        #map get roomvnum bunkerVnum;
+        #if {&kayos[bunker][] == 0} {
+            #var kayos[bunker][1] $bunkerVnum;
+        } {
+            #if {$kayos[bunker][1] == $bunkerVnum} {#NOP} {
+                #if {&kayos[bunker][] == 1} {
+                    #var kayos[bunker][2] $bunkerVnum;
+                } {
+                    #if {{$kayos[bunker][1] == $bunkerVnum} || {$kayos[bunker][2] == $bunkerVnum}} {#NOP} {
+                        #var kayos[bunker][3] $bunkerVnum;
+                    };
                 };
             };
         };
     };
-};
+} {1};
 
 #act {^-i-A scorch-marked landing pad.$} {
     #map get roomvnum kayos[ship];
-};
+} {1};
 
-#act {^-i-An intricate digital key%*$} {get key;};
+#act {^-i-An intricate digital key%*$} {get key;} {1};
 #act {You cannot go} {mapUndo};
 
 #class {bot} {close}
