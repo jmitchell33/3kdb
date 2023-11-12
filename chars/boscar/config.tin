@@ -1,20 +1,31 @@
 #class {player_config} {kill}
 #class {player_config} {open}
 
+#var donate_support 1;
+
 #NOP -- Bot Config;
 #alias {.pre_fight_check} {#nop};
 #alias {.pre_bot_check} {#nop};
 
-#var check_death 0;
+#var check_death 1;
 #alias .check_death {
+    corpse_trig;
     #if {$shp < 70} {
         .pause;
-        #delay 4 {..};
+        #delay 6 {..};
     };
 };
 
+#var mob_kill_action 1;
 #alias .mob_kill_action {
     kill $mob[target];
+    eval $mob[target];
+    #if {"$support_mode" == "defend" && $bot[active]} {
+        #line oneshot #action {Primary Damage type : [%w]} {
+            #format defendType {%l} {%%1};
+            #delay 3 {support defend $defendType};
+        };
+    };
 };
 
 

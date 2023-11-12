@@ -83,9 +83,14 @@
             #list donateSupportList reverse;
             #list donateSupportList indexate stim;
             #list donateSupportList refine {&0 < 100};
+			#var tmpTimer 1;
+			#var tmpInterval 2;
             #foreach $donateSupportList[%*] index {
-                #showme airdropping $index[player];
-                airdrop $index[player];
+				#if {$my[clan] > 0} {
+					#math tmpTimer {$tmpTimer * $tmpInterval};
+					#delay $tmpTimer {airdrop $index[player]};
+					#math tmpTimer {$tmpTimer + 1};
+				};
             };
         };
     } {1};
@@ -98,6 +103,6 @@
 
 
 #NOP Fire all nukes at current stepper mob or current enemy;
-#alias ff {fire $nukes};
+#alias ff {fire $my[nukes]};
 
 #class {jugger_aliases} {close}

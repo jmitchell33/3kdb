@@ -22,6 +22,46 @@
         #var cmbt[category][%1][freq][%3][dmg] %2;
         #var cmbt[category][%1][freq][%3][avg] %2;
     };
+
+    #if {$cmbt[category][%1][dmg] < 1000} {
+        #math cmbt[histogram][999] {$cmbt[histogram][999] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 999 && $cmbt[category][%1][dmg] <= 2000} {
+        #math cmbt[histogram][2000] {$cmbt[histogram][2000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 1999 && $cmbt[category][%1][dmg] <= 3000} {
+        #math cmbt[histogram][3000] {$cmbt[histogram][3000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 2999 && $cmbt[category][%1][dmg] <= 4000} {
+        #math cmbt[histogram][4000] {$cmbt[histogram][4000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 3999 && $cmbt[category][%1][dmg] <= 5000} {
+        #math cmbt[histogram][5000] {$cmbt[histogram][5000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 4999 && $cmbt[category][%1][dmg] <= 6000} {
+        #math cmbt[histogram][6000] {$cmbt[histogram][6000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 5999 && $cmbt[category][%1][dmg] <= 7000} {
+        #math cmbt[histogram][7000] {$cmbt[histogram][7000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 6999 && $cmbt[category][%1][dmg] <= 8000} {
+        #math cmbt[histogram][8000] {$cmbt[histogram][8000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 7999 && $cmbt[category][%1][dmg] <= 9000} {
+        #math cmbt[histogram][9000] {$cmbt[histogram][9000] + 1};
+    };
+
+    #if {$cmbt[category][%1][dmg] > 8999 && $cmbt[category][%1][dmg] <= 10000} {
+        #math cmbt[histogram][10000] {$cmbt[histogram][10000] + 1};
+    };
     
     #if {"$cmbt[category][%1][high]" == ""} {#var cmbt[category][%1][high] 0};
     #if {$cmbt[category][%1][curr] > $cmbt[category][%1][high]} {#var cmbt[category][%1][high] $cmbt[category][%1][curr];#echo {$newBest $dmgDisplay};};
@@ -353,6 +393,8 @@ dreset;
 
 #NOP Mob Dodge Tracking;
 #action {%* deftly slips away from your attack!$} {dodgeTrack};
+#action {%* blinks out in time to evade your attack.$} {dodgeTrack};
+#action {%* parries the attack.$} {dodgeTrack};
 
 #NOP #ticker dmg_stats {    #var caption_data[dmg] {\n Average damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.\n Best damage : $cmbt[high] damage};} 2;
 

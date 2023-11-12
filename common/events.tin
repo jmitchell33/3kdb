@@ -1,0 +1,21 @@
+#CLASS common_events kill;
+#CLASS common_events open;
+
+#config mouse on;
+#event {SCROLLED MOUSE WHEEL UP} {#buffer up 1};
+
+#EVENT {SCROLLED MOUSE WHEEL DOWN}{
+    #echo {%0 is 0};
+    #echo {%1 is 1};
+    #echo {%2 is 2};
+    #echo {%3 is 3};
+    #echo {%4 is 4};
+    #if {%2 == -1} {
+        #cursor {HISTORY NEXT};
+        #return
+    };
+    #NOP #if {%0 > $hpbar[height]} {#if {%1 < $ticker[bottom]} {#buffer {down} {1}};};
+};
+
+
+#CLASS common_events close;

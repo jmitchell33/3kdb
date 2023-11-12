@@ -17,10 +17,13 @@
 
 
 #alias {bagall} {
+    #var bagsFull 1;
     #format tmpBagCount {%d} %0;
     #loop 1 $tmpBagCount tmpBag {
         put all in bag $tmpBag
     };
+    #line oneshot #action {You put %* in %*.} {#var bagsFull 0};
+    #delay 4 {#if {$collector[items] && $bagsFull} {autocollect}};
 };
 
 #alias {unbagall} {
@@ -29,6 +32,7 @@
     #loop 1 $tmpBagCount tmpBag {
         get all from bag $tmpBag;drop all
     };
+    #var bagsFull 0;
 };
 
 
