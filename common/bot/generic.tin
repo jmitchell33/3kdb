@@ -191,6 +191,8 @@
             .mob_kill_action;
             peer human;
             kill human;
+            #undelay {bot_kick};
+            #undelay {bot_restart};
         } {2};
         #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
         #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
@@ -200,6 +202,8 @@
             #var mob[target] mob;
             .mob_kill_action;
             kill mob;
+            #undelay {bot_kick};
+            #undelay {bot_restart};
         } {2};
     }
 } {
@@ -231,6 +235,8 @@
                 #var mob[foundtimes] $foundtimes;
             };
         };
+        #undelay {bot_kick};
+        #undelay {bot_restart};
     } {2};
 };
 
@@ -346,7 +352,7 @@
 
 #alias {.bot} {#if {$bot[paused] == 0} {..}};
 
-#action {{(.*) (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {
+#action {{(.*) (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.}} {
     #echo {----- BOT REGISTERED KILL -----};
     #if {"%1" == "Fire Mite"} {
         #if {"$guild" == "mage"} {cast spell tap on corpse;cast corpse blast};
@@ -384,7 +390,12 @@
 #ticker {bot_ticker} {
     #if !$bot[paused] {
         #if {$bot[active] && !$idle_flag && !$bot[walk] && !$incombat} {
-            #delay {bot_kick} {#if {!$bot[walk] && !$incombat} {#showme BOT STUCK RESUMING IN 3 SECONDS;.bot}} {3};
+            #delay {bot_kick} {
+                #if {!$bot[walk] && !$incombat} {
+                    #showme BOT STUCK RESUMING IN 3 SECONDS;
+                    #delay {bot_restart} {.bot} {3};
+                };
+            } {3};
         };
     };
 } {5};
