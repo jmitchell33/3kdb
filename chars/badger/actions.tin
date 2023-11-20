@@ -1,0 +1,46 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#NOP -- NECROPOLIS
+#action {returns to its normal position, you discover a key lodged behind} {tell badger found necropolis key}
+#action {This orb exudes an aura of magical energy that almost seems to guide} {tell badger found first orb}
+#action {the inside of the basin and discover a small journal that you decide to} {tell badger found journal}
+#action {dynamite and decide to hang onto it.} {tell badger found dynamite}
+#action {A strange necklace flashes brilliantly when picked up!} {tell badger picked up necklace}
+#action {You grab the dull orb before it closes back up.} {tell badger found second orb}
+
+#NOP -- BANSHEE GUYAHI
+#action {Your mind is filled with the word '%w'.} {#var guyahicode %1}
+
+#NOP -- QUICK FIX FOR BANSHEES STEPPER
+#action {You fail to penetrate the magical barrier.} {dispel;down}
+#action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down}
+
+#NOP -- QUICK FIX FOR ANGEL2 STEPPER
+#action {Scroll of the Universe %*: Ok.} {look}
+
+#NOP -- REFLEXES
+#action {You have no pants.} {unwrap 1;fdeener}
+
+#NOP -- SECTIONZ WHITE CAPSULE
+#action {a bright white capsule: Ok.} {ptell found white capsule}
+
+#NOP --- ROLM and ETERNAL ENERGY WELL
+#action {The %* warms slightly in your grip...} {touch owl rune;eternal energy well}
+#action {The %* cools slightly in your grip...} {touch owl rune;eternal energy well}
+
+#NOP -- ETERNAL WHO REFRESHED ROOM TRIG
+#action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1}
+
+#NOP --- JUGGERNAUT AMMO
+#action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {truck ammo vbuy missile 6 1 40000}
+
+#NOP -- JUGGERNAUT CDEFEND FOR PARTY
+#action {The computer chirps 'Switching to PARTY defense mode.} {ptell cdefend ON for party}
+
+#NOP --- GENERAL MISC;
+#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
+
+
+
+#class {player_actions} {close}
