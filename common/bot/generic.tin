@@ -183,7 +183,7 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
-#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Turkey Farm" || "$area" == "Starcraft 2"} {
+#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Starcraft 2"} {
     #if {"$area" == "Starcraft 2"} {
         #act {^-M-_%*} {
             #var bot[foundmob] 1;
@@ -197,15 +197,17 @@
         #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
         #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
     } {
-        #act {^-M-_%*} {
-            #var bot[foundmob] 1;
-            #var mob[target] mob;
-            .mob_kill_action;
-            kill mob;
-            #undelay {bot_kick};
-            #undelay {bot_restart};
-        } {2};
-    }
+        #if {"$area" == "The Kayos Wars"} {
+            #act {^-M-_%*} {
+                #var bot[foundmob] 1;
+                #var mob[target] mob;
+                .mob_kill_action;
+                kill mob;
+                #undelay {bot_kick};
+                #undelay {bot_restart};
+            } {2};
+        };
+    };
 } {
     #act {{^-M-_(.*)( \[(.*)\])*( \[[0-9]*%\])?( (.*)attacking(.*))?([\r\n\t ]*?)?( \{([0-9]+)\})?( \{([A-Za-z]+)\})?}} {
         #var foundtimes 1;
