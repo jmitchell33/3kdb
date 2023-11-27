@@ -26,8 +26,7 @@
 #action {a bright white capsule: Ok.} {ptell found white capsule}
 
 #NOP --- ROLM and ETERNAL ENERGY WELL
-#action {The %* warms slightly in your grip...} {touch owl rune;eternal energy well}
-#action {The %* cools slightly in your grip...} {touch owl rune;eternal energy well}
+#action {The %* slightly in your grip...} #if {"$bot[active]" == "1" && !$idle_flag} {touch owl rune;eternal energy well}
 
 #NOP -- ETERNAL WHO REFRESHED ROOM TRIG
 #action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1}
@@ -36,7 +35,7 @@
 #action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {truck ammo vbuy missile 6 1 40000}
 
 #NOP -- JUGGERNAUT CDEFEND FOR PARTY
-#action {The computer chirps 'Switching to PARTY defense mode.} {ptell cdefend ON for party}
+#action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend ON for party}
 
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
