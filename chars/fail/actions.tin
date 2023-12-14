@@ -1,9 +1,6 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
-#NOP -- Teaching mskills to players
-#action {^To do so, type: tskill %* %*} {#if {!$idle_flag} {tskill %1 %2}};
-
 #NOP -- NECROPOLIS
 #action {returns to its normal position, you discover a key lodged behind} {tell $user found necropolis key}
 #action {This orb exudes an aura of magical energy that almost seems to guide} {tell $user found first orb}
@@ -29,7 +26,7 @@
 #action {a bright white capsule: Ok.} {ptell found white capsule}
 
 #NOP --- ROLM and ETERNAL ENERGY WELL
-#action {The %* slightly in your grip...} {#if {$bot[active] == 1 && !$idle_flag} {touch owl rune;eternal energy well}};
+#action {The %* slightly in your grip...} #if {$bot[active] == 1 && !$idle_flag} {touch owl rune}
 
 #NOP -- ETERNAL WHO REFRESHED ROOM TRIG
 #action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1}
