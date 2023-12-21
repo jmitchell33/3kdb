@@ -7,8 +7,7 @@
 #var bot_message_1 '----  KNIGHTS OF ERAH TRAINING  ----';
 #showme $bot_message_1;
 
-#var {bot[path]} {e;e;n;e;e;n;w;w;nw;w;w;ne;e;e;n;w;w;n;};
-#path load $bot[path];
+#var bot[path] {e;e;n;e;e;n;w;w;nw;w;w;ne;e;e;n;w;w;n;};
 
 #var knight1_1 0;
 #var knight2_1 0;
@@ -26,36 +25,40 @@
 #action {%*|  Defeat a knight commander in arena       : %d/5} {#math knight3_1 {%2 / 5}};
 #action {%*|  Defeat a grand commander class knight in arena : %d/5} {#math knight3_2 {%2 / 5}};
 
+#action {-i-The Challenger Board.} {
+    #NOP We treat the board like a mob;
+    #var bot[foundmob] 1;
+    examine board;
+} {1};
 
-#action {The Challenger Board.} {challenge};
-#action {%*Accepting %* defeat, your challenger} {get all;glance;} {1};
-#action {%* shifts %* combat style to the %*.} {.pre_fight_check;kill knight} {1};
+#action {There is no reason to 'challenge' here.} {examine board} {1};
+#action {There {is|are} %w {challenger|challengers} awaiting a noble challenger.} {
+    #var knights_left @word_to_number{%2};
+    challenge;
+} {1};
+#action {There are no challengers remaining here.} {
+    #var knights_left 0;
+    .botStep
+} {1};
 
-#action {There are no other challenge partners available right now.} {
-    #NOP -- Check mission progress - if complete go return it and get another;
-    mission list;
-    #delay 2 {#if {$knight1_1 || $knight2_1 && $knight2_2 && $knight2_3 || $knight3_1 && $knight3_2} {
-            go erah_knight;
-            #delay 2 {mission return};
-            #delay 3 {mission ask};
-            #delay 4 {mission accept;enter;#read common/bot/bots/knights.tin;#delay 2 {glance}};
-        } {
-            #path walk
-        };
+#action {%*Accepting %* defeat, your challenger} {
+    #if {$knights_left > 0} {
+        challenge
+    } {
+        .botStep
     };
 } {1};
+
+#action {%* shifts %* combat style to the %*.} {
+    #math knights_left {$knights_left - 1};
+    .pre_fight_check;kill knight
+} {1};
+
 #action {Congratulations!  You have completed the mission} {mission ask;};
 #action {You have been offered the mission} {mission accept;};
-#action {There is no reason to 'challenge' here.} {#path walk} {1};
 
-#action {#PATH WALK: #END OF PATH.} {door;.stop};
+#action {You have a challenger right in front of you - focus!} {mapUndo} {1};
+#action {You cannot leave while your challenge partner is present.} {mapUndo} {1};
 
-/* kill the bot */
-#alias {.stop} {
-    #unvar bot;
-    #class {bot} {kill};
-    #show Bot killed.;
-};
-
-challenge;
 #class {bot} {close}
+#read common/bot/generic.tin;
