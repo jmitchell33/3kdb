@@ -1,5 +1,7 @@
 #class {maphelper} {open}
 
+#action {You have arrived at a dungeon entrance.} {rating};
+
 #alias {maphelp} {
 	#show mapsave/mapload - save/load from map/3k_map.tin;
 	#show map <roomname> - set map at roomname;
@@ -337,7 +339,9 @@
 	#map undo;
 	#if {$bot[active] && !$bot[paused]} {
 		#math bot[step] {$bot[step] - 1};
-		#delay .5 {look};
+		#if {!$incombat} {
+			#delay .5 {look};
+		};
 	};
 };
 

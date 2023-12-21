@@ -136,47 +136,15 @@
 
 #alias {.resume} {
     #var bot $lastBot;
-    #macro {1} {
-        #delay 2 {
-            .pre_bot_check;
-            #var bot $lastBot;
-        };
-        #unmacro 1;
-        #unmacro 2;
-        #unmacro 3;
-    };
-
-    #macro {2} {
-        #ticker checkResume {#if {$roomvnum == $bot[start_vnum]} {#unticker checkResume;..}} .1;
-        #map run $bot[start_vnum];
-        #delay 2 {
-            .pre_bot_check;
-            #local i 1;
-            #action {{^-R-_(.*)-R-_}} {#if {$i <= ${bot[step]}} {$bot[steps][${i}];#math i {$i + 1};} {#unaction {{^-R-_(.*)-R-_}};..}};
-        };
-        #unmacro 1;
-        #unmacro 2;
-        #unmacro 3;
-    };
-
-    #macro {3} {
-        #showme <dfa>--- RESUME REQUEST CANCELLED ---;
-        #unmacro 1;
-        #unmacro 2;
-        #unmacro 3;
-    };
-
-    #showme <dfa>--- ATTEMPTING TO RESUME BOT FROM LAST POINT ---;
-    #showme <dfa>   The map must be sync'd if so:;
-    #showme <dfa>   Press (1) to resume from last room;
-    #showme <dfa>   Press (2) to resume from start room;
-    #showme <dfa>   Press (3) to cancel;
-    #showme <dfa>--- This option will expire in 5 seconds ---;
-    
-    #delay 5 {
-        #unmacro 1;
-        #unmacro 2;
-        #unmacro 3;
+    #if {"$lastBot[rating]" == "Section Z"} {
+        #map run 24786;
+        unpause game;
+        #echo {10 seconds until $lastBot[rating] resumes...};
+        #delay 10 {..};
+    } {
+        #map run $lastBot[pause_room];
+        #echo {10 seconds until $lastBot[rating] resumes...};
+        #delay 10 {..};
     };
 };
 
@@ -194,13 +162,14 @@
 };
 
 #alias .pause {
+    #map get roomvnum bot[pause_room];
     #var lastBot $bot;
     #undelay bot_kick;
     #var bot[paused] 1;
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
-#if {"$user" == "byron"} {
+#if {"$user" == "byron" || "$user" == "toren"} {
     #if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Turkey Farm" || "$area" == "Starcraft 2"} {
         #if {"$area" == "Starcraft 2"} {
             #act {^-M-_%*} {
@@ -231,7 +200,7 @@
             #format {mob[long]} {%p} {$mob[long]};
 
             #foreach $botmobs[%*] botmob {
-                #regexp {$mob[long]} {%*{$botmob[long]}%*} {
+                #regexp {$mob[long]} {$botmob[long]} {
                     #var bot[foundmob] 1;
                     #var mob[target] $botmob[target];
                 };
