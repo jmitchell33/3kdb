@@ -22,7 +22,7 @@
 };
 
 #alias {go} {
-	#if $bot[active] {#showme {Bot Paused!};.pause};
+	#if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
 	#map get roomvnum go_back;
 	#var roomfound 0;
 	#foreach $speedruns[%*] index {

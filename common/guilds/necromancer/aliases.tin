@@ -19,15 +19,11 @@
 
 #alias {preserve_remains} {
     checkStrategy {gemino} {
-        preserve gemino;
-        get preservation;
-        keep preservation;
-        get preservation;
-        keep preservation;
+        preserve gemino remains;
+        keep all preservation;
     } {
-        preserve remains;
-        get preservation;
-        keep preservation;
+        preserve get;
+        keep all preservation;
     };
 };
 
@@ -128,40 +124,30 @@
     };
 };
 
-
-
 #alias {topup} {
+    #echo {<dfa>-------- Restocking Reagents --------<088>};
+    gs;
     go necro_reagent;
-    #action {%sginseng:%d%sblack pearls:%d%sspider web:%d%sgoldenrod:%d} {
+    #line oneshot #action {%sginseng:%d%sblack pearls:%d%sspider web:%d%sgoldenrod:%d} {
         #math ginseng {999 - %%2};
         #math black_pearls {999 - %%4};
         #math spider_web {999 - %%6};
         #math goldenrod {999 - %%8};
-    };
-    #action {%smandrake:%d%spine needles:%d%snightshade:%d%sbloodmoss:%d} {
-        #math mandrake {999 - %%2};
-        #math pine_needles {999 - %%4};
-        #math nightshade {999 - %%6};
-        #math bloodmoss {999 - %%8};
-    };
-    gs;
-    #showme {<dfa>-------- Restocking Reagents --------<088>};
-    #delay .5 {
         #if $ginseng {buy $ginseng ginseng;};
         #if $black_pearls {buy $black_pearls black pearls;};
         #if $spider_web {buy $spider_web spider web;};
         #if $goldenrod {buy $goldenrod goldenrod;};
+    };
+    #line oneshot #action {%smandrake:%d%spine needles:%d%snightshade:%d%sbloodmoss:%d} {
+        #math mandrake {999 - %%2};
+        #math pine_needles {999 - %%4};
+        #math nightshade {999 - %%6};
+        #math bloodmoss {999 - %%8};
         #if $mandrake {buy $mandrake mandrake;};
         #if $pine_needles {buy $pine_needles pine needles;};
         #if $nightshade {buy $nightshade nightshade;};
     };
-    
-    #delay 1 {
-        #unaction {%sginseng:%d%sblack pearls:%d%sspider web:%d%sgoldenrod:%d};
-        #unaction {%smandrake:%d%spine needles:%d%snightshade:%d%sbloodmoss:%d};
-    };
-}
-
+};
 
 #ALIAS {power}
 {
