@@ -170,6 +170,7 @@ dreset;
 #action {^Your eyes burn with a blinding rage that strikes fear into your very} {#var cmbt[affects][bloodarc] 1} {2};
 #action {^You reach back and strike your bony hand outward, toward %*} {#var cmbt[affects][bloodarc] 1} {2};
 #action {^A violet scream erupts from your lips as you strikes forth with a} {#var cmbt[affects][bloodarc] 1} {2};
+#action {^You raise your palm forward and a %* skull of %*} {#var cmbt[affects][skullfire] 1} {2};
 
 #NOP -- Toggles for profession boosts;
 #action {^Your crazed ambition overflows!$} {#var cmbt[affects][big_game_hunter] 1} {2};
@@ -245,6 +246,7 @@ dreset;
     #var cmbt[affects][clutch] 0;
     #var cmbt[affects][grasp] 0;
     #var cmbt[affects][bloodarc] 0;
+    #var cmbt[affects][skullfire] 0;
     #var ewell_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
 };
@@ -305,6 +307,9 @@ dreset;
             };
             #if {$cmbt[affects][grasp]} {
                 dmgTrack grasp $dmgAmount $dmgTimes;
+            };
+            #if {$cmbt[affects][skullfire]} {
+                dmgTrack skullfire $dmgAmount $dmgTimes;
             };
             #if {$cmbt[affects][witch_hat]} {
                 dmgTrack WitchHat $dmgAmount $dmgTimes;

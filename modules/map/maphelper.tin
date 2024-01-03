@@ -150,7 +150,7 @@
 #act {AREA NAME: Ashridge Acres} {
 	#map get {roomvnum} {ashridge_room};
 	#map goto 22486
-} {4}
+} {1};
 
 #NOP Calvin and Hobbes
 #act {^on the snow calls to you, and you dread another day at school.} {#map goto 23824}
@@ -163,26 +163,26 @@
 		#map get {roomvnum} {tvroom};
 		#map goto 8315;
 	}
-} {4}
+} {1}
 
 #act {AREA NAME: Simpsons Expansion [Lostar]} {
 	#var {area} {Simpsons};
-} {4}
+} {1}
 
 #act {AREA NAME: Simpsons Expansion [Frank]} {
 	#var {area} {Simpsons Expansion};
 	#map get {roomvnum} {tvroom};
 	#map goto 8227
-} {4}
+} {1}
 #act {^   You dive cleanly through the computer screen!} {
 	#map goto $tvroom
 }
 
 #NOP Witch's Hat;
-#act {^You grab the velvet hat and try it on. You disappear in a} {#map goto 44363};
+#act {^You grab the velvet hat and try it on. You disappear in a} {#map goto 44363} {1};
 
 #NOP Death
-#act {^You die.$} {.pause;#map goto 6247}
+#act {^You die.$} {.pause;#map goto 6247} {2};
 
 #NOP Death Taco
 #act {^You shoot through a graceful arc, and feel weightless for the} {#map goto {roomnote} roaches}
@@ -229,7 +229,9 @@
 #NOP Chaos Sewers;
 #action {You lose your footing and wind up flat on your butt!} {mapUndo} {2};
 
-
+#NOP Catacombs;
+#action {The ancient statue comes to life and bars your path.} {mapUndo} {2};
+#action {The statue moves to block your way.} {mapUndo} {2};
 
 #NOP Kyoto
 #act {^-R-_A Poorly-lit Street} {
