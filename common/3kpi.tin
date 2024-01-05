@@ -1,0 +1,78 @@
+#class 3kpi kill;
+#class 3kpi open;
+
+#NOP -- Helper functions for the 3kpi server/database;
+#alias jsonFormatEternal {
+    #var apiPayload "character" : "$user";
+    #foreach $eternalList[%*] index {
+        #if {"$index[cur_cd]" == "RDY"} {#var powerStatus "true"} {#var powerStatus "false"};
+        #cat apiPayload { , "$index[key]" : $powerStatus};
+    };
+};
+
+#alias apiPostEternal {
+    #var endpoint https://www.3kpi.icu/api/eternal_powers/;
+    jsonFormatEternal;
+    #echo {Posting $user eternal powers to 3kdb in 3 seconds...};
+    #delay 3 {
+        #script {python3 scripts/3kpiConnector.py $endpoint $apiPayload};
+    };
+};
+
+#alias jsonFormatSatchel {
+    update_satchel;
+    #list apiSatchel clear;
+    #var apiCharacter "character" : "$user";
+    #foreach $craft[satchel][%*] index {
+        #var apiComponentName $index[name];
+        #replace apiComponentName {'} {};
+        #var apiComponentName "component" : "$apiComponentName";
+        #if {$index[legendary] > 0} {
+            #var apiData "component_quality" : "legendary", "quantity" : $index[legendary];
+            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+        };
+        #if {$index[superior] > 0} {
+            #var apiData "component_quality" : "superior", "quantity" : $index[superior];
+            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+        };
+        #if {$index[good] > 0} {
+            #var apiData "component_quality" : "good", "quantity" : $index[good];
+            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+        };
+        #if {$index[average] > 0} {
+            #var apiData "component_quality" : "average", "quantity" : $index[average];
+            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+        };
+        #if {$index[poor] > 0} {
+            #var apiData "component_quality" : "poor", "quantity" : $index[poor];
+            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+        };
+    };
+};
+
+#alias apiPostSatchel {
+    #unvar apiSatchelPayload;
+    #var endpoint https://www.3kpi.icu/api/satchel/;
+    jsonFormatSatchel;
+    #delay 1 {#echo {Posting $user satchel to 3kdb...}};
+    #delay 3 {
+        #var apiSatchelPayload [;
+        #loop 1 &apiSatchel[] item {
+            #if {$item < &apiSatchel[]} {
+                #cat apiSatchelPayload {\x7B};
+                #cat apiSatchelPayload {$apiSatchel[$item]};
+                #cat apiSatchelPayload {\x7D};
+                #cat apiSatchelPayload {,};
+            } {
+                #cat apiSatchelPayload {\x7B};
+                #cat apiSatchelPayload {$apiSatchel[$item]};
+                #cat apiSatchelPayload {\x7D};
+            };
+        };
+        #cat apiSatchelPayload {]};
+        #var apiSatchelPayload "satchel" : $apiSatchelPayload;
+        #NOP #script {python3 scripts/3kpiConnector.py $endpoint $apiSatchelPayload}
+    };
+};
+
+#class 3kpi close;

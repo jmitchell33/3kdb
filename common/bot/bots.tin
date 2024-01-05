@@ -3,6 +3,22 @@
 
 #read common/bot/bot_cycle.tin;
 
+#alias {.resume} {
+    #var bot $lastBot;
+    #var botResume 1;
+    #if {"$lastBot[rating]" == "Section Z"} {
+        #map run 24786;
+        unpause game;
+        #echo {10 seconds until $lastBot[rating] resumes...};
+        #delay 10 {..;#var botResume 0;};
+    } {
+        #map run $lastBot[pause_room];
+        #echo {10 seconds until $lastBot[rating] resumes...};
+        #delay 10 {..;#var botResume 0;};
+    };
+};
+
+
 #alias {+%1} {
     #NOP -- This does no checking and assumes you're in the correct room and kicks off;
     
@@ -177,7 +193,7 @@
 #list botlist add {{{file} {crystals1} {alias} {crystals1} {desc} {Crystals Level 1} {start_vnum} {10812} {loop} {1} {playercheck} {1}}};
 #list botlist add {{{file} {crystals4} {alias} {crystals4} {desc} {Crystals Level 4} {start_vnum} {11643} {loop} {1} {playercheck} {1}}};
 #list botlist add {{{file} {icyblue} {alias} {icyblue} {desc} {Icy Blue} {start_vnum} {23844} {loop} {0} {playercheck} {0}}};
-#list botlist add {{{file} {knights} {alias} {knights} {desc} {Knights of Erah Training} {start_vnum} {27759} {loop} {0} {playercheck} {0}}};
+#list botlist add {{{file} {knights} {alias} {knights} {desc} {Knights of Erah Training} {start_vnum} {28816} {loop} {0} {playercheck} {0}}};
 #list botlist add {{{file} {simpsons-plant-short} {alias} {simpsons-plant-short} {desc} {Simpsons Power Plant: Monkey Start} {start_vnum} {17464} {loop} {0} {playercheck} {1}}};
 #list botlist add {{{file} {banshees} {alias} {banshees} {desc} {Banshee's Lair: Levels 1-4} {start_vnum} {27705} {loop} {1} {playercheck} {0} {rating} {Banshee's Lair}}};
 #list botlist add {{{file} {banshees12} {alias} {banshees12} {desc} {Banshee's Lair: Levels 1-2} {start_vnum} {27705} {loop} {1} {playercheck} {0} {rating} {Banshee's Lair}}};

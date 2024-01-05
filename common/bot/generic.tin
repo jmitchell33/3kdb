@@ -26,8 +26,26 @@
 
 #NOP -- pre_bot check is loaded via the char/user/config.tin;
 .pre_bot_check;
-#var bot[step] 1;
-#list bot[steps] create {$bot[path]};
+
+#NOP -- If we're not resuming a bot, then set the step to 1, expand the botpath, and set the botmobs
+#if {$botResume} {
+    #NOP;
+} {
+    #var bot[step] 1;
+    #list bot[steps] create {$bot[path]};
+    #NOP -- If user is a necromancer, add the undeads from conjure to the botmobs;
+    #if {"$guild" == "necromancer"} {
+        #list botmobs add {{{long} {An undead smote} {target} {smote}}};
+        #list botmobs add {{{long} {An undead visyn} {target} {visyn}}};
+        #list botmobs add {{{long} {An undead spirit} {target} {spirit}}};
+        #list botmobs add {{{long} {An undead horrin} {target} {horrin}}};
+        #list botmobs add {{{long} {An undead zombie} {target} {zombie}}};
+        #list botmobs add {{{long} {An undead skeleton} {target} {skeleton}}};
+        #list botmobs add {{{long} {An undead wrack} {target} {wrack}}};
+    };
+    #var bot[mobs] $botmobs;
+};
+
 
 #if $check_death {
         #showme {<ffe>------ CHECKDEATH IS ACTIVE --------<088>};
@@ -134,20 +152,6 @@
     };
 };
 
-#alias {.resume} {
-    #var bot $lastBot;
-    #if {"$lastBot[rating]" == "Section Z"} {
-        #map run 24786;
-        unpause game;
-        #echo {10 seconds until $lastBot[rating] resumes...};
-        #delay 10 {..};
-    } {
-        #map run $lastBot[pause_room];
-        #echo {10 seconds until $lastBot[rating] resumes...};
-        #delay 10 {..};
-    };
-};
-
 /* kill the bot */
 #alias {.stop} {
     #var lastBot $bot;
@@ -169,106 +173,46 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
-#if {"$user" == "byron" || "$user" == "toren"} {
-    #if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Turkey Farm" || "$area" == "Starcraft 2"} {
-        #if {"$area" == "Starcraft 2"} {
-            #act {^-M-_%*} {
-                #var bot[foundmob] 1;
-                #var mob[target] mob;
-                .mob_kill_action;
-                peer human;
-                kill human;
-                #undelay {bot_kick};
-                #undelay {bot_restart};
-            } {2};
-            #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
-            #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
-        } {
-            #act {^-M-_%*} {
-                #var bot[foundmob] 1;
-                #var mob[target] mob;
-                .mob_kill_action;
-                kill mob;
-                #undelay {bot_kick};
-                #undelay {bot_restart};
-            } {2};
-        }
+#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Turkey Farm" || "$area" == "Starcraft 2"} {
+    #if {"$area" == "Starcraft 2"} {
+        #act {^-M-_%*} {
+            #var bot[foundmob] 1;
+            #var mob[target] mob;
+            .mob_kill_action;
+            peer human;
+            kill human;
+            #undelay {bot_kick};
+            #undelay {bot_restart};
+        } {2};
+        #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
+        #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
     } {
         #act {^-M-_%*} {
-            #var mob[long] %1;
-            #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
-            #format {mob[long]} {%p} {$mob[long]};
-
-            #foreach $botmobs[%*] botmob {
-                #regexp {$mob[long]} {$botmob[long]} {
-                    #var bot[foundmob] 1;
-                    #var mob[target] $botmob[target];
-                };
-            };
+            #var bot[foundmob] 1;
+            #var mob[target] mob;
+            .mob_kill_action;
+            kill mob;
             #undelay {bot_kick};
             #undelay {bot_restart};
         } {2};
-    };
+    }
 } {
-    #if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Starcraft 2"} {
-        #if {"$area" == "Starcraft 2"} {
-            #act {^-M-_%*} {
+    #act {^-M-_%*} {
+        #var mob[long] %1;
+        #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
+        #format {mob[long]} {%p} {$mob[long]};
+
+        #foreach $bot[mobs][%*] botmob {
+            #regexp {$mob[long]} {$botmob[long]} {
                 #var bot[foundmob] 1;
-                #var mob[target] mob;
-                .mob_kill_action;
-                peer human;
-                kill human;
-                #undelay {bot_kick};
-                #undelay {bot_restart};
-            } {2};
-            #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
-            #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
-        } {
-            #if {"$area" == "The Kayos Wars"} {
-                #act {^-M-_%*} {
-                    #var bot[foundmob] 1;
-                    #var mob[target] mob;
-                    .mob_kill_action;
-                    kill mob;
-                    #undelay {bot_kick};
-                    #undelay {bot_restart};
-                } {2};
+                #var mob[target] $botmob[target];
             };
         };
-    } {
-        #act {{^-M-_(.*)( \[(.*)\])*( \[[0-9]*%\])?( (.*)attacking(.*))?([\r\n\t ]*?)?( \{([0-9]+)\})?( \{([A-Za-z]+)\})?}} {
-            #var foundtimes 1;
-            #var mob[long] %1;
-
-            #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
-
-            #replace mob[long] {.} {};
-            #replace mob[long] {-M-_} {};
-            #replace mob[long] { \[%*\]} {};
-            #replace mob[long] { attacking%*!} {};
-            #replace mob[long] { !attacking%*!} {};
-            #replace mob[long] { attacking} {};
-            #replace mob[long] { \(crying\)} {};
-            #replace mob[long] { \(demoralized\)} {};
-
-            #regex {%2} {7B{[0-9]+}} {#var foundtimes &1;#replace mob[long] { \\x7B%*} {};};
-            #regex {%2} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
-
-            #format {mob[long]} {%p} {$mob[long]};
-
-            #foreach $botmobs[%*] botmob {
-                #regexp {"$mob[long]"} {"$botmob[long]"} {
-                    #undelay bot_kick;
-                    #var bot[foundmob] 1;
-                    #var mob[target] $botmob[target];
-                    #var mob[foundtimes] $foundtimes;
-                };
-            };
-            #undelay {bot_kick};
-            #undelay {bot_restart};
-        } {2};
-    };
+        #undelay {bot_kick};
+        #undelay {bot_restart};
+    } {2};
 };
+
 
 #act {^{-i-|-w-|-a-|-o-}%*.$} {
     #if {$bot[active] && !$bot[paused] && $bot[walk]} {
@@ -422,7 +366,7 @@
         #if {$bot[active] && !$idle_flag && !$bot[walk] && !$incombat} {
             #delay {bot_kick} {
                 #if {!$bot[walk] && !$incombat} {
-                    #showme BOT STUCK RESUMING IN 3 SECONDS;
+                    #echo {BOT STUCK RESUMING IN 3 SECONDS};
                     #delay {bot_restart} {.bot} {3};
                 };
             } {3};
