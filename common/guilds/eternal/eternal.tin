@@ -14,6 +14,26 @@
 	#var eternal_string {<fff>Eternal: $ewell_string $heal_string $shred_string $dupec_string $enlarge_string $fry_string $protection_string<088>};
 };
 
+#NOP -- Shortcuts for powers;
+#alias {dc} {
+	#case {""}   {#echo {<efb>========== DUPLICATING CREATURE ==========<088>}};
+	#send {eternal duplicate creature};
+};
+
+#alias {rd3} {
+	#switch {"%0"} {
+		#case {"mj"} {#send {eternal reset dungeon Mahjongg party};};
+		#case {"sz"} {#send {eternal reset dungeon Section Z party};};
+		#case {""}   {#echo {<efb>========== NO DUNGEON PROVIDED ==========<088>}};
+		#default 	 {#send {eternal reset dungeon %0 party};};
+	};
+};
+
+#alias {ewell} {
+	#case {""}   {#echo {<efb>========== FIRING ENERGY WELL ==========<088>}};
+	#send {eternal energy well};
+};
+
 
 #NOP -- Add a bit more details/data points to the cstats;
 #alias {(cstats} {
@@ -112,5 +132,7 @@
 	#if {!$idle_flag} {ctell %1 has reset.}
 	update_eternal_status;
 };
+
+
 
 #class {eternal} {close}
