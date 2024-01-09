@@ -44,27 +44,7 @@
 		#CASE {"I"} {#NOP Primary Guild Line;.mipProcessGline {1} {%2}};
 		#CASE {"J"} {#NOP Secondary Guild Line;.mipProcessGline {2} {%2}};
 		#CASE {"K"} {#NOP Mob Fighting;.mipProcessFFFK {%2}};
-		#CASE {"L"} {#NOP Mob Health;
-			#math enemy[hp_change] {$enemy[hp] - %2};
-			#format {enemy[hp]} {%d} {%2};
-			
-			#NOP -- Average the first 7 rounds of combat to see if it'll be a fast or longer fight;
-			#NOP -- This is useful for some powers to save if it's a very fast fight;
-			#if {$mip[round] <= 7} {
-				#if {$enemy[hp_change] > 0 && $mip[round] > 1} {
-					#math enemy[round_change] {$mip[round] - $enemy[last_round]};
-					#if {$enemy[round_change] <= 0} {#var enemy[round_change] 1};
-					#math enemy[kill_rate][${enemy[kill_rate_avg_count]}] {100 / $enemy[hp_change] * $enemy[round_change]};
-					#format {enemy[last_round]} {%d} {$mip[round]};
-					#var tempAvg 0;
-					#foreach $enemy[kill_rate][%*] index {
-						#math tempAvg {$tempAvg + $index};
-					};
-					#math enemy[kill_rate_avg] {$tempAvg / $enemy[kill_rate_avg_count]};
-					#math enemy[kill_rate_avg_count] {$enemy[kill_rate_avg_count] + 1};
-				};
-			};
-		};
+		#CASE {"L"} {#NOP Mob Health;#math enemy[hp_change] {$enemy[hp] - %2};#format {enemy[hp]} {%d} {%2};};
 		#CASE {"M"} {#NOP Mob Image File};
 		#CASE {"N"} {
 			#var {mip[last_round]} {$mip[round]};
@@ -72,11 +52,29 @@
 			#NOP -- If round is the same or 0, you're no longer in combat;
 			#NOP -- There's also a ticker to check this since this doesn't always fire at the end of a fight if no;
 			#NOP -- new MIP line is received;
-			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {#var incombat 0} {#var incombat 1;#var last_fight_rounds %2};
+			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
+				#var incombat 0
+			} {
+				#var incombat 1;
+				#var last_fight_rounds %2;
+			};
 			
 			#NOP Combat Round Counter;
-			#if !$total_rounds {#var total_rounds 1} {
-				#MATH total_rounds {$total_rounds + 1}
+			#if !$total_rounds {#var total_rounds 1} {#MATH total_rounds {$total_rounds + 1}};
+
+			#NOP -- Average the first 10 rounds of combat to see if it'll be a fast or longer fight;
+			#NOP -- This is useful for some powers to save if it's a very fast fight;
+			#NOP -- If it's a very long fight (>100 rounds) it will default to 100;
+			#if {$mip[round] <= 10 && $mip[round] > 1} {
+				#var enemy[hp_change] @max{$enemy[hp_change];1};
+				#math enemy[kill_rate][${enemy[kill_rate_avg_count]}] {100 / $enemy[hp_change]};
+				#format {enemy[last_round]} {%d} {$mip[round]};
+				#var tempAvg 0;
+				#foreach $enemy[kill_rate][%*] index {
+					#math tempAvg {$tempAvg + $index};
+				};
+				#math enemy[kill_rate_avg] {$tempAvg / &enemy[kill_rate][%*]};
+				#math enemy[kill_rate_avg_count] {$enemy[kill_rate_avg_count] + 1};
 			};
 		};
 		#DEFAULT {#NOP Every other non-handled flag}
