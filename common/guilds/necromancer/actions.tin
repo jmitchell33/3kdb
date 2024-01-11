@@ -109,6 +109,7 @@
 
 #NOP -- General Necro Power Tracking;
 #action {You scream with the power of the netherworld and thrust your hands toward} {
+    stat_record;
     #var my[necromancer][unholy_ground] 0;
     #var stats[unholy_ground][hits] 0;
 } {2};
@@ -155,42 +156,59 @@
 
 #NOP -- Track how many hits unholy ground lands;
 #action {Black lightning races along %* body into %*!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
-
 #action {Deathly black energy sizzles through %* flesh!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
-
+#action {Dark energy crackles from %w to Undead!} {
+        #echo {tracked UG hit};
+    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
+} {2};
 #action {Purple lightning arcs from %w to %*!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
-
 #action {A black bolt of energy blasts into %*!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
 #action {%* strikes %w and is dealt a blast of dark energy!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
-
+#action {%* is scorched by the dark energy surrounding %w!} {
+    #echo {tracked UG hit};
+    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
+} {2};
+#action {Jet black bolts of dark lightning slam into %*!} {
+    #echo {tracked UG hit};
+    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
+} {2};
 #action {%* recoils in a shock from striking %w!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
 #action {An explosion of black energy engulfs %*!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
 
 #action {Cool black lightning scorches across %* body!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2};
 #action {Cold, purple lightning crackles into %* body!} {
+    #echo {tracked UG hit};
     #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
 } {2}:
 
-#NOP -- Report how many hits unholy ground got;
+#NOP -- Report how many hits unholy ground landed;
 #action {Your grounding to the negative material plane dissipates in a sparkle.} {
     #echo {<ffa>UNHOLY GROUND LANDED $stats[unholy_ground][hits] TIMES<088>};
-    #list stats[unholy_ground][history] add $stats[unholy_ground][hits];
+    #list stats[unholy_ground][history] add {{{hits} {$stats[unholy_ground][hits]} {stats} {$tempStat[1]}}};
 } {2};
 
 #NOP -- Tracking Vampire abilities (bloodlet/bloodfuse potions);
