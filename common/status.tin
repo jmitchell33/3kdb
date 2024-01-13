@@ -49,8 +49,14 @@
     #var enemy[round_change] 0;
     #var enemy[kill_rate_avg_count] 1;
     #unvar enemy[kill_rate];
+};
 
-    
+#alias stat_record {
+    #send {score short};
+    #line oneshot #action {Str: %d%sDex: %d%sWis: %d%sInt: %d%sCon: %d%s Cha: %d} {
+        #list tempStat clear;
+        #list tempStat add {{{str} {%%1} {dex} {%%3} {wis} {%%5} {int} {%%7} {con} {%%9} {cha} {%%11}}};
+    };
 };
 
 
