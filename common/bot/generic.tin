@@ -173,45 +173,21 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
-#if {"$area" == "The Kayos Wars" || "$area" == "Kayos Wars" || "$area" == "Turkey Farm" || "$area" == "Starcraft 2"} {
-    #if {"$area" == "Starcraft 2"} {
-        #act {^-M-_%*} {
-            #var bot[foundmob] 1;
-            #var mob[target] mob;
-            .mob_kill_action;
-            peer human;
-            kill human;
-            #undelay {bot_kick};
-            #undelay {bot_restart};
-        } {2};
-        #ACTION {-- Damage Immunities: %*Melting%*} {#if {$enemy[hp] > 30} {ewell}};
-        #ACTION {-- Damage Immunities: %*Mental%*} {#if {$enemy[hp] > 30} {ewell}};
-    } {
-        #act {^-M-_%*} {
-            #var bot[foundmob] 1;
-            #var mob[target] mob;
-            .mob_kill_action;
-            kill mob;
-            #undelay {bot_kick};
-            #undelay {bot_restart};
-        } {2};
-    }
-} {
-    #act {^-M-_%*} {
-        #var mob[long] %1;
-        #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
-        #format {mob[long]} {%p} {$mob[long]};
 
-        #foreach $bot[mobs][%*] botmob {
-            #regexp {$mob[long]} {$botmob[long]} {
-                #var bot[foundmob] 1;
-                #var mob[target] $botmob[target];
-            };
+#act {^-M-_%*} {
+    #var mob[long] %1;
+    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
+    #format {mob[long]} {%p} {$mob[long]};
+
+    #foreach $bot[mobs][%*] botmob {
+        #regexp {$mob[long]} {$botmob[long]} {
+            #var bot[foundmob] 1;
+            #var mob[target] $botmob[target];
         };
-        #undelay {bot_kick};
-        #undelay {bot_restart};
-    } {2};
-};
+    };
+    #undelay {bot_kick};
+    #undelay {bot_restart};
+} {2};
 
 
 #act {^{-i-|-w-|-a-|-o-}%*.$} {

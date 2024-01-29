@@ -24,6 +24,12 @@
 
 #act {{^Ammo:\[(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?\] SHP:\[\s*(\d+)\] SNL:\[([\d\.]*)\] SM:\[(\w+)\] SA:\[(\w+)\] SD:\[(\w+)\] E:([\d\w]+)?\%?}} {
     #line gag;
+	#echo {1 is %1;};
+	#echo {2 is %2;};
+	#echo {3 is %3;};
+	#echo {4 is %4;};
+	#echo {5 is %5;};
+	#echo {6 is %6;};
 	#var {ammo[1]}	{%2};
 	#var {ammo[2]}	{%3};
 	#var {ammo[3]}	{%4};
@@ -35,7 +41,7 @@
 	#var {saf}	{%10};
 	#var {sdf}	{%11};
 	#var {ehealth}	{%12};
-	#format {ammo_len} {%L} {$ammo};
+	#var ammo_len $ammo[];
 };
 
 #class {guild_hpbar} {close}

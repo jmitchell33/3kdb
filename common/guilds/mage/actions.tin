@@ -29,7 +29,6 @@
 #ACTION {^You reinforce the magic within your deeppocket.$} {#var deeppocket 1} {1};
 #ACTION {^You already have a deeppockets spell functioning.$} {#var deeppocket 1} {1};
 #ACTION {^You feel slower as the haste wears off.$} {#var self_haste 0} {1};
-#ACTION {^You raise your arms and suddenly %w is moving much faster!$} {#var summons_haste 1 {1}}
 #ACTION {^Your immersion has expired.$} {#var my[immersion][active] 0;} {2};
 #action {^There is darkness as a Orb of Light goes dark.$} {cast light} {2};
 
@@ -72,15 +71,22 @@
 #action {^You wave your hands and anchor yourself to the spot!$} {#var my[anchor] 1;};
 #action {^Your anchor has been dispelled!$} {#var my[anchor] 0;};
 
+#action {^You can't study in combat!$} {#var studying 0};
+#action {^You cannot study while in combat!$} {#var studying 0};
+#action {^You cease your studying.$} {#var studying 0};
 #action {^You sit down and begin to carefully go over the spells in your tome.$} {#var studying 1;};
 #action {^Having absorbed all you can, you carefully close your spellbook.$} {#var studying 0;#var hpbar_mc 100;};
 
 #NOP --- SUMMONING ACTIONS;
+#var summons[summoned] 0;
+#action {You wave your hands calling forth summoning magics and draw %*} {
+    #math summons[summoned] {$summons[summoned] + 1};
+} {2};
 
 #var golemTypes {Straw;Wood;Flesh;Clay;Stone;Rope;Iron;Crystal};
 
 #ACTION {^You throw your golem construction materials to the ground and} {
-    say all, you are now in group summons/assist always;
+    say golem, you are now in group golem/assist always;
     #if $golem_tank {
         say golem, defend me
     };
@@ -97,24 +103,38 @@
     };
 } {1};
 
-#act {There's bits of the following materials remaining:} {
-    #line oneshot #action {%* crystal} {#var golemList %%0;#list golemList explode {  };};
-};
+#action {You throw your golem construction materials to the ground and utter a few} {
+    #var golem_toggle 1;
+    #delay 3 {#var golem_toggle 0}
+    cast haste on golem;
+} {2};
+
+#action {As your spell weaves its pattern %*\n%asuddenly grows larger!} {
+    #var summon_mf 1;
+} {2};
 
 #ACTION {^El Jefe %* seems to slow down...$} {
     #var golem_haste 0;
+    cast haste on golem;
 } {1};
 
 #ACTION {Señor Meow-meow the fluffy persian cat says: I did not have enough coins.} {#var ffetch_coins 0};
 #ACTION {^There is no reason to 'ffetch' here.$} {#if {$toggle_find_familiar} {#var toggle_find_familiar 0;#delay 4 {cast find familiar;#var toggle_find_familiar 1;};};} {1};
-#ACTION {^You don't have any basic construction materials for a %*!} {
+#ACTION {^You don't have any basic construction materials for a %w golem!} {
+    #var tempCreate %1;
     #if $ffetch_coins {
         ffetch materials;
-        #delay 5 {keep materials;create_golem};
+        #delay 5 {keep materials;cast create golem as $tempCreate};
     };
 } {1};
+#action {^You don't have any basic construction materials!$} {
+    #if $ffetch_coins {
+        ffetch materials;
+        #delay 5 {keep materials;cast create golem};
+    };
+} {2};
 
-#ACTION {^You wave your hands calling forth summoning magics and draw} {say all, you are now in group summons/assist always} {1};
-#ACTION {^A %* seems to slow down...$} {#var summons_haste 0} {1};
+#ACTION {^A %* seems to slow down...$} {#var summon_haste 0} {1};
+#ACTION {^A %* seems to grow smaller.} {#var summon_mf 0} {1};
 
 #class {guild_actions} {close}

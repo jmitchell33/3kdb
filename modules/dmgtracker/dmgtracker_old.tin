@@ -247,81 +247,88 @@ dreset;
     #var cmbt[affects][grasp] 0;
     #var cmbt[affects][bloodarc] 0;
     #var cmbt[affects][skullfire] 0;
+    #var cmbt[affects][lucanus_cloak] 0;
     #var ewell_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
 };
     
+#NOP -- If you've just conjured undeads with necromancer, ignore those;
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
-    #var vaf[numbers] 1;
-    #var incombat 1;
-    #format enemy[name_numbers] {%l} {%2};
-    #format dmgTimes {%d} %3;
-    #format dmgAmount {%d} %5;
-    #format dmgDisplay {%g} {$dmgAmount};
-    #line gag;
-    #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+    #if {"$guild" == "necromancer" && "%2" != "Undead"} {
+        #var vaf[numbers] 1;
+        #var incombat 1;
+        #format enemy[name_numbers] {%l} {%2};
+        #format dmgTimes {%d} %3;
+        #format dmgAmount {%d} %5;
+        #format dmgDisplay {%g} {$dmgAmount};
+        #line gag;
+        #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
 
-    #if !$ewell_round {
-        dmgTrack total $dmgAmount $dmgTimes;
+        #if !$ewell_round {
+            dmgTrack total $dmgAmount $dmgTimes;
 
-        #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
-            dmgTrack fury $dmgAmount $dmgTimes;
+            #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
+                dmgTrack fury $dmgAmount $dmgTimes;
+            };
+
+            #NOP -- If it's an iprime or eradication round, pull those out;
+            #if {$cmbt[affects][eradication] || $cmbt[affects][iprime]} {
+                #if {$cmbt[affects][eradication]} {
+                    dmgTrack eradication $dmgAmount $dmgTimes;
+                };
+
+                #if {$cmbt[affects][iprime]} {
+                    dmgTrack iprime $dmgAmount $dmgTimes;
+                };
+            } {
+                #if {$mob[lucanus_ring]} {
+                    dmgTrack lucanus $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][lucanus_cloak]} {
+                    dmgTrack lucan_cloak $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][big_game_hunter]} {
+                    dmgTrack BGH $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][assassin]} {
+                    dmgTrack assassin $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][tactician]} {
+                    dmgTrack tactician $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][magician]} {
+                    dmgTrack magician $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][drunken_master]} {
+                    dmgTrack DM $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][bloodfuse]} {
+                    dmgTrack bloodfuse $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][bloodarc]} {
+                    dmgTrack bloodarc $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][clutch]} {
+                    dmgTrack clutch $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][grasp]} {
+                    dmgTrack grasp $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][skullfire]} {
+                    dmgTrack skullfire $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][witch_hat]} {
+                    dmgTrack WitchHat $dmgAmount $dmgTimes;
+                };
+                #if {$cmbt[affects][convoke]} {
+                    dmgTrack convoke_${cmbt[affects][convoke]} $dmgAmount $dmgTimes;
+                    #math cmbt[affects][convoke] {$cmbt[affects][convoke] + 1};
+                };
+            };
         };
 
-        #NOP -- If it's an iprime or eradication round, pull those out;
-        #if {$cmbt[affects][eradication] || $cmbt[affects][iprime]} {
-            #if {$cmbt[affects][eradication]} {
-                dmgTrack eradication $dmgAmount $dmgTimes;
-            };
-
-            #if {$cmbt[affects][iprime]} {
-                dmgTrack iprime $dmgAmount $dmgTimes;
-            };
-        } {
-            #if {$mob[lucanus_ring]} {
-                dmgTrack lucanus $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][big_game_hunter]} {
-                dmgTrack BGH $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][assassin]} {
-                dmgTrack assassin $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][tactician]} {
-                dmgTrack tactician $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][magician]} {
-                dmgTrack magician $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][drunken_master]} {
-                dmgTrack DM $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][bloodfuse]} {
-                dmgTrack bloodfuse $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][bloodarc]} {
-                dmgTrack bloodarc $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][clutch]} {
-                dmgTrack clutch $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][grasp]} {
-                dmgTrack grasp $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][skullfire]} {
-                dmgTrack skullfire $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][witch_hat]} {
-                dmgTrack WitchHat $dmgAmount $dmgTimes;
-            };
-            #if {$cmbt[affects][convoke]} {
-                dmgTrack convoke_${cmbt[affects][convoke]} $dmgAmount $dmgTimes;
-                #math cmbt[affects][convoke] {$cmbt[affects][convoke] + 1};
-            };
-        };
-    };
-
-    dmg_mod_reset;
+        dmg_mod_reset;
+    }
 } {2};
 
 #act {{^El Jefe (.*) hit for (\d+) damage.$}} {
@@ -388,6 +395,11 @@ dreset;
     #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
     #nop showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
 };
+
+#NOP;
+#action {Your cloak glows as the attack strikes it and suddenly sends a blast of} {
+    #var cmbt[affects][lucanus_cloak] 1;
+} {2};
 
 #NOP Juggernaut Dmg report;
 #action {You jump attack %* for %*. \{%d\}} {

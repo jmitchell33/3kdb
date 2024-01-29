@@ -1,18 +1,23 @@
 #class {guild_aliases} {kill}
 #class {guild_aliases} {open}
 
-#NOP --- MAGE SUMMONING ALIASES;
-#alias {create_golem} {
-    examine materials;
-    #if {&golemList[]} {
-        cast create golem $golemList[1];
-        #list golemList delete 1;
-        #var golem_toggle 0;
-        #delay 2 {say golem, you are now in group golem/assist always/stfu/ibc};
-    };
-};
+#NOP --- Default GC Settings;
+#var mage[contingencies][mantle] 200;
+#var mage[contingencies][sphere] 799;
 
-#NOP The last of your Golem Materials has been used up.
+#NOP --- Mage Summon Aliases;
+#var mscMinSps 1500;
+#var mscMinConc 50;
+#alias {msc%+1..d %+1..2d %+1..w %+1..w} {
+    #format mscSummonSpell {%d} {%1};
+    #format mscSummonNumber {%d} {%2};
+    #format mscSummonStrategy {%l} {%3};
+    #format mscSummonGroup {%l} {%4};
+    #format mscSummonType {%l} {%5};
+    #var mscString monster summoning ${mscSummonSpell}#${mscSummonType}#${mscSummonNumber}#${mscMinSps}#${mscMinConc}#${mscSummonStrategy}#${mscSummonGroup};
+    cast summon config as $mscString;
+    cast summon config activate;
+};
 
 #alias {str_party} {
     members;
