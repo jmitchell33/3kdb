@@ -24,6 +24,7 @@
 	#switch {"%0"} {
 		#case {"mj"} {#send {eternal reset dungeon Mahjongg party};};
 		#case {"sz"} {#send {eternal reset dungeon Section Z party};};
+		#case {"aegis"} {#send {eternal reset dungeon Aegis Global party};};
 		#case {""}   {#echo {<efb>========== NO DUNGEON PROVIDED ==========<088>}};
 		#default 	 {#send {eternal reset dungeon %0 party};};
 	};
@@ -34,6 +35,34 @@
 	#send {eternal energy well};
 };
 
+#alias {reload} {
+	#switch {"%0"} {
+		#case {"cup"} {#send {eternal reload item lord stanley's cup};};
+		#case {""}   {#echo {<efb>========== NO ITEM PROVIDED ==========<088>}};
+		#default 	 {#send {eternal reload item %0};};
+	};
+};
+
+#alias {imm} {
+	#case {""}   {#echo {<efb>========== IMMORTALITY ==========<088>}};
+	#send {eternal immortality};
+};
+
+#alias {fry} {
+	#case {""}   {#echo {<efb>========== FRYING CREATURES ==========<088>}};
+	#send {eternal fry ALL};
+};
+
+#alias {refresh} {
+	#case {""}   {#echo {<efb>========== REFRESHING ROOM ==========<088>}};
+	#send {eternal refresh room};
+	#send {ptell room refreshed by $user};
+};
+
+#alias {unload} {
+	#case {""}   {#echo {<efb>========== UNLOADING ROOM ==========<088>}};
+	#send {eternal unload room};
+};
 
 #NOP -- Add a bit more details/data points to the cstats;
 #alias {(cstats} {
