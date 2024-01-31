@@ -116,7 +116,7 @@
 
 
 #NOP -- Skill Training;
-#act {^To do so, type: tskill %1$} {tskill %1};
+#act {^To do so, type: tskill %1$} {#if {!$idle_flag} {tskill %1}};
 
 
 #NOP -- Mob Life Counting;
@@ -125,5 +125,9 @@
     #showme ---------        BELOCH LIFE DOWN         -------;
     #showme -------------------------------------------------;
 };
+
+#NOP -- AUTO PULLING ROPE TO AND FROM PLAYER
+#action {Pull the rope, and you will be teleported to %*.} {#if {!$idle_flag} {pull rope}};
+#action {Pulling the rope, will allow %* passage.} {#if {!$idle_flag} {pull rope}};
 
 #class {default_actions} {close}

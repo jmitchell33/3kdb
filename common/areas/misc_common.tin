@@ -1,20 +1,140 @@
+#NOP -- FIREBAT
 #alias firebat_west {e;e;n;n;w;w;n;w;w;n;n;n;};
 #alias firebat_return {e;s;e;e;s;s;s;e;e;s;s;w;w;};
 
 #alias qt_firebat_west {qtrance e/e/n/n/w/w/n/w/w/n/n/n/w};
 #alias qt_firebat_return {qtrance e/e/s/s/s/e/e/s/e/e/s/s/w/w};
 
+#NOP -- ERAH GRAND MASTER
+#alias {gmaster} {
+    say reputation;
+    #delay {5} {say training};
+    #delay {10} {say train};
+    #delay {15} {say learn};
+    #delay {20} {say teach};
+    #delay {25} {learn}
+};
+
+#NOP -- SHANSBY CASTLE
+#alias {shankey} {
+    search bed;
+    pull lever;
+    search dresser;
+    open drawer;
+    get key;
+    keep key
+};
+
+#NOP -- WITCHY HAT
+
 #alias charge_hat {
     pull lever;
     get capacitor;
     open lid;
-    #8 {insert lint};
+    insert lint;
+    insert lint;
+    insert lint;
+    insert lint;
+    insert lint;
+    insert lint;
+    insert lint;
+    insert lint;
     close lid;
     load capacitor;
     pull lever;
-    push charge;
+    push green button;
+    look at display
 };
 
+#NOP -- BANU
 #action {As Banu teleports into his chamber, he's angered by the presence of his} {kill banu} {2};
+
+#NOP -- NECROPOLIS - BANU STEPS FOR MYSTIC CLOAK
+#alias {banu1} {examine torch;search torch;get key;look at key};
+#action {returns to its normal position, you discover a key lodged behind} {ptell found necropolis key};
+
+#alias {banu2} {examine trees;search trees};
+
+#alias {banu3} {examine pillar;search pillar;grab orb;look at orb;#echo {you have to fly dumbass}};
+#action {This orb exudes an aura of magical energy that almost seems to guide} {ptell found first orb};
+
+#alias {banu4} {examine fountain;search fountain;get journal;examine journal};
+#action {the inside of the basin and discover a small journal that you decide to} {ptell found journal};
+
+#alias {banu5} {examine pathway;search pathway;enter};
+
+#alias {banu6} {
+        say hi;
+        #delay {5} {say friend};
+        #delay {10} {say tower};
+        #delay {15} {say sigils};
+        #delay {20} {say coven};
+        #delay {25} {give journal to knight}
+};
+
+#alias {banu7} {open powder;sprinkle powder};
+
+#alias {banu8} {examine ivy;search ivy;get dynamite;look at dynamite};
+#action {dynamite and decide to hang onto it.} {ptell found dynamite};
+
+#alias {banu9} {ignite dynamite;drop dynamite};
+#alias {banu99} {examine runes;search runes;get necklace;look at necklace};
+#action {A strange necklace flashes brilliantly when picked up!} {ptell picked up necklace};
+
+#alias {banu10} {enter};
+
+#alias {banu11} {examine statues;search statues;pry orb;get orb;grab orb;look at orb;#echo {you have to fly dumbass}};
+#action {You grab the dull orb before it closes back up.} {ptell found second orb};
+
+#alias {banu12} {examine sigil;search sigil;north};
+
+#NOP -- BANSHEE GUYAHI
+#alias {queen1} {examine shelves;search shelves;reach for jar;get phylactery;examine phylactery;read runes;#echo {you have to fly dumbass}};
+#alias {guy1} {$guyahicode};
+#action {Your mind is filled with the word '%w'.} {#var guyahicode %1};
+
+#NOP -- SECTIONZ WHITE CAPSULE
+#action {a bright white capsule: Ok.} {#if {!$idle_flag} {ptell found white capsule}}
+
+#NOP -- SECTIONZ CAPSULE EATING FOR TIMED LIMITED MSKILL/REGEN/STAT BOOSTS
+#alias {eat-caps3} {swallow blue capsule;swallow orange capsule;swallow green capsule};
+#alias {eat-caps2} {swallow blue capsule;swallow orange capsule};
+#alias {eat-caps1} {swallow blue capsule};
+
+#NOP -- SECTIONZ CONTINUE CODES FOR LVL 20 & 40
+#alias {continue40} {enter $s40};
+#alias {continue20} {enter $s20};
 #action {Just a reminder, your continue code for Section 40 is %w} {#var s40 %1} {2};
 #action {Just a reminder, your continue code for Section 20 is %w} {#var s20 %1} {2};
+
+#NOP -- ALIAS'S TO SAVE YOU TO SECTIONZ
+#alias {set40} {
+    press start;
+    #delay {5} {pause game};
+    #delay {10} {play};
+    #delay {15} {continue40};
+    #delay {20} {pause game};
+    #delay {25} {play};
+    #delay {30} {unpause}
+};
+
+#alias {set20} {
+    press start;
+    #delay {5} {pause game};
+    #delay {10} {play};
+    #delay {15} {continue20};
+    #delay {20} {pause game};
+    #delay {25} {play};
+    #delay {30} {unpause}
+};
+
+#NOP -- GANDEREI CAE - FLOATIE POTION +STR
+#alias {get-floaties} {get dark black potion with yellow floaties};
+
+#NOP -- TERRAS TERRIFIC TREEHOUSE RINGS
+#alias {makering-blue} {bow;plant blue seed;plant blue seed;plant hammer;chop tree;whittle ring;get ring};
+#alias {makering-red} {bow;plant red seed;plant red seed;plant hammer;chop tree;whittle ring;get ring};
+#alias {makering-white} {bow;plant white seed;plant white seed;plant hammer;chop tree;whittle ring;get ring};
+#alias {makering-green} {bow;plant green seed;plant green seed;plant hammer;chop tree;whittle ring;get ring};
+
+
