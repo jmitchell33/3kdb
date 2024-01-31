@@ -1,6 +1,18 @@
 #class {guild_aliases} open
 
 
+#action {  --> %*\n%a-hp-} {
+  #var summon_haste 0;
+  #list summonList clear;
+  #format summon1 {%p} {%1};
+  #format summon2 {%p} {%2};
+  #var summonList $summon1 $summon2;
+  #list summonList explode {, };
+  #loop 1 &summonList[] index {
+    #regex {$summonList[$index]} {!} {#NOP} {#var summon_haste 1};
+  };
+};
+
 #alias formatSummonSelect {
     #format result {<acf>-----<fff> %+33s    <acf>-----<088>} {%1};
     #showme $result;

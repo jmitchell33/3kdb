@@ -104,10 +104,15 @@
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them}}};
 #list strategyList add {{{guild} {necromancer} {name} {gemino}  {active} {0} {description} {Preserve Gemino Corpses}}};
+#list strategyList add {{{guild} {mage} {name} {anchor}  {active} {0} {description} {Anchor Yourself During Combat}}};
 #list strategyList add {{{guild} {mage} {name} {slow}  {active} {0} {description} {Slow Mob}}};
 #list strategyList add {{{guild} {mage} {name} {atrophy}  {active} {0} {description} {Atrophy Mob (Nukes Special)}}};
 #list strategyList add {{{guild} {mage} {name} {edrain}  {active} {0} {description} {Edrain Mob (Removes 1 lvl from Mob)}}};
 #list strategyList add {{{guild} {mage} {name} {spelltap}  {active} {0} {description} {Spelltap Toggling}}};
+#list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
+#list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
+#list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
+#list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
 #list strategyList indexate name;
 
 
@@ -130,31 +135,51 @@
 };
 
 
-#var toggle_spelltap 1;
+#if {"$guild" == "mage"} {
+    #var toggle_spelltap 1;
+    #var summon_mf 0;
+    #var summon_haste 0;
 
-#alias _stratetegy_mage {
-    #if {!$idle_flag && $action_round < $mip[round]} {
-        #if {$mob[slow] < 1} {
-            checkStrategy {slow} {cast slow};
+    #alias _strategy_mage {
+        #if {!$idle_flag && $action_round < $mip[round]} {
+            #if {$mob[slow] < 1} {
+                checkStrategy {slow} {cast slow};
+            };
+            
+            #if {$mob[edrain] < 1} {
+                checkStrategy {edrain} {cast energy drain}
+            };
+
+            #if {$mob[atrophy] < 1} {
+                checkStrategy {atrophy} {cast mystic atrophy}
+            };
         };
-        
-        #if {$mob[edrain] < 1} {
-            checkStrategy {edrain} {cast energy drain}
+
+        checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor;};};
+
+        #if {$toggle_spelltap && $sp_percent > 70} {
+            checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}
         };
 
-        #if {$mob[atrophy] < 1} {
-            checkStrategy {atrophy} {cast mystic atrophy}
+        #if {!$toggle_spelltap && $sp_percent < 30} {
+            checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
         };
-    };
 
-    #if {$toggle_spelltap && $sp_percent > 70} {
-        checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}
-    };
+        #if {!$golem_haste && "$my[summon][golem]" != "0"} {cast haste on golem;};
 
-    #if {!$toggle_spelltap && $sp_percent < 30} {
-        checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
+        #if {$my[golem][current] && "$my[summon][golem]" == "0"} {
+            checkStrategy {golem_assist} {cast create golem};
+            #if $golem_toggle {
+                checkStrategy {golem_defend} {cast create golem;#delay 2 {say golem, defend me}};
+            };
+        };
+        #if {$sp_percent > 30} {
+            #if {!$summon_mf} {checkStrategy {summon_mf} {cast monstrous fortitude on summons};};
+            #if {!$summon_haste} {checkStrategy {summon_haste} {cast haste on summons};};
+        };
     };
 };
+
 
 #NOP -- First round strategies;
 #alias _strategy_necro_start {
@@ -207,8 +232,11 @@
         };
 
         #if {$my[necromancer][conjure_undead] > 0} {
-            #if {$my[gp1][current] < 50000 || $my[gp2][current] > 90} {
-                checkStrategy {conjure} {nukeUndead};
+            #if {$my[gp1][current] < 50000} {
+                checkStrategy {conjure} {nukeUndeadAbs};
+            };
+            #if {$my[gp1][current] > 50000 || $my[gp2][current] > 90} {
+                checkStrategy {conjure} {nukeUndeadPres};
             };
         };
     };
@@ -333,7 +361,7 @@
         #NOP -- Actions to perform at any time in the fight;
         #if {"$guild" == "necromancer"} {_strategy_necro};
         #if {"$guild" == "bard"} {_strategy_bard};
-        #if {"$guild" == "mage"} {_stratetegy_mage};
+        #if {"$guild" == "mage"} {_strategy_mage};
     };
 };
 

@@ -24,15 +24,12 @@
        };
        #10 {smuggle sack};
   };
-  #if $strategy[anchor] {
-       cast dispel magic;
-  };
+  checkStrategy {anchor} {cast dispel magic};
   study spellbook;
   
 };
 
 #alias summon_str {
-     #loop 1 13 i {c giant strength on $summon_string $i};
      c giant strength golem;
      c giant strength oscar;
      c giant strength giant;
@@ -62,7 +59,7 @@
 
 #alias {setup_c} {
      cast contingency as prot_evil#cast protection from evil;
-}
+};
 
 #alias {setup_gc} {
      cast greater contingency as stoneskin#cast stoneskin;
@@ -75,16 +72,11 @@
 
 #alias {clear_c} {
      #10 {cast remove contingency as 1};
-}
+};
 
 #alias {clear_gc} {
      #10 {cast remove greater contingency as 1};
 }
-
-#alias ms7 {
-     #var summoner 1;
-     cast monster summoning 7 as $summon_string;
-};
 
 #alias {check_beads} {
      #math hp_overmax_max {$my[hp][max] * 5};

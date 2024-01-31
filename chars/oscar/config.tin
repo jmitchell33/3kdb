@@ -6,12 +6,6 @@
 #alias {.pre_fight_check} {#nop};
 
 #alias {.pre_bot_check} {
-    #if {"$area" == "Whorehouse" || "$area" == "Catacombs"} {
-         #var strategy[slow] 0;
-    } else {
-         #var strategy[slow] 1;
-    };
-
     #var defs[SS] 1;
     #var defs[MG] 1;
     #var defs[A] 1;
@@ -27,11 +21,9 @@
           #delay 2 {say golem, defend me};
      } {
           kill $mob[target];
-          #if $strategy[slow] {cast slow $mob[target]};
+          checkStrategy {slow} {cast slow $mob[target]};
      };
-     #if $strategy[anchor] {
-          cast anchor;
-     };
+     checkStrategy {anchor} {cast anchor};
 };
 
 #alias {.check_death} {

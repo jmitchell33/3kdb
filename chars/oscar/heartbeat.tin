@@ -16,7 +16,6 @@
     #math sp_threshold {$my[sp][max] * .90};
     #math sp_percent {$my[sp][current] * 100 / $my[sp][max]};
     #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
-    #math summon_sp_minimum {$my[sp][max] * .4};
 
     #if !$idle_flag {
         #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {
@@ -44,10 +43,6 @@
             #var corpse_toggle 1;
             corpse_select;
             #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 0;i}
-        };
-
-        #if {$strategy[anchor] && !$my[anchor] && $mip[round] > 0} {
-            cast anchor;
         };
 
         #if {$my[immersion][count] && !$my[immersion][rounds] && ($my[golem][reset] > 80 || $my[sp][current] < $sp_min)} {
