@@ -1,32 +1,11 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
-#NOP -- Teaching mskills to players
-#action {^To do so, type: tskill %* %*} {#if {!$idle_flag} {tskill %1 %2}}
-
-#NOP -- NECROPOLIS
-#action {returns to its normal position, you discover a key lodged behind} {tell $user found necropolis key}
-#action {This orb exudes an aura of magical energy that almost seems to guide} {tell $user found first orb}
-#action {the inside of the basin and discover a small journal that you decide to} {tell $user found journal}
-#action {dynamite and decide to hang onto it.} {tell $user found dynamite}
-#action {A strange necklace flashes brilliantly when picked up!} {tell $user picked up necklace}
-#action {You grab the dull orb before it closes back up.} {tell $user found second orb}
-
-#NOP -- BANSHEE GUYAHI
-#action {Your mind is filled with the word '%w'.} {#var guyahicode %1}
-
-#NOP -- QUICK FIX FOR BANSHEES STEPPER
-#action {You fail to penetrate the magical barrier.} {dispel;down}
-#action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down}
-
 #NOP -- REFLEXES
 #action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}}
 
 #NOP -- AIRDROP
 #action {The computer chirps 'WARNING Stim energy levels too low to compensate} {#if {!$idle_flag} {airdrop}}
-
-#NOP -- SECTIONZ WHITE CAPSULE
-#action {a bright white capsule: Ok.} {#if {!$idle_flag} {ptell found white capsule}}
 
 #NOP --- ROLM and ETERNAL ENERGY WELL
 #action {The %* slightly in your grip...} {#if {$bot[active] == 1 && !$idle_flag} {touch owl rune;ewell}}

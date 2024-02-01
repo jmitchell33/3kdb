@@ -1,0 +1,23 @@
+#class {heartbeat} {kill}
+#class {heartbeat} {open}
+
+#var make_con 1;
+#var party_actions 1;
+
+#alias {_player_heartbeat} {
+	#if {!$idle_flag} {
+		#if {$make_con && $my[necromancer][worth] < 115} {con 100;#var make_con 0;#delay 4 {#var make_con 1}};
+		
+		#NOP -- Conditions to pause the bot;
+		#if {$auto_pilot && $bot[active] && !$bot[paused]} {
+			#if {$inventory[encumberance] > 90 || "$inventory[encumberance]" == "XX"} {
+				#if $auto_donate {
+					.pause;
+					add_action {{{name} {go-donate} {action} {go_donate2}}};
+				};
+			}
+		};
+	};
+};
+
+#class {heartbeat} {close}

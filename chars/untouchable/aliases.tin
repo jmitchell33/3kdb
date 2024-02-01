@@ -1,0 +1,230 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP --KNIGHT TOUR GAMES
+#alias {dotr6} {play;start;dt6}
+#alias {dotr8} {play;start;dt8}
+#alias {winaxe} {play;start;#5 throw axe}
+
+#NOP -- BOT STATUS
+#alias {3kdb} {ptell 3kdb bot status}
+
+#alias sz_study {pause game;qtrance teleport/w/w/w/w/w/d/sw/sw/se/s/u/nw/nw/path/sw/sw/w;.study;qtrance e/ne/ne/path/se/se/d/n/nw/ne/ne/u/e/e/e/e/e/teleport 1;play;unpause game;};
+#alias sz_reagents {pause game;qtrance teleport/w/w/w/w/w/u/w/w/w;topup;#delay 6 {qtrance e/e/e/d/e/e/e/e/e/teleport 1;play;unpause game;};}
+
+#alias track_gxp {
+    #var gxp_rounds 0;
+    #if $tracking_gxp {
+        #showme ----- NO LONGER TRACKING GXP -----;
+        #send {repeat combat/off};
+        #var tracking_gxp 0;
+        #unact { |  Next Circle:[%*]};
+        #unact {%*>-=-=-=-=-=-=-=-=-=-<*> Untouchable, Necromancer of the Golden White Robes <*>=-=-=-=-=-=-=-=-=-=-<%*};
+        #unact {%*>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-<%*};
+    } {
+        #showme ----- NOW TRACKING GXP -----;
+        #send {repeat combat/gs};
+        #list gxp_tracker clear;
+        #unvar old_gxp;
+        #unvar new_gxp;
+        #act {%*>-=-=-=-=-=-=-=-=-=-<*> Untouchable, Necromancer of the Golden White Robes <*>=-=-=-=-=-=-=-=-=-=-<%*} {
+            #line gag;
+            #gag { |%*|};
+        };
+        #act {%*>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-<%*} {
+            #line gag;
+            #ungag { |%*|};
+        };
+        #act { |  Next Circle:[%*]} {
+            #var tracking_gxp 1;
+            #if {$gxp_rounds == 0} {#var old_gxp %%1;#var gxp_rounds 1;} {
+                #var new_gxp %%1;
+                #math gxp_rounds {$gxp_rounds + 1};
+                #if {$old_gxp != $new_gxp} {
+                    #list gxp_tracker add {{{old_gxp} {$old_gxp} {new_gxp} {$new_gxp} {rounds} {$gxp_rounds}}};
+                    #var gxp_rounds 0;
+                };
+            };
+        };
+    };
+};
+
+#alias gxp_stats {
+    #var gxp_stats[avg] 0;
+    #var gxp_stats[rounds] 0;
+    #var gxp_stats[increases] 0;
+    #foreach $gxp_tracker[%*] round {
+        #math gxp_stats[increases] {$gxp_stats[increases] + 1};
+        #math gxp_stats[rounds] {$gxp_stats[rounds] + $round[rounds]}
+    };
+    #math gxp_stats[avg_rounds_for_increase] {1.00 * $gxp_stats[rounds] / $gxp_stats[increases]};
+    #showme {Each Increase Took On Average $gxp_stats[avg_rounds_for_increase] rounds};
+};
+
+
+#alias {corpse_trig} {
+    #if $check_death {
+        #NOP -- do nothing
+    } {
+        #if {$inventory[freezer] && $corpses[freezer] < 50} {
+            slab remains;
+            wrap remains;
+        } {
+            wrap remains;
+            preserve_remains;
+            #if $collector[items] {get all};
+        };
+        fuse 200;
+        keep all preservation;
+    };
+};
+
+#alias pg {
+    qtrance preserve gemino remains>25;
+    qtrance get preservation>25;
+};
+
+#alias corpse_dump2 {
+    #path save forward path;
+    #path get position pos;
+    go sol_crypt2;
+    unkeep all preservation;
+    #30 {put preservation in box};
+    #map run $go_back;
+};
+
+#alias .check_death {
+    #if $darkness {light torch};
+    #if $actions_stacked {
+        do_action;
+    } {
+        #if {$inventory[freezer] && $corpses[freezer] < 50} {
+            slab remains;
+            slab remains;
+        };
+        #if {$inventory[coffin] && $corpses[coffin] < 28} {
+            get remains;
+            wrap remains;
+            get remains;
+            wrap remains;
+        };
+        #if {$inventory[encumberance] > 95} {
+            #delay 1 {absorb;absorb;get all;.bot};
+        } {
+            #delay 1 {preserve_remains;preserve_remains;get all;put all in buckler;.bot};
+        };
+    };
+    fuse 200;
+};
+
+#alias {_player_deadmanActions} {
+    #if $bot[active] {.pause;#echo {paused from deadman}};
+};
+
+#alias {.mob_kill_action} {
+    #if $bloodlet_area {
+        bloodlet $mob[target];
+        .botStep;
+        #delay 1 {
+            ..;
+        };
+    } {
+        #var stats[starting-gp] $my[gp1][current];
+        kill $mob[target];
+        checkStrategy {snare} {snare $mob[target]};
+        checkStrategy {rabies} {rabies};
+        checkStrategy {corrode} {corrode};
+        checkStrategy {scythe} {scythe};
+        #if {$my[necromancer][maim] > 0} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {alter hybrid;maim}}};
+        checkStrategy {call} {call};
+        checkStrategy {undead} {=kill $mob[target]};
+        #if {"$area" == "Banshee's Lair"} {
+            #delay 3 {
+                kill undead 2;
+                snare undead 2;
+                rabies undead 2;
+                corrode undead 2;
+            };
+            #delay 6 {
+                kill undead 3;
+                snare undead 3;
+                rabies undead 3;
+                corrode undead 3;
+            };
+        };
+    };
+};
+
+#NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
+#alias {set_ticker} {#NOP;};
+
+#alias {go_donate} {
+    #map get roomvnum donate_go_back;
+    go necro_box;
+    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
+    #if {$bot[corpse-run]} {
+        go sol_crypt2;
+        unkeep all preservation;
+        put all in box;
+        go sol_crypt1;
+        put all in box;
+    } {
+        go morgue;
+        donate coffin;donate all;
+        go necro_corpse;
+        store all;
+    };
+    #map run $donate_go_back;
+};
+
+#alias {go_donate2} {
+    #map get roomvnum donate_go_back;
+    keep all preservation;
+    keep all component;
+    go necro_box;
+    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
+    #map run $donate_go_back;
+};
+
+
+#alias {go_study} {
+    powers;gs;
+    #map get roomvnum study_go_back;
+    #if $auto_study_teleport {
+        teleport;
+        mapgo necro_rr;
+        go necro_were;
+    } {
+        go necro_were;
+    };
+    #delay 2 {.study};
+    #delay 3 {go necro_reagent};
+    #delay 4 {topup};
+    #delay 6 {#if {$my[coins] < 25} {go bank;withdraw 25000}};
+    #delay 8 {
+        #if $auto_study_teleport {
+            teleport 1;
+            #map goto $study_go_back;
+        } {
+            #map run $study_go_back;
+        };
+        powers;gs;
+    };
+    #delay 10 {
+        #if $bot[active] {
+            #var bot[paused] 0;
+            ..;
+        } {
+            #NOP;
+        };
+    };
+};
+
+#alias {necro_reset} {
+    #NOP;
+};
+
+#alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
+
+
+#class {player_aliases} {close}

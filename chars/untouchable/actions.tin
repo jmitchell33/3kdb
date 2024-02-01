@@ -1,0 +1,31 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#var corpse_delay 0;
+
+#ACTION {^Owie. That hurt!} {
+	#if !$corpse_delay {
+		#var corpse_delay 1;
+		corpse_select;
+		#if {$equipped[mask]} {
+			#delay {2} {qtrance preserve remains/preserve remains/absorb/absorb;#var corpse_delay 0};
+		} {
+			qtrance preserve remains/absorb;#var corpse_delay 0;
+		};
+	};
+} {1};
+
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {preserve remains;absorb;} {1};
+
+#NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
+#act {^-M-_A Colossal Inductor} {(immortality} {1};
+
+#NOP -- NECRO POWERS;
+#act {You must assume your beast form to do that master.} {
+	#if !idle_flag {alter hybrid};
+};
+
+#NOP -- TRACKING STUFF;
+#act {^Duncan says: Thank you for donating %d corpses.$} {#system {echo Donated %1 corpses >> chars/toren/donates.log}};
+
+#class {player_actions} {close}
