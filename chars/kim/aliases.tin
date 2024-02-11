@@ -1,0 +1,52 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#NOP -- RESOLVE/PRISMATIC EMISSION
+#alias {acid1} {evoke resolve as acid;evoke prismatic emission as acid}
+#alias {blunt1} {evoke resolve as crushing;evoke prismatic emission as crushing}
+#alias {edged1} {evoke resolve as slashing;evoke prismatic emission as slashing}
+#alias {electric1} {evoke resolve as shocking;evoke prismatic emission as shocking}
+#alias {fire1} {evoke resolve as fire;evoke prismatic emission as fire}
+#alias {ice1} {evoke resolve as ice;evoke prismatic emission as ice}
+#alias {mind1} {evoke resolve as mental;evoke prismatic emission as mental}
+#alias {poison1} {evoke resolve as toxic;evoke prismatic emission as toxic}
+#alias {rad1} {evoke resolve as radiation;evoke prismatic emission as radiation}
+#alias {energy1} {evoke resolve as mental;evoke prismatic emission as magical}
+
+#NOP -- EXAMINING/SEARCHING
+#alias {x} {exa}
+
+#NOP -- Elemental guild shop & temple apex
+#alias {cot-elshop} {s;w;s;s;w;portal;n;n;n;n;n;e;e}
+#alias {elshop-cot} {w;w;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
+#alias {cot-apex} {s;w;s;s;w;portal;n;n;n;n;n;n;e;ne;u}
+#alias {apex-cot} {d;sw;w;s;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
+
+#NOP -- QUICK WALKS TO ROOMVNUMS
+#alias {wa} {#map run %1}
+
+#NOP -- BOT STATUS
+#alias {3kdb} {ptell 3kdb bot status}
+
+#NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
+#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
+#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s;mapgo cot}
+
+#NOP --KNIGHT TOUR GAMES
+#alias knight6 {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}};
+#alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
+#alias winaxe {play;start;#5 throw axe};
+
+#alias corpse_trig {
+    #if {"$area" == "Chaotic Sewers"} {
+        slab all;wrap all;evoke corpse drain;evoke corpse drain;get coins;stash all
+    } {
+        wrap remains;slab remains;evoke corpse drain;evoke corpse drain;divvy gold;get all;stash all
+    };
+};
+
+#class {player_aliases} {close}
