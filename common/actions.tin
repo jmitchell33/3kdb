@@ -5,12 +5,12 @@
 #var my[hmheal][others] 1;
 
 #NOP -- Generic corpse trigger;
-#NOP #action {^%w dealt the killing blow to %*.} {
-#NOP    mob_status_clear;
-#NOP #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
-#NOP   #if !$idle_flag {corpse_trig};
-#NOP  #math party[member][%1][kills] {$party[member][%1][kills] + 1};
-#NOP } {5};
+#action {^%w dealt the killing blow to %*.} {
+    mob_status_clear;
+    #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
+    #if !$idle_flag {corpse_trig};
+    #math party[member][%1][kills] {$party[member][%1][kills] + 1};
+} {5};
 
 #NOP -- Auto ask/solve/return missions;
 #act {-M-_%* <?>} {mission ask} {3};
