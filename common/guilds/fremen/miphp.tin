@@ -1,10 +1,17 @@
-#class {guild_miphp} kill;
-#class {guild_miphp} open;
+#class guild_miphp kill;
+#class guild_miphp open;
 
 #var guild_miphp 1;
 
 #alias {_guild_miphp} {
-	#NOP
+	
+	#list temp clear;
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Water:$gp1/$gp1_max GP2: $gp2/$gp2_max E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NP:$my[gp1][graph]  E:$enemy[graph]};
+
+	#var hpbar[prompt] $temp;
 }
 
-#class {guild_miphp} close;
+
+
+#class guild_miphp close;
