@@ -50,8 +50,10 @@
 } {1};
 
 #action {%* shifts %* combat style to the %*.} {
+    #var bot[foundmob] 1;
     #math knights_left {$knights_left - 1};
-    .pre_fight_check;kill knight
+    .pre_fight_check;
+    kill knight;
 } {1};
 
 #action {Congratulations!  You have completed the mission} {mission ask;};
@@ -59,6 +61,10 @@
 
 #action {You have a challenger right in front of you - focus!} {mapUndo} {1};
 #action {You cannot leave while your challenge partner is present.} {mapUndo} {1};
+
+#list botmobs clear;
+#list botmobs add {{{long} {An%*Knight%*} {target} {knight}}};
+#list botmobs add {{{long} {A%*Knight%*} {target} {knight}}};
 
 #class {bot} {close}
 #read common/bot/generic.tin;

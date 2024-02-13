@@ -7,7 +7,7 @@
 #action {%*The protective spirits break away from your body, fading into nothingness.$} {#if !$idle_flag {protection}};
 
 
-#action {You must be in altered form to maim someone master.} {
+#action {You must be in altered form to maim someone %w.} {
     alter hybrid;
     #delay 2 {#if $my[necromancer][altered] {maim}};
 } {2};
@@ -20,14 +20,14 @@
 
 #NOP --------------------------------------- NECROMANCER STATUS TRACKING  ------------------------------------------;
 #act {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1};
-#act {You are already altered into %* form master.}{#var my[necromancer][altered] 1};
+#act {You are already altered into %* form %w.}{#var my[necromancer][altered] 1};
 #act {You return to your normal were form.}{#var my[necromancer][altered] 1};
 #act {You alter into the embodimental spirit of the %*!} {#var my[necromancer][altered] 1};
 #act {You alter back to your normal, human form.}{#var my[necromancer][altered] 0};
-#act {You can only alter your form into beast form master.}{#var my[necromancer][altered] 0};
-#act {You have already skullfired this repower master.} {#var my[necromancer][skullfire] 0};
+#act {You can only alter your form into beast form %w.}{#var my[necromancer][altered] 0};
+#act {You have already skullfired this repower %w.} {#var my[necromancer][skullfire] 0};
 #act {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;}
-#act {Before the repowering, you attempt a last minute scribe2 of:} {
+#act {Before the repowering, you attempt a last minute %*} {
     #var my[necromancer][invoke-prime] 0;
     #var my[necromancer][spirit-howl] 0;
     #var my[necromancer][maim] 0;
@@ -47,7 +47,7 @@
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
 
 #NOP -- Update what repower powers are available;
-#action {Your repower-restricted abilities are listed below master...} {
+#action {Your repower-restricted abilities are listed below %w...} {
     #action {'Soulbound' essences  - You have %w {souls|soul} bound with your own} {
         #var my[necromancer][souls] @word_to_number{%%1};
     } {2};
@@ -114,7 +114,7 @@
     #var stats[unholy_ground][hits] 0;
 } {2};
 
-#action {  You must wait until repower to rend flesh again master.} {
+#action {  You must wait until repower to rend flesh again %w.} {
     #var my[necromancer][maim] 0;
 } {2};
 
@@ -229,7 +229,7 @@
     qtrance unkeep decanter/retrieve/open chest/put decanter in chest/deliver;
 } {2};
 
-#action {  That decanter already has blood in it master.} {
+#action {  That decanter already has blood in it %w.} {
     qtrance unkeep decanter/retrieve/open chest/put decanter in chest/deliver;
     checkStrategy {bloodlet} {bloodlet $enemy[target]};
 } {2};
