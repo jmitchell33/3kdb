@@ -43,6 +43,8 @@
     #math chat[height] {$chat[rows] + 1};
     #math chat[rows] {$chat[rows] - 1};
     
+    #NOP -- If map width isn't set, make it 33%;
+    #if {$map[widthperc] > 0} {#NOP} {#var map[widthperc] .33};
     #format map[width] {%d} {$map[widthperc] * $screen[width]};
     #math map[left] {$screen[width] - $map[width]};
 
@@ -118,7 +120,7 @@
     
     #math 	split[bottom]	{$hpbar[height] + 1};
     #var    split[left]     0;
-    #var 	split[right]	{$map[width] + 1};
+    #math 	split[right]	{$map[width] + 1};
 
     #NOP -- The map room details goes right inside the map area;
     #math draw_room[top] {$map[bottom]};
@@ -146,7 +148,7 @@
     #if {"$draw[hpbar][active]" == "on"} {
         #math hpbar[top] {$screen[height] - $hpbar[height]};
         #math hpbar[bottom] {$hpbar[top] + $hpbar[height] - 1};
-        #math hpbar[right] {$hpbar[left] + $screen[width]}; 
+        #math hpbar[right] {$screen[width]}; 
     	#draw {line} -$hpbar[height]-2 1 -$hpbar[height]-2 -1;
     } {
         #var hpbar[height] 0;
@@ -158,7 +160,7 @@
     #loop 1 $hpbar[height] index {
         #var prompt $hpbar[prompt][+$index];
         #math hpbar_line {$hpbar[top] + $index - 1};
-        #draw {<eeb>} {tile} $hpbar_line $hpbar[left] $hpbar_line -1 ${prompt};
+        #draw {<eeb>} {tile} $hpbar_line 1 $hpbar_line -1 ${prompt};
     };
 };
 

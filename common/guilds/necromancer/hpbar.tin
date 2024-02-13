@@ -15,7 +15,7 @@
 {
     #NOP %1;
     #REGEXP {%1} {{\s*(\S+)\[([^\]]*)\]\s*(.*)$}}
-    {   
+    {
         #IF {&{_guild}[minions][&2] > 0} {handler_necro_hpbar_Undead {&3};};
         #ELSE {
             #if {"&2" == "$"} {
@@ -168,6 +168,17 @@
 };
 
 #ALIAS {handler_necro_hpbar_Undead}
+{
+    #NOP %1;
+    #REGEXP {%1} {{((\d+)%\/(\d+)c|none)(\/(\d+)c|)}}
+    {
+        #VAR {my[necromancer][undead][hp]} {&3};
+        #VAR {my[corpse][minion][current]} {&4};
+        #VAR {my[corpse][coffin][current]} {&6};
+    };
+};
+
+#ALIAS {handler_necro_hpbar_Valithyn}
 {
     #NOP %1;
     #REGEXP {%1} {{((\d+)%\/(\d+)c|none)(\/(\d+)c|)}}

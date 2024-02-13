@@ -115,15 +115,14 @@
 } {1};
 
 #action {^-D-_%*\n%a-D-_$} {
-	#if {"$longcap" == "on"} {
-		#var longcap off;
-		#unvar long;
-		#var long {%1 %2};
-		#if {@cartcheck{${long}}} {
-			#nop
-		} {
-			#var room[long] {${long}};
-		};
+	#unvar long;
+	#format long1 {%p} {%1};
+	#format long2 {%p} {%2};
+	#var long {$long1 $long2};
+	#if {@cartcheck{${long}}} {
+		#nop
+	} {
+		#var room[long] {${long}};
 	};
 } {1};
 
