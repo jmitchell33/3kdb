@@ -5,6 +5,9 @@
     .pause;
 };
 
+#NOP -- EXAMINING/SEARCHING
+#alias {x} {exa}
+
 #NOP -- DUPC AND DOVE WITCH
 #alias {dwitch} {dc;dove;kill witch}
 
@@ -12,8 +15,9 @@
 #alias {dove} {touch dove rune}
 
 #NOP -- SUPPORT MECH
-#alias {su1} {#var dismiss_support 0;dismiss;support summon;#delay 4 {#var dismiss_support 1;support defend}}
-#alias {su2} {support assault fire;defend mech;forcehp}
+#alias {su1} {#var dismiss_support 0;dismiss;support summon;hp;#delay 4 {#var dismiss_support 1;support defend;hp}}
+#alias {su2} {support assault fire;defend mech;forcehp;hp}
+#alias {su3} {support summon;#delay 4 {support assault fire;hp}}
 #alias {sd} {support defend;forcehp}
 
 #NOP -- ROLM PORT TO COT AND MAP CORRECTION
@@ -39,11 +43,12 @@
 #alias {knight8} {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}}
 #alias {winaxe} {play;start;#5 throw axe}
 
+#NOP -- CORPSE ALIAS
 #alias corpse_trig {
     #if {"$area" == "Chaotic Sewers"} {
-        slab all;wrap all;fdeener;fdeener;get coins;stash all
+        wrap remains;slab remains;fdeener;fdeener;divvy gold;stash all
     } {
-        wrap remains;slab remains;fdeener;fdeener;divvy gold;get all;stash all
+        wrap remains;slab remains;fdeener;fdeener;burn remains;divvy gold;get all;stash all;
     };
 };
 

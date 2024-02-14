@@ -1,6 +1,8 @@
 #class common_party kill
 #class common_party open
 
+#var cassist[status] 0;
+
 #action {^You are already assisting %w.$} {
     #var addItem 1;
     #format temp {%l} {%1};
@@ -20,6 +22,7 @@
 
 #action {^You are now assisting %w.$} {
     #var addItem 1;
+    #var cassist[status] 1;
     #format temp {%l} {%1};
     #foreach $cassist[member][%*] member {
         #if {"$member[name]" == "%1"} {
@@ -38,6 +41,7 @@
 #action {^Cleared.$} {
     #foreach $cassist[member][%*] member {
         #var cassist[member][%1][active] 0;
+        #var cassist[status] 0;
     };
 };
 
