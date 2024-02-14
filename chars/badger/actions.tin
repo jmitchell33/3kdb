@@ -23,6 +23,9 @@
 #NOP -- JUGGERNAUT CDEFEND FOR PARTY
 #action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend ON for party}
 
+#NOP -- CORPSE TRIGGER (i dont have the ktrig vaf perk)
+#action {^=K=Badger dealt the killing blow to %*.=K=$} {#if {!$idle_flag && "$area" == "Serinth: The 2nd Dimension" && "$cassist[status]" == "0"} {corpse_trig}}
+
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 
