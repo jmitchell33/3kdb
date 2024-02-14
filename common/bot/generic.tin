@@ -183,6 +183,7 @@
         #regexp {$mob[long]} {$botmob[long]} {
             #var bot[foundmob] 1;
             #var mob[target] $botmob[target];
+            #echo {found $mob[target] - prepare to be boarded!};
         };
     };
     #undelay {bot_kick};
@@ -265,6 +266,7 @@
                 #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
             };
             #if {$bot[foundmob]} {
+                #echo {foundmob path fired};
                 .stop_prompt;
                 .pre_fight_check;
 
@@ -277,6 +279,7 @@
                     };
                 };
             } {
+                #echo {no mob path fired};
                 #if {$bot[foundobject]} {
                     #send $object_action;
                     #var bot[foundobject] 0;
@@ -293,7 +296,12 @@
         };
     };
 
-    #alias {.stop_prompt} {#map get roomvnum bot[curVnum];#unact {^>$};#var bot[walk] 0;#if {"$draw[status][active]" == "on"} {draw_status};};
+    #alias {.stop_prompt} {
+        #map get roomvnum bot[curVnum];
+        #unact {^>$};
+        #var bot[walk] 0;
+        #if {"$draw[status][active]" == "on"} {draw_status};
+    };
     
 	glance;
 
