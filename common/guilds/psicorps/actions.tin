@@ -7,20 +7,20 @@
 
 #action {You reach out, tear the fabric of reality and then fold it around yourself.} {
 	#if $reality_folded {
-		#map goto $fold_reality_room;
+		#map goto $fold_reality_source;
 		#var reality_folded 0;
 	} {
-		#map get roomvnum fold_reality_room;
 		#var reality_folded 1;
+		#map get roomvnum fold_reality_source;
 		#map goto $psi_entrance;
 		#if $psi_donate {
 			d;n;e;e;e;ne;put all in box;sw;se;put all in box;
-			fold reality;
-			#map goto $fold_reality_room;
+			#NOP -- When we get to the common storage box, we'll fold reality and resume;
+			#if {$bot[paused]} {#line oneshot #action {-i-General Storage box %*.} {#var bot[paused] 0;fold reality} {1}};
 			#var psi_donate 0;
 		};
 	};
-};
+} {2};
 
 #action {You can't focus on folding while fighting.} {
 	#var reality_folded 0;

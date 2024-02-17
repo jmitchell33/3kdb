@@ -67,11 +67,16 @@
 
 #NOP -- 3kdb reporting stuff;
 #act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w corpses} {
+    #var partyReportString $corpse_string;
+    #replace partyReportString {<088>} {};
+    #replace partyReportString {<ceb>} {};
+    #replace partyReportString {\\n} {:};
+    #replace partyReportString {  } {};
     #if {"%2" == "bot"} {
-        #if {!$idle_flag && $bot[active]} {#delay .2 {ptell $corpse_string};};
+        #if {!$idle_flag && $bot[active]} {#delay .2 {ptell $partyReportString};};
     };
     #if {"%2" == "$user"} {
-        #if {!$idle_flag} {#delay .2 {ptell $corpse_string};};
+        #if {!$idle_flag} {#delay .2 {ptell $partyReportString};};
     };
 } {2};
 
@@ -216,15 +221,11 @@
 
 #act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot path-find} {
     #if {!$idle_flag && $bot[active]} {
-        #unvar tempPath;
-        #unvar botPath;
-        #path get position position;
-        #math position {$position - 1};
-        #path save forward tempPath;
-        #list tempPath create {$tempPath};
-        #var botPath {Path to find me is: };
-        #foreach {$tempPath[+1..$position]} {dir} {#cat botPath {$dir;}};
-        #delay .2 {#send {ptell ${botPath}}};
+        #var partyReportPath {Path to find me is: $bot[steps][1]};
+        #loop 2 $bot[step] step {
+            #cat partyReportPath {;${$bot[steps][${step}]}};
+        };
+        #delay .2 {#send {ptell ${partyReportPath}}};
     };
 } {1};
 

@@ -44,10 +44,11 @@
 };
 
 #alias .check_death {
+  #echo {CHECKDEATH ALIAS FIRED};
   .pause;
   fuse 100;
-	#delay 1 {corpse_trig;get all;stash all;keep all component;psi_donate};
-	#delay 3 {..};
+  corpse_trig;get all;stash all;keep all component;
+  #delay 2 {#if {!$incombat} {psi_donate} {#var bot[paused] 0}};
 };
 
 #alias {psi_donate} {

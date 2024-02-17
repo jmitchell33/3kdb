@@ -3,6 +3,7 @@
 
 #NOP -- GENERAL CORPSE MANAGEMENT TRACKING FOR HPBAR;
 #var corpse_check 0;
+#var corpse_check_toggle 1;
 #var corpses[inventory] 0;
 #var corpses[smuggle] 0;
 #var corpses[cooler] 0;
@@ -17,13 +18,16 @@
 #act {You must have a corpse to absorb.} {#NOP} {1};
 
 #alias check_corpses {
-	i;
-    examine cooler;
-    smuggle;
+	#if $corpse_check_toggle {
+		#var corpse_check_toggle 0;
+		#delay 10 {#var corpse_check_toggle 1};
+		i;
+		examine cooler;
+	};
 };
 
 
-#action {You have no {corpse|remains}.} {check_corpses} {1};
+#action {You have no {corpse|remains}.} {check_corpses;} {1};
 
 #NOP -- Donate your corpses to the morgue and then go back/resuming botting;
 #alias dcoffin {
