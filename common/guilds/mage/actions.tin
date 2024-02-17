@@ -85,8 +85,10 @@
 
 #var golemTypes {Straw;Wood;Flesh;Clay;Stone;Rope;Iron;Crystal};
 
+
 #ACTION {^You throw your golem construction materials to the ground and} {
-    say golem, you are now in group golem/assist always;
+    checkStrategy {golem_assist} {say golem, you are now in group golem/assist always/ibc};
+    checkStrategy {golem_defend} {say golem, you are now in group golem/defend always};
     #if $golem_tank {
         say golem, defend me
     };
@@ -118,7 +120,8 @@
     cast haste on golem;
 } {1};
 
-#ACTION {Señor Meow-meow the fluffy persian cat says: I did not have enough coins.} {#var ffetch_coins 0};
+#NOP -- If your familiar doesn't have money
+#ACTION {%* says: I did not have enough coins.} {#var ffetch_coins 0};
 #ACTION {^There is no reason to 'ffetch' here.$} {#if {$toggle_find_familiar} {#var toggle_find_familiar 0;#delay 4 {cast find familiar;#var toggle_find_familiar 1;};};} {1};
 #ACTION {^You don't have any basic construction materials for a %w golem!} {
     #var tempCreate %1;
@@ -133,6 +136,14 @@
         #delay 5 {keep materials;cast create golem};
     };
 } {2};
+
+#action {^The last of your Golem Materials has been used up.$} {
+    #if $ffetch_coins {
+        ffetch materials;
+        #delay 5 {keep materials;cast create golem};
+    };
+} {2};
+
 
 #ACTION {^A %* seems to slow down...$} {#var summon_haste 0} {1};
 #ACTION {^A %* seems to grow smaller.} {#var summon_mf 0} {1};

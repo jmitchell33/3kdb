@@ -48,9 +48,9 @@
 
 
 #if $check_death {
-        #showme {<ffe>------ CHECKDEATH IS ACTIVE --------<088>};
+        #echo {<ffe>------ CHECKDEATH IS ACTIVE --------<088>};
     } {
-        #showme {<ffe>------ CHECKDEATH IS NOT ACTIVE --------<088>};
+        #echo {<ffe>------ CHECKDEATH IS NOT ACTIVE --------<088>};
 };
 
 #alias bot_report {
@@ -72,18 +72,18 @@
     #format total2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_xp};
     #format total3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_coins};
     
-    #showme <BBB><aad>---------------------------------------------------<088>;
-    #showme <BBB><aad>--------------     Current Loop     ---------------<088>;
-    #showme $loop1;
-    #showme $loop2;
-    #showme $loop3;
-    #showme <BBB><aad>---------------------------------------------------<088>;
-    #showme <BBB><aad>--------------     Total Run        ---------------<088>;
-    #showme $total1;
-    #showme $total2;
-    #showme $total3;
-    #showme <BBB><aad>---------------------------------------------------<088>;
-    #showme <BBB><aad>---------------------------------------------------<088>;
+    #echo {<BBB><aad>---------------------------------------------------<088>};
+    #echo {<BBB><aad>--------------     Current Loop     ---------------<088>};
+    #echo {$loop1};
+    #echo {$loop2};
+    #echo {$loop3};
+    #echo {<BBB><aad>---------------------------------------------------<088>};
+    #echo {<BBB><aad>--------------     Total Run        ---------------<088>};
+    #echo {$total1};
+    #echo {$total2};
+    #echo {$total3};
+    #echo {<BBB><aad>---------------------------------------------------<088>};
+    #echo {<BBB><aad>---------------------------------------------------<088>};
 };
 
 #alias bot_xp {
@@ -145,10 +145,10 @@
 #alias playercheck {
     #if $bot[playercheck] {
         #var bot[playercheck] 0;
-        #delay .2 {#showme <BAF><ffe>------ PLAYERCHECK IS NOW OFF --------<088>};
+        #delay .2 {#echo {<BAF><ffe>------ PLAYERCHECK IS NOW OFF --------<088>}};
     } {
         #var bot[playercheck] 1;
-        #delay .2 {#showme <BAF><ffe>------ PLAYERCHECK IS NOW ON --------<088>};
+        #delay .2 {#echo {<BAF><ffe>------ PLAYERCHECK IS NOW ON --------<088>}};
     };
 };
 
@@ -161,7 +161,7 @@
     #unact {^>$};
     #class {bot} {kill};
     #class {xbot} {kill};
-    #show Bot killed.;
+    #echo {Bot killed.};
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
@@ -183,7 +183,6 @@
         #regexp {$mob[long]} {$botmob[long]} {
             #var bot[foundmob] 1;
             #var mob[target] $botmob[target];
-            #echo {found $mob[target] - prepare to be boarded!};
         };
     };
     #undelay {bot_kick};
@@ -221,13 +220,17 @@
     };
 } {2};
 
+
 #alias .botStep {
     #if !$bot[paused] {
+        #format bot[timeLastStep] $bot[timeStepTaken];
+        #format bot[timeStepTaken] {%U};
+        #math bot[timeBetweenSteps] {($bot[timeStepTaken] - $bot[timeLastStep]) * .0001};
         #if {$bot[step] >= &bot[steps][]} {
-            $bot[steps][${bot[step]}];
-            #showme {------- BOT COMPLETE -----};
+            ${bot[steps][${bot[step]}]};
+            .botComplete;
         } {
-            $bot[steps][${bot[step]}];
+            ${bot[steps][${bot[step]}]};
             #math bot[step] {$bot[step] + 1};
         };
     };
@@ -238,10 +241,12 @@
     #class {xbot} {open};
 	#var bot[paused] 0;
 
-    #act {{^-R-_(.*)-R-_}} { 
-        #var room_short %%1;
-        #var room_item 0;
-        .onRoom;
+    #act {{^-R-_(.*)-R-_}} {
+        #if {!$bot[paused]} {
+            #var room_short %%1;
+            #var room_item 0;
+            .onRoom;
+        };
     } {1};
 
 	#alias {.onRoom} {
@@ -260,13 +265,12 @@
         #if {$bot[foundplayer]} {
             .stop_prompt;
             #var bot[walk] 1;
-            #delay .1 {.botStep};
+           .botStep;
         } {
             #if {$collector[items]} {
                 #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
             };
             #if {$bot[foundmob]} {
-                #echo {foundmob path fired};
                 .stop_prompt;
                 .pre_fight_check;
 
@@ -279,7 +283,6 @@
                     };
                 };
             } {
-                #echo {no mob path fired};
                 #if {$bot[foundobject]} {
                     #send $object_action;
                     #var bot[foundobject] 0;
@@ -289,7 +292,7 @@
                         .check_room;
                     } {
                         #var bot[walk] 1;
-                        #delay .1 {.botStep};
+                        .botStep;
                     };
                 };
             };
@@ -350,7 +353,7 @@
         #if {$bot[active] && !$idle_flag && !$bot[walk] && !$incombat} {
             #delay {bot_kick} {
                 #if {!$bot[walk] && !$incombat} {
-                    #echo {BOT STUCK RESUMING IN 3 SECONDS};
+                    #echo {<dfa>BOT STUCK RESUMING IN 3 SECONDS<088>};
                     #delay {bot_restart} {.bot} {3};
                 };
             } {3};
@@ -367,11 +370,11 @@
 
 
 /* Bot end actions... */
-#act {^------- BOT COMPLETE -----$} {
-    #showme BOT HAS COMPLETED LOOP ENTERED;
+#alias {.botComplete} {
+    #echo {<dfa>BOT HAS COMPLETED LOOP ENTERED<088>};
     #if !$bot[paused] {
         #if {!$bot[loop]} {
-            #show \nBot finished.;
+            #echo {<dfa>\nBot finished.<088>};
             #format {bot[report-time]} {%T} {};
             #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
             #if {$bot[delta-time] > 3600} {
@@ -388,7 +391,7 @@
             #var temp_xp $bot[stats][xp];
             thousandsFormatNumber temp_xp;
             ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
-            #show Coins Earned: $bot[stats][coins];
+            #echo {<dfa>Coins Earned: $bot[stats][coins]<088>};
             #if {&{botcycle[]} > 1} {
                 nextarea
             } {
@@ -399,11 +402,11 @@
                 #var bot[stats][loop][mobs] 0;
                 #var bot[stats][loop][xp] 0;
                 #var bot[stats][loop][coins] 0;
-                #show \nLooping bot...;
+                #echo {\nLooping bot.};
                 #var bot[step] 1;
                 .bot;
             } {
-                #show \nBot finished.;
+                #echo {\nBot finished.};
                 #format {bot[report-time]} {%T} {};
                 #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
                 #if {$bot[delta-time] > 3600} {
@@ -420,7 +423,7 @@
                 #var temp_xp $bot[stats][xp];
                 thousandsFormatNumber temp_xp;
                 ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
-                #show Coins Earned: $bot[stats][coins];
+                #echo {Coins Earned: $bot[stats][coins]};
                 #if {&{botcycle[]} > 1} {
                     nextarea
                 } {
