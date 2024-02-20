@@ -1,28 +1,6 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
-#NOP -- Assume blood plate is full when we start so it doesn't spam corpses nonstop if it can't find the variable;
-#var blood_plate[status] 100;
-#var blood_plate_toggle 1;
-
-#action {Your armour senses your near-death experience and infuses you with blood!} {
-    #math blood_plate[status] {$blood_plate[status] - 10};
-    #line gag;
-    #var blood_plate_toggle 1;
-} {2};
-
-#action {Tendrils from Psyron's armour reach for the corpse and %*} {
-    #if {$blood_plate[status] < 100} {
-        corpse_select;
-    };
-} {2};
-
-#ACTION {Your armour has reached its maximum saturation level.} {
-    #var blood_plate[status] 100;
-    #var blood_plate_toggle 0;
-} {2};
-
-
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 

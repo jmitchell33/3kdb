@@ -77,6 +77,7 @@
 #list strategyList add {{{guild} {all} {name} {lucanus} {active} {0} {description} {Automatically uses amulet and ring}}};
 #list strategyList add {{{guild} {all} {name} {epowers} {active} {0} {description} {Automatically use fry, shred, ewell}}};
 #list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {description} {Automatically use owl rune}}};
+#list strategyList add {{{guild} {all} {name} {bplate}  {active} {0} {description} {Blood Plate: Automatically feed}}};
 #list strategyList add {{{guild} {bard} {name} {backstab}  {active} {0} {description} {Backstab}}};
 #list strategyList add {{{guild} {bard} {name} {hammer}  {active} {0} {description} {Hammer Smashed Face}}};
 #list strategyList add {{{guild} {bard} {name} {rainbow} {active} {0} {description} {Rainbow of Death}}};
@@ -356,6 +357,14 @@
                 checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
                 checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
             };
+        };
+
+        checkStrategy {bplate} {
+            #class {eq_bloodplate} {size} {eq_bloodplate_loaded};
+            #if $eq_bloodplate_loaded {#NOP} {#read ${cwd}/common/eq/bloodplate.tin};
+        } {
+            #class {eq_bloodplate} {size} {eq_bloodplate_loaded};
+            #if $eq_bloodplate_loaded {#class eq_bloodplate kill;#var eq_bloodplate_loaded 0} {#NOP};
         };
 
         #NOP -- Actions to perform at any time in the fight;
