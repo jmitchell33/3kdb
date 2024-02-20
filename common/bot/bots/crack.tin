@@ -1,44 +1,48 @@
 #class {bot} {kill}
 #class {bot} {open}
 
-#var {area} {The Rejected Game};
-#var check_room 0;
-
-#var bot_message_1 '----  CRACK STEPPER  ----';
-#var bot_message_2 '---- ALL TARGETS ----';
-#show $bot_message_1;#show $bot_message_2;
-
-#NOP -- check current brief settings and store them into a variable until bot completes;
-#var brief[settings] {};
-#send !brief;
-#action {Your brief setting is currently: [%w, mapping %w]} {#var brief[settings] %1 %2};
-#action {Your brief setting is currently: [%w, %w mapping]} {#var brief[settings] %1 %2};
-#action {^------- BOT COMPLETE -----} {#send !brief $brief[settings]} {1};
+#showme ---- REJECT GAME CRACK STEPPER  ----;
 
 #NOP -- mobs are evil, set rolm to angel;
 touch angel rune;
 
-/* Call action to call rrotate */
-#action {{^[\s\.oO]{70}}} {#delay {rotate} {rrotate} {0.5}};
+#var inductor[color] none;
 
-#NOP -- These are the possible paths to crack depending on color;
+#NOP -- These are the possible paths to inductor depending on color;
 #var {bot[inductor][green]}		{e;e;e;e;n;n;n;w;ne;n;w;w;ne;e;n;w;sw;w;ne;w;w;w;w;w;w;w;sw;e;nw};
 #var {bot[inductor][blue]}		{s;s;s;s;e;e;e;n;se;e;n;n;se;s;e;n;nw;n;se;n;n;n;n;n;n;n;nw;s;ne};
 #var {bot[inductor][red]}		{w;w;w;w;s;s;s;e;sw;s;e;e;sw;w;s;e;ne;e;sw;e;e;e;e;e;e;e;ne;w;se};
 #var {bot[inductor][magenta]}	{n;n;n;n;w;w;w;s;nw;w;s;s;nw;n;w;s;se;s;nw;s;s;s;s;s;s;s;se;n;sw};
 
-#var {bot[steps]} {$bot[inductor][${inductor[color]}]};
+#alias fixColor {
+	#unvar bot[steps];
+    #list bot[steps] create {$bot[inductor][${inductor[color]}]};
+};
 
-/* Brief settings to avoid false rotations from cartography */
-#send !brief on no;
+#NOP -- These are the color patterns to know which path you're on;
+#NOP -- magenta;
+#action {~\e[0m\e[31m%1\e[35m%2} {#if {"$inductor[color]" != "magenta"} {#var inductor[color] magenta;fixColor}} {2};
+#action {~\e[0m\e[35m%1\e[31m%2} {#if {"$inductor[color]" != "magenta"} {#var inductor[color] magenta;fixColor}} {2};
 
-/* Brief settings to avoid map causing false rotate calls */
-#delay {inductor} {#send !brief on no} {1};
+#NOP -- green;
+#action {~\e[0m\e[32m%1\e[30;1m%2} {#if {"$inductor[color]" != "green"} {#var inductor[color] green;fixColor}} {2};
+#action {~\e[0m\e[30;1m%1\e[32m%2} {#if {"$inductor[color]" != "green"} {#var inductor[color] green;fixColor}} {2};
 
-#list botmobs clear;
+#NOP -- blue;
+#action {~\e[0m\e[35m%1\e[34m%2} {#if {"$inductor[color]" != "blue"} {#var inductor[color] blue;fixColor}} {2};
+#action {~\e[0m\e[34m%1\e[35m%2} {#if {"$inductor[color]" != "blue"} {#var inductor[color] blue;fixColor}} {2};
+
+#NOP -- red;
+#action {~\e[0m\e[31m%1\e[30;1m%2} {#if {"$inductor[color]" != "red"} {#var inductor[color] red;fixColor}} {2};
+#action {~\e[0m\e[30;1m%1\e[31m%2} {#if {"$inductor[color]" != "red"} {#var inductor[color] red;fixColor}} {2};
+
 #list botmobs add {{{long} {A Jacked Transistor} {target} {transistor}}};
 #list botmobs add {{{long} {A Yoked Resistor} {target} {resistor}}};
 #list botmobs add {{{long} {A Swole Capacitor} {target} {capacitor}}};
 
+
+look;
+
 #class {bot} {close}
 #read common/bot/generic.tin;
+
