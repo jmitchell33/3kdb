@@ -1,10 +1,25 @@
 #class {bot} {kill}
 #class {bot} {open}
 
-#showme ---- INDUCTOR STEPPER  ----;
+#var {area} {The Rejected Game};
+#var check_room 0;
+
+#var bot_message_1 '----  INDUCTOR STEPPER  ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#NOP -- check current brief settings and store them into a variable until bot completes;
+#var brief[settings] {};
+#send !brief;
+#action {Your brief setting is currently: [%w, mapping %w]} {#var brief[settings] %1 %2};
+#action {Your brief setting is currently: [%w, %w mapping]} {#var brief[settings] %1 %2};
+#action {^------- BOT COMPLETE -----} {#send !brief $brief[settings]} {1};
 
 #NOP -- mobs are evil, set rolm to angel;
 touch angel rune;
+
+/* Call action to call rrotate */
+#action {{^[\s\.oO]{70}}} {#delay {rotate} {rrotate} {0.5}};
 
 #NOP -- These are the possible paths to inductor depending on color;
 #var {bot[inductor][green]}		{e;e;e;e;n;n;n;w;n;w;s;se;s;w;n;w;s;w;sw;n;w;nw;sw;w;n;e;n;n;w;n;e;n;e;se;n;e;e;se;s;s;nw;sw;w;n};
@@ -12,8 +27,7 @@ touch angel rune;
 #var {bot[inductor][red]}		{w;w;w;w;s;s;s;e;s;e;n;nw;n;e;s;e;n;e;ne;s;e;se;ne;e;s;w;s;s;e;s;w;s;w;nw;s;w;w;nw;n;n;se;ne;e;s};
 #var {bot[inductor][magenta]}	{n;n;n;n;w;w;w;s;w;s;e;ne;e;s;w;s;e;s;se;w;s;sw;se;s;w;n;w;w;s;w;n;w;n;ne;w;n;n;ne;e;e;sw;se;s;w};
 
-/* Call action to call rrotate */
-#action {{^[\s\.oO]{70}}} {#delay {rotate} {rrotate} {0.5}};
+#var {bot[path]} {$bot[inductor][${inductor[color]}]};
 
 /* Brief settings to avoid false rotations from cartography */
 #send !brief on no;
@@ -21,30 +35,10 @@ touch angel rune;
 /* Brief settings to avoid map causing false rotate calls */
 #delay {inductor} {#send !brief on no} {1};
 
+#list botmobs clear;
 #list botmobs add {{{long} {A Jacked Transistor} {target} {transistor}}};
 #list botmobs add {{{long} {A Yoked Resistor} {target} {resistor}}};
 #list botmobs add {{{long} {A Swole Capacitor} {target} {capacitor}}};
-
-
-
-#alias {rrotate} {
-	#NOP Determine current orientation and set color for new rotation;
-	#map at 27662 {#map get roomexits rexits};
-	#switch {*rexits[]} {
-		#case {"{n}"}	{#var rej_color <228>;#var inductor[color] green};
-		#case {"{e}"}	{#var rej_color <148>;#var inductor[color] blue};
-		#case {"{s}"}	{#var rej_color <218>;#var inductor[color] red};
-		#case {"{w}"}	{#var rej_color <258>;#var inductor[color] magenta};
-		#default	{#showme {<142> Error determining area rotation <088>};}
-	};
-
-	#NOP Adjust Inductor Path for rotation;
-    #unvar bot[steps];
-    #list bot[steps] create {$bot[inductor][${inductor[color]}]};
-};
-
-#NOP -- Use the rotate alias to set the initial botpath;
-#delay 3 {rrotate};
 
 #class {bot} {close}
 #read common/bot/generic.tin;
