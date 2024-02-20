@@ -1,16 +1,12 @@
 #class rej_rotate open
 
-#NOP 27662-28934 30131-30174
+#NOP Vnums are 27662-28934 30131-30174;
 #alias {rrotate} {
-	#NOP Determine current orientation and set color for new rotation;
-	#map at 27662 {#map get roomexits rexits};
-	#switch {*rexits[]} {
-		#case {"{n}"}	{#var rej_color <228>;#var inductor[color] green};
-		#case {"{e}"}	{#var rej_color <148>;#var inductor[color] blue};
-		#case {"{s}"}	{#var rej_color <218>;#var inductor[color] red};
-		#case {"{w}"}	{#var rej_color <258>;#var inductor[color] magenta};
-		#default	{#showme {<142> Error determining area rotation <088>}}
-	};
+	#NOP Update the color;
+	#if {"$rejected_game[color]" == "green" {#var rej_color <228>}};
+	#if {"$rejected_game[color]" == "blue" {#var rej_color <148>}};
+	#if {"$rejected_game[color]" == "red" {#var rej_color <218>}};
+	#if {"$rejected_game[color]" == "magenta" {#var rej_color <258>}};
 
 	#loop 27662 30174 cnt {
 		#map get {roomarea} {rarea} {$cnt};
