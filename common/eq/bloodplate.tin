@@ -1,0 +1,34 @@
+#class eq_bloodplate kill;
+#class eq_bloodplate open;
+
+#NOP -- Assume blood plate is full when we start so it doesn't spam corpses nonstop if it can't find the variable;
+#var blood_plate[status] 100;
+#var blood_plate_toggle 1;
+
+#action {Your armour senses your near-death experience and infuses you with blood!} {
+    #math blood_plate[status] {$blood_plate[status] - 10};
+    #line gag;
+    #var blood_plate_toggle 1;
+} {2};
+
+#action {Tendrils from %* armour reach for the corpse and absorb its blood\n%a.$} {
+    #line gag;
+    #if {$blood_plate[status] < 100} {#var blood_plate_toggle 1;};
+} {2};
+
+#ACTION {Your armour has reached its maximum saturation level.} {
+    #line gag;
+    #var blood_plate[status] 100;
+    #var blood_plate_toggle 0;
+} {2};
+
+#ticker checkBloodPlate {
+    #if {!$idle_flag && $incombat} {
+        #if {$blood_plate_toggle && $corpses[total] > 0 && $blood_plate[status] < 100} {
+            corpse_select;
+            #var blood_plate_toggle 0;
+        };
+    };
+} {2};
+
+#class eq_bloodplate close;
