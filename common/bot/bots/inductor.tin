@@ -8,18 +8,11 @@
 #var bot_message_2 '---- ALL TARGETS ----';
 #show $bot_message_1;#show $bot_message_2;
 
-#NOP -- check current brief settings and store them into a variable until bot completes;
-#var brief[settings] {};
-#send !brief;
-#action {Your brief setting is currently: [%w, mapping %w]} {#var brief[settings] %1 %2};
-#action {Your brief setting is currently: [%w, %w mapping]} {#var brief[settings] %1 %2};
-#action {^------- BOT COMPLETE -----} {#send !brief $brief[settings]} {1};
-
 #NOP -- mobs are evil, set rolm to angel;
 touch angel rune;
 
-/* Call action to call rrotate */
-#action {{^[\s\.oO]{70}}} {#delay {rotate} {rrotate} {0.5}};
+/* Brief settings to avoid false rotations from cartography */
+#send !brief on no;
 
 #NOP -- These are the possible paths to inductor depending on color;
 #var {bot[inductor][green]}		{e;e;e;e;n;n;n;w;n;w;s;se;s;w;n;w;s;w;sw;n;w;nw;sw;w;n;e;n;n;w;n;e;n;e;se;n;e;e;se;s;s;nw;sw;w;n};
@@ -27,18 +20,16 @@ touch angel rune;
 #var {bot[inductor][red]}		{w;w;w;w;s;s;s;e;s;e;n;nw;n;e;s;e;n;e;ne;s;e;se;ne;e;s;w;s;s;e;s;w;s;w;nw;s;w;w;nw;n;n;se;ne;e;s};
 #var {bot[inductor][magenta]}	{n;n;n;n;w;w;w;s;w;s;e;ne;e;s;w;s;e;s;se;w;s;sw;se;s;w;n;w;w;s;w;n;w;n;ne;w;n;n;ne;e;e;sw;se;s;w};
 
-#var {bot[path]} {$bot[inductor][${inductor[color]}]};
-
-/* Brief settings to avoid false rotations from cartography */
-#send !brief on no;
-
-/* Brief settings to avoid map causing false rotate calls */
-#delay {inductor} {#send !brief on no} {1};
-
 #list botmobs clear;
 #list botmobs add {{{long} {A Jacked Transistor} {target} {transistor}}};
 #list botmobs add {{{long} {A Yoked Resistor} {target} {resistor}}};
 #list botmobs add {{{long} {A Swole Capacitor} {target} {capacitor}}};
 
+look;
+#delay .5 fixRJColor;
+
+#var bot[path] $bot[inductor][$rejected_game[color]];
+
 #class {bot} {close}
 #read common/bot/generic.tin;
+#read common/map/rej_rotate.tin;
