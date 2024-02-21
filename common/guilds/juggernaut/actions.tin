@@ -11,7 +11,6 @@
 	#math mounts[no_lock] {$mounts[no_lock] + 1};
 } {2};
 
-
 #action {The computer chirps 'A critical hit was scored!'} {
 	#math mounts[crit] {$mounts[crit] +1};
 } {2};
@@ -23,7 +22,17 @@
 	};
 } {2};
 
-#act {There is no reason to 'frenzy' here.} {#var frenzy 0;};
+#NOP -- When frenzy isn't available or is already active - toggle frenzy so we don't spam trying to use it;
+#action {There is no reason to 'frenzy' here.} {#var frenzy_toggle 0;};
+#action {The computer chirps 'That person is already raged.'} {#var frenzy_toggle 0} {2};
+#action {The rage subsides.} {#var frenzy_toggle 1} {2};
+
+#NOP -- If you can't fire a missile at this mob, turn off missile for that mob and we'll add a ticker to restart;
+#NOP -- it on the next fight by checking for MIP round = 1;
+#action {The computer chirps 'That is not a valid target.'} {
+	#var nuke_toggle 0;
+	#ticker nuke_toggle {#if {"$mip[round]" == "1"} {#var nuke_toggle 1;#unticker nuke_toggle}} {2};
+} {2};
 
 #action {The computer chirps 'Your %d missiles and %d clan powers are about to reset.'} {
 	#if {$donate_support && !$idle_flag} {
@@ -35,6 +44,11 @@
 		#delay 40 {donateSupport};
 		#delay 50 {donateSupport};
 	}
+} {2};
+
+#action {The computer chirps 'Your missiles and clan powers have reset.'} {
+	#var nuke_toggle 1;
+	#var frenzy_toggle 1;
 } {2};
 
 #action {The computer chirps 'Your transpose max has been reached,%*} {
