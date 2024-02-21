@@ -17,11 +17,12 @@
 #NOP -- Fix color if the map rotates;
 #var rj_rotate 1;
 #action {{^[\s\.oO]{70}}} {
-	#if $rj_rotate {
-		#var rj_rotate 0;
-		look;
-		#delay {fixColor} {fixRJColor} {2};
-		#delay {toggleRotate} {#var rj_rotate 1} {2};
+	#if {"$area" == "The Rejected Game"} {
+		#if $rj_rotate {
+			#var rj_rotate 0;
+			look;
+			#delay {fixColor} {fixRJColor;#var rj_rotate 1} {2};
+		};
 	};
 };
 
