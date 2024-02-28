@@ -42,6 +42,7 @@
 } {1};
 
 #action {%*Accepting %* defeat, your challenger} {
+    #var incombat 0;
     #if {$knights_left > 0} {
         challenge
     } {
@@ -51,9 +52,14 @@
 
 #action {%* shifts %* combat style to the %*.} {
     #var bot[foundmob] 1;
+    #var mob[target] knight;
     #math knights_left {$knights_left - 1};
     .pre_fight_check;
-    kill knight;
+    #if $mob_kill_action {
+        .mob_kill_action;
+    } {
+        kill knight;
+    };
 } {1};
 
 #action {Congratulations!  You have completed the mission} {mission ask;};
