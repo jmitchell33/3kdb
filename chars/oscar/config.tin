@@ -16,21 +16,17 @@
 };
 
 #alias {.mob_kill_action} {
-     #if $golem_tank {
-          #delay 1 {say golem, kill $mob[target];cast slow $mob[target];};
-          #delay 2 {say golem, defend me};
+     #if $summoner {
+          slice $mob[target];
+          checkStrategy {slow} {cast slow on $mob[target]};
      } {
           kill $mob[target];
-          checkStrategy {slow} {cast slow $mob[target]};
+          checkStrategy {slow} {cast slow on $mob[target]};
      };
      checkStrategy {anchor} {cast anchor};
 };
 
-#alias {.check_death} {
-     .pause;
-     corpse_trig;
-     #if !$idle_flag {#delay 2 {..}};
-};
+#alias {.check_death} {#NOP};
 
 
 #class {player_config} {close}

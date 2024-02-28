@@ -7,37 +7,15 @@
      #list temp set %1 {%2};
 };
 
-#alias corpse_trig {
-  cast spell tap on corpse;
-  slab;
-  wrap;
-  cast corpse blast;
-  #if $divvy {share gold} {get coins};
-  get all;
-  stash all;
-  fuse 50;
-  #if $bags {
-       #loop 1 10 i {
-            smuggle remove sack;
-            keep sack;
-            put all in sack;
-       };
-       #10 {smuggle sack};
-  };
-  checkStrategy {anchor} {cast dispel magic};
-  study spellbook;
-  do_action;
-};
 
-#alias summon_str {
-     c giant strength golem;
-     c giant strength oscar;
-     c giant strength giant;
-};
-
-#alias summon_buff {
-     cast haste on summons;
-}
+corpsetrig spelltap;
+corpsetrig freezer;
+corpsetrig coffin;
+corpsetrig corpseBlast;
+corpsetrig getAll;
+corpsetrig crafting;
+corpsetrig cocoon;
+corpsestrig study;
 
 #alias {_player_deadmanActions} {
     .pause;

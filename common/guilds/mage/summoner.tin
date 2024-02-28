@@ -14,6 +14,18 @@
 	checkStrategy {summon_mf} {#replace summon_string {(%d)} {&0 ${mf_icon}<088>}};
 };
 
+#alias summon_str {
+	#foreach $my[summons][%*] item {
+		#format lowerName {%l} $item[keyName];
+		#loop 1 $item[count] index {
+			cast giant strength on $lowerName $index;
+		};
+	};
+	cast giant strength;
+    cast giant strength on golem;
+};
+
+
 #action {  --> %*\n%a-hp-} {
 	#list summonList clear;
 	#list my[summons] clear;
