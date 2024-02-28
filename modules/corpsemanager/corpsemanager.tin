@@ -31,23 +31,17 @@
 
 #NOP -- Donate your corpses to the morgue and then go back/resuming botting;
 #alias dcoffin {
-    .pause;
+	#if $bot[active] {.pause};
     #map get roomvnum donate_go_back;
-    #path save forward path;
-    #path get position pos;
 	go morgue;
     donate coffin;donate all;
     #map run $donate_go_back;
-    #path load $path;
-    #path goto $pos;
-    #var bot[paused] 0;
+    #if $bot[active] {#var bot[paused] 0;.bot};
 };
 
 #alias dcoffin1 {
-    .pause;
+    #if $bot[active] {.pause};
     #map get roomvnum donate_go_back;
-    #path save forward path;
-    #path get position pos;
 	go morgue;
     donate coffin;donate all;
 	deslab all;
@@ -55,9 +49,7 @@
 	#10 {wrap all;donate coffin};
 	#5 {get all;donate all};
     #map run $donate_go_back;
-    #path load $path;
-    #path goto $pos;
-    #var bot[paused] 0;
+    #if $bot[active] {#var bot[paused] 0;.bot};
 };
 
 #alias cooler_rotate {

@@ -60,7 +60,8 @@
 			};
 			
 			#NOP Combat Round Counter;
-			#if !$total_rounds {#var total_rounds 1} {#MATH total_rounds {$total_rounds + 1}};
+			#if !$total_rounds {#var total_rounds 1} {#math total_rounds {$total_rounds + 1}};
+			#format total_rounds_string {%g} {$total_rounds};
 
 			#NOP -- Average the first 10 rounds of combat to see if it'll be a fast or longer fight;
 			#NOP -- This is useful for some powers to save if it's a very fast fight;
@@ -169,8 +170,6 @@
 		#REGEX {$mip[gline][2]}	{G2N:%d\%}			{#VAR {my[g2n]}					{&1}};
 		#REGEX {$mip[gline][2]}	{I: %d}				{#VAR {my[immersion][count]}	{&1}};
 
-		#REGEX {$mip[gline][2]}	{{golem|Straw|Rope|Wood|Flesh|Clay|Stone|Iron|Crystal}:%+0..5p}
-													{#VAR {my[summon][golem]}		{&2}} {#VAR {my[summon][golem]}		{0}};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>}
 	}

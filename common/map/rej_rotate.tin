@@ -1,24 +1,77 @@
 #class {rej_rotate} {kill}
 #class {rej_rotate} {open}
 
+#NOP -- When this first loads, it'll be the first room of the maze
+#NOP -- Based on the room[exit] - we'll set it to the first rejected_game[color];
+#NOP -- The map rotation goes clockwise,  n -> e -> s -> w;
+
+#delay .5 {#ECHO {UPDATING MAP ORIENTATION -- PLEASE STAY STILL FOR 3 SECONDS}};
+
+#delay 2 {
+	#map get roomexits tempExits;
+	#if {$tempExits[e]} {#var startMap green};
+	#if {$tempExits[w]} {#var startMap red};
+	#if {$tempExits[n]} {#var startMap magenta};
+	#if {$tempExits[s]} {#var startMap blue};
+
+	#if {"$room[exits]" == "n"} {
+		#var rejected_game[color] magenta;
+		#var rej_color <258>;
+		#if {"$startMap" == "red"} {rrotate};
+		#if {"$startMap" == "blue"} {rrotate;rrotate};
+		#if {"$startMap" == "green"} {rrotate;rrotate;rrotate};
+	};
+	#if {"$room[exits]" == "e"} {
+		#var rejected_game[color] green;
+		#var rej_color <228>;
+		#if {"$startMap" == "magenta"} {rrotate};
+		#if {"$startMap" == "red"} {rrotate;rrotate};
+		#if {"$startMap" == "blue"} {rrotate;rrotate;rrotate};
+	};
+	#if {"$room[exits]" == "s"} {
+		#var rejected_game[color] blue;
+		#var rej_color <148>;
+		#if {"$startMap" == "green"} {rrotate};
+		#if {"$startMap" == "magenta"} {rrotate;rrotate};
+		#if {"$startMap" == "red"} {rrotate;rrotate;rrotate};
+	};
+	#if {"$room[exits]" == "w"} {
+		#var rejected_game[color] red;
+		#var rej_color <218>;
+		#if {"$startMap" == "magenta"} {rrotate};
+		#if {"$startMap" == "green"} {rrotate;rrotate};
+		#if {"$startMap" == "blue"} {rrotate;rrotate;rrotate};
+	};
+
+	#delay 1 {#ECHO {MAP ORIENTED... THANK YOU COME AGAIN!}};
+};
+
+
 #NOP -- We call it inductor whether you're going to crack or not;
 #alias fixRJColor {
-	#if {$bot[active]} {
-		#var {bot[path]} {$bot[inductor][${rejected_game[color]}]};
-		#unvar bot[steps];
-		#list bot[steps] create $bot[path];
+	#if {$rj_rotate} {
+		#if {$bot[active]} {
+			#var {bot[path]} {$bot[inductor][${rejected_game[color]}]};
+			#unvar bot[steps];
+			#list bot[steps] create $bot[path];
+		};
+		rrotate;
 	};
-	rrotate;
 };
 
 #NOP -- Fix color if the map rotates;
-#var rj_rotate 1;
+#var rj_rotate 0;
 #action {{^[\s\.oO]{70}}} {
 	#if {"$area" == "The Rejected Game"} {
+		#if {$bot[active]} {.pause};
+		#var rj_rotate 1;
 		#if $rj_rotate {
 			#var rj_rotate 0;
 			look;
-			#delay {fixColor} {fixRJColor;#var rj_rotate 1} {2};
+			#delay {fixColor} {
+				fixRJColor;
+				#if {$bot[active]} {#var bot[paused] 0};
+			} {2};
 		};
 	} {
 		#NOP -- If we're not longer in the rejected game, kill the class;
@@ -28,29 +81,31 @@
 
 #NOP -- These are the color patterns to know which Rejected Game map you're in;
 #NOP -- magenta;
-#action {~\e[0m\e[31m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta"} {#var rejected_game[color] magenta;fixRJColor}} {2};
-#action {~\e[0m\e[35m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta"} {#var rejected_game[color] magenta;fixRJColor}} {2};
+#action {~\e[0m\e[31m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta"} {#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
+#action {~\e[0m\e[35m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta"} {#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
 
 #NOP -- green;
-#action {~\e[0m\e[32m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"} {#var rejected_game[color] green;fixRJColor}} {2};
-#action {~\e[0m\e[30;1m%1\e[32m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"} {#var rejected_game[color] green;fixRJColor}} {2};
+#action {~\e[0m\e[32m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"} {#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
+#action {~\e[0m\e[30;1m%1\e[32m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"} {#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
 
 #NOP -- blue;
-#action {~\e[0m\e[35m%1\e[34m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"} {#var rejected_game[color] blue;fixRJColor}} {2};
-#action {~\e[0m\e[34m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"} {#var rejected_game[color] blue;fixRJColor}} {2};
+#action {~\e[0m\e[35m%1\e[34m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"} {#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
+#action {~\e[0m\e[34m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"} {#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
 
 #NOP -- red;
-#action {~\e[0m\e[31m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"} {#var rejected_game[color] red;fixRJColor}} {2};
-#action {~\e[0m\e[30;1m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"} {#var rejected_game[color] red;fixRJColor}} {2};
+#action {~\e[0m\e[31m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"} {#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
+#action {~\e[0m\e[30;1m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"} {#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
 
 
 #NOP Vnums are 27662-28934 30131-30174;
 #alias {rrotate} {
+	#echo {rotating map};
 	#NOP Update the color;
 	#if {"$rejected_game[color]" == "green"} {#var rej_color <228>};
 	#if {"$rejected_game[color]" == "blue"} {#var rej_color <148>};
 	#if {"$rejected_game[color]" == "red"} {#var rej_color <218>};
 	#if {"$rejected_game[color]" == "magenta"} {#var rej_color <258>};
+	#if {"$rej_color" == ""} {#var rej_color};
 
 	#loop 27662 30174 cnt {
 		#map get {roomarea} {rarea} {$cnt};
@@ -84,15 +139,15 @@
 				#if {"$kexit" == "no"} {
 					#NOP Unlink old direction;
 					#map at $cnt {#map unlink $rexit}
-				}
+				};
 			};
 			#NOP Link new directions;
 			#foreach {*nrexits[]} {rexit} {
 				#map at $cnt {#map link $rexit $nrexits[$rexit]}
-			}
-		}
+			};
+		};
 	};
-}
+};
 
 
 #class {rej_rotate} {close}

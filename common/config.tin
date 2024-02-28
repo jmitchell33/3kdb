@@ -1,14 +1,16 @@
 #class common_config kill;
 #class common_config open;
 
-#conf pack 1;
-#conf color on;
-#conf {repeat enter} on;
+#config pack 1;
+#config color on;
+#config {repeat enter} on;
+#config log plain;
 
 #info env save;
 #info system save;
 
 #var cwd $info[SYSTEM][CWD];
+#format user_cap {%n} $user;
 
 #NOP -- Ticker to set incombat variable;
 #ticker check_combat {
@@ -18,7 +20,7 @@
         #var incombat 1;
     };
     #var incombat_last_round $mip[round];
-} {2};
+} {4};
 
 #alias {defaults_on} {
 	mipon;

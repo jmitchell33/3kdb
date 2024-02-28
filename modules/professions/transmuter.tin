@@ -57,7 +57,7 @@
                 transmute 5 $item quality to legendary;
             };
 
-            #NOP -- Above Level xxx the transmute ratio drops by 1 for average and above;
+            #NOP -- Above Level 50 the transmute ratio drops by 1 for average and above;
          #NOP   #if {"$item_quality" == "average"} {
          #NOP       #2 {unstash $item_quality $item};
          #NOP       transmute 2 $item quality to good;
@@ -147,7 +147,8 @@
                                         #if {$satchel_item[average] >= 3} {satchel_retrieve_xmute 3 average {$satchel_item[name]} $satchel_item[average];};
                                         #if {$satchel_item[good] >= 4} {satchel_retrieve_xmute 4 good {$satchel_item[name]} $satchel_item[good];};
 
-                                        #NOP -- Above Level xxx the transmute ratio drops by 1 for average and above;
+                                        #NOP -- Above Level 50 the transmute ratio drops by 1 for average and above;
+                                        #NOP -- This appears to only apply to components below a certain level - maybe it's relative to your level?;
                                         #NOP #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
                                         #NOP #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
                                         #NOP #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};

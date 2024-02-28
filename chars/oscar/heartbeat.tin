@@ -1,61 +1,15 @@
 #class {player_heartbeat} {kill}
 #class {player_heartbeat} {open}
 
-#var bot_toggle 0;
-#var ash_toggle 0;
-#var golem_toggle 0;
-#var immersion_casts 1;
-#var ms7_toggle 0;
-#var corpse_toggle 0;
-
-#var toggle_spelltap 1;
-
 #alias {_player_heartbeat} {
-    #var mc_threshold 90;
-    #var mc_danger 60;
-    #math sp_threshold {$my[sp][max] * .90};
-    #math sp_percent {$my[sp][current] * 100 / $my[sp][max]};
-    #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
 
     #if !$idle_flag {
-        #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {
-            ptell Pausing to study spellbook.;
-            #var bot_toggle 1;
-            .pause;
-        };
-        #if {($my[sp][current] < $sp_min || $my[gp1][current] > $monitors[saturation-stop]) && $corpses[total] < 5 && !$bot_toggle && $bot[active]} {
-            #send {ptell Stopping:  SP: $my[sp][current] Saturation: $my[gp1][current] Mental Cognition: $hpbar_mc};
-            #var bot_toggle 1;
-            .pause;
-        };
-        #if {($my[sp][current] > $sp_threshold && $my[gp1][current] < $monitors[saturation-start] && $hpbar_mc > $mc_threshold) && $bot_toggle && $bot[active]} {
-            #send {ptell Resuming:  SP: $my[sp][current] Saturation: $my[gp1][current] Mental Cognition: $hpbar_mc};
-            #var bot_toggle 0;
-            ..;
-        };
         #if {$beads && $hp_percent < 450 && sp_percent > 90} {
             check_beads;
         };
     };
 
     #if {!$idle_flag && $action_round < $mip[round]} {
-        #if {$my[gp1][current] > $monitors[saturation-corpse] && $corpses[total] > 0 && !$my[super][current] && !$corpse_toggle} {
-            #var corpse_toggle 1;
-            corpse_select;
-            #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 0;i}
-        };
-
-        #if {$my[immersion][count] && !$my[immersion][rounds] && ($my[golem][reset] > 80 || $my[sp][current] < $sp_min)} {
-            #var my[immersion][active] 1;
-            cast mystic immersion;
-            cast giant strength oscar;
-            cast giant strength golem;
-            #if $summoner {summon_str;cast haste on summons;};
-            #if $beads {check_beads};
-            repeat combat/cast mantle;
-            #delay 180 {ash on;ash;};
-        };
-
         #if {$my[sp][current] < $sp_min && $my[eternal][heal] && !$my[immersion][active]} {
             (heal oscar;
         };

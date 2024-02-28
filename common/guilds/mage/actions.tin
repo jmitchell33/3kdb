@@ -20,7 +20,6 @@
     #var mob[pws] 1;
 };
 
-
 #ACTION {^You begin speaking in soft low tones, slowly uttering forth the syllables} {#var mob[atrophy] 1} {1};
 #ACTION {^A %* is immune to this spell.$} {#var mob[atrophy] 2} {1};
 
@@ -32,30 +31,6 @@
 #ACTION {^Your immersion has expired.$} {#var my[immersion][active] 0;} {2};
 #action {^There is darkness as a Orb of Light goes dark.$} {cast light} {2};
 
-#ACTION {----*> Your prismatic_aura greater contingency has dissipated!<*----} {
-    cast greater contingency as prismatic_aura#cast prismatic aura
-} {1};
-#ACTION {----*> Your prismatic_aura contingency has dissipated!<*----} {
-    cast contingency as prismatic_aura#cast prismatic aura
-} {1};
-#ACTION {----*> Your stoneskin greater contingency has dissipated!<*----} {
-    cast greater contingency as stoneskin#cast stoneskin
-} {1};
-#ACTION {----*> Your stoneskin contingency has dissipated!<*----} {
-    cast contingency as stoneskin#cast stoneskin
-} {1};
-#ACTION {----*> Your blink greater contingency has dissipated!<*----} {
-    cast greater contingency as blink#cast blink
-} {1};
-#ACTION {----*> Your blink contingency has dissipated!<*----} {
-    cast contingency as blink#cast blink
-} {1};
-#ACTION {----*> Your major_globe greater contingency has dissipated!<*----} {
-    cast greater contingency as major_globe#cast major globe
-} {1};
-#ACTION {----*> Your major_globe contingency has dissipated!<*----} {
-    cast contingency as major_globe#cast major globe
-} {1};
 
 #NOP --- MAGE ACTIONS;
 #ACTION {^You are no longer allowing your SP to be healed.} {#var ash 0} {1};
@@ -85,40 +60,18 @@
 
 #var golemTypes {Straw;Wood;Flesh;Clay;Stone;Rope;Iron;Crystal};
 
-
 #ACTION {^You throw your golem construction materials to the ground and} {
-    checkStrategy {golem_assist} {say golem, you are now in group golem/assist always/ibc};
-    checkStrategy {golem_defend} {say golem, you are now in group golem/defend always};
-    #if $golem_tank {
-        say golem, defend me
-    };
+    checkStrategy {golem_assist} {say golem, you are now in group summons/assist always/ibc};
+    checkStrategy {golem_defend} {say golem, you are now in group summons/defend always};
 } {1};
 
 #ACTION {%* dealt the killing blow to {Flesh|Clay|Stone|Crystal|Diamond|Straw|Rope|Iron|Wood} golem.$} {#var golem_toggle 1} {1};
 #ACTION {^The golem shudders for a moment, then falls to the ground in a heap.$} {#var golem_toggle 1} {1};
 
-#ACTION {%w is already hasted.$} {
-    #foreach $golemTypes {golem} {
-        #if {"%1" == "$golem"} {
-            #var golem_haste 1;
-        };
-    };
-} {1};
-
 #action {You throw your golem construction materials to the ground and utter a few} {
     #var golem_toggle 1;
     #delay 3 {#var golem_toggle 0}
-    cast haste on golem;
 } {2};
-
-#action {As your spell weaves its pattern %*\n%asuddenly grows larger!} {
-    #var summon_mf 1;
-} {2};
-
-#ACTION {^El Jefe %* seems to slow down...$} {
-    #var golem_haste 0;
-    cast haste on golem;
-} {1};
 
 #NOP -- If your familiar doesn't have money
 #ACTION {%* says: I did not have enough coins.} {#var ffetch_coins 0};
@@ -143,9 +96,5 @@
         #delay 5 {keep materials;cast create golem};
     };
 } {2};
-
-
-#ACTION {^A %* seems to slow down...$} {#var summon_haste 0} {1};
-#ACTION {^A %* seems to grow smaller.} {#var summon_mf 0} {1};
 
 #class {guild_actions} {close}

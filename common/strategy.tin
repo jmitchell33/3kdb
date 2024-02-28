@@ -100,6 +100,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {illume}  {active} {0} {description} {Pure: Illume}}};
 #list strategyList add {{{guild} {necromancer} {name} {skullfire}  {active} {0} {description} {Pure: Skullfire}}};
 #list strategyList add {{{guild} {necromancer} {name} {corrode}  {active} {0} {description} {Pure: Corrode}}};
+#list strategyList add {{{guild} {necromancer} {name} {psibleed}  {active} {0} {description} {Pure: Psibleed}}};
 #list strategyList add {{{guild} {necromancer} {name} {diurnum}  {active} {0} {description} {Necro: Diurnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {nocturnum}  {active} {0} {description} {Necro: Nocturnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
@@ -138,8 +139,6 @@
 
 #if {"$guild" == "mage"} {
     #var toggle_spelltap 1;
-    #var summon_mf 0;
-    #var summon_haste 0;
 
     #alias _strategy_mage {
         #if {!$idle_flag && $action_round < $mip[round]} {
@@ -166,8 +165,6 @@
             checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
         };
 
-        #if {!$golem_haste && "$my[summon][golem]" != "0"} {cast haste on golem;};
-
         #if {$my[golem][current] && "$my[summon][golem]" == "0"} {
             checkStrategy {golem_assist} {cast create golem};
             #if $golem_toggle {
@@ -175,8 +172,8 @@
             };
         };
         #if {$sp_percent > 30} {
-            #if {!$summon_mf} {checkStrategy {summon_mf} {cast monstrous fortitude on summons};};
-            #if {!$summon_haste} {checkStrategy {summon_haste} {cast haste on summons};};
+            #if {$summon_renew_mf} {cast monstrous fortitude on summons;#var summon_renew_mf 0;};
+            #if {$summon_renew_haste} {cast haste on summons;#var summon_renew_haste 0};
         };
     };
 };
@@ -186,12 +183,13 @@
 #alias _strategy_necro_start {
     #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
 
-    checkStrategy {snare} {snare;};
-    checkStrategy {rabies} {rabies;};
-    checkStrategy {corrode} {corrode;};
-    checkStrategy {scythe} {scythe;};
-    checkStrategy {call} {call;};
-    checkStrategy {fury} {fury prime;};
+    checkStrategy {snare} {snare};
+    checkStrategy {rabies} {rabies};
+    checkStrategy {corrode} {corrode};
+    checkStrategy {scythe} {scythe};
+    checkStrategy {call} {call};
+    checkStrategy {fury} {fury prime};
+    checkStrategy {psibleed} {psibleed};
     checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
 };
 

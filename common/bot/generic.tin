@@ -173,6 +173,11 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
 };
 
+#alias .unpause {
+    #var bot[paused] 0;
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+};
+
 
 #act {^-M-_%*} {
     #var mob[long] %1;
@@ -312,6 +317,7 @@
 };
 
 #alias {.bot} {#if {$bot[paused] == 0} {..}};
+
 
 #action {{(.*) (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.}} {
     #echo {----- BOT REGISTERED KILL -----};

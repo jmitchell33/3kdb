@@ -1,0 +1,34 @@
+#class 3kdb_themes kill;
+#class 3kdb_themes open;
+
+#NOP -- Use the "colors" alias to see available colors;
+
+#if {"$theme" == ""} {
+    #SUBSTITUTE {-R-_} {};
+    #SUBSTITUTE {-X-_} {};
+    #SUBSTITUTE {-D-_} {};
+};
+
+#if {"$theme" == "byron"} {
+    #NOP Room Short;
+    #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
+    #NOP Room exits;
+    #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
+    #NOP Room description -- not really good to do here since it's multiline;
+    #SUBSTITUTE {-D-_} {};
+    #NOP Mobs;
+    #SUBSTITUTE {-M-_%1} {<fcb>%1<088>};
+    #NOP Players;
+	#SUBSTITUTE {-P-_%1} {<ffa>%1<088>};
+    #NOP Weapons;
+	#SUBSTITUTE {-w-%1} {};
+    #NOP Objects;
+	#SUBSTITUTE {-o-%1} {};
+    #NOP Armours;
+	#SUBSTITUTE {-a-%1} {};
+    #NOP Items;
+	#SUBSTITUTE {-i-%1} {};
+};
+
+
+#class 3kdb_themes close;

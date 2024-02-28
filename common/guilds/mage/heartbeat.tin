@@ -2,8 +2,19 @@
 #class {guild_heartbeat} {open}
 
 #var studying 0;
+#var bot_toggle 0;
+#var corpse_toggle 0;
+
+#var toggle_spelltap 1;
 
 #alias {_guild_heartbeat} {
+	#var mc_threshold 90;
+    #var mc_danger 60;
+    #math sp_danger {$my[sp][max] * .30};
+    #math sp_threshold {$my[sp][max] * .90};
+    #math sp_percent {$my[sp][current] * 100 / $my[sp][max]};
+    #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
+
 	#if !$idle_flag {
 		#if $defs[MB] {#if !$my[prots][MB] {cast mindblank} {#nop}};
 		#if $defs[PA] {#if !$my[prots][PA] {cast prismatic aura} {#nop}};
@@ -27,6 +38,36 @@
 		study spellbook;
 	};
 
+    #if !$idle_flag {
+        #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {
+            ptell Pausing to study spellbook.;
+            #var bot_toggle 1;
+            .pause;
+            #ticker mcBotResume {
+                #if {$hpbar_mc > $mc_threshold} {
+                    #unticker mcBotResume;
+                    .unpause;
+                    #var bot_toggle 0;
+                    #if {!$incombat} {.bot};
+                };
+            } {2};
+        };
+
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$my[immersion][count]} {
+            ptell Pausing to regenerate SPs.;
+            #var bot_toggle 1;
+            .pause;
+            #ticker spBotResume {
+                #if {$my[sp][current] > $sp_threshold} {
+                    #unticker spBotResume;
+                    .unpause;
+                    #var bot_toggle 0;
+                    #if {!$incombat} {.bot};
+                };
+            } {2};
+        };
+    };
+
 	#NOP -- Heartbeat actions that should only be attempted once per round;
     #if {!$idle_flag && $action_round < $mip[round]} {
 		#if {!$self_haste && $sp_percent > 30} {
@@ -34,11 +75,22 @@
 			#var self_haste 1;
 		};
 
+		#if {$my[gp1][current] > $monitors[saturation-corpse] && $corpses[total] > 0 && !$my[super][current] && !$corpse_toggle} {
+            #var corpse_toggle 1;
+            corpse_select;
+            #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 0;i}
+        };
+
+        #if {$my[immersion][count] && !$my[immersion][rounds] && ($my[golem][reset] > 80 || $my[sp][current] < $sp_danger)} {
+            #var my[immersion][active] 1;
+            cast mystic immersion;
+            #delay 180 {ash on;ash;};
+        };
 		
 		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
         #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
         #if {$my[super][current] && $my[gp1][current] > $monitors[saturation-corpse]} {cast explosive release};
-        #if {$my[gem] < 80 && !$go_fetch} {#if $ffetch_coins {#var go_fetch 1;ffetch gem};};
+        #if {$my[gem] < 90 && !$go_fetch} {#if $ffetch_coins {#var go_fetch 1;ffetch gem};};
 
         #NOP turn ash off if using MI;
         #if {$my[immersion][rounds] > 0 && $ash > 0} {

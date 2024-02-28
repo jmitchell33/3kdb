@@ -1,6 +1,9 @@
 #alias common_corpse kill;
 #class common_corpse open;
 
+#NOP This variable determines whether or not to fire corpse_trig;
+#var corpsetrigStatus 1;
+
 #alias formatItem {
     #format result {<acf>%+10s  %s<088>} {%1} {%2};
     #echo { $result};
@@ -48,14 +51,11 @@
                 #loop 1 &corpseActions[] item {
                     formatItem {<afc>$item:} {<efe>$corpseActions[$item][name]<088>};
                 };
-                #echo { \n<efa>corpsetrig++<088> <bcc>name<088> to <efc>increase<088> an action's priority};
-                #echo { <efa>corpsetrig--<088> <bcc>name<088> to <fac>decrease<088> an action's priority};
-                #echo { \n<efa>corpsetrig<088> <bcc>name<088> to add or remove an action};
-                #echo { <efa>corpsetrig-all<088> to see available actions};
-                #echo { <efa>corpsetrig clear<088> to clear corpsetrig};
+                #echo {\n <dfa>corpse_trig<088> will execute the corpsetrig actions.};
+                #echo { <dfa>corpsetrig-help <088> to see all available commands.};
             } {
                 #echo { There are currently no actions added to corpse_trig};
-                #echo { \n<efa>corpsetrig<088> <bcc>name<088> to add or remove an action};
+                #echo { \n <efa>corpsetrig<088> <bcc>name<088> to add or remove an action};
                 #echo { <efa>corpsetrig-all<088> to see available actions};
                 #echo { If the action doesn't exist, it will be added};
             };
@@ -63,6 +63,21 @@
     };
 };
 
+#alias corpsetrig-help {
+    #echo { ================ <dfa>3kdb CORPSE TRIGGER <088> ================ };
+    #echo {\n<faa>Usage:<088> };
+    #echo { <efa>corpse_trig<088> will execute the corpsetrig actions.};
+    #echo {\n<faa>Adding, Removing, and Moving Actions:<088> };
+    #echo { <efa>corpsetrig-all<088> to see available actions};
+    #echo {\n <efa>corpsetrig<088> <bcc>name<088> to add or remove an action};
+    #echo { <efa>corpsetrig clear<088> to clear corpsetrig};
+    #echo {\n <efa>corpsetrig++<088> <bcc>name<088> to <efc>increase<088> an action's priority};
+    #echo { <efa>corpsetrig--<088> <bcc>name<088> to <fac>decrease<088> an action's priority};
+    #echo {\n<faa>Modes:<088> };
+    #echo { <efa>corpsetrig-kb<088> to toggle corpsetrig for $user_cap killing blows};
+    #echo { <efa>corpsetrig-off<088> to turn off the corpsetrig};
+    #echo { <efa>corpsetrig-on<088> to turn on the corpsetrig};
+};
 
 #alias corpsetrig++ {
     #if {"%0" != ""} {
@@ -107,6 +122,26 @@
     };
 };
 
+#alias corpsetrig-kb {
+    #if !$corpsetrigKB {
+        #echo { <bba>corpse_trig will fire on all killing blows<088>};
+        #var corpsetrigKB 0;
+    } {
+        #echo { <bba>corpse_trig will only fire on $user killing blow<088>};
+        #var corpsetrigKB 1;
+    };
+};
+
+#alias corpsetrig-on {
+    #var corpsetrigStatus 1;
+    #echo { <bba>corpse_trig is now on<088>};
+};
+
+#alias corpsetrig-off {
+    #var corpsetrigStatus 0;
+    #echo { <bba>corpse_trig is now off<088>};
+};
+
 
 #alias {corpsetrig-all} {
     #echo {\n<ffb>   Current Corpse Trigger Actions   <088>};
@@ -133,7 +168,7 @@
             };
         };
     };
-    #echo { \n<efa>corpsetrig<088> <bcc>action<088> to add or remove an action};
+    #echo { \n <efa>corpsetrig<088> <bcc>action<088> to add or remove an action};
     #echo { <efa>corpsetrig-all<088> to see available actions};
     #echo { If the action doesn't exist, it will be added};
 };
@@ -141,22 +176,52 @@
 
 #list corpseList clear;
 #list corpseList add {{{name} {aoe} {guild} {all} {action} {immolate corpse} {active} {0} {description} {AOE Armor: Immolate Corpse}}};
-#list corpseList add {{{name} {divvy} {guild} {all} {action} {divvy gold} {active} {0} {description} {Divvy gold}}};
-#list corpseList add {{{name} {pause} {guild} {all} {action} {#delay 2 {#NOP}} {active} {0} {description} {2 Second Pause}}};
+#list corpseList add {{{name} {divvy} {guild} {all} {action} {divvy gold} {active} {0} {description} {Gold: Divvy gold}}};
+#list corpseList add {{{name} {coins} {guild} {all} {action} {get coins from corpse} {active} {0} {description} {Gold: Get coins from corpse}}};
+#list corpseList add {{{name} {delay} {guild} {all} {action} {#NOP} {active} {0} {description} {2 Second Delay}}};
 #list corpseList add {{{name} {wrap} {guild} {all} {action} {wrap remains}  {active} {0} {description} {Coffin: Wrap Corpse}}};
 #list corpseList add {{{name} {slab} {guild} {all} {action} {slab remains}  {active} {0} {description} {Freezer: Slab Corpse}}};
+#list corpseList add {{{name} {szCaps} {guild} {all} {action} {eat blue capsule;eat orange capsule}  {active} {0} {description} {SZ: Eat Blue/Orange Capsules}}};
+#list corpseList add {{{name} {szGreenCap} {guild} {all} {action} {eat green capsule}  {active} {0} {description} {SZ: Eat Green Capsule}}};
+#list corpseList add {{{name} {crafting} {guild} {all} {action} {stash all;keep all component}  {active} {0} {description} {Crafting: Stash All & Keep All Components}}};
+#list corpseList add {{{name} {getAll} {guild} {all} {action} {get all}  {active} {0} {description} {Get all}}};
+#list corpseList add {{{name} {collector} {guild} {all} {action} {#loop 10 1 i {put all in bag $i}}  {active} {0} {description} {Collector: Put all in bags (10 bags)}}};
+#list corpseList add {{{name} {hoarder} {guild} {all} {action} {#loop 20 1 i {put all in bag $i}}  {active} {0} {description} {Hoarder: Put all in bags (20 bags)}}};
+#list corpseList add {{{name} {spoon} {guild} {all} {action} {eat corpse}  {active} {0} {description} {Spoon: Eat Corpse}}};
+#list corpseList add {{{name} {cocoon} {guild} {all} {action} {fuse 100}  {active} {0} {description} {Cocoon: Fuse 100hps}}};
 #list corpseList add {{{name} {dirge} {guild} {bard} {action} {perform dirge}  {active} {0} {description} {Bard: Perform Dirge}}};
-#list corpseList add {{{name} {deener} {guild} {juggernaut} {action} {deener}  {active} {0} {description} {Juggernaut: Deener Drain Stim}}};
-#list corpseList add {{{name} {fdeener} {guild} {juggernaut} {action} {fdeener}  {active} {0} {description} {Juggernaut: Fdeener Drain Stim}}};
+#list corpseList add {{{name} {deener} {guild} {juggernaut} {action} {deener}  {active} {0} {description} {Juggernaut: Deener}}};
+#list corpseList add {{{name} {fdeener} {guild} {juggernaut} {action} {fdeener}  {active} {0} {description} {Juggernaut: Fdeener 1x}}};
+#list corpseList add {{{name} {fdeener2} {guild} {juggernaut} {action} {fdeener;fdeener}  {active} {0} {description} {Juggernaut: Fdeener 2x }}};
 #list corpseList add {{{name} {edrain} {guild} {elemental} {action} {evoke energy drain}  {active} {0} {description} {Elemental: Energy Drain}}};
 #list corpseList add {{{name} {preserve} {guild} {necromancer} {action} {qtrance preserve remains/get remains}  {active} {0} {description} {Necro: Preserve Remains}}};
+#list corpseList add {{{name} {corpseBlast} {guild} {mage} {action} {cast corpse blast}  {active} {0} {description} {Mage: Corpse Blast}}};
+#list corpseList add {{{name} {spelltap} {guild} {mage} {action} {cast spell tap on corpse}  {active} {0} {description} {Mage: Spell Tap}}};
+#list corpseList add {{{name} {anchor} {guild} {mage} {action} {cast dispel magic}  {active} {0} {description} {Mage: Dispel Magic (remove anchor)}}};
+#list corpseList add {{{name} {spellbook} {guild} {mage} {action} {study spellbook}  {active} {0} {description} {Mage: Study Spellbook}}};
 #list corpseList indexate name;
 
 
 #alias corpse_trig {
-    #if {&corpseActions[] > 0} {
-        #foreach $corpseActions[%*] item {
-            $item[action];
+    #if $corpsetrigStatus {
+        #if {&corpseActions[] > 0} {
+            #loop 1 &corpseActions[] item {
+                #if {$corpseActions[$item][name] == "delay"} {
+                    #var pauseCorpseAction 1;
+                    #var lastItem $item
+                    #math nextItem {$item + 1};
+                    #break
+                } {
+                    $corpseActions[$item][action];
+                };
+            };
+            #if {$pauseCorpseAction} {
+                #delay 2 {
+                    #loop $nextItem &corpseActions[] item {
+                        $corpseActions[$item][action];
+                    };
+                };
+            };
         };
     };
 };

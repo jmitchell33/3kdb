@@ -4,14 +4,6 @@
 #var my[hmheal][self] 1;
 #var my[hmheal][others] 1;
 
-#NOP -- Generic corpse trigger;
-#action {^%w dealt the killing blow to %*.} {
-    mob_status_clear;
-    #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
-    #if !$idle_flag {corpse_trig};
-    #math party[member][%1][kills] {$party[member][%1][kills] + 1};
-} {5};
-
 #NOP -- Auto ask/solve/return missions;
 #act {-M-_%* <?>} {mission ask} {3};
 #act {-M-_%* <!>} {mission return} {3};

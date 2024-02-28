@@ -248,17 +248,15 @@
 #NOP --------------------------------------- NECROMANCER SUPPORT ACTIONS  ------------------------------------------;
 #ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};daemon graft $lower;#list dgraft add $lower}} {6};
 #ACTION {%w goes 'Breakin the law! Breakin the law!' at you.} {#if !$idle_flag {qtrance preserve remains>50;qtrance preserve remains>50}} {6};
-#ACTION {You see a shadowy form escape from %w and disappear!} {#SHOWME DAEMON GRAFT LEFT %1};
+#ACTION {You see a shadowy form escape from %w and disappear!} {#SHOWME DAEMON GRAFT LEFT %1} {2};
 
 
 #NOP -- Teleport helpers;
-#action {Visions of the guild appear first in your mind, then reality...} {mapgo necro_rr};
+#action {Visions of the guild appear first in your mind, then reality...} {mapgo necro_rr} {2};
 
-#NOP #gag {%sYour destiny will wait a bit longer %w.};
-#NOP #gag {%sI can wait for you %w.  I can wait a very long time.};
-#NOP #gag {%sLive onward my son.};
-#NOP #gag {From afar, Death favors you.};
-#NOP #gag {Don't worry my son, I always collect my debts...eventually.};
-
+#NOP Make sure these things don't interfere with other triggers;
+#action {^-You activate your atrance-} {
+    #NOP
+} {1};
 
 #class {guild_actions} {close}

@@ -1,0 +1,46 @@
+#class guild_miphp kill;
+#class guild_miphp open;
+
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+    #if {&my[summons][] > 0} {#var summoner 1};
+
+    thousandsFormatNumber my[g2n];
+	#if $my[prots][S]  {#if $defs[shield] {#var shield_string <ACA><fff>*S*<088>} {#var shield_string *S*} } {#var shield_string {}};
+	#if $my[prots][B]  {#if $defs[blink] {#var blink_string <ACA><fff>*B*<088>} {#var blink_string *B*} } {#var blink_string {}};
+	#if $my[prots][PA] {#if $defs[PA] 	 {#var pa_string <ACA><fff>*PA*<088>} {#var pa_string *PA*} } {#var pa_string {}};
+	#if $my[prots][PS] {#if $defs[PS] 	 {#var ps_string <ACA><fff>*PS*<088>} {#var ps_string *PS*} } {#var ps_string {}};
+	#if $my[prots][A]  {#if $defs[A] {#var armor_string <ACA><fff>*A*<088>} {#var armor_string *A*} } {#var armor_string {}};
+	#if $my[prots][M]  {#if $defs[M] {#var m_string <ACA><fff>*M*<088>} {#var m_string *M*} } {#var m_string {}};
+	#if $my[prots][MB] {#if $defs[MB] {#var mb_string <ACA><fff>*MB*<088>} {#var mb_string *MB*} } {#var mb_string {}};
+	#if $my[prots][MS] {#if $defs[ms] {#var mag_string <ACA><fff>*MS*<088>} {#var mag_string *MS*} } {#var mag_string {}};
+	#if $my[prots][RS] {#if $defs[rs] {#var rs_string <ACA><fff>*RS*<088>} {#var rs_string *RS*} } {#var rs_string {}};
+	#if $my[prots][SS] {#if $defs[SS] {#var ss_string <ACA><fff>*SS*<088>} {#var ss_string *SS*} } {#var ss_string {}};
+	#if $my[prots][mg] {#if $defs[mg] {#var mg_string <ACA><fff>*mg*<088>} {#var mg_string *mg*} } {#var mg_string {}};
+	#if $my[prots][MG] {#if $defs[MG] {#var MG_string <ACA><fff>*MG*<088>} {#var MG_string *MG*} } {#var MG_string {}};
+	#if $my[prots][PG] {#if $defs[pg] {#var pg_string <ACA><fff>*PG*<088>} {#var pg_string *PG*} } {#var pg_string {}};
+	#if $my[prots][PE] {#if $defs[pe] {#var pe_string <ACA><fff>*PE*<088>} {#var pe_string *PE*} } {#var pe_string {}};
+	
+	#if {$my[immersion][rounds] > 0} {#var immersion_string $my[immersion][count]/$my[immersion][rounds]} {#var immersion_string $my[immersion][count]};
+
+	#var prots_string {$ps_string $m_string $mb_string $pa_string $MG_string $ss_string $armor_string $mag_string $rs_string $mg_string $pg_string $pe_string $blink_string $shield_string};
+	#replace prots_string  { } {};
+	#replace prots_string  {*} { };
+
+	#if {$ash == 0} {#var ash_string <FAA><bbb>OFF<088>};
+	#if {$ash == 1} {#var ash_string <ACA><fff>PLYRS<088>};
+	#if {$ash == 2} {#var ash_string <ACA><fff>ALL<088>};
+
+	#list temp clear;
+	#list temp add {<eeb>HP:<ffe>$hp/$hp_max <eeb>SP:<ffe>$sp/$sp_max <eeb>Sat:<ffe>$gp1/$gp1_max  <eeb>C:<ffe>$gp2/$gp2_max  <eeb>E:<ffe>$ehealth<088>};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Sat:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]<088>};
+	#list temp add {<eeb>Prots: <ffe>$prots_string <eeb>Gem: <ffe>$my[gem]%  <eeb>MC: <ffe>$my[mental_cognition]% ASH: $ash_string<088>};
+	#list temp add {<eeb>Golem: $my[golem][current]/$my[golem][reset]%  <eeb>Super: <ffe>$my[super][current]/$my[super][reset]%  <eeb>I: <ffe>$immersion_string<088>  <eeb>G2N: <ffe>$my[g2n]<088>};
+	#list temp add {<eeb>Gxp: <ffe>$gxp_gained <ffe>($average_gxp/rnd over $total_rounds_string rounds)<088>};
+    #if $summoner {#list temp add {$summon_string}};
+
+	#var hpbar[prompt] $temp;
+};
+
+#class guild_miphp close

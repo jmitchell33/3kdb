@@ -17,40 +17,6 @@
     kill $mob[target];
 };
 
-#alias corpse_trig {
-  get coins from corpse;
-  #if $spoon {eat corpse} {
-    slab corpse;
-    wrap corpse;
-  };
-
-  #if $bags {
-    #loop 1 20 i {
-        smuggle remove sack;
-        keep sack;
-        put all in sack;
-    };
-    #20 {smuggle sack};
-  };
-
-  #if {"$area" == "Section Z"} {
-      get all from corpse;
-      eat green;eat blue;eat orange;
-  };
-
-  #if {$aoe_immo} {
-    immolate all;
-  };  
-};
-
-#alias .check_death {
-  #echo {CHECKDEATH ALIAS FIRED};
-  .pause;
-  fuse 100;
-  corpse_trig;get all;stash all;keep all component;
-  #delay 2 {#if {!$incombat} {psi_donate} {#var bot[paused] 0}};
-};
-
 #alias {psi_donate} {
   #var psi_donate 1;
   #map get roomvnum donate_go_back;
