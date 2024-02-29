@@ -19,6 +19,10 @@
     #showme \n<bab>strategy<088> <bcc>name<088> to add or remove a strategy;
 };
 
+#alias strategy-clear {
+    #list strategyActive clear;
+    #if {"$draw[strategy][active]" == "on"} {draw_strategy};
+};
 
 #alias strategy {
     #list {strategyList} {find} {%0} {tempListIndex};
@@ -111,10 +115,13 @@
 #list strategyList add {{{guild} {mage} {name} {atrophy}  {active} {0} {description} {Atrophy Mob (Nukes Special)}}};
 #list strategyList add {{{guild} {mage} {name} {edrain}  {active} {0} {description} {Edrain Mob (Removes 1 lvl from Mob)}}};
 #list strategyList add {{{guild} {mage} {name} {spelltap}  {active} {0} {description} {Spelltap Toggling}}};
+#list strategyList add {{{guild} {mage} {name} {feeblemind}  {active} {0} {description} {Feeblemind (-int)}}};
+#list strategyList add {{{guild} {mage} {name} {phantasmal}  {active} {0} {description} {Phantasmal Killer}}};
 #list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
 #list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
 #list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
+
 #list strategyList indexate name;
 
 
@@ -147,11 +154,23 @@
             };
             
             #if {$mob[edrain] < 1} {
-                checkStrategy {edrain} {cast energy drain}
+                checkStrategy {edrain} {cast energy drain};
             };
 
             #if {$mob[atrophy] < 1} {
-                checkStrategy {atrophy} {cast mystic atrophy}
+                checkStrategy {atrophy} {cast mystic atrophy};
+            };
+
+            #if {$mob[feeblemind] < 1} {
+                checkStrategy {feeblemind} {cast feeblemind};
+            };
+
+            #if {$mob[phantasmal] < 1} {
+                checkStrategy {phantasmal} {
+                    cast phantasmal killer;
+                    checkStrategy {summon_haste} {cast haste on something};
+                    checkStrategy {summon_mf} {cast monstrous fortitude on something};
+                };
             };
         };
 
@@ -165,12 +184,9 @@
             checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
         };
 
-        #if {$my[golem][current] && "$my[summon][golem]" == "0"} {
-            checkStrategy {golem_assist} {cast create golem};
-            #if $golem_toggle {
-                checkStrategy {golem_defend} {cast create golem;#delay 2 {say golem, defend me}};
-            };
-        };
+        checkStrategy {golem_assist} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
+        checkStrategy {golem_defend} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
+
         #if {$sp_percent > 30} {
             #if {$summon_renew_mf} {cast monstrous fortitude on summons;#var summon_renew_mf 0;};
             #if {$summon_renew_haste} {cast haste on summons;#var summon_renew_haste 0};

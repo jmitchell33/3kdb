@@ -9,6 +9,8 @@
 
 
 #NOP --- MOB STATUS TRACKING;
+#ACTION {You wave your hands and *POOF*, %* worst nightmare steps from} {#var mob[phantasmal] 1} {1};
+#ACTION {You focus your destructive energy upon the mind of a %*} {#var mob[feeblemind] 1} {1};
 #ACTION {%w seems to speed up...$} {#var mob[slow] 0} {1};
 #ACTION {^You raise your arms and suddenly %* is moving much slower!$} {#var mob[slow] 1} {1};
 #ACTION {%w is already slowed.$} {#var mob[slow] 1} {1};
@@ -19,10 +21,10 @@
 #ACTION {You scream a power word at %*!$} {
     #line oneshot #ACTION {%* stumbles dazed and confused!$} {#var mob[pws] 1;};
     #line oneshot #ACTION {%* is unaffected by your spell!$} {#var mob[pws] 0;};
-};
+} {2};
 #action {They are already stunned!$} {
     #var mob[pws] 1;
-};
+} {2};
 
 #ACTION {^You begin speaking in soft low tones, slowly uttering forth the syllables} {#var mob[atrophy] 1} {1};
 #ACTION {^A %* is immune to this spell.$} {#var mob[atrophy] 2} {1};

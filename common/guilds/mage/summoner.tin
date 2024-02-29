@@ -1,3 +1,4 @@
+#class {guild_summoner} kill
 #class {guild_summoner} open
 
 #gag {  --> %*};
@@ -25,140 +26,96 @@
     cast giant strength on golem;
 };
 
+#alias _handleSummonString {
+	#list my[summons] clear;
+	#var my[golem][active] 0;
+
+	#loop 1 &summonList[] index {
+		#var summon_haste 0;
+		#var summon_mf 0;
+		#var summon_tanking 0;
+		#regex {$summonList[$index]} {%*:} {
+				#var tempName &1;
+				#list tempName explode { };
+				#format summon_name {%n} {$tempName[&tempName[]]};
+				#var keyName $summon_name;
+		};
+		#regex {$summonList[$index]} {~} {#var summon_tanking 1} {#var summon_tanking 0};
+		#regex {$summonList[$index]} {!} {#var summon_haste 1} {
+			#var summon_haste 0;
+			checkStrategy {summon_haste} {
+				#if {"$keyName" == "Something"} {cast haste on something} {#var summon_renew_haste 1}};
+		};
+		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
+			#var summon_mf 0;
+			checkStrategy {summon_mf} {
+				#if {"$keyName" == "Something"} {cast monstrous fortitude on something} {#var summon_renew_mf 1}};
+		};
+
+		#var found_summon 0;
+		#list my[summons] {size} {tempSize};
+		#loop 1 $tempSize item {
+			#if {"$my[summons][${item}][keyName]" == "$keyName"} {#var found_summon 1;#var itemIndex $item};
+		};
+
+		#if {$found_summon} {
+			#math summon_type_count {$my[summons][${itemIndex}][count] + 1};
+			#var my[summons][${itemIndex}][count] $summon_type_count;
+			#var my[summons][${itemIndex}][haste] $summon_haste;
+			#var my[summons][${itemIndex}][mf] $summon_mf;
+			#if $summon_tanking {#var my[summons][${itemIndex}][tanking] 1};
+		} {
+			#list my[summons] add {{{keyName} {$keyName} {name} {$summon_name} {haste} {$summon_haste} {mf} {$summon_mf} {count} {1} {tanking} {$summon_tanking}}};
+		};
+	};
+
+	#var total_summons 0;
+	#foreach $my[summons][%*] item {
+		#math total_summons {$total_summons + $item[count]};
+	};
+
+	_prepSummonString;
+
+	#var mob[phantasmal] 0;
+	
+	#foreach $my[summons][%*] item {
+		#NOP -- If phantasmal killer is in the summon list, we can update the mob status report;
+		#if {"$item[keyName]" == "Something"} {#var mob[phantasmal] 1};
+
+		#NOP -- Check if your golem is out;
+		#if {"$item[keyName]" == "Golem"} {#var my[golem][active] 1};
+
+		#unvar summonItemName;
+		#if $item[mf] {#var summonItemName <eab>};
+		#if $item[haste] {#var summonItemName <ffa>};
+		#if {$item[count] > 1} {#var tempName ($item[count]) $item[name]} {#var tempName $item[name]};
+
+		#if $item[tanking] {#cat summonItemName {${tank_icon} $tempName ${tank_icon} <088>}} {#cat summonItemName {$tempName<088>}};
+		#cat summon_string {$summonItemName, };
+	};
+
+	#NOP -- Remove the last 2 chars from summon_string, which will be ', ';
+	#format {summon_string_size} {%L} {$summon_string};
+	#math summon_string_size {$summon_string_size - 2};
+	#format {summon_string} {%.${summon_string_size}s} {$summon_string};
+};
+
 
 #action {  --> %*\n%a-hp-} {
 	#list summonList clear;
-	#list my[summons] clear;
 	#format summon1 {%p} {%1};
 	#format summon2 {%p} {%2};
 	#var summonList $summon1 $summon2;
 	#list summonList explode {, };
-	
-	#loop 1 &summonList[] index {
-		#var summon_haste 0;
-		#var summon_mf 0;
-		#var summon_tanking 0;
-		#regex {$summonList[$index]} {~} {#var summon_tanking 1} {#var summon_tanking 0};
-		#regex {$summonList[$index]} {!} {#var summon_haste 1} {
-			#var summon_haste 0;
-			checkStrategy {summon_haste} {#var summon_renew_haste 1};
-		};
-		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
-			#var summon_mf 0;
-			checkStrategy {summon_mf} {#var summon_renew_mf 1};
-		};
-		#regex {$summonList[$index]} {%*:} {
-				#var tempName &1;
-				#list tempName explode { };
-				#format summon_name {%n} {$tempName[&tempName[]]};
-				#var keyName $summon_name;
-		};
-
-		#var found_summon 0;
-		#list my[summons] {size} {tempSize};
-		#loop 1 $tempSize item {
-			#if {"$my[summons][${item}][keyName]" == "$keyName"} {#var found_summon 1;#var itemIndex $item};
-		};
-
-		#if {$found_summon} {
-			#math summon_type_count {$my[summons][${itemIndex}][count] + 1};
-			#var my[summons][${itemIndex}][count] $summon_type_count;
-			#var my[summons][${itemIndex}][haste] $summon_haste;
-			#var my[summons][${itemIndex}][mf] $summon_mf;
-			#if $summon_tanking {#var my[summons][${itemIndex}][tanking] 1};
-		} {
-			#list my[summons] add {{{keyName} {$keyName} {name} {$summon_name} {haste} {$summon_haste} {mf} {$summon_mf} {count} {1} {tanking} {$summon_tanking}}};
-		};
-	};
-
-	#var total_summons 0;
-	#foreach $my[summons][%*] item {
-		#math total_summons {$total_summons + $item[count]};
-	};
-
-	_prepSummonString;
-	
-	#foreach $my[summons][%*] item {
-		#unvar summonItemName;
-		#if $item[mf] {#var summonItemName <eab>};
-		#if $item[haste] {#var summonItemName <ffa>};
-		#if {$item[count] > 1} {#var tempName ($item[count]) $item[name]} {#var tempName $item[name]};
-
-		#if $item[tanking] {#cat summonItemName {${tank_icon} $tempName ${tank_icon} <088>}} {#cat summonItemName {$tempName<088>}};
-		#cat summon_string {$summonItemName, };
-	};
-
-	#NOP -- Remove the last 2 chars from summon_string, which will be ', ';
-	#format {summon_string_size} {%L} {$summon_string};
-	#math summon_string_size {$summon_string_size - 2};
-	#format {summon_string} {%.${summon_string_size}s} {$summon_string};
+	_handleSummonString;
 } {1};
 
 #action {  --> %*-hp-} {
 	#list summonList clear;
-	#list my[summons] clear;
 	#format summon1 {%p} {%1};
 	#var summonList $summon1;
 	#list summonList explode {, };
-	
-	#loop 1 &summonList[] index {
-		#var summon_haste 0;
-		#var summon_mf 0;
-		#var summon_tanking 0;
-		#regex {$summonList[$index]} {~} {#var summon_tanking 1} {#var summon_tanking 0};
-		#regex {$summonList[$index]} {!} {#var summon_haste 1} {
-			#var summon_haste 0;
-			checkStrategy {summon_haste} {#var summon_renew_haste 1};
-		};
-		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
-			#var summon_mf 0;
-			checkStrategy {summon_mf} {#var summon_renew_mf 1};
-		};
-		#regex {$summonList[$index]} {%*:} {
-				#var tempName &1;
-				#list tempName explode { };
-				#format summon_name {%n} {$tempName[&tempName[]]};
-				#var keyName $summon_name;
-		};
-
-		#var found_summon 0;
-		#list my[summons] {size} {tempSize};
-		#loop 1 $tempSize item {
-			#if {"$my[summons][${item}][keyName]" == "$keyName"} {#var found_summon 1;#var itemIndex $item};
-		};
-
-		#if {$found_summon} {
-			#math summon_type_count {$my[summons][${itemIndex}][count] + 1};
-			#var my[summons][${itemIndex}][count] $summon_type_count;
-			#var my[summons][${itemIndex}][haste] $summon_haste;
-			#var my[summons][${itemIndex}][mf] $summon_mf;
-			#if $summon_tanking {#var my[summons][${itemIndex}][tanking] 1};
-		} {
-			#list my[summons] add {{{keyName} {$keyName} {name} {$summon_name} {haste} {$summon_haste} {mf} {$summon_mf} {count} {1} {tanking} {$summon_tanking}}};
-		};
-	};
-
-	#var total_summons 0;
-	#foreach $my[summons][%*] item {
-		#math total_summons {$total_summons + $item[count]};
-	};
-
-	_prepSummonString;
-	
-	#foreach $my[summons][%*] item {
-		#unvar summonItemName;
-		#if $item[mf] {#var summonItemName <eab>};
-		#if $item[haste] {#var summonItemName <ffa>};
-		#if {$item[count] > 1} {#var tempName ($item[count]) $item[name]} {#var tempName $item[name]};
-
-		#if $item[tanking] {#cat summonItemName {${tank_icon} $tempName ${tank_icon} <088>}} {#cat summonItemName {$tempName<088>}};
-		#cat summon_string {$summonItemName, };
-	};
-
-	#NOP -- Remove the last 2 chars from summon_string, which will be ', ';
-	#format {summon_string_size} {%L} {$summon_string};
-	#math summon_string_size {$summon_string_size - 2};
-	#format {summon_string} {%.${summon_string_size}s} {$summon_string};
+	_handleSummonString;
 } {2};
 
 
