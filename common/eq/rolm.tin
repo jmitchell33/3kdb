@@ -37,7 +37,21 @@
 #NOP    #list caption_data set $draw[index][rolm] $rolm_string;     ;
 };
 
+#NOP -- Rolm shortcuts;
 
+#NOP -- set anchor point and winch back with map correction;
+#var set_anchor_point;
+#alias {setport} {
+    #var set_anchor_point $roomvnum;
+    touch anchor rune;
+};
+
+#alias {port} {
+    touch winch rune;
+    #DELAY {2} {
+        #map goto $set_anchor_point;
+    };
+};
 
 #NOP -- Easier weapon type or dmg switching;
 #alias {rolm} {
@@ -130,8 +144,8 @@
 
 #action {Warming in your grasp, %* twinkling points of} {#var rolm[charges] @word_to_number{%1}};
 
-#NOP -- use this to store a var when ROLM will reset
-#NOP Your fate is now sealed to the mighty artifact!
+#NOP -- use this to store a var when ROLM will reset;
+#NOP Your fate is now sealed to the mighty artifact!;
 
 #action {^The light fades and you materialize elsewhere....} {rating} {2};
 

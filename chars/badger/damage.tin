@@ -8,7 +8,7 @@
 #alias {dmgaset} {#send {aset numbers_pref [31;1m[Dmg]: [0m}}
 
 /* Hightlight Numbers */
-#sub {[Dmg]: You hit %* %d time%*for %d damage.} {<118>[DMG]:<088> You hit %1 %2 time%3for <118>%4<088> damage.}
+#substitute {[Dmg]: You hit %* %d time%*for %d damage.} {<faa>[DMG]:<088> You hit %1 %2 time%3for <faf>%4<088> damage.}
 
 /* Initialize variables */
 #var dmg[rnd][cur] 0
@@ -21,7 +21,7 @@
 #var dmg[tot] 0
 
 /* Action to capture dmg msg */
-#act {[Dmg]: You hit %* %d time%*for %d damage.} {
+#action {^[Dmg]: You hit %* %d time%*for %d damage.$} {
 	#NOP Set current hit dmg;
 	#var dmg[cur][hit] %4;
 
@@ -76,11 +76,14 @@
 	#var dmg[tot] 0
 }
 
-#NOP -- alias to display dmg data
+#NOP -- aliases to display dmg data
 #alias {ptdmg} {ptell Rnds: $dmg[rnd][tot] AvgHit: $dmg[avg] MaxHit: $dmg[max][hit] MaxRnd: $dmg[max][rnd] LastHit: $dmg[cur][hit]}
 #alias {ctdmg} {ctell Rnds: $dmg[rnd][tot] AvgHit: $dmg[avg] MaxHit: $dmg[max][hit] MaxRnd: $dmg[max][rnd] LastHit: $dmg[cur][hit]}
 
 #NOP -- reset dmg counter after energy well explodes
-#action {The brilliant sphere of energy explodes!} {#delay {2} dmgreset};
+#action {The brilliant sphere of energy explodes!} {#delay 2 {dmgreset}};
+
+#NOP -- reset dmg counter after frying
+#action {Energy flashes down from the sky, frying} {#delay 2 {dmgreset}};
 
 #class {damage} {close}

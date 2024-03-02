@@ -11,12 +11,6 @@
 #NOP -- AIRDROP
 #action {The computer chirps 'WARNING Stim energy levels too low to compensate} {#if {!$idle_flag} {airdrop}}
 
-#NOP --- ROLM and ETERNAL ENERGY WELL
-#action {The %* slightly in your grip...} {#if {$bot[active] == 1 && !$idle_flag} {touch owl rune;ewell}}
-
-#NOP -- ETERNAL WHO REFRESHED ROOM TRIG
-#action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1}
-
 #NOP --- JUGGERNAUT AMMO
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 6 1 40000}}
 
@@ -24,7 +18,7 @@
 #action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend ON for party}
 
 #NOP -- CORPSE TRIGGER (i dont have the ktrig vaf perk)
-#action {^=K=Badger dealt the killing blow to %*.=K=$} {#if {!$idle_flag && "$area" == "Serinth: The 2nd Dimension" && "$cassist[status]" == "0"} {corpse_trig}}
+#NOP #action {^=K=Badger dealt the killing blow to %*.=K=$} {#if {!$idle_flag && "$area" == "Serinth: The 2nd Dimension" && "$cassist[status]" == "0"} {corpse_trig}}
 
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};

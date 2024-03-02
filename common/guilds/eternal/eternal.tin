@@ -16,53 +16,126 @@
 
 #NOP -- Shortcuts for powers;
 #alias {dc} {
-	#case {""}   {#echo {<efb>========== DUPLICATING CREATURE ==========<088>}};
+	#echo {<efb>==========<088> <baf>DUPLICATING CREATURE<088> <efb>==========<088>};
 	#send {eternal duplicate creature};
 };
 
+#NOP -- reset dungeon;
 #alias {rd3} {
 	#switch {"%0"} {
 		#case {"mj"} {#send {eternal reset dungeon Mahjongg party};};
 		#case {"sz"} {#send {eternal reset dungeon Section Z party};};
 		#case {"aegis"} {#send {eternal reset dungeon Aegis Global party};};
-		#case {""}   {#echo {<efb>========== NO DUNGEON PROVIDED ==========<088>}};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO DUNGEON PROVIDED<088> <efb>==========<088>}};
 		#default 	 {#send {eternal reset dungeon %0 party};};
 	};
 };
 
+#NOP -- announce dungeon resets;
+#alias {dung_reset} {
+	#switch {"%0"} {
+		#case {"mj"} {#send {talk want mj reset?\nctell anyone want mj reset?\nhm anyone want mj reset?\nflapchat anyone want mj reset?};};
+		#case {"sz"} {#send {talk want sz reset?\nctell anyone want sz reset?\nhm anyone want sz reset?\nflapchat anyone want sz reset?};};
+		#case {"aegis"} {#send {talk want aegis reset?\nctell anyone want aegis reset?\nhm anyone want aegis reset?\nflapchat anyone want aegis reset?};};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO DUNGEON PROVIDED<088> <efb>==========<088>}};
+		#default 	 {#send {talk want %0 reset?\nctell anyone want %0 reset?\nhm anyone want %0 reset?\nflapchat anyone want %0 reset?};};
+	};
+};
+
+#NOP -- energy well;
 #alias {ewell} {
-	#case {""}   {#echo {<efb>========== FIRING ENERGY WELL CREATURE ==========<088>}};
+	#echo {<efb>==========<088> <baf>FIRING ENERGY WELL<088> <efb>==========<088>};
 	#send {eternal energy well};
 };
 
+#NOP -- reload item;
 #alias {rload} {
 	#switch {"%0"} {
 		#case {"cup"} {#send {eternal reload item lord stanley's cup};};
 		#case {"cooler"} {#send {eternal reload item Tech Ultra-Cooler};};
-		#case {""}   {#echo {<efb>========== NO ITEM PROVIDED ==========<088>}};
+		#case {"freezer"} {#send {eternal reload item Death's Freezer};};
+		#case {"glimmering"} {#send {eternal reload item Glimmering full platemail};};
+		#case {"feather"} {#send {eternal reload item A feather from a black dove};};
+		#case {"valor"} {#send {eternal reload item Valor of Arachnus};};
+		#case {"powerstone"} {#send {eternal reload item Powerstone};};
+		#case {"used"} {#send {eternal reload item A set of used armor};};
+		#case {"auroshield"} {#send {eternal reload item The Aurothon Shield};};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO ITEM PROVIDED<088> <efb>==========<088>}};
 		#default 	 {#send {eternal reload item %0};};
 	};
 };
 
+#NOP -- immortality;
 #alias {imm} {
-	#case {""}   {#echo {<efb>========== IMMORTALITY ==========<088>}};
+	#echo {<efb>==========<088> <baf>IMMORTALITY<088> <efb>==========<088>};
 	#send {eternal immortality};
 };
 
+#NOP -- protection;
+#alias {prot} {
+	#echo {<efb>==========<088> <baf>PROTECTION<088> <efb>==========<088>};
+	#send {eternal protection};
+};
+
+#NOP -- fry ALL;
 #alias {fry} {
-	#case {""}   {#echo {<efb>========== FRYING CREATURES ==========<088>}};
+	#echo {<efb>==========<088> <baf>FRYING CREATURES<088> <efb>==========<088>};
 	#send {eternal fry ALL};
 };
 
+#NOP -- refresh room;
 #alias {refresh} {
-	#case {""}   {#echo {<efb>========== REFRESHING ROOM ==========<088>}};
+	#echo {<efb>==========<088> <baf>REFRESHING ROOM<088> <efb>==========<088>};
 	#send {eternal refresh room};
-	#send {ptell room refreshed by $user};
 };
 
+#NOP -- unload room;
 #alias {unload} {
-	#case {""}   {#echo {<efb>========== UNLOADING ROOM ==========<088>}};
+	#echo {<efb>==========<088> <baf>UNLOADING ROOM<088> <efb>==========<088>};
 	#send {eternal unload room};
+};
+
+#NOP -- resurrect - raise the DEAD!;
+#alias {res} {
+	#switch {"%0"} {
+		#case {"myself"} {#send {eternal resurrect};};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO PLAYER PROVIDED<088> <efb>==========<088>}};
+		#default 	 {#send {eternal resurrect %0 here};};
+	};
+};
+	
+#NOP -- teleport yourself to cot or your present party to cot or yourself to another party member;
+#alias {tp1} {
+	#switch {"%0"} {
+		#case {"myself"} {#send {eternal teleport to CoT};};
+        #case {"party"} {#send {eternal teleport party to CoT};};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO PLAYER PROVIDED<088> <efb>==========<088>}};
+		#default 	 {#send {eternal teleport to %0};};
+	};
+};
+
+#NOP -- teleport present party to party member;
+#alias {tp2} {#echo {<efb>==========<088> <baf>TELEPORTING PARTY TO PARTY MEMBER<088> <efb>==========<088>};
+	#send {eternal teleport party to %0};
+};
+
+#NOP -- summon entire party or party member to you - summon any player to cot only;
+#alias {summ1} {
+	#switch {"%0"} {
+		#case {"party"} {#send {eternal summon party};};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO PLAYER PROVIDED<088> <efb>==========<088>}};
+		#default 	 {#send {eternal summon %0};};
+	};
+};
+
+#NOP -- summmon another players party to you at cot only;
+#alias {summ2} {#echo {<efb>==========<088> <baf>SUMMONING ANOTHER PLAYERS PARTY<088> <efb>==========<088>};
+	#send {eternal summon %0's party};
+};
+
+#NOP -- duplicate item;
+#alias {dupe} {#echo {<efb>==========<088> <baf>DUPLICATING ITEM<088> <efb>==========<088>};
+	#send {eternal duplicate item %0};
 };
 
 #NOP -- Add a bit more details/data points to the cstats;
@@ -162,7 +235,5 @@
 	#if {!$idle_flag} {ctell %1 has reset.}
 	update_eternal_status;
 };
-
-
 
 #class {eternal} {close}

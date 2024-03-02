@@ -1,20 +1,30 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- alias to fire powers at start of combat
+#alias {fire_powers} {#var Powers[startOfcombat] 0;psibleed;scythe;corrode;convoke ravens;call;rabies;con 100;#delay 1 #var Powers[startOfcombat] 1}
+
 #NOP -- EXAMINING/SEARCHING
-#alias {x} {exa}
+#alias {x} {examine %1;search %1}
 
 #NOP -- ATTACKING
 #alias {ass} {call;scythe;psibleed;corrode;convoke ravens;rabies}
+#action {Brianna unloads one of his long range missiles and carefully removes} {load core;say CORE LOADED LET'R"RIP}
+#action {You say: CORE LOADED LET'R"RIP} {ip1}
+#action {The ghostly apparition then dissipates away.} {harvest;bloodarc}
+#action {Brianna leaves by opening the door with a passcard and slipping} {swipe card}
 
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
 
 #NOP --KNIGHT TOUR GAMES
 #alias {knight6} {play;start;dt6}
-#alias {knight6} {play;start;dt8}
+#alias {knight8} {play;start;dt8}
 #alias {winaxe} {play;start;#5 throw axe}
-#alias {peace} {sleep;.botStep}
+
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/brianna/numpad.tin}
 
 #NOP -- BOT STATUS
 #alias {3kdb} {ptell 3kdb bot status}
@@ -69,24 +79,6 @@
     };
     #math gxp_stats[avg_rounds_for_increase] {1.00 * $gxp_stats[rounds] / $gxp_stats[increases]};
     #showme {Each Increase Took On Average $gxp_stats[avg_rounds_for_increase] rounds};
-};
-
-
-#alias {corpse_trig} {
-    #if $check_death {
-        #NOP -- do nothing
-    } {
-        #if {$inventory[freezer] && $corpses[freezer] < 50} {
-            slab remains;
-            wrap remains;
-        } {
-            wrap remains;
-            preserve_remains;
-            #if $collector[items] {get all};
-        };
-        fuse 200;
-        keep all preservation;
-    };
 };
 
 #alias pg {
@@ -167,6 +159,29 @@
 };
 
 #NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
+#alias {ktrigg} {corpsetrig clear;corpsetrig preserve remains;corpsetrig get corpse;corpsetrig divvy gold;corpsetrig cooler corpse};
+#alias {ein} {n;w;n;n;e;n;enter;e;e;e;s;s;e;e;n;n;n;trail;ne;climb gate;w;search tree;e;e;n;n;enter;unlock paperholder;turn paperholder;climb bench;stagedive;s;s;w;unlock door;open door;n};
+#alias {sna} #ticker {snar} {snare mage} {3};
+#alias {heal} #ticker {heals} {dream zzzzzzzzzzzzzzzzzzzzzzzzz} {2};
+#alias {bas} #ticker {tbash} {bash} {3};
+#alias {tstop} {#unticker tbash;#unticker snar;#unticker heals};
+#alias {chestp} {retrieve;open chest;put all in chest;deliver};
+#alias {peace} {sleep;.botStep};
+
+#NOP ---NECRO TIER MSGS
+#action {As you ponder the runes, they swim before your eyes.} {
+    #echo {<feb>1 The path before you is a long and hard one name here<088>};
+    #echo {<dfb>2 The path before you is a long one, barely have you begin your quest<088>};
+    #echo {<fcb>3 A long road remains before you in the quest for ascension<088>};
+    #echo {<ffa>4 A portion complete, your quest still awaits<088>};
+    #echo {<acf>5 More remains of your path than what you have seen thus far<088>};
+    #echo {<caf>6 The end of your journey is not yet in sight<088>};
+    #echo {<fac>7 The road before you is long, but shorter than that behind you<088>};
+    #echo {<afc>8 The end draws near, you sense this in your soul<088>};
+    #echo {<cfa>9 Your goal draws closer than you realize<088>};
+    #echo {<fca>10 There remains but only a few steps in your quest<088>};
+    #echo {<feb>11 You are ready to ascend in the ranks<088>}};
+
 #alias {set_ticker} {#NOP;};
 
 #alias {go_donate} {
