@@ -1,12 +1,19 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- DEADMAN
 #alias {_player_deadmanActions} {
-    .pause;
+    #if $bot[active] {.pause;#echo {stepper paused due to deadman timer}};
 };
 
-#NOP -- KILL THE REJ_ROTATE CLASS AND SET MY BRIEF SETTINGS BACK WHEN FINISHED IN THE REJECTED GAME AREA
-#alias {rej_off} {#class {rej_rotate} {kill};#send !brief off yes}
+#NOP -- ALIASES TO SETUP CORPSETRIG
+#alias {mycorpsetrig} {corpsetrig clear;corpsetrig+ wrap;corpsetrig+ bb;corpsetrig+ fdeener;corpsetrig+ burn remains;corpsetrig+ divvy;corpsetrig+ get all;corpsetrig+ stash all}
+
+#NOP -- EINSTEINS BRAIN - +3 INT BOOST
+#alias {ein_brain} {n;w;n;n;e;n;enter;e;e;e;s;s;e;e;n;n;n;trail;ne;climb gate;w;search tree;e;e;n;n;enter;unlock paperholder;turn paperholder;climb bench;stagedive;climb down;out;s;s;w;unlock door;open door;n}
+
+#NOP -- RESET MY BRIEF SETTINGS AFTER USING INDUCTOR STEPPER
+#alias {mybrief} {#send !brief off yes}
 
 #NOP -- VIGILANT BOOSTS
 #alias {vigiboost-wis} {buy 1;buy 2;buy 3;buy 4;buy 5;imprint wisdom;quaff flask;imprint wisdom;quaff flask;imprint wisdom;quaff flask;imprint wisdom;quaff flask;imprint wisdom;quaff flask}
@@ -25,9 +32,6 @@
 #alias {su2} {support assault fire;defend mech;forcehp;hp}
 #alias {su3} {support summon;#delay 4 {support assault fire;hp}}
 #alias {sd} {support defend;forcehp}
-
-#NOP -- ROLM PORT TO COT AND MAP CORRECTION
-#alias {port} {touch winch rune;mapgo cot}
 
 #NOP -- CURRENT SESSION JUGGERNAUT GXP AND MOUNT STATUS
 #alias {jr} {jugg_report}
@@ -48,14 +52,5 @@
 #alias {knight6} {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}}
 #alias {knight8} {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}}
 #alias {winaxe} {play;start;#5 throw axe}
-
-#NOP -- CORPSE ALIAS
-#alias corpse_trig {
-    #if {"$area" == "Chaotic Sewers"} {
-        wrap remains;slab remains;fdeener;fdeener;divvy gold;stash all
-    } {
-        wrap remains;slab remains;fdeener;fdeener;burn remains;divvy gold;get all;stash all;
-    };
-};
 
 #class {player_aliases} {close}

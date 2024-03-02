@@ -11,9 +11,6 @@
 #alias {cot-apex} {s;w;s;s;w;portal;n;n;n;n;n;n;e;ne;u}
 #alias {apex-cot} {d;sw;w;s;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
 
-#NOP -- ROLM PORT TO COT AND MAP CORRECTION
-#alias {port} {touch winch rune;mapgo cot}
-
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
 
@@ -28,13 +25,5 @@
 #alias knight6 {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}};
 #alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
 #alias winaxe {play;start;#5 throw axe};
-
-#alias corpse_trig {
-    #if {"$area" == "Chaotic Sewers"} {
-        slab all;wrap all;evoke corpse drain;evoke corpse drain;get coins;stash all
-    } {
-        wrap remains;slab remains;evoke corpse drain;evoke corpse drain;divvy gold;get all;stash all
-    };
-};
 
 #class {player_aliases} {close}
