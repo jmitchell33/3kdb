@@ -3,10 +3,12 @@
 
 #var corpse_delay 1;
 #var corpse_use 200;
+#var dismiss_support 1;
 
 #alias {_player_heartbeat} {
     #if !$idle_flag {
-        #NOP;
+        #if {$bot[active] && "$shp" != "" && $dismiss_support && $my[clan] && $shp < 25} {su1};
+        #if {"$area" == "Serinth: The 2nd Dimension" && "$shp" != "" && $dismiss_support && $my[clan] && $shp < 25} {su1};
     };
 };
 
