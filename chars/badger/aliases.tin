@@ -53,38 +53,4 @@
 #alias {knight8} {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}}
 #alias {winaxe} {play;start;#5 throw axe}
 
-#NOP -- 3kdb Badgers alias list
-
-#alias format_badgeraliases {
-    #format {baliases_name} {%-25s} {%1};
-    #format {baliases_desc} {%-30s} {%2};
-    #showme $baliases_name $baliases_desc;
-};
-
-#alias badgeralias {
-    #var tempflag 0;
-    #var number &badgeralias[];
-	#showme {<ccf>  -------------------<088><ffa>3kdb<088><ccf>--------------------------<088>  };
-    #showme {<ccf>  -------------<088> <ffa>BADGERS ALIASES<088> <fff>($number)<088> <ccf>--------------<088>  };
-    #showme {    Filters:  <eaf>boosts area guild corpsetrigs misc     <088>  };
-    #showme {<ccf>  -------------------------------------------------    <088>  };
-    #showme {<ccf>     Name                 Power: Usage              <088>  };
-    #list badgeralias index name;
-    #list badgeralias sort;
-    #foreach $badgeralias[%*] index {
-        #regexp {"%1"} {"$index[type]"} {
-            #var tempflag 1;
-            format_badgeraliases {     $index[name]} {$index[desc]};
-        }
-    };
-    #if !$tempflag {
-        #foreach $badgeralias[%*] index {
-            format_badgeraliases {     $index[name]} {$index[desc]};
-        };
-    };
-};
-
-#list badgeralias clear;
-#list badgeralias add {{{name} {dupe} {type} {life} {desc} {duplicate item: dupe <item>}}};
-
 #class {player_aliases} {close}
