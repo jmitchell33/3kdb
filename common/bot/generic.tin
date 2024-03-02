@@ -86,62 +86,6 @@
     #echo {<BBB><aad>---------------------------------------------------<088>};
 };
 
-#alias bot_xp {
-    #if {"%1" == "start"} {
-        #action {^You have %* total xp.$} {
-            #math bot[stats][xp] 0;
-            #math bot[stats][loop][xp] 0;
-            #format my[xp] {%d} {%%1};
-            #unaction {^You have %* total xp.$};
-        } {2};
-        xp;
-        #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
-    } {
-        #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
-        #math bot[stats][mobs] {$bot[stats][mobs] + 1};
-        #action {^You have %* total xp.$} {
-            #format temp_xp {%d} {%%1};
-            #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
-                #if {$temp_xp > $my[xp]} {
-                    #math fight_xp {$temp_xp - $my[xp]};
-                    #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
-                    #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
-                    #format my[xp] {%d} {%%1};
-                } {
-                    #NOP -- If current xp is less than total xp (spent it on stats or died) update my[xp] to reflect the new baseline;
-                    #format my[xp] {%d} {%%1}; 
-                }
-            } {
-                #format my[xp] {%d} {%%1};
-            };
-            #unaction {^You have %* total xp.$};
-        };
-        xp;
-        #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
-    };
-};
-
-#alias bot_coins {
-    #action {^You are carrying %d coins in loose change.$} {
-        #var temp_coins %%1;
-        #if {$my[coins] > 0 && "$temp_coins" != "$my[coins]"} {
-            #if {$temp_coins > $my[coins]} {
-                #math fight_coins {$temp_coins - $my[coins]};
-                #math bot[stats][coins] {$bot[stats][coins] + $fight_coins};
-                #math bot[stats][loop][coins] {$bot[stats][loop][coins] + $fight_coins};
-                #format my[coins] {%d} {%%1};
-            } {
-                #NOP -- If current coins are less than starting coins, we'll update the new baseline;
-                #format my[coins] {%d} {%%1}; 
-            };
-        } {
-            #format my[coins] {%d} {%%1};
-        };
-        #unaction {^You are carrying %d coins in loose change.$};
-    };
-    coins;
-};
-
 #alias playercheck {
     #if $bot[playercheck] {
         #var bot[playercheck] 0;
@@ -318,16 +262,12 @@
 
 #alias {.bot} {#if {$bot[paused] == 0} {..}};
 
-
-#action {{(.*) (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.}} {
-    #echo {----- BOT REGISTERED KILL -----};
-    #if {"%1" == "Fire Mite"} {
+#action {----- BOT REGISTERED KILL -----} {
+    #if {"$deathReport[mob_killed]" == "Fire Mite"} {
         #if {"$guild" == "mage"} {cast spell tap on corpse;cast corpse blast};
         #if {"$guild" == "bard"} {perform dirge};
         .bot;
     } {
-        bot_xp;
-        bot_coins;
         #var bot[foundmob] 0;
         #var bot[aggro-mob] 0;
         #if !$idle_flag {
@@ -352,6 +292,7 @@
         };
     };
 } {1};
+
 
 #NOP -- If you're not in combat and not walking, then begin walking;
 #ticker {bot_ticker} {

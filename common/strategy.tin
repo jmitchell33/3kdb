@@ -1,9 +1,9 @@
 #alias common_strategy kill;
 #class common_strategy open;
 
-#NOP -- Set some variables for multi-round actions
+#NOP -- Set some variables for multi-round actions or toggles;
 #var iprime_round 1;
-
+#var subjugate_toggle 1;
 
 #alias formatStrategy {
     #format result {<acf>-----<fff> %+15s  %s<088>} {%1} {%2};
@@ -119,11 +119,12 @@
 #list strategyList add {{{guild} {mage} {name} {phantasmal}  {active} {0} {description} {Phantasmal Killer}}};
 #list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
 #list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
+#list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
+#list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
 #list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
 
 #list strategyList indexate name;
-
 
 #alias checkStrategy {
     #var strategy_found 0;
@@ -190,6 +191,16 @@
         #if {$sp_percent > 30} {
             #if {$summon_renew_mf} {cast monstrous fortitude on summons;#var summon_renew_mf 0;};
             #if {$summon_renew_haste} {cast haste on summons;#var summon_renew_haste 0};
+        };
+
+        checkStrategy {super_sub} {
+            #NOP -- We'll use this when we don't have MI available since we don't really care about conc;
+            #NOP -- when we have MI available;
+            #if {$my[super][current] && !$my[immersion][count] && !$my[immersion][active] && $subjugate_toggle} {
+                #var subjugate_toggle 0;
+                cast subjugate;
+                #delay 30 {#var subjugate_toggle 1};
+            };
         };
     };
 };

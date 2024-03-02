@@ -1,7 +1,6 @@
 #class {bot} {open}
 
 #var {area} {Night of Colour};
-#var check_death 1;
 #var check_room 1;
 
 #var bot_message_1 '---- NIGHT OF COLORS STEPPER     ----';
@@ -31,8 +30,6 @@ n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;s
 #list botmobs add {{{long} {Smoking Glimmer} {target} {glimmer}}};
 #list botmobs add {{{long} {Peace} {target} {peace}}};
 
-
-
     
 #alias {.check_room} {
     consider shadow;
@@ -47,7 +44,7 @@ n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;s
         kill $mob[target];
         #unaction {^Monster class: Really Big (18).$}
     };
-	#delay {.4} {#if {!$foundshadow && !$bot[foundmob]} {#path walk;#var bot[walk] 1;};}
+	#delay {.4} {#if {!$foundshadow && !$bot[foundmob]} {#var bot[walk] 1;.botStep;};}
 }
 
 #act {^-i-{White web}} {

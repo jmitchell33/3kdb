@@ -1,270 +1,107 @@
-#class {dmg_tracker_mage} kill
-#class {dmg_tracker_mage} open
-
-#NOP -- MAGE SPELL SECTION;
-
-#var dc[de][text] De-Mob'd;
-#var dc[murderominates][text] Murderominates;
-#var dc[obliterificatifies][text] Obliterificatifies;
-#var dc[covid][text] Gave Covid-19;
-#var dc[fucks][text] Fucks Up;
-#var dc[downgrade][text] Downgrade;
-#var dc[deleted][text] Deleted;
-#var dc[wrecks][text] Wrecks;
-#var dc[ousside][text] Catches Ousside;
-#var dc[spoiled][text] Spoiled;
-#var dc[melted][text] Melted;
-#var dc[offed][text] Offed;
-#var dc[ripped][text] Ripped;
-#var dc[extirpated][text] Extirpated;
-#var dc[ravaged][text] Ravaged;
-#var dc[expunged][text] Expunged;
-#var dc[tore][text] Tore;
-#var dc[mutilated][text] Mutilated;
-#var dc[annihilated][text] Annihilated;
-#var dc[erased][text] Erased;
-#var dc[destruction][text] Destruction;
-#var dc[torn][text] Torn;
-#var dc[sand-castle][text] Sand-castle;
-#var dc[shredded][text] Shredded;
-#var dc[obliterated][text] Obliterated;
-#var dc[devastated][text] Devastated;
-#var dc[thrashed][text] Thrashed;
-
-#var dc[de][count] 0;
-#var dc[murderominates][count] 0;
-#var dc[obliterificatifies][count] 0;
-#var dc[covid][count] 0;
-#var dc[fucks][count] 0;
-#var dc[downgrade][count] 0;
-#var dc[deleted][count] 0;
-#var dc[wrecks][count] 0;
-#var dc[ousside][count] 0;
-#var dc[spoiled][count] 0;
-#var dc[melted][count] 0;
-#var dc[offed][count] 0;
-#var dc[ripped][count] 0;
-#var dc[extirpated][count] 0;
-#var dc[ravaged][count] 0;
-#var dc[expunged][count] 0;
-#var dc[tore][count] 0;
-#var dc[mutilated][count] 0;
-#var dc[annihilated][count] 0;
-#var dc[erased][count] 0;
-#var dc[destruction][count] 0;
-#var dc[torn][count] 0;
-#var dc[sand-castle][count] 0;
-#var dc[shredded][count] 0;
-#var dc[obliterated][count] 0;
-#var dc[devastated][count] 0;
-#var dc[thrashed][count] 0;
-
-#var dc[de][min_dmg] 0;
-#var dc[murderominates][min_dmg] 0;
-#var dc[obliterificatifies][min_dmg] 0;
-#var dc[covid][min_dmg] 0;
-#var dc[fucks][min_dmg] 0;
-#var dc[downgrade][min_dmg] 0;
-#var dc[deleted][min_dmg] 0;
-#var dc[wrecks][min_dmg] 0;
-#var dc[ousside][min_dmg] 0;
-#var dc[spoiled][min_dmg] 0;
-#var dc[melted][min_dmg] 0;
-#var dc[offed][min_dmg] 0;
-#var dc[ripped][min_dmg] 0;
-#var dc[extirpated][min_dmg] 0;
-#var dc[ravaged][min_dmg] 0;
-#var dc[expunged][min_dmg] 0;
-#var dc[tore][min_dmg] 0;
-#var dc[mutilated][min_dmg] 0;
-#var dc[annihilated][min_dmg] 0;
-#var dc[erased][min_dmg] 0;
-#var dc[destruction][min_dmg] 0;
-#var dc[torn][min_dmg] 0;
-#var dc[sand-castle][min_dmg] 0;
-#var dc[shredded][min_dmg] 0;
-#var dc[obliterated][min_dmg] 0;
-#var dc[devastated][min_dmg] 0;
-#var dc[thrashed][min_dmg] 0;
-
-#var dc[de][max_dmg] 0;
-#var dc[murderominates][max_dmg] 0;
-#var dc[obliterificatifies][max_dmg] 0;
-#var dc[covid][max_dmg] 0;
-#var dc[fucks][max_dmg] 0;
-#var dc[downgrade][max_dmg] 0;
-#var dc[deleted][max_dmg] 0;
-#var dc[wrecks][max_dmg] 0;
-#var dc[ousside][max_dmg] 0;
-#var dc[spoiled][max_dmg] 0;
-#var dc[melted][max_dmg] 0;
-#var dc[offed][max_dmg] 0;
-#var dc[ripped][max_dmg] 0;
-#var dc[extirpated][max_dmg] 0;
-#var dc[ravaged][max_dmg] 0;
-#var dc[expunged][max_dmg] 0;
-#var dc[tore][max_dmg] 0;
-#var dc[mutilated][max_dmg] 0;
-#var dc[annihilated][max_dmg] 0;
-#var dc[erased][max_dmg] 0;
-#var dc[destruction][max_dmg] 0;
-#var dc[torn][max_dmg] 0;
-#var dc[sand-castle][max_dmg] 0;
-#var dc[shredded][max_dmg] 0;
-#var dc[obliterated][max_dmg] 0;
-#var dc[devastated][max_dmg] 0;
-#var dc[thrashed][max_dmg] 0;
+#class dmgtracker_mage kill;
+#class dmgtracker_mage open;
 
 
-
-#alias sdmg_reset {#unvar summon_damage;};
+_registerAlias {summonDmg;guild;Mage Summon Damage Report};
+_registerAlias {summonDmg-clear;guild;Mage Summon Damage Report - Clear Data};
 
 #unvar summon_types_list;
-#unvar summon_dmg_summary;
-#unvar summon_damage;
 
-#var summon_types {Night Hag;Neo-otyugh;Roper;Frost Giant;Fire Giant;Phoenix;Stone Giant;Hill Giant;Ettin;Xorn;Giant Slug;Mummy;10-headed Hydra;Umber Hulk;Spectre;Mind-flayer;Fire Lizard;8-headed Pyro-hydra;Gorgon;Chimera;Sword of Spirit {radiant} (enchanted);Enormous Cloud Giant;Enormous Storm Giant};
+#list summon_types_list add {Celestial lion};
+#list summon_types_list add {Undead wraith};
+#list summon_types_list add {Shadow panther};
+#list summon_types_list add {Something};
 
-#list summon_types_list add {Night Hag};
-#list summon_types_list add {Neo-otyugh};
-#list summon_types_list add {Roper};
-#list summon_types_list add {Frost Giant};
-#list summon_types_list add {Fire Giant};
-#list summon_types_list add {Phoenix};
-#list summon_types_list add {Stone Giant};
-#list summon_types_list add {Hill Giant};
-#list summon_types_list add {Ettin};
-#list summon_types_list add {Xorn};
-#list summon_types_list add {Giant Slug};
-#list summon_types_list add {Mummy};
-#list summon_types_list add {10-headed Hydra};
-#list summon_types_list add {Umber Hulk};
-#list summon_types_list add {Spectre};
-#list summon_types_list add {Mind-flayer};
-#list summon_types_list add {Fire Lizard};
-#list summon_types_list add {8-headed Pyro-hydra};
-#list summon_types_list add {Gorgon};
-#list summon_types_list add {Chimera};
-#list summon_types_list add {Sword of Spirit {radiant} (enchanted)};
-#list summon_types_list add {Enormous Cloud Giant};
-#list summon_types_list add {Enormous Storm Giant};
+#unvar summon_dmg;
+#var summon_dmg[first_round] $total_rounds;
 
-#list summon_dmg add {Night Hag};
-#list summon_dmg add {Neo-otyugh};
-#list summon_dmg add {Roper};
-#list summon_dmg add {Frost Giant};
-#list summon_dmg add {Fire Giant};
-#list summon_dmg add {Phoenix};
-#list summon_dmg add {Stone Giant};
-#list summon_dmg add {Hill Giant};
-#list summon_dmg add {Ettin};
-#list summon_dmg add {Xorn};
-#list summon_dmg add {Giant Slug};
-#list summon_dmg add {Mummy};
-#list summon_dmg add {10-headed Hydra};
-#list summon_dmg add {Umber Hulk};
-#list summon_dmg add {Spectre};
-#list summon_dmg add {Mind-flayer};
-#list summon_dmg add {Fire Lizard};
-#list summon_dmg add {8-headed Pyro-hydra};
-#list summon_dmg add {Gorgon};
-#list summon_dmg add {Chimera};
-#list summon_dmg add {Sword of Spirit {radiant} (enchanted)};
-#list summon_dmg add {Enormous Cloud Giant}
-#list summon_dmg add {Enormous Storm Giant}
+#alias summonDmg-clear {
+    #unvar summon_dmg;
+    #var summon_dmg[first_round] $total_rounds;
+    #echo {<dfa> +-+-+-    SUMMON DAMAGE TRACKER RESET    -+-+-+<088>};
+};
 
-#list summon_hits add {Night Hag};
-#list summon_hits add {Neo-otyugh};
-#list summon_hits add {Roper};
-#list summon_hits add {Frost Giant};
-#list summon_hits add {Fire Giant};
-#list summon_hits add {Phoenix};
-#list summon_hits add {Stone Giant};
-#list summon_hits add {Hill Giant};
-#list summon_hits add {Ettin};
-#list summon_hits add {Xorn};
-#list summon_hits add {Giant Slug};
-#list summon_hits add {Mummy};
-#list summon_hits add {10-headed Hydra};
-#list summon_hits add {Umber Hulk};
-#list summon_hits add {Spectre};
-#list summon_hits add {Mind-flayer};
-#list summon_hits add {Fire Lizard};
-#list summon_hits add {8-headed Pyro-hydra};
-#list summon_hits add {Gorgon};
-#list summon_hits add {Chimera};
-#list summon_hits add {Sword of Spirit {radiant} (enchanted)};
-#list summon_hits add {Enormous Cloud Giant};
-#list summon_hits add {Enormous Storm Giant};
+#alias summonDmg {
+    #format dmgSummary {<dfa>%+20s %+9s %+9s %+9s %+9s<088>} {Summon} {Hits/Rnd} {Dmg/Hit} {Dmg/Rnd} {Total};
+    #echo $dmgSummary;
 
+    #var summon_dmg[current_round] $total_rounds;
+    #math summon_dmg[tracked_rounds] {$summon_dmg[current_round] - $summon_dmg[first_round]};
+    #foreach $summon_types_list[%*] summon {
+        #var summonTotalDmg 0;
+        #var summonPerHitDmg 0;
+        #var summonTotalHits 0;
+        #foreach $dmg_dataKey[%*] dmgItem {
+            #if {$summon_dmg[$summon][total][$dmgItem][count] > 0} {
+                #math summonItemTotalDmg {$summon_dmg[$summon][total][$dmgItem][count] * $dmg_data[melee][$dmgItem][min_dmg]};
+                #math summonTotalDmg {$summonTotalDmg + $summonItemTotalDmg};
+                #math summonTotalHits {$summonTotalHits + $summon_dmg[$summon][total][$dmgItem][count]};
+            };
+        };
+        #format summonTotalDmg {%M} {$summonTotalDmg};
+        #replace summonTotalDmg {G} {B};
+        
+        #math summonPerHitDmg {$summonTotalDmg / $summon_dmg[$summon][total][attempts]};
+        #format summonPerHitDmg {%d} {$summonPerHitDmg};
+        #format summonPerHitDmg {%g} {$summonPerHitDmg};
 
-#act {^%1 hit for %2 damage.} {
-    #var round_hit $mip[round];
-    #foreach $summon_types summon_type {
-        #if {"%1" == "%*$summon_type%*"} {
-            #list summon_types_list find $summon_type summon_types_index;
-            
-            #NOP -- If the summon hits for 0 damage, put that in its own category so we can also review;
-            #NOP -- which summons hit the most times (and get most gxp!);
-            #math {summon_damage[$summon_type][attacks]} {$summon_damage[$summon_type][attacks] + 1};
-            #if {%2 > 0} {
-                #math {summon_damage[$summon_type][total_dmg]} {$summon_damage[$summon_type][total_dmg] + %2};
-                #math {summon_damage[$summon_type][hits]} {$summon_damage[$summon_type][hits] + 1};
-                #math {summon_damage[$summon_type][avg_dmg]} {$summon_damage[$summon_type][total_dmg] / $summon_damage[$summon_type][hits]};
-                #math {summon_damage[$summon_type][accuracy]} {$summon_damage[$summon_type][hits] * 100 / $summon_damage[$summon_type][attacks]};
-            } {
-                #math {summon_damage[$summon_type][misses]} {$summon_damage[$summon_type][misses] + 1};
-                #math {summon_damage[$summon_type][accuracy]} {$summon_damage[$summon_type][hits] * 100 / $summon_damage[$summon_type][attacks]};
-            }
+        #math summonHitsPerRnd {$summonTotalHits / $summon_dmg[tracked_rounds]};
+        #format summonHitsPerRnd {%d} {$summonHitsPerRnd};
+
+        #math summonPerRoundDmg {$summonTotalDmg / $summon_dmg[tracked_rounds] * 1.0};
+        #format summonPerRoundDmg {%d} {$summonPerRoundDmg};
+        #format summonPerRoundDmg {%g} {$summonPerRoundDmg};
+
+        #if {$summonTotalDmg > 0} {
+            #if {"$summon" == "Something"} {#var summon Phantasmal Killer};
+            #format dmgSummary {%+20s %+9s %+9s %+9s %+9s} {$summon} {$summonHitsPerRnd} {$summonPerHitDmg} {$summonPerRoundDmg} {$summonTotalDmg};
+            #echo $dmgSummary;
         };
     };
 };
 
-#alias {formatDmgColumn %1} {
-    #var dmg_text %1;    
-    #format result {<acf>-----<fff> %+20s %+10s %+10s %+10s <acf>-----} {$dmg_text} {$summon_damage[$summon_type][hits]} {$summon_damage[$summon_type][avg_dmg]} {$summon_damage[$summon_type][accuracy]};
-    #showme $result;
-};
 
-
-#alias {sdmg} {
-    #format result {<acf>-----<fff> %+20s %+10s %+10s %+10s <acf>-----} {Summon} {# Hits} {Avg. Dmg} {Accuracy %};
-    #showme $result;
-    #foreach $summon_damage summon_type {
-        #list summon_types_list find $summon_type summon_types_index;
-        #if $summon_types_index {
-            formatDmgColumn $summon_type;
-        }
+#alias summonDmgRecord {
+    #var foundItem 0;
+    #format summonType {%p} {%1};
+    #format summonHit {%p} {%2};
+    #list summon_types_list find {$summonType} {foundItem};
+    #if $foundItem {
+        #math summon_dmg[$summonType][round][$summonHit][count] {$summon_dmg[$summonType][round][$summonHit][count] + 1};
+        #math summon_dmg[$summonType][total][$summonHit][count] {$summon_dmg[$summonType][total][$summonHit][count] + 1};
+        #math summon_dmg[$summonType][total][attempts] {$summon_dmg[$summonType][total][attempts] + 1};
     };
 };
 
+#ACTION {^%* blow was deflected.$} {summonDmgRecord {%1} deflected};
+#ACTION {^%* strike was ineffective.$} {summonDmgRecord {%1} ineffective};
+#ACTION {^%* bobble your swing.$} {summonDmgRecord {%1} bobble};
+#ACTION {^%* missed %*.$} {summonDmgRecord {%1} missed};
+#ACTION {^%* tickled %* in the stomach.$} {summonDmgRecord {%1} tickled};
+#ACTION {^%* grazed %*.$} {summonDmgRecord {%1} grazed};
+#ACTION {^%* hit %*.} {summonDmgRecord {%1} hit};
+#ACTION {^%* hit %* hard.$} {summonDmgRecord {%1} hit_hard};
+#ACTION {^%* hit %* very hard.$} {summonDmgRecord {%1} hit_vhard};
+#ACTION {^%* struck %* a mighty blow.$} {summonDmgRecord {%1} mighty};
+#ACTION {^%* smashed %* with a bone crushing sound.$} {summonDmgRecord {%1} bonecrush};
+#ACTION {^%* pulverized %* with a powerful attack.$} {summonDmgRecord {%1} pulverized};
+#ACTION {^%* trounced %* up and down.$} {summonDmgRecord {%1} trounced};
+#ACTION {^%* pummeled %* into small fragments.$} {summonDmgRecord {%1} pummeled};
+#ACTION {^%* massacred %* into tiny fragments.$} {summonDmgRecord {%1} massacred};
+#ACTION {^%* utterly annihilated %*.$} {summonDmgRecord {%1} annihilated};
+#ACTION {^%* completely devastated %* with awesome force.$} {summonDmgRecord {%1} devastated};
+#ACTION {^%* destroyed %*.$} {summonDmgRecord {%1} destroyed};
+#ACTION {^%* absolutely massacred %*.$} {summonDmgRecord {%1} amassacred};
+#ACTION {^%* thrashed %* completely.$} {summonDmgRecord {%1} thrashed};
+#ACTION {^%* demolished %*.$} {summonDmgRecord {%1} demolished};
+#ACTION {^%* nearly exterminated %*.$} {summonDmgRecord {%1} exterminated};
+#ACTION {^%* obliterated %*.$} {summonDmgRecord {%1} obliterated};
+#ACTION {^%* eradicated %*.$} {summonDmgRecord {%1} eradicated};
+#ACTION {^%* decimated %*.} {summonDmgRecord {%1} decimated};
+#ACTION {^%* beat %* like a rented mule.$} {summonDmgRecord {%1} rented_mule};
+#ACTION {^%* exsanguinated %*.$} {summonDmgRecord {%1} exsanguinated};
+#ACTION {^%* atomized %*.$} {summonDmgRecord {%1} atomized};
+#ACTION {^%* beat %* like a red-headed step child.$} {summonDmgRecord {%1} step_child};
+#ACTION {^%* drop-kicked %*.$} {summonDmgRecord {%1} dropkick};
 
-#act {Your %w de-%w %w!!!$} {#math {dc[de][count]} {$dc[de][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w murderominates %w.$} {#math {dc[murderominates][count]} {$dc[murderominates][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w obliterificatifies %w.} {#math {dc[obliterificatifies][count]} {$dc[obliterificatifies][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w gives %w COVID-19.$} {#math {dc[covid][count]} {$dc[covid][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w royally %!@'s %w up!!!$} {#math {dc[fucks][count]} {$dc[fucks][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w slams into %w so hard, your downgrade gets closer!!!$} {#math {dc[downgrade][count]} {$dc[downgrade][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w deleted %w whole damn save file!!!$} {#math {dc[deleted][count]} {$dc[deleted][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w wrecks %w into a mess worse than Havox's bot.$} {#math {dc[wrecks][count]} {$dc[wrecks][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w catches %w ousside, how 'bout that!?!$} {#math {dc[ousside][count]} {$dc[ousside][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w spoiled %w like a slut in a horror film.$} {#math {dc[spoiled][count]} {$dc[spoiled][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w melted %w like a Salvador Dali painting!!!$} {#math {dc[melted][count]} {$dc[melted][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w offed %w like a George R. R. Martin protagonist!!$} {#math {dc[offed][count]} {$dc[offed][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {%w was ripped apart by the %w like a toddler with Play-Doh.$} {#math {dc[ripped][count]} {$dc[ripped][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w EXTIRPATED every fabric of %w being!!$} {#math {dc[extirpated][count]} {$dc[extirpated][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w RAVAGED the very essence of %w body!!$} {#math {dc[raveged][count]} {$dc[ravaged][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w EXPUNGED %w from existence!!$} {#math {dc[expunged][count]} {$dc[expunged][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {Your %w TORE a hole into the fabric of %w reality!$} {#math {dc[tore][count]} {$dc[tore][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The power of %w MUTILATED %w, scattering pieces all over!!$} {#math {dc[mutilated][count]} {$dc[mutilated][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w annihilated %w with overwhelming devastation!$} {#math {dc[annihilated][count]} {$dc[annihilated][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {%w is nearly erased from the force of your %w!$} {#math {dc[erased][count]} {$dc[erased][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {You unleash a torrent of destruction upon %w with your %w!!!$} {#math {dc[destruction][count]} {$dc[destruction][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The ground shakes as %w is torn asunder by your %w!!$} {#math {dc[torn][count]} {$dc[torn][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {%w survived the %w like a sandcastle at high tide!$} {#math {dc[sand-castle][count]} {$dc[sand-castle][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {A resounding wave of energy blasts from %w, shredded by your %w!} {#math {dc[shredded][count]} {$dc[shredded][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w obliterated %w relentlessly!$} {#math {dc[obliterated][count]} {$dc[obliterated][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w absolutely devastated %w!$} {#math {dc[devastated][count]} {$dc[devastated][count] +1};#math {dc[total]} {$dc[total] +1}};
-#act {The %w thrashed %w beyond recognition!$} {#math {dc[thrashed][count]} {$dc[thrashed][count] +1};#math {dc[total]} {$dc[total] +1}};
-
-#class {dmg_tracker_mage} close
+#class dmgtracker_mage close;

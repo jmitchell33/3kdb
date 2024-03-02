@@ -9,12 +9,139 @@
     #echo { $result};
 };
 
+#NOP -- This section handles the corpsetrig actions and responding to mud output;
+
+#NOP -- We don't want to track a KB on certain deaths, like a mage summon;
+#alias _kbCheckIgnore {
+    #switch {"$deathReport[mob_killed]"} {
+        #case {"Celestial Lion"} {#var kbIgnore 1};
+        #case {"Undead Wraith"} {#var kbIgnore 1};
+        #case {"Shadow Panther"} {#var kbIgnore 1};
+        #case {"Something"} {#var kbIgnore 1};
+    };
+};
+
+#NOP -- We don't want to track a KB on certain killers, like the mob we're fighting;
+#alias _killerCheckIgnore {
+    #format tmpName {%l} $deathReport[mob_killer];
+    #regex {$tmpName} {$enemy[target]} {#var fakeKill 1};
+};
+
+#NOP -- The next line after this will have the killing blow message, which we'll capture as well;
+#action {%* {screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies}.} {
+    #NOP -- Set this to NA here and it will be picked up if the killer comes through on the next line;
+    #var deathReport[mob_killer] NA;
+    #var deathReport[mob_killed] %1;
+    #var kbIgnore 0;
+    #var fakeKill 0;
+    _kbCheckIgnore;
+    #if !$kbIgnore {
+        #line oneshot #action {^%* dealt the killing blow to %*.} {
+            #var deathReport[mob_killer] %%1;
+            _killerCheckIgnore;
+        };
+
+        #if !$fakeKill {
+        
+            corpse_trig;
+            update_xp;
+            update_coins;
+            #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
+            #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
+            mob_status_clear;
+            
+            #NOP -- Small delay to make sure we get the variables from the updates;
+            #delay 1 {
+                #var deathReport[mob_killed] %1;
+                #var deathReport[mob_rounds_to_kill] $mip[round];
+                #var deathReport[damage_dealt] 0;
+                #var deathReport[xp_earned] $fight_xp;
+                #var deathReport[coins_earned] $fight_coins;
+
+                #list deathSummary add {{
+                    {mob} {$deathReport[mob_killed]}
+                    {killer} {$deathReport[mob_killer]}
+                    {rounds} {$deathReport[mob_rounds_to_kill]}
+                    {xp_earned} {$deathReport[xp_earned]}
+                    {damage_dealt} {$deathReport[damage_dealt]}
+                    {coins_earned} {$deathReport[coins_earned]}
+                }};
+            };
+        };
+    };
+
+    #if $bot[active] {#showme {----- BOT REGISTERED KILL -----}};
+} {1};
+
+
+
+#NOP -- This section manages the corpsetrig aliases and moving items in the actual corpsetrig;
 #alias corpsetrig {
-    #if {"%0" == "clear"} {
-        #list corpseActions clear;
-        #echo {<caa>----  <fff> corpsetrig has been cleared <caa>  ----<088>};
+    #echo {<ffb>   Current Corpse Trigger Actions   <088>\n};
+    #if {&corpseActions[] > 0} {
+        formatItem {Priority:} {Name};
+        #loop 1 &corpseActions[] item {
+            formatItem {<afc>$item:} {<efe>$corpseActions[$item][name]<088>};
+        };
+        #echo {\n <dfa>corpse_trig<088> will execute the corpsetrig actions.};
+        #echo { <dfa>corpsetrig-help <088> to see all available commands.};
     } {
-        #if {"%0" != ""} {
+        #echo { There are currently no actions added to corpse_trig};
+        #echo {\n <efa>corpsetrig+<088> <bcc>name<088> to add an action};
+        #echo { <efa>corpsetrig-<088> <bcc>name/number<088> to remove an action};
+        #echo { <efa>corpsetrig-all<088> to see available actions};
+        #echo { If the action doesn't exist, it will be added};
+    };
+};
+
+#alias corpsetrig-clear {
+    #list corpseActions clear;
+    #echo {<caa>----  <fff> corpsetrig has been cleared <caa>  ----<088>};
+};
+
+#alias corpsetrig+ {
+    #if {"%0" != ""} {
+        #list corpseList {find} {%0} {tempListIndex};
+        #var tempList $corpseList[+$tempListIndex];
+        #if {&tempList[] == 0} {
+            #list corpseActions indexate name;
+            #list corpseActions {find} {%0} {tempListIndex};
+            #var tempList $corpseList[+$tempListIndex];
+        };
+        #if {&tempList[] > 0} {
+            #NOP -- If the corpseActions list exists, check if the selected action is a member and toggle it;
+            #NOP -- Otherwise, if there is no corpseActions list, we add it;
+            #if {&corpseActions[] > 0} {
+                #list corpseActions indexate name;
+                #list corpseActions {find} {%0} {itemExists};
+                #if {$itemExists} {
+                    #echo {<caa>----  <fff> %0 is already in the <fff>corpse_trig <caa>  ----<088>};
+                } {
+                    #list corpseActions add {{{name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
+                    #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>};
+                };
+            } {
+                #list corpseActions add {{{name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
+                #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>};
+            };
+        } {
+            #echo { <caa>----  <fff> %0 not found in corpsetrig List.  <caa>  ----<088>};
+            #echo { <caa>----  <fff> %0 has been added as an action.  <caa>  ----<088>};
+            #list corpseActions add {{{name} {%0} {action} {%0} {active} {1}}};
+        };
+    };
+};
+        
+#alias corpsetrig- {
+    #var useIndex 0;
+    #if {"%0" != ""} {
+        #regex {%0} {^%+1..2d$} {#var tempListIndex %0;#var useIndex 1};
+        #if $useIndex {
+            #echo {<caa>----  <fff> $corpseActions[+$tempListIndex][name] has been <baa>removed<088> from <fff>corpse_trig <caa>  ----<088>};
+            #list corpseActions delete %0;
+            #list corpseActions indexate name;
+
+        } {
             #list corpseList {find} {%0} {tempListIndex};
             #var tempList $corpseList[+$tempListIndex];
             #if {&tempList[] == 0} {
@@ -23,8 +150,6 @@
                 #var tempList $corpseList[+$tempListIndex];
             };
             #if {&tempList[] > 0} {
-                #NOP -- If the corpseActions list exists, check if the selected action is a member and toggle it;
-                #NOP -- Otherwise, if there is no corpseActions list, we add it;
                 #if {&corpseActions[] > 0} {
                     #list corpseActions indexate name;
                     #list corpseActions {find} {%0} {itemExists};
@@ -32,36 +157,16 @@
                         #echo {<caa>----  <fff> %0 has been <baa>removed<088> from <fff>corpse_trig <caa>  ----<088>};
                         #list corpseActions filter {} {%0};
                     } {
-                        #list corpseActions add {{{name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
-                        #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>};
+                        #echo {<caa>----  <fff> %0 not found in <fff>corpse_trig  <caa>  ----<088>};
                     };
-                } {
-                    #list corpseActions add {{{name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
-                    #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>};
-                };
+                }
             } {
-                #echo { <caa>----  <fff> %0 not found in corpsetrig List.  <caa>  ----<088>};
-                #echo { <caa>----  <fff> %0 has been added as an action.  <caa>  ----<088>};
-                #list corpseActions add {{{name} {%0} {action} {%0} {active} {1}}};
+                #echo {<caa>----  <fff> There are no actions currently in corpse_trig<caa>  ----<088>};
             };
-        } {
-            #echo {<ffb>   Current Corpse Trigger Actions   <088>\n};
-            #if {&corpseActions[] > 0} {
-                formatItem {Priority:} {Name};
-                #loop 1 &corpseActions[] item {
-                    formatItem {<afc>$item:} {<efe>$corpseActions[$item][name]<088>};
-                };
-                #echo {\n <dfa>corpse_trig<088> will execute the corpsetrig actions.};
-                #echo { <dfa>corpsetrig-help <088> to see all available commands.};
-            } {
-                #echo { There are currently no actions added to corpse_trig};
-                #echo { \n <efa>corpsetrig<088> <bcc>name<088> to add or remove an action};
-                #echo { <efa>corpsetrig-all<088> to see available actions};
-                #echo { If the action doesn't exist, it will be added};
-            };
-        };
+        }
     };
 };
+
 
 #alias corpsetrig-help {
     #echo { ================ <dfa>3kdb CORPSE TRIGGER <088> ================ };
@@ -69,8 +174,9 @@
     #echo { <efa>corpse_trig<088> will execute the corpsetrig actions.};
     #echo {\n<faa>Adding, Removing, and Moving Actions:<088> };
     #echo { <efa>corpsetrig-all<088> to see available actions};
-    #echo {\n <efa>corpsetrig<088> <bcc>name<088> to add or remove an action};
-    #echo { <efa>corpsetrig clear<088> to clear corpsetrig};
+    #echo {\n <efa>corpsetrig+<088> <bcc>name<088> to add an action};
+    #echo { <efa>corpsetrig-<088> <bcc>name/number<088> to remove an action};
+    #echo { <efa>corpsetrig-clear<088> to clear corpsetrig};
     #echo {\n <efa>corpsetrig++<088> <bcc>name<088> to <efc>increase<088> an action's priority};
     #echo { <efa>corpsetrig--<088> <bcc>name<088> to <fac>decrease<088> an action's priority};
     #echo {\n<faa>Modes:<088> };
@@ -168,7 +274,8 @@
             };
         };
     };
-    #echo { \n <efa>corpsetrig<088> <bcc>action<088> to add or remove an action};
+    #echo { \n <efa>corpsetrig+<088> <bcc>action<088> to add or remove an action};
+    #echo { \n <efa>corpsetrig-<088> <bcc>action/#<088> to remove an action};
     #echo { <efa>corpsetrig-all<088> to see available actions};
     #echo { If the action doesn't exist, it will be added};
 };

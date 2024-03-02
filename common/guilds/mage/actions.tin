@@ -11,6 +11,7 @@
 #NOP --- MOB STATUS TRACKING;
 #ACTION {You wave your hands and *POOF*, %* worst nightmare steps from} {#var mob[phantasmal] 1} {1};
 #ACTION {You focus your destructive energy upon the mind of a %*} {#var mob[feeblemind] 1} {1};
+#ACTION {That creature is dumb as a post.  It'd do no good.} {#var mob[feeblemind] 1} {1};
 #ACTION {%w seems to speed up...$} {#var mob[slow] 0} {1};
 #ACTION {^You raise your arms and suddenly %* is moving much slower!$} {#var mob[slow] 1} {1};
 #ACTION {%w is already slowed.$} {#var mob[slow] 1} {1};
@@ -70,16 +71,11 @@
     checkStrategy {golem_defend} {say golem, you are now in group summons/defend always};
 } {1};
 
-#ACTION {%* dealt the killing blow to {Flesh|Clay|Stone|Crystal|Diamond|Straw|Rope|Iron|Wood} golem.$} {#var golem_toggle 1} {1};
-#ACTION {^The golem shudders for a moment, then falls to the ground in a heap.$} {#var golem_toggle 1} {1};
+#NOP -- If your familiar doesn't have money;
+#NOP -- move to use the my[coins] variable;
+#NOP -- Golem materials cost 1500 coins;
+#NOP -- Gem costs 2100 coins;
 
-#action {You throw your golem construction materials to the ground and utter a few} {
-    #var golem_toggle 1;
-    #delay 3 {#var golem_toggle 0}
-} {2};
-
-#NOP -- If your familiar doesn't have money
-#ACTION {%* says: I did not have enough coins.} {#var ffetch_coins 0};
 #ACTION {^There is no reason to 'ffetch' here.$} {#if {$toggle_find_familiar} {#var toggle_find_familiar 0;#delay 4 {cast find familiar;#var toggle_find_familiar 1;};};} {1};
 #ACTION {^You don't have any basic construction materials for a %w golem!} {
     #var tempCreate %1;
@@ -88,6 +84,7 @@
         #delay 5 {keep materials;cast create golem as $tempCreate};
     };
 } {1};
+
 #action {^You don't have any basic construction materials!$} {
     #if $ffetch_coins {
         ffetch materials;
@@ -100,6 +97,10 @@
         ffetch materials;
         #delay 5 {keep materials;cast create golem};
     };
+} {2};
+
+#action {You need some basic construction materials to create a golem.} {
+    #if $ffetch_coins {ffetch materials};
 } {2};
 
 #class {guild_actions} {close}

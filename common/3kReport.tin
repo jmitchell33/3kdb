@@ -1,16 +1,147 @@
 #class 3kReport kill;
 #class 3kReport open;
 
+_registerAlias {3kReport;report;3kdb Kill Report};
+_registerAlias {3kReport-clear;report;3kdb Kill Report - clear data};
 
-#NOP -- Initialize variables.  If you read this in, we're assuming you want to use it.
-#var 3kReport[active] 1;
+#alias update_xp {
+    #if {"%1" == "start"} {
+        #action {^You have %* total xp.$} {
+            #if {$bot[active]} {
+                #math bot[stats][xp] 0;
+                #math bot[stats][loop][xp] 0;
+            };
+            #format my[xp] {%d} {%%1};
+            #unaction {^You have %* total xp.$};
+        } {2};
+        xp;
+        #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+    } {
+        #if {$bot[active]} {
+            #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
+            #math bot[stats][mobs] {$bot[stats][mobs] + 1};
+        };
+        
+        #action {^You have %* total xp.$} {
+            #format temp_xp {%d} {%%1};
+            #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
+                #if {$temp_xp > $my[xp]} {
+                    #math fight_xp {$temp_xp - $my[xp]};
+                    #if {$bot[active]} {
+                        #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
+                        #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
+                    };
+                    #format my[xp] {%d} {%%1};
+                } {
+                    #NOP -- If current xp is less than total xp (spent it on stats or died) update my[xp] to reflect the new baseline;
+                    #format my[xp] {%d} {%%1}; 
+                }
+            } {
+                #format my[xp] {%d} {%%1};
+            };
+            #unaction {^You have %* total xp.$};
+        };
+        xp;
+        #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+    };
+};
+
+#alias update_coins {
+    #NOP -- If the coins don't increase, we know we're down or there's another change making a measurement unreliable;
+    #var fight_coins 0;
+    #action {^You are carrying %d coins in loose change.$} {
+        #var temp_coins %%1;
+        #if {$my[coins] > 0 && "$temp_coins" != "$my[coins]"} {
+            #if {$temp_coins > $my[coins]} {
+                #math fight_coins {$temp_coins - $my[coins]};
+                #if {$bot[active]} {
+                    #math bot[stats][coins] {$bot[stats][coins] + $fight_coins};
+                    #math bot[stats][loop][coins] {$bot[stats][loop][coins] + $fight_coins};
+                };
+                #format my[coins] {%d} {%%1};
+            } {
+                #NOP -- If current coins are less than starting coins, we'll update the new baseline;
+                #format my[coins] {%d} {%%1}; 
+            };
+        } {
+            #format my[coins] {%d} {%%1};
+        };
+        #unaction {^You are carrying %d coins in loose change.$};
+    };
+    coins;
+};
+
+#alias _reportLine {
+    #echo {-------------------------------------------------------------------------};
+};
+
+#alias _reportHeader {
+    #echo {<eef>   -=+=-  -=+=-  -=+=-<088>      <eaa>3k KILL REPORT          <eef>-=+=-  -=+=-  -=+=-<088>};
+};
+
+#alias 3kReport-clear {
+    #unvar deathSummary;
+    #echo {<eef>   -=+=-  -=+=-  -=+=-<088>   <eaa>3k KILL REPORT CLEARED       <eef>-=+=-  -=+=-  -=+=-<088>};
+};
 
 #alias 3kReport {
-    #echo {--------------------------------------------------------------};
-    #echo {Killer                   Mob                                Rounds};
-    #foreach $3kReport[%*] item {
-        #echo {$item[killer]               $item[mob]                                $item[rounds]};
+    _reportHeader;
+    #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-9s} {Killer} {Mob} {} {Rounds} {} {XP} {} {Coins} {} {Dmg Dealt};
+    #echo { <dff>$reportLine<088>};
+    #format tmpTotalKills {%g} {&deathSummary[]};
+    #var tmpTotalXp 0;
+    #var tmpTotalRnds 0;
+    #var tmpTotalDmg 0;
+    #var tmpTotalCoins 0;
+
+    #var tmpPerMobXp 0;
+    #var tmpPerMobRnds 0;
+    #var tmpPerMobDmg 0;
+    #var tmpPerMobCoins 0;
+
+    #foreach $deathSummary[%*] item {
+        #math tmpTotalXp {$item[xp_earned] + $tmpTotalXp};
+        #math tmpTotalRnds {$item[rounds] + $tmpTotalRnds};
+        #math tmpTotalDmg {$item[damage_dealt] + $tmpTotalDmg};
+        #math tmpTotalCoins {$item[coins] + $tmpTotalCoins};
+        #format tmpMob {%.15s} {$item[mob]};
+        #format tmpKiller {%.15s} {$item[killer]};
+        #format tmpXP {%M} {$item[xp_earned]};
+        #format tmpCoins {%g} {$item[coins_earned]};
+        #format tmpDmg {%g} {$item[damage_dealt]};
+        #format tmpRounds {%g} {$item[rounds]};
+        
+        #if {$tmpCoins == 0} {#var tmpCoins -};
+        #if {$item[damage_dealt] == 0} {#var tmpDmg -};
+        #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-9s} {$tmpKiller} {$tmpMob} {} {$tmpRounds} {} {$tmpXP} {} {$tmpCoins} {} {$tmpDmg};
+        #echo { <eed>$reportLine<088>};
     };
+    #math tmpPerMobCoins {$tmpTotalCoins / $tmpTotalKills};
+    #math tmpPerMobDmg {$tmpTotalDmg / $tmpTotalKills};
+    #math tmpPerMobRnds {$tmpTotalRnds / $tmpTotalKills};
+    #math tmpPerMobXp {$tmpTotalXp / $tmpTotalKills};
+
+    #format tmpPerMobXp {%M} $tmpPerMobXp;
+    #replace tmpPerMobXp {G} {B};
+    #format tmpPerMobRnds {%g} $tmpPerMobRnds;
+    #format tmpPerMobDmg {%g} $tmpPerMobDmg;
+    #replace tmpPerMobDmg {G} {B};
+    #format tmpPerMobCoins {%g} $tmpPerMobCoins;
+
+    #format tmpTotalXp {%M} $tmpTotalXp;
+    #replace tmpTotalXp {G} {B};
+    #format tmpTotalRnds {%g} $tmpTotalRnds;
+    #format tmpTotalDmg {%g} $tmpTotalDmg;
+    #replace tmpTotalDmg {G} {B};
+    #format tmpTotalCoins {%g} $tmpTotalCoins;
+
+    _reportLine;
+    #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-9s} {TOTAL KILLS} {$tmpTotalKills} {} {$tmpTotalRnds} {} {$tmpTotalXp} {} {$tmpTotalCoins} {} {$tmpTotalDmg};
+    #echo { <eab>$reportLine<088>};
+    #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-9s} {PER MOB} {} {} {$tmpPerMobRnds} {} {$tmpPerMobXp} {} {$tmpPerMobCoins} {} {$tmpPerMobDmg};
+    #echo { <eed>$reportLine<088>};
+    _reportLine;
+    _reportHeader;
 };
 
 #class 3kReport close;
