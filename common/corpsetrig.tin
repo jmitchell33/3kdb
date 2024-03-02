@@ -49,12 +49,13 @@
             #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
             #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
             mob_status_clear;
+
+            #var deathReport[mob_killed] %1;
+            #var deathReport[mob_rounds_to_kill] $mip[round];
+            #var deathReport[damage_dealt] 0;
             
             #NOP -- Small delay to make sure we get the variables from the updates;
             #delay 1 {
-                #var deathReport[mob_killed] %1;
-                #var deathReport[mob_rounds_to_kill] $mip[round];
-                #var deathReport[damage_dealt] 0;
                 #var deathReport[xp_earned] $fight_xp;
                 #var deathReport[coins_earned] $fight_coins;
 
