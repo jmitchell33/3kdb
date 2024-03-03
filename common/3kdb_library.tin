@@ -1,0 +1,134 @@
+#class {3kdb_library} {kill}
+#class {3kdb_library} {open}
+
+#NOP -- 3kdb alias library;
+
+#alias format_3kdblibrary {
+    #format {command_name} {%-25s} {%1};
+    #format {command_desc} {%-30s} {%2};
+    #showme $command_name $command_desc;
+};
+
+#alias library3kdb {
+    #var tempflag 0;
+    #var number &library3kdb[];
+	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #showme {    Filters:  <eaf>eternal rolm crafting area<088>       };
+	#showme {                <eaf>profession guild misc<088>          };
+    #showme {                   <eaf>corpse combat<088>               };
+    #showme {                      <eaf>trackers bot<088>                  };
+    #showme {<ccf>  ---------------------------------------    <088>  };
+    #showme {<ccf>     Name                 Usage              <088>  };
+    #list library3kdb index name;
+    #list library3kdb sort;
+    #foreach $library3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_3kdblibrary {     $index[name]} {$index[desc]};
+        }
+    };
+    #if !$tempflag {
+        #foreach $library3kdb[%*] index {
+            format_3kdblibrary {     $index[name]} {$index[desc]};
+        };
+    };
+};
+
+#list library3kdb clear;
+
+#NOP -- eternal;
+#list library3kdb add {{{name} {dupe} {type} {eternal} {desc} {duplicate item: dupe <item>}}};
+#list library3kdb add {{{name} {dc} {type} {eternal} {desc} {Duplicate creature: dc}}};
+#list library3kdb add {{{name} {rd3} {type} {eternal} {desc} {Reset Dungeon: rd3 <mj/sz/aegis/dungeonname>}}};
+#list library3kdb add {{{name} {ewell} {type} {eternal} {desc} {Energy Well: ewell}}};
+#list library3kdb add {{{name} {rload} {type} {eternal} {desc} {Reload Item: rload <cup/cooler/freezer/glimmering/feather/item>}}};
+#list library3kdb add {{{name} {imm} {type} {eternal} {desc} {Immortality: imm}}};
+#list library3kdb add {{{name} {prot} {type} {eternal} {desc} {Protection: prot}}};
+#list library3kdb add {{{name} {fry} {type} {eternal} {desc} {Fry All: fry}}};
+#list library3kdb add {{{name} {refresh} {type} {eternal} {desc} {Refresh Room: refresh}}};
+#list library3kdb add {{{name} {unload} {type} {eternal} {desc} {Unload Room: unload}}};
+#list library3kdb add {{{name} {res} {type} {eternal} {desc} {Resurrect: res <playername>}}};
+#list library3kdb add {{{name} {tp1} {type} {eternal} {desc} {Teleport: tp1 <myself/party/playername>}}};
+#list library3kdb add {{{name} {tp2} {type} {eternal} {desc} {Teleport: tp2 <playername>}}};
+#list library3kdb add {{{name} {summ1} {type} {eternal} {desc} {Summon: summ1 <party/playername>}}};
+#list library3kdb add {{{name} {summ2} {type} {eternal} {desc} {Summon: summ2 <playername>}}};
+
+#NOP -- rolm;
+
+#list library3kdb add {{{name} {rolm} {type} {rolm} {desc} {rolm <dmgtype/wpntype>}}};
+#list library3kdb add {{{name} {setport} {type} {rolm} {desc} {setport (sets an anchor point)}}};
+#list library3kdb add {{{name} {port} {type} {rolm} {desc} {port (winch to anchor point)}}};
+
+#NOP -- crafting;
+
+#NOP -- area;
+
+#list library3kdb add {{{name} {gmaster} {type} {area} {desc} {Erah: Talk to the Grand Master}}};
+#list library3kdb add {{{name} {shankey} {type} {area} {desc} {Shansabyk's Castle: key}}};
+#list library3kdb add {{{name} {charge_hat} {type} {area} {desc} {Witch's Hat: Make Waerlys's Velvet Hat}}};
+#list library3kdb add {{{name} {banu1} {type} {area} {desc} {Banu Step 1: search torch/get key}}};
+#list library3kdb add {{{name} {banu2} {type} {area} {desc} {Banu Step 2: search trees/east (with key)}}};
+#list library3kdb add {{{name} {banu3} {type} {area} {desc} {Banu Step 3: search pillar/fly/grab orb (orb 1)}}};
+#list library3kdb add {{{name} {banu4} {type} {area} {desc} {Banu Step 4: search fountain/get journal}}};
+#list library3kdb add {{{name} {banu5} {type} {area} {desc} {Banu Step 5: search pathway/enter}}};
+#list library3kdb add {{{name} {banu6} {type} {area} {desc} {Banu Step 6: chat with him/give journal to knight}}};
+#list library3kdb add {{{name} {banu7} {type} {area} {desc} {Banu Step 7: open powder/sprinkle powder/enter}}};
+#list library3kdb add {{{name} {banu8} {type} {area} {desc} {Banu Step 8: search ivy/get dynamite}}};
+#list library3kdb add {{{name} {banu9} {type} {area} {desc} {Banu Step 9: ignite dynamite/drop dynamite}}};
+#list library3kdb add {{{name} {banu99} {type} {area} {desc} {Banu Step 9 pt2: kill witch/search runes/get necklace}}};
+#list library3kdb add {{{name} {banu10} {type} {area} {desc} {Banu Step 10: enter (with necklace)}}};
+#list library3kdb add {{{name} {banu11} {type} {area} {desc} {Banu Step 11: search statues/fly/pry orb/get orb (orb 2)}}};
+#list library3kdb add {{{name} {banu12} {type} {area} {desc} {Banu Step 12: search sigil/north (after giving orb 2 to guyahi)}}};
+#list library3kdb add {{{name} {queen1} {type} {area} {desc} {Banshee: read runes for code word}}};
+#list library3kdb add {{{name} {guy1} {type} {area} {desc} {Banshee: enter code word}}};
+#list library3kdb add {{{name} {continue20} {type} {area} {desc} {SectionZ: enter lvl 20 continue code}}};
+#list library3kdb add {{{name} {continue40} {type} {area} {desc} {SectionZ: enter lvl 40 continue code}}};
+#list library3kdb add {{{name} {set20} {type} {area} {desc} {SectionZ: save yourself to level 20}}};
+#list library3kdb add {{{name} {set40} {type} {area} {desc} {SectionZ: save yourself to level 40}}};
+#list library3kdb add {{{name} {get-floaties} {type} {area} {desc} {Ganderei Cae: get floaties potion (+str)}}};
+#list library3kdb add {{{name} {makering-blue} {type} {area} {desc} {Terra's Terrific Treehouse: make blue ring (sp regen)}}};
+#list library3kdb add {{{name} {makering-red} {type} {area} {desc} {Terra's Terrific Treehouse: make red ring (hp regen)}}};
+#list library3kdb add {{{name} {makering-white} {type} {area} {desc} {Terra's Terrific Treehouse: make white ring (DR)}}};
+#list library3kdb add {{{name} {makering-green} {type} {area} {desc} {Terra's Terrific Treehouse: make green ring (AC)}}};
+
+
+#NOP -- profession;
+
+#NOP -- guild;
+
+#NOP -- misc;
+
+#list library3kdb add {{{name} {dung_reset} {type} {misc} {desc} {Announce Dungeon Resets: dung_reset <mj/sz/aegis/dungeonname>}}};
+
+#NOP -- corpse;
+
+#list library3kdb add {{{name} {corpsetrig-help} {type} {corpse} {desc} {corpse trigger help}}};
+#list library3kdb add {{{name} {dcoffin} {type} {corpse} {desc} {auto run to morgue and donate coffin}}};
+
+#NOP -- combat;
+
+#list library3kdb add {{{name} {strategy} {type} {combat} {desc} {strategy <option>}}};
+#list library3kdb add {{{name} {strategy-list} {type} {combat} {desc} {available options}}};
+#list library3kdb add {{{name} {strategy-clear} {type} {combat} {desc} {clear strategy}}};
+
+#NOP -- bot;
+#list library3kdbadd add {{{name} {bot_report} {type} {bot} {desc} {Displays the progress and spoils of the current bot}}};
+#list library3kdbadd add {{{name} {playercheck} {type} {bot} {desc} {Toggles the playercheck}}};
+#list library3kdbadd add {{{name} {autocollect} {type} {bot} {desc} {Toggles picking up all items}}};
+#list library3kdbadd add {{{name} {botlist} {type} {bot} {desc} {Displays all available bots to run}}};
+#list library3kdbadd add {{{name} {-botname} {type} {bot} {desc} {Load a bot with options}}};
+#list library3kdbadd add {{{name} {+botname} {type} {bot} {desc} {Load a bot and automatically run to start room/start}}};
+#list library3kdbadd add {{{name} {.pause} {type} {bot} {desc} {Pauses the bot}}};
+#list library3kdbadd add {{{name} {.unpause} {type} {bot} {desc} {Unpauses the bot}}};
+#list library3kdbadd add {{{name} {.resume} {type} {bot} {desc} {Returns to the room that was paused and resumes the bot}}};
+#list library3kdbadd add {{{name} {..} {type} {bot} {desc} {Tells the bot to walk if it stopped and you don't know why}}};
+
+#NOP -- trackers;
+#list library3kdb add {{{name} {3kReport} {type} {trackers} {desc} {3kdb Kill Report}}};
+#list library3kdb add {{{name} {3kReport-clear} {type} {trackers} {desc} {3kdb Kill Report - clear data}}};
+#list library3kdb add {{{name} {summonDmg} {type} {trackers} {desc} {Mage Summon Damage Report}}};
+#list library3kdb add {{{name} {summonDmg-clear} {type} {trackers} {desc} {Mage Summon Damage Report - Clear Data}}};
+
+
+#class {3kdb_library} {close}

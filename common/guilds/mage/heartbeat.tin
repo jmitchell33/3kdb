@@ -66,6 +66,18 @@
                 };
             } {2};
         };
+        
+        #if {$my[gp1][current] > $monitors[saturation-corpse]} {
+            checkStrategy {super_er} {
+                #if $my[super][current] {cast explosive release};
+            } {
+                #if {$corpses[total] > 0 && !$corpse_toggle} {
+                    #var corpse_toggle 1;
+                    corpse_select;
+                    #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 0;i};
+                };
+            };
+        };
     };
 
 	#NOP -- Heartbeat actions that should only be attempted once per round;
@@ -79,19 +91,6 @@
             #var my[immersion][active] 1;
             cast mystic immersion;
             #delay 180 {ash on;ash;};
-        };
-		
-        
-        #if {$my[gp1][current] > $monitors[saturation-corpse]} {
-            checkStrategy {super_er} {
-                #if $my[super][current] {cast explosive release};
-            } {
-                #if {$corpses[total] > 0 && !$corpse_toggle} {
-                    #var corpse_toggle 1;
-                    corpse_select;
-                    #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 0;i};
-                };
-            };
         };
          
 		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
