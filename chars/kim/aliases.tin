@@ -5,6 +5,9 @@
     .pause;
 };
 
+#NOP -- ALIASES TO SETUP CORPSETRIG
+#alias {mycorpsetrig} {corpsetrig-clear;corpsetrig+ wrap;corpsetrig+ b;corpsetrig+ edrain;corpsetrig+ divvy;corpsetrig+ get all;corpsetrig+ stash all}
+
 #NOP -- RESOLVE/PRISMATIC EMISSION
 #alias {acid1} {evoke resolve as acid;evoke prismatic emission as acid}
 #alias {blunt1} {evoke resolve as crushing;evoke prismatic emission as crushing}
@@ -40,13 +43,5 @@
 #alias knight6 {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}};
 #alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
 #alias winaxe {play;start;#5 throw axe};
-
-#alias corpse_trig {
-    #if {"$area" == "Chaotic Sewers"} {
-        slab all;wrap all;evoke corpse drain;evoke corpse drain;get coins;stash all
-    } {
-        wrap remains;slab remains;evoke corpse drain;evoke corpse drain;divvy gold;get all;stash all
-    };
-};
 
 #class {player_aliases} {close}

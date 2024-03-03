@@ -1,12 +1,26 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- DEADMAN
 #alias {_player_deadmanActions} {
-    .pause;
+    #if $bot[active] {.pause;#echo {stepper paused due to deadman timer}};
 };
 
-#NOP -- KILL THE REJ_ROTATE CLASS AND SET MY BRIEF SETTINGS BACK WHEN FINISHED IN THE REJECTED GAME AREA
-#alias {rej_off} {#class {rej_rotate} {kill};#send !brief off yes}
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/$user/numpad.tin}
+
+#NOP -- ALIASES TO SETUP STRATEGY
+#alias {mystrategy} {strategy-clear;strategy rolm;strategy epowers}
+
+#NOP -- ALIASES TO SETUP CORPSETRIG
+#alias {mycorpsetrig} {corpsetrig-clear;corpsetrig+ wrap;corpsetrig+ bb;corpsetrig+ fdeener;corpsetrig+ burn remains;corpsetrig+ divvy;corpsetrig+ get all;corpsetrig+ stash all;corpsetrig+ szCaps}
+
+#NOP -- EINSTEINS BRAIN - +3 INT BOOST
+#alias {ein_brain} {n;w;n;n;e;n;enter;e;e;e;s;s;e;e;n;n;n;trail;ne;climb gate;w;search tree;e;e;n;n;enter;unlock paperholder;turn paperholder;climb bench;stagedive;climb down;out;s;s;w;unlock door;open door;n}
+
+#NOP -- RESET MY BRIEF SETTINGS AFTER USING INDUCTOR STEPPER
+#alias {mybrief} {#send !brief off yes}
 
 #NOP -- VIGILANT BOOSTS
 #alias {vigiboost-wis} {buy 1;buy 2;buy 3;buy 4;buy 5;imprint wisdom;quaff flask;imprint wisdom;quaff flask;imprint wisdom;quaff flask;imprint wisdom;quaff flask;imprint wisdom;quaff flask}
@@ -25,9 +39,6 @@
 #alias {su2} {support assault fire;defend mech;forcehp;hp}
 #alias {su3} {support summon;#delay 4 {support assault fire;hp}}
 #alias {sd} {support defend;forcehp}
-
-#NOP -- ROLM PORT TO COT AND MAP CORRECTION
-#alias {port} {touch winch rune;mapgo cot}
 
 #NOP -- CURRENT SESSION JUGGERNAUT GXP AND MOUNT STATUS
 #alias {jr} {jugg_report}
@@ -49,13 +60,62 @@
 #alias {knight8} {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}}
 #alias {winaxe} {play;start;#5 throw axe}
 
-#NOP -- CORPSE ALIAS
-#alias corpse_trig {
-    #if {"$area" == "Chaotic Sewers"} {
-        wrap remains;slab remains;fdeener;fdeener;divvy gold;stash all
-    } {
-        wrap remains;slab remains;fdeener;fdeener;burn remains;divvy gold;get all;stash all;
+#NOP -- 3kdb alias library;
+
+#alias format_badgersaliases {
+    #format {badgeralias_name} {%-25s} {%1};
+    #format {badgeralias_desc} {%-30s} {%2};
+    #showme $badgeralias_name $badgeralias_desc;
+};
+
+#alias badger3kdb {
+    #var tempflag 0;
+    #var number &badger3kdb[];
+	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------    <ffa>BADGERS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #showme {    Filters:    <eaf>corpses boosts combat misc<088>     };
+    #showme {<ccf>  ---------------------------------------    <088>  };
+    #showme {<ccf>     Name                 Usage              <088>  };
+    #list badger3kdb index name;
+    #list badger3kdb sort;
+    #foreach $badger3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_badgersaliases {     $index[name]} {$index[desc]};
+        }
+    };
+    #if !$tempflag {
+        #foreach $badger3kdb[%*] index {
+            format_badgersaliases {     $index[name]} {$index[desc]};
+        };
     };
 };
+
+#list badger3kdb clear;
+
+#NOP -- corpses;
+#list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {default corpsetrig setup}}};
+
+#NOP -- boosts;
+#list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list badger3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant Flask Boost: +15 wis}}};
+
+#NOP - combat;
+#list badger3kdb add {{{name} {su1} {type} {combat} {desc} {su1: dismiss and resummon into defend mode}}};
+#list badger3kdb add {{{name} {su2} {type} {combat} {desc} {su2: switch to assault fire and defend mech}}};
+#list badger3kdb add {{{name} {su3} {type} {combat} {desc} {su3: summon a new mech and into assault fire}}};
+#list badger3kdb add {{{name} {sd} {type} {combat} {desc} {sd: switch mech into defend mode}}};
+#list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {mystrategy: default strategy setup}}};
+
+#NOP -- misc;
+
+#list badger3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight Tour Game: 6x6}}};
+#list badger3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight Tour Game: 8x8}}};
+#list badger3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight Tour Game: Throwing Axes}}};
+#list badger3kdb add {{{name} {3kdb} {type} {misc} {desc} {Bot Status: check current stepper status}}};
+#list badger3kdb add {{{name} {dwitch} {type} {misc} {desc} {dwitch: dup-c and dove witch}}};
+#list badger3kdb add {{{name} {numoff} {type} {misc} {desc} {numoff: turn numpad macros OFF}}};
+#list badger3kdb add {{{name} {numon} {type} {misc} {desc} {numon: turn numpad macros ON}}};
+#list badger3kdb add {{{name} {mybrief} {type} {misc} {desc} {mybrief: set my brief settings back to default}}};
 
 #class {player_aliases} {close}

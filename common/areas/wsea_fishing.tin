@@ -1,0 +1,50 @@
+#class {wsea_fishing} {kill}
+#class {wsea_fishing} {open}
+
+#NOP -- FISHING STUFF;
+#act {{End:(\d+) E Req:(\d+|[LHM]) Dis:(\d+|[LHM])(?:cm)? Dir:([LRC+]+) Ten:(\d+|[LMH]) Line:(\d+|[LMH])+\%? Catch:(\d+|[LMH])+\%?}} 
+{
+	#var fish[end]		%2;
+	#var fish[req]		%3;
+	#var fish[dist]		%4;
+	#var fish[dir]		%5;
+	#var fish[ten]		%6;
+	#var fish[line]		%7;
+	#var fish[catch]	%8;
+	#switch {"$fish[req]"} 
+	{
+		#case {"L"}	{#var fish[req] 40};
+		#case {"M"}	{#var fish[req] 60};
+		#case {"H"}	{#var fish[req] 80};
+		#default 	{#nop};
+	};
+
+	#if {"$fish[dist]" == "H"} { #var fish[dist] 200; };
+	#if {$fish[end] < $fish[req]} { #send !catch;};
+ 	#if {$fish[ten] > 30 || "$fish[ten]" == "H" } { #send !slack;};
+	#if {$fish[catch] > 20} { #send !catch;};
+	#if {$fish[dist] > 100} { #send !reel;};
+	#elseif {"$fish[dir]" == "R"} {#send !pull left;};
+	#elseif {"$fish[dir]" == "L"} {#send !pull right;};
+	#elseif {$fish[dist] > 0} {#send !reel;};
+	#else { #nop {nothing}; };
+
+	#if {$fish[req] + 40 > $fish[end] && $fish[catch] > 15} {!catch;};
+};
+
+#gag {^You can't do another action yet.}
+#act {You hear a loud snap as your line breaks!} {thread rod;bait rod;fish}
+#act {^Suddenly something grabs hole of your line!!!} {reel}
+#act {^Even though you do everything right the catch manages to wriggle free} {fish}
+#act {^You fail to retrieve your catch!} {fish}
+#act {^You successfully manage to retrieve your catch!} {#send !take all; #send !fish;}
+#act {^You're too tired to do that.} {catch;fish}
+#act {^As no fish appear to be interested in your line, you pull it back up.} {bait rod;fish}
+#act {^You notice that your bait is gone!} {bait rod;fish}
+#act {^You can't fish without a line!} {
+	thread rod;
+	bait rod;
+	fish
+};
+
+#class {wsea_fishing} {close}

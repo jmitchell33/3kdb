@@ -11,20 +11,27 @@
 #NOP -- SEARCHING & EXAMINING
 #alias {x} {exa}
 
+#NOP --- JUGGERNAUT AMMO
+#action {The computer chirps 'Light Lrm 15 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 9 1 40000}}
+
 #NOP -- SUPPORT MECH
-#alias {su1} {#var dismiss_support 0;dismiss;support summon;#delay 4 {#var dismiss_support 1;support defend}}
-#alias {su2} {support assault fire;defend mech;forcehp}
+#alias {su1} {#var dismiss_support 0;dismiss;support summon;hp;#delay 4 {#var dismiss_support 1;support defend;hp}}
+#alias {su2} {support assault fire;defend mech;forcehp;hp}
 #alias {su3} {support summon;#delay 4 {support assault fire;hp}}
 #alias {sd} {support defend;forcehp}
 
-#NOP -- ROLM PORT TO COT AND MAP CORRECTION
-#alias {port} {touch winch rune;mapgo cot}
+#NOP -- XCORE
+#action {The missile whirrs as it accepts Untouchable's payload.} {get all;launch $mob[target];fire 2}
+#action {The field spits the corpse out, it doesn't like Monsanto and GMOs.} {wrap};
+
+#NOP -- COUPLE LOGIN TRIGS
+#action {3Kingdoms welcomes you back from linkdeath.} #delay {3} {deadman 200};
 
 #NOP -- CURRENT SESSION JUGGERNAUT GXP AND MOUNT STATUS
 #alias {jr} {jugg_report}
 
 #NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
+#alias {3kdb} {ptell 3kdb bot status} 
 
 #NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
 #alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
@@ -35,12 +42,8 @@
 #alias {knight8} {play;start;dt8}
 #alias {winaxe} {play;start;#5 throw axe}
 
-#alias corpse_trig {
-    #if {"$area" == "Chaotic Sewers"} {
-        slab all;wrap all;fdeener;fdeener;get coins;stash all
-    } {
-        wrap remains;slab remains;fdeener;fdeener;divvy gold;stash all
-    };
-};
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/brianna/numpad.tin}
 
 #class {player_aliases} {close}

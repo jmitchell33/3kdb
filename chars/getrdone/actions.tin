@@ -1,0 +1,42 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#var corpse_delay 0;
+
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {
+	#if {$my[song][rounds] > 1} {
+		#var randNumber @rnd{1;200};
+		add_action {{{name} {$randNumber} {action} {perform dirge} {priority} {3}}};
+	} {
+		perform dirge
+	};
+} {1};
+
+#ACTION {^Owie. That hurt!} {
+	#if !$corpse_delay {
+		#var corpse_delay 1;
+		corpse_select;
+		#delay {4} {cease;pd;pd;wrap};
+		#delay {4} {#var corpse_delay 0};
+	}
+} {1};
+
+
+#action {You feel a sudden wave of alcohol induced fury overcome you!} {
+	#var drunken_master 1;
+};
+
+#action {Your alcohol fueled strength dissipates.  Buuurp  .} {
+	#var drunken_master 0;
+};
+
+#NOP -- Charge stuff while Sholitia is gone;
+#act {Sholitia appears out of nowhere!} {cease;};
+#act {Sholitia utters a word of mystical power. She vanishes from sight,} {
+	#NOP;
+};
+
+#NOP --- GENERAL MISC;
+#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
+
+#class {player_actions} {close}
