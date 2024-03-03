@@ -6,6 +6,7 @@
 #var corpse_toggle 0;
 
 #var toggle_spelltap 1;
+#var rotate_tank 1;
 
 #alias {_guild_heartbeat} {
 	#var mc_threshold 90;
@@ -80,6 +81,7 @@
         };
     };
 
+
 	#NOP -- Heartbeat actions that should only be attempted once per round;
     #if {!$idle_flag && $action_round < $mip[round]} {
 		#if {!$self_haste && $sp_percent > 30} {
@@ -101,6 +103,14 @@
         #NOP turn ash off if using MI;
         #if {$my[immersion][rounds] > 0 && $ash > 0} {
             ash off;
+        };
+
+        checkStrategy {summon_tank} {
+            #if $rotate_tank {
+                #var rotate_tank 0;
+                _summonTankCheck;
+                #delay 15 {#var rotate_tank 1};
+            };
         };
     };
 };

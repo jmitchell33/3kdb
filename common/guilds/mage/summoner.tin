@@ -1,6 +1,13 @@
 #class {guild_summoner} kill
 #class {guild_summoner} open
 
+#unvar summon_types_list;
+#list summon_types_list add {Celestial lion};
+#list summon_types_list add {Undead wraith};
+#list summon_types_list add {Shadow panther};
+#list summon_types_list add {Something};
+
+
 #gag {  --> %*};
 #gag {%*-hp-};
 
@@ -117,6 +124,45 @@
 	#list summonList explode {, };
 	_handleSummonString;
 } {2};
+
+#alias _summonTankCheck {
+	#list summonTankList clear;
+	#var summonTankCheck 1;
+	look;
+	#delay 2 {
+		#var summonTankCheck 0;
+		#list summonTankList indexate health;
+		#list summonTankList order;
+		#list summonTankList reverse;
+		#switch {"$summonTankList[1][name]"} {
+			#case {"A Celestial Lion"} {
+				#var summonNewTank lion;
+			};
+			#case {"An Undead Wraith"} {
+				#var summonNewTank wraith;
+			};
+			#case {"A Shadow Panther"} {
+				#var summonNewTank panther;
+			};
+		};
+		#send {say $summonNewTank $summonTankList[1][index], defend me};
+	};
+};
+
+#action {^-M-_%* [summons] (%d%)} {
+	#var skipSummon 0;
+	#if $summonTankCheck {
+		#NOP -- We don't want to assign the Golem to tanking since it's damage drops if it's tanking;
+		#regex {"%1"} {"%*Golem%*"} {#var skipSummon 1};
+		#if !$skipSummon {
+			#var summonTankIndex 1;
+			#foreach $summonTankList[%*] item {
+				#if {"$item[name]" == "%1"} {#math summonTankIndex {$summonTankIndex + 1}};
+			};
+			#list summonTankList add {{{name} {%1} {health} {%2} {index} {$summonTankIndex}}};
+		};
+	};
+} {1};
 
 
 #class {guild_summoner} close
