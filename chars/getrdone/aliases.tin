@@ -5,56 +5,22 @@
     .pause;
 };
 
-#alias corpse_trig {
-    fuse 500;
-    i;
-};
+#NOP -- BOT STATUS
+#alias {3kdb} {ptell 3kdb bot status}
 
-#alias k {
-    checkStrategy {backstab} {
-        #if {"$wielded" == "The Rod of Lordly Might"} {
-            touch reaper rune;
-            cast mystic venom on rod of lordly might;
-        } {
-            cast mystic venom on redaxe;
-            cast mystic venom on sword;
-        };
-        hide in shadows;
-        backstab %0;
-        touch crown rune;
-    };
-    kill %0;
-    
-}
+#NOP --KNIGHT TOUR GAMES
+#alias {knight6} {play;start;dt6}
+#alias {knight8} {play;start;dt8}
+#alias {winaxe} {play;start;#5 throw axe}
 
-#alias {.mob_kill_action} {
-    checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/brianna/numpad.tin}
 
-    checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
+#NOP -- QUICK WALKS TO ROOMVNUMS
+#alias {wa} {#map run %1}
 
-    checkStrategy {backstab} {
-        cast mystic venom on redaxe;
-        cast mystic venom on sword;
-        hide in shadows;
-        backstab $mob[target];
-    };
-    
-    #NOP -- Kill the room if we're in SZ;
-    #if {"$area" == "Section Z"} {
-        kill balangool;
-        kill balangool 2;
-        kill balangool 3;
-    } {
-        kill $mob[target];
-    };
-    
-
-    checkStrategy {cloud} {#delay 2 {cast noxious cloud}};
-    checkStrategy {vortex} {#delay 5 {cast lightning vortex}};
-    checkStrategy {enrage} {enrage};
-}
-
-
-#alias {_login} {watch mywho;playcult;cult join;first impression;c floating disc};
+#NOP -- SEARCHING & EXAMINING
+#alias {x} {exa}
 
 #class {player_aliases} {close}
