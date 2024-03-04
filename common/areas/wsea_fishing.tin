@@ -1,8 +1,66 @@
 #class {wsea_fishing} {kill}
 #class {wsea_fishing} {open}
 
-#NOP -- FISHING STUFF;
-#act {{End:(\d+) E Req:(\d+|[LHM]) Dis:(\d+|[LHM])(?:cm)? Dir:([LRC+]+) Ten:(\d+|[LMH]) Line:(\d+|[LMH])+\%? Catch:(\d+|[LMH])+\%?}} 
+#NOP -- westersea fishing;
+
+#alias {startfishing} {thread rod;bait rod;fish}
+
+#action {^Suddenly something grabs hole of your line!!!} {reel}
+#action {^Even though you do everything right the catch manages to wriggle free} {fish}
+#action {^You fail to retrieve your catch!} {fish}
+#action {^You successfully manage to retrieve your catch!} {#send !take all; #send !fish}
+#action {^You're too tired to do that.} {catch;fish}
+#action {^As no fish appear to be interested in your line, you pull it back up.} {bait rod;fish}
+#action {^You notice that your bait is gone!} {bait rod;fish}
+#action {^You can't fish without a line!} {
+	thread rod;
+	bait rod;
+	fish
+};
+
+#action {^Your fishing rod bends violently and cracks in two!} {
+	thread rod;
+	bait rod;
+	fish
+} {2};
+
+#action {^You hear a loud snap as your line breaks!} {
+	thread rod;
+	bait rod;
+	fish
+} {2};
+
+#action {^With a loud 'thwang', your line snaps. Perhaps you should pay more} {
+	thread rod;
+	bait rod;
+	fish;
+} {2};
+
+#action {^Your fishing rod bends violenty and cracks in two!} {
+	#draw Yellow scroll line 1 1 1 80;
+	#showme GO BUY A ROD!;
+	#draw Yellow scroll line 1 1 1 80;
+
+	#send !return;
+} {2};
+
+#action {^You have nothing to bait the rod with!} {
+	#draw Yellow scroll line 1 1 1 80;
+	#showme GO BUY BAIT!;
+	#draw Yellow scroll line 1 1 1 80;
+
+	#send !return;
+} {2};
+
+#action {^You have nothing to thread the rod with!} {
+	#draw Yellow scroll line 1 1 1 80;
+	#showme GO BUY THREAD!;
+	#draw Yellow scroll line 1 1 1 80;
+
+	#send !return;
+} {2};
+
+#action {{^End:(\d+) E Req:(\d+|[LHM]) Dis:(\d+|[LHM])(?:cm)? Dir:([LRC+]+) Ten:(\d+|[LMH]) Line:(\d+|[LMH])+\%? Catch:(\d+|[LMH])+\%?$}}
 {
 	#var fish[end]		%2;
 	#var fish[req]		%3;
@@ -28,23 +86,27 @@
 	#elseif {"$fish[dir]" == "L"} {#send !pull right;};
 	#elseif {$fish[dist] > 0} {#send !reel;};
 	#else { #nop {nothing}; };
+	#act {^Your fishing rod bends violently and cracks in two!} {
+		thread rod;
+		bait rod;
+		fish;
+	} {2};
+	
+	#act {^You hear a loud snap as your line breaks!} {
+		thread rod;
+		bait rod;
+		fish;
+	} {2};
+
+	#act {^With a loud 'thwang', your line snaps. Perhaps you should pay more} {
+		thread rod;
+		bait rod;
+		fish;
+	} {2};
 
 	#if {$fish[req] + 40 > $fish[end] && $fish[catch] > 15} {!catch;};
 };
 
-#gag {^You can't do another action yet.}
-#act {You hear a loud snap as your line breaks!} {thread rod;bait rod;fish}
-#act {^Suddenly something grabs hole of your line!!!} {reel}
-#act {^Even though you do everything right the catch manages to wriggle free} {fish}
-#act {^You fail to retrieve your catch!} {fish}
-#act {^You successfully manage to retrieve your catch!} {#send !take all; #send !fish;}
-#act {^You're too tired to do that.} {catch;fish}
-#act {^As no fish appear to be interested in your line, you pull it back up.} {bait rod;fish}
-#act {^You notice that your bait is gone!} {bait rod;fish}
-#act {^You can't fish without a line!} {
-	thread rod;
-	bait rod;
-	fish
-};
+#gag {^You can't do another action yet.};
 
 #class {wsea_fishing} {close}
