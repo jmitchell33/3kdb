@@ -4,6 +4,9 @@
 #NOP This variable determines whether or not to fire corpse_trig;
 #var corpsetrigStatus 1;
 
+#NOP This variable determines to add a custom action if the user enters it 2x with corpsetrig+;
+#var tempCorpseActionToggle 1;
+
 #alias formatItem {
     #format result {<acf>%+10s  %s<088>} {%1} {%2};
     #echo { $result};
@@ -100,6 +103,7 @@
     #echo {<caa>----  <fff> corpsetrig has been cleared <caa>  ----<088>};
 };
 
+
 #alias corpsetrig+ {
     #if {"%0" != ""} {
         #list corpseList {find} {%0} {tempListIndex};
@@ -126,9 +130,25 @@
                 #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>corpse_trig  <caa>  ----<088>};
             };
         } {
-            #echo { <caa>----  <fff> %0 not found in corpsetrig List.  <caa>  ----<088>};
-            #echo { <caa>----  <fff> %0 has been added as an action.  <caa>  ----<088>};
-            #list corpseActions add {{{name} {%0} {action} {%0} {active} {1}}};
+            #if $tempCorpseActionToggle {
+                #delay 10 {#var tempCorpseActionToggle 1};
+                #var tempCorpseActionToggle 0;
+                #var tempCorpseAction %0;
+                #echo { <caa>----  <fff> %0 not found in corpsetrig List.  <caa>  ----<088>};
+                #echo { <caa>----  <fff> If this was not a typo and you wish to add this action, repeat the entry.  <caa>  ----<088>};
+            } {
+                #if {"$tempCorpseAction" == "%0"} {
+                    #var tempCorpseActionToggle 1;
+                    #echo { <caa>----  <fff> %0 has been added as an action.  <caa>  ----<088>};
+                    #list corpseActions add {{{name} {%0} {action} {%0} {active} {1}}};
+                } {
+                    #delay 10 {#var tempCorpseActionToggle 1};
+                    #var tempCorpseActionToggle 0;
+                    #var tempCorpseAction %0;
+                    #echo { <caa>----  <fff> %0 not found in corpsetrig List.  <caa>  ----<088>};
+                    #echo { <caa>----  <fff> If this was not a typo and you wish to add this action, repeat the entry.  <caa>  ----<088>};
+                };
+            }
         };
     };
 };
@@ -305,7 +325,7 @@
 #list corpseList add {{{name} {preserve} {guild} {necromancer} {action} {qtrance preserve remains/get remains}  {active} {0} {description} {Necro: Preserve Remains}}};
 #list corpseList add {{{name} {corpseBlast} {guild} {mage} {action} {cast corpse blast}  {active} {0} {description} {Mage: Corpse Blast}}};
 #list corpseList add {{{name} {spelltap} {guild} {mage} {action} {cast spell tap on corpse}  {active} {0} {description} {Mage: Spell Tap}}};
-#list corpseList add {{{name} {anchor} {guild} {mage} {action} {cast dispel magic}  {active} {0} {description} {Mage: Dispel Magic (remove anchor)}}};
+#list corpseList add {{{name} {anchor} {guild} {mage} {action} {#if !$incombat {cast dispel magic}}  {active} {0} {description} {Mage: Dispel Magic (remove anchor)}}};
 #list corpseList add {{{name} {spellbook} {guild} {mage} {action} {study spellbook}  {active} {0} {description} {Mage: Study Spellbook}}};
 #list corpseList indexate name;
 
@@ -315,6 +335,8 @@
         #if {&corpseActions[] > 0} {
             #loop 1 &corpseActions[] item {
                 #if {$corpseActions[$item][name] == "delay"} {
+                    #echo {found delay};
+                    #if {$bot[active]} {.pause};
                     #var pauseCorpseAction 1;
                     #var lastItem $item;
                     #math nextItem {$item + 1};
@@ -328,6 +350,7 @@
                     #loop $nextItem &corpseActions[] item {
                         $corpseActions[$item][action];
                     };
+                    #if {$bot[active]} {.unpause};
                 };
             };
         };

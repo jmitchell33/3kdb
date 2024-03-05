@@ -72,6 +72,10 @@
             checkStrategy {super_er} {
                 #if $my[super][current] {cast explosive release};
             } {
+                #NOP -- If you don't have corpses then use ER;
+                #if {$corpses[total] == 0 && $my[super][current]} {
+                    cast explosive release;
+                };
                 #if {$corpses[total] > 0 && !$corpse_toggle} {
                     #var corpse_toggle 1;
                     corpse_select;
@@ -81,6 +85,22 @@
         };
     };
 
+    #NOP -- Things to do while immersion is active;
+    #if {!$idle_flag && $my[immersion][active]} {
+        #if $summoner {cast focus mind};
+    };
+
+    #NOP -- Cull the unhealthy summons during immersion - we'll do this every 20 rounds;
+    #if {!$idle_flag && $my[immersion][active]} {
+        #if $summoner {
+            checkStrategy {summon_cull} {
+                #if {$my[immersion][rounds] == 70} {_summonHealthCull};
+                #if {$my[immersion][rounds] == 50} {_summonHealthCull};
+                #if {$my[immersion][rounds] == 30} {_summonHealthCull};
+                #if {$my[immersion][rounds] == 10} {_summonHealthCull};
+            };
+        };
+    };
 
 	#NOP -- Heartbeat actions that should only be attempted once per round;
     #if {!$idle_flag && $action_round < $mip[round]} {

@@ -120,6 +120,7 @@
 #list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
 #list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
 #list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Rotate Summon Tanking}}};
+#list strategyList add {{{guild} {mage} {name} {summon_cull}  {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
 #list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
 #list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
@@ -176,7 +177,7 @@
             };
         };
 
-        checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor;};};
+        checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor}};
 
         #if {$toggle_spelltap && $sp_percent > 70} {
             checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}

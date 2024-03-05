@@ -1,13 +1,22 @@
 #class dmgtracker_mage kill;
 #class dmgtracker_mage open;
 
+#read $cwd/modules/dmgtracker/data.tin;
+
 #unvar summon_dmg;
 #var summon_dmg[first_round] $total_rounds;
+#var spell_dmg[first_round] $total_rounds;
 
 #alias summonDmg-clear {
     #unvar summon_dmg;
     #var summon_dmg[first_round] $total_rounds;
     #echo {<dfa> +-+-+-    SUMMON DAMAGE TRACKER RESET    -+-+-+<088>};
+};
+
+#alias spellDmg-clear {
+    #unvar spell_dmg;
+    #var spell_dmg[first_round] $total_rounds;
+    #echo {<dfa> +-+-+-    SPELL DAMAGE TRACKER RESET    -+-+-+<088>};
 };
 
 #alias summonDmg {
@@ -27,17 +36,15 @@
                 #math summonTotalHits {$summonTotalHits + $summon_dmg[$summon][total][$dmgItem][count]};
             };
         };
-        #format summonTotalDmg {%M} {$summonTotalDmg};
-        #replace summonTotalDmg {G} {B};
         
         #math summonPerHitDmg {$summonTotalDmg / $summon_dmg[$summon][total][attempts]};
+        #math summonHitsPerRnd {$summonTotalHits / $summon_dmg[tracked_rounds] * 1.0};
+        #math summonPerRoundDmg {$summonTotalDmg / $summon_dmg[tracked_rounds] * 1.0};
+        
         #format summonPerHitDmg {%d} {$summonPerHitDmg};
         #format summonPerHitDmg {%g} {$summonPerHitDmg};
-
-        #math summonHitsPerRnd {$summonTotalHits / $summon_dmg[tracked_rounds]};
-        #format summonHitsPerRnd {%d} {$summonHitsPerRnd};
-
-        #math summonPerRoundDmg {$summonTotalDmg / $summon_dmg[tracked_rounds] * 1.0};
+        #format summonTotalDmg {%M} {$summonTotalDmg};
+        #replace summonTotalDmg {G} {B};
         #format summonPerRoundDmg {%d} {$summonPerRoundDmg};
         #format summonPerRoundDmg {%g} {$summonPerRoundDmg};
 
@@ -61,6 +68,10 @@
         #math summon_dmg[$summonType][total][attempts] {$summon_dmg[$summonType][total][attempts] + 1};
     };
 };
+
+#alias spellDmgRecord {
+
+}
 
 #ACTION {^%* blow was deflected.$} {summonDmgRecord {%1} deflected};
 #ACTION {^%* strike was ineffective.$} {summonDmgRecord {%1} ineffective};
@@ -92,5 +103,34 @@
 #ACTION {^%* atomized %*.$} {summonDmgRecord {%1} atomized};
 #ACTION {^%* beat %* like a red-headed step child.$} {summonDmgRecord {%1} step_child};
 #ACTION {^%* drop-kicked %*.$} {summonDmgRecord {%1} dropkick};
+
+#NOP #action {} {spellDmgRecord de};
+#NOP #action {} {spellDmgRecord murderominates};
+#NOP #action {} {spellDmgRecord obliterificatifies};
+#NOP #action {%* gives %* COVID-19.} {spellDmgRecord covid};
+#NOP #action {%* royally %!@'s %* up!!!} {spellDmgRecord fucks};
+#NOP #action {%* slams into %* so hard, your downgrade gets closer!!!} {spellDmgRecord downgrade};
+#NOP #action {%* deleted Spiral Gun's whole damn save file!!!} {spellDmgRecord deleted};
+#NOP #action {%* wrecks %* into a mess worse than Havox's bot.} {spellDmgRecord wrecks};
+#NOP #action {%* catches %* ousside, how 'bout that!?!} {spellDmgRecord ousside};
+#NOP #action {%* spoiled %* like a slut in a horror film.} {spellDmgRecord spoiled};
+#NOP #action {%* melted %* like a Salvador Dali painting!!!} {spellDmgRecord melted};
+#NOP #action {%* offed %* like a George R. R. Martin protagonist!!} {spellDmgRecord offed};
+#NOP #action {%* was ripped apart by the %* like a toddler with Play-Doh.} {spellDmgRecord ripped};
+#NOP #action {%* EXTIRPATED every fabric of %* being!!} {spellDmgRecord extirpated};
+#NOP #action {%* RAVAGED the very essence of %* body!!} {spellDmgRecord ravaged};
+#NOP #action {%* EXPUNGED %* from existence!!} {spellDmgRecord expunged};
+#NOP #action {%* TORE a hole into the fabric of %* reality!} {spellDmgRecord tore};
+#NOP #action {%* trashed %* like a freshman at a frat party!!!} {spellDmgRecord trashed};
+#NOP #action {%* MUTILATED %*, scattering pieces all over!!} {spellDmgRecord mutilated};
+#NOP #action {} {spellDmgRecord annihilated};
+#NOP #action {%* is nearly erased from the force of your %*!} {spellDmgRecord erased};
+#NOP #action {You unleash a torrent of destruction upon %* with your %*!!!} {spellDmgRecord destruction};
+#NOP #action {The ground shakes as %* is torn asunder by your %*!!} {spellDmgRecord torn};
+#NOP #action {%* survived the %* like a sandcastle at high tide!} {spellDmgRecord sand};
+#NOP #action {A resounding wave of energy blasts from %*, shredded by your %*!} {spellDmgRecord shredded};
+#NOP #action {} {spellDmgRecord obliterated};
+#NOP #action {} {spellDmgRecord devastated};
+#NOP #action {} {spellDmgRecord thrashed};
 
 #class dmgtracker_mage close;
