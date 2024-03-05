@@ -1,9 +1,128 @@
 #class {wsea_fishing} {kill}
 #class {wsea_fishing} {open}
 
-#NOP -- FISHING STUFF;
-#act {{End:(\d+) E Req:(\d+|[LHM]) Dis:(\d+|[LHM])(?:cm)? Dir:([LRC+]+) Ten:(\d+|[LMH]) Line:(\d+|[LMH])+\%? Catch:(\d+|[LMH])+\%?}} 
+#NOP -- westersea fishing;
+
+#NOP -- start fishing bot;
+#alias {startfishing} {
+	thread rod;
+	bait rod;
+	fish;
+	#var fish[caught] 0;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <ccf>LETS CATCH US A FISH!<088>;
+	#draw Yellow scroll line 1 1 1 30
+};
+
+#NOP -- stop fishing bot;
+#alias {stopfishing} {
+	#send !return
+};
+
+#NOP -- fishing bot;
+
+#var fish[caught] 0
+#action {^Suddenly something grabs hole of your line!!!} #if {!$idle_flag}
 {
+	#send !reel;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>REELING<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+#action {^Even though you do everything right the catch manages to wriggle free} #if {!$idle_flag}
+{
+	#send !fish;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <faa>THE FISH WIGGLED FREE!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+#action {^You fail to retrieve your catch!} #if {!$idle_flag} {fish}
+#action {^You successfully manage to retrieve your catch!} #if {!$idle_flag}
+{
+	#send !take all; 
+	#send !fish;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>YOU CAUGHT SOMETHING!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+#action {^%*fish: Ok.$} #if {!$idle_flag}
+{
+	#math {fish[caught]} {$fish[caught] + 1};
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>YOU CAUGHT A FISH!!!!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+
+#action {^You're too tired to do that.} #if {!$idle_flag} {catch;fish}
+#action {^As no fish appear to be interested in your line, you pull it back up.} #if {!$idle_flag}
+{
+	#send !bait rod;
+	#send !fish;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <faa>REBAITING FISHING ROD!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+#action {^You notice that your bait is gone!} #if {!$idle_flag}
+{
+	#send !bait rod;
+	#send !fish;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <faa>REBAITING FISHING ROD!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+#action {^You can't fish without a line!} #if {!$idle_flag}
+{
+	#send !thread rod;
+	#send !bait rod;
+	#send !fish;
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <faa>RETHREADING FISHING ROD!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+} {1};
+
+#action {^had some more experience you would be able to fish here.} {
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>GET MORE FISHING EXPERIENCE!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+
+	#send !return;
+} {1};
+
+#action {You can't thread a fragile fishing line to that.} {
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>GO BUY ANOTHER FISHING ROD!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+
+	#send !return;
+} {1};
+
+#action {^You have nothing to bait the rod with!} {
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>GO BUY BAIT!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+
+	#send !return;
+} {1};
+
+#action {^You have nothing to thread the rod with!} {
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <fff>GO BUY THREAD!<088>;
+	#draw Yellow scroll line 1 1 1 30;
+
+	#send !return;
+} {1};
+
+#action {{^End:(\d+) E Req:(\d+|[LHM]) Dis:(\d+|[LHM])(?:cm)? Dir:([LRC+]+) Ten:(\d+|[LMH]) Line:(\d+|[LMH])+\%? Catch:(\d+|[LMH])+\%?$}} #if {!$idle_flag}
+{
+	#draw Yellow scroll line 1 1 1 30;
+	#showme <ccf>Number of Fish Caught:<088> <fff>($fish[caught])<088>;
+	#draw Yellow scroll line 1 1 1 30;
 	#var fish[end]		%2;
 	#var fish[req]		%3;
 	#var fish[dist]		%4;
@@ -28,23 +147,30 @@
 	#elseif {"$fish[dir]" == "L"} {#send !pull right;};
 	#elseif {$fish[dist] > 0} {#send !reel;};
 	#else { #nop {nothing}; };
+	#action {^Your fishing rod bends violently and cracks in two!} #if {!$flag_flag}
+	{
+		thread rod;
+		bait rod;
+		fish;
+	} {1};
+	
+	#action {^You hear a loud snap as your line breaks!} #if {!$idle_flag}
+	{
+		thread rod;
+		bait rod;
+		fish;
+	} {1};
+
+	#action {^With a loud 'thwang', your line snaps. Perhaps you should pay more} #if {!$idle_flag}
+	{
+		thread rod;
+		bait rod;
+		fish;
+	} {1};
 
 	#if {$fish[req] + 40 > $fish[end] && $fish[catch] > 15} {!catch;};
 };
 
-#gag {^You can't do another action yet.}
-#act {You hear a loud snap as your line breaks!} {thread rod;bait rod;fish}
-#act {^Suddenly something grabs hole of your line!!!} {reel}
-#act {^Even though you do everything right the catch manages to wriggle free} {fish}
-#act {^You fail to retrieve your catch!} {fish}
-#act {^You successfully manage to retrieve your catch!} {#send !take all; #send !fish;}
-#act {^You're too tired to do that.} {catch;fish}
-#act {^As no fish appear to be interested in your line, you pull it back up.} {bait rod;fish}
-#act {^You notice that your bait is gone!} {bait rod;fish}
-#act {^You can't fish without a line!} {
-	thread rod;
-	bait rod;
-	fish
-};
+#gag {^You can't do another action yet.};
 
 #class {wsea_fishing} {close}

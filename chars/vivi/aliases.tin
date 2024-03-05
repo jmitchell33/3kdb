@@ -1,0 +1,38 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- DEADMAN
+#alias {_player_deadmanActions} {
+     #if $bot[active] {.pause;#echo {stepper paused due to deadman timer}};
+};
+ 
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/$user/numpad.tin}
+ 
+#NOP -- ALIASES TO SETUP STRATEGY
+#alias {mystrategy} {strategy-clear}
+ 
+#NOP -- ALIASES TO SETUP CORPSETRIG
+#alias {mycorpsetrig} {corpsetrig-clear}
+ 
+#NOP -- EINSTEINS BRAIN - +3 INT BOOST
+#alias {ein_brain} {n;w;n;n;e;n;enter;e;e;e;s;s;e;e;n;n;n;trail;ne;climb gate;w;search tree;e;e;n;n;enter;unlock paperholder;turn paperholder;climb bench;stagedive;climb down;out;s;s;w;unlock door;open door;n}
+
+#NOP -- EXAMINING/SEARCHING
+#alias {x} {exa}
+
+#NOP -- QUICK WALKS TO ROOMVNUMS
+#alias {wa} {#map run %1}
+
+#NOP -- BOT STATUS
+#alias {3kdb} {ptell 3kdb bot status}
+
+#NOP --KNIGHT TOUR GAMES
+#alias {dotr6} {play;start;dt6}
+#alias {dotr8} {play;start;dt8}
+#alias {knight6} {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}}
+#alias {knight8} {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}}
+#alias {winaxe} {play;start;#5 throw axe}
+
+#class {player_aliases} {close}

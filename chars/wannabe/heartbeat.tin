@@ -1,0 +1,19 @@
+#class {player_heartbeat} {kill}
+#class {player_heartbeat} {open}
+
+#alias {_player_heartbeat} {
+
+    #if !$idle_flag {
+        #if {$beads && $hp_percent < 450 && sp_percent > 90} {
+            check_beads;
+        };
+    };
+
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #if {$my[sp][current] < $sp_danger && $my[eternal][heal] && !$my[immersion][active]} {
+            (heal oscar;
+        };
+    };
+};
+
+#class {player_heartbeat} {close}
