@@ -1,1 +1,16 @@
+#class {crafting} {kill}
+#class {crafting} {open}
+
 #read modules/crafting/data.tin;
+
+#NOP -- auto assemble your crafting satchel On & Off;
+#alias {autostash-on} {
+    #read modules/crafting/assemble.tin;
+    #send !stashlist
+};
+
+#alias {autostash-off} {
+    #class autoassemble kill
+};
+
+#class {crafting} {close}
