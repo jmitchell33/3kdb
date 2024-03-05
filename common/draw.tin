@@ -176,6 +176,11 @@
     } {
         #list caption_data create {$corpse_string \n $eternal_string};
     };
+
+    #NOP -- Sometimes the corpse string is #1 and #2 - can't figure out why, but we'll just filter it if that's the case;
+    #regex {$caption_data[1]} {<088>💀 <ceb>} {#var tmp[1] 1} {#var tmp[1] 0};
+    #regex {$caption_data[2]} {<088>💀 <ceb>} {#var tmp[2] 1} {#var tmp[2] 0};
+    #if {$tmp[1] && $tmp[2]} {#list caption_data delete 2};
     
     #if {$idle_sec > $deadmanIdleTimeout} {
         #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];

@@ -7,6 +7,21 @@
 #list summon_types_list add {Shadow panther};
 #list summon_types_list add {Something};
 
+#list summon_types_list add {Wyvern};
+#list summon_types_list add {Wraith};
+#list summon_types_list add {Otyugh};
+#list summon_types_list add {Troll};
+#list summon_types_list add {Manticore};
+#list summon_types_list add {Weretiger};
+#list summon_types_list add {Wight};
+#list summon_types_list add {Rakshasa};
+#list summon_types_list add {Jackalwere};
+#list summon_types_list add {Phase spider};
+#list summon_types_list add {Carrion crawler};
+#list summon_types_list add {Ogre magi};
+#list summon_types_list add {Salamander};
+#list summon_types_list add {8-headed hydra};
+
 
 #gag {  --> %*};
 #gag {%*-hp-};
@@ -146,6 +161,31 @@
 			};
 		};
 		#send {say $summonNewTank $summonTankList[1][index], defend me};
+	};
+};
+
+#alias _summonHealthCull {
+	#list summonTankList clear;
+	#var summonTankCheck 1;
+	look;
+	#delay 2 {
+		#var summonTankCheck 0;
+		#list summonTankList indexate health;
+		#list summonTankList refine {&0 < 100};
+		#foreach $summonTankList[%*] item {
+			#switch {"$item[name]"} {
+			 	#case {"A Celestial Lion"} {
+			 		#var summonTmpName lion;
+			 	};
+			 	#case {"An Undead Wraith"} {
+			 		#var summonTmpName wraith;
+			 	};
+			 	#case {"A Shadow Panther"} {
+			 		#var summonTmpName panther;
+			 	};
+			 };
+			 say $summonTmpName $item[index], begone;
+		};
 	};
 };
 
