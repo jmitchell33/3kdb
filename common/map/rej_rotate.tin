@@ -16,62 +16,50 @@
 
 	#if {"$room[exits]" == "n"} {
 		#var rejected_game[color] magenta;
-		#var rej_color <258>;
 		#if {"$startMap" == "red"} {rrotate};
 		#if {"$startMap" == "blue"} {rrotate;rrotate};
 		#if {"$startMap" == "green"} {rrotate;rrotate;rrotate};
 	};
 	#if {"$room[exits]" == "e"} {
 		#var rejected_game[color] green;
-		#var rej_color <228>;
 		#if {"$startMap" == "magenta"} {rrotate};
 		#if {"$startMap" == "red"} {rrotate;rrotate};
 		#if {"$startMap" == "blue"} {rrotate;rrotate;rrotate};
 	};
 	#if {"$room[exits]" == "s"} {
 		#var rejected_game[color] blue;
-		#var rej_color <148>;
 		#if {"$startMap" == "green"} {rrotate};
 		#if {"$startMap" == "magenta"} {rrotate;rrotate};
 		#if {"$startMap" == "red"} {rrotate;rrotate;rrotate};
 	};
 	#if {"$room[exits]" == "w"} {
 		#var rejected_game[color] red;
-		#var rej_color <218>;
 		#if {"$startMap" == "magenta"} {rrotate};
 		#if {"$startMap" == "green"} {rrotate;rrotate};
 		#if {"$startMap" == "blue"} {rrotate;rrotate;rrotate};
 	};
-
 	#delay 1 {#ECHO {MAP ORIENTED... THANK YOU COME AGAIN!}};
 };
 
 
 #NOP -- We call it inductor whether you're going to crack or not;
 #alias fixRJColor {
-	#if {$rj_rotate} {
-		#if {$bot[active]} {
-			#var {bot[path]} {$bot[inductor][${rejected_game[color]}]};
-			#unvar bot[steps];
-			#list bot[steps] create $bot[path];
-		};
-		rrotate;
+	#if {$bot[active]} {
+		#var {bot[path]} {$bot[inductor][${rejected_game[color]}]};
+		#unvar bot[steps];
+		#list bot[steps] create $bot[path];
 	};
+	rrotate;
 };
 
 #NOP -- Fix color if the map rotates;
-#var rj_rotate 0;
+#var rj_rotate 1;
 #action {{^[\s\.oO]{70}}} {
 	#if {"$area" == "The Rejected Game"} {
-		#if {$bot[active]} {.pause};
-		#var rj_rotate 1;
 		#if $rj_rotate {
 			#var rj_rotate 0;
 			look;
-			#delay {fixColor} {
-				fixRJColor;
-				#if {$bot[active]} {#var bot[paused] 0};
-			} {2};
+			#delay {fixColor} {fixRJColor;#var rj_rotate 1} {2};
 		};
 	} {
 		#NOP -- If we're not longer in the rejected game, kill the class;
