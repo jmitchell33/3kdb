@@ -11,7 +11,7 @@
 #alias {_guild_heartbeat} {
 	#var mc_threshold 90;
     #var mc_danger 60;
-    #math sp_danger {$my[sp][max] * .30};
+    #math sp_danger {$my[sp][max] * .25};
     #math sp_threshold {$my[sp][max] * .90};
     #math sp_percent {$my[sp][current] * 100 / $my[sp][max]};
     #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
@@ -54,12 +54,12 @@
             } {2};
         };
 
-        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$my[immersion][count]} {
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$my[immersion][count] && !$my[immersion][active]} {
             ptell Pausing to regenerate SPs.;
             #var bot_toggle 1;
             .pause;
             #ticker spBotResume {
-                #if {$my[sp][current] > $sp_threshold} {
+                #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
                     #unticker spBotResume;
                     .unpause;
                     #var bot_toggle 0;
@@ -69,13 +69,13 @@
         };
         
         #if {$my[gp1][current] > $monitors[saturation-corpse]} {
+            #NOP -- If you don't have corpses then use ER;
+            #if {$corpses[total] == 0 && $my[super][current]} {
+                cast explosive release;
+            };
             checkStrategy {super_er} {
                 #if $my[super][current] {cast explosive release};
             } {
-                #NOP -- If you don't have corpses then use ER;
-                #if {$corpses[total] == 0 && $my[super][current]} {
-                    cast explosive release;
-                };
                 #if {$corpses[total] > 0 && !$corpse_toggle} {
                     #var corpse_toggle 1;
                     corpse_select;
