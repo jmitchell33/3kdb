@@ -13,6 +13,9 @@
 #NOP -- ETERNAL WHO REFRESHED ROOM TRIG
 #action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1}
 
+#NOP -- REFLEXES
+#action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}}
+
 #NOP --- JUGGERNAUT AMMO
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 6 1 40000}}
 
@@ -23,6 +26,6 @@
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 #action {A huge tome falls from the dark priest's robes} {truck get tome;burn remains}
 #action {Your training from the Grand Master Knight reminds you to train} {program bash;exec l c}
-#action {3Kingdoms welcomes you back from linkdeath.} {deadman 200;corpsetrig+ wrap;corpsetrig divvy;corpsetrig-on}
+
 
 #class {player_actions} {close}
