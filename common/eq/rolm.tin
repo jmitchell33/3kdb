@@ -40,17 +40,20 @@
 #NOP -- Rolm shortcuts;
 
 #NOP -- set anchor point and winch back with map correction;
-#var set_anchor_point {};
-#alias {setport} {
+#action {A small golden strand falls from the relic and imbeds itself into the ground.} {
     #var set_anchor_point $roomvnum;
+} {2};
+
+#action {A magical golden strand slithers into the room.  It gently encircles you} {
+    #map goto $set_anchor_point;
+} {2};
+
+#alias {setport} {
     touch anchor rune;
 };
 
 #alias {port} {
     touch winch rune;
-    #DELAY {2} {
-        #map goto $set_anchor_point;
-    };
 };
 
 #NOP -- Easier weapon type or dmg switching;
