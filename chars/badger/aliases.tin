@@ -6,6 +6,13 @@
     #if $bot[active] {.pause;#echo {stepper paused due to deadman timer}};
 };
 
+#NOP -- CALCULATOR
+#alias {calc} {
+	#math {math} {%1};
+	#format {math_format} {%g} {$math};
+	#echo $math_format
+};
+
 #NOP --NUMPAD ON OR OFF
 #alias {numoff} {#class numpad kill}
 #alias {numon} {#read chars/$user/numpad.tin}
@@ -14,7 +21,10 @@
 #alias {mystrategy} {strategy-clear;strategy rolm;strategy epowers}
 
 #NOP -- ALIASES TO SETUP CORPSETRIG
-#alias {mycorpsetrig} {corpsetrig-clear;corpsetrig+ wrap;corpsetrig+ bb;corpsetrig+ fdeener;corpsetrig+ burn remains;corpsetrig+ divvy;corpsetrig+ get all;corpsetrig+ stash all;corpsetrig+ szCaps}
+#alias {mycorpsetrig} {corpsetrig-clear;corpsetrig+ wrap;corpsetrig+ fdeener2;corpsetrig+ burn remains;corpsetrig+ burn remains;corpsetrig+ divvy;corpsetrig+ getAll;corpsetrig+ crafting;corpsetrig+ szCaps}
+#alias {corpseoff} {corpsetrig-off}
+#alias {corpseon} {corpsetrig-on}
+#alias {corpseclear} {corpestrig-clear}
 
 #NOP -- EINSTEINS BRAIN - +3 INT BOOST
 #alias {ein_brain} {n;w;n;n;e;n;enter;e;e;e;s;s;e;e;n;n;n;trail;ne;climb gate;w;search tree;e;e;n;n;enter;unlock paperholder;turn paperholder;climb bench;stagedive;climb down;out;s;s;w;unlock door;open door;n}
@@ -95,6 +105,9 @@
 
 #NOP -- corpses;
 #list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {default corpsetrig setup}}};
+#list badger3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {turn corpsetrig off}}};
+#list badger3kdb add {{{name} {corpseon} {type} {corpses} {desc} {turn corpsetrig on}}};
+#list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {clear corpsetrig settings}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
