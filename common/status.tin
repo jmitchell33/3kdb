@@ -60,17 +60,28 @@
     };
 };
 
-#alias status_export {
+#alias _variable_export {
     #class global open;
-    #map get roomvnum curvnum;
-    #var strategy $strategy;
-    #var lastBot $lastBot;
+    #map get roomvnum xcurvnum;
+    #var xstrategyActive $strategyActive;
+    #var xcorpseActions $corpseActions;
+    #var xhpbar $hpbar;
+    #var xlastBot $lastBot;
     #class global close;
     #class global write chars/$user/vars.tin;
 };
 
+#alias _variable_import {
+    #read chars/$user/vars.tin;
+    #var curvnum $xcurvnum;
+    #var strategyActive $xstrategyActive;
+    #var corpseActions $xcorpseActions;
+    #var hpbar $xhpbar;
+    #var lastBot $xlastBot;
+};
+
 #NOP Export user status every 10 mins;
-#ticker status_ticker {status_export;} {600};
+#ticker status_ticker {_variable_export;} {600};
 
 #action {As the energies swirl around you, you feel heartier and more robust.} {
     #var my[status][laugh] 1;
