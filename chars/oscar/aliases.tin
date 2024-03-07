@@ -7,6 +7,15 @@
      #list temp set %1 {%2};
 };
 
+#alias {useHeal} {
+     #if {!$my[eternal][heal] && $my[hmheal][self] && !$my[immersion][active]} {
+          hmheal;
+     };
+     #if {$my[eternal][heal] && !$my[immersion][active]} {
+          (heal oscar;
+     };
+};
+
 #NOP -- Default corpse_trig;
 #alias corpsetrig1 {
      corpsetrig-clear;
@@ -41,6 +50,7 @@
 #alias {setup_c} {
      cast contingency as prot_evil#cast protection from evil;
 };
+
 
 #alias {setup_gc} {
      cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
