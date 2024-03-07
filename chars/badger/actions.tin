@@ -5,6 +5,9 @@
 #action {You fail to penetrate the magical barrier.} {dispel;down}
 #action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down}
 
+#NOP -- PROGRAM BASH AUTOMATICALLY AFTER LEARNING SHIELD FROM ERAH GRAND MASTER
+#action {Your training from the Grand Master Knight reminds you to train} {#if {!$idle_flag } {program bash;exec l c}}
+
 #NOP -- REFLEXES
 #action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}}
 
@@ -16,9 +19,6 @@
 
 #NOP -- JUGGERNAUT CDEFEND FOR PARTY
 #action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend ON for party}
-
-#NOP -- CORPSE TRIGGER (i dont have the ktrig vaf perk)
-#action {^=K=Badger dealt the killing blow to %*.$} {#if {!$idle_flag && "$area" == "Serinth: The 2nd Dimension" && "$cassist[status]" == "0"} {corpse_trig}}
 
 #NOP --- GENERAL MISC;
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
