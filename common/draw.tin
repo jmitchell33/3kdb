@@ -136,12 +136,16 @@
     draw_all;
 }
 
-
+#alias {draw_caption_all} {
+    draw_caption_corpses;
+    draw_caption_status;
+    draw_caption_strategy;
+};
 
 #alias draw_all {
     #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
     #if {"$draw[chat][active]" == "on"} { draw_chat };
-    #if {"$draw[caption][active]" == "on"} { draw_caption };
+    #if {"$draw[caption][active]" == "on"} { draw_caption_all };
     #if {"$draw[room][active]" == "on"} { draw_room };
 };
 
@@ -166,8 +170,8 @@
     };
 };
 
-#NOP /* -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) -- */
-#alias draw_caption {
+#NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
+#alias draw_caption_corpses {
     #nop -- Clear any old drawings;
     #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
@@ -178,9 +182,9 @@
     };
 
     #NOP -- Sometimes the corpse string is #1 and #2 - can't figure out why, but we'll just filter it if that's the case;
-    #regex {$caption_data[1]} {<088>💀 <ceb>} {#var tmp[1] 1} {#var tmp[1] 0};
-    #regex {$caption_data[2]} {<088>💀 <ceb>} {#var tmp[2] 1} {#var tmp[2] 0};
-    #if {$tmp[1] && $tmp[2]} {#list caption_data delete 2};
+    #NOP #regex {$caption_data[1]} {<088>💀 <ceb>} {#var tmp[1] 1} {#var tmp[1] 0};
+    #NOP #regex {$caption_data[2]} {<088>💀 <ceb>} {#var tmp[2] 1} {#var tmp[2] 0};
+    #NOP #if {$tmp[1] && $tmp[2]} {#list caption_data delete 2};
     
     #if {$idle_sec > $deadmanIdleTimeout} {
         #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
@@ -206,7 +210,7 @@
 
 
 #NOP /* -- Bot status -- */
-#alias draw_status {
+#alias draw_caption_status {
     #if {$draw[index][bot]} {
         #NOP -- If the stored index is greater than those existing, reset it;
         #if {$draw[index][bot] > &caption_data[]} {
@@ -266,7 +270,7 @@
     #list caption_data set $draw[index][bot] $bot_string;
 };
 
-#alias draw_strategy {
+#alias draw_caption_strategy {
     #if {$draw[index][strategy]} {
         #NOP -- If the stored index is greater than those existing, reset it;
         #if {$draw[index][strategy] > &caption_data[]} {

@@ -106,7 +106,7 @@
     #class {bot} {kill};
     #class {xbot} {kill};
     #echo {Bot killed.};
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
 #alias .pause {
@@ -114,12 +114,12 @@
     #var lastBot $bot;
     #undelay bot_kick;
     #var bot[paused] 1;
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
 #alias .unpause {
     #var bot[paused] 0;
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_status}};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
 #act {^-M-_%*} {
@@ -251,7 +251,7 @@
         #map get roomvnum bot[curVnum];
         #unact {^>$};
         #var bot[walk] 0;
-        #if {"$draw[status][active]" == "on"} {draw_status};
+        #if {"$draw[status][active]" == "on"} {draw_caption_status};
     };
     
 	glance;
