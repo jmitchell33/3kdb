@@ -6,21 +6,12 @@
 #NOP set hp_pref -hp-;
 #NOP set hp_suff -hp-;
 
-#alias reset_gxp {
-    dreset;
-    #var gxp_gained 0;
-    #var total_gxp_gained 0;
-    #var average_gxp 0;
-    #var total_rounds 0;
-}
-
 
 #act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%d Prots: %* MI: %d ST: %* Cof: %*} {
     #line gag;
     #var hpbar_mc %5;
     #var hpbar_gem %6;
     #var hpbar_prots %14;
-    #if {!$g2n_last_round} {#var g2n_last_round %13};
 
     #REGEX {$hpbar_prots}	{SS}		{#VAR {my[prots][SS]} {1}}	{#VAR {my[prots][SS]} {0}};
     #REGEX {$hpbar_prots}	{PA}		{#VAR {my[prots][PA]} {1}}	{#VAR {my[prots][PA]} {0}};
@@ -36,9 +27,19 @@
     #REGEX {$hpbar_prots}	{PG}		{#VAR {my[prots][PG]} {1}}	{#VAR {my[prots][PG]} {0}};
     #REGEX {$hpbar_prots}	{PE}		{#VAR {my[prots][PE]} {1}}	{#VAR {my[prots][PE]} {0}};  
     
-    #math {gxp_gained} {$g2n_last_round - %13};
-    #math {total_gxp_gained} {$total_gxp_gained + $gxp_gained};
-    #math {average_gxp} {$total_gxp_gained / $total_rounds};
+    #if {!$g2n_last_round} {#var g2n_last_round %13};
+    #if {$incombat} {
+        #math {my[gxp][last_round]} {$g2n_last_round - %13};
+        #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
+        #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
+        #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
+        #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+        #if {$my[gxp][best] < $my[gxp][last_round]} {$my[gxp][last_round]};
+        #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
+        #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
+        .gxp_t30_add;
+        .gxp_time;
+    };
 
     #var g2n_last_round %13;
 } {2};
