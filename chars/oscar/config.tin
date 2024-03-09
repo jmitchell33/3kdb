@@ -16,14 +16,23 @@
 };
 
 #alias {.mob_kill_action} {
-     #if $summoner {
-          slice $mob[target];
-          checkStrategy {slow} {cast slow on $mob[target]};
+     #if cheese {
+          cast death fog;
+          #delay 2 {
+               say wraith, kill balangool;
+               say wraith 2, kill balangool 2;
+               say wraith 3, kill balangool 3;
+          };
      } {
-          kill $mob[target];
-          checkStrategy {slow} {cast slow on $mob[target]};
+          checkStrategy {summon_tank} {
+               slice $mob[target];
+               checkStrategy {slow} {cast slow on $mob[target]};
+          } {
+               kill $mob[target];
+               checkStrategy {slow} {cast slow on $mob[target]};
+          };
+          checkStrategy {anchor} {cast anchor};
      };
-     checkStrategy {anchor} {cast anchor};
 };
 
 #alias {.check_death} {#NOP};

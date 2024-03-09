@@ -171,9 +171,6 @@
 
 #alias .botStep {
     #if !$bot[paused] {
-        #format bot[timeLastStep] $bot[timeStepTaken];
-        #format bot[timeStepTaken] {%U};
-        #math bot[timeBetweenSteps] {($bot[timeStepTaken] - $bot[timeLastStep]) * .0001};
         #if {$bot[step] >= &bot[steps][]} {
             ${bot[steps][${bot[step]}]};
             .botComplete;
