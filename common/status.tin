@@ -45,7 +45,8 @@
     #var mob[shred] 0;
     #var mob[lucanus_ring] 0;
     #var mob[lucanus_amulet] 0;
-    
+    #var mob[corpses_used] 0;
+
     #var enemy[last_round] 1;
     #var enemy[round_change] 0;
     #var enemy[kill_rate_avg_count] 1;
@@ -177,8 +178,62 @@
 };
 
 
-#NOP -- Guild GXP Trackers;
+#NOP -- Corpse Use Trackers;
+#if {"$guild" == "mage"} {
+    #action {The corpse explodes in a violent burst of energy!} {
+        #if $hockey_corpse {
+            #var hockey_corpse 0;
+        } {
+            #math mob[corpses_used] {$mob[corpses_used] + 1}
+        };
+    };
+};
 
+#NOP -- Guild GXP Trackers;
+#if {"$guild" == "mage"} {
+    #NOP -- 30 round rolling gxp average;
+    #alias .gxp_t30_add {
+        #if {&my[gxp][t30][] > 30} {
+            #math my[gxp][t30_total] {$my[gxp][t30_total] - $my[gxp][t30][1]};
+            #list my[gxp][t30] delete 1;
+            #list my[gxp][t30] add $my[gxp][last_round];
+            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
+        } {
+            #list my[gxp][t30] add $my[gxp][last_round];
+            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
+        };
+        #math my[gxp][t30_average] {$my[gxp][t30_total] / &my[gxp][t30][]};
+        #math my[gxp][t30_per_hr] {$my[gxp][t30_average] * 30 * 60};
+        #format my[gxp][str_t30_per_hr] {%M} {$my[gxp][t30_per_hr]};
+    };
+
+    #alias .gxp_time {
+        #format {my[gxp][report-time]} {%T} {};
+        #math my[gxp][delta-time] {$my[gxp][report-time] - $my[gxp][start-time]};
+        #if {$my[gxp][delta-time] > 3600} {
+            #math my[gxp][delta-time] {$my[gxp][delta-time] / 3600 * 1.00};
+            #var my[gxp][str_time] ($my[gxp][delta-time] Hrs);
+        } {
+            #math my[gxp][delta-time] {$my[gxp][delta-time] / 60 * 1.00};
+            #var my[gxp][str_time] ($my[gxp][delta-time] Mins);
+        };
+    };
+
+    #alias reset_gxp {
+        #list my[gxp][t30] clear;
+        #var my[gxp][total] 0;
+        #var my[gxp][last_round] 0;
+        #var my[gxp][best] 0;
+        #var my[gxp][average] 0;
+        #var my[gxp][t30_average] 0;
+        #var my[gxp][t30_total] 0;
+        #var my[gxp][t30_per_hr] 0;
+        #var my[gxp][rounds_tracked] 0;
+        #var my[gxp][starting_round] $total_rounds;
+        #format {my[gxp][start-time]} {%T} {};
+    };
+    reset_gxp;
+};
 
 
 #class player_status close

@@ -7,6 +7,10 @@
 #NOP This variable determines to add a custom action if the user enters it 2x with corpsetrig+;
 #var tempCorpseActionToggle 1;
 
+#NOP This variable determines whether to fire on user killing blow or any killing blow;
+#NOP by default it is set to any killing blow;
+#var corpsetrigKB 0;
+
 #alias formatItem {
     #format result {<acf>%+10s  %s<088>} {%1} {%2};
     #echo { $result};
@@ -45,17 +49,20 @@
         };
 
         #if !$fakeKill {
-        
-            corpse_trig;
+            #if {$corpsetrigKB} {
+                #if {"$deathReport[mob_killer]" == "$user_cap"} {corpse_trig}
+            } {corpse_trig};
             update_xp;
             update_coins;
             #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
             #if $dmgtracker {dmg_mod_reset;#var cmbt[affects][convoke] 0};
-            mob_status_clear;
 
             #var deathReport[mob_killed] %1;
             #var deathReport[mob_rounds_to_kill] $mip[round];
             #var deathReport[damage_dealt] 0;
+            #var deathReport[corpses_used] $mob[corpses_used];
+
+            mob_status_clear;
             
             #NOP -- Small delay to make sure we get the variables from the updates;
             #delay 1 {
@@ -69,6 +76,7 @@
                     {xp_earned} {$deathReport[xp_earned]}
                     {damage_dealt} {$deathReport[damage_dealt]}
                     {coins_earned} {$deathReport[coins_earned]}
+                    {corpses_used} {$deathReport[corpses_used]}
                 }};
             };
         };
@@ -250,7 +258,7 @@
 };
 
 #alias corpsetrig-kb {
-    #if !$corpsetrigKB {
+    #if $corpsetrigKB {
         #echo { <bba>corpse_trig will fire on all killing blows<088>};
         #var corpsetrigKB 0;
     } {

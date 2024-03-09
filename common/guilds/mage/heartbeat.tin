@@ -10,7 +10,7 @@
 
 #NOP -- saturation-stop turns off ash, saturation-corpse unwraps a corpse;
 #var monitors[saturation-corpse] 89;
-#var monitors[saturation-stop] 70;
+#var monitors[saturation-stop] 85;
 
 #alias {_guild_heartbeat} {
 	#var mc_threshold 90;
@@ -121,7 +121,7 @@
          
 		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
         #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
-        #if {$my[gem] < 90 && !$go_fetch} {#if $ffetch_coins {#var go_fetch 1;ffetch gem};};
+        #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {#var go_fetch 1;ffetch gem};
         #if {$my[coins] > 2100} {#var ffetch_coins 1} {#var ffetch_coins 0};
 
         #NOP turn ash off if using MI;
@@ -129,7 +129,7 @@
             ash off;
         };
 
-        checkStrategy {summon_tank} {
+        checkStrategy {summon_tank1} {
             #if $rotate_tank {
                 #var rotate_tank 0;
                 _summonTankCheck;

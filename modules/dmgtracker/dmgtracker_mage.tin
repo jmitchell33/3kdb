@@ -47,6 +47,7 @@
         #replace summonTotalDmg {G} {B};
         #format summonPerRoundDmg {%d} {$summonPerRoundDmg};
         #format summonPerRoundDmg {%g} {$summonPerRoundDmg};
+        #format summon_dmg[tracked_rounds_rep] {%g} {$summon_dmg[tracked_rounds]};
 
         #if {$summonTotalDmg > 0} {
             #if {"$summon" == "Something"} {#var summon Phantasmal Killer};
@@ -54,6 +55,7 @@
             #echo $dmgSummary;
         };
     };
+    #echo {<dfa>---------- TOTAL ROUNDS: $summon_dmg[tracked_rounds_rep] ----------<088>};
 };
 
 
@@ -123,14 +125,18 @@
 #NOP #action {%* TORE a hole into the fabric of %* reality!} {spellDmgRecord tore};
 #NOP #action {%* trashed %* like a freshman at a frat party!!!} {spellDmgRecord trashed};
 #NOP #action {%* MUTILATED %*, scattering pieces all over!!} {spellDmgRecord mutilated};
-#NOP #action {} {spellDmgRecord annihilated};
+#NOP #action {The %* annihilated %* with overwhelming devastation!} {spellDmgRecord annihilated};
 #NOP #action {%* is nearly erased from the force of your %*!} {spellDmgRecord erased};
 #NOP #action {You unleash a torrent of destruction upon %* with your %*!!!} {spellDmgRecord destruction};
 #NOP #action {The ground shakes as %* is torn asunder by your %*!!} {spellDmgRecord torn};
 #NOP #action {%* survived the %* like a sandcastle at high tide!} {spellDmgRecord sand};
 #NOP #action {A resounding wave of energy blasts from %*, shredded by your %*!} {spellDmgRecord shredded};
-#NOP #action {} {spellDmgRecord obliterated};
-#NOP #action {} {spellDmgRecord devastated};
+#NOP #action {The %* obliterated %* relentlessly!} {spellDmgRecord obliterated};
+#NOP #action {The %* absolutely devastated %*!} {spellDmgRecord devastated};
 #NOP #action {} {spellDmgRecord thrashed};
+#NOP #action {The %* utterly destroyed %*!} {spellDmgRecord destroyed};
+#NOP #action {Your %* thundered into %*!} {spellDmgRecord thundered};
+
+
 
 #class dmgtracker_mage close;
