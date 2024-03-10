@@ -44,6 +44,10 @@
 	};
 
     #if !$idle_flag {
+        #if {$my[coins] > 2100} {#var ffetch_coins 1} {#var ffetch_coins 0};
+        #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {#var go_fetch 1;ffetch gem};
+
+        #NOP -- Conditions to stop bot (low sps or low mental cognition (MC));
         #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {
             ptell Pausing to study spellbook.;
             #var bot_toggle 1;
@@ -72,6 +76,7 @@
             } {2};
         };
         
+        #NOP -- Logic to reduce Sat either via corpses or Explosive Release;
         #if {$my[gp1][current] > $monitors[saturation-corpse]} {
             #NOP -- If you don't have corpses then use ER;
             #if {$corpses[total] == 0 && $my[super][current]} {
@@ -121,8 +126,6 @@
          
 		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
         #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
-        #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {#var go_fetch 1;ffetch gem};
-        #if {$my[coins] > 2100} {#var ffetch_coins 1} {#var ffetch_coins 0};
 
         #NOP turn ash off if using MI;
         #if {$my[immersion][rounds] > 0 && $ash > 0} {
