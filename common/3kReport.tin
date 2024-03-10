@@ -82,19 +82,33 @@
 };
 
 #alias 3kReport {
-    #NOP -- If a # is provided, show the last # of kills - otherwise show the entire list;
-    #list deathSummary size tempReportSize;
-    #regex {%1} {%d} {
-        #math tempReportStart {$tempReportSize - %1};
-        #if {%1 > $tempReportSize} {
-            #format tmpTotalKills {%g} {$tempReportSize}
+    #list tmpList copy deathSummary;
+    #list tmpList size tempReportSize;
+    #var tempReportStart 1;
+    #format tmpTotalKills {%g} {$tempReportSize};
+
+    #NOP -- Filter the list either by # or mob name;
+    #if {"%1" != ""} {
+        #NOP -- If a # is provided, show the last # of kills - otherwise show the entire list;
+        #NOP -- If a word is provided, filter based on that monster;
+        #NOP -- Since tintin matches numbers as the word pattern, we'll have to rely on no digits being provided;
+        #regex {%1} {%+1..d} {
+            #echo {MATCHED #};
+            #math tempReportStart {$tempReportSize - %1};
+            #if {%1 > $tempReportSize} {
+                #format tmpTotalKills {%g} {$tempReportSize}
+            } {
+                #format tmpTotalKills {%g} {%1}
+            };
         } {
-            #format tmpTotalKills {%g} {%1}
+            #echo {MATCHED WORD};
+            #var tempReportStart 1;
+            #format tmpTotalKills {%g} {$tempReportSize}
+            #list tmpList indexate mob;
+            #list tmpList filter {%i%1}
         };
-    } {
-        #var tempReportStart 1;
-        #format tmpTotalKills {%g} {$tempReportSize}
     };
+    
     _reportHeader;
     #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {Killer} {Mob} {} {Rounds} {} {XP} {} {Coins} {} {Dmg} {} {Corpses};
     #echo { <dff>$reportLine<088>};
@@ -111,22 +125,22 @@
     #var tmpPerMobCorpses 0;
 
     #loop $tempReportStart $tempReportSize item {
-        #math tmpTotalXp {$deathSummary[$item][xp_earned] + $tmpTotalXp};
-        #math tmpTotalRnds {$deathSummary[$item][rounds] + $tmpTotalRnds};
-        #math tmpTotalDmg {$deathSummary[$item][damage_dealt] + $tmpTotalDmg};
-        #math tmpTotalCoins {$deathSummary[$item][coins] + $tmpTotalCoins};
-        #math tmpTotalCorpses {$deathSummary[$item][corpses_used] + $tmpTotalCorpses};
-        #format tmpMob {%.15s} {$deathSummary[$item][mob]};
-        #format tmpKiller {%.15s} {$deathSummary[$item][killer]};
-        #format tmpXP {%M} {$deathSummary[$item][xp_earned]};
-        #format tmpCoins {%g} {$deathSummary[$item][coins_earned]};
-        #format tmpDmg {%g} {$deathSummary[$item][damage_dealt]};
-        #format tmpRounds {%g} {$deathSummary[$item][rounds]};
-        #format tmpCorpses {%g} {$deathSummary[$item][corpses_used]};
+        #math tmpTotalXp {$tmpList[$item][xp_earned] + $tmpTotalXp};
+        #math tmpTotalRnds {$tmpList[$item][rounds] + $tmpTotalRnds};
+        #math tmpTotalDmg {$tmpList[$item][damage_dealt] + $tmpTotalDmg};
+        #math tmpTotalCoins {$tmpList[$item][coins] + $tmpTotalCoins};
+        #math tmpTotalCorpses {$tmpList[$item][corpses_used] + $tmpTotalCorpses};
+        #format tmpMob {%.15s} {$tmpList[$item][mob]};
+        #format tmpKiller {%.15s} {$tmpList[$item][killer]};
+        #format tmpXP {%M} {$tmpList[$item][xp_earned]};
+        #format tmpCoins {%g} {$tmpList[$item][coins_earned]};
+        #format tmpDmg {%g} {$tmpList[$item][damage_dealt]};
+        #format tmpRounds {%g} {$tmpList[$item][rounds]};
+        #format tmpCorpses {%g} {$tmpList[$item][corpses_used]};
         
         #if {$tmpCoins == 0} {#var tmpCoins -};
-        #if {$deathSummary[$item][damage_dealt] == 0} {#var tmpDmg -};
-        #if {$deathSummary[$item][corpses_used] == 0} {#var tmpCorpses -};
+        #if {$tmpList[$item][damage_dealt] == 0} {#var tmpDmg -};
+        #if {$tmpList[$item][corpses_used] == 0} {#var tmpCorpses -};
         #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {$tmpKiller} {$tmpMob} {} {$tmpRounds} {} {$tmpXP} {} {$tmpCoins} {} {$tmpDmg} {} {$tmpCorpses};
         #echo { <eed>$reportLine<088>};
     };
