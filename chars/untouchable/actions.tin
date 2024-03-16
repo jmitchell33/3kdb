@@ -4,7 +4,7 @@
 #var corpse_delay 0;
 
 #NOP -- trigger to fire powers at start of combat
-#action {{Brianna attacks|attacking Brianna!.}} {#if {!$idle_flag && $Powers[startOfcombat]} {#delay 2 fire_powers}}
+#action {{Brianna attacks|attacking Brianna!.}} {#if {!$idle_flag && $Powers[startOfcombat]} {#delay 2 fire_powers;create darkness}}
 
 #ACTION {^Owie. That hurt!} {
 	#if !$corpse_delay {
@@ -20,6 +20,7 @@
 
 #action {Pure status saved.} {#if {!$idle_flag} {unholy armour brianna;spirithowl;daemon graft brianna}}
 #action {#if {$idle_flag} {Your body shifts back into the prime dimension.} {shift}};
+#action {The darkness fades} {create darkness};
 #action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {preserve remains;absorb;} {1};
 #action {one last time.} {convoke ravens}
 #action {You only have} {dream zzzzzzzzzzzzzzzzzzzzzzzzzzzzz}
@@ -28,10 +29,13 @@
 #action {This chest belongs to Untouchable.} {deadman 200;cassist brianna}
 #GAG {#LIST DELETE: VARIABLE {tempIP} IS NOT A LIST.}
 #GAG {*.,'`'SaTaN'`',.* tells you:}
+
 #NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
 #act {^-M-_A Colossal Inductor} {(immortality} {1};
 
 #NOP -- NECRO POWERS;
+#action {Zombie arrives hunting Untouchable.} {.pause}
+#action {Aegis Sentry arrives hunting Untouchable.} {sleep robot}
 #act {You must assume your beast form to do that master.} {
 	#if !idle_flag {alter hybrid};
 };
