@@ -55,25 +55,25 @@
             #ticker mcBotResume {
                 #if {$hpbar_mc > $mc_threshold} {
                     #var bot_toggle 0;
-                    #if {!$incombat} {..};
+                    #if {!$incombat} {..} {.unpause};
                     #unticker mcBotResume;
                 };
             } {2};
         };
 
         #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$my[immersion][count] && !$my[immersion][active]} {
-            ptell Pausing to regenerate SPs.;
-            #var bot_toggle 1;
-            .pause;
-            #ticker spBotResume {
-                #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
-                    #echo {SP IS GOOD RESUMING};
-                    #echo {COMBAT FLAG IS $incombat};
-                    #var bot_toggle 0;
-                    #if {!$incombat} {..};
-                    #unticker spBotResume;
-                };
-            } {2};
+            #if {!$my[hmheal][self] || !$my[eternal][heal]} {
+                ptell Pausing to regenerate SPs.;
+                #var bot_toggle 1;
+                .pause;
+                #ticker spBotResume {
+                    #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
+                        #var bot_toggle 0;
+                        #if {!$incombat} {..} {.unpause};
+                        #unticker spBotResume;
+                    };
+                } {2};
+            };
         };
         
         #NOP -- Logic to reduce Sat either via corpses or Explosive Release;
@@ -92,11 +92,6 @@
                 };
             };
         };
-    };
-
-    #NOP -- Things to do while immersion is active;
-    #if {!$idle_flag && $my[immersion][active]} {
-        #if $summoner {cast focus mind};
     };
 
     #NOP -- Cull the unhealthy summons during immersion - we'll do this every 20 rounds;
