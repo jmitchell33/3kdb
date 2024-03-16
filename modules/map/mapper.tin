@@ -8,10 +8,10 @@
 	#map {get} {ROOMAREA} {roomarea};
 	#map {get} {ROOMNAME} {roomname};
 	#map {get} {ROOMDESC} {roomdesc};
-	#format {roomname_len}	{%L} {$roomname};
-	#format {roomvnum_len}	{%L} {$roomvnum};
-	#format {roomarea_len}	{%L} {$roomarea};
-	#format {roomdesc_len}	{%L} {$roomdesc};
+	#format {roomname_len}	{%L} {${roomname}};
+	#format {roomvnum_len}	{%L} {${roomvnum}};
+	#format {roomarea_len}	{%L} {${roomarea}};
+	#format {roomdesc_len}	{%L} {${roomdesc}};
 #NOP	#math {name_len} {42-$roomvnum_len-3};
 #NOP	#format {name_trunc} {%.${name_len}s} {$roomname};
 #NOP	#unvar area_mapped;
@@ -49,7 +49,7 @@
 
 #function cartcheck {
 	#format cart {%.40s} {%0};
-	#if {"$cart" == "                                        " || "$cart" == ""} {
+	#if {"$cart" == "                                        " || "${cart}" === ""} {
 		#return 1
 	} {
 		#return 0
@@ -68,7 +68,7 @@
 			#foreach {$rexit} {eachexit} {
 				#map at {$eachexit} {
 					#map get {roomarea} {eacharea};
-					#if {"$eacharea" == ""} {
+					#if {"${eacharea}" === ""} {
 						#map set {roomcolor} {<118>};
 					};
 				};

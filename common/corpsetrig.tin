@@ -169,18 +169,16 @@
             #echo {<caa>----  <fff> $corpseActions[+$tempListIndex][name] has been <baa>removed<088> from <fff>corpse_trig <caa>  ----<088>};
             #list corpseActions delete %0;
             #list corpseActions indexate name;
-
         } {
+            #list corpseActions indexate name;
             #list corpseList {find} {%0} {tempListIndex};
             #var tempList $corpseList[+$tempListIndex];
             #if {&tempList[] == 0} {
-                #list corpseActions indexate name;
                 #list corpseActions {find} {%0} {tempListIndex};
                 #var tempList $corpseList[+$tempListIndex];
             };
             #if {&tempList[] > 0} {
                 #if {&corpseActions[] > 0} {
-                    #list corpseActions indexate name;
                     #list corpseActions {find} {%0} {itemExists};
                     #if {$itemExists} {
                         #echo {<caa>----  <fff> %0 has been <baa>removed<088> from <fff>corpse_trig <caa>  ----<088>};
@@ -192,7 +190,8 @@
             } {
                 #echo {<caa>----  <fff> There are no actions currently in corpse_trig<caa>  ----<088>};
             };
-        }
+            #list corpseActions indexate name;
+        };
     };
 };
 

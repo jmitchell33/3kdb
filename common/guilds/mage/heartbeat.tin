@@ -3,7 +3,7 @@
 
 #var studying 0;
 #var bot_toggle 0;
-#var corpse_toggle 0;
+#var corpse_toggle 1;
 
 #var toggle_spelltap 1;
 #var rotate_tank 1;
@@ -54,10 +54,9 @@
             .pause;
             #ticker mcBotResume {
                 #if {$hpbar_mc > $mc_threshold} {
-                    #unticker mcBotResume;
-                    .unpause;
                     #var bot_toggle 0;
-                    #if {!$incombat} {.bot};
+                    #if {!$incombat} {..};
+                    #unticker mcBotResume;
                 };
             } {2};
         };
@@ -68,10 +67,11 @@
             .pause;
             #ticker spBotResume {
                 #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
-                    #unticker spBotResume;
-                    .unpause;
+                    #echo {SP IS GOOD RESUMING};
+                    #echo {COMBAT FLAG IS $incombat};
                     #var bot_toggle 0;
-                    #if {!$incombat} {.bot};
+                    #if {!$incombat} {..};
+                    #unticker spBotResume;
                 };
             } {2};
         };
@@ -85,10 +85,10 @@
             checkStrategy {super_er} {
                 #if $my[super][current] {cast explosive release};
             } {
-                #if {$corpses[total] > 0 && !$corpse_toggle} {
-                    #var corpse_toggle 1;
+                #if {$corpses[total] > 0 && $corpse_toggle} {
+                    #var corpse_toggle 0;
                     corpse_select;
-                    #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 0;i};
+                    #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 1;i};
                 };
             };
         };
@@ -124,8 +124,8 @@
             #delay 180 {ash on;ash;};
         };
          
-		#if {$my[gp1][current] < 30 && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
-        #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0} {ash off;#var ash 0;};
+		#if {$my[sp][percent] < .9  && $ash == 0 && $my[immersion][rounds] < 1} {ash on;ash;};
+        #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0 && $corpses[total] == 0} {ash off;#var ash 0;};
 
         #NOP turn ash off if using MI;
         #if {$my[immersion][rounds] > 0 && $ash > 0} {
