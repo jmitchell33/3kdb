@@ -7,11 +7,12 @@
 #NOP set hp_suff -hp-;
 
 
-#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%d Prots: %* MI: %d ST: %* Cof: %*} {
+#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%d Prots: %* MI: %d ST: %* Cof: %d/%d} {
     #line gag;
     #var hpbar_mc %5;
     #var hpbar_gem %6;
     #var hpbar_prots %14;
+    #var corpses[coffin] %17;
 
     #REGEX {$hpbar_prots}	{SS}		{#VAR {my[prots][SS]} {1}}	{#VAR {my[prots][SS]} {0}};
     #REGEX {$hpbar_prots}	{PA}		{#VAR {my[prots][PA]} {1}}	{#VAR {my[prots][PA]} {0}};

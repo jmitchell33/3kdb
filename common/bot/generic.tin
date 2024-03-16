@@ -122,9 +122,18 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
+#alias .clearRoomData {
+    #list room[mobs] clear;
+    #list room[familiars] clear;
+    #list room[summons] clear;
+    #list room[items] clear;
+};
+
 #act {^-M-_%*} {
     #var mob[long] %1;
-    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;};
+    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
+    #regex {$mob[long]} {7B{[0-9]+}} {#replace mob[long] { \\x7B%*} {};};
+    #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
     #format {mob[long]} {%p} {$mob[long]};
 
     #foreach $bot[mobs][%*] botmob {
@@ -135,21 +144,24 @@
     };
     #undelay {bot_kick};
     #undelay {bot_restart};
+    #list room[mobs] add $mob[long];
 } {2};
 
 
 #act {^{-i-|-w-|-a-|-o-}%*.$} {
+    #var item_number 1;
+    #var item_long %2;
+
+    #replace item_long {.} {};
+    #replace item_long { \[%*\]} {};
+
+    #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
+    #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
+
+    #list room[items] add $item_long;
+
     #if {$bot[active] && !$bot[paused] && $bot[walk]} {
         #if {$collector[items]} {
-            #var item_number 1;
-            #var item_long %2;
-
-            #replace item_long {.} {};
-            #replace item_long { \[%*\]} {};
-
-            #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
-            #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
-
             #foreach $item_grab_list[%*] item {
                 #regexp {"$item_long"} {$item[long]} {
                     #$item_number get $item[target];
@@ -187,6 +199,7 @@
 	#var bot[paused] 0;
 
     #act {{^-R-_(.*)-R-_}} {
+        .clearRoomData;
         #if {!$bot[paused]} {
             #var room_short %%1;
             #var room_item 0;
@@ -273,7 +286,6 @@
                     #if $check_death {
                         .check_death;
                     } {
-                        corpse_trig;
                         .bot;
                     };
                 };
@@ -281,8 +293,7 @@
                 #if $check_death {
                     .check_death;
                 } {
-                    corpse_trig;
-                    .bot;
+                    #delay .5 {.bot};
                 };
             };
         };

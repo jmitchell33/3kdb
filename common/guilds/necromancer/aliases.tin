@@ -213,7 +213,7 @@
     };
     #ELSE
     {
-        #IF {"$my[necromancer][powerdefaults]" == ""}
+        #IF {"${my[necromancer][powerdefaults]}" === ""}
         {
             .study help
         };
@@ -221,7 +221,7 @@
         {
             #FOREACH {*my[necromancer][powerdefaults][]} {_necStudy[power]}
             {
-                #IF {"$my[necromancer][power][$_necStudy[power]]" == ""}
+                #IF {"${my[necromancer][power][$_necStudy[power]]}" === ""}
                 {
                     #VAR {_necStudy[count]} {$my[necromancer][powerdefaults][$_necStudy[power]]};
                 };

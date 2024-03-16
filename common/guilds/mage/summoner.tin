@@ -6,6 +6,10 @@
 #list summon_types_list add {Undead wraith};
 #list summon_types_list add {Shadow panther};
 #list summon_types_list add {Something};
+#list summon_types_list add {Wood golem};
+#list summon_types_list add {Demon hellhound};
+#list summon_types_list add {Fey dryad};
+#list summon_types_list add {Beast owlbear};
 
 #list summon_types_list add {Wyvern};
 #list summon_types_list add {Wraith};
@@ -66,7 +70,8 @@
 		#regex {$summonList[$index]} {!} {#var summon_haste 1} {
 			#var summon_haste 0;
 			checkStrategy {summon_haste} {
-				#if {"$keyName" == "Something"} {cast haste on something} {#var summon_renew_haste 1}};
+				#NOP -- We can't haste phantasmal killer or other illusions;
+				#if {"$keyName" == "Something"} {#NOP} {#var summon_renew_haste 1}};
 		};
 		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
 			#var summon_mf 0;
@@ -189,17 +194,26 @@
 	};
 };
 
-#action {^-M-_%* [summons] (%d%)} {
-	#var skipSummon 0;
+#NOP -- Eventually this logic will be collapsed into the -M- action that's going to be standardized;
+#action {^-M-_%* [summons] (%d%)%*} {
+	#format tmpSummonName {%p} {%1};
+	#var summonTankIndex 1;
+	#var mobIndex 1;
+	#regex {%3} {7B{[0-9]+}} {#var mobIndex &1};
+	
+	#loop 1 $mobIndex tmpIndex {
+		#list room[summons] add {{{name} {$tmpSummonName} {health} {%2} {index} {$tmpIndex}}};
+	};
+
 	#if $summonTankCheck {
 		#NOP -- We don't want to assign the Golem to tanking since it's damage drops if it's tanking;
-		#regex {"%1"} {"%*Golem%*"} {#var skipSummon 1};
+		#regex {"$tmpSummonName"} {"%*Golem%*"} {#var skipSummon 1};
 		#if !$skipSummon {
 			#var summonTankIndex 1;
 			#foreach $summonTankList[%*] item {
-				#if {"$item[name]" == "%1"} {#math summonTankIndex {$summonTankIndex + 1}};
+				#if {"$item[name]" == "$tmpSummonName"} {#math summonTankIndex {$summonTankIndex + 1}};
 			};
-			#list summonTankList add {{{name} {%1} {health} {%2} {index} {$summonTankIndex}}};
+			#list summonTankList add {{{name} {$tmpSummonName} {health} {%2} {index} {$summonTankIndex}}};
 		};
 	};
 } {1};

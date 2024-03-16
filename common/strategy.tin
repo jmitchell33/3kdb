@@ -101,6 +101,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {bloodarc}  {active} {0} {description} {Lich: Bloodarc}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodlet}  {active} {0} {description} {Vamp: Bloodlet}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodfuse}  {active} {0} {description} {Vamp: Bloodfuse}}};
+#list strategyList add {{{guild} {necromancer} {name} {rage}  {active} {0} {description} {Vamp: Rage}}};
 #list strategyList add {{{guild} {necromancer} {name} {illume}  {active} {0} {description} {Pure: Illume}}};
 #list strategyList add {{{guild} {necromancer} {name} {skullfire}  {active} {0} {description} {Pure: Skullfire}}};
 #list strategyList add {{{guild} {necromancer} {name} {corrode}  {active} {0} {description} {Pure: Corrode}}};
@@ -172,8 +173,8 @@
             #if {$mob[phantasmal] < 1} {
                 checkStrategy {phantasmal} {
                     cast phantasmal killer;
-                    checkStrategy {summon_haste} {cast haste on something};
-                    checkStrategy {summon_mf} {cast monstrous fortitude on something};
+                    #NOP -- You can't haste any illusions, so we'll cast MF on it;
+                    cast monstrous fortitude on something;
                 };
             };
         };
@@ -219,6 +220,7 @@
     checkStrategy {scythe} {scythe};
     checkStrategy {call} {call};
     checkStrategy {fury} {fury prime};
+    checkStrategy {rage} {rage prime};
     checkStrategy {psibleed} {psibleed};
     checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
 };
