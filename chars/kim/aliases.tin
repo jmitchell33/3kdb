@@ -1,47 +1,277 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- deadman;
 #alias {_player_deadmanActions} {
-    .pause;
+    #if {$bot[active]} {
+        .pause;
+        #echo {stepper paused due to deadman timer}
+    };
 };
 
-#NOP -- ALIASES TO SETUP CORPSETRIG
-#alias {mycorpsetrig} {corpsetrig-clear;corpsetrig+ wrap;corpsetrig+ b;corpsetrig+ b;corpsetrig+ edrain;corpsetrig+ divvy;corpsetrig+ getAll;corpsetrig+ crafting}
+#NOP -- use a corpse to heal nrg;
+#alias {b} {
+    evoke corpse drain
+};
 
-#NOP -- RESOLVE/PRISMATIC EMISSION
-#alias {acid1} {evoke resolve as acid;evoke prismatic emission as acid}
-#alias {blunt1} {evoke resolve as crushing;evoke prismatic emission as crushing}
-#alias {edged1} {evoke resolve as slashing;evoke prismatic emission as slashing}
-#alias {electric1} {evoke resolve as shocking;evoke prismatic emission as shocking}
-#alias {fire1} {evoke resolve as fire;evoke prismatic emission as fire}
-#alias {ice1} {evoke resolve as ice;evoke prismatic emission as ice}
-#alias {mind1} {evoke resolve as mental;evoke prismatic emission as mental}
-#alias {poison1} {evoke resolve as toxic;evoke prismatic emission as toxic}
-#alias {rad1} {evoke resolve as radiation;evoke prismatic emission as radiation}
-#alias {energy1} {evoke resolve as mental;evoke prismatic emission as magical}
+#NOP -- strengthens your form to withstand more damage;
+#alias {buff} {
+    evoke solidify
+};
 
-#NOP -- EXAMINING/SEARCHING
-#alias {x} {exa}
+#NOP -- drain nrg from enemies to replenish your own nrg;
+#alias {ed} {
+    evoke energy drain
+};
 
-#NOP -- Elemental guild shop & temple apex
-#alias {cot-elshop} {s;w;s;s;w;portal;n;n;n;n;n;e;e}
-#alias {elshop-cot} {w;w;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
-#alias {cot-apex} {s;w;s;s;w;portal;n;n;n;n;n;n;e;ne;u}
-#alias {apex-cot} {d;sw;w;s;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
+#NOP -- check elemental skills OR raise an elemental skill;
+#alias {en} {
+    enhance %1
+};
 
-#NOP -- QUICK WALKS TO ROOMVNUMS
+#NOP -- evaluate mobs to check vital imformation about their power;
+#alias {eval} {
+    evoke evaluate at %1
+};
+
+#NOP -- get all from vortex;
+#alias {gv} {
+    get all from vortex
+};
+
+#NOP -- put all in vortex;
+#alias {pv} {
+    put all in vortex
+};
+
+#NOP -- heal hps using sps;
+#alias {h} {
+    evoke rebuild
+};
+
+#NOP -- toggle room damage;
+#alias {kall} {
+    evoke equipollent
+};
+
+#NOP -- guild light;
+#alias {ll} {
+    evoke self illumination as %1
+};
+
+#NOP -- heal your sps to full (once per mental reset);
+#alias {nc} {
+    evoke natural convergence
+};
+
+#NOP -- login stats of exp & gxp gained;
+#alias {p} {
+    pstats
+};
+
+#NOP -- another login stats check;
+#alias {p2} {
+    pstats2
+};
+
+#NOP -- sp regen;
+#alias {soulwave} {
+    evoke soul wave
+};
+
+#NOP -- regen energy;
+#alias {si} {
+    evoke siphon
+};
+
+#NOP -- check whats in vortex;
+#alias {vl} {
+    vlist
+};
+
+#NOP -- fly;
+#alias {fly} {
+    evoke fly
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+    #class numpad kill
+};
+
+#alias {numon} {
+    #read chars/$user/numpad.tin
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ mDepletion;
+    corpsetrig+ edrain;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ szCaps
+};
+
+#alias {corpseoff} {
+    corpsetrig-off
+};
+
+#alias {corpseon} {
+    corpsetrig-on
+};
+
+#alias {corpseclear} {
+    corpestrig-clear
+};
+
+#NOP -- aliases to setup strategies;
+#alias {mystrategy} {
+    strategy-clear;
+    strategy epowers
+};
+
+#alias {stclear} {
+    strategy-clear
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa
+};
+
+#NOP -- vigilant boosts;
+#alias {vigiboost-wis} {
+    buy 1;buy 2;buy 3;buy 4;buy 5;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask
+};
+
+#NOP -- Elemental guild shop & temple apex (since elemental guild isnt mapped yet);
+#alias {cot-elshop} {s;w;s;s;w;portal;n;n;n;n;n;e;e};
+#alias {elshop-cot} {w;w;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot};
+#alias {cot-apex} {s;w;s;s;w;portal;n;n;n;n;n;n;e;ne;u};
+#alias {apex-cot} {d;sw;w;s;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot};
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n
+};
+
+#NOP -- QUICK WALKS TO ROOMVNUMS;
 #alias {wa} {#map run %1}
 
-#NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
+#NOP -- TO AND FROM BIGPIG (DUKE NUKEM);
+#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up};
+#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s;mapgo cot};
 
-#NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
-#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
-#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s;mapgo cot}
+#NOP -- knight tour games;
+#alias {knight6} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
 
-#NOP --KNIGHT TOUR GAMES
-#alias knight6 {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}};
-#alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
-#alias winaxe {play;start;#5 throw axe};
+#alias {knight8} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+
+#alias {winaxe} {
+    play;
+    start;
+    #5 throw axe
+};
+
+#NOP -- kims 3kdb aliases;
+
+#alias format_kimsaliases {
+    #format {kimalias_name} {%-25s} {%1};
+    #format {kimalias_desc} {%-30s} {%2};
+    #showme $kimalias_name $kimalias_desc;
+};
+
+#alias kim3kdb {
+    #var tempflag 0;
+    #var number &kim3kdb[];
+	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------    <ffa>KIMS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
+    #showme {                  <eaf>guild<088>                        };
+    #showme {<ccf>  ----------------------------------------   <088>  };
+    #showme {<ccf>     Name                 Usage              <088>  };
+    #list kim3kdb index name;
+    #list kim3kdb sort;
+    #foreach $kim3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_kimsaliases {     $index[name]} {$index[desc]};
+        }
+    };
+    #if !$tempflag {
+        #foreach $kim3kdb[%*] index {
+            format_kimsaliases {     $index[name]} {$index[desc]};
+        };
+    };
+};
+
+#list kim3kdb clear;
+
+#NOP -- corpses;
+#list kim3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig setup}}};
+#list kim3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list kim3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list kim3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+
+#NOP -- boosts;
+#list kim3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list kim3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
+
+#NOP - combat;
+#list kim3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list kim3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+
+#NOP -- misc;
+#list kim3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list kim3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list kim3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list kim3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list kim3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list kim3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+
+#NOP -- guild;
+#list kim3kdb add {{{name} {b} {type} {guild} {desc} {Corpse drain: replenish nrg with a corpse}}};
+#list kim3kdb add {{{name} {buff} {type} {guild} {desc} {Solidify: withstand more damage}}};
+#list kim3kdb add {{{name} {ed} {type} {guild} {desc} {Energy drain: drain nrg from mob to heal your own nrg}}};
+#list kim3kdb add {{{name} {en} {type} {guild} {desc} {Enhance: check elemental skills OR raise an elemental skill}}};
+#list kim3kdb add {{{name} {eval} {type} {guild} {desc} {Evaluate: check vital info on a mob - eval <mobname>}}};
+#list kim3kdb add {{{name} {gv} {type} {guild} {desc} {Vortex: get all from vortex}}};
+#list kim3kdb add {{{name} {pv} {type} {guild} {desc} {Vortex: put all in vortex}}};
+#list kim3kdb add {{{name} {vl} {type} {guild} {desc} {Vortex: check vortex}}};
+#list kim3kdb add {{{name} {h} {type} {guild} {desc} {Rebuild: heal hps using sp}}};
+#list kim3kdb add {{{name} {kall} {type} {guild} {desc} {Equipollent: toggle room damage}}};
+#list kim3kdb add {{{name} {ll} {type} {guild} {desc} {Guild light: ll <light level>}}};
+#list kim3kdb add {{{name} {nc} {type} {guild} {desc} {Natural Convergence: heal sps to full per mental reset}}};
+#list kim3kdb add {{{name} {p} {type} {guild} {desc} {Pstats: check login stats}}};
+#list kim3kdb add {{{name} {p2} {type} {guild} {desc} {Pstats2: another login stats check}}};
+#list kim3kdb add {{{name} {soulwave} {type} {guild} {desc} {Soul wave: regen sps}}};
+#list kim3kdb add {{{name} {si} {type} {guild} {desc} {Siphon: regen nrg}}};
+#list kim3kdb add {{{name} {fly} {type} {guild} {desc} {Fly}}};
 
 #class {player_aliases} {close}

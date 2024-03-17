@@ -50,15 +50,18 @@
 #list library3kdb add {{{name} {unload} {type} {eternal} {desc} {Unload Room: unload}}};
 #list library3kdb add {{{name} {res} {type} {eternal} {desc} {Resurrect: res <playername>}}};
 #list library3kdb add {{{name} {tp1} {type} {eternal} {desc} {Teleport: tp1 <myself/party/playername>}}};
-#list library3kdb add {{{name} {tp2} {type} {eternal} {desc} {Teleport: tp2 <playername>}}};
+#list library3kdb add {{{name} {tp2} {type} {eternal} {desc} {Teleport: tp2 <playername> (present party to party member)}}};
 #list library3kdb add {{{name} {summ1} {type} {eternal} {desc} {Summon: summ1 <party/playername>}}};
-#list library3kdb add {{{name} {summ2} {type} {eternal} {desc} {Summon: summ2 <playername>}}};
+#list library3kdb add {{{name} {summ2} {type} {eternal} {desc} {Summon: summ2 <playername> (summon another party to cot)}}};
+#list library3kdb add {{{name} {em} {type} {eternal} {desc} {Embiggen: Boost your stats}}};
+#list library3kdb add {{{name} {hw} {type} {eternal} {desc} {Heightened Awareness: xp boost for 1hr}}};
 
 #NOP -- rolm;
 
 #list library3kdb add {{{name} {rolm} {type} {rolm} {desc} {rolm <dmgtype/wpntype>}}};
-#list library3kdb add {{{name} {setport} {type} {rolm} {desc} {setport (sets an anchor point)}}};
-#list library3kdb add {{{name} {port} {type} {rolm} {desc} {port (winch to anchor point)}}};
+#list library3kdb add {{{name} {setport} {type} {rolm} {desc} {Sets an anchor point}}};
+#list library3kdb add {{{name} {port} {type} {rolm} {desc} {Winch to anchor point}}};
+#list library3kdb add {{{name} {dove} {type} {rolm} {desc} {Room peace}}};
 
 #NOP -- crafting;
 #list library3kdb add {{{name} {autostash-on} {type} {crafting} {desc} {Crafter's Satchel: turn on auto assembler}}};
@@ -111,18 +114,121 @@
 #NOP -- profession;
 #list library3kdb add {{{name} {transmute_burn} {type} {profession} {desc} {transmute_burn <consolidate/consolidate-leg/train/train-leg>}}};
 #list library3kdb add {{{name} {refk} {type} {profession} {desc} {Reforger: buys a knife then reforges it and disposes of it}}};
+#list library3kdb add {{{name} {refs} {type} {profession} {desc} {Reforger: buys a sword then reforges it and disposes of it}}};
 #list library3kdb add {{{name} {ref} {type} {profession} {desc} {Reforger: ref <item> <ACtype> (reforges item ACtype to defense)}}};
 #list library3kdb add {{{name} {refg} {type} {profession} {desc} {Reforger: same as ref except reforges items on ground}}};
 
-#NOP -- guild;
+#NOP -- guild (juggernaut);
+#if {"$guild" == "juggernaut"} {
+#list library3kdb add {{{name} {ff} {type} {guild} {desc} {Missiles: fire all nukes at current enemy}}};
+#list library3kdb add {{{name} {cdef} {type} {guild} {desc} {Cdefend: cdef <party/player/show/clear>}}};
+#list library3kdb add {{{name} {tj} {type} {guild} {desc} {Topjuggs: tj <age/bdamage/bkill/cage/damage/gxp/jkills/recruits>}}};
+#list library3kdb add {{{name} {stimheal1} {type} {guild} {desc} {Fdeener: Check coffin/freezer/cooler for a corpse to heal stim}}};
+#list library3kdb add {{{name} {stimheal2} {type} {guild} {desc} {Fdeener: Same as stimheal1 but will pause stepper if no corpses}}};
+};
 
-#list library3kdb add {{{name} {ff} {type} {guild} {desc} {Juggs: fire all nukes at current enemy}}};
+#NOP -- guild (mage);
+#if {"$guild" == "mage"} {
+    #NOP
+}; 
+
+#NOP -- guild (necromancer);
+#if {"$guild" == "necromancer"} {
+    #NOP
+};
+
+#NOP -- guild (bard);
+#if {"$guild" == "bard"} {
+    #NOP
+};
+
+#NOP -- guild (angel);
+#if {"$guild" == "angel"} {
+    #NOP
+}; 
+
+#NOP -- guild (bladesinger);
+#if {"$guild" == "bladesinger"} {
+    #NOP
+};
+
+#NOP -- guild (changeling);
+#if {"$guild" == "changeling"} {
+    #NOP
+};
+
+#NOP -- guild (cyborg);
+#if {"$guild" == "cyborg"} {
+    #NOP
+};
+
+#NOP -- guild (elemental);
+#if {"$guild" == "elemental"} {
+#list library3kdb add {{{name} {blast} {type} {guild} {desc} {Blasts: give blast to current enemy - blast <mob>}}};
+#list library3kdb add {{{name} {gs} {type} {guild} {desc} {Escore}}};
+#list library3kdb add {{{name} {gs2} {type} {guild} {desc} {Escore2}}};
+#list library3kdb add {{{name} {acid1} {type} {guild} {desc} {Acid damage}}};
+#list library3kdb add {{{name} {blunt1} {type} {guild} {desc} {Blunt damage}}};
+#list library3kdb add {{{name} {edged1} {type} {guild} {desc} {Edged damage}}};
+#list library3kdb add {{{name} {electric1} {type} {guild} {desc} {Electric damage}}};
+#list library3kdb add {{{name} {fire1} {type} {guild} {desc} {Fire damage}}};
+#list library3kdb add {{{name} {ice1} {type} {guild} {desc} {Ice damage}}};
+#list library3kdb add {{{name} {mind1} {type} {guild} {desc} {Mind damage}}};
+#list library3kdb add {{{name} {poison1} {type} {guild} {desc} {Poison damage}}};
+#list library3kdb add {{{name} {rad1} {type} {guild} {desc} {Radiation damage}}};
+#list library3kdb add {{{name} {energy1} {type} {guild} {desc} {Energy damage}}};
+};
+
+#NOP -- guild (fremen);
+#if {"$guild" == "fremen"} {
+    #NOP
+};
+
+#NOP -- guild (gentech);
+#if {"$guild" == "gentech"} {
+    #NOP
+};
+
+#NOP -- guild (jedi);
+#if {"$guild" == "jedi"} {
+    #NOP
+};
+
+#NOP -- guild (knight);
+#if {"$guild" == "knight"} {
+    #NOP
+};
+
+#NOP -- guild (monk);
+#if {"$guild" == "monk"} {
+    #NOP
+};
+
+#NOP -- guild (priest);
+#if {"$guild" == "priest"} {
+    #NOP
+};
+
+#NOP -- guild (psicorps);
+#if {"$guild" == "psicorps"} {
+    #NOP
+};
+
+#NOP -- guild (sii);
+#if {"$guild" == "sii"} {
+    #NOP
+};
 
 #NOP -- misc;
 
 #list library3kdb add {{{name} {dung_reset} {type} {misc} {desc} {Announce Dungeon Resets: dung_reset <mj/sz/aegis/dungeonname>}}};
 #list library3kdb add {{{name} {speedruns} {type} {misc} {desc} {Displays all available speedruns}}};
 #list library3kdb add {{{name} {ld} {type} {misc} {desc} {Go Linkdead saving certain variable values}}};
+#list library3kdb add {{{name} {th} {type} {misc} {desc} {Tellhist}}};
+#list library3kdb add {{{name} {exa} {type} {misc} {desc} {Examine & search stuff}}};
+#list library3kdb add {{{name} {cwho1} {type} {misc} {desc} {List currently online clan members}}};
+#list library3kdb add {{{name} {calc} {type} {misc} {desc} {Calculator: calc <mathproblem> (example - calc 5+5)}}};
+#list library3kdb add {{{name} {dwitch} {type} {misc} {desc} {Dupe-c witch then dove them & attack first witch}}};
 
 #NOP -- corpse;
 
@@ -146,6 +252,7 @@
 #list library3kdb add {{{name} {.unpause} {type} {bot} {desc} {Unpauses the bot}}};
 #list library3kdb add {{{name} {.resume} {type} {bot} {desc} {Returns to the room that was paused and resumes the bot}}};
 #list library3kdb add {{{name} {..} {type} {bot} {desc} {Tells the bot to walk if it stopped and you don't know why}}};
+#list library3kdb add {{{name} {3kdb} {type} {bot} {desc} {Share current bot status on party line}}};
 
 #NOP -- trackers;
 #list library3kdb add {{{name} {3kReport} {type} {trackers} {desc} {3kdb Kill Report - Reports all kills}}};
