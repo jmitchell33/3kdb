@@ -11,24 +11,24 @@
 #NOP -- jugger suit swapping;
 #action {The computer chirps 'Swap Complete!'} {
 	#if {$sallysuit} {
-		#send !calltruck;
-        tp;
+		#delay 2 {#send !calltruck};
+        #delay 4 {tp};
         #send !enhance 70;
-        #delay 2 {#send !empower};
-        #delay 4 {sd};
-        #delay 6 {#send !cdefend clear};
+        #delay 6 {#send !empower};
+        #delay 8 {sd};
+        #delay 10 {#send !cdefend clear};
         #send !cassist +clear;
         #send !lose;
         #send !unfollow ALL;
         reset_tracking;
         #var sallysuit 0;
 	}; #elseif {$gnomesuit} {
-        #send !calltruck;
-        tp;
+        #delay 2 {#send !calltruck};
+        #delay 4 {tp};
         #send !enhance 90;
-        #delay 2 {#send !empower};
-        #delay 4 {su2};
-        #delay 6 {#send !cdefend clear};
+        #delay 6 {#send !empower};
+        #delay 8 {su2};
+        #delay 10 {#send !cdefend clear};
         #send !cassist +clear;
         #send !lose;
         #send !unfollow ALL;
@@ -36,6 +36,47 @@
         #var gnomesuit 0;
     };
 };
+
+#action {The computer chirps 'Storing your Salamander suit. Please do NOT move .. '} {
+    #var sallysuit 0;
+    #var gnomesuit 1
+};
+
+#action {The computer chirps 'Storing your Gnome suit. Please do NOT move .. '} {
+    #var gnomesuit 0;
+    #var sallysuit 1
+};
+
+#action {The computer chirps 'Suit storage complete!'} {
+    #if {$sallysuit} {
+        change salamander;
+		#delay 2 {#send !calltruck};
+        #delay 4 {tp};
+        #send !enhance 70;
+        #delay 6 {#send !empower};
+        #delay 8 {sd};
+        #delay 10 {#send !cdefend clear};
+        #send !cassist +clear;
+        #send !lose;
+        #send !unfollow ALL;
+        reset_tracking;
+        #var sallysuit 0;
+	}; #elseif {$gnomesuit} {
+        change gnome;
+        #delay 2 {#send !calltruck};
+        #delay 4 {tp};
+        #send !enhance 90;
+        #delay 6 {#send !empower};
+        #delay 8 {su2};
+        #delay 10 {#send !cdefend clear};
+        #send !cassist +clear;
+        #send !lose;
+        #send !unfollow ALL;
+        reset_tracking;
+        #var gnomesuit 0;
+    };
+};
+
 
 #NOP -- QUICK FIX FOR BANSHEES STEPPER
 #action {You fail to penetrate the magical barrier.} {dispel;down}
