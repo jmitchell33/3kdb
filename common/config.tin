@@ -22,6 +22,10 @@
     #var incombat_last_round $mip[round];
 } {4};
 
+#NOP -- In general...if you're idle >4 minutes gxp cuts off;
+#NOP -- so this ticker will send a "non-command" to the mud if you're in combat and not deadman;
+#ticker {noise} {#if {$incombat && !$idle_flag} {#cr}} {240};
+
 #alias {defaults_on} {
     _variable_import;
 	mipon;

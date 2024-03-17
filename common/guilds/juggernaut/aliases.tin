@@ -1,6 +1,7 @@
 #class {guild_aliases} {kill}
 #class {guild_aliases} {open}
 
+#NOP -- jugger report;
 #alias jugg_report {
 	#math mounts[percent] {100 * $mounts[no_lock] / $total_rounds};
 	#math mounts[hits] {$total_rounds - $mounts[no_lock]};
@@ -16,22 +17,12 @@
 	#echo {<cbd>--------  <ddd>$mounts[no_lock] failures to lock (${mounts[percent]}% of total)<088> <cbd>--------<088>};
 };
 
+#NOP -- reset jugger report;
 #alias reset_tracking {
 	#unvar my[gxp];
 	#var total_rounds 0;
 	#var mounts[no_lock] 0;
 	#var mounts[crit] 0;
-};
-
-#action {^%sPoints Available:%*} {
-	#format support_points {%d} %2;
-	#math support_secondary_pts {$support_points - 99};
-	#if $support_rebuild {
-		#99 support upgrade $support_primary;
-		#${support_secondary_pts} support upgrade $support_secondary;
-		#var support_rebuild 0;
-		support $support_mode;
-	};
 };
 
 #alias support_defense {
@@ -52,29 +43,70 @@
 	support status;
 };
 
-#alias {stimheal} {
-	#if {$corpses[inventory] > 10} {
-		#math {corpses[inventory]} {$corpses[inventory] - 1}
-	}; #elseif {$corpses[truck] > 0} {
-		#send !get corpse from cl;
-		#math {corpses[truck]} {$corpses[truck] -1}
+#NOP -- check top juggernauts in various catagories;
+#alias {tj} {
+	#switch {"%0"} {
+		#case {"age"} {topjuggs age};
+		#case {"bdamage"} {topjuggs bdamage};
+		#case {"bkill"} {topjuggs bkill};
+		#case {"cage"} {topjuggs cage};
+		#case {"damage"} {topjuggs damage};
+		#case {"gxp"} {topjuggs gxp};
+		#case {"jkills"} {topjuggs jkills};
+		#case {"recruits"} {topjuggs recruits};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO OPTION PROVIDED<088> <efb>==========<088>}};
+		#default 	 {topjuggs %0};
+	};
+};
+
+#NOP -- cdefend player or entire party;
+#alias {cdef} {
+	#switch {"%0"} {
+		#case {"party"} {cdefend party};
+		#case {"show"} {cdefend show};
+		#case {"clear"} {cdefend clear};
+		#case {""}   {#echo {<efb>==========<088> <faa>NO PLAYER OR OPTION PROVIDED<088> <efb>==========<088>}};
+		#default 	 {cdefend %0};
+	};
+};
+
+#NOP -- cycle through coffin/freezer/cooler for a corpse to heal stim otherwise will pause stepper if no corpses;
+#alias {stimheal2} {
+	#if {$corpses[coffin] > 0} {
+		#send !unwrap 1;
+	}; #elseif {$corpses[freezer] > 0} {
+		#send !deslab;
 	}; #elseif {$corpses[cooler] > 0} {
-		#send !uncooler corpse
+		#send !uncooler corpse;
 	}; #else {
 		#if {$bot[active]} {
-			.stop;
+			.pause;
+			#echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
 		};
-		#bell
 	};
 	#send !fdeener
 };
 
-#NOP -- Alias to donate airdrops to needy friends;
+#NOP -- cycle through coffin/freezer/cooler for a corpse to heal stim (general use);
+#alias {stimheal1} {
+	#if {$corpses[coffin] > 0} {
+		#send !unwrap 1;
+	}; #elseif {$corpses[freezer] > 0} {
+		#send !deslab;
+	}; #elseif {$corpses[cooler] > 0} {
+		#send !uncooler corpse;
+	}; #else {
+		#echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
+	};
+	#send !fdeener
+};
+
+#NOP -- Alias to donate airdrops to needy friends (needs fixing - it donates airdrops to me rather then sending to others and doesnt unaction itself);
 #alias donateSupport {
     #list donateSupportList clear;
     #action {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>} {
         #action {%w%s %* %d/%d %s %d/%d %s %d% %*} {
-            #format tempStr {%l} {%%%1};
+			#format tempStr {%l} {%%%1};
             #format tempNum {%d} {%%%10};
             #list donateSupportList add {{{player} {$tempStr} {stim} {$tempNum}}};
         } {1};
@@ -98,7 +130,7 @@
         #unaction {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>};
         #unaction {%w%s %* %d/%d %s %d/%d %s %d% %*};
     };
-    #send {!juggs2};
+	#send {!juggs2};
 };
 
 

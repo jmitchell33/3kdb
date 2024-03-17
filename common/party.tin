@@ -65,6 +65,11 @@
     #delay 2 {#unaction {%w%s%w%s[%*/%*] [%*/%*]%s%d%s%d%s%d}};
 }
 
+#NOP -- share bot status;
+#alias {3kdb} {
+    ptell 3kdb bot status
+};
+
 #NOP -- 3kdb reporting stuff;
 #act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w corpses} {
     #var partyReportString $corpse_string;
@@ -166,6 +171,8 @@
     };
 } {1};
 
+
+#NOP -- Need to rewrite this to work with 3kReport;
 #act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot standings} {
     #if {$bot[active] && !$idle_flag} {
         #var total_kills 0;

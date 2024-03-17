@@ -5,16 +5,24 @@
 #alias {debug} {#debug all on;#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
 #alias {debugoff} {#debug all off;#UNEVENT {SEND OUTPUT};};
 
-#NOP #alias corpse_trig {     ;
-#NOP     #foreach corpseActions ;
-#NOP }; ;
-
-
 #NOP -- Generic QOL improvements;
 #alias {exa} {#send {!examine %0};#send {!search %0};};
 #alias {th} {#send {!tellhist}};
 #alias {cwho1} {#send {!cwho -O}};
 
+#NOP -- calculator;
+#alias {calc} {
+	#math {math} {%1};
+	#format {math_format} {%g} {$math};
+	#echo $math_format;
+};
+
+#NOP -- dupc and dove witch;
+#alias {dwitch} {
+    dc;
+    dove;
+    kill witch
+};
 
 #alias {bagall} {
     #var bagsFull 1;

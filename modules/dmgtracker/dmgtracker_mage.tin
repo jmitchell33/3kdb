@@ -7,6 +7,8 @@
 #var summon_dmg[first_round] $total_rounds;
 #var spell_dmg[first_round] $total_rounds;
 
+#delay 10 {summonDmg-clear;spellDmg-clear};
+
 #alias summonDmg-clear {
     #unvar summon_dmg;
     #var summon_dmg[first_round] $total_rounds;
@@ -58,6 +60,39 @@
     #echo {<dfa>---------- TOTAL ROUNDS: $summon_dmg[tracked_rounds_rep] ----------<088>};
 };
 
+#alias summonRoundDmgCalc {
+    #foreach $summon_types_list[%*] summon {
+        #var summonTotalDmg 0;
+        #var summonPerHitDmg 0;
+        #var summonTotalHits 0;
+        #foreach $dmg_dataKey[%*] dmgItem {
+            #if {$summon_dmg[$summon][round][$dmgItem][count] > 0} {
+                #math summonItemTotalDmg {$summon_dmg[$summon][round][$dmgItem][count] * $dmg_data[melee][$dmgItem][min_dmg]};
+                #math summonTotalDmg {$summonTotalDmg + $summonItemTotalDmg};
+                #math summonTotalHits {$summonTotalHits + $summon_dmg[$summon][total][$dmgItem][count]};
+            };
+        };
+        
+        #math summonPerHitDmg {$summonTotalDmg / $summon_dmg[$summon][round][attempts]};
+        #math summonHitsPerRnd {$summonTotalHits};
+        #math summonPerRoundDmg {$summonTotalDmg};
+        
+        #format summonPerHitDmg {%d} {$summonPerHitDmg};
+        #format summonPerHitDmg {%g} {$summonPerHitDmg};
+        #format summonTotalDmg {%M} {$summonTotalDmg};
+        #replace summonTotalDmg {G} {B};
+        #format summonPerRoundDmg {%d} {$summonPerRoundDmg};
+        #format summonPerRoundDmg {%g} {$summonPerRoundDmg};
+        #format summon_dmg[tracked_rounds_rep] {%g} {$summon_dmg[tracked_rounds]};
+
+        #if {$summonTotalDmg > 0} {
+            #if {"$summon" == "Something"} {#var summon Phantasmal Killer};
+            #format dmgSummary {%+20s %+9s %+9s %+9s %+9s} {$summon} {$summonHitsPerRnd} {$summonPerHitDmg} {$summonPerRoundDmg} {$summonTotalDmg};
+            #echo $dmgSummary;
+        };
+    };
+};
+
 
 #alias summonDmgRecord {
     #var foundItem 0;
@@ -67,6 +102,7 @@
     #if $foundItem {
         #math summon_dmg[$summonType][round][$summonHit][count] {$summon_dmg[$summonType][round][$summonHit][count] + 1};
         #math summon_dmg[$summonType][total][$summonHit][count] {$summon_dmg[$summonType][total][$summonHit][count] + 1};
+        #math summon_dmg[$summonType][round][attempts] {$summon_dmg[$summonType][round][attempts] + 1};
         #math summon_dmg[$summonType][total][attempts] {$summon_dmg[$summonType][total][attempts] + 1};
     };
 };

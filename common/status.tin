@@ -177,16 +177,37 @@
     };
 };
 
-
 #NOP -- Corpse Use Trackers;
-#if {"$guild" == "mage"} {
-    #action {The corpse explodes in a violent burst of energy!} {
+#NOP -- The goal is to see how many corpses you're using to sustain combat - so we'll only track what;
+#NOP -- is being consumed during combat;
+#alias .corpseRecord {
+    #if $incombat {
         #if $hockey_corpse {
-            #var hockey_corpse 0;
+                #var hockey_corpse 0;
         } {
-            #math mob[corpses_used] {$mob[corpses_used] + 1}
+            #math mob[corpses_used] {$mob[corpses_used] + 1};
         };
     };
+};
+
+#if {"$guild" == "mage"} {
+    #action {The corpse explodes in a violent burst of energy!} {.corpseRecord} {2};
+};
+
+#if {"$guild" == "bard"} {
+    #action {You play a death dirge for the fallen corpse.  The corpse slowly crumbles} {.corpseRecord} {2};
+};
+
+#if {"$guild" == "juggernaut"} {
+    #action {Your computer drains the nutrients from the body and converts it into} {
+        .corpseRecord
+    } {2};
+};
+
+#if {"$guild" == "elemental"} {
+    #action {You envelop the corpse in your elemental energies.} {
+        .corpseRecord
+    } {2};
 };
 
 #NOP -- Guild GXP Trackers;
@@ -232,7 +253,7 @@
         #var my[gxp][starting_round] $total_rounds;
         #format {my[gxp][start-time]} {%T} {};
     };
-    reset_gxp;
+    #delay 10 {reset_gxp};
 };
 
 

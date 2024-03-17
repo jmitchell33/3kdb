@@ -77,7 +77,8 @@
 };
 
 #alias 3kReport-clear {
-    #unvar deathSummary;
+    #list deathSummary clear;
+    #list tmpList clear;
     #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>3k KILL REPORT CLEARED          <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
 };
 
@@ -93,7 +94,6 @@
         #NOP -- If a word is provided, filter based on that monster;
         #NOP -- Since tintin matches numbers as the word pattern, we'll have to rely on no digits being provided;
         #regex {%1} {%+1..d} {
-            #echo {MATCHED #};
             #math tempReportStart {$tempReportSize - %1};
             #if {%1 > $tempReportSize} {
                 #format tmpTotalKills {%g} {$tempReportSize}
@@ -101,17 +101,16 @@
                 #format tmpTotalKills {%g} {%1}
             };
         } {
-            #echo {MATCHED WORD};
-            #var tempReportStart 1;
-            #format tmpTotalKills {%g} {$tempReportSize}
+            #format tmpWord {%p} {%1};
             #list tmpList indexate mob;
-            #list tmpList filter {%i%1}
+            #list tmpList filter {%i%*{$tmpWord}%*};
+            #list tmpList size tempReportSize;
+            #format tmpTotalKills {%g} {$tempReportSize};
         };
     };
     
     _reportHeader;
-    #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {Killer} {Mob} {} {Rounds} {} {XP} {} {Coins} {} {Dmg} {} {Corpses};
-    #echo { <dff>$reportLine<088>};
+    
     #var tmpTotalXp 0;
     #var tmpTotalRnds 0;
     #var tmpTotalDmg 0;
@@ -124,53 +123,59 @@
     #var tmpPerMobCoins 0;
     #var tmpPerMobCorpses 0;
 
-    #loop $tempReportStart $tempReportSize item {
-        #math tmpTotalXp {$tmpList[$item][xp_earned] + $tmpTotalXp};
-        #math tmpTotalRnds {$tmpList[$item][rounds] + $tmpTotalRnds};
-        #math tmpTotalDmg {$tmpList[$item][damage_dealt] + $tmpTotalDmg};
-        #math tmpTotalCoins {$tmpList[$item][coins] + $tmpTotalCoins};
-        #math tmpTotalCorpses {$tmpList[$item][corpses_used] + $tmpTotalCorpses};
-        #format tmpMob {%.15s} {$tmpList[$item][mob]};
-        #format tmpKiller {%.15s} {$tmpList[$item][killer]};
-        #format tmpXP {%M} {$tmpList[$item][xp_earned]};
-        #format tmpCoins {%g} {$tmpList[$item][coins_earned]};
-        #format tmpDmg {%g} {$tmpList[$item][damage_dealt]};
-        #format tmpRounds {%g} {$tmpList[$item][rounds]};
-        #format tmpCorpses {%g} {$tmpList[$item][corpses_used]};
-        
-        #if {$tmpCoins == 0} {#var tmpCoins -};
-        #if {$tmpList[$item][damage_dealt] == 0} {#var tmpDmg -};
-        #if {$tmpList[$item][corpses_used] == 0} {#var tmpCorpses -};
-        #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {$tmpKiller} {$tmpMob} {} {$tmpRounds} {} {$tmpXP} {} {$tmpCoins} {} {$tmpDmg} {} {$tmpCorpses};
+    #if {$tempReportSize > 0} {
+        #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {Killer} {Mob} {} {Rounds} {} {XP} {} {Coins} {} {Dmg} {} {Corpses};
+        #echo { <dff>$reportLine<088>};
+        #loop $tempReportStart $tempReportSize item {
+            #math tmpTotalXp {$tmpList[$item][xp_earned] + $tmpTotalXp};
+            #math tmpTotalRnds {$tmpList[$item][rounds] + $tmpTotalRnds};
+            #math tmpTotalDmg {$tmpList[$item][damage_dealt] + $tmpTotalDmg};
+            #math tmpTotalCoins {$tmpList[$item][coins] + $tmpTotalCoins};
+            #math tmpTotalCorpses {$tmpList[$item][corpses_used] + $tmpTotalCorpses};
+            #format tmpMob {%.15s} {$tmpList[$item][mob]};
+            #format tmpKiller {%.15s} {$tmpList[$item][killer]};
+            #format tmpXP {%M} {$tmpList[$item][xp_earned]};
+            #format tmpCoins {%g} {$tmpList[$item][coins_earned]};
+            #format tmpDmg {%g} {$tmpList[$item][damage_dealt]};
+            #format tmpRounds {%g} {$tmpList[$item][rounds]};
+            #format tmpCorpses {%g} {$tmpList[$item][corpses_used]};
+            
+            #if {$tmpCoins == 0} {#var tmpCoins -};
+            #if {$tmpList[$item][damage_dealt] == 0} {#var tmpDmg -};
+            #if {$tmpList[$item][corpses_used] == 0} {#var tmpCorpses -};
+            #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {$tmpKiller} {$tmpMob} {} {$tmpRounds} {} {$tmpXP} {} {$tmpCoins} {} {$tmpDmg} {} {$tmpCorpses};
+            #echo { <eed>$reportLine<088>};
+        };
+        #math tmpPerMobCoins {$tmpTotalCoins / $tmpTotalKills};
+        #math tmpPerMobDmg {$tmpTotalDmg / $tmpTotalKills};
+        #math tmpPerMobRnds {$tmpTotalRnds / $tmpTotalKills * 1.0};
+        #math tmpPerMobXp {$tmpTotalXp / $tmpTotalKills};
+        #math tmpPerMobCorpses {$tmpTotalCorpses / $tmpTotalKills * 1.0};
+
+        #format tmpPerMobXp {%M} $tmpPerMobXp;
+        #replace tmpPerMobXp {G} {B};
+        #format tmpPerMobRnds {%g} $tmpPerMobRnds;
+        #format tmpPerMobDmg {%g} $tmpPerMobDmg;
+        #replace tmpPerMobDmg {G} {B};
+        #format tmpPerMobCoins {%g} $tmpPerMobCoins;
+
+        #format tmpTotalXp {%M} $tmpTotalXp;
+        #replace tmpTotalXp {G} {B};
+        #format tmpTotalRnds {%g} $tmpTotalRnds;
+        #format tmpTotalDmg {%g} $tmpTotalDmg;
+        #replace tmpTotalDmg {G} {B};
+        #format tmpTotalCoins {%g} $tmpTotalCoins;
+
+        _reportLine;
+        #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {TOTAL KILLS} {$tmpTotalKills} {} {$tmpTotalRnds} {} {$tmpTotalXp} {} {$tmpTotalCoins} {} {$tmpTotalDmg} {} {$tmpTotalCorpses};
+        #echo { <eab>$reportLine<088>};
+        #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s}  {PER MOB} {} {} {$tmpPerMobRnds} {} {$tmpPerMobXp} {} {$tmpPerMobCoins} {} {$tmpPerMobDmg} {} {$tmpPerMobCorpses};
         #echo { <eed>$reportLine<088>};
-    };
-    #math tmpPerMobCoins {$tmpTotalCoins / $tmpTotalKills};
-    #math tmpPerMobDmg {$tmpTotalDmg / $tmpTotalKills};
-    #math tmpPerMobRnds {$tmpTotalRnds / $tmpTotalKills * 1.0};
-    #math tmpPerMobXp {$tmpTotalXp / $tmpTotalKills};
-    #math tmpPerMobCorpses {$tmpTotalCorpses / $tmpTotalKills * 1.0};
-
-    #format tmpPerMobXp {%M} $tmpPerMobXp;
-    #replace tmpPerMobXp {G} {B};
-    #format tmpPerMobRnds {%g} $tmpPerMobRnds;
-    #format tmpPerMobDmg {%g} $tmpPerMobDmg;
-    #replace tmpPerMobDmg {G} {B};
-    #format tmpPerMobCoins {%g} $tmpPerMobCoins;
-
-    #format tmpTotalXp {%M} $tmpTotalXp;
-    #replace tmpTotalXp {G} {B};
-    #format tmpTotalRnds {%g} $tmpTotalRnds;
-    #format tmpTotalDmg {%g} $tmpTotalDmg;
-    #replace tmpTotalDmg {G} {B};
-    #format tmpTotalCoins {%g} $tmpTotalCoins;
-
-    _reportLine;
-    #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {TOTAL KILLS} {$tmpTotalKills} {} {$tmpTotalRnds} {} {$tmpTotalXp} {} {$tmpTotalCoins} {} {$tmpTotalDmg} {} {$tmpTotalCorpses};
-    #echo { <eab>$reportLine<088>};
-    #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s}  {PER MOB} {} {} {$tmpPerMobRnds} {} {$tmpPerMobXp} {} {$tmpPerMobCoins} {} {$tmpPerMobDmg} {} {$tmpPerMobCorpses};
-    #echo { <eed>$reportLine<088>};
-    _reportLine;
-    _reportHeader;
+        _reportLine;
+        _reportHeader;
+    } {
+        #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>NO KILLS YET YOU PACIFIST     <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
+    }
 };
 
 #class 3kReport close;
