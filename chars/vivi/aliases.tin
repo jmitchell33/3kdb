@@ -1,38 +1,115 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
-#NOP -- DEADMAN
+#NOP -- deadman;
 #alias {_player_deadmanActions} {
-     #if $bot[active] {.pause;#echo {stepper paused due to deadman timer}};
+     #if {$bot[active]} {
+          .pause;
+          #echo {stepper paused due to deadman timer}
+     };
 };
  
-#NOP --NUMPAD ON OR OFF
-#alias {numoff} {#class numpad kill}
-#alias {numon} {#read chars/$user/numpad.tin}
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+     cast contingency as armor#cast armor;
+     cast contingency as shield#cast magnificent shield;
+     cast contingency as minor globe#cast minor globe;
+     #delay 2 {prots_armor};
+     #delay 4 {prots_ms};
+     #delay 6 {prots_mg};
+     #delay 8 {prots_mb};
+     #delay 10 {prots_pfe};
+     #delay 12 {prots_rs};
+     hp
+};
+
+#NOP -- clear contingency;
+#alias {clear_c} {
+     #10 {cast remove contingency as 1};
+     clear_prots
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+     #class numpad kill
+};
+
+#alias {numon} {
+     #read chars/$user/numpad.tin
+};
  
-#NOP -- ALIASES TO SETUP STRATEGY
-#alias {mystrategy} {strategy-clear}
+#NOP -- aliases to setup strategies;
+#alias {mystrategy} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_assist
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#alias {mycorpsetrig} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ corpseBlast;
+     corpsetrig+ cast corpse blast;
+     corpsetrig+ cast corpse blast;
+     corpsetrig+ getAll;
+     corpsetrig+ put all in pocket;
+     corpsetrig+ put all in pocket;
+     corpsetrig+ crafting;
+     corpsetrig+ spellbook
+};
+
+#alias {corpseoff} {
+     corpsetrig-off
+};
  
-#NOP -- ALIASES TO SETUP CORPSETRIG
-#alias {mycorpsetrig} {corpsetrig-clear}
+#alias {corpseon} {
+     corpsetrig-on
+};
  
-#NOP -- EINSTEINS BRAIN - +3 INT BOOST
-#alias {ein_brain} {n;w;n;n;e;n;enter;e;e;e;s;s;e;e;n;n;n;trail;ne;climb gate;w;search tree;e;e;n;n;enter;unlock paperholder;turn paperholder;climb bench;stagedive;climb down;out;s;s;w;unlock door;open door;n}
+#alias {corpseclear} {
+     corpestrig-clear
+};
 
-#NOP -- EXAMINING/SEARCHING
-#alias {x} {exa}
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+     n;w;n;n;e;n;
+     enter;
+     e;e;e;s;s;e;e;n;n;n;
+     trail;ne;climb gate;
+     w;search tree;
+     e;e;n;n;enter;
+     unlock paperholder;
+     turn paperholder;
+     climb bench;stagedive;
+     climb down;out;
+     s;s;w;unlock door;open door;n
+};
 
-#NOP -- QUICK WALKS TO ROOMVNUMS
-#alias {wa} {#map run %1}
+#NOP -- examining & searching;
+#alias {x} {
+     exa
+};
 
-#NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
-
-#NOP --KNIGHT TOUR GAMES
-#alias {dotr6} {play;start;dt6}
-#alias {dotr8} {play;start;dt8}
-#alias {knight6} {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}}
-#alias {knight8} {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}}
-#alias {winaxe} {play;start;#5 throw axe}
+#NOP -- knight tour games;
+#alias {knight6} {
+     play;
+     start;
+     #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
+ 
+#alias {knight8} {
+     play;
+     start;
+     #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+ 
+#alias {winaxe} {
+     play;
+     start;
+     #5 throw axe
+};
 
 #class {player_aliases} {close}

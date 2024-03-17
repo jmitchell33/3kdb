@@ -1,6 +1,17 @@
 #class {guild_actions} {kill}
 #class {guild_actions} {open}
 
+#NOP -- jugger support mech points;
+#action {^%sPoints Available:%*} {
+	#format support_points {%d} %2;
+	#math support_secondary_pts {$support_points - 99};
+	#if $support_rebuild {
+		#99 support upgrade $support_primary;
+		#${support_secondary_pts} support upgrade $support_secondary;
+		#var support_rebuild 0;
+		support $support_mode;
+	};
+};
 
 #NOP -- Disable ammo_buy for energy mounts;
 #act {^That gun is full already.} {
@@ -34,6 +45,7 @@
 	#ticker nuke_toggle {#if {"$mip[round]" == "1"} {#var nuke_toggle 1;#unticker nuke_toggle}} {2};
 } {2};
 
+#NOP -- donate airdrops to needy friends;
 #action {The computer chirps 'Your %d missiles and %d clan powers are about to reset.'} {
 	#if {$donate_support && !$idle_flag} {
 		donateSupport;
