@@ -8,7 +8,53 @@
           #echo {stepper paused due to deadman timer}
      };
 };
- 
+
+#NOP -- offensive single target damage spell (venomous spray - poison dmg);
+#alias {poison1} {
+     cast perform as cast venomous spray;
+     cast activate c
+};
+
+#NOP -- offensive single target damage spell (acid arrow - acid dmg);
+#alias {acid1} {
+     cast perform as cast acid arrow;
+     cast activate c
+};
+
+#NOP -- mage identify;
+#alias {id} {
+     cast identify on %0 1;
+     cast identify on %0 2;
+     cast identify on %0 3;
+     cast identify on %0 4;
+     cast identify on %0 5;
+     cast identify on %0 6;
+     cast identify on %0 7;
+     cast identify on %0 8;
+     cast identify on %0 9;
+     cast identify on %0 10;
+     cast identify on %0 11;
+     cast identify on %0 12;
+     cast identify on %0 13;
+     cast identify on %0 14;
+     cast identify on %0 15;
+     cast identify on %0 16;
+     cast identify on %0 17;
+     cast identify on %0 18;
+     cast identify on %0 19;
+     cast identify on %0 20;
+     cast identify on %0 21;
+     cast identify on %0 22;
+     cast identify on %0 23;
+     cast identify on %0 24;
+     cast identify on %0 25;
+     cast identify on %0 26;
+     cast identify on %0 27;
+     cast identify on %0 28;
+     cast identify on %0 29;
+     cast identify on %0 30;
+};
+
 #NOP -- setup contingency with defenses;
 #alias {setup_c} {
      cast contingency as armor#cast armor;
@@ -19,8 +65,7 @@
      #delay 6 {prots_mg};
      #delay 8 {prots_mb};
      #delay 10 {prots_pfe};
-     #delay 12 {prots_rs};
-     hp
+     #delay 12 {prots_rs}
 };
 
 #NOP -- clear contingency;
@@ -46,6 +91,10 @@
      strategy golem_assist
 };
 
+#alias {stclear} {
+     strategy-clear
+};
+
 #NOP -- aliases to setup corpsetrigs;
 #alias {mycorpsetrig} {
      corpsetrig-clear;
@@ -59,6 +108,12 @@
      corpsetrig+ put all in pocket;
      corpsetrig+ crafting;
      corpsetrig+ spellbook
+};
+
+#alias {mycorpsetrig-party} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ spellbook;
 };
 
 #alias {corpseoff} {
