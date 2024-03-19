@@ -2,31 +2,11 @@
 #class {player_config} {open}
 
 #NOP -- Bot Config;
-#var mob_kill_action 1;
 #alias {.pre_fight_check} {#nop};
+#alias {.pre_bot_check} {#nop};
 
-#alias {.pre_bot_check} {
-    #var defs[SS] 1;
-    #var defs[MG] 1;
-    #var defs[A] 1;
-    #var defs[MB] 1;
-    #var defs[ms] 1;
-    #var defs[M] 1;
-    #var defs[PS] 1;
+#alias .mob_kill_action {
+    kill $mob[target];
 };
-
-#alias {.mob_kill_action} {
-     #if $summoner {
-          slice $mob[target];
-          checkStrategy {slow} {cast slow on $mob[target]};
-     } {
-          kill $mob[target];
-          checkStrategy {slow} {cast slow on $mob[target]};
-     };
-     checkStrategy {anchor} {cast anchor};
-};
-
-#alias {.check_death} {#NOP};
-
 
 #class {player_config} {close}

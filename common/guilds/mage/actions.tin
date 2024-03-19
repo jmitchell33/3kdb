@@ -78,31 +78,29 @@
 #NOP -- Golem materials cost 1500 coins;
 #NOP -- Gem costs 2100 coins;
 
-#ACTION {^There is no reason to 'ffetch' here.$} {#if {$toggle_find_familiar} {#var toggle_find_familiar 0;#delay 4 {cast find familiar;#var toggle_find_familiar 1;};};} {1};
-#ACTION {^You don't have any basic construction materials for a %w golem!} {
-    #var tempCreate %1;
-    #if $ffetch_coins {
-        ffetch materials;
-        #delay 5 {keep materials;cast create golem as $tempCreate};
+#ACTION {^There is no reason to 'ffetch' here.$} {
+    #if {$toggle_find_familiar} {
+        #var toggle_find_familiar 0;
+        #delay 4 {cast find familiar;#var toggle_find_familiar 1}
     };
 } {1};
 
 #action {^You don't have any basic construction materials!$} {
-    #if $ffetch_coins {
+    #if {$ffetch_coins && !$idle_flag} {
         ffetch materials;
         #delay 5 {keep materials;cast create golem};
     };
 } {2};
 
 #action {^The last of your Golem Materials has been used up.$} {
-    #if $ffetch_coins {
+    #if {$ffetch_coins && !$idle_flag} {
         ffetch materials;
         #delay 5 {keep materials;cast create golem};
     };
 } {2};
 
 #action {You need some basic construction materials to create a golem.} {
-    #if $ffetch_coins {ffetch materials};
+    #if {$ffetch_coins && !$idle_flag} {ffetch materials};
 } {2};
 
 #class {guild_actions} {close}
