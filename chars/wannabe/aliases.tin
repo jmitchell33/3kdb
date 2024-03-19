@@ -25,6 +25,24 @@
 #alias {numoff} {#class numpad kill}
 #alias {numon} {#read chars/brianna/numpad.tin}
 
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+    cast contingency as armor#cast armor;
+    cast contingency as shield#cast shield;
+    cast contingency as minor globe#cast minor globe;
+    #delay 2 {prots_armor};
+    #delay 4 {prots_ms};
+    #delay 6 {prots_mg};
+    #delay 8 {prots_pfe};
+    #delay 10 {prots_mb}
+};
+
+#NOP -- clear contingency;
+#alias {clear_c} {
+    #10 {cast remove contingency as 1};
+    clear_prots
+};
+
 #NOP -- BOT STATUS
 #alias {3kdb} {ptell 3kdb bot status}
 
