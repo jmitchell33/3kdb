@@ -9,6 +9,45 @@
      };
 };
 
+#NOP -- mystic immersion (regen sp at twice the normal rate - lasts 3min);
+#alias {cmi} {
+     cast mystic immersion
+};
+
+#NOP -- explosive release (reduce sat);
+#alias {cer} {
+     cast explosive release
+};
+
+#NOP -- activate summon config;
+#alias {activate_sconfig} {
+     cast summon config activate
+};
+
+#NOP -- clear and deactivate summon config;
+#alias {clear_sconfig} {
+     #2 {cast remove summon config 1};
+     cast summon config deactivate
+};
+
+#NOP -- setup summon config with golem;
+#alias {mscgolem} {
+     #2 {cast remove summon config 1};
+     cast summon config as create golem##1#1500#70#assist#summons#always;
+     cast summon config activate
+};
+
+#NOP -- polymorph other (turn mobs against each other);
+#alias {pmo} {
+     cast polymorph other on %0
+};
+
+#NOP -- offensive single target damage spell (disintegrate - energy dmg);
+#alias {energy1} {
+     cast perform as cast disintegrate;
+     cast activate c
+};
+
 #NOP -- offensive single target damage spell (venomous spray - poison dmg);
 #alias {poison1} {
      cast perform as cast venomous spray;
@@ -19,6 +58,35 @@
 #alias {acid1} {
      cast perform as cast acid arrow;
      cast activate c
+};
+
+#NOP -- offensive single target damage spell (prismatic spray - multi non e/b damage);
+#alias {multi-dmg} {
+     cast perform as cast prismatic spray;
+     cast activate c
+};
+
+#NOP -- fabricate (make daggers x12);
+#alias {make-daggers} {
+     #12 {cast fabricate as dagger#dagger#dagger};
+     #12 {get dagger}
+};
+
+#NOP -- fabricate (forge);
+#alias {make-forge} {
+     cast fabricate as item#forge#forge;
+     get forge;
+     keep forge
+};
+
+#NOP -- reforger pxp for mages;
+#alias {refmage} {
+     #12 {cast fabricate as dagger#dagger#dagger};
+     cast fabricate as item#forge#forge;
+     #12 {get dagger};
+     #12 {reforge dagger with little from edged to penetrate;dispose dagger};
+     get forge;
+     dispose forge
 };
 
 #NOP -- mage identify;
@@ -52,26 +120,47 @@
      cast identify on %0 27;
      cast identify on %0 28;
      cast identify on %0 29;
-     cast identify on %0 30;
+     cast identify on %0 30
+};
+
+#NOP -- setup defense;
+#alias {setup_defense} {
+     clear_c;
+     setup_c;
+     #delay 2 {prots_armor};
+     #delay 4 {prots_ms};
+     #delay 6 {prots_MG};
+     #delay 8 {prots_ss};
+     #delay 10 {prots_mb};
+     #delay 12 {prots_pfe}
 };
 
 #NOP -- setup contingency with defenses;
 #alias {setup_c} {
      cast contingency as armor#cast armor;
      cast contingency as shield#cast magnificent shield;
-     cast contingency as minor globe#cast minor globe;
-     #delay 2 {prots_armor};
-     #delay 4 {prots_ms};
-     #delay 6 {prots_mg};
-     #delay 8 {prots_mb};
-     #delay 10 {prots_pfe};
-     #delay 12 {prots_rs}
+     cast contingency as major globe#cast major globe;
+     cast contingency as stoneskin#cast stoneskin
 };
 
 #NOP -- clear contingency;
 #alias {clear_c} {
-     #10 {cast remove contingency as 1};
-     clear_prots
+     #10 {cast remove contingency as 1}
+};
+
+#NOP -- greater contingency;
+#alias {setup_gc} {
+     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+     cast greater contingency as major globe#cast major globe;
+     cast greater contingency as stoneskin#cast stoneskin;
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as armor#cast armor;
+};
+
+#NOP -- clear greater contingency;
+#alias {clear_gc} {
+     #10 {cast remove greater contingency as 1}
 };
 
 #NOP -- numpad off & on;
@@ -88,7 +177,11 @@
      strategy-clear;
      strategy slow;
      strategy super_er;
-     strategy golem_assist
+     strategy golem_assist;
+     strategy feeblemind;
+     strategy phantasmal;
+     strategy spelltap;
+     strategy edrain
 };
 
 #alias {stclear} {
@@ -102,15 +195,25 @@
      corpsetrig+ wrap;
      corpsetrig+ cBlast2;
      corpsetrig+ getAll;
-     corpsetrig+ pPocket;
      corpsetrig+ crafting;
+     corpsetrig+ pPocket;
      corpsetrig+ spellbook
 };
 
 #alias {mycorpsetrig-party} {
      corpsetrig-clear;
      corpsetrig+ spelltap;
-     corpsetrig+ spellbook;
+     corpsetrig+ spellbook
+};
+
+#alias {mycorpsetrig-sewers} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast2;
+     corpsetrig+ crafting;
+     corpsetrig+ pPocket;
+     corpsetrig+ spellbook
 };
 
 #alias {corpseoff} {
@@ -122,7 +225,7 @@
 };
  
 #alias {corpseclear} {
-     corpestrig-clear
+     corpsetrig-clear
 };
 
 #NOP -- einsteins brain (+3 int);
@@ -145,6 +248,9 @@
      exa
 };
 
+#NOP -- QUICK WALKS TO ROOMVNUMS
+#alias {wa} {#map run %1}
+
 #NOP -- knight tour games;
 #alias {knight6} {
      play;
@@ -163,5 +269,84 @@
      start;
      #5 throw axe
 };
+
+#NOP -- vivis 3kdb aliases;
+
+#alias format_vivisaliases {
+     #format {vivialias_name} {%-25s} {%1};
+     #format {vivialias_desc} {%-30s} {%2};
+     #showme $vivialias_name $vivialias_desc;
+};
+ 
+#alias vivi3kdb {
+     #var tempflag 0;
+     #var number &vivi3kdb[];
+     #showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+     #showme {<ccf>  -------    <ffa>VIVI'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+     #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
+     #showme {                  <eaf>guild spells<088>                        };
+     #showme {<ccf>  ----------------------------------------   <088>  };
+     #showme {<ccf>     Name                 Usage              <088>  };
+     #list vivi3kdb index name;
+     #list vivi3kdb sort;
+     #foreach $vivi3kdb[%*] index {
+         #regexp {"%1"} {"$index[type]"} {
+             #var tempflag 1;
+             format_vivisaliases {     $index[name]} {$index[desc]};
+         }
+     };
+     #if !$tempflag {
+         #foreach $vivi3kdb[%*] index {
+             format_vivisaliases {     $index[name]} {$index[desc]};
+         };
+     };
+};
+ 
+#list vivi3kdb clear;
+ 
+#NOP -- corpses;
+#list vivi3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig setup}}};
+#list vivi3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list vivi3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list vivi3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list vivi3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list vivi3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
+ 
+#NOP -- boosts;
+#list vivi3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list vivi3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
+ 
+#NOP - combat;
+#list vivi3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list vivi3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+ 
+#NOP -- misc;
+#list vivi3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list vivi3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list vivi3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list vivi3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list vivi3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list vivi3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+ 
+#NOP -- guild;
+#list vivi3kdb add {{{name} {activate_sconfig} {type} {guild} {desc} {Activate summon config}}};
+#list vivi3kdb add {{{name} {clear_sconfig} {type} {guild} {desc} {Clear summon config}}};
+#list vivi3kdb add {{{name} {mscgolem} {type} {guild} {desc} {Setup summon config with golem}}};
+#list vivi3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
+#list vivi3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
+#list vivi3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
+
+#NOP -- spells;
+#list vivi3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
+#list vivi3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison dmg)}}};
+#list vivi3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg)}}};
+#list vivi3kdb add {{{name} {multi-dmg} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b damage)}}};
+#list vivi3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
+#list vivi3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg)}}};
+#list vivi3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
+#list vivi3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+#list vivi3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
+#list vivi3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
+#list vivi3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
 
 #class {player_aliases} {close}
