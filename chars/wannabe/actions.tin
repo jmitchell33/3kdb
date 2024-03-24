@@ -10,9 +10,11 @@
 };
 
 #NOP -- MAGE ACTIONS;
+#action {whispers to you: fan} {#if {!$idle_flag} {cast corpse blast;cast corpse blast}};
+#action {dealt the killing} {cast spell tap on corpse};
+#action {Responding to Brianna's call for support} {cast secure shelter;#delay 8 {out}};
 #action {The coffin expels your selected corpse!} {cast corpse blast};
 #action {That corpse has already been tapped.} {cast corpse blast};
-#action {seems to slow down...} {cast haste on summons};
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 #action {a summon, with: defend} {cast haste on summons};
 #action {dealt the killing blow} {study spellbook};
@@ -27,6 +29,10 @@
 #alias {sat} {uncooler corpse;cast corpse blast};
 #alias {scon} {cast remove summon config as 1;cast summon config as monster summoning 3#Wererat#3#500#15#defend#MeMbRaIn};
 
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    mywhosync
+};
 
 #NOP --NUMPAD ON OR OFF
 #alias {numoff} {#class numpad kill}
@@ -36,7 +42,8 @@
 #alias {setup_c} {
     cast contingency as armor#cast armor;
     cast contingency as shield#cast magnificent shield;
-    cast contingency as minor globe#cast minor globe;
+    cast contingency as major globe#cast major globe;
+    cast contingency as stoneskin#cast stoneskin;
     #delay 2 {prots_armor};
     #delay 4 {prots_ms};
     #delay 6 {prots_mg};

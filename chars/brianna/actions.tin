@@ -19,6 +19,11 @@
 #NOP -- COUPLE LOGIN TRIGS
 #action {unload room} {deadman 200};
 
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    mywhosync
+};
+
 #NOP --- JUGGERNAUT AMMO
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 6 1 40000}}
 
@@ -26,7 +31,7 @@
 #action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend for party accept badger let him DIE.}
 
 #NOP --- GENERAL MISC;
-#action {Out of nowhere a crazed hockey} {#if {!$idle_flag} {dog eat;dog eat}};
+#action {Out of nowhere a crazed hockey} {#if {!$idle_flag} {whisper wannabe fan}};
 #action {Your dog looks very hungry.} {#if {!$idle_flag} {unwrap 1;unwrap 1;dog eat;dog eat}};
 #action {Happy: 75%} {#if {!$idle_flag} {dog pet;dog pet;dog pet}};
 #action {Hungry: 80%} {#if {!$idle_flag} {unwrap 1;unwrap 1;dog eat;dog eat}};
