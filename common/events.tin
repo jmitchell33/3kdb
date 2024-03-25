@@ -1,20 +1,73 @@
 #CLASS common_events kill;
 #CLASS common_events open;
 
-#config mouse on;
-#event {SCROLLED MOUSE WHEEL UP} {#buffer up 1};
+#var mouseActive 0;
+
+#alias qq {
+    #if $mouseActive {
+        #var mouseActive 0;
+        #ECHO {<efb> ⛔🪤⛔  THE MOUSE HAS BEEN CAPTURED AND IS NO MORE!  ⛔🪤⛔ <088>};
+        #config mouse off;
+    } {
+        #var mouseActive 1;
+        #ECHO {<efb> 🐭🧀🐭  MOUSE IS ACTIVE AND REPORTING FOR SERVICE!  🐭🧀🐭<088>};
+        #config mouse on;
+    };
+};
+
+#EVENT {SCROLLED MOUSE WHEEL UP}{
+    #math tmpHpbarTop {$hpbar[top] - 2};
+    #if {%2 == -1} {
+        #cursor {HISTORY PREV};
+        #return
+    };
+    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {up} {1}};};
+};
 
 #EVENT {SCROLLED MOUSE WHEEL DOWN}{
-    #echo {%0 is 0};
-    #echo {%1 is 1};
-    #echo {%2 is 2};
-    #echo {%3 is 3};
-    #echo {%4 is 4};
+    #math tmpHpbarTop {$hpbar[top] - 2};
     #if {%2 == -1} {
         #cursor {HISTORY NEXT};
         #return
     };
-    #NOP #if {%0 > $hpbar[height]} {#if {%1 < $ticker[bottom]} {#buffer {down} {1}};};
+    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {down} {1}};};
+};
+
+#nop -------------------------------------------------------------------------;
+#nop Sometimes an error doesn't give enough information and it's useful to;
+#nop see the calling script.;
+#nop -------------------------------------------------------------------------;
+
+#event {RECEIVED ERROR} {
+	#echo <118>%h { TOKENIZER };
+	#info tokenizer -1;
+	#echo <118>%h
+};
+
+#NOP This will highlight your last input and any input other than enter will clear it.;
+#event {HISTORY UPDATE} {
+    #delay 0 #line ignore #showme {<ccf><FFF><788>%0<088>} {-1};
+    #var last_input {%0}
+};
+
+#event {PROCESSED KEYPRESS} {
+    #if {{%1} != {10} && {$last_input} !== {}} {
+        #var last_input {};
+        #line ignore #showme {} {-1};
+        #cursor end;
+        #history insert {}
+    }
+};
+
+#NOP -- This creates two input lines that can be switched between using the tab key;
+#macro {\t} {inputswitch};
+
+#alias {inputswitch} {
+	#cursor get {input[current]};
+	#cursor clear;
+	#cursor set {$input[buffer2]};
+	#cursor end;
+	#var input[buffer2] {$input[current]};
 };
 
 

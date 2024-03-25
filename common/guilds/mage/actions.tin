@@ -2,6 +2,7 @@
 #class {guild_actions} {open}
 
 #var ffetch_coins 1;
+#var ffetch_materials 1;
 #var my[immersion][active] 0;
 
 #NOP -- Automatically use the corpse if a stanley cup corpse drops;
@@ -49,7 +50,7 @@
 #ACTION {^You will not cast spell tap every round in combat.$} {#var spelltap 0} {1};
 
 #ACTION {^%* darts out of the room.$} {#var go_fetch 1} {1};
-#ACTION {^%* darts into the room.$} {#var go_fetch 0;keep materials} {1};
+#ACTION {^%* darts into the room.$} {#var go_fetch 0} {1};
 
 #action {^You wave your hands and anchor yourself to the spot!$} {#var my[anchor] 1;};
 #action {^Your anchor has been dispelled!$} {#var my[anchor] 0;};
@@ -86,21 +87,27 @@
 } {1};
 
 #action {^You don't have any basic construction materials!$} {
-    #if {$ffetch_coins && !$idle_flag} {
+    #if {$ffetch_coins && !$idle_flag && $ffetch_materials} {
         ffetch materials;
-        #delay 5 {keep materials;cast create golem};
+        #delay 6 {keep materials};
     };
 } {2};
 
 #action {^The last of your Golem Materials has been used up.$} {
-    #if {$ffetch_coins && !$idle_flag} {
+    #if {$ffetch_coins && !$idle_flag && $ffetch_materials} {
         ffetch materials;
-        #delay 5 {keep materials;cast create golem};
+        #delay 6 {keep materials};
     };
 } {2};
 
 #action {You need some basic construction materials to create a golem.} {
-    #if {$ffetch_coins && !$idle_flag} {ffetch materials};
+    #if {$ffetch_coins && !$idle_flag && $ffetch_materials} {ffetch materials};
 } {2};
+
+#action {You fumble and drop it!} {
+    #var ffetch_materials 0;
+} {2};
+
+
 
 #class {guild_actions} {close}

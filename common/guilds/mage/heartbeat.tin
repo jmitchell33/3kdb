@@ -85,7 +85,11 @@
 
             #if {$corpses[total] > 0 && $corpse_toggle} {
                 checkStrategy {super_er} {
-                    #if $my[super][current] {cast explosive release}
+                    #if $my[super][current] {cast explosive release} {
+                        #var corpse_toggle 0;
+                        corpse_select;
+                        #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 1;i};        
+                    };
                 } {
                     #var corpse_toggle 0;
                     corpse_select;
