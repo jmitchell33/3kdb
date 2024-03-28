@@ -60,14 +60,19 @@
      cast contingency as armor#cast armor;
      cast contingency as shield#cast magnificent shield;
      cast contingency as major globe#cast major globe;
-     cast contingency as stoneskin#cast stoneskin;
+     cast contingency as stoneskin#cast stoneskin
+};
+
+#NOP -- setup defense;
+#alias {setup_defense} {clear_c;setup_c;
      #delay 2 {prots_armor};
      #delay 4 {prots_ms};
-     #delay 6 {prots_mg};
-     #delay 8 {prots_mb};
-     #delay 10 {prots_pfe};
-     #delay 12 {prots_rs}
-};
+     #delay 6 {prots_MG};
+     #delay 8 {prots_ss};
+     #delay 10 {prots_mb};
+     #delay 12 {prots_pfe};
+     #delay 14 {prots_pa};
+     #delay 16 {prots_blink}};
 
 #NOP -- clear contingency;
 #alias {clear_c} {
@@ -85,13 +90,7 @@
 };
  
 #NOP -- aliases to setup strategies;
-#alias {mystrategy} {
-     strategy-clear;
-     strategy slow;
-     strategy super_sub
-     strategy super_er;   
-     strategy golem_assist
-};
+#alias {mystrat} {strategy-clear;strategy slow;strategy super_sub;strategy super_er;strategy golem_assist;strategy summon_haste;strategy phantasmal;strategy edrain;strategy feeblemind};
 
 #alias {stclear} {
      strategy-clear
@@ -127,6 +126,9 @@
      corpestrig-clear
 };
 
+#NOP -- Monster summon 5;
+#alias {ms5} {cast monster summoning 5;say all, you are now in group summons;say all, defend always};
+
 #NOP -- einsteins brain (+3 int);
 #alias {ein_brain} {
      n;w;n;n;e;n;
@@ -147,24 +149,10 @@
      exa
 };
 
-#NOP -- knight tour games;
+
 #NOP --KNIGHT TOUR GAMES
-#alias {knight6} {
-     play;
-     start;
-     dt6
-};
+#alias {knight6} {play;start;dt6};
+#alias {knight8} {play;start;dt8};
+#alias {winaxe} {play;start;#5 throw axe};
 
-#alias {knight8} {
-     play;
-     start;
-     dt8
-};
-
-#alias {winaxe} {
-     play;
-     start;
-     #5 throw axe
-};
-
-#class {player_aliases} {close}
+#class {player_aliases} {close};
