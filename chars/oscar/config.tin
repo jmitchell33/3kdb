@@ -16,25 +16,14 @@
 };
 
 #alias {.mob_kill_action} {
-     #if {$cheese && "$area" == "Section Z"} {
-          kill balangool;
-          kill balangool 2;
-          kill balangool 3;
-          #delay 2 {
-               say wraith, kill balangool;
-               say wraith 2, kill balangool 2;
-               say wraith 3, kill balangool 3;
-          };
+     checkStrategy {summon_tank} {
+          slice $mob[target];
+          checkStrategy {slow} {cast slow on $mob[target]};
      } {
-          checkStrategy {summon_tank} {
-               slice $mob[target];
-               checkStrategy {slow} {cast slow on $mob[target]};
-          } {
-               kill $mob[target];
-               checkStrategy {slow} {cast slow on $mob[target]};
-          };
-          checkStrategy {anchor} {cast anchor};
+          kill $mob[target];
+          checkStrategy {slow} {cast slow on $mob[target]};
      };
+     checkStrategy {anchor} {cast anchor};
 };
 
 #alias {.check_death} {#NOP};
