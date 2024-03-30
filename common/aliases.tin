@@ -27,7 +27,7 @@
 #alias {bagall} {
     #var bagsFull 1;
     #format tmpBagCount {%d} %0;
-    #loop 1 $tmpBagCount tmpBag {
+    #loop $tmpBagCount 1 tmpBag {
         put all in bag $tmpBag
     };
     #line oneshot #action {You put %* in %*.} {#var bagsFull 0};
@@ -234,6 +234,42 @@
         {
                 #unhighlight {%%i%0%%*\|%%*} {<338>};
         } {1};
+    };
+};
+
+#alias .gswap {
+    #var guild %0;
+
+    #NOP -- load common;
+    #read common/index.tin;
+    #read common/bot/bots.tin;
+    #read modules/helpers/helpers.tin;
+
+    #NOP -- Kill existing guild classes;
+    #class {guild_actions} kill;
+    #class {guild_aliases} kill;
+    #class {guild_gags} kill;
+    #class {guild_heartbeat} kill;
+    #class {guild_miphp} kill;
+    #class {guild_tickers} kill;
+    #class {guild_vars} kill;
+
+    #NOP -- load new guild;
+    #read common/guilds/$guild/index.tin;
+    
+    #NOP -- load character-specific;
+    #read chars/$user/actions.tin;
+    #read chars/$user/aliases.tin;
+    #read chars/$user/config.tin;
+    #read chars/$user/heartbeat.tin;
+    #read chars/$user/miphp.tin;
+    #read chars/$user/private.tin;
+    #read chars/$user/styles.tin;
+
+    #delay 4 {
+        mipon;
+        init_screen;
+        (powers;
     };
 };
 
