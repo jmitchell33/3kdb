@@ -21,8 +21,8 @@
 #var mob_kill_action 1;
 #alias .mob_kill_action {
     kill $mob[target];
-    eval $mob[target];
     #if {"$support_mode" == "defend" && $bot[active]} {
+        eval $mob[target];
         #line oneshot #action {Primary Damage type : [%w]} {
             #format defendType {%l} {%%1};
             #delay 3 {support defend $defendType};

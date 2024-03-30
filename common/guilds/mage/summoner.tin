@@ -2,17 +2,29 @@
 #class {guild_summoner} open
 
 #unvar summon_types_list;
+#NOP - Phantasmal Killer;
+#list summon_types_list add {Something};
+#NOP -- Golems;
+#list summon_types_list add {Straw golem};
+#list summon_types_list add {Rope golem};
+#list summon_types_list add {Wood golem};
+#list summon_types_list add {Flesh golem};
+#list summon_types_list add {Clay golem};
+#list summon_types_list add {Stone golem};
+#list summon_types_list add {Iron golem};
+#list summon_types_list add {Crystal golem};
+#NOP -- Monster Summoning 10;
 #list summon_types_list add {Celestial lion};
 #list summon_types_list add {Undead wraith};
 #list summon_types_list add {Shadow panther};
-#list summon_types_list add {Something};
-#list summon_types_list add {Wood golem};
+#NOP -- Monster Summoning 9;
 #list summon_types_list add {Demon hellhound};
 #list summon_types_list add {Fey dryad};
 #list summon_types_list add {Beast owlbear};
+#NOP -- Monster Summoning 8;
 #list summon_types_list add {Storm giant};
 #list summon_types_list add {Cloud giant};
-
+#NOP -- Monster Summoning 6;
 #list summon_types_list add {Wyvern};
 #list summon_types_list add {Wraith};
 #list summon_types_list add {Otyugh};
@@ -27,6 +39,29 @@
 #list summon_types_list add {Ogre magi};
 #list summon_types_list add {Salamander};
 #list summon_types_list add {8-headed hydra};
+
+#NOP -- Monster Summoning 7;
+#list summon_types_list add {10-headed Hydra};
+#list summon_types_list add {Night Hag};
+#list summon_types_list add {Neo-otyugh};
+#list summon_types_list add {Roper};
+#list summon_types_list add {Mind Flayer};
+#list summon_types_list add {Fire Lizard};
+#list summon_types_list add {8-headed Pyro-hydra};
+#list summon_types_list add {Spectre};
+#list summon_types_list add {Mummy};
+#list summon_types_list add {Frost Giant};
+#list summon_types_list add {Fire Giant};
+#list summon_types_list add {Stone Giant};
+#list summon_types_list add {Hill Giant};
+#list summon_types_list add {Ettin};
+#list summon_types_list add {Umber Hulk};
+#list summon_types_list add {Phoenix};
+#list summon_types_list add {Gorgon};
+#list summon_types_list add {Xorn};
+#list summon_types_list add {Chimera};
+#list summon_types_list add {Giant Slug};
+
 
 
 #gag {  --> %*};
@@ -156,18 +191,8 @@
 		#list summonTankList indexate health;
 		#list summonTankList order;
 		#list summonTankList reverse;
-		#switch {"$summonTankList[1][name]"} {
-			#case {"A Celestial Lion"} {
-				#var summonNewTank lion;
-			};
-			#case {"An Undead Wraith"} {
-				#var summonNewTank wraith;
-			};
-			#case {"A Shadow Panther"} {
-				#var summonNewTank panther;
-			};
-		};
-		#send {say $summonNewTank $summonTankList[1][index], defend me};
+		.summonLookupName $summonTankList[1][name];
+		#send {say $summonTmpName $summonTankList[1][index], defend me};
 	};
 };
 
@@ -180,18 +205,8 @@
 		#list summonTankList indexate health;
 		#list summonTankList refine {&0 < 100};
 		#foreach $summonTankList[%*] item {
-			#switch {"$item[name]"} {
-			 	#case {"A Celestial Lion"} {
-			 		#var summonTmpName lion;
-			 	};
-			 	#case {"An Undead Wraith"} {
-			 		#var summonTmpName wraith;
-			 	};
-			 	#case {"A Shadow Panther"} {
-			 		#var summonTmpName panther;
-			 	};
-			 };
-			 say $summonTmpName $item[index], begone;
+			.summonLookupName $item[name];
+			say $summonTmpName $item[index], begone;
 		};
 	};
 };
@@ -201,6 +216,7 @@
 	#format tmpSummonName {%p} {%1};
 	#var summonTankIndex 1;
 	#var mobIndex 1;
+	#var skipSummon 0;
 	#regex {%3} {7B{[0-9]+}} {#var mobIndex &1};
 	
 	#loop 1 $mobIndex tmpIndex {
@@ -219,6 +235,43 @@
 		};
 	};
 } {1};
+
+#alias .summonLookupName {
+	#var tmpName %0;
+	#switch {"$tmpName"} {
+		#case {"A Celestial Lion"} {#var summonTmpName lion;};
+		#case {"An Undead Wraith"} {#var summonTmpName wraith;};
+		#case {"A Shadow Panther"} {#var summonTmpName panther;};
+		#case {"10-headed Hydra"} {#var summonTmpName hydra;};
+		#case {"Night Hag"} {#var summonTmpName hag;};
+		#case {"Neo-otyugh"} {#var summonTmpName neo-otyugh;};
+		#case {"Roper"} {#var summonTmpName roper;};
+		#case {"Mind Flayer"} {#var summonTmpName mind flayer;};
+		#case {"Fire Lizard"} {#var summonTmpName fire lizard;};
+		#case {"8-headed Pyro-hydra"} {#var summonTmpName hydra;};
+		#case {"Spectre"} {#var summonTmpName spectre;};
+		#case {"Mummy"} {#var summonTmpName mummy;};
+		#case {"Frost Giant"} {#var summonTmpName giant;};
+		#case {"Fire Giant"} {#var summonTmpName giant;};
+		#case {"Stone Giant"} {#var summonTmpName giant;};
+		#case {"Hill Giant"} {#var summonTmpName giant;};
+		#case {"Ettin"} {#var summonTmpName ettin;};
+		#case {"Umber Hulk"} {#var summonTmpName hulk;};
+		#case {"Phoenix"} {#var summonTmpName phoenix;};
+		#case {"Gorgon"} {#var summonTmpName gorgon;};
+		#case {"Xorn"} {#var summonTmpName xorn;};
+		#case {"Chimera"} {#var summonTmpName chimera;};
+		#case {"Giant Slug"} {#var summonTmpName slug;};
+		#case {"A Disfigured Wereboar"} {#var summonTmpName wereboar;};
+		#case {"A Giant Spider"} {#var summonTmpName spider;};
+		#case {"A Nasty Cockatrice"} {#var summonTmpName cockatrice;};
+		#case {"An Enormous Minotaur"} {#var summonTmpName minotaur;};
+		#case {"A Swift Leucrotta"} {#var summonTmpName leucrotta;};
+		#case {"A Shimmering Black Displacer Beast"} {#var summonTmpName beast;};
+		#case {"A Gnarly 7-headed Hydra"} {#var summonTmpName hydra;};
+		#case {"A Giant Poisonous Snake"} {#var summonTmpName snake;};
+	};
+};
 
 
 #class {guild_summoner} close

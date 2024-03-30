@@ -6,52 +6,139 @@
     clear_prots;
 };
 
-#NOP ---THIS SECTION IS FOR BARD SPECIFIC ALIASES
-#alias {{hh}} {cast healing hands};
-#alias {{karma}} {unwrap corpse;dirge};
-#alias {boost} {
-        perform hero for %1;
-        #delay {114} {perform memory for %1};
-        #delay {192} {perform let it be for %1};
-        #delay {310} {perform naked sunday for %1};
-        #delay {352} {perform son of man for %1};
+#if {"$guild" == "bard"} {
+        #NOP ---THIS SECTION IS FOR BARD SPECIFIC ALIASES;
+        #alias {{hh}} {cast healing hands};
+        #alias {{karma}} {unwrap corpse;dirge};
+        #alias {boost} {
+                perform hero for %1;
+                #delay {114} {perform memory for %1};
+                #delay {192} {perform let it be for %1};
+                #delay {310} {perform naked sunday for %1};
+                #delay {352} {perform son of man for %1};
+        };
+
+        #alias {heals} {
+        cast mystic guardian at hp/500/(heal;
+        setpanic hmheal at 1800;
+        reflex add hp 5400 cast healing hands
+        };
+
+        #alias {dmgoff} {reflex remove sp >400};
+        #alias {es} {empowered strikes};
+        #alias {gxp_rate} {
+                #math {gxp_avg} {$gxp_total / $gxp_rounds};
+                #math {gxp_time} {((($g2n / $gxp_avg) * 2) / 60) / 60};
+                #math {gxp_hour} {$gxp_avg * 1800};
+                #showme {Total gxp earned is: $gxp_total.  Gxp per round is: $gxp_avg  Total rounds: $gxp_rounds};                                   
+                #showme {Average time to glevel: $gxp_time hours.  Current gxp/hr: $gxp_hour}                                                        
+        };
+        #alias {defense} {
+        	prots_grace;
+                prots_muse;
+                prots_hs;
+                prots_blink;
+        };
+};
+
+#if {"$guild" == "mage"} {
+    #list {temp} create {};
+
+    #ACTION {^%d:You will cast %w should your %w ever} {
+        #list temp set %1 {%2};
+    };
+
+    #alias {useHeal} {
+        #if {!$my[eternal][heal] && $my[hmheal][self] && !$my[immersion][active]} {
+            hmheal;
+        };
+        #if {$my[eternal][heal] && !$my[immersion][active]} {
+            (heal oscar;
+        };
+    };
+
+    #NOP -- Default corpse_trig;
+    #alias corpsetrig1 {
+        corpsetrig-clear;
+        corpsetrig+ spelltap;
+        corpsetrig+ slab;
+        corpsetrig+ wrap;
+        corpsetrig+ corpseBlast;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ cocoon;
+        corpsetrig+ spellbook;
+    };
+
+    #alias {_player_deadmanActions} {
+        .pause;
+    };
+
+    #alias {setup_defense} {
+        clear_c;
+        clear_gc;
+        setup_c;
+        setup_gc;
+        #delay 2 {prots_ss};
+        #delay 4 {prots_MG};
+        #delay 6 {prots_ms};
+        #delay 8 {prots_armor};
+        #delay 10 {prots_ps};
+        #delay 12 {cast mantle};
+        #delay 14 {prots_pfe};
+    };
+
+    #alias {setup_c} {
+        cast contingency as prot_evil#cast protection from evil;
+    };
+
+
+    #alias {setup_gc} {
+        cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+        cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+        cast greater contingency as major globe#cast major globe;
+        cast greater contingency as stoneskin#cast stoneskin;
+        cast greater contingency as shield#cast magnificent shield;
+        cast greater contingency as armor#cast armor;
+    };
+
+    #alias {clear_c} {
+        #10 {cast remove contingency as 1};
+    };
+
+    #alias {clear_gc} {
+        #10 {cast remove greater contingency as 1};
+    };
+
+    #alias {check_beads} {
+        #math hp_overmax_max {$my[hp][max] * 5};
+        #math hp_overmax_shortfall {$hp_overmax_max - $my[hp][current]};
+        #math grasps_needed {$hp_overmax_shortfall / 33};
+
+        #math sp_threshold {$my[sp][max] * .20};
+        #math sp_extra {$my[sp][current] - $sp_threshold};
+        #math grasps_possible {$sp_extra / 100};
+
+        #if {$grasps_needed < $grasps_possible} {
+            #var grasp_beads $grasps_needed;
+        } {
+            #var grasp_beads $grasps_possible;
+        };
+
+        #$grasp_beads {grasp beads};
+    };
+
+    #alias pmo {cast polymorph other on %0;};
 };
 
 #NOP -- THIS SECTION IS FOR OTHER ALIASES
-
-#alias {map} {
-	#var roomfound 0;
-	#foreach $speedruns[%*] index {
-        #regexp {"%1"} {"$index[name]"} {
-			#var roomfound 1;
-            #showme {Found room %1 - teleporting map there!};
-			#map go $index[vnum];
-        };
-    };
-	#if !$roomfound {#showme {Unable to find %1}};
-};
-
 
 #alias {k} {
         #var killing 1;
         kill %1;
 };
-#alias {gxp_rate} {
-        #math {gxp_avg} {$gxp_total / $gxp_rounds};
-        #math {gxp_time} {((($g2n / $gxp_avg) * 2) / 60) / 60};
-        #math {gxp_hour} {$gxp_avg * 1800};
-        #showme {Total gxp earned is: $gxp_total.  Gxp per round is: $gxp_avg  Total rounds: $gxp_rounds};                                   
-        #showme {Average time to glevel: $gxp_time hours.  Current gxp/hr: $gxp_hour}                                                        
-        };
 
-#alias {heals} {
-        cast mystic guardian at hp/500/(heal;
-        setpanic hmheal at 1800;
-        reflex add hp 5400 cast healing hands
-};
 
-#alias {dmgoff} {reflex remove sp >400};
-#alias {es} {empowered strikes};
 
 #alias {dmg_stats} {
         #math {cmbt[avg]} {$cmbt[dmg] / $cmbt[rnd]};
@@ -82,12 +169,6 @@
         dispose knife;
 };
 
-#alias {defense} {
-	prots_grace;
-	prots_muse;
-	prots_hs;
-	prots_blink;
-};
 
 #alias {zell1} {sr shelf;take gloves;n;n;w;w;w;s;get key from pool;drop gloves;n;e;e;e;s;s;e;e;e;n;e;e;e;n;n;n;n;w;w;w;w;s;s;s;s;unlock door;open door;w;take key;e;n;n;n;n;e;e;e;e;s;s;s;s;w;w;w;s;w;w;w;n;n;w;w;n;unlock door;open door;w;w;s;s;sw;w;w;w;n;nw;e;e;e;e;n;ne;e;e;e;n};
 #alias {zell2} {s;w;w;w;sw;s;w;w;w;w;se;s;e;e;e;ne;n;n;e;e;e;s;w;s;se;s;e;s;s;out;map zell}
