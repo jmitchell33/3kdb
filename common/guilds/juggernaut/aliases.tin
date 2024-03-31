@@ -101,36 +101,38 @@
 	#send !fdeener
 };
 
-#NOP -- Alias to donate airdrops to needy friends (needs fixing - it donates airdrops to me rather then sending to others and doesnt unaction itself);
+#NOP -- Alias to donate airdrops to needy friends
 #alias donateSupport {
+	#class supportDonate open;
     #list donateSupportList clear;
     #action {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>} {
         #action {%w%s %* %d/%d %s %d/%d %s %d% %*} {
 			#format tempStr {%l} {%%%1};
             #format tempNum {%d} {%%%10};
-            #list donateSupportList add {{{player} {$tempStr} {stim} {$tempNum}}};
+			#if {"$tempStr" != "$user"} {
+				#list donateSupportList add {{{player} {$tempStr} {stim} {$tempNum}}}
+			};
         } {1};
-        #NOP -- Reverse the list for small juggs first, then filter those less than 100 stim and donate to them;
+        #NOP -- Reverse the list for small juggs first, then filter those less than 115 stim (this is overmax max) and donate to them;
         #delay 2 {
             #list donateSupportList reverse;
             #list donateSupportList indexate stim;
-            #list donateSupportList refine {&0 < 100};
+            #list donateSupportList refine {&0 < 115};
 			#var tmpTimer 1;
 			#var tmpInterval 2;
             #foreach $donateSupportList[%*] index {
-				#if {$my[clan] > 0} {
+				#if {$my[clan] > 1} {
 					#math tmpTimer {$tmpTimer * $tmpInterval};
 					#delay $tmpTimer {airdrop $index[player]};
+					#echo {timer is $tmpTimer};
 					#math tmpTimer {$tmpTimer + 1};
 				};
             };
         };
     } {1};
-    #line oneshot #action {==============================================================================} {
-        #unaction {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>};
-        #unaction {%w%s %* %d/%d %s %d/%d %s %d% %*};
-    };
 	#send {!juggs2};
+	#class supportDonate close;
+	#delay 4 {#class supportDonate kill}
 };
 
 
