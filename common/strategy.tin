@@ -127,6 +127,10 @@
 #list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
 #list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
+#list strategyList add {{{guild} {juggernaut} {name} {frenzy}  {active} {0} {description} {Before Reset: Use Frenzy}}};
+#list strategyList add {{{guild} {juggernaut} {name} {donateA}  {active} {0} {description} {Before Reset: Donate Airdrops}}};
+#list strategyList add {{{guild} {juggernaut} {name} {donateF}  {active} {0} {description} {Before Reset: Donate Frenzy}}};
+#list strategyList add {{{guild} {juggernaut} {name} {nukes}  {active} {0} {description} {Before Reset: Fire Nukes}}};
 
 #list strategyList indexate name;
 
@@ -148,6 +152,32 @@
     };
 };
 
+#if {"$guild" == "juggernaut"} {
+    #var frenzy_toggle 1;
+    #var nuke_toggle 1;
+    #var donate_toggle 1;
+
+    #alias _strategy_juggernaut {
+        #if {!$idle_flag} {
+            #NOP -- Use your powers when close to reset;
+            #if {$reset >= 95} {
+                #if {$frenzy_toggle && $my[clan] > 0 && $mip[round]} {
+                    checkStrategy {frenzy} {#send !frenzy;#var frenzy_toggle 0};
+                };
+                #if {$nuke_toggle && $my[nukes] > 0 && $mip[round]} {
+                    checkStrategy {nukes} {fire $my[nukes];#var nuke_toggle 0};
+                };
+                #NOP -- donate airdrops to needy friends;
+                #if {$donate_toggle && $my[clan] > 1} {
+                    checkStrategy {donateA} {donateSupport airdrop;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}}
+                };
+                #if {$donatep_toggle && $my[clan] > 1} {
+                    checkStrategy {donateF} {donateSupport frenzy;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}}
+                };
+            };
+        };
+    };
+};
 
 #if {"$guild" == "mage"} {
     #var toggle_spelltap 1;
@@ -211,129 +241,140 @@
 
 
 #NOP -- First round strategies;
-#alias _strategy_necro_start {
-    #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
+#if {"$guild" == "necromancer"} {
+    #alias _strategy_necro_start {
+        #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
 
-    checkStrategy {snare} {snare};
-    checkStrategy {rabies} {rabies};
-    checkStrategy {corrode} {corrode};
-    checkStrategy {scythe} {scythe};
-    checkStrategy {call} {call};
-    checkStrategy {fury} {fury prime};
-    checkStrategy {rage} {rage prime};
-    checkStrategy {psibleed} {psibleed};
-    checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
-};
-
-#alias _strategy_necro {
-    #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
-        #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
-            checkStrategy {iprime} {#var iprime_round 0;ip1;#delay 10 {#var iprime_round 1}};
-        };
-
-        #if {$my[necromancer][diurnum] > 0 || $my[necromancer][nocturnum] > 0} {
-            checkStrategy {diurnum} {diurnum prime;#var my[necromancer][diurnum] 0;#var my[necromancer][nocturnum] 0;};
-            checkStrategy {nocturnum} {nocturnum prime;#var my[necromancer][diurnum] 0;#var my[necromancer][nocturnum] 0;};
-        };
-        #if {$my[necromancer][bloodfuse] > 0 && $my[necromancer][decanters][powered] > 0} {
-            checkStrategy {bloodfuse} {
-                corpse_select;
-                #if $mask[active] {
-                    #send {qatrance cackle;qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
-                    } {
-                    #send {qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
-                };
-            };
-        };
-
-        #if {$my[necromancer][soulbind] && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
-            checkStrategy {soulbind} {soulbind};
-        };
-
-        #if {$my[necromancer][bloodarc] > 0 && !$mob[bloodarc]} {
-            checkStrategy {bloodarc} {bloodarc};
-        };
-        
-        #if {$my[necromancer][harvest] > 0} {
-            checkStrategy {harvest} {harvest};
-        };
-
-        #if {$my[necromancer][skullfire] > 0 && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
-            checkStrategy {skullfire} {skullfire};
-        };
-
-        #if {$my[necromancer][conjure_undead] > 0} {
-            #if {$my[gp1][current] < 50000} {
-                checkStrategy {conjure} {nukeUndeadAbs};
-            };
-            #if {$my[gp1][current] > 50000 || $my[gp2][current] > 90} {
-                checkStrategy {conjure} {nukeUndeadPres};
-            };
-        };
+        checkStrategy {snare} {snare};
+        checkStrategy {rabies} {rabies};
+        checkStrategy {corrode} {corrode};
+        checkStrategy {scythe} {scythe};
+        checkStrategy {call} {call};
+        checkStrategy {fury} {fury prime};
+        checkStrategy {rage} {rage prime};
+        checkStrategy {psibleed} {psibleed};
+        checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
     };
 
-    #if {$my[necromancer][spirit-howl] > 0} {
-        checkStrategy {spirithowl} {spirithowl;#var my[necromancer][spirit-howl] 0;};
-    };
-
-    #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][illuming]} {
-        checkStrategy {illume} {illume};
-    };
-    
-};
-
-
-#alias _strategy_bard {
-    checkStrategy {assault} {
-        #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
-            martial assault;
-            martial assault;
-            martial assault;
-        };
-    };
-
-    #NOP -- Bard Song-Bot Strategies;
-    #if {$mip[round] > 1} {
-            
-        #NOP --- If we're above the level we should use a corpse, remove the action to use the corpse;
-        #if {$my[gp1][current] > $karma_use_corpse_between_songs && $actions_stacked} {remove_action corpse-between-songs;};
-
-        #NOP --- The song bots shouldn't attempt to keep rolling if we're near using a corpse;
-        checkStrategy {rainbow} {
-            #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
-            #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
-                add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+    #alias _strategy_necro {
+        #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
+            #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
+                checkStrategy {iprime} {#var iprime_round 0;ip1;#delay 10 {#var iprime_round 1}};
             };
 
-            #if {$my[gp1][current] > $karma_heal} {
-                #if {$my[song][rounds] > 1} {#NOP;} {
-                    #if {!$actions_stacked} {
-                        #if $resume_song {perform rainbow of death}
-                    } {
-                        do_action
+            #if {$my[necromancer][diurnum] > 0 || $my[necromancer][nocturnum] > 0} {
+                checkStrategy {diurnum} {diurnum prime;#var my[necromancer][diurnum] 0;#var my[necromancer][nocturnum] 0;};
+                checkStrategy {nocturnum} {nocturnum prime;#var my[necromancer][diurnum] 0;#var my[necromancer][nocturnum] 0;};
+            };
+            #if {$my[necromancer][bloodfuse] > 0 && $my[necromancer][decanters][powered] > 0} {
+                checkStrategy {bloodfuse} {
+                    corpse_select;
+                    #if $mask[active] {
+                        #send {qatrance cackle;qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
+                        } {
+                        #send {qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
                     };
                 };
-                #if !$my[defs][fr] {cast focus the rainbow};
+            };
+
+            #if {$my[necromancer][soulbind] && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
+                checkStrategy {soulbind} {soulbind};
+            };
+
+            #if {$my[necromancer][bloodarc] > 0 && !$mob[bloodarc]} {
+                checkStrategy {bloodarc} {bloodarc};
+            };
+            
+            #if {$my[necromancer][harvest] > 0} {
+                checkStrategy {harvest} {harvest};
+            };
+
+            #if {$my[necromancer][skullfire] > 0 && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
+                checkStrategy {skullfire} {skullfire};
+            };
+
+            #if {$my[necromancer][conjure_undead] > 0} {
+                #if {$my[gp1][current] < 50000} {
+                    checkStrategy {conjure} {nukeUndeadAbs};
+                };
+                #if {$my[gp1][current] > 50000 || $my[gp2][current] > 90} {
+                    checkStrategy {conjure} {nukeUndeadPres};
+                };
             };
         };
 
-        checkStrategy {hammer} {
-            #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
-            #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
-                add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+        #if {$my[necromancer][spirit-howl] > 0} {
+            checkStrategy {spirithowl} {spirithowl;#var my[necromancer][spirit-howl] 0;};
+        };
+
+        #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][illuming]} {
+            checkStrategy {illume} {illume};
+        };  
+    };
+};
+
+#if {"$guild" == "bard"} {
+    #alias _strategy_bard {
+        checkStrategy {assault} {
+            #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
+                martial assault;
+                martial assault;
+                martial assault;
             };
-            #if {$my[gp1][current] > $karma_heal} {
-                #if {$my[song][rounds] > 1} {#NOP;} {
-                    #if {$my[gp2][current] > 20} {
-                        #if {$mip[round] > 10} {
-                            #if {!$actions_stacked} {
-                                #if {$resume_song} {
-                                    perform hammer smashed face
+        };
+
+        #NOP -- Bard Song-Bot Strategies;
+        #if {$mip[round] > 1} {
+                
+            #NOP --- If we're above the level we should use a corpse, remove the action to use the corpse;
+            #if {$my[gp1][current] > $karma_use_corpse_between_songs && $actions_stacked} {remove_action corpse-between-songs;};
+
+            #NOP --- The song bots shouldn't attempt to keep rolling if we're near using a corpse;
+            checkStrategy {rainbow} {
+                #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
+                #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
+                    add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+                };
+
+                #if {$my[gp1][current] > $karma_heal} {
+                    #if {$my[song][rounds] > 1} {#NOP;} {
+                        #if {!$actions_stacked} {
+                            #if $resume_song {perform rainbow of death}
+                        } {
+                            do_action
+                        };
+                    };
+                    #if !$my[defs][fr] {cast focus the rainbow};
+                };
+            };
+
+            checkStrategy {hammer} {
+                #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
+                #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
+                    add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+                };
+                #if {$my[gp1][current] > $karma_heal} {
+                    #if {$my[song][rounds] > 1} {#NOP;} {
+                        #if {$my[gp2][current] > 20} {
+                            #if {$mip[round] > 10} {
+                                #if {!$actions_stacked} {
+                                    #if {$resume_song} {
+                                        perform hammer smashed face
+                                    };
+                                } {
+                                    do_action;
                                 };
+                                
                             } {
-                                do_action;
+                                #if !$my[defs][fr] {cast focus the rainbow};
+                                #if {!$actions_stacked} {
+                                    #if {$resume_song} {
+                                        perform rainbow of death;
+                                    };
+                                } {
+                                    do_action;
+                                };
                             };
-                            
                         } {
                             #if !$my[defs][fr] {cast focus the rainbow};
                             #if {!$actions_stacked} {
@@ -343,15 +384,6 @@
                             } {
                                 do_action;
                             };
-                        };
-                    } {
-                        #if !$my[defs][fr] {cast focus the rainbow};
-                        #if {!$actions_stacked} {
-                            #if {$resume_song} {
-                                perform rainbow of death;
-                            };
-                        } {
-                            do_action;
                         };
                     };
                 };
@@ -401,6 +433,7 @@
         #if {"$guild" == "necromancer"} {_strategy_necro};
         #if {"$guild" == "bard"} {_strategy_bard};
         #if {"$guild" == "mage"} {_strategy_mage};
+        #If {"$guild" == "juggernaut"} {_strategy_juggernaut};
     };
 };
 

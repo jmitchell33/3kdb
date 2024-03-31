@@ -103,6 +103,8 @@
 
 #NOP -- Alias to donate airdrops to needy friends
 #alias donateSupport {
+	#var supportType %0;
+	#if {"%0" = ""} {#var supportType airdrop};
 	#class supportDonate open;
     #list donateSupportList clear;
     #action {<<<<<<<<<<<<<<<<<<<<<<<<<<<< Juggernauts On-Line >>>>>>>>>>>>>>>>>>>>>>>>>>>>>} {
@@ -118,21 +120,29 @@
             #list donateSupportList reverse;
             #list donateSupportList indexate stim;
             #list donateSupportList refine {&0 < 115};
-			#var tmpTimer 1;
-			#var tmpInterval 2;
+			#var delayTicker 1;
             #foreach $donateSupportList[%*] index {
 				#if {$my[clan] > 1} {
-					#math tmpTimer {$tmpTimer * $tmpInterval};
-					#delay $tmpTimer {airdrop $index[player]};
-					#echo {timer is $tmpTimer};
-					#math tmpTimer {$tmpTimer + 1};
+					#if {$delayTicker == 1} {
+						$supportType $index[player]
+					};
+					#if {$delayTicker == 2} {
+						#delay 2 {$supportType $index[player]};
+					};
+					#if {$delayTicker == 3} {
+						#delay 4 {$supportType $index[player]}
+					};
+					#if {$delayTicker == 4} {
+						#delay 6 {$supportType $index[player]}
+					};
+					#math delayTicker {$delayTicker + 1};
 				};
             };
         };
     } {1};
 	#send {!juggs2};
 	#class supportDonate close;
-	#delay 4 {#class supportDonate kill}
+	#delay 10 {#class supportDonate kill}
 };
 
 
