@@ -1,22 +1,9 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
-#var frenzy_toggle 1;
-#var nuke_toggle 1;
 
 #alias {_guild_heartbeat} {
-	#if !$idle_flag {
-		#if {$reset >= 95} {
-			#if {$frenzy_toggle && $my[clan] > 0 && $mip[round]} {
-				#send !frenzy;
-				#var frenzy_toggle 0;
-			};
-			#if {$nuke_toggle && $my[nukes] > 0 && $mip[round]} {
-				fire $my[nukes];
-				#var nuke_toggle 0;
-			};
-		};
-	};
+	#if !$idle_flag {#NOP};
 };
 
 #class {guild_heartbeat} {close}
