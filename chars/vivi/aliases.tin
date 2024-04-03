@@ -9,6 +9,16 @@
      };
 };
 
+#NOP -- monstrous fortitude;
+#alias {mf} {
+     cast monstrous fortitude on %0
+};
+
+#NOP -- charm monster (mob peace);
+#alias {charm} {
+     cast charm monster
+};
+
 #NOP -- mystic immersion (regen sp at twice the normal rate - lasts 3min);
 #alias {cmi} {
      cast mystic immersion
@@ -19,22 +29,17 @@
      cast explosive release
 };
 
-#NOP -- activate summon config;
-#alias {activate_sconfig} {
-     cast summon config activate
+#NOP - aliases for setting up summon config & strategies with golem and summons for assist or defending;
+#alias {assistmode} {
+     mystrategy-assist;
+     ms golema;
+     ms 5a
 };
 
-#NOP -- clear and deactivate summon config;
-#alias {clear_sconfig} {
-     #2 {cast remove summon config 1};
-     cast summon config deactivate
-};
-
-#NOP -- setup summon config with golem;
-#alias {mscgolem} {
-     #2 {cast remove summon config 1};
-     cast summon config as create golem##1#1500#70#assist#summons#always;
-     cast summon config activate
+#alias {defendmode} {
+     mystrategy-defend;
+     ms golemd;
+     ms 5d
 };
 
 #NOP -- polymorph other (turn mobs against each other);
@@ -66,6 +71,12 @@
      cast activate c
 };
 
+#NOP -- offensive single target damage spell (burning hands - fire damage);
+#alias {fire1} {
+     cast perform as cast burning hands;
+     cast activate c
+};
+
 #NOP -- fabricate (make daggers x12);
 #alias {make-daggers} {
      #12 {cast fabricate as dagger#dagger#dagger};
@@ -83,10 +94,48 @@
 #alias {refmage} {
      #12 {cast fabricate as dagger#dagger#dagger};
      cast fabricate as item#forge#forge;
-     #12 {get dagger};
-     #12 {reforge dagger with little from edged to penetrate;dispose dagger};
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
      get forge;
      dispose forge
+};
+
+#alias {refd} {
+     #12 {reforge dagger with little from edged to penetrate;dispose dagger}
 };
 
 #NOP -- mage identify;
@@ -126,21 +175,24 @@
 #NOP -- setup defense;
 #alias {setup_defense} {
      clear_c;
+     setup_gc;
      setup_c;
      #delay 2 {prots_armor};
      #delay 4 {prots_ms};
      #delay 6 {prots_MG};
      #delay 8 {prots_ss};
      #delay 10 {prots_mb};
-     #delay 12 {prots_pfe}
+     #delay 12 {prots_pfe};
+     #delay 14 {prots_pa};
+     #delay 16 {prots_blink}
 };
 
 #NOP -- setup contingency with defenses;
 #alias {setup_c} {
-     cast contingency as armor#cast armor;
-     cast contingency as shield#cast magnificent shield;
-     cast contingency as major globe#cast major globe;
-     cast contingency as stoneskin#cast stoneskin
+     cast contingency as stoneskin#cast stoneskin;
+     cast contingency as protection from evil#cast protection from evil;
+     cast contingency as prismatic aura;#cast prismatic aura;
+     cast contingency as blink#cast blink
 };
 
 #NOP -- clear contingency;
@@ -150,12 +202,9 @@
 
 #NOP -- greater contingency;
 #alias {setup_gc} {
-     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
-     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
-     cast greater contingency as major globe#cast major globe;
-     cast greater contingency as stoneskin#cast stoneskin;
-     cast greater contingency as shield#cast magnificent shield;
      cast greater contingency as armor#cast armor;
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as major globe#cast major globe
 };
 
 #NOP -- clear greater contingency;
@@ -173,7 +222,8 @@
 };
  
 #NOP -- aliases to setup strategies;
-#alias {mystrategy} {
+#NOP -- strategy setup for summons assisting;
+#alias {mystrategy-assist} {
      strategy-clear;
      strategy slow;
      strategy super_er;
@@ -181,14 +231,103 @@
      strategy feeblemind;
      strategy phantasmal;
      strategy spelltap;
-     strategy edrain
+     strategy edrain;
+     strategy atrophy;
+     strategy super_sub;
+     strategy epowers
 };
 
+#NOP -- strategy setup for summons defending;
+#alias {mystrategy-defend} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_defend;
+     strategy feeblemind;
+     strategy phantasmal;
+     strategy spelltap;
+     strategy edrain;
+     strategy atrophy;
+     strategy super_sub;
+     strategy summon_tank;
+     strategy summon_tank1;
+     strategy epowers
+};
+
+#NOP -- clear strategies;
 #alias {stclear} {
      strategy-clear
 };
 
+#NOP -- switch between hasting summons or casting monstrous fortitude;
+#NOP -- assisting;
+#alias {mystrategy-assisthaste} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_assist;
+     strategy feeblemind;
+     strategy phantasmal;
+     strategy spelltap;
+     strategy edrain;
+     strategy atrophy;
+     strategy super_sub;
+     strategy summon_haste;
+     strategy epowers
+};
+
+#alias {mystrategy-assistmf} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_assist;
+     strategy feeblemind;
+     strategy phantasmal;
+     strategy spelltap;
+     strategy edrain;
+     strategy atrophy;
+     strategy super_sub;
+     strategy summon_mf;
+     strategy epowers
+};
+
+#NOP -- defending;
+#alias {mystrategy-defendhaste} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_defend;
+     strategy feeblemind;
+     strategy phantasmal;
+     strategy spelltap;
+     strategy edrain;
+     strategy summon_atrophy;
+     strategy super_sub;
+     strategy summon_tank;
+     strategy summon_tank1;
+     strategy summon_haste;
+     strategy epowers
+};
+
+#alias {mystrategy-defendmf} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_defend;
+     strategy feeblemind;
+     strategy phantasmal;
+     strategy spelltap;
+     strategy edrain;
+     strategy summon_atrophy;
+     strategy super_sub;
+     strategy summon_tank;
+     strategy summon_tank1;
+     strategy summon_mf;
+     strategy epowers
+};
+
 #NOP -- aliases to setup corpsetrigs;
+#NOP -- solo kill trig;
 #alias {mycorpsetrig} {
      corpsetrig-clear;
      corpsetrig+ spelltap;
@@ -200,12 +339,14 @@
      corpsetrig+ spellbook
 };
 
+#NOP -- party kill trig;
 #alias {mycorpsetrig-party} {
      corpsetrig-clear;
      corpsetrig+ spelltap;
      corpsetrig+ spellbook
 };
 
+#NOP -- sewers kill trig;
 #alias {mycorpsetrig-sewers} {
      corpsetrig-clear;
      corpsetrig+ spelltap;
@@ -305,7 +446,7 @@
 #list vivi3kdb clear;
  
 #NOP -- corpses;
-#list vivi3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig setup}}};
+#list vivi3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Corpsetrig for soloing}}};
 #list vivi3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list vivi3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list vivi3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
@@ -317,8 +458,13 @@
 #list vivi3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
  
 #NOP - combat;
-#list vivi3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
-#list vivi3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+#list vivi3kdb add {{{name} {mystrategy-assist} {type} {combat} {desc} {Setup strategy for summons (assisting)}}};
+#list vivi3kdb add {{{name} {mystrategy-defend} {type} {combat} {desc} {Setup strategy for summons (defending)}}};
+#list vivi3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
+#list vivi3kdb add {{{name} {mystrategy-assisthaste} {type} {combat} {desc} {Haste summons (assisting)}}};
+#list vivi3kdb add {{{name} {mystrategy-assistmf} {type} {combat} {desc} {Monstrous fortitude summons (assisting)}}};
+#list vivi3kdb add {{{name} {mystrategy-defendhaste} {type} {combat} {desc} {Haste summons (defending)}}};
+#list vivi3kdb add {{{name} {mystrategy-defendmf} {type} {combat} {desc} {Monstrous fortitude summons (defending)}}};
  
 #NOP -- misc;
 #list vivi3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -329,12 +475,13 @@
 #list vivi3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
  
 #NOP -- guild;
-#list vivi3kdb add {{{name} {activate_sconfig} {type} {guild} {desc} {Activate summon config}}};
-#list vivi3kdb add {{{name} {clear_sconfig} {type} {guild} {desc} {Clear summon config}}};
-#list vivi3kdb add {{{name} {mscgolem} {type} {guild} {desc} {Setup summon config with golem}}};
 #list vivi3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
+#list vivi3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
+#list vivi3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
 #list vivi3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
 #list vivi3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
+#list vivi3kdb add {{{name} {assistmode} {type} {guild} {desc} {Setup summon config/strategy with golem & summons (assisting)}}};
+#list vivi3kdb add {{{name} {defendmode} {type} {guild} {desc} {Setup summon config/strategy with golem & summons (defending)}}};
 
 #NOP -- spells;
 #list vivi3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
@@ -348,5 +495,8 @@
 #list vivi3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
 #list vivi3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
 #list vivi3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
+#list vivi3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+#list vivi3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg)}}};
+#list vivi3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
 
 #class {player_aliases} {close}

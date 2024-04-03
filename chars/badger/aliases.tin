@@ -120,10 +120,23 @@
 };
 
 #NOP -- aliases to setup strategies;
+#NOP -- default;
 #alias {mystrategy} {
     strategy-clear;
     strategy rolm;
-    strategy epowers
+    strategy epowers;
+    strategy frenzy;
+    strategy nukes;
+};
+
+#NOP -- mech tanking;
+#alias {mystrategy-mech} {
+    strategy-clear;
+    strategy rolm;
+    strategy epowers;
+    strategy frenzy;
+    strategy nukes;
+    strategy mech_resummon
 };
 
 #alias {stclear} {
@@ -131,7 +144,19 @@
 };
 
 #NOP -- aliases to setup corpsetrigs;
+#NOP -- default corpse trig;
 #alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ fdeener2;
+    corpsetrig+ bRemains;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting
+};
+
+#NOP -- default corpse trig with sz cap eating;
+#alias {mycorpsetrig-sz} {
     corpsetrig-clear;
     corpsetrig+ wrap;
     corpsetrig+ fdeener2;
@@ -142,7 +167,20 @@
     corpsetrig+ szCaps
 };
 
+#NOP -- corpsetrig for partying with mages;
 #alias {mycorpsetrig-mage} {
+    corpsetrig-clear;
+    corpsetrig+ delay;
+    corpsetrig+ wrap;
+    corpsetrig+ fdeener2;
+    corpsetrig+ bRemains;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting
+};
+
+#NOP -- corpsetrig for partying with mages & sz cap eating;
+#alias {mycorpsetrig-magesz} {
     corpsetrig-clear;
     corpsetrig+ delay;
     corpsetrig+ wrap;
@@ -199,32 +237,6 @@
 #NOP -- examining & searching;
 #alias {x} {
     exa
-};
-
-#NOP -- jugger support mech;
-#alias {su1} {
-    #var dismiss_support 0;
-    dismiss;
-    support summon;
-    hp;
-    #delay 4 {#var dismiss_support 1;support defend;hp}
-};
-
-#alias {su2} {
-    support assault fire;
-    defend mech;
-    forcehp;
-    hp
-};
-
-#alias {su3} {
-    support summon;
-    #delay 4 {support assault fire;hp}
-};
-
-#alias {sd} {
-    support defend;
-    forcehp
 };
 
 #NOP -- QUICK WALKS TO ROOMVNUMS
@@ -300,22 +312,21 @@
 #list badger3kdb clear;
 
 #NOP -- corpses;
-#list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig setup}}};
+#list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
+#list badger3kdb add {{{name} {mycorpsetrig-sz} {type} {corpses} {desc} {Default corpsetrig & sz cap eating}}};
 #list badger3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list badger3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list badger3kdb add {{{name} {mycorpsetrig-mage} {type} {corpses} {desc} {Corpsetrig for partying with mages}}};
+#list badger3kdb add {{{name} {mycorpsetrig-magesz} {type} {corpses} {desc} {Corpsetrig for partying with mages & sz cap eating}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
 #list badger3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
 
 #NOP - combat;
-#list badger3kdb add {{{name} {su1} {type} {combat} {desc} {Dismiss & resummon into defend mode}}};
-#list badger3kdb add {{{name} {su2} {type} {combat} {desc} {Switch to assault fire & defend mech}}};
-#list badger3kdb add {{{name} {su3} {type} {combat} {desc} {Summon a new mech & into assault fire}}};
-#list badger3kdb add {{{name} {sd} {type} {combat} {desc} {Switch mech into defend mode}}};
 #list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list badger3kdb add {{{name} {mystrategy-mech} {type} {combat} {desc} {Mystrategy: mech tanking}}};
 #list badger3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
 
 #NOP -- misc;
