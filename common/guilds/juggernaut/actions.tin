@@ -45,22 +45,10 @@
 	#ticker nuke_toggle {#if {"$mip[round]" == "1"} {#var nuke_toggle 1;#unticker nuke_toggle}} {2};
 } {2};
 
-#NOP -- donate airdrops to needy friends;
-#action {The computer chirps 'Your %d missiles and %d clan powers are about to reset.'} {
-	#if {$donate_support && !$idle_flag} {
-		donateSupport;
-		#delay 5 {donateSupport};
-		#delay 10 {donateSupport};
-		#delay 20 {donateSupport};
-		#delay 30 {donateSupport};
-		#delay 40 {donateSupport};
-		#delay 50 {donateSupport};
-	}
-} {2};
-
 #action {The computer chirps 'Your missiles and clan powers have reset.'} {
 	#var nuke_toggle 1;
 	#var frenzy_toggle 1;
+	#var support_toggle 1;
 } {2};
 
 #action {The computer chirps 'Your transpose max has been reached,%*} {
