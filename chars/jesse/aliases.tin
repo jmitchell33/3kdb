@@ -1,15 +1,28 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- deadman;
 #alias {_player_deadmanActions} {
-    .pause;
+    #if {$bot[active]} {
+        .pause;
+        #echo {stepper paused due to deadman timer}
+    };
 };
 
-#NOP -- Elemental guild shop & temple apex
-#alias {cot-elshop} {s;w;s;s;w;portal;n;n;n;n;n;e;e}
-#alias {elshop-cot} {w;w;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
-#alias {cot-apex} {s;w;s;s;w;portal;n;n;n;n;n;n;e;ne;u}
-#alias {apex-cot} {d;sw;w;s;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot}
+#NOP -- aliases to setup corpsetrig;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ absorb;
+    corpsetrig+ absorb;
+    corpsetrig+ b;
+    corpsetrig+ b;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ con;
+    corpsetrig+ con
+};
 
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
