@@ -14,34 +14,101 @@
     qtrance animate dead/study tome/chant/study tome/=lead/keep tome
 };
 
+#NOP -- aliases to setup strategies;
+#NOP -- default;
+#alias {mystrategy} {
+    strategy-clear;
+    strategy rolm;
+    strategy call;
+    strategy fury
+};
+
 #NOP -- aliases to setup corpsetrig;
+#NOP -- default corpse trig;
 #alias {mycorpsetrig} {
     corpsetrig-clear;
     corpsetrig+ wrap;
-    corpsetrig+ absorb;
-    corpsetrig+ absorb;
-    corpsetrig+ b;
-    corpsetrig+ b;
+    corpsetrig+ absorbSp2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
     corpsetrig+ crafting;
-    corpsetrig+ con;
-    corpsetrig+ con
+    corpsetrig+ conWorth
+};
+
+#NOP -- corpsetrig for partying;
+#alias {mycorpsetrig-party} {
+    corpsetrig-clear;
+    corpsetrig+ conWorth
+};
+
+#alias {corpseoff} {
+    corpsetrig-off
+};
+
+#alias {corpseon} {
+    corpsetrig-on
+};
+
+#alias {corpseclear} {
+    corpsetrig-clear
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa
 };
 
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
 
-#NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
-
 #NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
 #alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
 #alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s;mapgo cot}
 
-#NOP --KNIGHT TOUR GAMES
-#alias knight6 {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}};
-#alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
-#alias winaxe {play;start;#5 throw axe};
+#NOP -- knight tour games;
+#alias {knight6} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
+
+#alias {knight8} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+
+#alias {winaxe} {
+    play;
+    start;
+    #5 throw axe
+};
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n
+};
+
+#NOP -- vigilant boosts;
+#alias {vigiboost-wis} {
+    buy 1;buy 2;buy 3;buy 4;buy 5;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask
+};
+
+
 
 #class {player_aliases} {close}
