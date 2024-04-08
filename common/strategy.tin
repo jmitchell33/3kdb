@@ -249,7 +249,6 @@
 
 #NOP -- First round strategies;
 #if {"$guild" == "necromancer"} {
-    #var my[necromancer][fury] 1;
 
     #alias _strategy_necro_start {
         #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
@@ -260,7 +259,7 @@
         checkStrategy {scythe} {scythe};
         checkStrategy {call} {call};
         checkStrategy {fury_prime} {fury prime};
-        checkStrategy {fury} {#if {$my[necromancer][fury] && $my[necromancer][glamors][current]} {fury;#var my[necromancer][fury] 0}};
+        checkStrategy {fury} {#if {$my[necromancer][glamors][current]} {fury}};
         checkStrategy {rage} {rage prime};
         checkStrategy {psibleed} {psibleed};
         checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
