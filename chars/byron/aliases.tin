@@ -5,20 +5,10 @@
     .pause;
 };
 
-#alias corpse_trig {
-    fuse 500;
-    i;
-};
-
 #alias k {
     checkStrategy {backstab} {
-        #if {"$wielded" == "The Rod of Lordly Might"} {
-            touch reaper rune;
-            cast mystic venom on rod of lordly might;
-        } {
-            cast mystic venom on redaxe;
-            cast mystic venom on sword;
-        };
+        rolm edged;
+        cast mystic venom on rod;
         hide in shadows;
         backstab %0;
         touch crown rune;
@@ -33,8 +23,8 @@
     checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
 
     checkStrategy {backstab} {
-        cast mystic venom on redaxe;
-        cast mystic venom on sword;
+        rolm edged;
+        cast mystic venom on rod;
         hide in shadows;
         backstab $mob[target];
     };

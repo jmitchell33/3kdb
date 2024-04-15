@@ -53,24 +53,6 @@
     #showme {Each Increase Took On Average $gxp_stats[avg_rounds_for_increase] rounds};
 };
 
-
-#alias {corpse_trig} {
-    #if $check_death {
-        #NOP -- do nothing
-    } {
-        #if {$inventory[freezer] && $corpses[freezer] < 50} {
-            slab remains;
-            wrap remains;
-        } {
-            wrap remains;
-            preserve_remains;
-            #if $collector[items] {get all};
-        };
-        fuse 200;
-        keep all preservation;
-    };
-};
-
 #alias pg {
     qtrance preserve gemino remains>25;
     qtrance get preservation>25;

@@ -91,7 +91,19 @@
 #alias {banu12} {examine sigil;search sigil;north};
 
 #NOP -- BANSHEE GUYAHI
-#alias {queen1} {examine shelves;search shelves;reach for jar;get phylactery;examine phylactery;read runes;#echo {you have to fly dumbass}};
+#alias {queen1} {
+    examine shelves;
+    search shelves;
+    #if {"$guild" == "necromancer"} {shapeshift raven};
+    #if {"$guild" == "bard"} {cast wings of the phoenix};
+    reach for jar;
+    #if {"$guild" == "necromancer"} {shapeshift};
+    #if {"$guild" == "bard"} {land};
+    get phylactery;
+    examine phylactery;
+    read runes;
+    #echo {you have to fly dumbass}
+};
 #alias {guy1} {$guyahicode};
 #action {Your mind is filled with the word '%w'.} {#var guyahicode %1} {2};
 
