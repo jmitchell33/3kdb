@@ -1,32 +1,162 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
-#NOP -- EXAMINING/SEARCHING
-#alias {x} {exa}
+#NOP -- deadman;
+#alias {_player_deadmanActions} {
+     #if {$bot[active]} {
+          .pause;
+          #echo {stepper paused due to deadman timer}
+     };
+};
 
-#NOP -- QUICK WALKS TO ROOMVNUMS
-#alias {wa} {#map run %1}
+#NOP -- Random aliases for mage;
+#alias {tap} {unwrap 1;cast spell tap on corpse;cast corpse blast};
+
+#NOP -- offensive single target damage spell (venomous spray - poison dmg);
+#alias {poison1} {
+     cast perform as cast venomous spray;
+     cast activate c
+};
+
+#NOP -- offensive single target damage spell (acid arrow - acid dmg);
+#alias {acid1} {
+     cast perform as cast acid arrow;
+     cast activate c
+};
+
+#NOP -- mage identify;
+#alias {id} {
+     cast identify on %0 1;
+     cast identify on %0 2;
+     cast identify on %0 3;
+     cast identify on %0 4;
+     cast identify on %0 5;
+     cast identify on %0 6;
+     cast identify on %0 7;
+     cast identify on %0 8;
+     cast identify on %0 9;
+     cast identify on %0 10;
+     cast identify on %0 11;
+     cast identify on %0 12;
+     cast identify on %0 13;
+     cast identify on %0 14;
+     cast identify on %0 15;
+     cast identify on %0 16;
+     cast identify on %0 17;
+     cast identify on %0 18;
+     cast identify on %0 19;
+     cast identify on %0 20;
+     cast identify on %0 21;
+     cast identify on %0 22;
+     cast identify on %0 23;
+     cast identify on %0 24;
+     cast identify on %0 25;
+     cast identify on %0 26;
+     cast identify on %0 27;
+     cast identify on %0 28;
+     cast identify on %0 29;
+     cast identify on %0 30;
+};
+
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+     cast contingency as armor#cast armor;
+     cast contingency as shield#cast magnificent shield;
+     cast contingency as major globe#cast major globe;
+     cast contingency as stoneskin#cast stoneskin
+};
+
+#NOP -- setup defense;
+#alias {setup_defense} {clear_c;setup_c;
+     #delay 2 {prots_armor};
+     #delay 4 {prots_ms};
+     #delay 6 {prots_MG};
+     #delay 8 {prots_ss};
+     #delay 10 {prots_mb};
+     #delay 12 {prots_pfe};
+     #delay 14 {prots_pa};
+     #delay 16 {prots_blink}};
+
+#NOP -- clear contingency;
+#alias {clear_c} {
+     #10 {cast remove contingency as 1};
+     clear_prots
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+     #class numpad kill
+};
+
+#alias {numon} {
+     #read chars/$user/numpad.tin
+};
+ 
+#NOP -- aliases to setup strategies;
+#alias {mystrat} {strategy-clear;strategy slow;strategy super_sub;strategy super_er;strategy golem_assist;strategy summon_haste;strategy phantasmal;strategy edrain;strategy feeblemind};
+
+#alias {stclear} {
+     strategy-clear
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#alias corpsetrig1 {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ slab;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast;
+     corpsetrig+ getAll;
+     corpsetrig+ crafting;
+     corpsetrig+ cocoon;
+     corpsetrig+ spellbook;
+};
+
+#alias {mycorpsetrig-party} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ spellbook;
+};
+
+#alias {corpseoff} {
+     corpsetrig-off
+};
+ 
+#alias {corpseon} {
+     corpsetrig-on
+};
+ 
+#alias {corpseclear} {
+     corpestrig-clear
+};
+
+#NOP -- Monster summon 5;
+#alias {ms5} {cast monster summoning 5;say all, you are now in group summons;say all, defend always};
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+     n;w;n;n;e;n;
+     enter;
+     e;e;e;s;s;e;e;n;n;n;
+     trail;ne;climb gate;
+     w;search tree;
+     e;e;n;n;enter;
+     unlock paperholder;
+     turn paperholder;
+     climb bench;stagedive;
+     climb down;out;
+     s;s;w;unlock door;open door;n
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+     exa
+};
+
 
 #NOP --KNIGHT TOUR GAMES
-#alias {knight6} {play;start;dt6}
-#alias {knight8} {play;start;dt8}
-#alias {winaxe} {play;start;#5 throw axe}
+#alias {knight6} {play;start;dt6};
+#alias {knight8} {play;start;dt8};
+#alias {winaxe} {play;start;#5 throw axe};
 
-#NOP --MAGE ALIASES;
-#alias {ha} {cast haste on summons};
-#alias {sat} {uncooler corpse;cast corpse blast};
-#alias {scon} {cast remove summon config as 1;cast summon config as monster summoning 3#Wererat#3#500#15#defend#MeMbRaIn};
-#action {A creature forms from the materials!} {say golem, defend always;say golem, ignore blanket commands;say golem, you are now in group INSANE};
-#action {Your armor spell has dissipated!} {cast armor};
-#action {Your shield is shattered} {cast shield};
-#action {You wave your hands calling forth} {say all, defend always};
-
-#NOP --NUMPAD ON OR OFF
-#alias {numoff} {#class numpad kill}
-#alias {numon} {#read chars/brianna/numpad.tin}
-
-#NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
-
-
-#class {player_aliases} {close}
+#class {player_aliases} {close};

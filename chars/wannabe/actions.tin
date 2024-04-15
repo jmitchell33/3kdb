@@ -1,13 +1,63 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
-#action {seems to slow down...} {cast haste on summons};
-#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
-#action {a summon, with: defend} {cast haste on summons};
+#NOP -- reflexes;
+#action {You have no pants.} {
+    #if {!$idle_flag} {
+        unwrap 1;
+        cast corpse blast
+    };
+};
+
+#NOP -- MAGE ACTIONS;
+#action {whispers to you: fan} {#if {!$idle_flag} {cast corpse blast;cast corpse blast}};
+#action {dealt the killing} {cast spell tap on corpse};
+#action {Responding to Brianna's call for support} {cast secure shelter;#delay 8 {out}};
+#action {The coffin expels your selected corpse!} {cast corpse blast};
+#action {That corpse has already been tapped.} {cast corpse blast};
 #action {dealt the killing blow} {study spellbook};
+#action {Wannabe kicks you. OUCH!} {#if {!$idle_flag} {shoo}};
+#action {A creature forms from the materials!} {say golem, defend always;say golem, ignore blanket commands;say golem, you are now in group INSANE};
+#action {Your armor spell has dissipated!} {cast armor};
+#action {Your shield is shattered} {cast shield};
+#action #LINE GAG {is already hasted.};
+#action {Poisonous Snake (100%) into the room!} {shoo snake};
+#action {You wave your hands calling forth} {say all, defend always};
 
-#NOP -- REFLEXES
-#action {Whom do you wish to kick?} {#if {!$idle_flag} {shoo}}
+#NOP -- MAGE ALIASES;
+#alias {ha} {cast haste on summons};
+#alias {sat} {uncooler corpse;cast corpse blast};
+#alias {scon} {cast remove summon config as 1;cast summon config as monster summoning 3#Wererat#3#500#15#defend#MeMbRaIn};
 
+#NOP -- COUPLE LOGIN TRIGS
+#action {unload room} {deadman 200};
+
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    mywhosync
+};
+
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/brianna/numpad.tin}
+
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+    cast contingency as armor#cast armor;
+    cast contingency as shield#cast magnificent shield;
+    cast contingency as major globe#cast major globe;
+    cast contingency as stoneskin#cast stoneskin;
+    #delay 2 {prots_armor};
+    #delay 4 {prots_ms};
+    #delay 6 {prots_mg};
+    #delay 8 {prots_pfe};
+    #delay 10 {prots_mb}
+};
+
+#NOP -- clear contingency;
+#alias {clear_c} {
+    #10 {cast remove contingency as 1};
+    clear_prots
+};
 
 #class {player_actions} {close}
