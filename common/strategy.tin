@@ -80,7 +80,7 @@
 #list strategyList clear;
 #list strategyList add {{{guild} {all} {name} {lucanus} {active} {0} {description} {Automatically uses amulet and ring}}};
 #list strategyList add {{{guild} {all} {name} {epowers} {active} {0} {description} {Automatically use fry, shred, ewell}}};
-#list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {description} {Automatically use owl rune}}};
+#list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {description} {Automatically use owl & raven runes}}};
 #list strategyList add {{{guild} {all} {name} {bplate}  {active} {0} {description} {Blood Plate: Automatically feed}}};
 #list strategyList add {{{guild} {bard} {name} {backstab}  {active} {0} {description} {Backstab}}};
 #list strategyList add {{{guild} {bard} {name} {hammer}  {active} {0} {description} {Hammer Smashed Face}}};
@@ -96,7 +96,8 @@
 #list strategyList add {{{guild} {necromancer} {name} {harvest}  {active} {0} {description} {Reaper: Grim Harvest}}};
 #list strategyList add {{{guild} {necromancer} {name} {soulbind}  {active} {0} {description} {Reaper: Soulbind}}};
 #list strategyList add {{{guild} {necromancer} {name} {rabies}  {active} {0} {description} {Were: Rabies}}};
-#list strategyList add {{{guild} {necromancer} {name} {fury}  {active} {0} {description} {Were: Fury}}};
+#list strategyList add {{{guild} {necromancer} {name} {fury_prime}  {active} {0} {description} {Were: Fury Prime}}};
+#list strategyList add {{{guild} {necromancer} {name} {fury} {active} {0} {description} {Were: Fury}}};
 #list strategyList add {{{guild} {necromancer} {name} {spirithowl}  {active} {0} {description} {Were: Spirithowl}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodarc}  {active} {0} {description} {Lich: Bloodarc}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodlet}  {active} {0} {description} {Vamp: Bloodlet}}};
@@ -131,6 +132,7 @@
 #list strategyList add {{{guild} {juggernaut} {name} {donateA}  {active} {0} {description} {Before Reset: Donate Airdrops}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateF}  {active} {0} {description} {Before Reset: Donate Frenzy}}};
 #list strategyList add {{{guild} {juggernaut} {name} {nukes}  {active} {0} {description} {Before Reset: Fire Nukes}}};
+#list strategyList add {{{guild} {juggernaut} {name} {mech_resummon} {active} {0} {description} {Mech: Dismiss & resummon back into defend mode}}};
 
 #list strategyList indexate name;
 
@@ -156,9 +158,14 @@
     #var frenzy_toggle 1;
     #var nuke_toggle 1;
     #var donate_toggle 1;
+    #var dismiss_support 1;
 
     #alias _strategy_juggernaut {
         #if {!$idle_flag} {
+            #NOP -- resummon support mech after dismissing and back into defend mode when mech hp is below 25 percent;
+            #if {"$shp" != "" && $dismiss_support && $my[clan] && $shp < 25} {
+                checkStrategy {mech_resummon} {#var dismiss_support 0;dismiss;support summon;hp;#delay 4 {#var dismiss_support 1;support defend;hp}};
+            };
             #NOP -- Use your powers when close to reset;
             #if {$reset >= 95} {
                 #if {$frenzy_toggle && $my[clan] > 0 && $mip[round]} {
@@ -169,10 +176,10 @@
                 };
                 #NOP -- donate airdrops to needy friends;
                 #if {$donate_toggle && $my[clan] > 1} {
-                    checkStrategy {donateA} {donateSupport airdrop;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}}
+                    checkStrategy {donateA} {donateSupport airdrop;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}};
                 };
                 #if {$donatep_toggle && $my[clan] > 1} {
-                    checkStrategy {donateF} {donateSupport frenzy;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}}
+                    checkStrategy {donateF} {donateSupport frenzy;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}};
                 };
             };
         };
@@ -242,6 +249,7 @@
 
 #NOP -- First round strategies;
 #if {"$guild" == "necromancer"} {
+
     #alias _strategy_necro_start {
         #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
 
@@ -250,7 +258,8 @@
         checkStrategy {corrode} {corrode};
         checkStrategy {scythe} {scythe};
         checkStrategy {call} {call};
-        checkStrategy {fury} {fury prime};
+        checkStrategy {fury_prime} {fury prime};
+        checkStrategy {fury} {#if {$my[necromancer][glamors][current]} {fury}};
         checkStrategy {rage} {rage prime};
         checkStrategy {psibleed} {psibleed};
         checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
