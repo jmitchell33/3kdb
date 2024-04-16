@@ -36,7 +36,12 @@
 	#var mob_string[affects] {};
 	#if $mob[enrage] {#cat mob_string[affects] {Enraged}};
 	#if $mob[noxious-cloud] {#cat mob_string[affects] {Nox. Cloud}};
-	#var fight_string \n<ffb>Round $mip[round] vs. $enemy[name]<088>;
+	#if $incombat {
+		#var fight_string \n<ffb>Round $mip[round] vs. $enemy[name]<088>;
+	} {
+		#var fight_string \n<dfc> === NOT IN COMBAT === <edb>(Last: $enemy[last][name])<088>;
+	}
+	
 };
 
 

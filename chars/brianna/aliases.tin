@@ -14,12 +14,6 @@
 #NOP --- JUGGERNAUT AMMO
 #action {The computer chirps 'Light Lrm 15 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 9 1 40000}}
 
-#NOP -- SUPPORT MECH
-#alias {su1} {#var dismiss_support 0;dismiss;support summon;hp;#delay 4 {#var dismiss_support 1;support defend;hp}}
-#alias {su2} {support assault fire;defend mech;forcehp;hp}
-#alias {su3} {support summon;#delay 4 {support assault fire;hp}}
-#alias {sd} {support defend;forcehp}
-
 #NOP -- XCORE
 #action {The missile whirrs as it accepts Untouchable's payload.} {get all;launch $mob[target];fire 2}
 #action {The field spits the corpse out, it doesn't like Monsanto and GMOs.} {wrap};
@@ -39,7 +33,7 @@
 #NOP --KNIGHT TOUR GAMES
 #alias {knight6} {play;start;dt6}
 #alias {knight8} {play;start;dt8}
-#alias {winaxe} {play;start;#5 throw axe}
+#alias {winaxe} {play;start;#5 throw axe} 
 
 #NOP --NUMPAD ON OR OFF
 #alias {numoff} {#class numpad kill}
@@ -85,10 +79,7 @@
 
 
 #NOP - combat;
-#list brianna3kdb add {{{name} {su1} {type} {combat} {desc} {su1: dismiss and resummon into defend mode}}};
-#list brianna3kdb add {{{name} {su2} {type} {combat} {desc} {su2: switch to assault fire and defend mech}}};
-#list brianna3kdb add {{{name} {su3} {type} {combat} {desc} {su3: summon a new mech and into assault fire}}};
-#list brianna3kdb add {{{name} {sd} {type} {combat} {desc} {sd: switch mech into defend mode}}};
+
 
 #NOP -- misc;
 
