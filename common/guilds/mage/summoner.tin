@@ -182,7 +182,7 @@
 	_handleSummonString;
 } {2};
 
-#alias _summonTankCheck {
+#alias _summonTankSwap {
 	#list summonTankList clear;
 	#var summonTankCheck 1;
 	look;
@@ -193,6 +193,7 @@
 		#list summonTankList reverse;
 		.summonLookupName $summonTankList[1][name];
 		#send {say $summonTmpName $summonTankList[1][index], defend me};
+		_summonHealthCull;
 	};
 };
 
@@ -203,7 +204,7 @@
 	#delay 2 {
 		#var summonTankCheck 0;
 		#list summonTankList indexate health;
-		#list summonTankList refine {&0 < 100};
+		#list summonTankList refine {&0 < 50};
 		#foreach $summonTankList[%*] item {
 			.summonLookupName $item[name];
 			say $summonTmpName $item[index], begone;

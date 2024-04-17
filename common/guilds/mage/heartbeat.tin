@@ -103,10 +103,9 @@
     #if {!$idle_flag && $my[immersion][active]} {
         #if $summoner {
             checkStrategy {summon_cull} {
-                #if {$my[immersion][rounds] == 70} {_summonHealthCull};
-                #if {$my[immersion][rounds] == 50} {_summonHealthCull};
-                #if {$my[immersion][rounds] == 30} {_summonHealthCull};
-                #if {$my[immersion][rounds] == 10} {_summonHealthCull};
+                #if {$my[immersion][rounds] == 70} {_summonTankSwap};
+                #if {$my[immersion][rounds] == 30} {_summonTankSwap};
+                #if {$my[immersion][rounds] == 10} {_summonTankSwap};
             };
         };
     };
@@ -132,11 +131,11 @@
             ash off;
         };
 
-        checkStrategy {summon_tank1} {
+        checkStrategy {summon_tank} {
             #if $rotate_tank {
                 #var rotate_tank 0;
-                _summonTankCheck;
-                #delay 15 {#var rotate_tank 1};
+                _summonTankSwap;
+                #delay 20 {#var rotate_tank 1};
             };
         };
     };
