@@ -4,9 +4,23 @@
 #NOP -- reflexes;
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        unwrap 1;
-        absorb prime;
+        #4 {bioconsume loads}
     };
+};
+
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    #if {!idle_flag} {
+        mywhosync
+    };
+};
+
+#action {[%w reconnects]} {
+    mywhosync
+};
+
+#action {[%w disconnects]} {
+    mywhosync
 };
 
 #class {player_actions} {close}

@@ -69,7 +69,7 @@
 
 #var haste_icon ⚡;
 #var mf_icon 💪;
-#var tank_icon 🛡️;
+#var tank_icon !!;
 
 #alias _prepSummonString {
 	#unvar summon_string;
@@ -112,8 +112,9 @@
 		};
 		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
 			#var summon_mf 0;
-			checkStrategy {summon_mf} {
-				#if {"$keyName" == "Something"} {cast monstrous fortitude on something} {#var summon_renew_mf 1}};
+			checkStrategy {summon_mf} {#var summon_renew_mf 1};
+			#if {"$keyName" == "Something"} {
+				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something}};
 		};
 
 		#var found_summon 0;

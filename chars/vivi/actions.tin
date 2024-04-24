@@ -16,6 +16,18 @@
     };
 };
 
+#action {[%w reconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#action {[%w disconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
 #NOP -- cast haste on golem;
 #action {^You throw your golem construction materials to the ground and$} {
     #if {!$idle_flag} {
