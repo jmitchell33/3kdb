@@ -8,28 +8,31 @@
 #NOP set show_summon_status 1;
 
 
-#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%d Prots: %* MI: %d ST: %* Cof: %d/%d} {
+#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%d Prots: %* MI: %d ST: %* Cof: %*} {
     #line gag;
     #var hpbar_mc %5;
     #var hpbar_gem %6;
-    #var hpbar_prots %14;
-    #var corpses[coffin] %17;
-
-    #REGEX {$hpbar_prots}	{SS}		{#VAR {my[prots][SS]} {1}}	{#VAR {my[prots][SS]} {0}};
-    #REGEX {$hpbar_prots}	{PA}		{#VAR {my[prots][PA]} {1}}	{#VAR {my[prots][PA]} {0}};
-    #REGEX {$hpbar_prots}	{{PS|PS!}}	{#VAR {my[prots][PS]} {1}}	{#VAR {my[prots][PS]} {0}};
-    #REGEX {$hpbar_prots}	{A}		    {#VAR {my[prots][A]}  {1}}	{#VAR {my[prots][A]}  {0}};
-    #REGEX {$hpbar_prots}	{B}     	{#VAR {my[prots][B]}  {1}}	{#VAR {my[prots][B]}  {0}};
-    #REGEX {$hpbar_prots}	{MB}		{#VAR {my[prots][MB]} {1}}	{#VAR {my[prots][MB]} {0}};
-    #REGEX {$hpbar_prots}	{MS}		{#VAR {my[prots][MS]} {1}}	{#VAR {my[prots][MS]} {0}};
-    #REGEX {$hpbar_prots}	{{M|M!}}	{#VAR {my[prots][M]}  {1}}	{#VAR {my[prots][M]}  {0}};
-    #REGEX {$hpbar_prots}	{RS}		{#VAR {my[prots][RS]} {1}}	{#VAR {my[prots][RS]} {0}};
-    #REGEX {$hpbar_prots}	{MG}		{#VAR {my[prots][MG]} {1}}	{#VAR {my[prots][MG]} {0}};
-    #REGEX {$hpbar_prots}	{mg}		{#VAR {my[prots][mg]} {1}}	{#VAR {my[prots][mg]} {0}};
-    #REGEX {$hpbar_prots}	{PG}		{#VAR {my[prots][PG]} {1}}	{#VAR {my[prots][PG]} {0}};
-    #REGEX {$hpbar_prots}	{PE}		{#VAR {my[prots][PE]} {1}}	{#VAR {my[prots][PE]} {0}};  
-    
+    #NOP -- Add a space to the beginning and end of the protections for matching purposes;
+    #var hpbar_prots { %14 };
+    #regex {%17} {None} {#var corpses[coffin] 0};
+    #regex {%17} {%d/%d} {#var corpses[coffin] &1};
     #if {!$g2n_last_round} {#var g2n_last_round %13};
+
+    #REGEX {$hpbar_prots}	{ SS }		{#VAR {my[prots][SS]} {1}}	{#VAR {my[prots][SS]} {0}};
+    #REGEX {$hpbar_prots}	{ PA }		{#VAR {my[prots][PA]} {1}}	{#VAR {my[prots][PA]} {0}};
+    #REGEX {$hpbar_prots}	{{PS|PS!}}	{#VAR {my[prots][PS]} {1}}	{#VAR {my[prots][PS]} {0}};
+    #REGEX {$hpbar_prots}	{ A }	    {#VAR {my[prots][A]}  {1}}	{#VAR {my[prots][A]}  {0}};
+    #REGEX {$hpbar_prots}	{ B }     	{#VAR {my[prots][B]}  {1}}	{#VAR {my[prots][B]}  {0}};
+    #REGEX {$hpbar_prots}	{ MB }  	{#VAR {my[prots][MB]} {1}}	{#VAR {my[prots][MB]} {0}};
+    #REGEX {$hpbar_prots}	{ S }		{#VAR {my[prots][S]} {1}}	{#VAR {my[prots][S]} {0}};
+    #REGEX {$hpbar_prots}	{ MS }		{#VAR {my[prots][MS]} {1}}	{#VAR {my[prots][MS]} {0}};
+    #REGEX {$hpbar_prots}	{{M|M!}}	{#VAR {my[prots][M]}  {1}}	{#VAR {my[prots][M]}  {0}};
+    #REGEX {$hpbar_prots}	{ RS }		{#VAR {my[prots][RS]} {1}}	{#VAR {my[prots][RS]} {0}};
+    #REGEX {$hpbar_prots}	{ MG }		{#VAR {my[prots][MG]} {1}}	{#VAR {my[prots][MG]} {0}};
+    #REGEX {$hpbar_prots}	{ mg }		{#VAR {my[prots][mg]} {1}}	{#VAR {my[prots][mg]} {0}};
+    #REGEX {$hpbar_prots}	{ PG }		{#VAR {my[prots][PG]} {1}}	{#VAR {my[prots][PG]} {0}};
+    #REGEX {$hpbar_prots}	{ PE }		{#VAR {my[prots][PE]} {1}}	{#VAR {my[prots][PE]} {0}};  
+    
     #if {$incombat} {
         #math {my[gxp][last_round]} {$g2n_last_round - %13};
         #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
