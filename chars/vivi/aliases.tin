@@ -9,6 +9,17 @@
      };
 };
 
+#NOP -- cast subjugate (lowers amount of concentration summons require to control);
+#alias {sub} {
+     cast subjugate
+};
+
+#NOP -- cast strength and giant strength (+str);
+#alias {caststr} {
+     cast giant strength on %0;
+     cast strength on %0
+};
+
 #NOP -- monstrous fortitude;
 #alias {mf} {
      cast monstrous fortitude on %0
@@ -27,19 +38,6 @@
 #NOP -- explosive release (reduce sat);
 #alias {cer} {
      cast explosive release
-};
-
-#NOP - aliases for setting up summon config & strategies with golem and summons for assist or defending;
-#alias {assistmode} {
-     mystrategy-assist;
-     ms golema;
-     ms 5a
-};
-
-#alias {defendmode} {
-     mystrategy-defend;
-     ms golemd;
-     ms 5d
 };
 
 #NOP -- polymorph other (turn mobs against each other);
@@ -230,11 +228,11 @@
      strategy super_er;
      strategy golem_assist;
      strategy feeblemind;
-     strategy phantasmal;
      strategy spelltap;
      strategy edrain;
      strategy atrophy;
      strategy super_sub;
+     strategy summon_mf;
      strategy epowers
 };
 
@@ -243,15 +241,13 @@
      strategy-clear;
      strategy slow;
      strategy super_er;
-     strategy golem_defend;
+     strategy golem_assist;
      strategy feeblemind;
-     strategy phantasmal;
      strategy spelltap;
      strategy edrain;
      strategy atrophy;
      strategy super_sub;
-     strategy summon_tank;
-     strategy summon_tank1;
+     strategy summon_mf;
      strategy epowers
 };
 
@@ -260,71 +256,32 @@
      strategy-clear
 };
 
-#NOP -- switch between hasting summons or casting monstrous fortitude;
-#NOP -- assisting;
-#alias {mystrategy-assisthaste} {
-     strategy-clear;
-     strategy slow;
-     strategy super_er;
-     strategy golem_assist;
-     strategy feeblemind;
-     strategy phantasmal;
-     strategy spelltap;
-     strategy edrain;
-     strategy atrophy;
-     strategy super_sub;
-     strategy summon_haste;
-     strategy epowers
+#NOP - aliases for setting up summon config & strategies with golem and summons for assist or defending;
+#alias {assistmode} {
+     clear_sconfig;
+     shoo;
+     mystrategy-assist;
+     ms golema;
+     ms 6a
 };
 
-#alias {mystrategy-assistmf} {
-     strategy-clear;
-     strategy slow;
-     strategy super_er;
-     strategy golem_assist;
-     strategy feeblemind;
-     strategy phantasmal;
-     strategy spelltap;
-     strategy edrain;
-     strategy atrophy;
-     strategy super_sub;
-     strategy summon_mf;
-     strategy epowers
+#alias {defendmode} {
+     clear_sconfig;
+     shoo;
+     mystrategy-defend;
+     ms golema;
+     ms 6d
 };
 
-#NOP -- defending;
-#alias {mystrategy-defendhaste} {
-     strategy-clear;
-     strategy slow;
-     strategy super_er;
-     strategy golem_defend;
-     strategy feeblemind;
-     strategy phantasmal;
-     strategy spelltap;
-     strategy edrain;
-     strategy atrophy;
-     strategy super_sub;
-     strategy summon_tank;
-     strategy summon_tank1;
-     strategy summon_haste;
-     strategy epowers
+#NOP -- aliases to setup strategies for phantasmal killer;
+#NOP -- toggle phantasmal killer on and off;
+#alias {pk} {
+     strategy phantasmal
 };
 
-#alias {mystrategy-defendmf} {
-     strategy-clear;
-     strategy slow;
-     strategy super_er;
-     strategy golem_defend;
-     strategy feeblemind;
-     strategy phantasmal;
-     strategy spelltap;
-     strategy edrain;
-     strategy atrophy;
-     strategy super_sub;
-     strategy summon_tank;
-     strategy summon_tank1;
-     strategy summon_mf;
-     strategy epowers
+#NOP -- toggle casting monstrous fortitude on phantasmal killer on and off;
+#alias {pkmf} {
+     strategy phantasmal_mf
 };
 
 #NOP -- aliases to setup corpsetrigs;
@@ -464,10 +421,6 @@
 #list vivi3kdb add {{{name} {mystrategy-assist} {type} {combat} {desc} {Setup strategy for summons (assisting)}}};
 #list vivi3kdb add {{{name} {mystrategy-defend} {type} {combat} {desc} {Setup strategy for summons (defending)}}};
 #list vivi3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
-#list vivi3kdb add {{{name} {mystrategy-assisthaste} {type} {combat} {desc} {Haste summons (assisting)}}};
-#list vivi3kdb add {{{name} {mystrategy-assistmf} {type} {combat} {desc} {Monstrous fortitude summons (assisting)}}};
-#list vivi3kdb add {{{name} {mystrategy-defendhaste} {type} {combat} {desc} {Haste summons (defending)}}};
-#list vivi3kdb add {{{name} {mystrategy-defendmf} {type} {combat} {desc} {Monstrous fortitude summons (defending)}}};
  
 #NOP -- misc;
 #list vivi3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -501,5 +454,9 @@
 #list vivi3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
 #list vivi3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg)}}};
 #list vivi3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
+#list vivi3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
+#list vivi3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
+#list vivi3kdb add {{{name} {pk} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+#list vivi3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
 
 #class {player_aliases} {close}

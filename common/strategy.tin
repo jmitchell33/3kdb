@@ -119,6 +119,7 @@
 #list strategyList add {{{guild} {mage} {name} {spelltap}  {active} {0} {description} {Spelltap Toggling}}};
 #list strategyList add {{{guild} {mage} {name} {feeblemind}  {active} {0} {description} {Feeblemind (-int)}}};
 #list strategyList add {{{guild} {mage} {name} {phantasmal}  {active} {0} {description} {Phantasmal Killer}}};
+#list strategyList add {{{guild} {mage} {name} {phantasmal_mf} {active} {0} {description} {Cast Monstrous Fortitude on Phantasmal}}};
 #list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
 #list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
 #list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Summon Tanking}}};
@@ -210,7 +211,7 @@
                 checkStrategy {phantasmal} {
                     cast phantasmal killer;
                     #NOP -- You can't haste any illusions, so we'll cast MF on it;
-                    cast monstrous fortitude on something;
+                    checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
                 };
             };
         };

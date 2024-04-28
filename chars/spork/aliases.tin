@@ -1,0 +1,284 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- deadman;
+#alias {_player_deadmanActions} {
+    #if {$bot[active]} {
+        .pause;
+        #echo {stepper paused due to deadman timer}
+    };
+};
+
+#NOP -- aliases to setup strategies;
+#NOP -- default;
+#alias {mystrategy} {
+    strategy-clear;
+    strategy call
+};
+
+#alias {stclear} {
+    strategy-clear
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#NOP -- default corpse trig;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ absorbSp2;
+    corpsetrig+ divvy;
+    corpsetrig+ crafting;
+    corpsetrig+ conWorth
+};
+
+#NOP -- corpsetrig for partying;
+#alias {mycorpsetrig-party} {
+    corpsetrig-clear;
+    corpsetrig+ conWorth
+};
+
+#alias {corpseoff} {
+    corpsetrig-off
+};
+
+#alias {corpseon} {
+    corpsetrig-on
+};
+
+#alias {corpseclear} {
+    corpsetrig-clear
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa
+};
+
+#NOP -- QUICK WALKS TO ROOMVNUMS;
+#alias {wa} {#map run %1};
+
+#NOP -- knight tour games;
+#alias {knight6} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
+
+#alias {knight8} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+
+#alias {winaxe} {
+    play;
+    start;
+    #5 throw axe
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+    #class numpad kill
+};
+
+#alias {numon} {
+    #read chars/$user/numpad.tin
+};
+
+#alias sz_study {pause game;qtrance teleport/w/w/w/w/w/d/sw/sw/se/s/u/nw/nw/path/sw/sw/w;.study;qtrance e/ne/ne/path/se/se/d/n/nw/ne/ne/u/e/e/e/e/e/teleport 1;play;unpause game;};
+#alias sz_reagents {pause game;qtrance teleport/w/w/w/w/w/u/w/w/w;topup;#delay 6 {qtrance e/e/e/d/e/e/e/e/e/teleport 1;play;unpause game;};}
+
+#alias track_gxp {
+    #var gxp_rounds 0;
+    #if $tracking_gxp {
+        #showme ----- NO LONGER TRACKING GXP -----;
+        #send {repeat combat/off};
+        #var tracking_gxp 0;
+        #unact { |  Next Circle:[%*]};
+        #unact {%*>-=-=-=-=-=-=-=-=-=-<*> Spork, Necromancer of the Red Robes <*>=-=-=-=-=-=-=-=-=-=-<%*};
+        #unact {%*>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-<%*};
+    } {
+        #showme ----- NOW TRACKING GXP -----;
+        #send {repeat combat/gs};
+        #list gxp_tracker clear;
+        #unvar old_gxp;
+        #unvar new_gxp;
+        #act {%*>-=-=-=-=-=-=-=-=-=-<*> Spork, Necromancer of the Red Robes <*>=-=-=-=-=-=-=-=-=-=-<%*} {
+            #line gag;
+            #gag { |%*|};
+        };
+        #act {%*>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-<%*} {
+            #line gag;
+            #ungag { |%*|};
+        };
+        #act { |  Next Circle:[%*]} {
+            #var tracking_gxp 1;
+            #if {$gxp_rounds == 0} {#var old_gxp %%1;#var gxp_rounds 1;} {
+                #var new_gxp %%1;
+                #math gxp_rounds {$gxp_rounds + 1};
+                #if {$old_gxp != $new_gxp} {
+                    #list gxp_tracker add {{{old_gxp} {$old_gxp} {new_gxp} {$new_gxp} {rounds} {$gxp_rounds}}};
+                    #var gxp_rounds 0;
+                };
+            };
+        };
+    };
+};
+
+#alias gxp_stats {
+    #var gxp_stats[avg] 0;
+    #var gxp_stats[rounds] 0;
+    #var gxp_stats[increases] 0;
+    #foreach $gxp_tracker[%*] round {
+        #math gxp_stats[increases] {$gxp_stats[increases] + 1};
+        #math gxp_stats[rounds] {$gxp_stats[rounds] + $round[rounds]}
+    };
+    #math gxp_stats[avg_rounds_for_increase] {1.00 * $gxp_stats[rounds] / $gxp_stats[increases]};
+    #showme {Each Increase Took On Average $gxp_stats[avg_rounds_for_increase] rounds};
+};
+
+#alias pg {
+    qtrance preserve gemino remains>25;
+    qtrance get preservation>25;
+};
+
+#NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
+
+#alias {house_donate} {
+    #map get roomvnum donate_go_back;
+    #send {!keep all bound};
+    #send {!keep all equip};
+    #send {!keep all corpse};
+    go house_box;
+    put all in box;
+    get all from buckler;
+    put all in box;
+    #map run $donate_go_back;
+};
+
+#alias {go_donate} {
+    #map get roomvnum donate_go_back;
+    go necro_box;
+    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
+    #if {$bot[corpse-run]} {
+        go sol_crypt2;
+        unkeep all preservation;
+        put all in box;
+        go sol_crypt1;
+        put all in box;
+    } {
+        go morgue;
+        donate coffin;donate all;
+        go necro_corpse;
+        store all;
+    };
+    #map run $donate_go_back;
+};
+
+#alias {go_donate2} {
+    #map get roomvnum donate_go_back;
+    keep all preservation;
+    keep all component;
+    go necro_box;
+    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
+    #map run $donate_go_back;
+};
+
+
+#alias {go_study} {
+    powers;gs;
+    #map get roomvnum study_go_back;
+    #if $auto_study_teleport {
+        teleport;
+        mapgo necro_rr;
+        go necro_were;
+    } {
+        go necro_were;
+    };
+    #delay 2 {.study};
+    #delay 3 {go necro_reagent};
+    #delay 4 {topup};
+    #delay 6 {#if {$my[coins] < 25} {go bank;withdraw 25000}};
+    #delay 8 {
+        #if $auto_study_teleport {
+            teleport 1;
+            #map goto $study_go_back;
+        } {
+            #map run $study_go_back;
+        };
+        powers;gs;
+    };
+    #delay 10 {
+        #if $bot[active] {
+            #var bot[paused] 0;
+            ..;
+        } {
+            #NOP;
+        };
+    };
+};
+
+#alias {necro_reset} {
+    #NOP;
+};
+
+#alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
+
+#NOP -- sporks 3kdb aliases;
+
+#alias format_sporksaliases {
+    #format {sporkalias_name} {%-25s} {%1};
+    #format {sporkalias_desc} {%-30s} {%2};
+    #showme $sporkalias_name $sporkalias_desc;
+};
+
+#alias spork3kdb {
+    #var tempflag 0;
+    #var number &spork3kdb[];
+	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------    <ffa>SPORKS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
+    #showme {                  <eaf>guild<088>                        };
+    #showme {<ccf>  ----------------------------------------   <088>  };
+    #showme {<ccf>     Name                 Usage              <088>  };
+    #list spork3kdb index name;
+    #list spork3kdb sort;
+    #foreach $spork3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_sporksaliases {     $index[name]} {$index[desc]};
+        }
+    };
+    #if !$tempflag {
+        #foreach $spork3kdb[%*] index {
+            format_sporksaliases {     $index[name]} {$index[desc]};
+        };
+    };
+};
+
+#list spork3kdb clear;
+
+#NOP -- corpses;
+#list spork3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
+#list spork3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list spork3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list spork3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list spork3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+
+#NOP -- boosts;
+
+#NOP - combat;
+#list spork3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list spork3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+
+#NOP -- misc;
+#list spork3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list spork3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list spork3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list spork3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list spork3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list spork3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+
+#NOP -- guild;
+
+#class {player_aliases} {close}
