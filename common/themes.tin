@@ -11,27 +11,51 @@
     #SUBSTITUTE {-D-_} {};
 };
 
+#action {^-D-_%*\n%a-D-_$} {
+	#unvar long;
+	#format long1 {%p} {%1};
+	#format long2 {%p} {%2};
+	#var long {$long1 $long2};
+	#if {@cartcheck{${long}}} {
+		#nop
+	} {
+		#var room[long] {${long}};
+	};
+} {1};
+
+
 #if {"$theme" == "default"} {
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
+    
     #NOP Room exits;
     #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
+    
     #NOP Room description -- not really good to do here since it's multiline;
     #SUBSTITUTE {-D-_} {};
+    
     #NOP Mage Summons;
-    #SUBSTITUTE {^-M-_%1[summons]%2.$} {<dad>%1[summons]%2.<088>} {1};
-    #NOP Mobs;
-    #SUBSTITUTE {-M-_%1} {<fcb>%1<088>} {2};
+    #SUBSTITUTE {^-M-_%1[summons]%2.$} {<dcd>%1[summons]%2.<088>} {1};
+    #SUBSTITUTE {^-M-_$my[familiar].$} {<eee>$my[familiar] [familiar].<088>} {1};
+
+    #NOP Mobs - first is attempting to substitute for multi-line mobs;
+    #SUBSTITUTE {-M-_%1\n%a.$} {<fcb>%1 %2<088>} {1};
+    #SUBSTITUTE {-M-_%1.$} {<fcb>%1<088>} {2};
+    
     #NOP Players;
 	#SUBSTITUTE {-P-_%1} {<ffa>%1<088>};
+    
     #NOP Weapons;
-	#SUBSTITUTE {-w-%1} {<cda>%1<088>};
+	#SUBSTITUTE {-w-%1} {<bff>%1<088>};
+    
     #NOP Objects;
 	#SUBSTITUTE {-o-%1} {};
+    
     #NOP Armours;
-	#SUBSTITUTE {-a-%1} {<fff>%1<088>};
+	#SUBSTITUTE {-a-%1} {<beb>%1<088>};
+    
     #NOP Items;
-	#SUBSTITUTE {-i-%1} {<fae>%1<088>};
+	#SUBSTITUTE {-i-%1} {<ded>%1<088>};
 };
 
 #if {"$theme" == "bright"} {
