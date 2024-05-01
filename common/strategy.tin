@@ -128,6 +128,7 @@
 #list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
 #list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
+#list strategyList add {{{guild} {mage} {name} {gstrength}  {active} {0} {description} {Giant Strength}}};
 #list strategyList add {{{guild} {juggernaut} {name} {frenzy}  {active} {0} {description} {Before Reset: Use Frenzy}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateA}  {active} {0} {description} {Before Reset: Donate Airdrops}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateF}  {active} {0} {description} {Before Reset: Donate Frenzy}}};
@@ -217,6 +218,8 @@
         };
 
         checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor}};
+
+        checkStrategy {gstrength} {#if $my[prots][GS] {#NOP} {cast giant strength on $user;cast strength on $user}};
 
         #if {$toggle_spelltap && $sp_percent > 70} {
             checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}
