@@ -2,6 +2,7 @@
 #class 3kdb_themes open;
 
 #NOP -- Use the "colors" alias to see available colors;
+#var theme default;
 
 #NOP -- If no theme exists, just hide the room ansi variables;
 #if {"${theme}" === ""} {
@@ -10,25 +11,27 @@
     #SUBSTITUTE {-D-_} {};
 };
 
-#if {"$theme" == "byron"} {
+#if {"$theme" == "default"} {
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
     #NOP Room exits;
     #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
     #NOP Room description -- not really good to do here since it's multiline;
     #SUBSTITUTE {-D-_} {};
+    #NOP Mage Summons;
+    #SUBSTITUTE {^-M-_%1[summons]%2.$} {<dad>%1[summons]%2.<088>} {1};
     #NOP Mobs;
-    #SUBSTITUTE {-M-_%1} {<fcb>%1<088>};
+    #SUBSTITUTE {-M-_%1} {<fcb>%1<088>} {2};
     #NOP Players;
 	#SUBSTITUTE {-P-_%1} {<ffa>%1<088>};
     #NOP Weapons;
-	#SUBSTITUTE {-w-%1} {};
+	#SUBSTITUTE {-w-%1} {<cda>%1<088>};
     #NOP Objects;
 	#SUBSTITUTE {-o-%1} {};
     #NOP Armours;
-	#SUBSTITUTE {-a-%1} {};
+	#SUBSTITUTE {-a-%1} {<fff>%1<088>};
     #NOP Items;
-	#SUBSTITUTE {-i-%1} {};
+	#SUBSTITUTE {-i-%1} {<fae>%1<088>};
 };
 
 #if {"$theme" == "bright"} {
