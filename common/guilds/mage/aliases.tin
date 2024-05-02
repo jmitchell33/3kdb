@@ -21,7 +21,14 @@
 
 #alias {str_party} {
     members;
-    #delay 2 {#foreach $party[member][%*] member {cast giant strength $member[name-lower]};};
+    #delay 2 {
+        #if {&party[member][] > 0} {
+            #foreach $party[member][%*] member {
+                cast giant strength on $member[name-lower];
+                cast strength on $member[name-lower]
+            };
+        };
+    };
 };
 
 #NOP --- MAGE DEFENSE ALIASES;

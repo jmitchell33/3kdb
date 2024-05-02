@@ -223,6 +223,10 @@
 };
 
 #NOP -- Eventually this logic will be collapsed into the -M- action that's going to be standardized;
+
+#NOP -- Ignore your familiar for any mob checks, if you see it in the room set go_fetch to 0;
+#action {^-M-_${my[familiar]}.$} {#NOP;#var go_fetch 0} {1};
+
 #action {^-M-_%* [summons] (%d%)%*} {
 	#format tmpSummonName {%p} {%1};
 	#var summonTankIndex 1;
