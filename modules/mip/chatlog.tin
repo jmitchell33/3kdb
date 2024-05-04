@@ -279,6 +279,30 @@
 
 
 #NOP ***** 2 Way Communication (Tell/Emote) *****
+
+
+#NOP -- This toggle will allow you to log just tells or emotes + tells;
+#NOP -- Flag specifically if it's a tell using action;
+#NOP -- If it matches the MIP sender, we'll log it so mobs/echo's don't get logged;
+#action {^%w tells you: %*} {#var chat[act_tell][from] %1;#delay 1 {#unvar chat[act_tell][from]}} {2};
+
+#alias {chatlog %1} {
+	#if {"%1" == "emotes"} {
+		#if {"$chat[log][emotes]" === ""} {
+			#var chat[log][emotes] 1;
+			#echo {<cfa> ========== CHATLOG IS NOW LOGGING EMOTES ========== };
+		} {
+			#if $chat[log][emotes] {
+				#var chat[log][emotes] 0;
+				#echo {<fda> ========== CHATLOG WILL NOT LOG EMOTES ========== };
+			} {
+				#var chat[log][emotes] 1;
+				#echo {<cfa> ========== CHATLOG IS NOW LOGGING EMOTES ========== };
+			}
+		};
+	};
+};
+
 #ALIAS {.mipProcessBABgag} {
 	#var mipgag 0;
 	#var tempString %0;
@@ -410,7 +434,7 @@
 	#REGEX {$tempString} { stumbles in confusion as the headband hypnotizes } {#var mipgag 1};
 
 	#IF {$mipgag == 0} {.mipProcessBAB %0;};
-}
+};
 
 #ALIAS {.mipProcessBAB} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)}} {
@@ -422,27 +446,30 @@
 			#var mip[comm][source]	{&3};
 			#var mip[comm][line]	{Tell};
 
-			#NOP Revert ^^ back to ~;
-			#REPLACE {mip[comm][data]} {\^\^} {~};
-            
-			#var mip[comm][command]	{tell $mip[comm][source]};
-			#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
-			#format {datestamp} {%t} {%Y-%m-%d.log};
-			#format {timestamp_save} {%t} {[%H:%M] };
-			#if {"$mip[comm][data]" != "$lastData"} {
-				#IF {"&2" == "x"} {
-					#NOP Message to another player;
-					#var mip[comm][twoway] {to};
-					#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-					#line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
-					update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
-				} {
-					#NOP Message from another player;
-					#var mip[comm][twoway] {from};
+			#NOP -- If the MIP data source matches the tell source registered by the action, we log the chat;
+			#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
+				#NOP Revert ^^ back to ~;
+				#REPLACE {mip[comm][data]} {\^\^} {~};
+				
+				#var mip[comm][command]	{tell $mip[comm][source]};
+				#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+				#format {datestamp} {%t} {%Y-%m-%d.log};
+				#format {timestamp_save} {%t} {[%H:%M] };
+				#if {"$mip[comm][data]" != "$lastData"} {
+					#IF {"&2" == "x"} {
+						#NOP Message to another player;
+						#var mip[comm][twoway] {to};
 						#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-						#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
-						update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
-						#bell;
+						#line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
+						update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
+					} {
+						#NOP Message from another player;
+						#var mip[comm][twoway] {from};
+							#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+							#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+							update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+							#bell;
+					};
 				};
 			};
 		};
