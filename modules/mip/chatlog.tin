@@ -287,6 +287,9 @@
 #action {^%w tells you: %*} {#var chat[act_tell][from] %1;#delay 10 {#unvar chat[act_tell][from]}} {2};
 #action {^You tell %w:} {#var chat[act_tell][from] $userCap};
 
+#NOP -- Linktells
+#action {^%w LTs \(%*\)} {#var chat[act_tell][from] %1;#delay 10 {#unvar chat[act_tell][from]}} {2};
+
 #alias {chatlog %1} {
 	#if {"%1" == "emotes"} {
 		#if {"$chat[log][emotes]" === ""} {
