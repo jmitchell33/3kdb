@@ -285,6 +285,7 @@
 #NOP -- Flag specifically if it's a tell using action;
 #NOP -- If it matches the MIP sender, we'll log it so mobs/echo's don't get logged;
 #action {^%w tells you: %*} {#var chat[act_tell][from] %1;#delay 10 {#unvar chat[act_tell][from]}} {2};
+#action {^%w tells you (%*): %*} {#var chat[act_tell][from] %1;#var chat[group] %2;#delay 10 {#unvar chat[act_tell][from];#unvar chat[group]}} {2};
 #action {^You tell %w:} {#var chat[act_tell][from] $userCap};
 
 #NOP -- Linktells
@@ -472,7 +473,11 @@
 						#var mip[comm][twoway] {from};
 						#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
 						#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
-						update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+						#if {"$chat[group]" === ""} {
+							update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+						} {
+							update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
+						};
 						#bell;
 					};
 				};

@@ -221,6 +221,7 @@
 
 	#alias {.onPrompt} {
         #if {$bot[foundplayer]} {
+            #if $botDebug {#echo {found player - stepping}};
             .stop_prompt;
             #var bot[walk] 1;
            .botStep;
@@ -249,6 +250,7 @@
                     #if {$check_room} {
                         .check_room;
                     } {
+                        #if $botDebug {#echo {no mob or item, walking}};
                         #var bot[walk] 1;
                         .botStep;
                     };
