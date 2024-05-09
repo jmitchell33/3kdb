@@ -9,10 +9,10 @@
 
 #var check_death 1;
 #alias .check_death {
-    corpse_trig;
     #if {$shp < 70} {
         .pause;
-        #delay 6 {..};
+        .unpause;
+        .bot;
     } {
         .bot;
     };
@@ -21,11 +21,12 @@
 #var mob_kill_action 1;
 #alias .mob_kill_action {
     kill $mob[target];
-    #if {"$support_mode" == "defend" && $bot[active]} {
+    #if {$bot[active]} {
         eval $mob[target];
         #line oneshot #action {Primary Damage type : [%w]} {
             #format defendType {%l} {%%1};
             #delay 3 {support defend $defendType};
+            #delay 5 {support assault};
         };
     };
 };
