@@ -1,0 +1,74 @@
+#class {hpbar} {kill}
+#class {hpbar} {open}
+
+#NOP Knight hpconfig setting;
+#NOP hpconfig HP:#CHP#/#MHP# SP:#CSP#/#MSP# STM:#CST#/#MST# STN:#STN#% SW:#SEC#% | #SNC# #MTH##NLN#PPD(#PRE#) End(#END#) Cry(#CRY#) Dfl(#DFL#) Study(#STD#) Dodge(#DDG#) Brawl(#BRL#) Shield(#SHB#) Parry(#PRY#)#NLN#GXP: #GXP#(#G2N#) Joust:#JST# E:#MOB#
+
+#act {{HP:(\d+)/(\d+) SP:(\d+)/(\d+) STM:(\d+)/(\d+) STN:(\d+)\% SW:([\d\.]+)\% \| (\w+) (\w+)}} {
+	#echo {MATCH};
+	#var {my[hp][current]}	{%2};
+	#var {my[hp][max]}	{%3};
+	#var {my[sp][current]}	{%4};
+	#var {my[sp][max]}	{%5};
+	#var {my[gp1][current]}	{%6};
+	#var {my[gp1][max]}	{%7};
+	#var {my[gp2][current]}	{%8};
+    #var {swind} {%9};
+    #format {swind} {%d} {$swind};
+	#var {stance}		{%10};
+	#var {method}		{%11};
+};
+
+#act {PPD(%w) End(%w) Cry(%p) Dfl(%w) Study(%w) Dodge(%w) Brawl(%w) Shield(%w) Parry(%w)} {
+	#echo {MATCH};
+	#var {kskills[prepare]}		{%1};
+    #if {"$kskills[prepare]" == "Y"} {#var kskills[prepare] <ffa>ON<088>};
+    #if {"$kskills[prepare]" == "n"} {#var kskills[prepare] <faa>OFF<088>;#send !prepare on};
+	#var {kskills[endurance]}	{%2};
+    #if {"$kskills[endurance]" == "Y"} {#var kskills[endurance] <ffa>ON<088>};
+    #if {"$kskills[endurance]" == "n"} {#var kskills[endurance] <faa>OFF<088>};
+	#var {kskills[battlecry]}	{%3};
+    #if {"$kskills[battlecry]" == "Y"} {#var kskills[battlecry] <ffa>ON<088>};
+    #if {"$kskills[battlecry]" == "n"} {#var kskills[battlecry] <faa>OFF<088>};
+	#var {kskills[deflect]}		{%4};
+    #if {"$kskills[deflect]" == "Y"} {#var kskills[deflect] <ffa>ON<088>};
+    #if {"$kskills[deflect]" == "n"} {#var kskills[deflect] <faa>OFF<088>};
+	#var {kskills[study]}		{%5};
+    #if {"$kskills[study]" == "Y"} {#var kskills[study] <ffa>ON<088>};
+    #if {"$kskills[study]" == "n"} {#var kskills[study] <faa>OFF<088>};
+	#var {kskills[dodge]}		{%6};
+    #if {"$kskills[dodge]" == "Y"} {#var kskills[dodge] <ffa>ON<088>};
+    #if {"$kskills[dodge]" == "n"} {#var kskills[dodge] <faa>OFF<088>}; 
+	#var {kskills[brawl]}		{%7};
+    #if {"$kskills[brawl]" == "Y"} {#var kskills[brawl] <ffa>ON<088>};
+    #if {"$kskills[brawl]" == "n"} {#var kskills[brawl] <faa>OFF<088>};
+	#var {kskills[shieldblock]}	{%8};
+    #if {"$kskills[shieldblock]" == "Y"} {#var kskills[shieldblock] <ffa>ON<088>};
+    #if {"$kskills[shieldblock]" == "n"} {#var kskills[shieldblock] <faa>OFF<088>};
+	#var {kskills[parry]}		{%9};
+    #if {"$kskills[parry]" == "Y"} {#var kskills[parry] <ffa>ON<088>};
+    #if {"$kskills[parry]" == "n"} {#var kskills[parry] <faa>OFF<088>};
+};
+
+#act {GXP: %d(%p) Joust:%p E:%p} {
+	#echo {MATCH};
+    #if {!$g2n_last_round} {#var g2n_last_round %1};
+	#var {gxp_to_nxt_glvl}	{%2};
+	#var {joust}	{%3};
+    #if {"$joust" != "READY"} {#var joust <faa>%3<088>};
+    #if {"$joust" == "READY"} {#var joust <ffa>%3<088>};
+	#var {ehealth}	{%5};
+    #math {my[gxp][last_round]} {$g2n_last_round - %1};
+    #math {my[gxp][total]} {$my[gxp][total] - $my[gxp][last_round]};
+    #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
+    #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
+    #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+    #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
+    #format {my[gxp][str_total]} {%M} {$my[gxp][total]};
+    #format {my[gxp][str_total]} {%p} {$my[gxp][str_total]};
+    #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
+    .gxp_time;
+	#var g2n_last_round %1;
+};
+
+#class {hpbar} {close}
