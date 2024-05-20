@@ -5,20 +5,7 @@
 #var corpse_use 200;
 
 #alias {_player_heartbeat} {
-    #if {!$idle_flag} {
-        #if {$bot[active] && $gp1 < 25} {
-            .pause;
-        };
-    };
-
-    #if {$bot[active] && $gp2 < 60} {
-        .pause;
-    };
-
-    #if {$bot[paused] && "$gp1" == "$gp1_max" && "$gp2" == "$gp2_max"} {
-        .unpause;
-        ..;
-    };
+    #if {!$idle_flag} {#NOP};
 };
 
 #class {player_heartbeat} {close}

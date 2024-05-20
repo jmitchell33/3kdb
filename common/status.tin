@@ -295,5 +295,28 @@
     #delay 10 {reset_gxp};
 };
 
+#if {"$guild" == "knight"} {
+    #alias .gxp_time {
+        #format {my[gxp][report-time]} {%T} {};
+        #math my[gxp][delta-time] {$my[gxp][report-time] - $my[gxp][start-time]};
+        #if {$my[gxp][delta-time] > 3600} {
+            #math my[gxp][delta-time] {$my[gxp][delta-time] / 3600 * 1.00};
+            #var my[gxp][str_time] ($my[gxp][delta-time] Hrs);
+        } {
+            #math my[gxp][delta-time] {$my[gxp][delta-time] / 60 * 1.00};
+            #var my[gxp][str_time] ($my[gxp][delta-time] Mins);
+        };
+    };
+
+    #alias reset_gxp {
+        #var my[gxp][total] 0;
+        #var my[gxp][last_round] 0;
+        #var my[gxp][average] 0;
+        #var my[gxp][rounds_tracked] 0;
+        #var my[gxp][starting_round] $total_rounds;
+        #format {my[gxp][start-time]} {%T} {};
+    };
+    #delay 10 {reset_gxp};
+};
 
 #class player_status close

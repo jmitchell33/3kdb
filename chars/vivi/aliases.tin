@@ -182,16 +182,12 @@
      #delay 8 {prots_ss};
      #delay 10 {prots_mb};
      #delay 12 {prots_pfe};
-     #delay 14 {prots_pa};
-     #delay 16 {prots_blink}
+     #delay 14 {prots_ps}
 };
 
 #NOP -- setup contingency with defenses;
 #alias {setup_c} {
-     cast contingency as stoneskin#cast stoneskin;
-     cast contingency as protection from evil#cast protection from evil;
-     cast contingency as prismatic aura#cast prismatic aura;
-     cast contingency as blink#cast blink
+     cast contingency as protection from evil#cast protection from evil
 };
 
 #NOP -- clear contingency;
@@ -201,9 +197,11 @@
 
 #NOP -- greater contingency;
 #alias {setup_gc} {
-     cast greater contingency as armor#cast armor;
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+     cast greater contingency as major globe#cast major globe;
+     cast greater contingency as stoneskin#cast stoneskin;
      cast greater contingency as shield#cast magnificent shield;
-     cast greater contingency as major globe#cast major globe
+     cast greater contingency as armor#cast armor
 };
 
 #NOP -- clear greater contingency;
@@ -227,13 +225,12 @@
      strategy slow;
      strategy super_er;
      strategy golem_assist;
-     strategy feeblemind;
      strategy spelltap;
-     strategy edrain;
-     strategy atrophy;
      strategy super_sub;
      strategy summon_mf;
-     strategy epowers
+     strategy gstrength;
+     strategy epowers;
+     strategy rolm
 };
 
 #NOP -- strategy setup for summons defending;
@@ -242,13 +239,12 @@
      strategy slow;
      strategy super_er;
      strategy golem_assist;
-     strategy feeblemind;
      strategy spelltap;
-     strategy edrain;
-     strategy atrophy;
      strategy super_sub;
      strategy summon_mf;
-     strategy epowers
+     strategy gstrength;
+     strategy epowers;
+     strategy rolm
 };
 
 #NOP -- clear strategies;
@@ -262,7 +258,7 @@
      shoo;
      mystrategy-assist;
      ms golema;
-     ms 6a
+     ms 7a
 };
 
 #alias {defendmode} {
@@ -270,12 +266,12 @@
      shoo;
      mystrategy-defend;
      ms golema;
-     ms 6d
+     ms 7d
 };
 
 #NOP -- aliases to setup strategies for phantasmal killer;
 #NOP -- toggle phantasmal killer on and off;
-#alias {pk} {
+#alias {pkiller} {
      strategy phantasmal
 };
 
@@ -294,15 +290,31 @@
      corpsetrig+ divvy;
      corpsetrig+ getAll;
      corpsetrig+ crafting;
-     corpsetrig+ pPocket;
-     corpsetrig+ spellbook
+     corpsetrig+ spellbook;
+     corpsetrig+ szCaps;
+     corpsetrig+ ted
+};
+
+#NOP -- solo kill trig without get all;
+#alias {mycorpsetrig-noget} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlasat2;
+     corpsetrig+ divvy;
+     corpsetrig+ getAll;
+     corpsetrig+ crafting;
+     corpsetrig+ spellbook;
+     corpsetrig+ szCaps;
+     corpsetrig+ ted
 };
 
 #NOP -- party kill trig;
 #alias {mycorpsetrig-party} {
      corpsetrig-clear;
      corpsetrig+ spelltap;
-     corpsetrig+ spellbook
+     corpsetrig+ spellbook;
+     corpsetrig+ ted
 };
 
 #NOP -- sewers kill trig;
@@ -314,7 +326,8 @@
      corpsetrig+ divvy;
      corpsetrig+ crafting;
      corpsetrig+ pPocket;
-     corpsetrig+ spellbook
+     corpsetrig+ spellbook;
+     corpsetrig+ ted
 };
 
 #alias {corpseoff} {
@@ -412,6 +425,7 @@
 #list vivi3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list vivi3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
 #list vivi3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
+#list vivi3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
  
 #NOP -- boosts;
 #list vivi3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -456,7 +470,7 @@
 #list vivi3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
 #list vivi3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
 #list vivi3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
-#list vivi3kdb add {{{name} {pk} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+#list vivi3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
 #list vivi3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
 
 #class {player_aliases} {close}

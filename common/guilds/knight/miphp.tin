@@ -5,8 +5,12 @@
 
 #alias {_guild_miphp} {
 	#list temp clear;
-	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max GP1:$gp1/$gp1_max  GP2:$gp2/$gp2_max  E:$ehealth};
-	#list temp add {H:$my[hp][graph] S:$my[sp][graph] GP1:$my[gp1][graph] GP2:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {HP:$my[hp][current]/$my[hp][max] SP:$my[sp][current]/$my[sp][max]   STM:$my[gp1][current]/$my[gp1][max]    STN:$my[gp2][current]/$my[gp2][max]      E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] STM:$my[gp1][graph] STN:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {<eaf>PPD: $kskills[prepare] <eaf>End: $kskills[endurance] <eaf>Cry: $kskills[battlecry] <eaf>Dfl: $kskills[deflect] <eaf>Study: $kskills[study] <eaf>Dodge: $kskills[dodge] <eaf>Brawl: $kskills[brawl]<088>};
+	#list temp add {<eaf>Shield: $kskills[shieldblock] <eaf>Parry: $kskills[parry] <edf>Joust: $joust <edf>Secondwind: <eeb>$swind<dfe>/<eeb>100<088>};
+	#list temp add {<edf>Stance: <ffa>$stance <edf>Method: <ffa>$method <dfe>(<eeb>Total Gxp: <dea>$g2n_last_round <dfe>| <eeb>NxtGlvl: <dea>$gxp_to_nxt_glvl<dfe>)<088>};
+	#list temp add {<eeb>Login Gxp $my[gxp][str_time]: <dea>$my[gxp][str_average_per_hr]/Hr <dfe>| <dea>$my[gxp][str_total] <eeb>Total Earned<088>};
 	#var hpbar[prompt] $temp;
 };
 
