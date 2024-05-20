@@ -38,12 +38,22 @@
 #nop see the calling script.;
 #nop -------------------------------------------------------------------------;
 
+#var flagErrors 0;
 #alias .monitorErrors {
-    #event {RECEIVED ERROR} {
-        #echo <118>%h { TOKENIZER };
-        #info tokenizer -1;
-        #echo <118>%h
+    #if $flagErrors {
+        #var flagErrors 0;
+        #ECHO {<efb> NO LONGER MONITORING ERROR MESSAGES <088>};
+        #unevent {RECEIVED ERROR};
+    } {
+        #var flagErrors 1;
+        #ECHO {<efb> NOW MONITORING ERROR MESSAGES <088>};
+        #event {RECEIVED ERROR} {
+            #echo <118>%h { TOKENIZER };
+            #info tokenizer -1;
+            #echo <118>%h
+        };
     };
+    
 };
 
 #NOP This will highlight your last input and any input other than enter will clear it.;

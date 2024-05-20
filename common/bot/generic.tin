@@ -122,13 +122,6 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
-#alias .clearRoomData {
-    #list room[mobs] clear;
-    #list room[familiars] clear;
-    #list room[summons] clear;
-    #list room[items] clear;
-};
-
 #act {^-M-_%*} {
     #var mob[long] %1;
     #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
