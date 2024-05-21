@@ -61,6 +61,15 @@
 #action {^You sit down and begin to carefully go over the spells in your tome.$} {#var studying 1;};
 #action {^Having absorbed all you can, you carefully close your spellbook.$} {#var studying 0;#var hpbar_mc 100;};
 
+#var tmpFlag 1;
+#action {You feel less awesomesauce.} {
+    #if $tmpFlag {
+        #var tmpFlag 0;
+        deslab;unwrap;cast corpse blast;
+        #delay tmpFlag {#var tmpFlag 1} 2;
+    };
+};
+
 #NOP --- SUMMONING ACTIONS;
 #var summons[summoned] 0;
 #action {You wave your hands calling forth summoning magics and draw %*} {
