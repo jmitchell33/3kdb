@@ -39,7 +39,7 @@
 #ACTION {^You already have a deeppockets spell functioning.$} {#var deeppocket 1} {1};
 #ACTION {^You feel slower as the haste wears off.$} {#var self_haste 0} {1};
 #ACTION {^Your immersion has expired.$} {#var my[immersion][active] 0;} {2};
-#action {^There is darkness as a Orb of Light goes dark.$} {cast light} {2};
+#action {^There is darkness as a Orb of Light goes dark.$} {#if !$idle_flag {cast light}} {2};
 
 #NOP --- MAGE ACTIONS;
 #ACTION {^You are no longer allowing your SP to be healed.} {#var ash 0} {1};
@@ -79,9 +79,11 @@
 #var golemTypes {Straw;Wood;Flesh;Clay;Stone;Rope;Iron;Crystal};
 
 #ACTION {^You throw your golem construction materials to the ground and} {
-    say golem, ibc;
-    checkStrategy {golem_assist} {say golem, you are now in group summons/assist always/ibc};
-    checkStrategy {golem_defend} {say golem, you are now in group summons/defend always};
+    #if !$idle_flag {
+        say golem, ibc;
+        checkStrategy {golem_assist} {say golem, you are now in group summons/assist always/ibc};
+        checkStrategy {golem_defend} {say golem, you are now in group summons/defend always};
+    };
 } {1};
 
 #NOP -- If your familiar doesn't have money;
