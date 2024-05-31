@@ -4,7 +4,7 @@
 /* Collect HP Bar line */
 #ACTION {{^(\S:|)((HP|SP|NP|E|HSN|HSN%|Status|Cr|Corpses|Exp|TG|Moon|Planes|Reag|\$|Memory)\[.*\].*$)}}
 {
-    #line gag;
+    #if {$debug[hpbar] == 1} {#NOP} {#line gag};
     handler_necro_hpbar {%3};
 };
 
@@ -190,16 +190,39 @@
     };
 };
 
+
+#unvar moonList;
+#unvar moonStamps;
+#unvar planeList;
+#unvar planeStamps;
 /* Moon[--O-->] */
 #ALIAS {handler_necro_hpbar_Moon}
 {
-    #NOP %1;
+    #var my[necromancer][moon][current] %1;
+    #var foundItem 0;
+    #format {timeStamp} {%T};
+    #list moonList find {$my[necromancer][moon][current]} {foundItem};
+    #if $foundItem {
+        #NOP;
+    } {
+        #list moonList add {$my[necromancer][moon][current]};
+        #list moonStamps add {$timeStamp};
+    };
 };
 
 /* Planes[--<)++] */
 #ALIAS {handler_necro_hpbar_Planes}
 {
-    #NOP %1;
+    #var my[necromancer][plane][current] %1;
+    #var foundItem 0;
+    #format {timeStamp} {%T};
+    #list planeList find {$my[necromancer][plane][current]} {foundItem};
+    #if $foundItem {
+        #NOP;
+    } {
+        #list planeList add {$my[necromancer][plane][current]};
+        #list planeStamps add {$timeStamp};
+    };
 };
 
 /* Reag[g999 b5 w999 r999 m999 p999 n999] */

@@ -11,7 +11,158 @@
     #list room[familiars] clear;
     #list room[summons] clear;
     #list room[items] clear;
+    #list room[players] clear;
+    #list room[botmobs] clear;
+    #var room[updated] 0;
 };
 
+#NOP -- Update if there is a player in the room not in friends list;
+#act {{^-P-_(.*)}} {
+    #if $bot[playercheck] {
+        #var bot[foundplayer] 1;
+    };
+} {2};
+
+
+#act {{^-R-_(.*)-R-_}} {
+    .clearRoomData;
+    #var room_short %%1;
+    #var room_item 0;
+    
+    #if $bot[active] {
+
+        #if {!$bot[paused]} {
+            #var bot[foundmob] 0;
+            #var bot[foundobject] 0;
+            #var bot[foundplayer] 0;
+            #var bot[aggro-mob] 0;
+        };
+    };
+    #line oneshot #action {^>$} {
+        #var room[updated] 1;
+        #if $bot[active] {
+            #if $debug[bot] {#echo {Prompt reached, calling .determineBotAction}};
+            .determineBotAction
+        };
+    } {1};
+
+} {1};
+
+#act {^{-i-|-w-|-a-|-o-}%*.$} {
+    #var item_number 1;
+    #var item_long %2;
+
+    #replace item_long {.} {};
+    #replace item_long { \[%*\]} {};
+
+    #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
+    #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
+
+    #list room[items] add $item_long;
+
+    #if {$bot[active] && !$bot[paused] && $bot[walk]} {
+        #if {$collector[items]} {
+            #foreach $item_grab_list[%*] item {
+                #regexp {"$item_long"} {$item[long]} {
+                    #$item_number get $item[target];
+                    #if {"$guild" == "bard"} {
+                        identify $item[target];
+                    };
+                    #if {"$guild" == "priest"} {
+                        recognize $item[target];
+                    };
+                    #if {"$item[target]" == "bag"} {
+                        #loop 2 20 i {put bag in bag $i};
+                    };
+                };
+            };
+        };
+    };
+} {2};
+
+
+#act {^-M-_%*} {
+    #var mob[long] %1;
+    #var foundTimes 1;
+    #var mobIndex 1;
+    #var botTarget 0;
+    
+    #NOP -- Mob health if it has not taken damage does not appear and is 100%;
+    #var tmpHealth 100;
+    #regex {$mob[long]} {(%d%)} {#var tmpHealth &1};
+
+    #NOP -- Clean up the mob long a bit;
+    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
+    #regex {$mob[long]} {7B{[0-9]+}} {#var foundTimes &1;#replace mob[long] { \\x7B%*} {};};
+    #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
+    #format {mob[long]} {%p} {$mob[long]};
+
+    #if $bot[active] {
+        #foreach $bot[mobs][%*] botmob {
+        #regexp {$mob[long]} {$botmob[long]} {
+                #var bot[foundmob] 1;
+                #var mob[target] $botmob[target];
+                #var botTarget 1;
+            };
+        };
+        #undelay {bot_kick};
+        #undelay {bot_restart};
+    };
+
+    #NOP -- Separate mage summons into their own group/exclude from room[mobs];
+    #regex {$mob[long]} {%* [summons] (%d%)%*} {
+        #var summonIndex 1;
+        #var debug[room] {#echo {<cfa>DEBUG ROOM: Summon found &0}};
+        #format tmpSummonName {%p} {&0};
+        #replace tmpSummonName { [summons]%*} {};
+        #var summonTankIndex 1;
+        
+        #NOP -- We don't want to assign the Golem to tanking since it's damage drops if it's tanking;
+        #var skipSummon 0;
+        
+        #if {$foundTimes == 1} {
+            #if {&room[summons] > 0} {
+                #var tmpFound 0;
+                #foreach $room[summons][%*] tmpItem {
+                    #if {"$tmpItem[name]" == "$tmpSummonName"} {
+                        #math summonIndex {$tmpItem[index] + 1};
+                    };
+                };
+                #list room[summons] add {{{name} {$tmpSummonName} {health} {&2} {index} {$summonIndex}}};
+            };
+        } {
+            #loop 1 $foundTimes tmpIndex {
+                #list room[summons] add {{{name} {$tmpSummonName} {health} {&2} {index} {$tmpIndex}}};
+            };
+        };
+
+        #if $summonTankCheck {
+            #regex {"$tmpSummonName"} {"%*Golem%*"} {#var skipSummon 1};
+            #if !$skipSummon {
+                #var summonTankIndex 1;
+                #foreach $summonTankList[%*] item {
+                    #if {"$item[name]" == "$tmpSummonName"} {#math summonTankIndex {$summonTankIndex + 1}};
+                };
+                #list summonTankList add {{{name} {$tmpSummonName} {health} {&2} {index} {$summonTankIndex}}};
+            };
+        };
+    } {
+        #if {$foundTimes == 1} {
+            #if {&room[mobs] > 0} {
+                #var tmpFound 0;
+                #foreach $room[mobs][%*] tmpItem {
+                    #if {"$tmpItem[name]" == "$mob[long]"} {
+                        #math mobIndex {$tmpItem[index] + 1};
+                    };
+                };
+                #list room[mobs] add {{{name} {$mob[long]} {health} {$tmpHealth} {index} {$mobIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+            };
+        } {
+            #loop 1 $foundTimes tmpIndex {
+                #list room[mobs] add {{{name} {$mob[long]} {health} {$tmpHealth} {index} {$tmpIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+            };
+        };
+    };
+} {2};
 
 #class common_room close;

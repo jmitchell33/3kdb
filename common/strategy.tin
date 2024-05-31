@@ -103,10 +103,12 @@
 #list strategyList add {{{guild} {necromancer} {name} {bloodlet}  {active} {0} {description} {Vamp: Bloodlet}}};
 #list strategyList add {{{guild} {necromancer} {name} {bloodfuse}  {active} {0} {description} {Vamp: Bloodfuse}}};
 #list strategyList add {{{guild} {necromancer} {name} {rage}  {active} {0} {description} {Vamp: Rage}}};
+#list strategyList add {{{guild} {necromancer} {name} {rage_prime}  {active} {0} {description} {Vamp: Rage Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {illume}  {active} {0} {description} {Pure: Illume}}};
 #list strategyList add {{{guild} {necromancer} {name} {skullfire}  {active} {0} {description} {Pure: Skullfire}}};
 #list strategyList add {{{guild} {necromancer} {name} {corrode}  {active} {0} {description} {Pure: Corrode}}};
 #list strategyList add {{{guild} {necromancer} {name} {psibleed}  {active} {0} {description} {Pure: Psibleed}}};
+#list strategyList add {{{guild} {necromancer} {name} {shackle}  {active} {0} {description} {Pure: Shackle}}};
 #list strategyList add {{{guild} {necromancer} {name} {diurnum}  {active} {0} {description} {Necro: Diurnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {nocturnum}  {active} {0} {description} {Necro: Nocturnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
@@ -143,6 +145,7 @@
         #foreach $strategyActive[%*] item {
             #if {"$item[name]" == "%1"} {
                 #var strategy_found 1;
+                #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %2<088>}};
                 %2;
             };
         };
@@ -257,13 +260,15 @@
         #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
 
         checkStrategy {snare} {snare};
+        checkStrategy {shackle} {shackle};
         checkStrategy {rabies} {rabies};
         checkStrategy {corrode} {corrode};
         checkStrategy {scythe} {scythe};
         checkStrategy {call} {call};
-        checkStrategy {fury_prime} {fury prime};
+        checkStrategy {fury_prime} {#if {$my[necromancer][glamors][current]} {fury prime}};
         checkStrategy {fury} {#if {$my[necromancer][glamors][current]} {fury}};
-        checkStrategy {rage} {rage prime};
+        checkStrategy {rage_prime} {#if {$my[necromancer][glamors][current]} {rage prime}};
+        checkStrategy {rage} {#if {$my[necromancer][glamors][current]} {rage}};
         checkStrategy {psibleed} {psibleed};
         checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
     };
@@ -407,8 +412,8 @@
 #alias _strategy_heartbeat {
     #if {!$idle_flag && $action_round < $mip[round]} {
 
-        #NOP -- Actions to perform the first round of combat;
-        #if {$mip[round] == 1} {
+        #NOP -- Actions to perform the first rounds of combat;
+        #if {$mip[round] >= 1 && $mip[round] <= 3} {
             #if {"$guild" == "necromancer"} {_strategy_necro_start};
         };
 

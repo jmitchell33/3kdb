@@ -1,0 +1,159 @@
+#NOP Corpse Sorter Version 3.3
+#NOP By Balthus.
+
+#NOP *** Corpses are dropped on the ground to swap/sort them. ***
+#NOP *** Therefore be careful where you choose to do a sort.  ***
+
+#NOP ALIASES TO HANDLE CORPSE MOVEMENT:
+
+#ALIAS {.cs_me_get}       {#SEND {!get preservation %1};};
+#ALIAS {.cs_me_drop}      {#SEND {!drop preservation %1};};
+#ALIAS {.cs_minion_get}   {#SEND {!=get preservation %1};};
+#ALIAS {.cs_minion_drop}  {#SEND {!=drop preservation %1};};
+#NOP #ALIAS {.cs_smuggle_get}  {#SEND {!qtrance get preservation %1/smuggle preservation};};
+#NOP #ALIAS {.cs_smuggle_drop} {#SEND {!qtrance smuggle remove preservation %1/drop preservation};};
+#ALIAS {.cs_coffin_get}   {#SEND {!wrap};};
+#ALIAS {.cs_coffin_drop}  {#SEND {!unwrap %1};};
+
+#VAR {_corpses[listname]}      {me};
+#VAR {_corpses[me][list]}      {};
+#VAR {_corpses[minion][list]}  {};
+#VAR {_corpses[smuggle][list]} {};
+#VAR {_corpses[coffin][list]}  {};
+
+#ACTION {Listing the corpses carried by your undead follower master...}
+{
+    #VAR {_corpses[listname]} {minion};
+};
+
+#NOP #ACTION {Items you are currently smuggling}
+#NOP {
+#NOP     #VAR {_corpses[listname]} {smuggle};
+#NOP };
+
+#ACTION {Your enchanted coffin contains}
+{
+    #VAR {_corpses[listname]} {coffin};
+};
+
+#ACTION {You speak: Corpse List Finished}
+{
+    .aProcessCorpse;
+};
+
+#ACTION {{([\(\[])([\-\|\*]{5})[\)\]]\s.*$}}
+{
+    #LIST {_corpses[$_corpses[listname]][list]} {ins} {-1} {@fCorpseSize{%0}};
+};
+
+#ALIAS {.aProcessCorpse}
+{
+    #NOP #WHILE {@fSwapCorpse{{me}{smuggle}} > 0}     {#NOP;};
+    #WHILE {@fSwapCorpse{{me}{minion}} > 0}      {#NOP;};
+    #WHILE {@fSwapCorpse{{me}{coffin}} > 0}      {#NOP;};
+    #NOP #WHILE {@fSwapCorpse{{minion}{smuggle}} > 0} {#NOP;};
+    #WHILE {@fSwapCorpse{{coffin}{minion}} > 0}  {#NOP;};
+    #NOP #WHILE {@fSwapCorpse{{smuggle}{coffin}} > 0} {#NOP;};
+    .aSortCorpse {me};
+    .aSortCorpse {minion};
+    #NOP .aSortCorpse {smuggle};
+    #VAR {my[corpse][held][list]}    {$_corpses[me][list]};
+    #VAR {my[corpse][minion][list]}  {$_corpses[minion][list]};
+    #NOP #VAR {my[corpse][smuggle][list]} {$_corpses[smuggle][list]};
+    #VAR {my[corpse][coffin][list]}  {$_corpses[coffin][list]};
+    #CLASS {$path[guild]/scripts/CorpseSort.tin} {kill};
+};
+
+#ALIAS {.aSortCorpse}
+{
+    #VAR {_corpses[%1][sortpos]} {0};
+    #VAR {_corpses[%1][max][size]} {0};
+    #VAR {_corpses[%1][count]} {0};
+    #IF {&_corpses[%1][list][1] == 0} {#RETURN;}
+    #FOREACH {*_corpses[%1][list][]} {v}
+    {
+        #IF {$_corpses[%1][list][$v] > $_corpses[%1][max][size]}
+        {
+            #VAR {_corpses[%1][max][size]} {$_corpses[%1][list][$v]};
+        };
+        #IF {$_corpses[%1][list][$v] < $_corpses[%1][max][size]}
+        {
+            #VAR {_corpses[%1][sortpos]} {$v};
+        };
+        #MATH {_corpses[%1][count]} {$_corpses[%1][count] + 1};
+    };
+    #MATH {_corpses[%1][max][size]} {$_corpses[%1][max][size] - 1};
+    #LOOP {$_corpses[%1][max][size]} {1} {i}
+    {
+        #FOREACH {$_corpses[%1][list]} {j}
+        {
+            #IF {$j <= $_corpses[%1][sortpos]}
+            {
+                #IF {$_corpses[%1][list][$j] == $i && $j > 1}
+                {
+                    .cs_%1_drop {$j};
+                    .cs_%1_get;
+                    #LIST {_corpses[%1][list]} {del} {$j};
+                    #LIST {_corpses[%1][list]} {ins} {1} {&i};
+                };
+            };
+        };
+    };
+};
+
+/* @fSwapCorpse{{container1}{container2}} */
+/* Checks if largest corpse from container 1 is bigger than smallest from container 2 */
+/* Swaps the two if true */
+#FUNCTION {fSwapCorpse}
+{
+    #IF {&_corpses[%1][list][1] == 0}
+    {
+        #RETURN 0;
+    };
+    #IF {&_corpses[%2][list][1] == 0}
+    {
+        #RETURN 0;
+    };
+    #VAR {_corpses[%1][max][pos]} {0};
+    #VAR {_corpses[%1][max][size]} {0};
+    #FOREACH {*_corpses[%1][list][]} {i}
+    {
+        #IF {$_corpses[%1][list][$i] > $_corpses[%1][max][size]}
+        {
+            #VAR {_corpses[%1][max][size]} {$_corpses[%1][list][$i]};
+            #VAR {_corpses[%1][max][pos]} {$i};
+        };
+    };
+    #VAR {_corpses[%2][min][pos]} {999};
+    #VAR {_corpses[%2][min][size]} {999};
+    #FOREACH {*_corpses[%2][list][]} {i}
+    {
+        #IF {$_corpses[%2][list][$i] < $_corpses[%2][min][size]}
+        {
+            #VAR {_corpses[%2][min][size]} {$_corpses[%2][list][$i]};
+            #VAR {_corpses[%2][min][pos]} {$i};
+        };
+    };
+    #IF {$_corpses[%1][max][size] > $_corpses[%2][min][size]}
+    {
+        .cs_%2_drop {$_corpses[%2][min][pos]};
+        .cs_%1_drop {$_corpses[%1][max][pos]};
+        .cs_%2_get;
+        .cs_%1_get;
+        #LIST {_corpses[%1][list]} {del} {$_corpses[%1][max][pos]};
+        #LIST {_corpses[%1][list]} {ins} {1} {$_corpses[%2][min][size]};
+        #LIST {_corpses[%2][list]} {del} {$_corpses[%2][min][pos]};
+        #LIST {_corpses[%2][list]} {ins} {1} {$_corpses[%1][max][size]};
+        #RETURN 1;
+    };
+        #ELSE
+    {
+        #RETURN 0;
+    };
+};
+
+#SEND {!ic};
+#SEND {!iu c};
+#NOP #SEND {!smuggle};
+#SEND {!icof};
+#SEND {!nsay Corpse List Finished};

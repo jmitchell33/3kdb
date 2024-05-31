@@ -227,30 +227,6 @@
 #NOP -- Ignore your familiar for any mob checks, if you see it in the room set go_fetch to 0;
 #action {^-M-_${my[familiar]}.$} {#NOP;#var go_fetch 0} {1};
 
-#action {^-M-_%* [summons] (%d%)%*} {
-	#format tmpSummonName {%p} {%1};
-	#var summonTankIndex 1;
-	#var mobIndex 1;
-	#var skipSummon 0;
-	#regex {%3} {7B{[0-9]+}} {#var mobIndex &1};
-	
-	#loop 1 $mobIndex tmpIndex {
-		#list room[summons] add {{{name} {$tmpSummonName} {health} {%2} {index} {$tmpIndex}}};
-	};
-
-	#if $summonTankCheck {
-		#NOP -- We don't want to assign the Golem to tanking since it's damage drops if it's tanking;
-		#regex {"$tmpSummonName"} {"%*Golem%*"} {#var skipSummon 1};
-		#if !$skipSummon {
-			#var summonTankIndex 1;
-			#foreach $summonTankList[%*] item {
-				#if {"$item[name]" == "$tmpSummonName"} {#math summonTankIndex {$summonTankIndex + 1}};
-			};
-			#list summonTankList add {{{name} {$tmpSummonName} {health} {%2} {index} {$summonTankIndex}}};
-		};
-	};
-} {1};
-
 #alias .summonLookupName {
 	#var tmpName %0;
 	#switch {"$tmpName"} {
