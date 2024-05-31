@@ -25,8 +25,10 @@
 		};
 		
 		#var action_round $mip[round];
-		#if {"$draw[hpbar][active]" == "on"} {draw_hpbar};
-		#if {"$draw[ticker][active]" == "on"} {draw_ticker};
+		#if $mapFullScreen {#NOP} {
+			#if {"$draw[hpbar][active]" == "on"} {draw_hpbar};
+			#if {"$draw[ticker][active]" == "on"} {draw_ticker};
+		};
     } {2};
 };
 

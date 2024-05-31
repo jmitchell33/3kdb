@@ -101,10 +101,7 @@
     #var lastBot $bot;
     #unvar bot;
     #unalias {..};
-    #unalias {.onPrompt};
-    #unact {^>$};
     #class {bot} {kill};
-    #class {xbot} {kill};
     #echo {Bot killed.};
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
@@ -122,58 +119,6 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
-#act {^-M-_%*} {
-    #var mob[long] %1;
-    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
-    #regex {$mob[long]} {7B{[0-9]+}} {#replace mob[long] { \\x7B%*} {};};
-    #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
-    #format {mob[long]} {%p} {$mob[long]};
-
-    #foreach $bot[mobs][%*] botmob {
-        #regexp {$mob[long]} {$botmob[long]} {
-            #var bot[foundmob] 1;
-            #var mob[target] $botmob[target];
-        };
-    };
-    #undelay {bot_kick};
-    #undelay {bot_restart};
-    #list room[mobs] add $mob[long];
-} {2};
-
-
-#act {^{-i-|-w-|-a-|-o-}%*.$} {
-    #var item_number 1;
-    #var item_long %2;
-
-    #replace item_long {.} {};
-    #replace item_long { \[%*\]} {};
-
-    #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
-    #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
-
-    #list room[items] add $item_long;
-
-    #if {$bot[active] && !$bot[paused] && $bot[walk]} {
-        #if {$collector[items]} {
-            #foreach $item_grab_list[%*] item {
-                #regexp {"$item_long"} {$item[long]} {
-                    #$item_number get $item[target];
-                    #if {"$guild" == "bard"} {
-                        identify $item[target];
-                    };
-                    #if {"$guild" == "priest"} {
-                        recognize $item[target];
-                    };
-                    #if {"$item[target]" == "bag"} {
-                        #loop 2 20 i {put bag in bag $i};
-                    };
-                };
-            };
-        };
-    };
-} {2};
-
-
 #alias .botStep {
     #if !$bot[paused] {
         #if {$bot[step] >= &bot[steps][]} {
@@ -186,83 +131,52 @@
     };
 };
 
-#NOP -- starts or continues the bot after it's loaded;
-#alias {..} {
-    #class {xbot} {open};
-	#var bot[paused] 0;
-
-    #act {{^-R-_(.*)-R-_}} {
-        .clearRoomData;
-        #if {!$bot[paused]} {
-            #var room_short %%1;
-            #var room_item 0;
-            .onRoom;
-        };
-    } {1};
-
-	#alias {.onRoom} {
-        #var bot[foundmob] 0;
-        #var bot[foundobject] 0;
-        #var bot[foundplayer] 0;
-        #var bot[aggro-mob] 0;
-        .prompt;
-	};
-
-    #alias {.prompt} {
-        #act {^>$} {.onPrompt} {1};
-    };
-
-	#alias {.onPrompt} {
-        #if {$bot[foundplayer]} {
-            #if $botDebug {#echo {found player - stepping}};
-            .stop_prompt;
-            #var bot[walk] 1;
-           .botStep;
-        } {
-            #if {$collector[items]} {
-                #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
-            };
-            #if {$bot[foundmob]} {
-                .stop_prompt;
-                .pre_fight_check;
-
-                #unact {{^-R-_(.*)-R-_}};
-                #if {!$bot[aggro-mob]} {
-                    #if {$mob_kill_action} {
-                        .mob_kill_action;
-                    } {
-                        kill $mob[target];
-                    };
-                };
-            } {
-                #if {$bot[foundobject]} {
-                    #send $object_action;
-                    #var bot[foundobject] 0;
-                } {
-                    .stop_prompt;
-                    #if {$check_room} {
-                        .check_room;
-                    } {
-                        #if $botDebug {#echo {no mob or item, walking}};
-                        #var bot[walk] 1;
-                        .botStep;
-                    };
-                };
-            };
-        };
-    };
-
-    #alias {.stop_prompt} {
-        #map get roomvnum bot[curVnum];
-        #unact {^>$};
-        #var bot[walk] 0;
-        #if {"$draw[status][active]" == "on"} {draw_caption_status};
-    };
-    
-	glance;
-
-	#class {xbot} {close};
+#alias {.botStopWalking} {
+    #map get roomvnum bot[curVnum];
+    #var bot[walk] 0;
+    #if {"$draw[status][active]" == "on"} {draw_caption_status};
 };
+
+#alias {.determineBotAction} {
+    .botStopWalking;
+    #if {$bot[foundplayer]} {
+        #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Found player - calling .botStep<088>}};
+        #var bot[walk] 1;
+        .botStep;
+    } {
+        #if {$collector[items]} {
+            #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
+        };
+        #if {$bot[foundmob]} {
+            #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Mob in the list has been found<088>}};
+            .pre_fight_check;
+
+            #if {!$bot[aggro-mob]} {
+                #if {$mob_kill_action} {
+                    .mob_kill_action;
+                } {
+                    kill $mob[target];
+                };
+            };
+        } {
+            #if {$bot[foundobject]} {
+                #send $object_action;
+                #var bot[foundobject] 0;
+            } {
+                #if {$check_room} {
+                    .check_room;
+                } {
+                    #if $debug[bot] {#echo {<cfa>BOT DEBUG: No mob, no item, no check room - calling .botStep<088>}};
+                    #var bot[walk] 1;
+                    .botStep;
+                };
+            };
+        };
+    };
+};
+
+#NOP -- starts or continues the bot after it's loaded;
+#alias {..} {glance};
 
 #alias {.bot} {#if {$bot[paused] == 0} {..}};
 
@@ -309,13 +223,6 @@
         };
     };
 } {5};
-
-/* Signify there is a player in the room, if not in friends list */
-#act {{^-P-_(.*)}} {
-    #if $bot[playercheck] {
-        #var bot[foundplayer] 1;
-    };
-} {2};
 
 
 /* Bot end actions... */

@@ -15,7 +15,16 @@
 	};
 } {1};
 
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {#var hockey_corpse 1;preserve remains;absorb;} {1};
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {
+	#var hockey_corpse 1;
+	preserve remains;
+	#NOP -- If red spark hits, don't absorb it and save the corpse;
+	#if $spark_corpse {
+		get preservation;keep all preservation;#var hockey_corpse 0;
+	} {
+		absorb;
+	};
+} {1};
 
 #NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
 #act {^-M-_A Colossal Inductor} {(immortality} {1};

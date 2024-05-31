@@ -2,6 +2,9 @@
 #class {guild_actions} {open}
 
 #list dgraft clear;
+#var my[necromancer][repowers] 0;
+#var my[necromancer][spark-corpse] 0;
+#var spark_corpse 0;
 
 #NOP --------------------------------------- NECROMANCER SPECIFIC ACTIONS ------------------------------------------;
 #action {%*The protective spirits break away from your body, fading into nothingness.$} {#if !$idle_flag {protection}};
@@ -18,7 +21,35 @@
 #act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1} {2};
 #act {The creature has been permanently maimed!} {#var mob[maim] 1;#math my[necromancer][maim] {$my[necromancer][maim] - 1}} {2};
 
+
+#unvar moonSparkList;
+#unvar planeSparkList;
+#var stats[corpses][preserved] 0;
 #NOP --------------------------------------- NECROMANCER STATUS TRACKING  ------------------------------------------;
+
+#action {You prepare the corpse with your innate, necromantic energies.} {
+    #math stats[corpses][preserved] {$stats[corpses][preserved] + 1};
+} {2};
+#action {A spark of red energy appears out of nowhere and enters the corpse.} {
+    #var spark_corpse 1;
+    #list moonSparkList find {$my[necromancer][moon][current]} {foundMoon};
+    #list planeList find {$my[necromancer][plane][current]} {planeIndex};
+    #list planeSparkList find {$planeIndex} {foundPlane};
+    #if $foundMoon {
+        #math moonSparkList[$my[necromancer][moon][current]] {$moonSparkList[$my[necromancer][moon][current]] + 1};
+    } {
+        #var moonSparkList[$my[necromancer][moon][current]] 1;
+    };
+
+    #if $foundPlane {
+        #math planeSparkList[$planeIndex] {$planeSparkList[$planeIndex] + 1};
+    } {
+        #var planeSparkList[$planeIndex] 1;
+    };
+    
+    #math my[necromancer][spark-corpse] {$my[necromancer][spark-corpse] + 1};
+    #delay .5 {#var spark_corpse 0};
+} {2};
 #act {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1};
 #act {You are already altered into %* form %w.}{#var my[necromancer][altered] 1};
 #act {You return to your normal were form.}{#var my[necromancer][altered] 1};
@@ -42,6 +73,7 @@
     #var my[necromancer][souls] 0;
     #var my[necromancer][skullfire] 0;
     #var my[necromancer][unholy_ground] 0;
+    #math my[necromancer][repowers] {$my[necromancer][repowers] + 1};
     #send {!repower};
 };
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
