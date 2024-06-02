@@ -80,10 +80,21 @@
     };
 } {2};
 
+#NOP -- Clean up the mob long a bit;
+#alias .mobNameClean {
+    #var foundTimes 1;
+    #var mob[long] %0;
+    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
+    #regex {$mob[long]} {7B{[0-9]+}} {#var foundTimes &1;#replace mob[long] { \\x7B%*} {};};
+    #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
+    #format {mob[long]} {%p} {$mob[long]};
+    #replace mob[long] { [scratched]%*} {};
+    #replace mob[long] { [wounded]%*} {};
+    #replace mob[long] { [dying]%*} {};
+};
 
 #act {^-M-_%*} {
-    #var mob[long] %1;
-    #var foundTimes 1;
+    .mobNameClean %1;
     #var mobIndex 1;
     #var botTarget 0;
     
@@ -91,11 +102,7 @@
     #var tmpHealth 100;
     #regex {$mob[long]} {(%d%)} {#var tmpHealth &1};
 
-    #NOP -- Clean up the mob long a bit;
-    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
-    #regex {$mob[long]} {7B{[0-9]+}} {#var foundTimes &1;#replace mob[long] { \\x7B%*} {};};
-    #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
-    #format {mob[long]} {%p} {$mob[long]};
+    
 
     #if $bot[active] {
         #foreach $bot[mobs][%*] botmob {
@@ -112,7 +119,7 @@
     #NOP -- Separate mage summons into their own group/exclude from room[mobs];
     #regex {$mob[long]} {%* [summons] (%d%)%*} {
         #var summonIndex 1;
-        #var debug[room] {#echo {<cfa>DEBUG ROOM: Summon found &0}};
+        #if $debug[room] {#echo {<cfa>DEBUG ROOM: Summon found &0}};
         #format tmpSummonName {%p} {&0};
         #replace tmpSummonName { [summons]%*} {};
         #var summonTankIndex 1;
@@ -147,6 +154,7 @@
             };
         };
     } {
+        #NOP -- THIS SECTION HANDLES MOBS OTHER THAN MAGE SUMMONS;
         #if {$foundTimes == 1} {
             #if {&room[mobs] > 0} {
                 #var tmpFound 0;
