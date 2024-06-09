@@ -120,6 +120,7 @@
 			#CASE {"mage"}			{.mipProcessGlineMage {%1}};
 			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
+			#CASE {"fremen"}        {.mipProcessGlineFremen {%1}};
 		}
 	};
 };
@@ -222,6 +223,33 @@
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	}
+};
+
+#ALIAS {.mipProcessGlineFremen} {
+	#IF {%1 == 1} {
+		#REGEX {$mip[gline][1]} {FOCUS: %w} {#VAR {my[litany][focus]} {&1}}; 
+		#REGEX {$mip[gline][1]} {GXP: %d} {#VAR {my[g2n]} {&1}};
+		#math {my[gxp][last_round]} {$my[g2n]};
+        #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
+        #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
+        #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
+        #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+        #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
+        #format {my[gxp][str_total]} {%M} {$my[gxp][total]};
+        #format {my[gxp][str_total]} {%p} {$my[gxp][str_total]};
+        #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
+        .gxp_time;
+	}; #ELSEIF {%1 == 2} {
+		#REGEX {$mip[gline][2]} {POISON: %d/%d\%} {
+			#VAR {my[fremen][poisons]} {&1};
+			#VAR {my[poisons][reset]} {&2};
+		};
+		#REGEX {$mip[gline][2]} {LIMBERNESS: %d\%} {
+			#VAR {my[limberness]} {&1};
+		}; #ELSE {
+			#ECHO {<171> Invalid Gline Number <088>};
+		}
+	};
 };
 
 #ALIAS {.mipProcessGlineJuggernaut} {
