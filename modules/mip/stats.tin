@@ -229,7 +229,7 @@
 	#IF {%1 == 1} {
 		#REGEX {$mip[gline][1]} {FOCUS: %w} {#VAR {my[litany][focus]} {&1}}; 
 		#REGEX {$mip[gline][1]} {GXP: %d} {#VAR {my[g2n]} {&1}};
-		#math {my[gxp][last_round]} {$my[g2n]};
+		#VAR {my[gxp][last_round]} {$my[g2n]};
         #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
         #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
         #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
