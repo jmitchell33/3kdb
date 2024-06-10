@@ -150,6 +150,9 @@
         #if {$bot[foundmob]} {
             #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Mob in the list has been found<088>}};
             .pre_fight_check;
+            #if {$pre_fight_actions} {
+                .pre_fight_actions;
+            };
 
             #if {!$bot[aggro-mob]} {
                 #if {$mob_kill_action} {
@@ -189,6 +192,9 @@
         #var bot[foundmob] 0;
         #var bot[aggro-mob] 0;
         #if !$idle_flag {
+            #if $after_death {
+                .after_death;
+            };
             #if $actions_stacked {
                 do_action;
                 #delay 2 {
@@ -198,12 +204,11 @@
                         .bot;
                     };
                 };
+            };
+            #if $check_death {
+                .check_death;
             } {
-                #if $check_death {
-                    .check_death;
-                } {
-                    #delay .5 {.bot};
-                };
+                #delay .5 {.bot};
             };
         };
     };

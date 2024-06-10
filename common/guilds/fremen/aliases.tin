@@ -1,7 +1,22 @@
 #class {guild_aliases} {kill}
 #class {guild_aliases} {open}
 
-#NOP --- GUILD SPECIFIC ALIASES
+#NOP -- donate water otherwise reclaim;
+#var watertoggle;
+#math {watertoggle} {$my[gp1][max] / 2};
+#alias {fremCorpse} {
+    #if {$my[gp1][current] > $watertoggle} {
+        #send !fai;
+    }; #else {
+        #send !reclaim;
+    };
+};
 
+#NOP -- fill and donate literjons at shamoom;
+#alias {donate_water} {
+    acquire all;
+    fill all;
+    donate all
+};
 
 #class {guild_aliases} {close}
