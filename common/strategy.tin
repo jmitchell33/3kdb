@@ -138,8 +138,6 @@
 #list strategyList add {{{guild} {juggernaut} {name} {mech_resummon} {active} {0} {description} {Mech: Dismiss & resummon back into defend mode}}};
 #list strategyList add {{{guild} {fremen} {name} {ambush} {active} {0} {description} {Fremen: Ambush your mobs with a crippling first blow}}};
 #list strategyList add {{{guild} {fremen} {name} {agony} {active} {0} {description} {Fremen: Inflict pain (mind dmg)}}};
-#list strategyList add {{{guild} {fremen} {name} {hide} {active} {0} {description} {Fremen: Hide in the shadows before ambushing mob}}};
-#list strategyList add {{{guild} {fremen} {name} {poison} {active} {0} {description} {Fremen: Add poison to your weapon}}};
 #list strategyList add {{{guild} {fremen} {name} {stun} {active} {0} {description} {Fremen: Stun mobs with a poison pellet}}};
 #list strategyList add {{{guild} {fremen} {name} {voicehold} {active} {0} {description} {Fremen: Causes mob to stop fighting for a short time}}};
 #list strategyList add {{{guild} {fremen} {name} {voicefeeble} {active} {0} {description} {Fremen: Mind AC shred}}};
@@ -492,15 +490,7 @@
     #var pre_fight_actions 1;
     #alias {.pre_fight_actions} {
         checkStrategy {ambush} {ambush $mob[target]};
-    };
-};
-
-#NOP -- Actions to perform after kill;
-#if {"$guild" == "fremen"} {
-    #var after_death 1;
-    #alias {.after_death} {
-        checkStrategy {hide} {#if {!$incombat != 1} {hide}};
-        checkStrategy {poison} {#if {$my[fremen][poisons] > 0} {poison}};
+        kill $mob[target];
     };
 };
 
