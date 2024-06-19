@@ -228,9 +228,7 @@
      strategy spelltap;
      strategy super_sub;
      strategy summon_mf;
-     strategy gstrength;
-     strategy epowers;
-     strategy rolm
+     strategy gstrength
 };
 
 #NOP -- strategy setup for summons defending;
@@ -242,9 +240,19 @@
      strategy spelltap;
      strategy super_sub;
      strategy summon_mf;
-     strategy gstrength;
-     strategy epowers;
-     strategy rolm
+     strategy gstrength
+};
+
+#NOP -- default strategy;
+#alias {mystrategy} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_assist;
+     strategy spelltap;
+     strategy super_sub;
+     strategy summon_mf;
+     strategy gstrength
 };
 
 #NOP -- clear strategies;
@@ -257,7 +265,6 @@
      clear_sconfig;
      shoo;
      mystrategy-assist;
-     ms golema;
      ms 7a
 };
 
@@ -265,8 +272,23 @@
      clear_sconfig;
      shoo;
      mystrategy-defend;
-     ms golema;
      ms 7d
+};
+
+#alias {killmode} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 7##2#1500#70#defend#summons#always;
+     ms 6##2#1500#70#assist#summons#always
+};
+
+#alias {killmode2} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 6##2#1500#70#defend#summons#always;
+     ms 7##2#1500#70#assist#summons#always
 };
 
 #NOP -- aliases to setup strategies for phantasmal killer;
@@ -290,9 +312,9 @@
      corpsetrig+ divvy;
      corpsetrig+ getAll;
      corpsetrig+ crafting;
+     corpsetrig+ pPocket;
      corpsetrig+ spellbook;
-     corpsetrig+ szCaps;
-     corpsetrig+ ted
+     corpsetrig+ szCaps
 };
 
 #NOP -- solo kill trig without get all;
@@ -302,11 +324,7 @@
      corpsetrig+ wrap;
      corpsetrig+ cBlasat2;
      corpsetrig+ divvy;
-     corpsetrig+ getAll;
-     corpsetrig+ crafting;
-     corpsetrig+ spellbook;
-     corpsetrig+ szCaps;
-     corpsetrig+ ted
+     corpsetrig+ spellbook
 };
 
 #NOP -- party kill trig;
@@ -324,10 +342,7 @@
      corpsetrig+ wrap;
      corpsetrig+ cBlast2;
      corpsetrig+ divvy;
-     corpsetrig+ crafting;
-     corpsetrig+ pPocket;
-     corpsetrig+ spellbook;
-     corpsetrig+ ted
+     corpsetrig+ spellbook
 };
 
 #alias {corpseoff} {

@@ -4,16 +4,6 @@
 #var corpse_delay 1;
 #var corpse_use 200;
 
-#alias {_player_heartbeat} {
-    #if {!$idle_flag} {
-        #if {$bot[active] && $my[hp][current] < 600} {
-            .pause;
-        };
-        #if {$bot[paused] && "$my[hp][current]" == "$my[hp][max]" } {
-            .unpause;
-            ..;
-        };
-    };
-};
+#alias {_player_heartbeat} {#NOP};
 
 #class {player_heartbeat} {close}
