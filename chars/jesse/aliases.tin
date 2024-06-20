@@ -9,36 +9,57 @@
     };
 };
 
-#NOP -- animate dead;
-#alias {adead} {
-    qtrance animate dead/study tome/chant/study tome/=lead/keep tome
-};
-
 #NOP -- aliases to setup strategies;
 #NOP -- default;
 #alias {mystrategy} {
     strategy-clear;
-    strategy rolm;
-    strategy call;
-    strategy fury
+    strategy ambush;
+    strategy agony;
+    strategy stun;
+    strategy voicefeeble;
+    strategy spicebeer;
+    strategy focus
+};
+
+#alias {stclear} {
+    strategy-clear
 };
 
 #NOP -- aliases to setup corpsetrig;
-#NOP -- default corpse trig;
+#NOP -- default corpse trig - donate water otherwise recover water;
 #alias {mycorpsetrig} {
     corpsetrig-clear;
-    corpsetrig+ wrap;
-    corpsetrig+ absorbSp2;
+    corpsetrig+ fremcorpse;
+    corpsetrig+ divvy;
+    corpsetrig+ hide;
+    corpsetrig+ poison
+};
+
+#NOP -- corpsetrig to donate water from a corpse;
+#alias {mycorpsetrig-dwater} {
+    corpsetrig-clear;
+    corpsetrig+ fai;
+    corpsetrig+ divvy
+};
+
+#NOP -- corpsetrig to recover water from a corpse;
+#alias {mycorpsetrig-water} {
+    corpsetrig-clear;
+    corpsetrig+ reclaim;
+    corpsetrig+ divvy
+};
+
+#NOP -- corpsetrig for sectionz;
+#alias {mycorpsetrig-sz} {
+    corpsetrig-clear;
+    corpsetrig+ fremcorpse;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
     corpsetrig+ crafting;
-    corpsetrig+ conWorth
-};
-
-#NOP -- corpsetrig for partying;
-#alias {mycorpsetrig-party} {
-    corpsetrig-clear;
-    corpsetrig+ conWorth
+    corpsetrig+ szCaps;
+    corpsetrig+ szGreenCap;
+    corpsetrig+ hide;
+    corpsetrig+ poison
 };
 
 #alias {corpseoff} {
@@ -109,6 +130,80 @@
     imprint wisdom;quaff flask
 };
 
+#NOP -- numpad off & on;
+#alias {numoff} {
+    #class numpad kill
+};
 
+#alias {numon} {
+    #read chars/$user/numpad.tin
+};
+
+#NOP -- reset my brief settings after using inductor stepper;
+#alias {mybrief} {
+    #send !brief off yes
+};
+
+#NOP -- jesses 3kdb aliases;
+
+#alias format_jessesaliases {
+    #format {jessealias_name} {%-25s} {%1};
+    #format {jessealias_desc} {%-30s} {%2};
+    #showme $jessealias_name $jessealias_desc;
+};
+
+#alias jesse3kdb {
+    #var tempflag 0;
+    #var number &jesse3kdb[];
+	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------    <ffa>JESSE'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
+    #showme {                  <eaf>guild<088>                        };
+    #showme {<ccf>  ----------------------------------------   <088>  };
+    #showme {<ccf>     Name                 Usage              <088>  };
+    #list jesse3kdb index name;
+    #list jesse3kdb sort;
+    #foreach $jesse3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_jessesaliases {     $index[name]} {$index[desc]};
+        }
+    };
+    #if !$tempflag {
+        #foreach $jesse3kdb[%*] index {
+            format_jessesaliases {     $index[name]} {$index[desc]};
+        };
+    };
+};
+
+#list jesse3kdb clear;
+
+#NOP -- corpses;
+#list jesse3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-sz} {type} {corpses} {desc} {Default corpsetrig & sz cap eating}}};
+#list jesse3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list jesse3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list jesse3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-dwater} {type} {corpses} {desc} {Corpsetrig to donate water to guild}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {Corpsetrig to recover water}}};
+
+#NOP -- boosts;
+#list jesse3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list jesse3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
+
+#NOP - combat;
+#list jesse3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list jesse3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+
+#NOP -- misc;
+#list jesse3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list jesse3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list jesse3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list jesse3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list jesse3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list jesse3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
+#list jesse3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+
+#NOP -- guild;
 
 #class {player_aliases} {close}

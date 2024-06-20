@@ -136,7 +136,13 @@
 #list strategyList add {{{guild} {juggernaut} {name} {donateF}  {active} {0} {description} {Before Reset: Donate Frenzy}}};
 #list strategyList add {{{guild} {juggernaut} {name} {nukes}  {active} {0} {description} {Before Reset: Fire Nukes}}};
 #list strategyList add {{{guild} {juggernaut} {name} {mech_resummon} {active} {0} {description} {Mech: Dismiss & resummon back into defend mode}}};
-
+#list strategyList add {{{guild} {fremen} {name} {ambush} {active} {0} {description} {Fremen: Ambush your mobs with a crippling first blow}}};
+#list strategyList add {{{guild} {fremen} {name} {agony} {active} {0} {description} {Fremen: Inflict pain (mind dmg)}}};
+#list strategyList add {{{guild} {fremen} {name} {stun} {active} {0} {description} {Fremen: Stun mobs with a poison pellet}}};
+#list strategyList add {{{guild} {fremen} {name} {voicehold} {active} {0} {description} {Fremen: Causes mob to stop fighting for a short time}}};
+#list strategyList add {{{guild} {fremen} {name} {voicefeeble} {active} {0} {description} {Fremen: Mind AC shred}}};
+#list strategyList add {{{guild} {fremen} {name} {spicebeer} {active} {0} {description} {Fremen: Drink spice beer}}};
+#list strategyList add {{{guild} {fremen} {name} {focus} {active} {0} {description} {Fremen: Concentrate your attacks on a single mob}}};
 #list strategyList indexate name;
 
 #alias checkStrategy {
@@ -155,6 +161,25 @@
     #NOP -- a different action if the strategy isn't active;
     #if {!$strategy_found && "%3" !== ""} {
         %3;
+    };
+};
+
+#if {"$guild" == "fremen"} {
+    #alias {_strategy_fremen} {
+        #if {!$idle_flag} {
+            #if {$mip[round] > 1} {
+                checkStrategy {agony} {#if {$my[gp1][current] > 0 && $my[sp][current] > 0} {agony}};
+                checkStrategy {stun} {#if {$my[gp1][current] > 0} {stun}};
+                checkStrategy {voicehold} {#if {$my[gp1][current] > 0} {voice}};
+                checkStrategy {voicefeeble} {#if {$my[gp1][current] > 0} {voice $enemy[target] to enfeeblement}};
+                checkStrategy {spicebeer} {#if {$spicebeertoggle} {smuggle remove spice beer;drink spice beer}};
+            };
+        };
+    };
+    #alias _strategy_fremen_start {
+        #if {$my[gp1][current] > 0} {
+            checkStrategy {focus} {focus};
+        };
     };
 };
 
@@ -416,13 +441,16 @@
         #if {$mip[round] >= 1 && $mip[round] <= 3} {
             #if {"$guild" == "necromancer"} {_strategy_necro_start};
         };
-
+        #NOP -- Actions to perform only once in first round;
+        #if {$mip[round] >= 1 && $mip[round] <= 1} {
+            #if {"$guild" == "fremen"} {_strategy_fremen_start};
+        };
         #NOP -- Actions to perform only in the beginning of the fight;
         #if {$mip[round] > 2 && $mip[round] < 6} {
             checkStrategy {epowers} {
                 #if $eternal {
-                    #if ${my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
-                    #if ${my[eternal][fry]} {(fry;};
+                    #if {$my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
+                    #if {$my[eternal][fry]} {(fry;};
                 };
             };
 
@@ -452,7 +480,17 @@
         #if {"$guild" == "necromancer"} {_strategy_necro};
         #if {"$guild" == "bard"} {_strategy_bard};
         #if {"$guild" == "mage"} {_strategy_mage};
-        #If {"$guild" == "juggernaut"} {_strategy_juggernaut};
+        #if {"$guild" == "juggernaut"} {_strategy_juggernaut};
+        #if {"$guild" == "fremen"} {_strategy_fremen};
+    };
+};
+
+#NOP -- Actions to perform before start of combat;
+#if {"$guild" == "fremen"} {
+    #var pre_fight_actions 1;
+    #alias {.pre_fight_actions} {
+        checkStrategy {ambush} {ambush $mob[target]};
+        kill $mob[target];
     };
 };
 
