@@ -1,26 +1,37 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
+#NOP -- reclaim corpse from stanely cup;
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {
+    #if {!$idle_flag} {
+        reclaim;
+    };
+} {1};
+
 #NOP -- reflexes;
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        #4 {bioconsume loads}
+        {#NOP}
     };
 };
 
 #NOP -- auto update linktell list;
 #action {[%w enters the game]} {
-    #if {!idle_flag} {
-        mywhosync
+    #if {!$idle_flag} {
+        mywhosync;
     };
 };
 
 #action {[%w reconnects]} {
-    mywhosync
+    #if {!$idle_flag} {
+        mywhosync;
+    };
 };
 
 #action {[%w disconnects]} {
-    mywhosync
+    #if {!$idle_flag} {
+        mywhosync;
+    };
 };
 
 #class {player_actions} {close}
