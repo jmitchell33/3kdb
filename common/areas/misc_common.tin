@@ -96,13 +96,17 @@
     search shelves;
     #if {"$guild" == "necromancer"} {shapeshift raven};
     #if {"$guild" == "bard"} {cast wings of the phoenix};
+    #if {"$guild" == "juggernaut"} {jumpjet};
     reach for jar;
-    #if {"$guild" == "necromancer"} {shapeshift};
-    #if {"$guild" == "bard"} {land};
-    get phylactery;
-    examine phylactery;
-    read runes;
-    #echo {you have to fly dumbass}
+    #delay {5} {
+        #if {"$guild" == "necromancer"} {shapeshift};
+        #if {"$guild" == "bard"} {land};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        get phylactery;
+        examine phylactery;
+        read runes;
+        #echo {you have to fly dumbass};
+    };
 };
 #alias {guy1} {$guyahicode};
 #action {Your mind is filled with the word '%w'.} {#var guyahicode %1} {2};
