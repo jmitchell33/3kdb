@@ -6,8 +6,18 @@
 
 #alias {_player_heartbeat} {
     #if !$idle_flag {
-        #NOP;
+        #if {$my[super][current] > 0 && $my[super][reset] > 95} {
+            cast explosive release;
+        };
+        #if {$bot[active] && $my[mental_cognition] < 85} {
+            .pause;
+        };
+        #if {$bot[paused] && $my[mental_cognition] > 97} {
+            .unpause;
+            ..;
+        };
     };
 };
+
 
 #class {player_heartbeat} {close}
