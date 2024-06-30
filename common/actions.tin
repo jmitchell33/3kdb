@@ -11,6 +11,36 @@
 #act {-M-_%* <.>} {#nop} {3};
 
 
+#NOP -- Hockey corpse defaults;
+#alias .hockeyCorpse {
+    #var hockey_corpse 1;
+    #if {"$guild" == "bard"} {
+        #if {$my[song][rounds] > 1} {
+            #var randNumber @rnd{1;200};
+            add_action {{{name} {$randNumber} {action} {perform dirge} {priority} {3}}};
+        } {
+            perform dirge
+        };
+    };
+    #if {"$guild" == "gentech"} {recharge;reclaim};
+    #if {"$guild" == "juggernaut"} {deener;truck deener;};
+    #if {"$guild" == "mage"} {cast corpse blast};
+    #if {"$guild" == "necromancer"} {
+        preserve remains;
+        #NOP -- If red spark hits, don't absorb it and save the corpse;
+        #if $spark_corpse {
+            get preservation;keep all preservation;#var hockey_corpse 0;
+        } {
+            absorb;
+        };
+    };
+    #if {"$guild" == "priest"} {offer corpse};
+};
+
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {.hockeyCorpse} {1};
+
+#action {^A hockey fan sprints out and dies.$} {.hockeyCorpse} {1};
+
 #NOP -- Auto defaults_on - the primary reason for turning this off is to debug things since the mip;
 #NOP -- scripts are so spammy;
 #action {^3Kingdoms welcomes you!} {defaults_on;#delay 2 {#map goto 6220}} {2};

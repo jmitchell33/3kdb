@@ -205,9 +205,9 @@
     .callCaptureMob;
             
     #line oneshot #action {^>$} {
+        #format mob[desc] {%p} {$mob[desc]};
         #loop 1 &room[mobs][] i {
             #if {"$room[mobs][$i][name]" == "$mob[long]"} {
-                #echo checking;
                 #var room[mobs][$i][items] $mob[items];
                 #var room[mobs][$i][desc] $mob[desc];
             };
@@ -221,12 +221,12 @@
 
     #event {PROCESSED LINE}{
         #format tmpLine {%p} {%%1};
-        #regex {$tmpLine} {%* must be on drugs to look that healthy.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is in perfect health.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* has a few scratches and bruises.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is bleeding from numerous wounds. } {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is destined for the emergency ward.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is waiting for Death to take %* into his arms.} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* must be on drugs to look that healthy.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is in perfect health.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* has a few scratches and bruises.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is bleeding from numerous wounds.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is destined for the emergency ward.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is waiting for Death to take %* into his arms.$} {#var mobDescCap 0};
         #if {$mobLine == 1} {
             .mobNameClean $tmpLine;
         } {
