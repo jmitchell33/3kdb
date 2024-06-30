@@ -13,7 +13,15 @@
     #list room[items] clear;
     #list room[players] clear;
     #list room[botmobs] clear;
+    #var room[long]  ;
     #var room[updated] 0;
+
+    #if $bot[active] {
+        #var bot[foundmob] 0;
+        #var bot[foundobject] 0;
+        #var bot[foundplayer] 0;
+        #var bot[aggro-mob] 0;
+    };
 };
 
 #NOP -- Update if there is a player in the room not in friends list;
@@ -27,30 +35,39 @@
 #act {{^-R-_(.*)-R-_}} {
     .clearRoomData;
     #var room_short %%1;
-    #var room_item 0;
     
-    #if $bot[active] {
-
-        #if {!$bot[paused]} {
-            #var bot[foundmob] 0;
-            #var bot[foundobject] 0;
-            #var bot[foundplayer] 0;
-            #var bot[aggro-mob] 0;
-        };
-    };
+    
     #line oneshot #action {^>$} {
         #var room[updated] 1;
         #if $bot[active] {
             #if $debug[bot] {#echo {Prompt reached, calling .determineBotAction}};
             .determineBotAction
         };
+        #if $explore[updateDB] {
+            #var explore[walk] 0;
+            #format checkRoomLength {%L} {$room[long]};
+            apiPostAll;
+            #delay 2 {#var explore[walk] 1};
+        };
     } {1};
-
 } {1};
+
+#action {^-D-_%*\n%a-D-_$} {
+    #delay .1 {
+        #unvar long;
+        #format long1 {%p} {%1};
+        #format long2 {%p} {%2};
+        #var long {$long1 $long2};
+        #replace long {\n} { };
+        #var room[long] {${long}};
+    };
+} {1};
+
 
 #act {^{-i-|-w-|-a-|-o-}%*.$} {
     #var item_number 1;
     #var item_long %2;
+    #var item_long_full %0;
 
     #replace item_long {.} {};
     #replace item_long { \[%*\]} {};
@@ -58,7 +75,7 @@
     #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
     #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
 
-    #list room[items] add $item_long;
+    #list room[items] add $item_long_full;
 
     #if {$bot[active] && !$bot[paused] && $bot[walk]} {
         #if {$collector[items]} {
@@ -80,8 +97,20 @@
     };
 } {2};
 
+#function checkPeriod {
+    #var result 0;
+    #local tmpWord %0;
+    #format revTmpWord {%p} {$tmpWord};
+    #format revTmpWord {%r} {$tmpWord};
+    #format tmpWord {%.1s} {$revTmpWord};
+    #if {"$tmpWord" == "."} {#var result 1};
+};
+
 #NOP -- Clean up the mob long a bit;
 #alias .mobNameClean {
+    #var isPeriod 0;
+    #var mob[long] {};
+    #var mob[autoName] {};
     #var foundTimes 1;
     #var mob[long] %0;
     #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
@@ -91,6 +120,17 @@
     #replace mob[long] { [scratched]%*} {};
     #replace mob[long] { [wounded]%*} {};
     #replace mob[long] { [dying]%*} {};
+
+    #NOP -- If there is a period at the end, remove it;
+    #var isPeriod @checkPeriod{$mob[long]};
+    #format mobLength {%L} $mob[long];
+    #if $isPeriod {
+        #math mobLength {$mobLength - 1};
+        #format mob[long] {%.${mobLength}s} {$mob[long]};
+    };
+    #var tmpMob $mob[long];
+    #list tmpMob {explode} { };
+    #format mob[autoName] {%l} $tmpMob[&tmpMob[]];
 };
 
 #act {^-M-_%*} {
@@ -102,11 +142,9 @@
     #var tmpHealth 100;
     #regex {$mob[long]} {(%d%)} {#var tmpHealth &1};
 
-    
-
     #if $bot[active] {
         #foreach $bot[mobs][%*] botmob {
-        #regexp {$mob[long]} {$botmob[long]} {
+            #regexp {$mob[long]} {$botmob[long]} {
                 #var bot[foundmob] 1;
                 #var mob[target] $botmob[target];
                 #var botTarget 1;
@@ -163,11 +201,11 @@
                         #math mobIndex {$tmpItem[index] + 1};
                     };
                 };
-                #list room[mobs] add {{{name} {$mob[long]} {health} {$tmpHealth} {index} {$mobIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+                #list room[mobs] add {{{autoName} {$mob[autoName]} {name} {$mob[long]} {health} {$tmpHealth} {index} {$mobIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
             };
         } {
             #loop 1 $foundTimes tmpIndex {
-                #list room[mobs] add {{{name} {$mob[long]} {health} {$tmpHealth} {index} {$tmpIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+                #list room[mobs] add {{{autoName} {$mob[autoName]} {name} {$mob[long]} {health} {$tmpHealth} {index} {$tmpIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
             };
         };
     };

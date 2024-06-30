@@ -52,7 +52,7 @@
 #function sanitizePayload {
 	#NOP -- Function to remove potentially problematic characters from the payload;
 	#NOP -- Maybe we can replace these with char or ascii representations to pass the desired character;
-	#var tempString %0;
+	#var tempString {%0};
 	#replace tempString {#} {};
 	#replace tempString {$} {};
 	#replace tempString {*} {};
@@ -76,7 +76,7 @@
 
 #function ansiStrip {
     #line strip #var tempString {%0};
-    #replace {tempString} {;} {\;};
+    #replace {tempString} {\;} {};
     #return {$tempString};
 };
 
