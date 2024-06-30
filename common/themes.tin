@@ -11,18 +11,6 @@
     #SUBSTITUTE {-D-_} {};
 };
 
-#action {^-D-_%*\n%a-D-_$} {
-	#unvar long;
-	#format long1 {%p} {%1};
-	#format long2 {%p} {%2};
-	#var long {$long1 $long2};
-	#if {@cartcheck{${long}}} {
-		#nop
-	} {
-		#var room[long] {${long}};
-	};
-} {1};
-
 
 #if {"$theme" == "default"} {
     #NOP Room Short;

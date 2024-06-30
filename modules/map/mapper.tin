@@ -44,7 +44,6 @@
 } {4};
 
 /* Data Grab Trigger */
-#var longcap off;
 #var finding_here off;
 
 #function cartcheck {
@@ -82,7 +81,6 @@
 			#map set roomcolor;
 		};
 		#if {$roomdesc_len == 0} {#var longcap on;};
-		#if {"$finding_here" == "on"} {#var longcap on;};
 		#delay 0 mapupdate;
 	};
 };
@@ -109,32 +107,10 @@
 			#map set roomcolor;
 		};
 		#if {$roomdesc_len == 0} {#var longcap on;};
-		#if {"$finding_here" == "on"} {#var longcap on;};
 		#map get {roomvnum} {gonum};
 		#map goto $gonum;
 	};
 } {6}
-
-#act {\-X\-_{.*}} {
-	#if {"$longcap" == "on"} {
-		#var longcap off;
-		#if {"$finding_here" == "off"} {
-			#map set roomdesc {$room[long]}
-		}
-	}
-} {1};
-
-#action {^-D-_%*\n%a-D-_$} {
-	#unvar long;
-	#format long1 {%p} {%1};
-	#format long2 {%p} {%2};
-	#var long {$long1 $long2};
-	#if {@cartcheck{${long}}} {
-		#nop
-	} {
-		#var room[long] {${long}};
-	};
-} {1};
 
 #act {AREA NAME: %1 [%2]} {
 	#var area %1;
