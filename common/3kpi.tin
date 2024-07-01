@@ -57,10 +57,9 @@
 #NOP -- This is used by the .lookAtItem alias and is for adding armours (ac values), weapons, etc.;
 #alias jsonFormatItem {
     #var apiItem[desc] @sanitizePayload{$apiItem[desc]};
-    #format apiItem[desc] {%p} $apiItem[desc];
-    #format apiItem[short] {%p} $apiItem[short];
+    #var apiItem[short] @sanitizePayload{$apiItem[short]};
     #unvar apiPayLoad;
-    #var apiPayload "short" : "$apiItem[short]", "description" : "$apiItem[desc]", "type" : "$apiItem[type]", "slot" : "$apiItem[slot]", "edged" : "$apiItem[edged]", "blunt" : "$apiItem[blunt]", "fire" : "$apiItem[fire]", "ice" : "$apiItem[ice]", "acid" : "$apiItem[acid]", "electricity" : "$apiItem[electricity]", "mind" : "$apiItem[mind]", "energy" : "$apiItem[energy]", "poison" : "$apiItem[poison]", "radiation" : "$apiItem[radiation]", "smd" : "$apiItem[smd]", "block" : "$apiItem[block]";
+    #var apiPayload "short" : "$apiItem[short]", "description" : "$apiItem[desc]", "type" : "$apiItem[type]", "slot" : "$apiItem[slot]", "edged" : "$apiItem[edged]", "blunt" : "$apiItem[blunt]", "fire" : "$apiItem[fire]", "ice" : "$apiItem[ice]", "acid" : "$apiItem[acid]", "electricity" : "$apiItem[electricity]", "mind" : "$apiItem[mind]", "energy" : "$apiItem[energy]", "poison" : "$apiItem[poison]", "radiation" : "$apiItem[radiation]", "smd" : "$apiItem[smd]", "block" : "$apiItem[block]", "legendary" : "$apiItem[legendary]", "standard_resist_range" : "$apiItem[standard_resist_range]", "weight" : "$apiItem[weight]", "bind_on_equip" : "$apiItem[bind_on_equip]", "classification" : "$apiItem[classification]";
 };
 
 #alias apiPostMonster {
@@ -205,9 +204,9 @@
     .callCaptureMob;
             
     #line oneshot #action {^>$} {
+        #format mob[desc] {%p} {$mob[desc]};
         #loop 1 &room[mobs][] i {
             #if {"$room[mobs][$i][name]" == "$mob[long]"} {
-                #echo checking;
                 #var room[mobs][$i][items] $mob[items];
                 #var room[mobs][$i][desc] $mob[desc];
             };
@@ -221,12 +220,12 @@
 
     #event {PROCESSED LINE}{
         #format tmpLine {%p} {%%1};
-        #regex {$tmpLine} {%* must be on drugs to look that healthy.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is in perfect health.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* has a few scratches and bruises.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is bleeding from numerous wounds. } {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is destined for the emergency ward.} {#var mobDescCap 0};
-        #regex {$tmpLine} {%* is waiting for Death to take %* into his arms.} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* must be on drugs to look that healthy.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is in perfect health.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* has a few scratches and bruises.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is bleeding from numerous wounds.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is destined for the emergency ward.$} {#var mobDescCap 0};
+        #regex {$tmpLine} {%* is waiting for Death to take %* into his arms.$} {#var mobDescCap 0};
         #if {$mobLine == 1} {
             .mobNameClean $tmpLine;
         } {
@@ -251,6 +250,8 @@
     #var apiItem[short] {};
     #var apiItem[type] {};
     #var apiItem[slot] {};
+    #var apiItem[unbreakable] 0;
+    #var apiItem[standard_resist_range] 1;
     #var apiItem[edged] 0;
     #var apiItem[blunt] 0;
     #var apiItem[fire] 0;
@@ -263,6 +264,10 @@
     #var apiItem[radiation] 0;
     #var apiItem[smd] 0;
     #var apiItem[block] 0;
+    #var apiItem[bind_on_equip] 0;
+    #var apiItem[legendary] 0;
+    #var apiItem[weight] {};
+    #var apiItem[classification] Normal;
 
 
     #var itemLine 1;
@@ -271,56 +276,129 @@
     .callCaptureItem;
 };
 
+#function ignoreCaptureLine {
+    #var result 0;
+    #local capturedLine %0;
+    #NOP -- Lines we don't want captured on items/armours/etc.;
+    #regex {$capturedLine} {This armor has: The mark of %*} {#var result 1};
+    #regex {$capturedLine} {You sense this item is not original but rather a clever duplicate.} {#var result 1};
+    #regex {$capturedLine} {This looks like it will wear out in %*.} {#var result 1};
+    #regex {$capturedLine} {Its strength is currently {unyielding}.} {#var result 1};
+};
+
+#alias .callCaptureItemCleanup {
+    #NOP -- We use the weight line to cleanup and assign some values based on others received, for example if;
+    #NOP -- the slot is a shield, the "type" will be set to 'a';
+    
+    #var apiItem[weight] %0;
+    #format apiItem[desc] {%p} $apiItem[desc];
+    #format apiItem[short] {%p} $apiItem[short];
+    #format apiItem[weight] {%p} $apiItem[weight];
+
+    #SWITCH {"$apiItem[slot]"} {
+        #CASE {"Helmet"} {#var apiItem[type] a};
+        #CASE {"Shield"} {#var apiItem[type] a};
+        #CASE {"Other"} {#var apiItem[type] a};
+        #CASE {"Magical"} {#var apiItem[type] a};
+        #CASE {"Unknown"} {#var apiItem[type] a};
+        #CASE {"Cloak"} {#var apiItem[type] a};
+        #CASE {"Ring"} {#var apiItem[type] a};
+        #CASE {"Armour"} {#var apiItem[type] a};
+        #CASE {"Other"} {#var apiItem[type] a};
+        #CASE {"Amulet"} {#var apiItem[type] a};
+        #CASE {"Helmet"} {#var apiItem[type] a};
+        #CASE {"Gloves"} {#var apiItem[type] a};
+        #CASE {"Boots"} {#var apiItem[type] a};
+        #CASE {"Headband"} {#var apiItem[type] a};
+
+        #CASE {"Object"} {#var apiItem[type] o};
+        #CASE {"Weapon"} {#var apiItem[type] w};
+        
+
+        #CASE {"Wand"} {#var apiItem[type] i};
+    };
+
+    #class tmpCapture kill;
+};
+
+#alias .toggleItemDescCap {
+    #var itemDescCap 0;
+    #var apiItem[slot] %0;
+    #format apiItem[slot] {%n} {$apiItem[slot]};
+};
 
 #alias .callCaptureItem {
     #class {tmpCapture} {open};
+    
+    #NOP -- Kill the class no matter what after 3 seconds;
+    #delay {class_kill} {.callCaptureItemCleanup} {3};
 
     #event {PROCESSED LINE}{
         #format tmpLine {%p} {%%1};
-        #NOP -- These are used to signify the end of the item description capture;
-        #regex {$tmpLine} {You sense this item is not original but rather a clever duplicate.} {#var itemDescCap 0};
-        #regex {$tmpLine} {The %w is in perfect condition.} {
-            #var itemDescCap 0;
-            #var apiItem[slot] &1;
-            #format apiItem[slot] {%n} {$apiItem[slot]};
-        };
-        #regex {$tmpLine} {This armor provides special defense against melee attacks.} {#var apiItem[smd] 1};
-        #regex {$tmpLine} {Block chance : \~%d\%} {#var apiItem[block] &1};
-        #if {$itemLine == 1} {
-            #var apiItem[short] $tmpLine;
-            #format apiItem[short] {%p} {$apiItem[short]};
+        #var ignoreLine @ignoreCaptureLine{$tmpLine};
+
+        #if {!$ignoreLine} {
+            #NOP -- These are used to signify the end of the item description capture;
+            #regex {$tmpLine} {You sense this item is not original but rather a clever duplicate.} {#var itemDescCap 0};
+            #regex {$tmpLine} {The %w is in flawless condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %w is in perfect condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {This item is bound to you.} {#var apiItem[bind_on_equip] 1;#var itemDescCap 0;};
+
+            #regex {$tmpLine} {This armor provides special defense against melee attacks.} {#var apiItem[smd] 1};
+            #regex {$tmpLine} {Block chance : \~%d\%} {#var apiItem[block] &1};
+            #regex {$tmpLine} {This item is legendary and you cannot possess more than one.} {
+                #var apiItem[legendary] 1;
+                #var apiItem[classification] Legendary;
+            };
+            #regex {$tmpLine} {This appears to be an artifact for the %* guild.} {#var apiItem[classification] Guild Artifact};
+            #regex {$tmpLine} {It looks unbreakable.} {#var apiItem[unbreakable] 1};
+            #regex {$tmpLine} {This armor has a non-standard resistance range.} {#var apiItem[standard_resist_range] 0};
+            #regex {$tmpLine} {This item will bind to you when equipped.} {#var apiItem[bind_on_equip] 1};
+
             
-            #NOP -- Get rid of the * as first char if it's there;
-            #list tmpList tokenize $apiItem[short];
-            #if {"$tmpList[1]" == "*"} {
-                #list tmpList delete 1;
-                #var apiItem[short] $tmpList;
-                #list apiItem[short] collapse;
+            
+            #if {$itemLine == 1} {
+                #var apiItem[short] $tmpLine;
+                #format apiItem[short] {%p} {$apiItem[short]};
+                
+                #NOP -- Get rid of the * as first char if it's there;
+                #list tmpList tokenize $apiItem[short];
+                #if {"$tmpList[1]" == "*"} {
+                    #list tmpList delete 1;
+                    #var apiItem[short] $tmpList;
+                    #list apiItem[short] collapse;
+                };
+                #replace apiItem[short] { (worn)%*} {};
+                #replace apiItem[short] { (worn on %*} {};
+                
+            } {
+                #if {$itemDescCap} {
+                    #var apiItem[desc] {${apiItem[desc]} $tmpLine};
+                };
+                #if {$acCap} {
+                    #regex {$tmpLine} {%d edged} {#var apiItem[edged] &1};
+                    #regex {$tmpLine} {%d blunt} {#var apiItem[blunt] &1};
+                    #regex {$tmpLine} {%d fire} {#var apiItem[fire] &1};
+                    #regex {$tmpLine} {%d ice} {#var apiItem[ice] &1};
+                    #regex {$tmpLine} {%d acid} {#var apiItem[acid] &1};
+                    #regex {$tmpLine} {%d electric} {#var apiItem[electricity] &1};
+                    #regex {$tmpLine} {%d mind} {#var apiItem[mind] &1};
+                    #regex {$tmpLine} {%d energy} {#var apiItem[energy] &1};
+                    #regex {$tmpLine} {%d poison} {#var apiItem[poison] &1};
+                    #regex {$tmpLine} {%d radiation} {#var apiItem[radiation] &1};
+                };
             };
-            #replace apiItem[short] { (worn)%*} {};
-        } {
-            #if {$itemDescCap} {
-                #var apiItem[desc] {${apiItem[desc]} $tmpLine};
-            };
-            #if {$acCap} {
-                #regex {$tmpLine} {%d edged} {#var apiItem[edged] &1};
-                #regex {$tmpLine} {%d blunt} {#var apiItem[blunt] &1};
-                #regex {$tmpLine} {%d fire} {#var apiItem[fire] &1};
-                #regex {$tmpLine} {%d ice} {#var apiItem[ice] &1};
-                #regex {$tmpLine} {%d acid} {#var apiItem[acid] &1};
-                #regex {$tmpLine} {%d electric} {#var apiItem[electricity] &1};
-                #regex {$tmpLine} {%d mind} {#var apiItem[mind] &1};
-                #regex {$tmpLine} {%d energy} {#var apiItem[energy] &1};
-                #regex {$tmpLine} {%d poison} {#var apiItem[poison] &1};
-                #regex {$tmpLine} {%d radiation} {#var apiItem[radiation] &1};
-            };
+            #regex {$tmpLine} {This armor has the following resistances:} {#var acCap 1};
+            #math itemLine {$itemLine + 1};
+            
+            #NOP -- Use the weight line to end the capture;
+            #regex {$tmpLine} {It looks very light.} {.callCaptureItemCleanup It looks very light.};
+            #regex {$tmpLine} {It looks light.} {.callCaptureItemCleanup It looks light.};
+            #regex {$tmpLine} {It doesn't look too heavy.} {.callCaptureItemCleanup It doesn't look too heavy.};
+            #regex {$tmpLine} {It looks heavy.} {.callCaptureItemCleanup It looks heavy.};
+            #regex {$tmpLine} {It would take considerable effort to lift this.} {.callCaptureItemCleanup It would take considerable effort to lift this.};
+            #regex {$tmpLine} {You'll most likely herniate a disc lifting this} {.callCaptureItemCleanup You'll most likely herniate a disc lifting this.};
         };
-        #regex {$tmpLine} {This armor has the following resistances:} {#var acCap 1};
-        #math itemLine {$itemLine + 1};
-        
-        #NOP -- Use the weight line to end the capture;
-        #regex {$tmpLine} {^It looks light.$} {#class tmpCapture kill};
-        #regex {$tmpLine} {^It looks light.$} {#class tmpCapture kill};
     };
     #class {tmpCapture} {close};
 };

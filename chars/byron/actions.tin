@@ -3,15 +3,6 @@
 
 #var corpse_delay 0;
 
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {
-	#if {$my[song][rounds] > 1} {
-		#var randNumber @rnd{1;200};
-		add_action {{{name} {$randNumber} {action} {perform dirge} {priority} {3}}};
-	} {
-		perform dirge
-	};
-} {1};
-
 #ACTION {^Owie. That hurt!} {
 	#if !$corpse_delay {
 		#var corpse_delay 1;
