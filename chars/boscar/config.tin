@@ -18,18 +18,4 @@
     };
 };
 
-#var mob_kill_action 1;
-#alias .mob_kill_action {
-    kill $mob[target];
-    #if {$bot[active]} {
-        eval $mob[target];
-        #line oneshot #action {Primary Damage type : [%w]} {
-            #format defendType {%l} {%%1};
-            #delay 3 {support defend $defendType};
-            #delay 5 {support assault};
-        };
-    };
-};
-
-
 #class {player_config} {close}

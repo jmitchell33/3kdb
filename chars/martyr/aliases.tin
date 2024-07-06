@@ -5,26 +5,9 @@
     .pause;
 } {1};
 
-#alias {corpse_trig} {
-    share gold;
-    get all;
-    gt-repair;
-    fuse 500;
-    #if {&genbuddy[] >0} {
-        #foreach $genbuddy buddy {
-            gt-repair $buddy;
-        };
-    };
-};
-
 #alias k {
     gt-repair;
     kill %0;
-};
-
-#alias .mob_kill_action {
-    kill $mob[target];
-    #if $darkness {extinguish torch};
 };
 
 #class {player_aliases} {close}

@@ -1,0 +1,282 @@
+#alias common_mka kill;
+#class common_mka open;
+
+#NOP This variable determines whether or not to fire mka;
+#var mkaStatus 1;
+
+#NOP This variable determines to add a custom action if the user enters it 2x with mka+;
+#var tempMKAToggle 1;
+
+#alias formatMKAItem {
+    #format result {<acf>%+10s  %s<088>} {%1} {%2};
+    #echo { $result};
+};
+
+#alias mka-check {
+    #echo {<ffb>   Current Mob Kill Actions (mka)   <088>\n};
+    #if {&mkaActions[] > 0} {
+        formatItem {Priority:} {Name};
+        #loop 1 &mkaActions[] item {
+            formatItem {<afc>$item:} {<efe>$mkaActions[$item][name]<088>};
+        };
+        #echo {\n <dfa>mka<088> will execute the mob kill actions.};
+        #echo { <dfa>mka-help <088> to see all available commands.};
+    } {
+        #echo { There are currently no actions added to mka};
+        #echo {\n <efa>mka+<088> <bcc>name<088> to add an action};
+        #echo { <efa>mka-<088> <bcc>name/number<088> to remove an action};
+        #echo { <efa>corpsetrig-all<088> to see available actions};
+        #echo { If the action doesn't exist, it will be added};
+    };
+};
+
+
+#NOP -- This section manages the aliases and moving items in the actual MKA;
+#alias mka-all {
+    #echo {<ffb>   Current Mob Kill Actions   <088>\n};
+    #if {&mkaActions[] > 0} {
+        formatMKAItem {Priority:} {Name};
+        #loop 1 &mkaActions[] item {
+            formatMKAItem {<afc>$item:} {<efe>$mkaActions[$item][name]<088>};
+        };
+        #echo {\n <dfa>mka<088> will execute the mob kill actions.};
+        #echo { <dfa>mka-help <088> to see all available commands.};
+    } {
+        #echo { There are currently no actions added to mob kill actions};
+        #echo {\n <efa>mka+<088> <bcc>name<088> to add an action};
+        #echo { <efa>mka-<088> <bcc>name/number<088> to remove an action};
+        #echo { <efa>mka-all<088> to see available actions};
+        #echo { If the action doesn't exist, it will be added};
+    };
+};
+
+#alias mka-clear {
+    #list mkaActions clear;
+    #echo {<caa>----  <fff> Mob Kill Actions (mka) has been cleared <caa>  ----<088>};
+};
+
+
+#alias mka+ {
+    #if {"%0" != ""} {
+        #list mkaList {find} {%0} {tempListIndex};
+        #var tempList $mkaList[+$tempListIndex];
+        #if {&tempList[] == 0} {
+            #list mkaActions indexate name;
+            #list mkaActions {find} {%0} {tempListIndex};
+            #var tempList $mkaList[+$tempListIndex];
+        };
+        #if {&tempList[] > 0} {
+            #NOP -- If the mkaActions list exists, check if the selected action is a member and toggle it;
+            #NOP -- Otherwise, if there is no mkaActions list, we add it;
+            #if {&mkaActions[] > 0} {
+                #list mkaActions indexate name;
+                #list mkaActions {find} {%0} {itemExists};
+                #if {$itemExists} {
+                    #echo {<caa>----  <fff> %0 is already in the <fff>mka <caa>  ----<088>};
+                } {
+                    #list mkaActions add {{{name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
+                    #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>mka  <caa>  ----<088>};
+                };
+            } {
+                #list mkaActions add {{{name} {$tempList[name]} {action} {$tempList[action]} {active} {1}}};
+                #echo {<caa>----  <fff> %0 has been <bfd>added<088> to <fff>mka  <caa>  ----<088>};
+            };
+        } {
+            #if $tempMKAToggle {
+                #delay 10 {#var tempMKAToggle 1};
+                #var tempMKAToggle 0;
+                #var tempMKAAction %0;
+                #echo { <caa>----  <fff> %0 not found in mka List.  <caa>  ----<088>};
+                #echo { <caa>----  <fff> If this was not a typo and you wish to add this action, repeat the entry.  <caa>  ----<088>};
+            } {
+                #if {"$tempMKAAction" == "%0"} {
+                    #var tempMKAToggle 1;
+                    #echo { <caa>----  <fff> %0 has been added as an action.  <caa>  ----<088>};
+                    #list mkaActions add {{{name} {%0} {action} {%0} {active} {1}}};
+                } {
+                    #delay 10 {#var tempMKAToggle 1};
+                    #var tempMKAToggle 0;
+                    #var tempMKAAction %0;
+                    #echo { <caa>----  <fff> %0 not found in mka List.  <caa>  ----<088>};
+                    #echo { <caa>----  <fff> If this was not a typo and you wish to add this action, repeat the entry.  <caa>  ----<088>};
+                };
+            }
+        };
+    };
+};
+        
+#alias mka- {
+    #var useIndex 0;
+    #if {"%0" != ""} {
+        #regex {%0} {^%+1..2d$} {#var tempListIndex %0;#var useIndex 1};
+        #if $useIndex {
+            #echo {<caa>----  <fff> $mkaActions[+$tempListIndex][name] has been <baa>removed<088> from <fff>mka <caa>  ----<088>};
+            #list mkaActions delete %0;
+            #list mkaActions indexate name;
+        } {
+            #list mkaActions indexate name;
+            #list mkaList {find} {%0} {tempListIndex};
+            #var tempList $mkaList[+$tempListIndex];
+            #if {&tempList[] == 0} {
+                #list mkaActions {find} {%0} {tempListIndex};
+                #var tempList $mkaList[+$tempListIndex];
+            };
+            #if {&tempList[] > 0} {
+                #if {&mkaActions[] > 0} {
+                    #list mkaActions {find} {%0} {itemExists};
+                    #if {$itemExists} {
+                        #echo {<caa>----  <fff> %0 has been <baa>removed<088> from <fff>mka <caa>  ----<088>};
+                        #list mkaActions filter {} {%0};
+                    } {
+                        #echo {<caa>----  <fff> %0 not found in <fff>mka  <caa>  ----<088>};
+                    };
+                }
+            } {
+                #echo {<caa>----  <fff> There are no actions currently in mka<caa>  ----<088>};
+            };
+            #list mkaActions indexate name;
+        };
+    };
+};
+
+
+#alias mka-help {
+    #echo { ================ <dfa>3kdb MOB KILL ACTIONS <088> ================ };
+    #echo {\n<faa>Usage:<088> };
+    #echo { <efa>mka<088> will execute the mob kill actions.  If no target is provided, it will attempt to guess the first mob in the room};
+    #echo {\n<faa>Adding, Removing, and Moving Actions:<088> };
+    #echo { <efa>mka-check<088> to see current actions};
+    #echo { <efa>mka-all<088> to see available actions};
+    #echo {\n <efa>mka+<088> <bcc>name<088> to add an action};
+    #echo { <efa>mka-<088> <bcc>name/number<088> to remove an action};
+    #echo { <efa>mka-clear<088> to clear mob kill actions};
+    #echo {\n <efa>mka++<088> <bcc>name<088> to <efc>increase<088> an action's priority};
+    #echo { <efa>mka--<088> <bcc>name<088> to <fac>decrease<088> an action's priority};
+    #echo {\n<faa>Modes:<088> };
+    #echo { <efa>mka-off<088> to turn off mob kill actions};
+    #echo { <efa>mka-on<088> to turn on mob kill actions};
+};
+
+#alias mka++ {
+    #if {"%0" != ""} {
+        #var foundItem 0;
+        #list mkaActions indexate name;
+        #list mkaActions find {%0} {foundItem};
+        #if {$foundItem == 0} {
+            #echo { <bba>$foundItem[name] was not found in the mka actions<088>};
+        };
+        #if {$foundItem != 0 && $foundItem > 1} {
+            #math swapItem {$foundItem - 1};
+            #list mkaActions swap $foundItem $swapItem;
+            #echo { <efc>$foundItem[name] priority has been increased by 1<088>};
+        } {
+            #echo { <bba>$foundItem[name] priority is already the first item to trigger<088>};
+        };
+    } {
+        #echo {<fac>  No mka name provided.<088>};
+    };
+};
+
+
+#alias mka-- {
+    #if {"%0" != ""} {
+        #var foundItem 0;
+        #list mkaActions indexate name;
+        #list mkaActions find {%0} {foundItem};
+        #if {$foundItem == 0} {
+            #echo { <bba>$foundItem[name] was not found in the mka actions<088>};
+        };
+        #if {$foundItem != &mkaActions[]} {
+            #if {$foundItem != 0 && $foundItem >= 1} {
+                #math swapItem {$foundItem + 1};
+                #list mkaActions swap $foundItem $swapItem;
+                #echo { <efc>$foundItem[name] priority has been decreased by 1<088>};
+            };
+        } {
+            #echo { <bba>$mkaActions[$foundItem][name] priority is already the last item<088>};
+        };
+    } {
+        #echo {<fac>  No mka name provided.<088>};
+    };
+};
+
+
+#alias mka-on {
+    #var mkaStatus 1;
+    #var mob_kill_action 1;
+    #echo { <bba>MOB KILL ACTIONS are now on<088>};
+};
+
+#alias mka-off {
+    #var mkaStatus 0;
+    #var mob_kill_action 0;
+    #echo { <bba>MOB KILL ACTIONS are now off<088>};
+};
+
+
+#alias {mka-all} {
+    #echo {\n<ffb>   Current Mob Kill Actions   <088>};
+    #if {&mkaActions[] > 0} {
+        #loop 1 &mkaActions[] item {
+            #echo {   <afc>$item: <efe> $mkaActions[$item][name]   <088>};
+        };
+    } {
+        #echo {<fac>             None              <088>};
+    };
+    #var inactiveItems ${mkaList};
+    #list inactiveItems indexate name;
+    #if {&mkaActions[] > 0} {
+        #foreach $mkaActions[%*] active {
+            #list inactiveItems filter {} {$active[name]};
+        };
+    };
+    #if {&inactiveItems[] > 0} {
+        #echo {\n<ffb>   Available Options   <088>};
+        formatMKAItem {Name} {Description};
+        #foreach $inactiveItems[%*] index {
+            #if {"$index[guild]" == "all" || "$index[guild]" == "$guild"} {
+                formatMKAItem {$index[name]} {<cba>$index[description]<088>};
+            };
+        };
+    };
+    #echo { \n <efa>mka+<088> <bcc>action<088> to add or remove an action};
+    #echo { \n <efa>mka-<088> <bcc>action/#<088> to remove an action};
+    #echo { <efa>mka-all<088> to see available actions};
+    #echo { If the action doesn't exist, it will be added};
+};
+
+
+#list mkaList clear;
+#list mkaList add {{{name} {kill} {guild} {all} {action} {
+    #if {"$guild" == "bard"} {
+        checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
+        checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
+    };
+    kill $mkaTargetName;
+} {active} {0} {description} {Attack the mob using 'kill'}}};
+#list mkaList add {{{name} {backstab} {guild} {bard} {action} {rolm edged;cast mystic venom on rod;hide in shadows;backstab $mob[target];} {active} {0} {description} {Bard: Backstab the mob}}};
+#list mkaList add {{{name} {roomAttack} {guild} {bard} {action} {itf;} {active} {0} {description} {Bard: Attack Room w/ Into The Fire}}};
+#list mkaList add {{{name} {suppDefend} {guild} {juggernaut} {action} {eval $mob[target];#line oneshot #action {Primary Damage type : [%w]} {#format defendType {%l} {%%1};#delay 3 {support defend $defendType};#delay 5 {support assault};};} {active} {0} {description} {Jugger: Support Defend Mob Dmg Type}}};
+#list mkaList add {{{name} {call} {guild} {necromancer} {action} {call} {active} {0} {description} {Necromancer: Call familiar into combat}}};
+#list mkaList add {{{name} {undead} {guild} {necromancer} {action} {=kill $mob[target]} {active} {0} {description} {Necromancer: Undead enter combat}}};
+#list mkaList add {{{name} {curse} {guild} {priest} {action} {#delay 2 curse} {active} {0} {description} {Priest: Curse}}};
+#list mkaList add {{{name} {ffire} {guild} {priest} {action} {#delay 4 ffire} {active} {0} {description} {Priest: Faerie Fire}}};
+
+        
+#list mkaList indexate name;
+
+
+#alias mka {
+    #var mkaTarget 1;
+    #if {"%0" === ""} {#var mkaTargetName $room[mobs][1][autoName]} {#var mkaTargetName %0};
+    #if $mkaStatus {
+        #if {&mkaActions[] > 0} {
+            #loop 1 &mkaActions[] item {
+                $mkaActions[$item][action];
+            };
+        };
+    };
+};
+
+
+#class common_mka close;

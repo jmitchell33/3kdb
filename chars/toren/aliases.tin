@@ -96,35 +96,27 @@
 };
 
 #alias {.mob_kill_action} {
-    #if $bloodlet_area {
-        bloodlet $mob[target];
-        .botStep;
-        #delay 1 {
-            ..;
+    #var stats[starting-gp] $my[gp1][current];
+    kill $mob[target];
+    checkStrategy {snare} {snare $mob[target]};
+    checkStrategy {rabies} {rabies};
+    checkStrategy {corrode} {corrode};
+    checkStrategy {scythe} {scythe};
+    #if {$my[necromancer][maim] > 0} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {alter hybrid;maim}}};
+    checkStrategy {call} {call};
+    checkStrategy {undead} {=kill $mob[target]};
+    #if {"$area" == "Banshee's Lair"} {
+        #delay 3 {
+            kill undead 2;
+            snare undead 2;
+            rabies undead 2;
+            corrode undead 2;
         };
-    } {
-        #var stats[starting-gp] $my[gp1][current];
-        kill $mob[target];
-        checkStrategy {snare} {snare $mob[target]};
-        checkStrategy {rabies} {rabies};
-        checkStrategy {corrode} {corrode};
-        checkStrategy {scythe} {scythe};
-        #if {$my[necromancer][maim] > 0} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {alter hybrid;maim}}};
-        checkStrategy {call} {call};
-        checkStrategy {undead} {=kill $mob[target]};
-        #if {"$area" == "Banshee's Lair"} {
-            #delay 3 {
-                kill undead 2;
-                snare undead 2;
-                rabies undead 2;
-                corrode undead 2;
-            };
-            #delay 6 {
-                kill undead 3;
-                snare undead 3;
-                rabies undead 3;
-                corrode undead 3;
-            };
+        #delay 6 {
+            kill undead 3;
+            snare undead 3;
+            rabies undead 3;
+            corrode undead 3;
         };
     };
 };
