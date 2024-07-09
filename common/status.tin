@@ -67,6 +67,7 @@
     #map get roomvnum xcurvnum;
     #var xstrategyActive $strategyActive;
     #var xcorpseActions $corpseActions;
+    #var xmkaActions $mkaActions;
     #var xhpbar $hpbar;
     #var xspiceBeers $spiceBeers;
     #var xlastBot $lastBot;
@@ -82,6 +83,7 @@
     #var curvnum $xcurvnum;
     #var strategyActive $xstrategyActive;
     #var corpseActions $xcorpseActions;
+    #var mkaActions $xmkaActions;
     #var hpbar $xhpbar;
     #var spiceBeers $xspiceBeers;
     #var rolm $xrolm;
@@ -90,6 +92,7 @@
     #var chat[log][emotes] $xchat[log][emotes];
     #if {"$strategyActive" == "xstrategyActive"} {#var strategyActive {}};
     #if {"$corpseActions" == "xcorpseActions"} {#var corpseActions {}};
+    #if {"$mkaActions" == "xmkaActions"} {#var mkaActions {}};
     #if {"$hpbar" == "$xhpbar"} {#var hpbar {}};
     #if {"$spiceBeers" == "$xspiceBeers"} {#var spiceBeers {$xspiceBeers}};
     #if {"$rolm" == "$xrolm"} {#var rolm {}};
@@ -223,6 +226,10 @@
     #action {You envelop the corpse in your elemental energies.} {
         .corpseRecord
     } {2};
+};
+
+#if {"$guild" == "gentech"} {
+    #NOP -- Gentech is handled in the gentech actions since you need to recharge after reclaiming;
 };
 
 #if {"$guild" == "necromancer"} {

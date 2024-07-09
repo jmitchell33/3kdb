@@ -156,7 +156,7 @@
 
             #if {!$bot[aggro-mob]} {
                 #if {$mob_kill_action} {
-                    .mob_kill_action;
+                    mka $mob[target];
                 } {
                     kill $mob[target];
                 };
@@ -179,7 +179,7 @@
 };
 
 #NOP -- starts or continues the bot after it's loaded;
-#alias {..} {glance};
+#alias {..} {.unpause;glance};
 
 #alias {.bot} {#if {$bot[paused] == 0} {..}};
 

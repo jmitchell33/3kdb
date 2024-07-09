@@ -1,6 +1,20 @@
 #class {misc_common} {open}
 
-#NOP -- FIREBAT
+#NOP -- UNDEAD KNIGHT;
+#alias run_uk {
+    #class uk_killer open;
+    go uk;sw;
+    #action {Shivers run down your spine as unaided the book begins to open.} {
+        #delay 35 {u;go uk;#delay 10 {sw}};
+    } {2};
+    #action {A knight of death has fallen into peace.} {
+        #class uk_killer kill;
+    } {2};
+    #class uk_killer close;
+
+};
+
+#NOP -- FIREBAT;
 #alias firebat_west {e;e;n;n;w;w;n;w;w;n;n;n;};
 #alias firebat_return {e;s;e;e;s;s;s;e;e;s;s;w;w;};
 
@@ -17,7 +31,7 @@
     #delay {25} {learn}
 };
 
-#NOP -- SHANSBY CASTLE
+#NOP -- SHANSBY CASTLE;
 #alias {shankey} {
     search bed;
     pull lever;
@@ -27,7 +41,7 @@
     keep key
 };
 
-#NOP -- WITCHY HAT
+#NOP -- WITCHY HAT;
 
 #alias charge_hat {
     pull lever;
@@ -48,10 +62,10 @@
     look at display
 };
 
-#NOP -- BANU
+#NOP -- BANU;
 #action {As Banu teleports into his chamber, he's angered by the presence of his} {kill banu} {2};
 
-#NOP -- NECROPOLIS - BANU STEPS FOR MYSTIC CLOAK
+#NOP -- NECROPOLIS - BANU STEPS FOR MYSTIC CLOAK;
 #alias {banu1} {examine torch;search torch;get key;look at key};
 #action {returns to its normal position, you discover a key lodged behind} {ptell found necropolis key};
 
