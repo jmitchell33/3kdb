@@ -361,7 +361,11 @@
         #if {&corpseActions[] > 0} {
             #loop 1 &corpseActions[] item {
                 #if {"$corpseActions[$item][name]" == "delay"} {
-                    #if {$bot[active]} {.pause};
+                    #if {$bot[active]} {
+                        #NOP -- If the bot has already been paused, note that and don't unpause automatically after delay;
+                        #if $bot[paused] {#var pauseCorpseActionBot 1} {#var pauseCorpseActionBot 0};
+                        .pause
+                    };
                     #var pauseCorpseAction 1;
                     #var lastItem $item;
                     #math nextItem {$item + 1};
@@ -376,7 +380,10 @@
                         $corpseActions[$item][action];
                         #var pauseCorpseAction 0;
                     };
-                    #if {$bot[active]} {.unpause;..};
+                    #if {$bot[active]} {
+                        #if !$pauseCorpseActionBot {.unpause};
+                        .bot
+                    };
                 };
             };
         };
