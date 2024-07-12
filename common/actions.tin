@@ -49,12 +49,15 @@
 #NOP -- This is to ignore necromancers killing their undead horde of summons;
 #action {Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
 
+#NOP -- Dead/Alive variable;
+#action {A dark chill enters the room, filling you with awe, mixed with fear.} {#var my[dead] 0} {2};
+#action {Demanding an audience with Death, %* instructs him to return your} {#var my[dead] 0} {2};
 
-#action {^You lift the drink to your mouth, but in your stomach} {#var my[drunk] 1};
-#action {^You drink the wine and feel healed.$} {#var my[drunk] 0};
+#action {^You lift the drink to your mouth, but in your stomach} {#var my[drunk] 1} {2};
+#action {^You drink the wine and feel healed.$} {#var my[drunk] 0} {2};
 
-#action {The effects of the%*blue capsule fade away.}{#if !$idle_flag {swallow blue capsule};};
-#action {The effects of the%*orange capsule fade away.}{#if !$idle_flag {swallow orange capsule};};
+#action {The effects of the%*blue capsule fade away.} {#if !$idle_flag {swallow blue capsule}} {2};
+#action {The effects of the%*orange capsule fade away.} {#if !$idle_flag {swallow orange capsule}} {2};
 
 #NOP #action {Zosimus says: There, it is done, push your hand into the rump of the beast} {push hand into cows rump};
 #action {%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
