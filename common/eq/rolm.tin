@@ -3,6 +3,8 @@
 
 #var rolm[owl] 1;
 #var rolm[raven] 1;
+#var rolm[gremlin] 1;
+#var rolm[cairn] 1;
 
 #alias update_rolm_string {
     #var rolm_string <fff>ROLM (${rolm[charges]}):;
@@ -126,9 +128,10 @@
 
 #action {Upon the %* the %* glows brightly again.} {
     #var tmpWord %2;
-    #regex {$tmpWord} {owl} {#var rolm[owl] 1};
+    #regex {$tmpWord} {owl} {#var rolm[owl] 1;#format owl_end {%T};#math cd_owl {$owl_end - $owl_start};#echo {COOLDOWN OWL: $cd_owl}};
     #regex {$tmpWord} {raven} {#var rolm[raven] 1};
-    #regex {$tmpWord} {cairn} {#var rolm[cairn] 1};
+    #regex {$tmpWord} {cairn} {#var rolm[cairn] 1;#format cairn_end {%T};#math cd_cairn {$cairn_end - $cairn_start};#echo {COOLDOWN CAIRN: $cd_cairn}};
+    #regex {$tmpWord} {gremlin} {#var rolm[gremlin] 1};
 } {2};
 
 #action {You wield DragonBlade.} {#var rolm[type] Sword/Fire;update_rolm_string} {2};
@@ -137,9 +140,31 @@
 #action {You wield VenomClaw.} {#var rolm[type] Dagger/Poison;update_rolm_string} {2};
 #action {You wield PhotonSphere.} {#var rolm[type] Exotic/Radiation;update_rolm_string} {2};
 
-#action {You touch the Owl rune on the artifact and hear a soft *click*} {#var rolm[owl] 0;};
-#action {You touch the Raven rune on the artifact and hear a soft *click*} {#var rolm[raven] 0;};
-#action {You touch the Cairn rune on the artifact and hear a soft *click*} {#var rolm[cairn] 0;};
+#NOP -- Update charges on use and set tickers in case the "glows brightly" pattern doesn't match;
+#NOP -- Tickers are padded with about 10 seconds;
+#action {You touch the Owl rune on the artifact and hear a soft *click*} {#var rolm[owl] 0;#format owl_start {%T}};
+#action {You touch the Raven rune on the artifact and hear a soft *click*} {
+    #var rolm[raven] 0;
+    #line oneshot #action {The diamond rune flashes briefly on the artifact.} {
+        #math rolm[charges] {$rolm[charges] - 1};
+        #delay rolm_raven {#var rolm[raven] 1} 310;
+    } {1};
+};
+#action {You touch the Cairn rune on the artifact and hear a soft *click*} {
+    #var rolm[cairn] 0;
+    #line oneshot #action {The diamond rune flashes briefly on the artifact.} {
+        #math rolm[charges] {$rolm[charges] - 1};
+        #delay rolm_cairn {#var rolm[cairn] 1} 300;
+    } {1};
+    #format cairn_start {%T}
+};
+#action {You touch the Gremlin rune on the artifact and hear a soft *click*} {
+    #var rolm[gremlin] 0;
+    #line oneshot #action {The diamond rune flashes briefly on the artifact.} {
+        #math rolm[charges] {$rolm[charges] - 1};
+        #delay rolm_gremlin {#var rolm[gremlin] 1} 1280;
+    } {1};
+};
 
 #NOP Charge math;
 #action {^The %w rune flashes thrice briefly on the artifact.} {#math rolm[charges] {$rolm[charges] - 3};update_rolm_string} {2};

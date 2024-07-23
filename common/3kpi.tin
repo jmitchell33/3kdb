@@ -59,7 +59,7 @@
     #var apiItem[desc] @sanitizePayload{$apiItem[desc]};
     #var apiItem[short] @sanitizePayload{$apiItem[short]};
     #unvar apiPayLoad;
-    #var apiPayload "short" : "$apiItem[short]", "description" : "$apiItem[desc]", "type" : "$apiItem[type]", "slot" : "$apiItem[slot]", "edged" : "$apiItem[edged]", "blunt" : "$apiItem[blunt]", "fire" : "$apiItem[fire]", "ice" : "$apiItem[ice]", "acid" : "$apiItem[acid]", "electricity" : "$apiItem[electricity]", "mind" : "$apiItem[mind]", "energy" : "$apiItem[energy]", "poison" : "$apiItem[poison]", "radiation" : "$apiItem[radiation]", "smd" : "$apiItem[smd]", "block" : "$apiItem[block]", "legendary" : "$apiItem[legendary]", "standard_resist_range" : "$apiItem[standard_resist_range]", "weight" : "$apiItem[weight]", "bind_on_equip" : "$apiItem[bind_on_equip]", "classification" : "$apiItem[classification]";
+    #var apiPayload "short" : "$apiItem[short]", "description" : "$apiItem[desc]", "type" : "$apiItem[type]", "weapon_type" : "$apiItem[weapon_type]", "slot" : "$apiItem[slot]", "edged" : "$apiItem[edged]", "blunt" : "$apiItem[blunt]", "fire" : "$apiItem[fire]", "ice" : "$apiItem[ice]", "acid" : "$apiItem[acid]", "electricity" : "$apiItem[electricity]", "mind" : "$apiItem[mind]", "energy" : "$apiItem[energy]", "poison" : "$apiItem[poison]", "radiation" : "$apiItem[radiation]", "smd" : "$apiItem[smd]", "block" : "$apiItem[block]", "legendary" : "$apiItem[legendary]", "standard_resist_range" : "$apiItem[standard_resist_range]", "weight" : "$apiItem[weight]", "bind_on_equip" : "$apiItem[bind_on_equip]", "classification" : "$apiItem[classification]", "level_required" : "$apiItem[level_required]", "exceptionally_balanced" : "$apiItem[exceptionally_balanced]", "standard_damage_range" : "$apiItem[standard_damage_range]";
 };
 
 #alias apiPostMonster {
@@ -249,9 +249,13 @@
     #var apiItem[desc] {};
     #var apiItem[short] {};
     #var apiItem[type] {};
+    #var apiItem[weapon_type] {};
     #var apiItem[slot] {};
     #var apiItem[unbreakable] 0;
+    #var apiItem[level_required] 1;
+    #var apiItem[exceptionally_balanced] 0;
     #var apiItem[standard_resist_range] 1;
+    #var apiItem[standard_damage_range] 1;
     #var apiItem[edged] 0;
     #var apiItem[blunt] 0;
     #var apiItem[fire] 0;
@@ -284,6 +288,8 @@
     #regex {$capturedLine} {You sense this item is not original but rather a clever duplicate.} {#var result 1};
     #regex {$capturedLine} {This looks like it will wear out in %*.} {#var result 1};
     #regex {$capturedLine} {Its strength is currently {unyielding}.} {#var result 1};
+    #regex {$capturedLine} {The Rod of Lordly Might is fated to you.} {#var result 1};
+    #regex {$capturedLine} {You are fully attuned to this epic artifact.} {#var result 1};
 };
 
 #alias .callCaptureItemCleanup {
@@ -342,21 +348,28 @@
             #regex {$tmpLine} {You sense this item is not original but rather a clever duplicate.} {#var itemDescCap 0};
             #regex {$tmpLine} {The %w is in flawless condition.} {.toggleItemDescCap &1};
             #regex {$tmpLine} {The %w is in perfect condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {This %w is in excellent condition.} {.toggleItemDescCap &1};
             #regex {$tmpLine} {This item is bound to you.} {#var apiItem[bind_on_equip] 1;#var itemDescCap 0;};
-
-            #regex {$tmpLine} {This armor provides special defense against melee attacks.} {#var apiItem[smd] 1};
-            #regex {$tmpLine} {Block chance : \~%d\%} {#var apiItem[block] &1};
+            
             #regex {$tmpLine} {This item is legendary and you cannot possess more than one.} {
                 #var apiItem[legendary] 1;
                 #var apiItem[classification] Legendary;
             };
             #regex {$tmpLine} {This appears to be an artifact for the %* guild.} {#var apiItem[classification] Guild Artifact};
             #regex {$tmpLine} {It looks unbreakable.} {#var apiItem[unbreakable] 1};
+
+            #NOP -- Armor Specific Settings;
+            #regex {$tmpLine} {You must be level %d to wear this.} {#var apiItem[level_required] &1};
             #regex {$tmpLine} {This armor has a non-standard resistance range.} {#var apiItem[standard_resist_range] 0};
             #regex {$tmpLine} {This item will bind to you when equipped.} {#var apiItem[bind_on_equip] 1};
+            #regex {$tmpLine} {Block chance : \~%d\%} {#var apiItem[block] &1};
+            #regex {$tmpLine} {This armor provides special defense against melee attacks.} {#var apiItem[smd] 1};
 
-            
-            
+            #NOP -- Weapon Specific Settings;
+            #regex {$tmpLine} {This weapon gains benefits from your %w weapon skill.} {#var apiItem[weapon_type] &1};
+            #regex {$tmpLine} {This weapon is exceptionally balanced.} {#var apiItem[exceptionally_balanced] 1};
+            #regex {$tmpLine} {You must be level %d to wield this weapon.} {#var apiItem[level_required] &1};
+
             #if {$itemLine == 1} {
                 #var apiItem[short] $tmpLine;
                 #format apiItem[short] {%p} {$apiItem[short]};

@@ -117,6 +117,7 @@
     #regex {$mob[long]} {7B{[0-9]+}} {#var foundTimes &1;#replace mob[long] { \\x7B%*} {};};
     #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
     #format {mob[long]} {%p} {$mob[long]};
+
     #replace mob[long] { [scratched]%*} {};
     #replace mob[long] { [wounded]%*} {};
     #replace mob[long] { [dying]%*} {};
@@ -130,6 +131,12 @@
         #format mob[long] {%.${mobLength}s} {$mob[long]};
     };
     #var tmpMob $mob[long];
+
+    #NOP -- Get rid of anything in brackets;
+    #replace tmpMob { \[%*\]%*} {};
+    #replace tmpMob { \(%*\)%*} {};
+    #replace tmpMob { \\x7B%*\\x7D%*} {};
+
     #list tmpMob {explode} { };
     #format mob[autoName] {%l} $tmpMob[&tmpMob[]];
 };
@@ -138,6 +145,11 @@
     .mobNameClean %1;
     #var mobIndex 1;
     #var botTarget 0;
+
+    #NOP -- Auto ask/solve/return missions;
+    #regex {%1} {<?>} {mission ask};
+    #regex {%1} {<!>} {mission return};
+    #regex {%1} {<!.>} {mission return;mission ask};
     
     #NOP -- Mob health if it has not taken damage does not appear and is 100%;
     #var tmpHealth 100;
