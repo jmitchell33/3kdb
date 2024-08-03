@@ -190,7 +190,7 @@
 #act {^You grab the velvet hat and try it on. You disappear in a} {#map goto 44363} {1};
 
 #NOP Death
-#act {^You die.$} {.pause;#map goto 6247} {2};
+#act {^You die.$} {#var my[dead] 1;.pause;#map goto 6247} {2};
 
 #NOP Death Taco
 #act {^You shoot through a graceful arc, and feel weightless for the} {#map goto {roomnote} roaches}
@@ -453,6 +453,9 @@
 #NOP Mage Tower
 #act {^The guard blocks your passage.} {mapUndo}
 
+#NOP Necropolis;
+#action {^You trip on one of the bricks as you traverse the cave.$} {mapUndo} {2};
+
 #NOP Night of Colour
 #act {^Impediment slaps you back, thorns tearing.} {mapUndo}
 #act {^Serrated sword extended, Bulwark stops your progress.} {mapUndo}
@@ -497,7 +500,7 @@
 #act {^Your understanding fails you and you cannot flee!!} {mapUndo};
 
 #NOP Terra;
-#action {The imposing presence of A Guardian Branch prevents you from going %w.} {mapUndo};
+#action {The imposing presence of %* prevents you from going %w.} {mapUndo} {2};
 
 #NOP Theatre of Souls
 #act {^A closed door blocks your way.} {mapUndo};
