@@ -2,33 +2,9 @@
 #class {player_config} {open}
 
 #NOP -- Bot Config;
-#var mob_kill_action 1;
+
 #alias {.pre_fight_check} {#nop};
 
-#alias {.pre_bot_check} {
-     #NOP -- Kill-Em-All, Reflex, Spell, Song Settings based on area name here;
-     #NOP -- Songs aren't added in the initial alias so you're not singing and blocking all your spells from casting;
-     #NOP -- Add songs via the aliases before you kick off the stepper;
-
-     #NOP -- Empowered Strikes and Blink are always on;
-     #var defs[es] 1;
-     #var defs[blink] 1;
-
-     echo_divider1;
-     clear_prots;reflex_clear;
-     echo_divider2;
-     #nop - Turn off kill-em-all;
-     #var kill_em_all 0;
-
-     echo_divider1;
-     clear_prots;reflex_clear;
-     echo_divider2;
-     echo_reflex_header;
-     reflex_critic $dmg_spell_sp;reflex_soothe $dmg_spell_sp;reflex_ow $karma_heal;
-     reflex_ma 700;reflex_ma 700;
-     reflex combat;
-     
-     echo_divider2;
 
      #NOP -- Rotate mobs if in Section Z;
      #if {"$area" == "Section Z"} {

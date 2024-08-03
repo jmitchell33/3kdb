@@ -2,26 +2,30 @@
 #class {player_actions} {open}
 
 #NOP --- BARD MISC;
-#action {Model} {enthrall robot;say NAP TIME}
+#action {The regenerative mist surrounding Askum dissipates.} {regenerate askum};
+#action {Askum attacks} {rift;beckon};
+#action {Model} {enthrall robot;say NAP TIME};
 #action {to shake off the effects of your cacophonous blast.} {#if {!$idle_flag} {cacophony}};
 #action {Your skin relaxes to a more normal state.} {#if {!$idle_flag} {cast hardened skin}};
 #action {The coffin expels your selected corpse!} {perform dirge};
 
 #NOP --- GENERAL MISC;
+#action {There is no reason to 'heal' here.} {invigorate askum};#LINE GAG;
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {perform dirge};
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 #action {Responding to Brianna's call} {#if {!$idle_flag} {rallycry heal}};
 #action {Status of} {#if {!$idle_flag} {heal brianna}};
 
 #var corpse_delay 0;
 
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {immolate corpse};
 	#if {$my[song][rounds] > 1} {
 		#var randNumber @rnd{1;200};
 		add_action {{{name} {$randNumber} {action} {perform dirge} {priority} {3}}};
 	} {
 		perform dirge
 	};
-} {1};
+
 
 #ACTION {^Owie. That hurt!} {
 	#if !$corpse_delay {
