@@ -27,76 +27,6 @@
     };
 };
 
-#NOP -- jugger suit swapping;
-#action {The computer chirps 'Swap Complete!'} {
-	#if {$sallysuit} {
-		#delay 2 {#send !calltruck};
-        #delay 4 {tp};
-        #send !enhance 70;
-        #delay 6 {#send !empower};
-        #delay 8 {sd};
-        #delay 10 {#send !cdefend clear};
-        #send !cassist +clear;
-        #send !lose;
-        #send !unfollow ALL;
-        reset_tracking;
-        #var sallysuit 0;
-	}; #elseif {$gnomesuit} {
-        #delay 2 {#send !calltruck};
-        #delay 4 {tp};
-        #send !enhance 90;
-        #delay 6 {#send !empower};
-        #delay 8 {su2};
-        #delay 10 {#send !cdefend clear};
-        #send !cassist +clear;
-        #send !lose;
-        #send !unfollow ALL;
-        reset_tracking;
-        #var gnomesuit 0;
-    };
-};
-
-#action {The computer chirps 'Storing your Salamander suit. Please do NOT move .. '} {
-    #var sallysuit 0;
-    #var gnomesuit 1
-};
-
-#action {The computer chirps 'Storing your Gnome suit. Please do NOT move .. '} {
-    #var gnomesuit 0;
-    #var sallysuit 1
-};
-
-#action {The computer chirps 'Suit storage complete!'} {
-    #if {$sallysuit} {
-        change salamander;
-		#delay 2 {#send !calltruck};
-        #delay 4 {tp};
-        #send !enhance 70;
-        #delay 6 {#send !empower};
-        #delay 8 {sd};
-        #delay 10 {#send !cdefend clear};
-        #send !cassist +clear;
-        #send !lose;
-        #send !unfollow ALL;
-        reset_tracking;
-        #var sallysuit 0;
-	}; #elseif {$gnomesuit} {
-        change gnome;
-        #delay 2 {#send !calltruck};
-        #delay 4 {tp};
-        #send !enhance 90;
-        #delay 6 {#send !empower};
-        #delay 8 {su2};
-        #delay 10 {#send !cdefend clear};
-        #send !cassist +clear;
-        #send !lose;
-        #send !unfollow ALL;
-        reset_tracking;
-        #var gnomesuit 0;
-    };
-};
-
-
 #NOP -- QUICK FIX FOR BANSHEES STEPPER
 #action {You fail to penetrate the magical barrier.} {dispel;down}
 #action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down}
@@ -123,6 +53,12 @@
 
 #NOP -- jugger ammo;
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {
+    #if {!$idle_flag} {
+        truck ammo vbuy missile 6 1 40000
+    };
+};
+
+#action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {
     #if {!$idle_flag} {
         truck ammo vbuy missile 6 1 40000
     };
