@@ -4,62 +4,352 @@
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
     #if {$bot[active]} {
-        .pause;
-        #echo {stepper paused due to deadman timer}
+         .pause;
+         #echo {stepper paused due to deadman timer}
     };
 };
 
-#NOP -- aliases to setup strategies;
-#NOP -- default;
-#alias {mystrategy} {
-    strategy-clear;
-    strategy ambush;
-    strategy agony;
-    strategy stun;
-    strategy voicefeeble;
-    strategy spicebeer;
-    strategy focus
+#NOP -- cast subjugate (lowers amount of concentration summons require to control);
+#alias {sub} {
+    cast subjugate
 };
 
+#NOP -- cast strength and giant strength (+str);
+#alias {caststr} {
+    cast giant strength on %0;
+    cast strength on %0
+};
+
+#NOP -- monstrous fortitude;
+#alias {mf} {
+    cast monstrous fortitude on %0
+};
+
+#NOP -- charm monster (mob peace);
+#alias {charm} {
+    cast charm monster
+};
+
+#NOP -- mystic immersion (regen sp at twice the normal rate - lasts 3min);
+#alias {cmi} {
+    cast mystic immersion
+};
+
+#NOP -- explosive release (reduce sat);
+#alias {cer} {
+    cast explosive release
+};
+
+#NOP -- polymorph other (turn mobs against each other);
+#alias {pmo} {
+    cast polymorph other on %0
+};
+
+#NOP -- offensive single target damage spell (disintegrate - energy dmg);
+#alias {energy1} {
+    cast perform as cast disintegrate;
+    cast activate c
+};
+
+#NOP -- offensive single target damage spell (venomous spray - poison dmg);
+#alias {poison1} {
+    cast perform as cast venomous spray;
+    cast activate c
+};
+
+#NOP -- offensive single target damage spell (acid arrow - acid dmg);
+#alias {acid1} {
+    cast perform as cast acid arrow;
+    cast activate c
+};
+
+#NOP -- offensive single target damage spell (prismatic spray - multi non e/b damage);
+#alias {multi-dmg} {
+    cast perform as cast prismatic spray;
+    cast activate c
+};
+
+#NOP -- offensive single target damage spell (burning hands - fire damage);
+#alias {fire1} {
+    cast perform as cast burning hands;
+    cast activate c
+};
+
+#NOP -- fabricate (make daggers x12);
+#alias {make-daggers} {
+    #12 {cast fabricate as dagger#dagger#dagger};
+    #12 {get dagger}
+};
+
+#NOP -- fabricate (forge);
+#alias {make-forge} {
+    cast fabricate as item#forge#forge;
+    get forge;
+    keep forge
+};
+
+#NOP -- reforger pxp for mages;
+#alias {refmage} {
+    #12 {cast fabricate as dagger#dagger#dagger};
+    cast fabricate as item#forge#forge;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get dagger;
+    reforge dagger with little from edged to penetrate;
+    dispose dagger;
+    get forge;
+    dispose forge
+};
+
+#alias {refmage2} {
+    unkeep forge;
+    drop forge;
+    refd;
+    #delay 2 {get forge;keep forge};
+};
+
+#alias {refd} {
+    #12 {reforge dagger with little from edged to penetrate;dispose dagger}
+};
+
+#NOP -- mage identify;
+#alias {id} {
+    cast identify on %0 1;
+    cast identify on %0 2;
+    cast identify on %0 3;
+    cast identify on %0 4;
+    cast identify on %0 5;
+    cast identify on %0 6;
+    cast identify on %0 7;
+    cast identify on %0 8;
+    cast identify on %0 9;
+    cast identify on %0 10;
+    cast identify on %0 11;
+    cast identify on %0 12;
+    cast identify on %0 13;
+    cast identify on %0 14;
+    cast identify on %0 15;
+    cast identify on %0 16;
+    cast identify on %0 17;
+    cast identify on %0 18;
+    cast identify on %0 19;
+    cast identify on %0 20;
+    cast identify on %0 21;
+    cast identify on %0 22;
+    cast identify on %0 23;
+    cast identify on %0 24;
+    cast identify on %0 25;
+    cast identify on %0 26;
+    cast identify on %0 27;
+    cast identify on %0 28;
+    cast identify on %0 29;
+    cast identify on %0 30
+};
+
+#NOP -- setup defense;
+#alias {setup_defense} {
+    clear_gc;
+    clear_c;
+    setup_gc;
+    setup_c;
+    #delay 2 {prots_armor};
+    #delay 4 {prots_ms};
+    #delay 6 {prots_MG};
+    #delay 8 {prots_ss};
+    #delay 10 {prots_mb};
+    #delay 12 {prots_pfe};
+    #delay 14 {prots_ps}
+};
+
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+    cast contingency as protection from evil#cast protection from evil
+};
+
+#NOP -- clear contingency;
+#alias {clear_c} {
+    #10 {cast remove contingency as 1}
+};
+
+#NOP -- greater contingency;
+#alias {setup_gc} {
+    cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+    cast greater contingency as major globe#cast major globe;
+    cast greater contingency as stoneskin#cast stoneskin;
+    cast greater contingency as shield#cast magnificent shield;
+    cast greater contingency as armor#cast armor
+};
+
+#NOP -- clear greater contingency;
+#alias {clear_gc} {
+    #10 {cast remove greater contingency as 1}
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+    #class numpad kill
+};
+
+#alias {numon} {
+    #read chars/$user/numpad.tin
+};
+
+#NOP -- aliases to setup strategies;
+#NOP -- strategy setup for summons assisting;
+#alias {mystrategy-assist} {
+    strategy-clear;
+    strategy slow;
+    strategy super_er;
+    strategy golem_assist;
+    strategy spelltap;
+    strategy super_sub;
+    strategy summon_mf;
+    strategy gstrength
+};
+
+#NOP -- strategy setup for summons defending;
+#alias {mystrategy-defend} {
+    strategy-clear;
+    strategy slow;
+    strategy super_er;
+    strategy golem_assist;
+    strategy spelltap;
+    strategy super_sub;
+    strategy summon_mf;
+    strategy gstrength
+};
+
+#NOP -- default strategy;
+#alias {mystrategy} {
+    strategy-clear;
+    strategy slow;
+    strategy super_er;
+    strategy golem_assist;
+    strategy spelltap;
+    strategy super_sub;
+    strategy summon_mf;
+    strategy gstrength
+};
+
+#NOP -- clear strategies;
 #alias {stclear} {
     strategy-clear
 };
 
-#NOP -- aliases to setup corpsetrig;
-#NOP -- default corpse trig - donate water otherwise recover water;
+#NOP - aliases for setting up summon config & strategies with golem and summons for assist or defending;
+#alias {assistmode} {
+    clear_sconfig;
+    shoo;
+    mystrategy-assist;
+    ms 7a
+};
+
+#alias {defendmode} {
+    clear_sconfig;
+    shoo;
+    mystrategy-defend;
+    ms 7d
+};
+
+#alias {killmode} {
+    clear_sconfig;
+    shoo;
+    mystrategy;
+    ms 7##2#1500#70#defend#summons#always;
+    ms 6##2#1500#70#assist#summons#always
+};
+
+#alias {killmode2} {
+    clear_sconfig;
+    shoo;
+    mystrategy;
+    ms 6##2#1500#70#defend#summons#always;
+    ms 7##2#1500#70#assist#summons#always
+};
+
+#NOP -- aliases to setup strategies for phantasmal killer;
+#NOP -- toggle phantasmal killer on and off;
+#alias {pkiller} {
+    strategy phantasmal
+};
+
+#NOP -- toggle casting monstrous fortitude on phantasmal killer on and off;
+#alias {pkmf} {
+    strategy phantasmal_mf
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#NOP -- solo kill trig;
 #alias {mycorpsetrig} {
     corpsetrig-clear;
-    corpsetrig+ fremcorpse;
-    corpsetrig+ divvy;
-    corpsetrig+ hide;
-    corpsetrig+ poison
-};
-
-#NOP -- corpsetrig to donate water from a corpse;
-#alias {mycorpsetrig-dwater} {
-    corpsetrig-clear;
-    corpsetrig+ fai;
-    corpsetrig+ divvy
-};
-
-#NOP -- corpsetrig to recover water from a corpse;
-#alias {mycorpsetrig-water} {
-    corpsetrig-clear;
-    corpsetrig+ reclaim;
-    corpsetrig+ divvy
-};
-
-#NOP -- corpsetrig for sectionz;
-#alias {mycorpsetrig-sz} {
-    corpsetrig-clear;
-    corpsetrig+ fremcorpse;
+    corpsetrig+ spelltap;
+    corpsetrig+ wrap;
+    corpsetrig+ cBlast2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
     corpsetrig+ crafting;
-    corpsetrig+ szCaps;
-    corpsetrig+ szGreenCap;
-    corpsetrig+ hide;
-    corpsetrig+ poison
+    corpsetrig+ pPocket;
+    corpsetrig+ spellbook;
+    corpsetrig+ szCaps
+};
+
+#NOP -- solo kill trig without get all;
+#alias {mycorpsetrig-noget} {
+    corpsetrig-clear;
+    corpsetrig+ spelltap;
+    corpsetrig+ wrap;
+    corpsetrig+ cBlasat2;
+    corpsetrig+ divvy;
+    corpsetrig+ spellbook
+};
+
+#NOP -- party kill trig;
+#alias {mycorpsetrig-party} {
+    corpsetrig-clear;
+    corpsetrig+ spelltap;
+    corpsetrig+ spellbook;
+    corpsetrig+ ted
+};
+
+#NOP -- sewers kill trig;
+#alias {mycorpsetrig-sewers} {
+    corpsetrig-clear;
+    corpsetrig+ spelltap;
+    corpsetrig+ wrap;
+    corpsetrig+ cBlast2;
+    corpsetrig+ divvy;
+    corpsetrig+ spellbook
 };
 
 #alias {corpseoff} {
@@ -74,6 +364,21 @@
     corpsetrig-clear
 };
 
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n
+};
+
 #NOP -- examining & searching;
 #alias {x} {
     exa
@@ -81,10 +386,6 @@
 
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
-
-#NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
-#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
-#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s;mapgo cot}
 
 #NOP -- knight tour games;
 #alias {knight6} {
@@ -105,46 +406,7 @@
     #5 throw axe
 };
 
-#NOP -- einsteins brain (+3 int);
-#alias {ein_brain} {
-    n;w;n;n;e;n;
-    enter;
-    e;e;e;s;s;e;e;n;n;n;
-    trail;ne;climb gate;
-    w;search tree;
-    e;e;n;n;enter;
-    unlock paperholder;
-    turn paperholder;
-    climb bench;stagedive;
-    climb down;out;
-    s;s;w;unlock door;open door;n
-};
-
-#NOP -- vigilant boosts;
-#alias {vigiboost-wis} {
-    buy 1;buy 2;buy 3;buy 4;buy 5;
-    imprint wisdom;quaff flask;
-    imprint wisdom;quaff flask;
-    imprint wisdom;quaff flask;
-    imprint wisdom;quaff flask;
-    imprint wisdom;quaff flask
-};
-
-#NOP -- numpad off & on;
-#alias {numoff} {
-    #class numpad kill
-};
-
-#alias {numon} {
-    #read chars/$user/numpad.tin
-};
-
-#NOP -- reset my brief settings after using inductor stepper;
-#alias {mybrief} {
-    #send !brief off yes
-};
-
-#NOP -- jesses 3kdb aliases;
+#NOP -- Jesse's 3kdb aliases;
 
 #alias format_jessesaliases {
     #format {jessealias_name} {%-25s} {%1};
@@ -155,10 +417,10 @@
 #alias jesse3kdb {
     #var tempflag 0;
     #var number &jesse3kdb[];
-	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
     #showme {<ccf>  -------    <ffa>JESSE'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
     #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
-    #showme {                  <eaf>guild<088>                        };
+    #showme {                  <eaf>guild spells<088>                        };
     #showme {<ccf>  ----------------------------------------   <088>  };
     #showme {<ccf>     Name                 Usage              <088>  };
     #list jesse3kdb index name;
@@ -170,7 +432,7 @@
         }
     };
     #if !$tempflag {
-        #foreach $jesse3kdb[%*] index {
+        #foreach  jesse3kdb[%*] index {
             format_jessesaliases {     $index[name]} {$index[desc]};
         };
     };
@@ -179,21 +441,22 @@
 #list jesse3kdb clear;
 
 #NOP -- corpses;
-#list jesse3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
-#list jesse3kdb add {{{name} {mycorpsetrig-sz} {type} {corpses} {desc} {Default corpsetrig & sz cap eating}}};
+#list jesse3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Corpsetrig for soloing}}};
 #list jesse3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list jesse3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list jesse3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
-#list jesse3kdb add {{{name} {mycorpsetrig-dwater} {type} {corpses} {desc} {Corpsetrig to donate water to guild}}};
-#list jesse3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {Corpsetrig to recover water}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
 
 #NOP -- boosts;
 #list jesse3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
 #list jesse3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
 
 #NOP - combat;
-#list jesse3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
-#list jesse3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+#list jesse3kdb add {{{name} {mystrategy-assist} {type} {combat} {desc} {Setup strategy for summons (assisting)}}};
+#list jesse3kdb add {{{name} {mystrategy-defend} {type} {combat} {desc} {Setup strategy for summons (defending)}}};
+#list jesse3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
 
 #NOP -- misc;
 #list jesse3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -201,9 +464,36 @@
 #list jesse3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
 #list jesse3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
 #list jesse3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
-#list jesse3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
 #list jesse3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
 
 #NOP -- guild;
+#list jesse3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
+#list jesse3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
+#list jesse3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
+#list jesse3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
+#list jesse3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
+#list jesse3kdb add {{{name} {assistmode} {type} {guild} {desc} {Setup summon config/strategy with golem & summons (assisting)}}};
+#list jesse3kdb add {{{name} {defendmode} {type} {guild} {desc} {Setup summon config/strategy with golem & summons (defending)}}};
+
+#NOP -- spells;
+#list jesse3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
+#list jesse3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison dmg)}}};
+#list jesse3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg)}}};
+#list jesse3kdb add {{{name} {multi-dmg} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b damage)}}};
+#list jesse3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
+#list jesse3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg)}}};
+#list jesse3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
+#list jesse3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+#list jesse3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
+#list jesse3kdb add {{{name} {refmage2} {type} {spells} {desc} {Reforge 12 daggers using mage forge}}};
+#list jesse3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
+#list jesse3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
+#list jesse3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+#list jesse3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg)}}};
+#list jesse3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
+#list jesse3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
+#list jesse3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
+#list jesse3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+#list jesse3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
 
 #class {player_aliases} {close}
