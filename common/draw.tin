@@ -136,6 +136,7 @@
     draw_all;
 };
 
+
 #var mapFullScreen 0;
 #alias {mapFull} {
     #if $mapFullScreen {
@@ -143,10 +144,61 @@
         #split $split[top] $split[bottom] $split[left] $split[right];
         #map offset $map[top] -$map[width]+2 $map[bottom]-1 -2;
     } {
+        #screen clear all;
         #var mapFullScreen 1;
-        #split $screen[height] $split[bottom];
-        #map offset;
+        #math map[fullLower] {$screen[height] - 5};
+        #split $map[fullLower] 0 30 0 1;
+        #map offset -30 -30;
+
+        #NOP -- Set where the area list box starts at (we want the current area to be centered on the list);
+        #list mapAreaList find $area map[full][list][current_area_index];
+        #var map[full][list][max] &mapAreaList[];
+
+        #math map[full][list][bounds] {($map[fullLower] / 2) - 1};
+
+        #if {$map[full][list][current_area_index] > 0} {
+            #math map[full][list][start] {$map[full][list][current_area_index] - $map[full][list][bounds]};
+            #math map[full][list][end] {$map[full][list][current_area_index] + $map[full][list][bounds]};
+
+            #var map[full][list][start] @max{1;$map[full][list][start]};
+            #var map[full][list][end] @min{$map[full][list][max];$map[full][list][end]};
+        } {
+            #var map[full][list][start] 1;
+        };
+        #delay 2 {_draw_mapAreas};
+        
     };
+};
+
+#alias {_draw_mapAreas} {
+    #unvar tmpMapAreaList;
+    #foreach data[areas][%*] index {
+        #if {"$area" == "$index[name]"} {
+            <fff> ** $mapAreaList[$map[full][list][current_area_index]] ** <ada>
+        } {
+            #list tmpMapAreaList add {$index[name]};
+        };
+    };
+    #line sub var #line sub esc #draw green left right side 2 1 $map[fullLower] 30 $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
+    #draw green calign jeweled line 1 1 1 30  {    AREA LIST    };
+};
+
+#alias {_draw_mapAreasScrollUp}
+
+
+#NOP -- Click and drag map;
+#event {MAP REGION PRESSED MOUSE BUTTON ONE} {
+        #var {o_x} %0;
+        #var {o_y} %1;
+        #var {pressed_at} %0
+};
+
+#event {MAP REGION MOVED MOUSE BUTTON ONE} {
+            #var d_x %0;
+            #var d_y %1;
+            #math {c_x} {$o_x - $d_x};
+            #math {c_y} {$d_y - $o_y};
+            #map center $c_y $c_x 0
 };
 
 
@@ -334,7 +386,7 @@
     #map get roomnote roomMapNoteStr;
 
     #if $mapFullScreen {
-        #draw {<dda>} {tile} 1 1 2 -1 {Room Notes: ${roomMapNoteStr}};
+        #NOP #draw {<dda>} {tile} 1 1 2 -1 {Room Notes: ${roomMapNoteStr}};;
     } {
         #nop -- Clear any old drawings;
         #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {};

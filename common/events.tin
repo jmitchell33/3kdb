@@ -15,14 +15,56 @@
     };
 };
 
-#EVENT {SCROLLED MOUSE WHEEL UP}{
-    #math tmpHpbarTop {$hpbar[top] - 2};
-    #if {%2 == -1} {
-        #cursor {HISTORY PREV};
-        #return
-    };
-    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {up} {1}};};
+
+
+#event {SCROLLED MOUSE WHEEL UP} 
+{
+	#if {$mapFullScreen} {
+		#echo {MAP FULL SCROLL};
+		#math map[full][list][start] {$map[full][list][start] + 1};
+		#math map[full][list][end] {$map[full][list][end] - 1};
+
+#NOP        #var map[full][list][start] @min{20;$map[full][list][start]};
+#NOP        #var map[full][list][end] @max{20;$map[full][list][end]};
+        
+        @min map
+		_draw_mapAreas;
+	} {
+		#if {%0 > $screen[rows] - $split[bottom]} 
+		{
+			#cursor {HISTORY PREV};
+		};
+		#if {%0 > $split[top] && %0 < $screen[rows] - $split[bottom]} 
+		{
+			#if {"$screen[scroll]" == "page"} 
+			{
+				#buffer up $screen[rows]
+			}; 
+			#elseif {"$screen[scroll]" == "line"} 
+			{
+				#buffer up 1
+			};
+		};
+		#if {%0 < $split[top]} 
+		{
+			chatup
+		};
+	};
 };
+
+
+
+
+
+
+#NOP    #EVENT {SCROLLED MOUSE WHEEL UP}{    ;
+#NOP        #math tmpHpbarTop {$hpbar[top] - 2};    ;
+#NOP        #if {%2 == -1} {    ;
+#NOP            #cursor {HISTORY PREV};    ;
+#NOP            #return    ;
+#NOP        };    ;
+#NOP        #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {up} {1}};};    ;
+#NOP    };    ;
 
 #EVENT {SCROLLED MOUSE WHEEL DOWN}{
     #math tmpHpbarTop {$hpbar[top] - 2};
@@ -80,6 +122,11 @@
 	#cursor set {$input[buffer2]};
 	#cursor end;
 	#var input[buffer2] {$input[current]};
+};
+
+#NOP -- Map stuff;
+#EVENT {MAP SHORT-CLICKED MOUSE BUTTON ONE} {
+     #map run %0
 };
 
 
