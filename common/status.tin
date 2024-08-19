@@ -1,6 +1,17 @@
 #class player_status kill
 #class player_status open
 
+#alias _status_boot {
+    #line oneshot #action {^ |  Current Reboot : #%d} {#var session[boot] %%1};
+    #line oneshot #action {^ |  Current Uptime : %* (%*)} {
+        #format session[uptime] {%p} {%%1};
+    };
+    #line oneshot #action {^ |  Next Reboot in : %* |} {
+        #format session[reboot] {%p} {%%1}
+    };
+    uptime;
+};
+
 #alias status_coins {
     #action {^You are carrying %d coins in loose change.$} {
         #format my[coins] {%d} {%%1};

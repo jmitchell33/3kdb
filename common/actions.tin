@@ -127,6 +127,24 @@
     };
 } {2};
 
+#action {^%w stares at you in %w best Anti-Christ pose.} {
+    #if !$idle_flag {
+        #format healtarget {%l} {%1}; 
+        (heal $healtarget;
+        #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
+        #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+    };
+} {2};
+
+#action {^From afar, %w stares at you in %w best Anti-Christ pose.} {
+    #if !$idle_flag {
+        #format healtarget {%l} {%1}; 
+        (heal $healtarget;
+        #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
+        #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+    };
+} {2};
+
 #action {^You call forth high mortal energies to heal yourself!$} {
     #var my[hmheal][self] 0;
     #delay hmheal-self {#var my[hmheal][self] 1} {3600};
