@@ -80,7 +80,7 @@
     #if {"$draw[chat][active]" == "on"} {
         #math chat[height] {$chat[rows] + 1};
         #math ticker[top] {$chat[height]};
-        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];2} + 1};
+        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
         #if {"$draw[map][active]" == "on" && "$draw[map][position]" == "top"} {
             #math {chat[right]} {-$map[width]-1};
             #var ticker[right] $chat[right];
@@ -90,7 +90,7 @@
         }
     } {
         #var ticker[top] 1;
-        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];2} + 1};
+        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
         #var chat[height] 0
     };
 
