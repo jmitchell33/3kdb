@@ -46,19 +46,22 @@
 
 #NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
 #alias {i} {
-    #if {"$guild" == "necromancer"} {
-        #NOP -- Track decanters for bloodfuse;
-        #var my[necromancer][decanters][empty] 0;
-        #var my[necromancer][decanters][full] 0;
-        #var my[necromancer][decanters][powered] 0;
-        check_chest;
+    #if {"%1" == "unkept"} {
+        #send {i unkept};
+    } {
+        #if {"$guild" == "necromancer"} {
+            #NOP -- Track decanters for bloodfuse;
+            #var my[necromancer][decanters][empty] 0;
+            #var my[necromancer][decanters][full] 0;
+            #var my[necromancer][decanters][powered] 0;
+            check_chest;
+        };
+        #var inventory_check 1;
+        #var corpse_check 1;
+        #var corpses[inventory] 0;
+        #send i;
+        #delay 2 {#var corpse_check 0;#var inventory_check 0;};
     };
-	
-    #var inventory_check 1;
-	#var corpse_check 1;
-	#var corpses[inventory] 0;
-	#send i;
-	#delay 2 {#var corpse_check 0;#var inventory_check 0;};
 };
 
 
