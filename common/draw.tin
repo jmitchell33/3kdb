@@ -2,6 +2,7 @@
 #CLASS draw {open}
 
 #unvar draw[index];
+#var draw[initiated] 0;
 #var draw[index][caption] 1;
 #var draw[chat][active] on;
 #var draw[chat][size] .3;
@@ -76,11 +77,10 @@
     };
 
     #NOP -- Ticker goes right under the chatlog;
-
     #if {"$draw[chat][active]" == "on"} {
         #math chat[height] {$chat[rows] + 1};
         #math ticker[top] {$chat[height]};
-        #math ticker[bottom] {$ticker[top] + 3};
+        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
         #if {"$draw[map][active]" == "on" && "$draw[map][position]" == "top"} {
             #math {chat[right]} {-$map[width]-1};
             #var ticker[right] $chat[right];
@@ -90,7 +90,7 @@
         }
     } {
         #var ticker[top] 1;
-        #var ticker[bottom] 3;
+        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
         #var chat[height] 0
     };
 
@@ -116,7 +116,7 @@
     };
 
     #NOP -- If there is a ticker, then adjust the split;
-    #if {"$draw[ticker][active]" == "on"} {#math split[top] {$split[top] + 3}};
+    #if {"$draw[ticker][active]" == "on"} {#math split[top] {$split[top] + @max{&ticker_data[];3} + 1}};
     
     #math 	split[bottom]	{$hpbar[height] + 1};
     #var split[bottom] {@max{2;$split[bottom]}};
@@ -133,6 +133,7 @@
 
     init_map;
     init_hpbar;
+    #var draw[initiated] 1;
     draw_all;
 };
 
@@ -263,15 +264,27 @@
 #alias draw_ticker {
     #if $mapFullScreen {#NOP} {
         #if {&ticker_data[]} {
-            #list ticker_data set 1 {Idle: $idle_cap  <eaa>Deadman: $deadManTimeLeft_cap $fight_string};
+            #list ticker_data set 1 {<aed>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
         } {
-            #list ticker_data create {Idle: $idle_cap  <eaa>Deadman: $deadManTimeLeft_cap $fight_string};
+            #list ticker_data create {<aed>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
+        };
+
+        #if {&ticker_data[] == 1} {
+            #list ticker_data add {$server_string};
+        } {
+            #list ticker_data set 2 {$server_string};
+        };
+
+        #if {&ticker_data[] == 2} {
+            #list ticker_data add {$fight_string};
+        } {
+            #list ticker_data set 3 {$fight_string};
         };
 
         #if {$idle_sec > $deadmanIdleTimeout} {
             #draw calign grid red jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
         } {
-            #draw calign grid blue jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
+            #draw calign grid $theme[chatbox] jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
         };
     };
 };
@@ -389,9 +402,11 @@
     #if $mapFullScreen {
         #NOP #draw {<dda>} {tile} 1 1 2 -1 {Room Notes: ${roomMapNoteStr}};;
     } {
-        #nop -- Clear any old drawings;
-        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {};
-        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: ${roomMapNoteStr}};
+        #if $draw[initiated] {
+            #nop -- Clear any old drawings;
+            #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {};
+            #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: ${roomMapNoteStr}};
+        };
     };
 };
 
@@ -410,7 +425,10 @@
 #EVENT {SCREEN RESIZE} {#delay 3 {init_screen};};
 
 #NOP /* kick off */;
-init_screen;
-draw_all;
+#echo {<fff> CONNECTED TO 3KDB -- UPDATING SCREEN IN 3 seconds...};
+#delay 4 {
+    init_screen;
+    draw_all;
+};
 
 #CLASS draw {close}
