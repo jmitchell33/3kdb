@@ -1,0 +1,133 @@
+#class draw_mapFull kill;
+#class draw_mapFull open;
+
+#var mapFullScreen 1;
+
+#config mouse on;
+#unmacro %d;
+#Read modules/helpers/functions.tin;
+#map read common/map/3k_shared.map;
+#map goto $map[full][startVnum];
+#screen clear all;
+#map map;
+#map flag vtmap on
+#read common/data/areas.tin;
+
+#delay 3 {
+    #screen clear all;
+    #map map;
+    #map center;
+    _draw_mapAreas_initiate;
+};
+
+
+
+
+
+#alias {_draw_mapAreas_initiate} {
+    #NOP -- Set how large of a slice we should be taking;
+    #math map[full][list][bounds] {($map[fullLower] / 2) - 2};
+
+    #NOP -- Populate area list and set where the area list box starts at since;
+    #NOP -- we want the current area to be highlighted and centered on the list to start;
+
+    #unvar tmpMapAreaList;
+    #if {"$area" == ""} {#var area Pinnacle;#list tmpMapAreaList find {Pinnacle} {map[full][list][current_area_index]}};
+    #loop 1 &data[areas][] index {
+        #if {"$area" == "$data[areas][$index][name]"} {
+            #list tmpMapAreaList add {<fff> ** $data[areas][$index][name] ** <ada>};
+            #var map[full][list][current_area_index] $index;
+        } {
+            #if {"$area" != ""} {#list tmpMapAreaList add {$data[areas][$index][name]}};
+        };
+    };
+
+    #var map[full][list][max] &data[areas][];
+
+    #if {$map[full][list][current_area_index] > 0} {
+        #math map[full][list][start] {$map[full][list][current_area_index] - $map[full][list][bounds]};
+        #math map[full][list][end] {$map[full][list][current_area_index] + $map[full][list][bounds]};
+
+        #var map[full][list][start] @max{1;$map[full][list][start]};
+        #var map[full][list][end] @min{$map[full][list][max];$map[full][list][end]};
+    } {
+        #var map[full][list][start] 1;
+    };
+
+    _draw_mapAreas;
+};
+
+#alias {_draw_mapAreas} {
+    #line sub var #line sub esc #draw green left right bottom side 2 1 -3 30 $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
+    #draw <fba> box -4 1 -1 30 {$buttons[area_selected][text]};
+    #draw green calign jeweled line 1 1 1 30  {    AREA LIST    };
+};
+
+#alias {_draw_mapAreasScrollUp} {
+    #if {$map[full][list][start] >= 1} {
+        #math map[full][list][start] {$map[full][list][start] - 1};
+        #math map[full][list][end] {$map[full][list][end] - 1};
+    } {
+        #NOP
+    };
+    _draw_mapAreas;
+};
+
+#alias {_draw_mapAreasScrollDown} {
+    #if {$map[full][list][end] <= $map[full][list][max]} {
+        #math map[full][list][start] {$map[full][list][start] + 1};
+        #math map[full][list][end] {$map[full][list][end] + 1};
+    } {
+        #NOP
+    };
+    _draw_mapAreas;
+};
+
+
+
+#NOP -- Click and drag map;
+#event {MAP REGION PRESSED MOUSE BUTTON ONE} {
+    #var {o_x} %0;
+    #var {o_y} %1;
+};
+
+#event {MAP REGION MOVED MOUSE BUTTON ONE} {
+    #var d_x %0;
+    #var d_y %1;
+    #math {c_x} {$o_x - $d_x};
+    #math {c_y} {$d_y - $o_y};
+    #map center $c_y $c_x 0
+};
+
+
+#EVENT {SCROLLED MOUSE WHEEL UP} {
+    _draw_mapAreasScrollUp
+};
+
+#EVENT {SCROLLED MOUSE WHEEL DOWN} {
+    _draw_mapAreasScrollDown
+};
+
+#EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
+    #math map[full][list][selected][index] {$map[full][list][start] + %0 - 2};
+    #var map[full][list][selected][name] $tmpMapAreaList[$map[full][list][selected][index]];
+    
+    #var buttons[area_selected][text] $map[full][list][selected][name];
+    _draw_mapAreas;
+    
+    #map list {roomarea}{$map[full][list][selected][name]} {variable}{arealist};
+    #map goto *arealist[+1];
+    #map map;
+    _draw_mapAreas
+};
+
+#EVENT {MAP SHORT-CLICKED MOUSE BUTTON ONE} {
+     #map goto %0;
+     #map get roomname buttons[room_selected][text];
+     #replace buttons[area_selected][text] {\n%*} {};
+     #var buttons[area_selected][text] {$buttons[area_selected][text] \n $buttons[room_selected][text]};
+     _draw_mapAreas
+};
+
+
+#class draw_mapFull close;

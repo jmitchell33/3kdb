@@ -16,21 +16,25 @@
 };
 
 #EVENT {SCROLLED MOUSE WHEEL UP}{
-    #math tmpHpbarTop {$hpbar[top] - 2};
     #if {%2 == -1} {
         #cursor {HISTORY PREV};
         #return
     };
+    #math tmpHpbarTop {$hpbar[top] - 2};
     #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {up} {1}};};
 };
 
 #EVENT {SCROLLED MOUSE WHEEL DOWN}{
-    #math tmpHpbarTop {$hpbar[top] - 2};
     #if {%2 == -1} {
         #cursor {HISTORY NEXT};
         #return
     };
+    #math tmpHpbarTop {$hpbar[top] - 2};
     #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {down} {1}};};
+};
+
+#EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
+    #NOP;
 };
 
 #nop -------------------------------------------------------------------------;

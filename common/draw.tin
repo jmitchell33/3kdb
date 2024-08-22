@@ -141,67 +141,24 @@
 #var mapFullScreen 0;
 #alias {mapFull} {
     #if $mapFullScreen {
+        #if {$tmpToggle} {qq;#var tmpToggle 0};
         #var mapFullScreen 0;
-        #split $split[top] $split[bottom] $split[left] $split[right];
-        #map offset $map[top] -$map[width]+2 $map[bottom]-1 -2;
-        init_screen;
+        #port zap port_mapFull;
     } {
-        #screen clear all;
+        #NOP -- We will start a dummy server port with the map layout and send commands for seed data;
         #var mapFullScreen 1;
-        #math map[fullLower] {$screen[height] - 5};
-        #split $map[fullLower] 0 30 0 1;
-        #map offset -30 -30;
-
-        #NOP -- Set where the area list box starts at (we want the current area to be centered on the list);
-        #list mapAreaList find $area map[full][list][current_area_index];
-        #var map[full][list][max] &mapAreaList[];
-
-        #math map[full][list][bounds] {($map[fullLower] / 2) - 1};
-
-        #if {$map[full][list][current_area_index] > 0} {
-            #math map[full][list][start] {$map[full][list][current_area_index] - $map[full][list][bounds]};
-            #math map[full][list][end] {$map[full][list][current_area_index] + $map[full][list][bounds]};
-
-            #var map[full][list][start] @max{1;$map[full][list][start]};
-            #var map[full][list][end] @min{$map[full][list][max];$map[full][list][end]};
-        } {
-            #var map[full][list][start] 1;
-        };
-        #delay 2 {_draw_mapAreas};
-        
+        #math map[fullLower] {$screen[height] - 2};
+        #map get roomvnum map[full][startVnum];
+        #port {init} {port_mapFull} {0};
+        #{port_mapFull} {#var area $area;};
+        #{port_mapFull} {#var map {${map}};};
+        #{port_mapFull} {#read common/draw_mapFull.tin};
+        #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
+        #ses {port_mapFull};
     };
 };
 
-#alias {_draw_mapAreas} {
-    #unvar tmpMapAreaList;
-    #foreach data[areas][%*] index {
-        #if {"$area" == "$index[name]"} {
-            <fff> ** $mapAreaList[$map[full][list][current_area_index]] ** <ada>
-        } {
-            #list tmpMapAreaList add {$index[name]};
-        };
-    };
-    #line sub var #line sub esc #draw green left right side 2 1 $map[fullLower] 30 $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
-    #draw green calign jeweled line 1 1 1 30  {    AREA LIST    };
-};
 
-#alias {_draw_mapAreasScrollUp}
-
-
-#NOP -- Click and drag map;
-#event {MAP REGION PRESSED MOUSE BUTTON ONE} {
-        #var {o_x} %0;
-        #var {o_y} %1;
-        #var {pressed_at} %0
-};
-
-#event {MAP REGION MOVED MOUSE BUTTON ONE} {
-            #var d_x %0;
-            #var d_y %1;
-            #math {c_x} {$o_x - $d_x};
-            #math {c_y} {$d_y - $o_y};
-            #map center $c_y $c_x 0
-};
 
 
 #alias {draw_caption_all} {
@@ -211,12 +168,10 @@
 };
 
 #alias draw_all {
-    #if $mapFullScreen {#NOP} {
-        #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
-        #if {"$draw[chat][active]" == "on"} { draw_chat };
-        #if {"$draw[caption][active]" == "on"} { draw_caption_all };
-        #if {"$draw[room][active]" == "on"} { draw_room };
-    };
+    #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
+    #if {"$draw[chat][active]" == "on"} { draw_chat };
+    #if {"$draw[caption][active]" == "on"} { draw_caption_all };
+    #if {"$draw[room][active]" == "on"} { draw_room };
 };
 
 #NOP /* calculate hpbar size and draws initial line above hpbar area */
@@ -242,139 +197,132 @@
 
 #NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
 #alias draw_caption_corpses {
-    #if $mapFullScreen {#NOP} {
-        #nop -- Clear any old drawings;
-        #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
+    #nop -- Clear any old drawings;
+    #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
-        #if {&caption_data[]} {
-            #list caption_data set $draw[index][caption] {$corpse_string \n $eternal_string};
-        } {
-            #list caption_data create {$corpse_string \n $eternal_string};
-        };
+    #if {&caption_data[]} {
+        #list caption_data set $draw[index][caption] {$corpse_string \n $eternal_string};
+    } {
+        #list caption_data create {$corpse_string \n $eternal_string};
+    };
 
-        #if {$idle_sec > $deadmanIdleTimeout} {
-            #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
-        } {
-            #draw calign grid <ccc> tubed box $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
-        };
+    #if {$idle_sec > $deadmanIdleTimeout} {
+        #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
+    } {
+        #draw calign grid <ccc> tubed box $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
     };
 };
 
 #NOP /* -- TICKER (Idle timer, Deadman, Current Round etc) -- */
 #alias draw_ticker {
-    #if $mapFullScreen {#NOP} {
-        #if {&ticker_data[]} {
-            #list ticker_data set 1 {<aed>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
-        } {
-            #list ticker_data create {<aed>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
-        };
+    #if {&ticker_data[]} {
+        #list ticker_data set 1 {<aed>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
+    } {
+        #list ticker_data create {<aed>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
+    };
 
-        #if {&ticker_data[] == 1} {
-            #list ticker_data add {$server_string};
-        } {
-            #list ticker_data set 2 {$server_string};
-        };
+    #if {&ticker_data[] == 1} {
+        #list ticker_data add {$server_string};
+    } {
+        #list ticker_data set 2 {$server_string};
+    };
 
-        #if {&ticker_data[] == 2} {
-            #list ticker_data add {$fight_string};
-        } {
-            #list ticker_data set 3 {$fight_string};
-        };
+    #if {&ticker_data[] == 2} {
+        #list ticker_data add {$fight_string};
+    } {
+        #list ticker_data set 3 {$fight_string};
+    };
 
-        #if {$idle_sec > $deadmanIdleTimeout} {
-            #draw calign grid red jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
-        } {
-            #draw calign grid $theme[chatbox] jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
-        };
+    #if {$idle_sec > $deadmanIdleTimeout} {
+        #draw calign grid red jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
+    } {
+        #draw calign grid $theme[chatbox] jeweled box $ticker[top] 1 $ticker[bottom] $ticker[right] $ticker_data[];
     };
 };
 
 
 #NOP /* -- Bot status -- */
 #alias draw_caption_status {
-    #if $mapFullScreen {#NOP} {
-        #if {$draw[index][bot]} {
-            #NOP -- If the stored index is greater than those existing, reset it;
-            #if {$draw[index][bot] > &caption_data[]} {
-                #math draw[index][bot] {&caption_data[] + 1};
-                #list caption_data insert $draw[index][bot] {};
-            };
-        } {
+    #if {$draw[index][bot]} {
+        #NOP -- If the stored index is greater than those existing, reset it;
+        #if {$draw[index][bot] > &caption_data[]} {
             #math draw[index][bot] {&caption_data[] + 1};
             #list caption_data insert $draw[index][bot] {};
         };
+    } {
+        #math draw[index][bot] {&caption_data[] + 1};
+        #list caption_data insert $draw[index][bot] {};
+    };
 
-        #if $bot[active] {
-            #var bot_total_rooms &bot[steps][];
-            #var bot_current_room $bot[step];
+    #if $bot[active] {
+        #var bot_total_rooms &bot[steps][];
+        #var bot_current_room $bot[step];
 
-            #math bot_current_room {$bot_current_room - 1};
-            #math bot_progress {100 * $bot_current_room / $bot_total_rooms};
+        #math bot_current_room {$bot_current_room - 1};
+        #math bot_progress {100 * $bot_current_room / $bot_total_rooms};
 
-            #format {bot[report-time]} {%T} {};
-            #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
-            #if {$bot[delta-time] > 3600} {
-                #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
-                #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-                thousandsFormatNumber bot[delta-rate];
-                #var xp_rate_str $bot[delta-rate];
-                #var xp_time_str $bot[delta-time] Hrs;
-            } {
-                #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
-                #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-                thousandsFormatNumber bot[delta-rate];
-                #var xp_rate_str $bot[delta-rate];
-                #var xp_time_str $bot[delta-time] mins;
-            };
-            #var temp_xp $bot[stats][xp];
-            thousandsFormatNumber temp_xp;
-
-            #if $bot[paused] {
-                #var bot_string {\n <088>Bot Status:<DAA><aaa> 🖐 <088>};
-            } {
-                #var bot_string {\n Bot Status:<ACA><fff> ▶ <088>};
-            };
-
-            #if $bot[playercheck] {
-                #cat bot_string {<ACA><fff> ✔ <088>};
-            } {
-                #cat bot_string {<DAA><aaa> ✔ <088>};
-            };
-
-            #cat bot_string {\n Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
-
-            #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
-
+        #format {bot[report-time]} {%T} {};
+        #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
+        #if {$bot[delta-time] > 3600} {
+            #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
+            #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
+            thousandsFormatNumber bot[delta-rate];
+            #var xp_rate_str $bot[delta-rate];
+            #var xp_time_str $bot[delta-time] Hrs;
         } {
-            #var bot_string {\n <088>Bot: <fff>OFF<088>};
+            #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
+            #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
+            thousandsFormatNumber bot[delta-rate];
+            #var xp_rate_str $bot[delta-rate];
+            #var xp_time_str $bot[delta-time] mins;
+        };
+        #var temp_xp $bot[stats][xp];
+        thousandsFormatNumber temp_xp;
+
+        #if $bot[paused] {
+            #var bot_string {\n <088>Bot Status:<DAA><aaa> 🖐 <088>};
+        } {
+            #var bot_string {\n Bot Status:<ACA><fff> ▶ <088>};
         };
 
-        #list caption_data set $draw[index][bot] $bot_string;
+        #if $bot[playercheck] {
+            #cat bot_string {<ACA><fff> ✔ <088>};
+        } {
+            #cat bot_string {<DAA><aaa> ✔ <088>};
+        };
+
+        #cat bot_string {\n Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+
+        #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
+
+    } {
+        #var bot_string {\n <088>Bot: <fff>OFF<088>};
     };
+
+    #list caption_data set $draw[index][bot] $bot_string;
 };
 
 #alias draw_caption_strategy {
-    #if $mapFullScreen {#NOP} {
-        #if {$draw[index][strategy]} {
-            #NOP -- If the stored index is greater than those existing, reset it;
-            #if {$draw[index][strategy] > &caption_data[]} {
-                #math draw[index][strategy] {&caption_data[] + 1};
-                #list caption_data insert $draw[index][strategy] {};
-            };
-        } {
+    
+    #if {$draw[index][strategy]} {
+        #NOP -- If the stored index is greater than those existing, reset it;
+        #if {$draw[index][strategy] > &caption_data[]} {
             #math draw[index][strategy] {&caption_data[] + 1};
             #list caption_data insert $draw[index][strategy] {};
         };
-
-        #var strategy_string {\n <bef>Strategy:<088>};
-
-        #foreach $strategyActive[%*] index {
-            #format strat_name {%n} {$index[name]};
-            #cat strategy_string { <afa>$strat_name<088>};
-        };
-
-        #list caption_data set $draw[index][strategy] $strategy_string;
+    } {
+        #math draw[index][strategy] {&caption_data[] + 1};
+        #list caption_data insert $draw[index][strategy] {};
     };
+
+    #var strategy_string {\n <bef>Strategy:<088>};
+
+    #foreach $strategyActive[%*] index {
+        #format strat_name {%n} {$index[name]};
+        #cat strategy_string { <afa>$strat_name<088>};
+    };
+
+    #list caption_data set $draw[index][strategy] $strategy_string;
 };
 
 #NOP /* -- MAP -- */
@@ -399,14 +347,10 @@
     #map get roomname roomMapNameStr;
     #map get roomnote roomMapNoteStr;
 
-    #if $mapFullScreen {
-        #NOP #draw {<dda>} {tile} 1 1 2 -1 {Room Notes: ${roomMapNoteStr}};;
-    } {
-        #if $draw[initiated] {
-            #nop -- Clear any old drawings;
-            #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {};
-            #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: ${roomMapNoteStr}};
-        };
+    #if $draw[initiated] {
+        #nop -- Clear any old drawings;
+        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {};
+        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: ${roomMapNoteStr}};
     };
 };
 
