@@ -1,0 +1,79 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#action {[%w reconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#action {[%w disconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#NOP -- hurinteons tome;
+#action {Hurinteon's tome vibrates and flashes brightly for a moment.} {
+    #if {!$idle_flag} {
+        ptell Hurinteon's tome has reset
+    };
+};
+
+#NOP -- QUICK FIX FOR BANSHEES STEPPER
+#action {You fail to penetrate the magical barrier.} {dispel;down}
+#action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down}
+
+#NOP -- program bash automatically after learning shield from erah grand master;
+#action {Your training from the Grand Master Knight reminds you to train} {
+    program bash;exec l c;
+};
+
+#NOP -- reflexes;
+#action {You have no pants.} {
+    #if {!$idle_flag} {
+        stimheal1;
+        fdeener
+    };
+};
+
+#NOP -- emergency airdrop;
+#action {The computer chirps 'WARNING Stim energy levels too low to compensate} {
+    #if {!$idle_flag} {
+        airdrop
+    };
+};
+
+#NOP -- jugger ammo;
+#action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {
+    #if {!$idle_flag} {
+        truck ammo vbuy missile 6 1 40000
+    };
+};
+
+#action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {
+    #if {!$idle_flag} {
+        truck ammo vbuy missile 6 1 40000
+    };
+};
+
+#NOP -- jugger cdefend for party;
+#action {The computer chirps 'Switching to PARTY defense mode.'} {
+    ptell cdefend ON for party
+};
+
+#NOP -- cult;
+#action {Gargoyle <cgame>: The remaining roles were:} {
+    #if {$cultjoin && !$idle_flag} {
+        #delay 6 {cult join}
+    };
+};
+
+#class {player_actions} {close}
