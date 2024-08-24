@@ -1,6 +1,17 @@
 #class player_status kill
 #class player_status open
 
+#alias _status_boot {
+    #line oneshot #action {^ |  Current Reboot : #%d} {#var session[boot] %%1};
+    #line oneshot #action {^ |  Current Uptime : %* (%*)} {
+        #format session[uptime] {%p} {%%1};
+    };
+    #line oneshot #action {^ |  Next Reboot in : %* |} {
+        #format session[reboot] {%p} {%%1}
+    };
+    uptime;
+};
+
 #alias status_coins {
     #action {^You are carrying %d coins in loose change.$} {
         #format my[coins] {%d} {%%1};
@@ -68,12 +79,21 @@
     #var xstrategyActive $strategyActive;
     #var xcorpseActions $corpseActions;
     #var xmkaActions $mkaActions;
-    #var xhpbar $hpbar;
     #var xspiceBeers $spiceBeers;
     #var xlastBot $lastBot;
     #var xrolm $rolm;
     #var xtheme $theme;
     #var xchat[log][emotes] $chat[log][emotes];
+
+    #NOP -- These variables are at a minimum used to draw somewhere;
+    #var xsplit $split;
+    #var xhpbar $hpbar;
+    #var xcaption $caption;
+    #var xcaption_data $caption_data;
+    #var xticker $ticker;
+    #var xmap $map;
+    #var xdraw_room $draw_room;
+
     #class global close;
     #class global write chars/$user/vars.tin;
 };
@@ -90,6 +110,16 @@
     #var lastBot $xlastBot;
     #var theme $xtheme;
     #var chat[log][emotes] $xchat[log][emotes];
+    
+    #var split $split;
+    #var hpbar $xhpbar;
+    #var caption $xcaption;
+    #var caption_data $xcaption_data;
+    #var ticker $xticker;
+    #var map $xmap;
+    #var draw_room $xdraw_room;
+
+
     #if {"$strategyActive" == "xstrategyActive"} {#var strategyActive {}};
     #if {"$corpseActions" == "xcorpseActions"} {#var corpseActions {}};
     #if {"$mkaActions" == "xmkaActions"} {#var mkaActions {}};

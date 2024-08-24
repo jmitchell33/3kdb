@@ -155,12 +155,26 @@
 };
 
 #alias {go_donate2} {
+    .pause;
     #map get roomvnum donate_go_back;
     keep all preservation;
-    keep all component;
-    go necro_box;
-    donate all;donate all from bag;donate all from bag 2;donate all from buckler;
-    #map run $donate_go_back;
+    go house_box;
+    put all in box;
+    go necro_corpse;
+    unwrap all;deslab all;unkeep all corpse;drop all;
+    #delay 4 {
+        pg;pg;store all;
+        pg;pg;store all;
+        pg;pg;store all;
+        pg;pg;store all;
+        pg;pg;store all;
+        pg;pg;store all;
+        pg;pg;store all;
+    };
+    #delay 8 {
+        #map run $donate_go_back;
+        #delay 4 {.unpause};
+    };
 };
 
 

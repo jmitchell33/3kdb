@@ -10,6 +10,7 @@
         #math {idle} {$idle + 1};
 		#math {deadManTimeLeft} {$deadManTimeLeft - 1};
         _update_idle;
+		_update_server;
     } {1};
     #TICKER {heartbeat} {
 		#if !$idle_flag {
@@ -25,7 +26,7 @@
 		};
 		
 		#var action_round $mip[round];
-		#if $mapFullScreen {#NOP} {
+		#if $draw[initiated] {
 			#if {"$draw[hpbar][active]" == "on"} {draw_hpbar};
 			#if {"$draw[ticker][active]" == "on"} {draw_ticker};
 		};
@@ -39,13 +40,18 @@
 	#if $mob[enrage] {#cat mob_string[affects] {Enraged}};
 	#if $mob[noxious-cloud] {#cat mob_string[affects] {Nox. Cloud}};
 	#if $incombat {
-		#var fight_string \n<ffb>Round $mip[round] vs. $enemy[name]<088>;
+		#var fight_string <ffb>Round $mip[round] vs. $enemy[name]<088>;
 	} {
-		#var fight_string \n<dfc> === NOT IN COMBAT === <edb>(Last: $enemy[last][name])<088>;
-	}
-	
+		#var fight_string <dfc> === NOT IN COMBAT === <edb>(Last: $enemy[last][name])<088>;
+	};	
 };
 
+#alias {_update_server} {
+	#format {reboot_cap}	{%+5s}	{$session[reboot]};
+	#format {uptime_cap}	{%+5s}	{$session[uptime]};
+	#format {lag_cap}		{%+4s}	{$session[lag]};
+	#var server_string {<fff>Uptime: <aff>$session[uptime] <fff>Reboot: <aff>$session[reboot] <fff>Lag: <aff>$session[lag] <088>};
+};
 
 #alias {_update_idle} {
 	#math   {idle_hr}       {$idle / 3600};
@@ -63,7 +69,7 @@
 	#if     {$deadManTimeLeft_min < 10}{#var deadManTimeLeft_min 0$deadManTimeLeft_min};
 	#if     {$deadManTimeLeft_sec < 10}{#var deadManTimeLeft_sec 0$deadManTimeLeft_sec};
 	#format {deadManTimeLeft_cap}      {%+4s}  {<268>[<128>$deadManTimeLeft_hr<268>:<128>$deadManTimeLeft_min<268>:<128>$deadManTimeLeft_sec<268>]<088>};
-}
+};
 
 #alias {_update_health} {
     #var	{my[hp][graph]}		{@graph{$my[hp][current];${my[hp][max]}}};

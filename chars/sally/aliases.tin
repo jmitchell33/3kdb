@@ -1,0 +1,367 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- deadman;
+#alias {_player_deadmanActions} {
+    #if {$bot[active]} {
+        .pause;
+        #echo {stepper paused due to deadman timer}
+    };
+};
+
+#NOP -- jugger suit swapping;
+#alias {swapsuit %d} {
+    enhance %1;
+    cassist +clear;
+    #delay 2 {calltruck};
+    #delay 4 {tp};
+    #delay 6 {empower};
+    #delay 8 {cdefend clear};
+};
+
+#NOP -- airdrop;
+#alias {air} {
+    airdrop
+};
+
+#NOP -- analyze armour AC to self;
+#alias {ana} {
+    analyze %1
+};
+
+#NOP -- analyze armour AC to room;
+#alias {rana} {
+    ranalyze %1
+};
+
+#NOP -- analyze armour AC to room;
+#alias {ss} {
+    support status;
+    truck status;
+};
+
+#NOP -- heal stim with corpse;
+#alias {b} {
+    fdeener
+};
+
+#NOP -- casualty report;
+#alias {cr} {
+    creport
+};
+
+#NOP -- manually defend a player;
+#alias {def} {
+    defend %1
+};
+
+#NOP -- heal yourself using stim or set your enhance to auto heal at a certain percentage;
+#alias {en} {
+    enhance %1
+};
+
+#NOP -- give all items to truck;
+#alias {gi} {
+    give all to mushroom
+};
+
+#NOP -- get all items from truck;
+#alias {gii} {
+    get all from mushroom
+};
+
+#NOP -- toggle levitate using jumpjets;
+#alias {fly1} {
+    jumpjet
+};
+
+#NOP -- change attacks to another target;
+#alias {kk} {
+    retarget %1
+};
+
+#NOP -- guild light;
+#alias {ll} {
+    lowlight
+};
+
+#NOP -- login jugger exp & gxp progress;
+#alias {p} {
+    gs4
+};
+
+#NOP -- reset login jugger exp & gxp progress;
+#alias {p2} {
+    gs4 reset
+};
+
+#NOP -- check costs of techs in the field;
+#alias {rt} {
+    rtech
+};
+
+#NOP -- toggle plasma focusing for truck;
+#alias {tp} {
+    truck pfocus
+};
+
+#NOP -- check level of truck;
+#alias {ts} {
+    truck status
+};
+
+#NOP -- examine truck;
+#alias {xm} {
+    examine mushroom
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+    #class numpad kill
+};
+
+#alias {numon} {
+    #read chars/$user/numpad.tin
+};
+
+#NOP -- aliases to setup strategies;
+#NOP -- default;
+#alias {mystrategy} {
+    strategy-clear;
+    strategy rolm;
+    strategy epowers;
+    strategy frenzy;
+    strategy nukes;
+};
+
+#NOP -- mech tanking;
+#alias {mystrategy-mech} {
+    strategy-clear;
+    strategy rolm;
+    strategy epowers;
+    strategy frenzy;
+    strategy nukes;
+    strategy mech_resummon
+};
+
+#alias {stclear} {
+    strategy-clear
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#NOP -- default corpse trig;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ fdeener2;
+    corpsetrig+ bRemains;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting
+};
+
+#NOP -- default corpse trig with sz cap eating;
+#alias {mycorpsetrig-sz} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ fdeener2;
+    corpsetrig+ bRemains;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ szCaps
+};
+
+#NOP -- corpsetrig for partying with mages;
+#alias {mycorpsetrig-mage} {
+    corpsetrig-clear;
+    corpsetrig+ delay;
+    corpsetrig+ wrap;
+    corpsetrig+ fdeener2;
+    corpsetrig+ bRemains;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting
+};
+
+#NOP -- corpsetrig for partying with mages & sz cap eating;
+#alias {mycorpsetrig-magesz} {
+    corpsetrig-clear;
+    corpsetrig+ delay;
+    corpsetrig+ wrap;
+    corpsetrig+ fdeener2;
+    corpsetrig+ bRemains;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ szCaps
+};
+
+#alias {corpseoff} {
+    corpsetrig-off
+};
+
+#alias {corpseon} {
+    corpsetrig-on
+};
+
+#alias {corpseclear} {
+    corpsetrig-clear
+};
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n
+};
+
+#NOP -- reset my brief settings after using inductor stepper;
+#alias {mybrief} {
+    #send !brief off yes
+};
+
+#NOP -- vigilant boosts;
+#alias {vigiboost-wis} {
+    buy 1;buy 2;buy 3;buy 4;buy 5;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa
+};
+
+#NOP -- QUICK WALKS TO ROOMVNUMS
+#alias {wa} {#map run %1}
+
+#NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
+#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
+#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s}
+
+#NOP -- knight tour games;
+#alias {dotr6} {
+    play;
+    start;
+    dt6
+};
+
+#alias {dotr8} {
+    play;
+    start;
+    dt8
+};
+
+#alias {knight6} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
+
+#alias {knight8} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+
+#alias {winaxe} {
+    play;
+    start;
+    #5 throw axe
+};
+
+#NOP -- badgers 3kdb aliases;
+
+#alias format_badgersaliases {
+    #format {badgeralias_name} {%-25s} {%1};
+    #format {badgeralias_desc} {%-30s} {%2};
+    #showme $badgeralias_name $badgeralias_desc;
+};
+
+#alias badger3kdb {
+    #var tempflag 0;
+    #var number &badger3kdb[];
+	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #showme {<ccf>  -------    <ffa>BADGERS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
+    #showme {                  <eaf>guild<088>                        };
+    #showme {<ccf>  ----------------------------------------   <088>  };
+    #showme {<ccf>     Name                 Usage              <088>  };
+    #list badger3kdb index name;
+    #list badger3kdb sort;
+    #foreach $badger3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_badgersaliases {     $index[name]} {$index[desc]};
+        }
+    };
+    #if !$tempflag {
+        #foreach $badger3kdb[%*] index {
+            format_badgersaliases {     $index[name]} {$index[desc]};
+        };
+    };
+};
+
+#list badger3kdb clear;
+
+#NOP -- corpses;
+#list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
+#list badger3kdb add {{{name} {mycorpsetrig-sz} {type} {corpses} {desc} {Default corpsetrig & sz cap eating}}};
+#list badger3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list badger3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list badger3kdb add {{{name} {mycorpsetrig-mage} {type} {corpses} {desc} {Corpsetrig for partying with mages}}};
+#list badger3kdb add {{{name} {mycorpsetrig-magesz} {type} {corpses} {desc} {Corpsetrig for partying with mages & sz cap eating}}};
+
+#NOP -- boosts;
+#list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list badger3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
+
+#NOP - combat;
+#list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list badger3kdb add {{{name} {mystrategy-mech} {type} {combat} {desc} {Mystrategy: mech tanking}}};
+#list badger3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+
+#NOP -- misc;
+#list badger3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list badger3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list badger3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list badger3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list badger3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list badger3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
+#list badger3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+
+#NOP -- guild;
+#list badger3kdb add {{{name} {air} {type} {guild} {desc} {Airdrop: heal stim, hp and sp}}};
+#list badger3kdb add {{{name} {ana} {type} {guild} {desc} {Analyze armour AC to self: ana <armour>}}};
+#list badger3kdb add {{{name} {rana} {type} {guild} {desc} {Ranalyze armour AC to room: rana <armour>}}};
+#list badger3kdb add {{{name} {b} {type} {guild} {desc} {Fdeener: use a corpse to heal stim}}};
+#list badger3kdb add {{{name} {cr} {type} {guild} {desc} {Creport: casualty report}}};
+#list badger3kdb add {{{name} {def} {type} {guild} {desc} {Defend a player manually: def <player>}}};
+#list badger3kdb add {{{name} {en} {type} {guild} {desc} {Enhance at a certain percentage of hp: en <hp%>}}};
+#list badger3kdb add {{{name} {gi} {type} {guild} {desc} {Give all items to truck}}};
+#list badger3kdb add {{{name} {gii} {type} {guild} {desc} {Get all items from truck}}};
+#list badger3kdb add {{{name} {fly1} {type} {guild} {desc} {Jumpjet: toggle levitate using jumpjets}}};
+#list badger3kdb add {{{name} {kk} {type} {guild} {desc} {Retarget attacks to another mob: kk <mob>}}};
+#list badger3kdb add {{{name} {ll} {type} {guild} {desc} {Guild light}}};
+#list badger3kdb add {{{name} {p} {type} {guild} {desc} {Gs4: login jugger exp & gxp progress}}};
+#list badger3kdb add {{{name} {p2} {type} {guild} {desc} {Gs4 reset: reset login jugger exp & gxp progress}}};
+#list badger3kdb add {{{name} {rt} {type} {guild} {desc} {Rtech: check costs of techs in the field}}};
+#list badger3kdb add {{{name} {tp} {type} {guild} {desc} {Truck pfocus: toggle plasma focusing for truck}}};
+#list badger3kdb add {{{name} {ts} {type} {guild} {desc} {Truck status: check level of truck}}};
+#list badger3kdb add {{{name} {xm} {type} {guild} {desc} {Examine truck}}};
+#list badger3kdb add {{{name} {swapsuit} {type} {guild} {desc} {Swapping suits: setup basic powers after swapping}}};
+
+#class {player_aliases} {close}

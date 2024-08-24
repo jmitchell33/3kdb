@@ -31,7 +31,7 @@
     #if {"$guild" == "priest"} {offer corpse};
 };
 
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {.hockeyCorpse} {1};
+#action {^Out of nowhere a crazed hockey fan leaps towards the Cup.} {.hockeyCorpse} {1};
 
 #action {^A hockey fan sprints out and dies.$} {.hockeyCorpse} {1};
 
@@ -41,7 +41,7 @@
 #action {^3Kingdoms welcomes you back from linkdeath.} {defaults_on} {2}
 
 #NOP -- This is to ignore necromancers killing their undead horde of summons;
-#action {Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
+#action {^Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
 
 #NOP -- Dead/Alive variable;
 #action {A dark chill enters the room, filling you with awe, mixed with fear.} {#var my[dead] 0} {2};
@@ -50,11 +50,12 @@
 #action {^You lift the drink to your mouth, but in your stomach} {#var my[drunk] 1} {2};
 #action {^You drink the wine and feel healed.$} {#var my[drunk] 0} {2};
 
-#action {The effects of the%*blue capsule fade away.} {#if !$idle_flag {swallow blue capsule}} {2};
-#action {The effects of the%*orange capsule fade away.} {#if !$idle_flag {swallow orange capsule}} {2};
+#action {^The effects of the%*blue capsule fade away.$} {#if !$idle_flag {swallow blue capsule}} {2};
+#action {^The effects of the%*orange capsule fade away.$} {#if !$idle_flag {swallow orange capsule}} {2};
 
 #NOP #action {Zosimus says: There, it is done, push your hand into the rump of the beast} {push hand into cows rump};
-#action {%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
+
+#action {^%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
 #action {^The daemon hisses: Dost thou choose to graft with me %w?} {#format {graft} {%l} {%1};#if {"$user" == "$graft"} {say yes}};
 #action {^%1 begins to follow %2\.$} {#format {follower} {%l} {%1};#if {"$user" == "$follower"} {#format {following} {%n} {%2}}};
 #action {^You stop following %1} {#unvar following};
@@ -83,7 +84,7 @@
     #if {$my[song][rounds] == 0} {
         remove shield;give knight shield to $user;keep knight shield;wear knight shield;
     };
-};
+} {2};
 
 #NOP -- Toggle that mortiis mask has been worn or removed;
 #action {^Head:         The mask of Gemino Mortis} {#var equipped[mask] 1} {2};
@@ -97,56 +98,78 @@
 #action {^${userCap}'s eyes glow bright green upon} {#var mask[active] 1} {2};
 
 
-#action {It turns dark.} {#var room_darkness 1;};
-#action {You can see again.} {#var room_darkness 0;};
+#action {^It turns dark.$} {#var room_darkness 1;} {2};
+#action {^You can see again.$} {#var room_darkness 0;} {2};
 
-#act {{(\w+) taps you on the shoulder\.}} { 
+#action {^%w taps you on the shoulder.$} { 
     #if !$idle_flag {
-        #format followtarget {%l} {%2}; 
+        #format followtarget {%l} {%1}; 
         follow $followtarget;
         cassist $followtarget;
     };
-};
+} {2};
 
-#act {{From afar, (\w+) stares at you in (\w+) Jesus Christ pose\.}} {
+#action {^From afar, %w stares at you in %w Jesus Christ pose.$} {
     #if !$idle_flag {
-        #format healtarget {%l} {%2}; 
+        #format healtarget {%l} {%1}; 
         hmheal $healtarget;
+        #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
+        #delay 2 {#unaction {^You need rest to use that power again.$}};
     };
-};
+} {2};
 
-#act {{(\w+) stares at you in (\w+) Jesus Christ pose\.}} { 
+#action {^%w stares at you in %w Jesus Christ pose.$} { 
     #if !$idle_flag {
-        #format healtarget {%l} {%2}; 
+        #format healtarget {%l} {%1}; 
         hmheal $healtarget;
+        #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
+        #delay 2 {#unaction {^You need rest to use that power again.$}};
     };
-};
+} {2};
 
-#act {You call forth high mortal energies to heal yourself!} {
+#action {^%w stares at you in %w best Anti-Christ pose.} {
+    #if !$idle_flag {
+        #format healtarget {%l} {%1}; 
+        (heal $healtarget;
+        #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
+        #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+    };
+} {2};
+
+#action {^From afar, %w stares at you in %w best Anti-Christ pose.} {
+    #if !$idle_flag {
+        #format healtarget {%l} {%1}; 
+        (heal $healtarget;
+        #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
+        #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+    };
+} {2};
+
+#action {^You call forth high mortal energies to heal yourself!$} {
     #var my[hmheal][self] 0;
     #delay hmheal-self {#var my[hmheal][self] 1} {3600};
-};
+} {2};
 
-#act {{(\w+) says, 'Greetings, Comrade!' to you.$}} { 
+#action {^%w says, 'Greetings, Comrade!' to you.$} { 
     #if !$idle_flag {
         #10 corpse_select
     };
-};
+} {2};
 
 
 #NOP -- Skill Training;
-#act {^To do so, type: tskill %1$} {#if {!$idle_flag} {tskill %1}};
+#action {^To do so, type: tskill %1$} {#if {!$idle_flag} {tskill %1}} {2};
 
 
 #NOP -- Mob Life Counting;
-#act {^Beloch falters slightly but shakes off the assault.} {
+#action {^Beloch falters slightly but shakes off the assault.} {
     #showme -------------------------------------------------;
     #showme ---------        BELOCH LIFE DOWN         -------;
     #showme -------------------------------------------------;
-};
+} {2};
 
 #NOP -- AUTO PULLING ROPE TO AND FROM PLAYER
-#action {Pull the rope, and you will be teleported to %*.} {#if {!$idle_flag} {pull rope}};
-#action {Pulling the rope, will allow %* passage.} {#if {!$idle_flag} {pull rope}};
+#action {^Pull the rope, and you will be teleported to %*.$} {#if {!$idle_flag} {pull rope}};
+#action {^Pulling the rope, will allow %* passage.$} {#if {!$idle_flag} {pull rope}};
 
 #class {default_actions} {close}
