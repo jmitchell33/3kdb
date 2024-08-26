@@ -1,13 +1,9 @@
 #class {player_config} {kill}
 #class {player_config} {open}
 
-#NOP -- Bot Config;
+#NOP -- Rotate mobs if in Section Z;
 
-#alias {.pre_fight_check} {#nop};
-
-
-     #NOP -- Rotate mobs if in Section Z;
-     #if {"$area" == "Section Z"} {
+          #if {"$area" == "Section Z"} {
           #class bot open;
           #ticker gool1 {#if !$idle_flag {kill balangool}} 10;
           #ticker gool2 {#if !$idle_flag {kill balangool 2}} 20;
@@ -24,7 +20,7 @@
           #var defs[pn] 1;
      };
      echo_divider2;
-};
+
 
 
 #class {player_config} {close}
