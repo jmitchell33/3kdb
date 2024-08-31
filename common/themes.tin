@@ -2,7 +2,11 @@
 #class 3kdb_themes open;
 
 #NOP -- Use the "colors" alias to see available colors;
-#var theme[name] default;
+
+#NOP -- If no theme is set, use default;
+#if {"${theme[name]}" === ""} {
+    #var theme[name] default;
+};
 
 
 #if {"$theme[name]" == "default"} {
@@ -10,28 +14,15 @@
     #var theme[chatbox] <cee>;
 
     #NOP Chat Header Colors;
-    #var theme[chatHeader][party] <ffb>;
-    #var theme[chatHeader][tells] <fac>;
-    #var theme[chatHeader][clan] <ffe>;
-    #var theme[chatHeader][guild] <cfe>;
-    #var theme[chatHeader][hm] <faf>;
+    #var theme[chatHeader][party] <dbe>;
+    #var theme[chatHeader][tells] <dbe>;
+    #var theme[chatHeader][clan] <dbe>;
+    #var theme[chatHeader][guild] <dbe>;
+    #var theme[chatHeader][hm] <dbe>;
     #var theme[chatcolor][party] <ffb>;
     #var theme[chatcolor][gjugg] <cfb>;
     #var theme[chatcolor][hm] <fad>;
     #var theme[chatcolor][auction] <fef>;
-};
-
-#NOP -- If no theme exists, just hide the room ansi variables;
-#if {"${theme[name]}" === ""} {
-    #SUBSTITUTE {-R-_} {};
-    #SUBSTITUTE {-X-_} {};
-    #SUBSTITUTE {-D-_} {};
-};
-
-
-#if {"$theme[name]" == "default"} {
-    #NOP Chatbox Color;
-    #var theme[chatbox] <cee>;
 
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
@@ -64,6 +55,20 @@
 };
 
 #if {"$theme[name]" == "bright"} {
+    #NOP Chatbox Color;
+    #var theme[chatbox] <cee>;
+
+    #NOP Chat Header Colors;
+    #var theme[chatHeader][party] <dbe>;
+    #var theme[chatHeader][tells] <dbe>;
+    #var theme[chatHeader][clan] <dbe>;
+    #var theme[chatHeader][guild] <dbe>;
+    #var theme[chatHeader][hm] <dbe>;
+    #var theme[chatcolor][party] <ffb>;
+    #var theme[chatcolor][gjugg] <cfb>;
+    #var theme[chatcolor][hm] <fad>;
+    #var theme[chatcolor][auction] <fef>;
+
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
     #NOP Room exits;
