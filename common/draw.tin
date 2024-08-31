@@ -149,12 +149,16 @@
         #var mapFullScreen 1;
         #math map[fullLower] {$screen[height] - 2};
         #map get roomvnum map[full][startVnum];
+
+        #event {PORT CONNECTION} {
+            #{port_mapFull} {#var area $area;};
+            #{port_mapFull} {#var map {${map}};};
+            #{port_mapFull} {#read common/draw_mapFull.tin};
+            #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
+            #ses {port_mapFull};
+        };
+
         #port {init} {port_mapFull} {0};
-        #{port_mapFull} {#var area $area;};
-        #{port_mapFull} {#var map {${map}};};
-        #{port_mapFull} {#read common/draw_mapFull.tin};
-        #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
-        #ses {port_mapFull};
     };
 };
 

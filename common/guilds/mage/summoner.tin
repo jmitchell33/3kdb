@@ -270,4 +270,31 @@
 };
 
 
+#var summons[summoned] 0;
+#var my[summon_selected] An Undead Wraith;
+#action {^You wave your hands calling forth summoning magics and draw %*\n%a (100%) into the room!$} {
+	#var summonSCA 0;
+	#math summons[summoned] {$summons[summoned] + 1};
+	#format tmp1 {%p} {%1};
+	#format tmp2 {%p} {%2};
+	#var summonCalled {$tmp1 $tmp2};
+	#replace summonCalled {\n} { };
+	#if {"$my[summon_selected]" != "$summonCalled"} {
+		#list summonCalled {explode} { };
+    	#format summonShort {%l} $summonCalled[&summonCalled[]];
+		shoo $summonShort;
+	} {
+		#list summonCalled {explode} { };
+    	#format summonShort {%l} $summonCalled[&summonCalled[]];
+		#delay 1 {#if !$summonSCA {say $summonShort, you are now in group summons;#var summonSCA 0};};
+	};
+	
+} {2};
+
+#NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
+#NOP -- If not, then it was manually summoned and needs to be assigned to 'summons' group so casting haste/mf on the group works;
+#var summonSCA 0;
+#action {^You are creating a summon, with:} {#var summonSCA 1};
+
+
 #class {guild_summoner} close
