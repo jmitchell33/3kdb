@@ -67,24 +67,38 @@
     #var theme[chatcolor][party] <ffb>;
     #var theme[chatcolor][gjugg] <cfb>;
     #var theme[chatcolor][hm] <fad>;
-    #var theme[chatcolor][auction] <fef>;
+    #var theme[chatcolor][auction] <cea>;
 
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
+    
     #NOP Room exits;
     #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
+    
     #NOP Room description -- not really good to do here since it's multiline;
     #SUBSTITUTE {-D-_} {%1};
+
+    #NOP Mage Summons;
+    #SUBSTITUTE {^-M-_%1[summons]%2.$} {<dcd>%1[summons]%2.<088>} {3};
+    #SUBSTITUTE {^-M-_$my[familiar].$} {<eaf>$my[familiar] [familiar].<088>} {3};
+
+    #SUBSTITUTE {^-M-_%1.$} {<fcb>%1<088>} {4};
+    
     #NOP Mobs;
     #SUBSTITUTE {^-M-_%1} {<fcb>%1<088>};
+    
     #NOP Players;
 	#SUBSTITUTE {^-P-_%1} {<ffa>%1<088>};
+    
     #NOP Weapons;
 	#SUBSTITUTE {^-w-%1} {<cda>%1<088>};
+    
     #NOP Objects;
 	#SUBSTITUTE {^-o-%1} {%1};
+    
     #NOP Armours;
 	#SUBSTITUTE {^-a-%1} {<fff>%1<088>};
+    
     #NOP Items;
 	#SUBSTITUTE {^-i-%1} {<fae>%1<088>};
 };
