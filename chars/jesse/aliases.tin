@@ -226,30 +226,6 @@
 };
 
 #NOP -- aliases to setup strategies;
-#NOP -- strategy setup for summons assisting;
-#alias {mystrategy-assist} {
-    strategy-clear;
-    strategy slow;
-    strategy super_er;
-    strategy golem_assist;
-    strategy spelltap;
-    strategy super_sub;
-    strategy summon_mf;
-    strategy gstrength
-};
-
-#NOP -- strategy setup for summons defending;
-#alias {mystrategy-defend} {
-    strategy-clear;
-    strategy slow;
-    strategy super_er;
-    strategy golem_assist;
-    strategy spelltap;
-    strategy super_sub;
-    strategy summon_mf;
-    strategy gstrength
-};
-
 #NOP -- default strategy;
 #alias {mystrategy} {
     strategy-clear;
@@ -257,9 +233,8 @@
     strategy super_er;
     strategy golem_assist;
     strategy spelltap;
-    strategy super_sub;
-    strategy summon_mf;
-    strategy gstrength
+    strategy gstrength;
+    strategy rolm
 };
 
 #NOP -- clear strategies;
@@ -267,35 +242,29 @@
     strategy-clear
 };
 
-#NOP - aliases for setting up summon config & strategies with golem and summons for assist or defending;
-#alias {assistmode} {
-    clear_sconfig;
-    shoo;
-    mystrategy-assist;
-    ms 7a
-};
-
-#alias {defendmode} {
-    clear_sconfig;
-    shoo;
-    mystrategy-defend;
-    ms 7d
-};
-
+#NOP - aliases for setting up summon config & strategies;
 #alias {killmode} {
     clear_sconfig;
     shoo;
     mystrategy;
-    ms 7##2#1500#70#defend#summons#always;
-    ms 6##2#1500#70#assist#summons#always
+    ms 4##2#1500#70#defend#summons#always;
+    ms 3##2#1500#70#assist#summons#always
 };
 
 #alias {killmode2} {
     clear_sconfig;
     shoo;
     mystrategy;
-    ms 6##2#1500#70#defend#summons#always;
-    ms 7##2#1500#70#assist#summons#always
+    ms 4##2#1500#70#assist#summons#always;
+    ms 3##2#1500#70#assist#summons#always
+};
+
+#alias {killmode3} {
+    clear_sconfig;
+    shoo;
+    mystrategy;
+    ms 4##2#1500#70#defend#summons#always;
+    ms 3##2#1500#70#defend#summons#always
 };
 
 #NOP -- aliases to setup strategies for phantasmal killer;
@@ -319,9 +288,9 @@
     corpsetrig+ divvy;
     corpsetrig+ getAll;
     corpsetrig+ crafting;
-    corpsetrig+ pPocket;
     corpsetrig+ spellbook;
-    corpsetrig+ szCaps
+    corpsetrig+ szCaps;
+    corpsetrig+ szGreenCap
 };
 
 #NOP -- solo kill trig without get all;
@@ -329,7 +298,7 @@
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
-    corpsetrig+ cBlasat2;
+    corpsetrig+ cBlast2;
     corpsetrig+ divvy;
     corpsetrig+ spellbook
 };
@@ -340,16 +309,6 @@
     corpsetrig+ spelltap;
     corpsetrig+ spellbook;
     corpsetrig+ ted
-};
-
-#NOP -- sewers kill trig;
-#alias {mycorpsetrig-sewers} {
-    corpsetrig-clear;
-    corpsetrig+ spelltap;
-    corpsetrig+ wrap;
-    corpsetrig+ cBlast2;
-    corpsetrig+ divvy;
-    corpsetrig+ spellbook
 };
 
 #alias {corpseoff} {
@@ -446,7 +405,6 @@
 #list jesse3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list jesse3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list jesse3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
-#list jesse3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
 #list jesse3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
 
 #NOP -- boosts;
@@ -454,8 +412,7 @@
 #list jesse3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
 
 #NOP - combat;
-#list jesse3kdb add {{{name} {mystrategy-assist} {type} {combat} {desc} {Setup strategy for summons (assisting)}}};
-#list jesse3kdb add {{{name} {mystrategy-defend} {type} {combat} {desc} {Setup strategy for summons (defending)}}};
+#list jesse3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies}}};
 #list jesse3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
 
 #NOP -- misc;
@@ -472,8 +429,9 @@
 #list jesse3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
 #list jesse3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
 #list jesse3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
-#list jesse3kdb add {{{name} {assistmode} {type} {guild} {desc} {Setup summon config/strategy with golem & summons (assisting)}}};
-#list jesse3kdb add {{{name} {defendmode} {type} {guild} {desc} {Setup summon config/strategy with golem & summons (defending)}}};
+#list jesse3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (highest ms tanking)}}};
+#list jesse3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
+#list jesse3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
 
 #NOP -- spells;
 #list jesse3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
