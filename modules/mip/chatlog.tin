@@ -126,7 +126,7 @@
 			#case {"Bard Main"}			{#var {commcol} {<ddd>}};
 			#case {"Bard Mystic"}		{#var {commcol} {<ddd>}};
             #case {"Announce"}        	{#var {commcol} {<168>}};
-            #case {"Auction"}        	{#var {commcol} {${theme[chatcolor][auction]}}};
+            #case {"Auction"}        	{#var {commcol} {$theme[chatcolor][auction]}};
             #case {"Bear"}            	{#var {commcol} {<168>}};
             #case {"Bloodname"}        	{#var {commcol} {<218>}};
             #case {"Breed"}            	{#var {commcol} {<158>}};
@@ -149,8 +149,8 @@
             #case {"Falcon"}        	{#var {commcol} {<128>}};
             #case {"Fcom"}            	{#var {commcol} {<268>}};
             #case {"Gamers"}        	{#var {commcol} {<268>}};
-		    #case {"Gjugg"}            	{#var {commcol} {${theme[chatcolor][gjugg]}}};
-            #case {"High Mortal"}       {#var {commcol} {${theme[chatcolor][hm]}}};
+		    #case {"Gjugg"}            	{#var {commcol} {$theme[chatcolor][gjugg]}};
+            #case {"High Mortal"}       {#var {commcol} {$theme[chatcolor][hm]}};
             #case {"Jedi"}            	{#var {commcol} {<158>}};
             #case {"JEDI"}            	{#var {commcol} {<128>}};
             #case {"JuggAnnounce"}      {#var {commcol} {<118>}};
@@ -164,7 +164,7 @@
 			
 			#NOP Mages;
 			#case {"Mage"}            	{#var {commcol} {<118>}};
-			#case {"Mage"}		    	#var {commcol} {<118>}};
+			#case {"Mage"}		    	{#var {commcol} {<118>}};
 			#case {"Arch Mage"}		    {#var {commcol} {<118>}};
 			#case {"High Mage"}		    {#var {commcol} {<118>}};
 			#case {"Sorcerer"}		    {#var {commcol} {<118>}};
@@ -181,7 +181,7 @@
             #case {"Ncom"}            	{#var {commcol} {<268>}};
             #case {"Newbie"}        	{#var {commcol} {<138>}};
             #case {"Notify"}        	{#var {commcol} {<168>}};
-            #case {"Party"}            	{#var {commcol} {${theme[chatcolor][party]}}};
+            #case {"Party"}            	{#var {commcol} {$theme[chatcolor][party]}};
             #case {"Poll"}           	{#var {commcol} {<178>}};
             #case {"Professions"}       {#var {commcol} {<178>}};
             #case {"Psi Main"}        	{#var {commcol} {<168>}};
@@ -509,7 +509,7 @@
 #alias updateChatCategory {
 	#switch {"$chatCategory"} {
 		#case {"party"} {#var partyString @formatHeader{PARTY}};
-		#case {"tells"} {#var tellsString @formatHeader{TELLS}};
+		#case {"tells"} {#var tellString @formatHeader{TELLS}};
 		#case {"clan"} {#var clanString @formatHeader{CLAN}};
 		#case {"guild"} {#var guildString @formatHeader{GUILD}};
 		#case {"high_mortal"} {#var hmString @formatHeader{HM}};
@@ -543,7 +543,7 @@
 	updateChatCategory;
 	#if {"$draw[chat][active]" == "on"} {
 		#line sub var #line sub esc #draw $theme[chatbox] left right side 2 1 $chat[height]-1 $chat[right] $chat[general][-$chat[start]..-$chat[end]];
-		#draw $theme[chatbox] calign jeweled line 1 1 1 $map[left]  {    $tellsString    $partyString    $clanString    $guildString    $hmString    };
+		#draw $theme[chatbox] calign jeweled line 1 1 1 $map[left]  {    $tellString    $partyString    $clanString    $guildString    $hmString    };
 	};
 };
 
