@@ -125,6 +125,7 @@
 #list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
 #list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Summon Tanking}}};
 #list strategyList add {{{guild} {mage} {name} {summon_cull}  {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
+#list strategyList add {{{guild} {mage} {name} {summon_select}  {active} {0} {description} {Summoner: Shoo unwanted summons}}};
 #list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
 #list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
@@ -240,6 +241,19 @@
                     cast phantasmal killer;
                     #NOP -- You can't haste any illusions, so we'll cast MF on it;
                     checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
+                };
+            };
+        };
+
+        checkStrategy {summon_select} {
+            #if {!$idle_flag} {
+                #local tmpCount 0;
+                #local index {};
+                #loop 1 &my[summons][] index {
+                    #if {"$my[summons][$index][keyName]" == "Golem"} {#NOP} {#math tmpCount {$tmpCount + $my[summons][$index][count]}};
+                };
+                #if {$tmpCount < 4} {
+                    cast monster summoning 10 as wraith;
                 };
             };
         };

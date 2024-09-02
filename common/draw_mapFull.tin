@@ -3,22 +3,31 @@
 
 #var mapFullScreen 1;
 
-#config mouse on;
+
+#event {MAP REGION PRESSED MOUSE BUTTON ONE} {#echo {CLICKED MAP REGION (%0,%1) vnum %4 [%5]}};
+
+
+
 #unmacro %d;
-#Read modules/helpers/functions.tin;
+#read modules/helpers/functions.tin;
 #map read common/map/3k_shared.map;
+#var buttons[area_selected][text] $area;
 #map goto $map[full][startVnum];
-#screen clear all;
 #map map;
 #map flag vtmap on
+#config mouse on;
 #read common/data/areas.tin;
 
-#delay 3 {
-    #screen clear all;
-    #map map;
-    #map center;
-    _draw_mapAreas_initiate;
-};
+#screen clear all;
+_draw_mapAreas_initiate;
+
+
+
+#NOP #delay 3 {
+#NOP     #screen clear all;
+#NOP     #map map;
+#NOP     #map center;
+#NOP };
 
 
 

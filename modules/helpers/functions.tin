@@ -132,4 +132,39 @@
 	#return $tmpResult;
 };
 
+#function {roman_to_number} {
+	#class tmpRomantoNumbers open;
+	#var romanNumber[I] 1;
+	#var romanNumber[II] 2;
+	#var romanNumber[III] 3;
+	#var romanNumber[IV] 4;
+	#var romanNumber[V] 5;
+	#var romanNumber[VI] 6;
+	#var romanNumber[VII] 7;
+	#var romanNumber[VIII] 8;
+	#var romanNumber[IX] 9;
+	#var romanNumber[X] 10;
+	#var romanNumber[XI] 11;
+	#var romanNumber[XII] 12;
+	#var romanNumber[XIII] 13;
+	#var romanNumber[XIV] 14;
+	#var romanNumber[XV] 15;
+	#var romanNumber[XVI] 16;
+	#class tmpRomantoNumbers close;
+
+	#unvar tmpList;
+	#var tmpList %0;
+	#replace tmpList {-} { };
+	#replace tmpList { } { };
+	#list tmpList explode { };
+	#var tmpResult 0;
+	#loop 1 &tmpList[] i {
+		#var x $romanNumber[$tmpList[$i]];
+		#if {"$x" != ""} {#math tmpResult {$tmpResult + $x}} {
+		};
+	};
+	#class tmpRomantoNumbers kill;
+	#return $tmpResult;
+};
+
 #class helpers close;
