@@ -1,25 +1,14 @@
 #class {general_gags} kill;
 #class {general_gags} open;
 
-#NOP -- Generic Gags;
-#gag {^hide%*};
+
+#NOP -- Always on Gags;
+#NOP -- Prompt;
 #gag {^$};
 #gag {^>$};
-#gag {^Your shield blocks %* attack!$};
-#gag {^***THAWHACK*** You critically hit %*!$};
-#gag {^**THWACK** You critically hit %*!$};
-#gag {^You drive your attack past %* resistances!$};
-#gag {^You nimbly dodge %* attack!$};
 
-#NOP -- Mskill Gags;
-#gag {^Your great speed allows you to attack again!$};
-
-#NOP -- Eternal Gags;
+#NOP -- Ewell spam;
 #var ewell_gag 1;
-#gag {^The assault glances harmlessly off your aura.$};
-#gag {^A bolt of pure energy flies out of the sky striking %*!$};
-#gag {^Your form shimmers and becomes impenetrable.$};
-#gag {^You have become grounded in this plane yet again.$};
 #act {^The brilliant sphere flashes brightly.$} {
     #line gag;
     #if $ewell_gag {
@@ -29,391 +18,560 @@
     };
 };
 
-#NOP -- Cyborg Gags;
-#gag {The stream from %* freon injector freezes %* badly.};
-#gag {%* freezes %* freon injector's stream.};
-#act {%* freezes %* like a Thanksgiving turkey with the stream %*} {
-    #line gag;
-    #line oneshot #act {%*freon injector.} {#line gag;};
-};
-#act {%* gets some serious third-degree frostburn %*} {
-    #NOP;
-    #line gag;
-    #line oneshot #act {%*freon injector.} {#line gag;};
-} {1};
-#gag {The stream from Wendigo's freon injector freezes Leago badly.}
-#gag {%* with %* laser!};
-#gag {%* with a stream from %* freon injector.};
 
-#NOP -- Land2 Gags;
-#gag {^The angry servitors of Andelain and the Land fall upon you!$};
+#NOP -- 'gags' alias will toggle groups of gags;
+#alias gags {
+    #echo { ================ <dfa>  ACTIVE GAGS<088>  ================ };
+    #format gagName {%-20s} {Name};
+    #echo {<dfb>$gagName Description<088>};
+    #loop 1 &gagList[] item {
+        #format gagName {%-20s} {$gagList[$item][name]};
+        #if $gagList[$item][active] {#echo {<ddd>$gagName $gagList[$item][description]<088>};};
+    };
+    #echo {\n};
+    #echo { ================ <dfa>AVAILABLE GAGS<088> ================ };
+    #format gagName {%-20s} {Name};
+    #echo {<dfb>$gagName Description<088>};
+    #loop 1 &gagList[] item {
+        #format gagName {%-20s} {$gagList[$item][name]};
+        #if !$gagList[$item][active] {#echo {<ddd>$gagName $gagList[$item][description]<088>};};
+    };
 
-
-#NOP -- Rimalkin Gags;
-#action {^The %* Rimalkin lunges at you with its needle-like fangs!$} {#line gag} {1};
-#gag {^The %* Rimalkin slashes at you with its razor sharp claws!$};
-#gag {^The %* Rimalkin looks at you with little red eyes, scratching the ground nervously.$};
-
-#NOP -- Zelligar Gags;
-#gag {^The Golem Cackles madly like an insane man!$};
-#gag {^The Golem GLARES at you with his evil eyes and you freeze in panic!!!$};
-#gag {^The Golem slashes you with his sharp claws.$};
-#gag {^The Golem hurls a MASSIVE boulder at you!!$};
-#gag {^The Golem CRUSHES you with his giant fist!$};
-#gag {^The Golem SMASHES you so hard your whole family hurts!!$};
-#gag {^The Golem SLASHES you with a jagged edge!!$};
-#gag {^The Golem SLICES and DICES!!!!$};
-#gag {^The Golem hurls shards of glass at you!!$};
-
-#NOP -- Chessboard Gags;
-#gag {^The %* crushes you with a mighty swipe of his};
-#gag {^trunk!$};
-#gag {^%* whips out a brightly glowing book and somehow};
-#gag {^blasts you with pure energy!$};
-#gag {^The %* opens his palm and a ray of frost erupts};
-#gag {^from it at you!$};
-#gag {^The A War Correspondent nearly blinds you with a powerful flash};
-#gag {^from his camera!$};
-#gag {^The %* rolls his chariot over you, slicing deeply!$};
-#gag {^The %* holds up his sceptre and it begins to glow eerily.$};
-#gag {^The Angry Horse rears up and slashes you with his sharpened};
-#gag {^horseshoes!$};
-#gag {^The %* preaches at you. Blood gushes from your ears!$};
-#gag {^The A Refugee smacks you with a befouled rag!$};
-#gag {^The %* throws a vial of burning acid at you!$};
-#gag {^The %* sword bursts into flame as he viciously};
-#gag {^slices into you!$};
-#gag {^into you!$};
-
-#NOP -- Hotel Gags;
-#gag {^The cook grunts and glares, suddenly a sharp knife flies towards you!$};
-#gag {^The bell hop makes a gurgling noise, a blast shoots towards you!$};
-
-#NOP -- Item Gags;
-#gag {^The sword pulses in your grasp!$};
-#gag {%*Your body quakes violently as a sickly, mutated arm$};
-#gag {%*spears forth from your torso and smashes%*!$};
-#gag {%* quakes violently as a sickly, mutated arm spears};
-#gag {forth from his torso and viciously smashes %*!};
-#gag {^{The Spork Lance SLICES into (.*)\!}};
-#gag {^{The Spork Lance tingles and you feel refreshed\.}};
-#gag {{^A spork tine breaks off into (.*)\!}};
-#gag {{^The Spork Lance GASHES (.*)\!}};
-#gag {{^The spork tine falls out of (.*)\.}};
-#gag {{^(.*) bleeds from where the spork tine is embedded in (.*)\!}};
-#gag {^The aura surrounding you absorbs some of the incoming attack.$};
-#gag {^Acid from the Queen's skin sizzles %* alive!$};
-#gag {^The sharp spikes SHRED %* flesh like paper.$};
-#gag {^A mighty pulse of strength wells in your arms!$};
-#gag {^The gloves course a powerful strike through your arms!$};
-
-#action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {#line gag} {1};
-#gag {%* bashes %* with %* shield, cutting it and sending it reeling backward.};
-#action {%* bashes %* with %* shield, cutting it and sending it reeling backward} {
-    #line gag;
-    #line oneshot #act {backward.} {#line gag;};
-    #line oneshot #act {reeling backward.} {#line gag;};
-} {1};
-
-#gag {it reeling backward.};
-#gag {sending it reeling backward.};
-#gag {Your armour absorbs the blood from your wounds.};
-#gag {Your armour extends a tendril of blood that deflects the incoming attack!};
-
-#NOP -- Bard Gags;
-#gag {%w hacks and wheezes in the toxic cloud.$};
-#gag {^The lightning vortex crackles loudly.$};
-#gag {%w is burning in acid!$};
-#gag {%w wears %*Shield%*.$};
-#gag {%w removes %*Shield%*.$};
-#gag {%w finishes his performance with a bow.$};
-#gag {%w cracks %w knuckles and gets ready to play for %*};
-#gag {%w takes a deep breath and prepares to perform a song for %*};
-
-#NOP -- Monk Gags;
-#gag {%w body ruptures at all major joints!$};
-#gag {%w body erupts from within!!!$};
-#gag {%* body shakes apart!!$};
-#gag {Psionic waves emanate from %* body.$};
-#gag {%w body is wracked in pain.$};
-#gag {%w lays hands.$};
-#gag {%w sends deadly vibrations through his foe!$};
-#action {KER-POW!!!!!  %w has stunned %w!$} {#line gag} {1};
-#gag {%w concentrates on %w, causing it to scream out in pain!!$};
-#gag {%w gestures towards %w, causing it to fall backwards in pain!$};
-#gag {%w gestures towards Cloud Eye, and pieces of it fly off in all directions!$};
-#gag {%w stares at %w, causing external bleeding.$};
-#gag {%w gestures towards %w, and smoke pours out its ears!$};
-#gag {POP!  Veins pop forth from a %w head, spraying blood into the air like a fountain.$};
-#gag {%w stares at %w, and grey mush oozes out of its ears!$}:
-#gag {%w stares at %w, and pieces of it fly off in all directions!$};
-#gag {%w concentrates on %w, missing completely.$};
-#gag {%w concentrates on %w, and pieces of it fly off in all directions!$};
-#gag {%w gestures towards %w, melting its brain!$};
-
-#NOP -- SIMPSONS EXPANSION
-#gag {^Your party %w the Beatle's defenses.$};
-
-#NOP -- Mahjong;
-#gag {^The tiger swipes at you with its giant paw!$};
-#gag {^The tiger leaps up and tries to maul you!$};
-#gag {^The dolphin tries to swim away from your attack!$};
-#action {^The dolphin lets loose an ear-splitting shriek!$} {#line gag} {1};
-#gag {^The dolphin bops you in the nose with its tail!$};
-#gag {^The dragon whips its tail around, nearly knocking you off your feet!$};
-#gag {^The dragon belches fire all over you!$};
-#gag {^The dragon rakes you across the face with its claws!$};
-#gag {^The phoenix scorches you as it bursts into flames!$};
-#gag {^The phoenix digs its talons into your skin!$};
-#gag {^The phoenix pecks at your eyes!$};
-#gag {^The butterfly flutters its wings at you!$};
-#gag {^The butterfly tries desperately to get away!$};
-#gag {^The serpent slips past you and darts in for another bite!$};
-#gag {^The serpent digs its fangs into your flesh!$};
-#gag {^The serpent bites you, sending poison coursing through your veins!$};
-#gag {^The rabbit leaps up and kicks you right in the groin!$};
-#gag {^The rabbit tries to turn tail and run!$};
-#gag {^The horse kicks you hard with a powerful thrust of its back legs!$};
-#gag {^The horse flaps its wings and prepares to take flight!$};
-#gag {^The ram drives its horns deeply into your chest!$};
-#gag {^The ram rears up and paws at you with its front hooves!$};
-#gag {^The rat bites deeply into your flesh!$};
-#gag {^The rat launches itself at your neck!$};
-#gag {^The ox gores you with its horns!$};
-#gag {^The ox stamps on you with one giant hoof!$};
-
-#NOP -- POL Gags;
-#gag {^The faerie lizard dives forward, sinking its teeth into you.$};
-#gag {^The faerie lizard's claws lash forward, striking you across the face.$};
-#gag {^The wyvern's tail lashes forward, striking you across the face.$};
-#gag {^The wyvern dives forward, sinking its claws into you.$};
-#gag {^The wolf viciously rips at your throat.$};
-#gag {^The wolf drools in anticipation of feeding upon you.$};
-#gag {^The elf slices you with his sword!$};
-#gag {^The stag impales you with its sharp antlers!$};
-#gag {^The stag rears up on its hind feet, then charges forward!$};
-#gag {^The stag tosses its head back and lets out a challenging call.$};
-#gag {^The baby dragon dives forward, slashing into you with its claws.$};
-#gag {^The baby dragon's tail lashes forward, striking you across the face.$};
-
-#NOP -- Chicken Plant;
-#gag {^*BZZZTT*  You get stunned by the guard!$};
-#gag {^Guard steps back and lets loose an energy beam.$};
-#gag {^You are pummeled by punches from every direction.$};
-#gag {^The worker rages at you with blind fury.$};
-#gag {^The worker punches you viciously.$};
-#gag {^The worker throws a chicken in your face!$};
-#gag {^The worker throws guts in your face!$};
-#gag {^The foreman steps back and blasts you with a beam out of his eye!$};
-#gag {^Your hair stands on end as the foreman lashes you with the whip!$};
-#gag {^The foreman docks your pay!$};
-
-#NOP -- Sii Gags;
-#gag {^The brood's tiny wicked claws tear at %*!};
-#gag {^The brood's razor claws slash into %*!};
-#gag {^The brood claws viciously at %*!};
-#gag {^Mental plan (%d): %*};
-#gag {^You are already focusing your malice on %*};
-#gag {^You focus your malice at %*, intent on destruction!};
-#gag {^Your malicious attacks fade.};
-
-#NOP -- Gentech Gags;
-#gag {^The ionbeam illuminates %*!$};
-#gag {^The ionbeam warms %*!$};
-#gag {^The ionbeam blisters %*!$};
-#gag {^The ionbeam superheats %*!};
-#gag {^The ionbeam singes %*!};
-#gag {%* focuses free radicals at %*.};
-#gag {%* focuses energy nodules at %*.};
-#gag {%*V3.0 tickled Charging Ram in the stomach.}
-#gag {%* focuses ionized air currents at %*.$};
-#gag {%* synthorg sonic emitters send subtle vibrations at %*.$};
-#gag {%* synthorg sonic emitters send a low humming at %*.$};
-#action {%* is enclosed within a blue-green energy field.$} {#line gag} {1}; 
-
-#NOP -- Carebears;
-#gag {Tugs wimpers and curls up into a ball.};
-#gag {Tugs says: It hurts, it really hurts, please stop.};
-#gag {Tugs sobs: I'm so sorry, i won't do it again.};
-#gag {{Tugs|Hugs} cringes in terror.};
-#act {Hugs screams out in pain: I'm sorry Grumpy I promise I'll never do it} {
-    #line gag;
-    #line oneshot #act {again!} {#line gag;};
+    #echo {\n <efa>gag+<088> <bcc>name<088> to <efc>gag<088> a group};
+    #echo { <efa>gag-<088> <bcc>name<088> to <fac>ungag<088> a group};
 };
 
-#NOP -- Erah Gags;
-#act {%* harnesses %* strength into a single FOCUSED strike on} {
-    #line gag;
-    #line oneshot #act {you.$} {#line gag;};
+#alias gag+ {
+    #if {"%0" == ""} {
+        #echo {<efd> No gag name provided.  Type 'gags' to see available options.<088>};
+    } {
+        #local tmpItem %0;
+        #loop 1 &gagList[] item {
+            #if {"$gagList[$item][name]" == "$tmpItem"} {
+                #var gagList[$item][active] 1;
+                #var gags[$gagList[$item][name]] 1;
+                $gagList[$item][action];
+                #echo {<efd>---------- $gagList[$item][name] NOW GAGGED  ----------<efd>};
+            };
+        };
+    };
 };
 
-#gag {%* harnesses %* strength into a single FOCUSED strike on you.};
-#gag {%* goes into a FLURRY of rapid attacks.};
-
-#NOP -- Section Z Gags;
-#gag {^The Ripper body slams %*!$};
-#gag {^A wailing cry emits from the Soldier as it charges %* with full force!$};
-#gag {^A well placed blast from the Soldier's cannon pounds into %* chest!$};
-#gag {^The Groma's entire body impacts %* with a stunning force!$};
-#gag {^The Groma falls into a dive and pierces %* with pointed wing tips!$};
-#gag {^The Leago spins and drills into %*, leaving a large crater!$};
-#gag {^The Leago slams down into %*, clobbering you senseless!$};
-#gag {^The Leeva makes an unexpected lunge and plows into %*!$};
-#gag {^The Leeva flits around aimlessly bouncing off nearby walls.$};
-#gag {^The Leeva darts left, right, then straight into %*!$};
-#gag {^In a massive somersault, the Gun launches from the wall, striking};
-#gag {%* with massive force in the chest!$};
-#gag {^The Spiral Gun fires a swirling ball of energy directly at %*!$};
-#gag {^The generator glows bright red and blasts you with an unseen energy!$};
-#gag {^With a deafening CRACK, electricity arcs between you and the generator!$};
-#gag {^Twzzzps and bzzzaps crackle from the generator as it hums and churns.$};
-#gag {^The Ripper stands in front of you, obstructing any passage.$};
-#gag {^The Spiral Gun ominously follows you with its turret.$};
-#gag {^The Ripper hangs motionless in the air before you.$};
-#gag {^The Groma hangs in the air like a bird on a breeze.$};
-#gag {^you with massive force in the chest!$};
-
-#act {^A pulse of red light fires from the Cloud Eye and sears your skin as it%*} {
-    #line gag;
-    #line oneshot #act {crosses your path.$} {#line gag;};
+#alias gag- {
+    #if {"%0" == ""} {
+        #echo {<efd> No gag name provided.  Type 'gags' to see available options.<088>};
+    } {
+        #local tmpItem %0;
+        #loop 1 &gagList[] item {
+            #if {"$gagList[$item][name]" == "$tmpItem"} {
+                #var gagList[$item][active] 0;
+                #var gags[$gagList[$item][name]] 0;
+                $gagList[$item][action];
+                #echo {<faa>---------- $gagList[$item][name] NO LONGER GAGGED ----------<088>};
+            };
+        };
+    };
 };
 
-#act {^A column of accelerated energy beams from the Cloud Eye and envelopes%*} {
-    #line gag;
-    #line oneshot #act {you in sheer agony!$} {#line gag;};
+#NOP -- If the gag requires an action
+#unvar gagList
+#list gagList add {{{name} {hpbar} {active} {0} {action} {#NOP} {description} {Generic: Gag HPBar}}};
+#list gagList add {{{name} {combat_generic} {active} {0} {action} {_gag_combat_generic} {description} {Combat: Generic (melee, dodges, blocks, etc.)}}};
+#list gagList add {{{name} {combat_area} {active} {0} {action} {_gag_combat_area} {description} {Combat: Spammy Mobs}}};
+#list gagList add {{{name} {combat_guild} {active} {0} {action} {_gag_combat_guild} {description} {Combat: Spammy Guild Attacks (Cyborgs, Necros, etc.)}}};
+#list gagList add {{{name} {combat_items} {active} {0} {action} {_gag_combat_items} {description} {Combat: Spammy Items (CMC, Erah Shield, etc.)}}};
+
+#alias .update_gags {
+    #if {&gagList[] > 0} {
+        #local item {};
+        #loop 1 &gagList[] item {
+            #if $gagList[$item][active] {
+                gag+ $gagList[$item][name];
+                #echo {<faa>---------- GAGGED: $gagList[$item][name] <088>};
+            } {
+                gag- $gagList[$item][name];
+                #echo {<efd>---------- VERBOSE: $gagList[$item][name] <088>};
+            };
+        };
+    };
 };
 
-#act {^The Cloud Eye blinks its metal eyelid with the sound of gears chewing%*} {
-    #line gag;
-    #line oneshot #act {on flesh.$} {#line gag;};
-};
- 
-#NOP -- Necromancer Gags;
-#gag {^The crimson field engulfing %* dissolves away.$};
-#gag {A crimson mist then appears and engulfs %*!$};
-#gag {%* eyes glow %* stares %* at %*.$};
-#gag {%* mind is torn asunder by the spectres of energy.$};
-#gag {%* is sheared by the %*!$};
-#gag {%* flesh is corroded away by the curse!$};
-#gag {The glowing field engulfing %* dissolves away.$};
-#gag {The radiant sickle flies around!$};
-#gag {The crimson energy wraps %* in a painful, agonizing torment.$};
-#gag {%* cries out in agony from the corroding decay!$};
-#gag {%* is hacked to bits by the %*!$};
-#gag {The %* slashes downward, hungry for blood!$};
-#gag {%* convulses and howls in agony.$};
-#gag {%* mind and thoughts drain away into the crimson mist.$};
-#gag {%* staggers about, lost in the delirium of rabies.$};
-#gag {%* rampages about, a wild, unthinking look in %* eyes.$};
-#gag {%* staggers from the painful crimson energy mist.$};
-#gag {%* is painfully raked by the spectres in the glowing mist.$};
-#gag {%* stumbles about wheezing as %* tries to breathe.$};
-#gag {%* flesh is dissolved painfully by the curse! $};
-#gag {The %* cleaves through the chest of %*!$};
-#gag {The %* flies around!$};
-#gag {The %* cuts %* to ribbons!$};
-#gag {%* froths at the mouth.$};
-#gag {%* is sheared by the %*!$};
-#gag {%* infuses you with vampiric energy.$};
-#gag {%* flesh is dissolved painfully by the curse!$};
-#gag {%* wails in pain from the golden corrosion!$};
-#gag {The %* bloodily cuts into %*!$};
-#gag {%* recoils from the acid of the golden decay!$};
-#gag {%* thoughts painfully dissipate %*.$};
-#gag {The radiant sickle %*!$};
-#gag {The gleaming scythe %*!$};
-#gag {A deadly golden scythe flies into the room!!$};
-#gag {A glowing, spectral mist then appears and engulfs %*!$};
-#gag {The spectral glowing energy field drains the mind of %*.$};
-#gag {%* mind is sapped into the crimson field of energy.};
-#gag {The crimson energy field drains the mind of %*.};
-#gag {%* is painfully drained by the crimson mist.};
-#gag {%* hands some coins to %* familiar.$};
-#action {%* rakes dark claw-like nails across the face of %*!$} {#line gag} {1};
-#gag {%* eyes glow red as %* stares at %*.};
-#gag {%* unleashes %* vengeance upon %* foe!$};
-#gag {%* affects %* with a dark, necromantic touch.$};
 
-#action {%* snarls like a wild beast, %* brow beaded%*} {
-    #line gag;
-    #line oneshot #action {%*which ravages %* body.$} {#line gag;};
-};
+#NOP -- Mud Combat Gags;
+#alias _gag_combat_generic {
+    #if $gags[combat_generic] {
 
-#action {%* charges %* and clamps down on %*, piercing} {
-    #line gag;
-    #line oneshot #action {%*crunching bone in %* jaws%*} {#line gag;};
-    #line oneshot #action {%*the wound and allow %*} {#line gag;};
-    #line oneshot #action {%*dreaded infection of rabies!$} {#line gag;};
-} {1};
+        #class gags_combat_generic open;
+        #gag {^Your shield blocks %* attack!$};
+        #gag {^***THAWHACK*** You critically hit %*!$};
+        #gag {^**THWACK** You critically hit %*!$};
+        #gag {^You drive your attack past %* resistances!$};
+        #gag {^You nimbly dodge %* attack!$};        
+        
+        #NOP -- Mskill Gags;
+        #gag {^Your great speed allows you to attack again!$};
 
-#action {Thunder rolls across the land as %*} {
-    #line gag;
-    #line oneshot #action {%*In a flash of brilliance,%*} {#line gag;};
-    #line oneshot #action {%*forming into a radiant scythe of%*} {#line gag;};
-    #line oneshot #action {%*with an unholy scream of rage$} {#line gag;};
-    #line oneshot #action {%*The celestial blade$} {#line gag;};
-    #line oneshot #action {%*forth part of the$} {#line gag;};
-    #line oneshot #action {%*as the scythe then sparkles$} {#line gag;};
-    #line oneshot #action {%*nothingess.$} {#line gag;};
-} {1};
+        #NOP -- Eternal Gags;
+        #gag {^The assault glances harmlessly off your aura.$};
+        #gag {^A bolt of pure energy flies out of the sky striking %*!$};
+        #gag {^Your form shimmers and becomes impenetrable.$};
+        #gag {^You have become grounded in this plane yet again.$};
 
-#action {^The razor-sharp beaks of the winged creatures %*!} {
-    #nop;
-    #line gag;
-} {1};
+        #NOP -- Profession Gags;
+        #NOP Assassin;
+        #gag {Your insidious inspiration flows through you as you make the most of each attack!};
+        #gag {Your insidious inspiration fades.};
 
-#action {^Ashen-Shugar %*!} {
-    #nop;
-    #line gag;
-} {1};
+        #NOP Drunken Master;
+        #gag {You drunkenly hurl a spell with maximum effectiveness!};
+        #gag {You stumble forward unexpectedly and strike with surprising alcohol fueled strength!};
 
-#NOP -- Whorehouse Gags;
-#gag {^The %w whore %*!$};
-#gag {^The %w whore %*?$};
+        #NOP Big Game Hunter;
+        #gag {Your crazed ambition overflows!};
+        #gag {Your ambition overflows as you try to bring down the big game with a spell!};
+        #gag {Your ambition overflows as you try to bring down the big game with a ferocious attack!};
+        #gag {Your wild ambition drives you ever onward!};
+        #gag {Your wild ambition takes a back seat to prudence.};
 
-#NOP -- Sewer Gags;
-#gag {^The thorn beast wraps a vine around you and strangles you.$};
-#gag {^The thorn beast releases a deadly spray of thorns at you!$};
-#gag {^The thorn beast sinks its deadly thorns into you.$};
-#gag {^The mudman pummels you with its huge arms.$};
-#gag {^The muck monster bashes you in the head.$};
-#gag {^The fungus shoots a stream of acid at you!$};
+        #NOP Lumberjack;
+        #gag {You sing: };
+        #gag {Yes, you're a lumberjack and you're ok, but you're done singing for now.};
 
-#NOP -- Lucanus Gags;
-#gag {^The power of the gods intervene to protect you from the attack.$};
-#action {^The aura around %* amplifies%*} {
-    #line gag;
-    #line oneshot #action {%*attack.$} {#line gag;};
+        #NOP Tactician;
+        #gag {You outfox your opponent and take advantage of it!};
+        #gag {You press your advantage on your outsmarted foe!};
+        #gag {Your tactical advantage ends.};
+
+        #GAG {^Your blow was deflected.$};
+        #GAG {^Your strike was ineffective.$};
+        #GAG {^You bobble your swing.$};
+        #GAG {^You missed %%1.$};
+        #GAG {^You tickled %%1 in the stomach.$};
+        #GAG {^You grazed %%1.$};
+        #GAG {^You hit %%1.};
+        #GAG {^You hit %%1 hard.$};
+        #GAG {^You hit %%1 very hard.$};
+        #GAG {^You struck %%1 a mighty blow.$};
+        #GAG {^You smashed %%1 with a bone crushing sound.$};
+        #GAG {^You pulverized %%1 with a powerful attack.$};
+        #GAG {^You trounced %%1 up and down.$};
+        #GAG {^You pummeled %%1 into small fragments.$};
+        #GAG {^You massacred %%1 into tiny fragments.$};
+        #GAG {^You utterly annihilated %%1.$};
+        #GAG {^You completely devastated %%1 with awesome force.$};
+        #GAG {^You destroyed %%1.$};
+        #GAG {^You absolutely massacred %%1.$};
+        #GAG {^You thrashed %%1 completely.$};
+        #GAG {^You demolished %%1.$};
+        #GAG {^You nearly exterminated %%1.$};
+        #GAG {^You obliterated %%1.$};
+        #GAG {^You eradicated %%1.$};
+        #GAG {^You decimated %%1.};
+        #GAG {^You beat %%1 like a rented mule.$};
+        #GAG {^You exsanguinated %%1.$};
+        #GAG {^You atomized %%1.$};
+        #GAG {^You beat %%1 like a red-headed step child.$};
+        #GAG {^You drop-kicked %%1.$};
+
+        #class gags_combat_generic close;
+    } {
+        #class gags_combat_generic kill;
+    };
 };
 
-#NOP -- Spammy People Gags - aka necros I party with;
-#gag {^*.,'`'SaTaN'`',.* %*!$};
-#gag {^Solar %*!$};
 
-#NOP -- Profession Gags;
-#NOP Assassin;
-#gag {Your insidious inspiration flows through you as you make the most of each attack!};
-#gag {Your insidious inspiration fades.};
 
-#NOP Drunken Master;
-#gag {You drunkenly hurl a spell with maximum effectiveness!};
-#gag {You stumble forward unexpectedly and strike with surprising alcohol fueled strength!};
 
-#NOP Big Game Hunter;
-#gag {Your crazed ambition overflows!};
-#gag {Your ambition overflows as you try to bring down the big game with a spell!};
-#gag {Your ambition overflows as you try to bring down the big game with a ferocious attack!};
-#gag {Your wild ambition drives you ever onward!};
-#gag {Your wild ambition takes a back seat to prudence.};
 
-#NOP Lumberjack;
-#gag {You sing: };
-#gag {Yes, you're a lumberjack and you're ok, but you're done singing for now.};
 
-#NOP Tactician;
-#gag {You outfox your opponent and take advantage of it!};
-#gag {You press your advantage on your outsmarted foe!};
-#gag {Your tactical advantage ends.};
+#alias _gag_combat_guild {
+    #if $gags[combat_guild] {
+        #class gags_combat_guild open;
+        #NOP -- Cyborg Gags;
+            #gag {%* with %* laser!};
+            #gag {The stream from %* freon injector freezes %* badly.};
+            #gag {%* freezes %* freon injector's stream.};
+            #gag {%* with a stream from %* freon injector.};
+            #act {%* freezes %* like a Thanksgiving turkey with the stream %*} {
+                #line gag;
+                #line oneshot #act {%*freon injector.} {#line gag;};
+            };
+            #act {%* gets some serious third-degree frostburn %*} {
+                #NOP;
+                #line gag;
+                #line oneshot #act {%*freon injector.} {#line gag;};
+            } {1};
+            
 
+        #NOP -- Bard Gags;
+        #gag {%w hacks and wheezes in the toxic cloud.$};
+        #gag {^The lightning vortex crackles loudly.$};
+        #gag {%w is burning in acid!$};
+        #gag {%w wears %*Shield%*.$};
+        #gag {%w removes %*Shield%*.$};
+        #gag {%w finishes his performance with a bow.$};
+        #gag {%w cracks %w knuckles and gets ready to play for %*};
+        #gag {%w takes a deep breath and prepares to perform a song for %*};
+
+        #NOP -- Monk Gags;
+        #gag {%w body ruptures at all major joints!$};
+        #gag {%w body erupts from within!!!$};
+        #gag {%* body shakes apart!!$};
+        #gag {Psionic waves emanate from %* body.$};
+        #gag {%w body is wracked in pain.$};
+        #gag {%w lays hands.$};
+        #gag {%w sends deadly vibrations through his foe!$};
+        #gag {KER-POW!!!!!  %w has stunned %w!$};
+        #gag {%w concentrates on %w, causing it to scream out in pain!!$};
+        #gag {%w gestures towards %w, causing it to fall backwards in pain!$};
+        #gag {%w gestures towards Cloud Eye, and pieces of it fly off in all directions!$};
+        #gag {%w stares at %w, causing external bleeding.$};
+        #gag {%w gestures towards %w, and smoke pours out its ears!$};
+        #gag {POP!  Veins pop forth from a %w head, spraying blood into the air like a fountain.$};
+        #gag {%w stares at %w, and grey mush oozes out of its ears!$};
+        #gag {%w stares at %w, and pieces of it fly off in all directions!$};
+        #gag {%w concentrates on %w, missing completely.$};
+        #gag {%w concentrates on %w, and pieces of it fly off in all directions!$};
+        #gag {%w gestures towards %w, melting its brain!$};
+
+        #NOP -- Sii Gags;
+        #gag {^The brood's tiny wicked claws tear at %*!};
+        #gag {^The brood's razor claws slash into %*!};
+        #gag {^The brood claws viciously at %*!};
+        #gag {^Mental plan (%d): %*};
+        #gag {^You are already focusing your malice on %*};
+        #gag {^You focus your malice at %*, intent on destruction!};
+        #gag {^Your malicious attacks fade.};
+
+        #NOP -- Gentech Gags;
+        #gag {^The ionbeam illuminates %*!$};
+        #gag {^The ionbeam warms %*!$};
+        #gag {^The ionbeam blisters %*!$};
+        #gag {^The ionbeam superheats %*!};
+        #gag {^The ionbeam singes %*!};
+        #gag {%* focuses free radicals at %*.};
+        #gag {%* focuses energy nodules at %*.};
+        #gag {%*V3.0 tickled Charging Ram in the stomach.};
+        #gag {%* focuses ionized air currents at %*.$};
+        #gag {%* synthorg sonic emitters send subtle vibrations at %*.$};
+        #gag {%* synthorg sonic emitters send a low humming at %*.$};
+        #gag {%* is enclosed within a blue-green energy field.$}; 
+
+        #NOP -- Necromancer Gags;
+        #gag {^The crimson field engulfing %* dissolves away.$};
+        #gag {A crimson mist then appears and engulfs %*!$};
+        #gag {%* eyes glow %* stares %* at %*.$};
+        #gag {%* mind is torn asunder by the spectres of energy.$};
+        #gag {%* is sheared by the %*!$};
+        #gag {%* flesh is corroded away by the curse!$};
+        #gag {The glowing field engulfing %* dissolves away.$};
+        #gag {The radiant sickle flies around!$};
+        #gag {The crimson energy wraps %* in a painful, agonizing torment.$};
+        #gag {%* cries out in agony from the corroding decay!$};
+        #gag {%* is hacked to bits by the %*!$};
+        #gag {The %* slashes downward, hungry for blood!$};
+        #gag {%* convulses and howls in agony.$};
+        #gag {%* mind and thoughts drain away into the crimson mist.$};
+        #gag {%* staggers about, lost in the delirium of rabies.$};
+        #gag {%* rampages about, a wild, unthinking look in %* eyes.$};
+        #gag {%* staggers from the painful crimson energy mist.$};
+        #gag {%* is painfully raked by the spectres in the glowing mist.$};
+        #gag {%* stumbles about wheezing as %* tries to breathe.$};
+        #gag {%* flesh is dissolved painfully by the curse! $};
+        #gag {The %* cleaves through the chest of %*!$};
+        #gag {The %* flies around!$};
+        #gag {The %* cuts %* to ribbons!$};
+        #gag {%* froths at the mouth.$};
+        #gag {%* is sheared by the %*!$};
+        #gag {%* infuses you with vampiric energy.$};
+        #gag {%* flesh is dissolved painfully by the curse!$};
+        #gag {%* wails in pain from the golden corrosion!$};
+        #gag {The %* bloodily cuts into %*!$};
+        #gag {%* recoils from the acid of the golden decay!$};
+        #gag {%* thoughts painfully dissipate %*.$};
+        #gag {The radiant sickle %*!$};
+        #gag {The gleaming scythe %*!$};
+        #gag {A deadly golden scythe flies into the room!!$};
+        #gag {A glowing, spectral mist then appears and engulfs %*!$};
+        #gag {The spectral glowing energy field drains the mind of %*.$};
+        #gag {%* mind is sapped into the crimson field of energy.};
+        #gag {The crimson energy field drains the mind of %*.};
+        #gag {%* is painfully drained by the crimson mist.};
+        #gag {%* hands some coins to %* familiar.$};
+        #action {%* rakes dark claw-like nails across the face of %*!$} {#line gag} {1};
+        #gag {%* eyes glow red as %* stares at %*.};
+        #gag {%* unleashes %* vengeance upon %* foe!$};
+        #gag {%* affects %* with a dark, necromantic touch.$};
+
+        #action {%* snarls like a wild beast, %* brow beaded%*} {
+            #line gag;
+            #line oneshot #action {%*which ravages %* body.$} {#line gag;};
+        };
+
+        #action {%* charges %* and clamps down on %*, piercing} {
+            #line gag;
+            #line oneshot #action {%*crunching bone in %* jaws%*} {#line gag;};
+            #line oneshot #action {%*the wound and allow %*} {#line gag;};
+            #line oneshot #action {%*dreaded infection of rabies!$} {#line gag;};
+        } {1};
+
+        #action {Thunder rolls across the land as %*} {
+            #line gag;
+            #line oneshot #action {%*In a flash of brilliance,%*} {#line gag;};
+            #line oneshot #action {%*forming into a radiant scythe of%*} {#line gag;};
+            #line oneshot #action {%*with an unholy scream of rage$} {#line gag;};
+            #line oneshot #action {%*The celestial blade$} {#line gag;};
+            #line oneshot #action {%*forth part of the$} {#line gag;};
+            #line oneshot #action {%*as the scythe then sparkles$} {#line gag;};
+            #line oneshot #action {%*nothingess.$} {#line gag;};
+        } {1};
+
+        #action {^The razor-sharp beaks of the winged creatures %*!} {
+            #nop;
+            #line gag;
+        } {1};
+
+        #NOP -- Specific Necro Familiar Gags;
+        #gag {^*.,'`'SaTaN'`',.* %*!$};
+        #gag {^Solar %*!$};
+        #gag {^Ashen-Shugar %*!};
+
+        #class gags_combat_guild close;
+    } {
+        #class gags_combat_guild kill;
+    };
+};
+
+#alias _gag_combat_area {
+    #if $gags[combat_area] {
+        #class gags_combat_area open;
+
+        #NOP -- Carebears;
+        #gag {Tugs wimpers and curls up into a ball.};
+        #gag {Tugs says: It hurts, it really hurts, please stop.};
+        #gag {Tugs sobs: I'm so sorry, i won't do it again.};
+        #gag {{Tugs|Hugs} cringes in terror.};
+        #act {Hugs screams out in pain: I'm sorry Grumpy I promise I'll never do it} {
+            #line gag;
+            #line oneshot #act {again!} {#line gag;};
+        };
+
+        #NOP -- Erah Gags;
+        #act {%* harnesses %* strength into a single FOCUSED strike on} {
+            #line gag;
+            #line oneshot #act {you.$} {#line gag;};
+        };
+        #gag {%* harnesses %* strength into a single FOCUSED strike on you.};
+        #gag {%* goes into a FLURRY of rapid attacks.};
+
+        #NOP -- Land2 Gags;
+        #gag {^The angry servitors of Andelain and the Land fall upon you!$};
+
+        #NOP -- Rimalkin Gags;
+        #action {^The %* Rimalkin lunges at you with its needle-like fangs!$} {#line gag} {1};
+        #gag {^The %* Rimalkin slashes at you with its razor sharp claws!$};
+        #gag {^The %* Rimalkin looks at you with little red eyes, scratching the ground nervously.$};
+
+        #NOP -- Zelligar Gags;
+        #gag {^The Golem Cackles madly like an insane man!$};
+        #gag {^The Golem GLARES at you with his evil eyes and you freeze in panic!!!$};
+        #gag {^The Golem slashes you with his sharp claws.$};
+        #gag {^The Golem hurls a MASSIVE boulder at you!!$};
+        #gag {^The Golem CRUSHES you with his giant fist!$};
+        #gag {^The Golem SMASHES you so hard your whole family hurts!!$};
+        #gag {^The Golem SLASHES you with a jagged edge!!$};
+        #gag {^The Golem SLICES and DICES!!!!$};
+        #gag {^The Golem hurls shards of glass at you!!$};
+
+        #NOP -- Chessboard Gags;
+        #gag {^The %* crushes you with a mighty swipe of his};
+        #gag {^trunk!$};
+        #gag {^%* whips out a brightly glowing book and somehow};
+        #gag {^blasts you with pure energy!$};
+        #gag {^The %* opens his palm and a ray of frost erupts};
+        #gag {^from it at you!$};
+        #gag {^The A War Correspondent nearly blinds you with a powerful flash};
+        #gag {^from his camera!$};
+        #gag {^The %* rolls his chariot over you, slicing deeply!$};
+        #gag {^The %* holds up his sceptre and it begins to glow eerily.$};
+        #gag {^The Angry Horse rears up and slashes you with his sharpened};
+        #gag {^horseshoes!$};
+        #gag {^The %* preaches at you. Blood gushes from your ears!$};
+        #gag {^The A Refugee smacks you with a befouled rag!$};
+        #gag {^The %* throws a vial of burning acid at you!$};
+        #gag {^The %* sword bursts into flame as he viciously};
+        #gag {^slices into you!$};
+        #gag {^into you!$};
+
+        #NOP -- Hotel Gags;
+        #gag {^The cook grunts and glares, suddenly a sharp knife flies towards you!$};
+        #gag {^The bell hop makes a gurgling noise, a blast shoots towards you!$};
+
+        #NOP -- SIMPSONS EXPANSION;
+        #gag {^Your party %w the Beatle's defenses.$};
+
+        #NOP -- Mahjong;
+        #gag {^The tiger swipes at you with its giant paw!$};
+        #gag {^The tiger leaps up and tries to maul you!$};
+        #gag {^The dolphin tries to swim away from your attack!$};
+        #gag {^The dolphin lets loose an ear-splitting shriek!$};
+        #gag {^The dolphin bops you in the nose with its tail!$};
+        #gag {^The dragon whips its tail around, nearly knocking you off your feet!$};
+        #gag {^The dragon belches fire all over you!$};
+        #gag {^The dragon rakes you across the face with its claws!$};
+        #gag {^The phoenix scorches you as it bursts into flames!$};
+        #gag {^The phoenix digs its talons into your skin!$};
+        #gag {^The phoenix pecks at your eyes!$};
+        #gag {^The butterfly flutters its wings at you!$};
+        #gag {^The butterfly tries desperately to get away!$};
+        #gag {^The serpent slips past you and darts in for another bite!$};
+        #gag {^The serpent digs its fangs into your flesh!$};
+        #gag {^The serpent bites you, sending poison coursing through your veins!$};
+        #gag {^The rabbit leaps up and kicks you right in the groin!$};
+        #gag {^The rabbit tries to turn tail and run!$};
+        #gag {^The horse kicks you hard with a powerful thrust of its back legs!$};
+        #gag {^The horse flaps its wings and prepares to take flight!$};
+        #gag {^The ram drives its horns deeply into your chest!$};
+        #gag {^The ram rears up and paws at you with its front hooves!$};
+        #gag {^The rat bites deeply into your flesh!$};
+        #gag {^The rat launches itself at your neck!$};
+        #gag {^The ox gores you with its horns!$};
+        #gag {^The ox stamps on you with one giant hoof!$};
+
+        #NOP -- POL Gags;
+        #gag {^The faerie lizard dives forward, sinking its teeth into you.$};
+        #gag {^The faerie lizard's claws lash forward, striking you across the face.$};
+        #gag {^The wyvern's tail lashes forward, striking you across the face.$};
+        #gag {^The wyvern dives forward, sinking its claws into you.$};
+        #gag {^The wolf viciously rips at your throat.$};
+        #gag {^The wolf drools in anticipation of feeding upon you.$};
+        #gag {^The elf slices you with his sword!$};
+        #gag {^The stag impales you with its sharp antlers!$};
+        #gag {^The stag rears up on its hind feet, then charges forward!$};
+        #gag {^The stag tosses its head back and lets out a challenging call.$};
+        #gag {^The baby dragon dives forward, slashing into you with its claws.$};
+        #gag {^The baby dragon's tail lashes forward, striking you across the face.$};
+
+        #NOP -- Chicken Plant;
+        #gag {^*BZZZTT*  You get stunned by the guard!$};
+        #gag {^Guard steps back and lets loose an energy beam.$};
+        #gag {^You are pummeled by punches from every direction.$};
+        #gag {^The worker rages at you with blind fury.$};
+        #gag {^The worker punches you viciously.$};
+        #gag {^The worker throws a chicken in your face!$};
+        #gag {^The worker throws guts in your face!$};
+        #gag {^The foreman steps back and blasts you with a beam out of his eye!$};
+        #gag {^Your hair stands on end as the foreman lashes you with the whip!$};
+        #gag {^The foreman docks your pay!$};
+
+        #NOP -- Section Z Gags;
+        #gag {^The Ripper body slams %*!$};
+        #gag {^A wailing cry emits from the Soldier as it charges %* with full force!$};
+        #gag {^A well placed blast from the Soldier's cannon pounds into %* chest!$};
+        #gag {^The Groma's entire body impacts %* with a stunning force!$};
+        #gag {^The Groma falls into a dive and pierces %* with pointed wing tips!$};
+        #gag {^The Leago spins and drills into %*, leaving a large crater!$};
+        #gag {^The Leago slams down into %*, clobbering you senseless!$};
+        #gag {^The Leeva makes an unexpected lunge and plows into %*!$};
+        #gag {^The Leeva flits around aimlessly bouncing off nearby walls.$};
+        #gag {^The Leeva darts left, right, then straight into %*!$};
+        #gag {^In a massive somersault, the Gun launches from the wall, striking};
+        #gag {%* with massive force in the chest!$};
+        #gag {^The Spiral Gun fires a swirling ball of energy directly at %*!$};
+        #gag {^The generator glows bright red and blasts you with an unseen energy!$};
+        #gag {^With a deafening CRACK, electricity arcs between you and the generator!$};
+        #gag {^Twzzzps and bzzzaps crackle from the generator as it hums and churns.$};
+        #gag {^The Ripper stands in front of you, obstructing any passage.$};
+        #gag {^The Spiral Gun ominously follows you with its turret.$};
+        #gag {^The Ripper hangs motionless in the air before you.$};
+        #gag {^The Groma hangs in the air like a bird on a breeze.$};
+        #gag {^you with massive force in the chest!$};
+
+        #act {^A pulse of red light fires from the Cloud Eye and sears your skin as it%*} {
+            #line gag;
+            #line oneshot #act {crosses your path.$} {#line gag;};
+        };
+
+        #act {^A column of accelerated energy beams from the Cloud Eye and envelopes%*} {
+            #line gag;
+            #line oneshot #act {you in sheer agony!$} {#line gag;};
+        };
+
+        #act {^The Cloud Eye blinks its metal eyelid with the sound of gears chewing%*} {
+            #line gag;
+            #line oneshot #act {on flesh.$} {#line gag;};
+        };
+
+        #NOP -- Sewer Gags;
+        #gag {^The thorn beast wraps a vine around you and strangles you.$};
+        #gag {^The thorn beast releases a deadly spray of thorns at you!$};
+        #gag {^The thorn beast sinks its deadly thorns into you.$};
+        #gag {^The mudman pummels you with its huge arms.$};
+        #gag {^The muck monster bashes you in the head.$};
+        #gag {^The fungus shoots a stream of acid at you!$};
+
+        #NOP -- Whorehouse Gags;
+        #gag {^The %w whore %*!$};
+        #gag {^The %w whore %*?$};
+
+        #class gags_combat_area close;
+    } {
+        #class gags_combat_area kill;
+    };
+};
+
+#alias _gag_combat_items {
+    #if $gags[combat_items] {
+        #class gags_combat_items open;
+
+        #NOP -- Item Gags;
+        #gag {^The sword pulses in your grasp!$};
+        #gag {%*Your body quakes violently as a sickly, mutated arm$};
+        #gag {%*spears forth from your torso and smashes%*!$};
+        #gag {%* quakes violently as a sickly, mutated arm spears};
+        #gag {forth from his torso and viciously smashes %*!};
+        #gag {^{The Spork Lance SLICES into (.*)\!}};
+        #gag {^{The Spork Lance tingles and you feel refreshed\.}};
+        #gag {{^A spork tine breaks off into (.*)\!}};
+        #gag {{^The Spork Lance GASHES (.*)\!}};
+        #gag {{^The spork tine falls out of (.*)\.}};
+        #gag {{^(.*) bleeds from where the spork tine is embedded in (.*)\!}};
+        #gag {^The aura surrounding you absorbs some of the incoming attack.$};
+        #gag {^Acid from the Queen's skin sizzles %* alive!$};
+        #gag {^The sharp spikes SHRED %* flesh like paper.$};
+        #gag {^A mighty pulse of strength wells in your arms!$};
+        #gag {^The gloves course a powerful strike through your arms!$};
+
+        #NOP CMC;
+        #action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {#line gag} {1};
+
+        #NOP Erah Shield;
+        #gag {%* bashes %* with %* shield, cutting it and sending it reeling backward.};
+        #action {%* bashes %* with %* shield, cutting it and sending it reeling backward} {
+            #line gag;
+            #line oneshot #act {backward.} {#line gag;};
+            #line oneshot #act {reeling backward.} {#line gag;};
+        } {1};
+
+        #gag {it reeling backward.};
+        #gag {sending it reeling backward.};
+
+        #NOP Blood Plate;
+        #gag {Your armour absorbs the blood from your wounds.};
+        #gag {Your armour extends a tendril of blood that deflects the incoming attack!};
+
+        #NOP -- Lucanus Gags;
+        #gag {^The power of the gods intervene to protect you from the attack.$};
+        #action {^The aura around %* amplifies%*} {
+            #line gag;
+            #line oneshot #action {%*attack.$} {#line gag;};
+        };
+        
+        
+        #class gags_combat_items close;
+    } {
+        #class gags_combat_items kill;
+    };
+};
 
 #class {general_gags} close;

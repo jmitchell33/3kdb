@@ -466,16 +466,19 @@
 				} {
 					#NOP Message from another player;
 					#NOP -- If the MIP data source matches the tell source registered by the action, we log the chat;
-					#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
-						#var mip[comm][twoway] {from};
-						#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-						#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
-						#if {"$chat[group]" === ""} {
-							update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
-						} {
-							update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
+					#NOP -- Make sure we have a source, otherwise it's likely an action/emote triggering the MIP;
+					#if {"$mip[comm][source]" != ""} {
+						#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
+							#var mip[comm][twoway] {from};
+							#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+							#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+							#if {"$chat[group]" === ""} {
+								update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+							} {
+								update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
+							};
+							#bell;
 						};
-						#bell;
 					};
 				};
 			};
@@ -539,6 +542,7 @@
 #ALIAS {draw_chat} {
 	#math chat[start]	{$chat[rows]};
 	#math chat[end]		{$chat[offset] + 1};
+
 	filterSpam;
 	updateChatCategory;
 	#if {"$draw[chat][active]" == "on"} {

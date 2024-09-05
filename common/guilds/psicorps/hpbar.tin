@@ -1,0 +1,20 @@
+#class guild_hpbar kill;
+#class guild_hpbar open;
+
+#NOP -- Psicorps hpbar with all options below;
+#alias 3kdb_hpbar {
+    #send {pset custom_hp HP: &$HP$&/&$MHP$& SP: &$SP$&/&$MSP$& PE: &$PE$&/&$MPE$& ST: &$ST$&/&$MST$& EC: &$EC$& AAT: &$AAT$& Gold: &$AU$& &$NL$&POW: &$AS$&};
+};
+
+#action {HP: %d/%d SP: %d/%d PE: %d/%d ST: %d/%d EC: %d AAT: %* Gold: %d} {
+    #line oneshot #action {POW: [[ %* ]]} {
+        #if $gags[hpbar] {
+            #line gag;
+        };    
+    };
+    #if $gags[hpbar] {
+        #line gag;
+    };
+} {2};
+
+#class guild_hpbar close;
