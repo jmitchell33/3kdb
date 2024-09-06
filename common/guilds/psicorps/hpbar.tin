@@ -7,13 +7,59 @@
 };
 
 #action {HP: %d/%d SP: %d/%d PE: %d/%d ST: %d/%d EC: %d AAT: %* Gold: %d} {
-    #line oneshot #action {POW: [[ %* ]]} {
-        #if $gags[hpbar] {
-            #line gag;
-        };    
-    };
     #if $gags[hpbar] {
         #line gag;
+    };
+    #line oneshot #action {^POW: %*} {
+        #if $gags[hpbar] {
+            #line gag;
+        };
+        #if {"%%1" == ""} {
+            #NOP -- If you just see a POW, there are no powers online;
+            #var powers_string <ebc>NONE<088>;
+            #var my[powers] {};
+        } {
+            #var powers %%1;
+
+            #NOP -- String for HPBAR;
+            #var powers_string %%1;
+
+            #NOP -- Replacements;
+            #replace powers {[[} {};
+            #replace powers {]]} {};
+            #replace powers_string {[[} {};
+            #replace powers_string {]]} {};
+            #replace powers {:}{};
+            #replace powers { }{;};
+            #list powers create $powers;
+
+            #local i 1;
+
+            #var my[powers] [];
+            #var my[powers_time] [];
+            #while {$i <= &powers[]} {
+                #math {time_index} {$i + 1};
+                #list {powers} {get} {$i} {power};
+                #list {powers} {get} {$time_index} {time};
+
+                #NOP -- If the regex finds a number, the power has a duration.  If it doesn't, it's the next power in the list;
+                #NOP -- Powers with a timer we use the timer, if not we make it an 11;
+                #regex {$time} {%+d} {
+                    #var time &0;
+                    #if {$time > 0} {
+                        #math {i} {$i + 2};
+                    } {
+                        #var time 11;
+                        #math {i} {$i + 1};
+                    };
+                } {
+                    #var time 11;
+                    #math {i} {$i + 1};
+                };
+                #var my[powers][$power] 1;
+                #var my[powers_time][$power] $time;
+            };
+        };
     };
 } {2};
 

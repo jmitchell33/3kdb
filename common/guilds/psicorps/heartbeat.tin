@@ -167,66 +167,6 @@
   #return #nop;
 };
 
-#NOP -- Heartbeat;
-
-#act {^HP: %d/%d  SP: %d/%d  PE: %d/%d  ST: %d/%d} {
-    #line gag;
-    #var my[hp][current] %1;
-    #var my[hp][max] %2;
-    #var my[sp][current] %3;
-    #var my[sp][max] %4;
-    #var my[gp1][current] %5;
-    #var my[gp1][max] %6;
-    #var my[gp2][current] %7;
-    #var my[gp2][max] %8;
-    
-    #if {$_DEBUG_HB} { 
-      #SHOW [debug_heartbeat] HP: $my[hp][current]/$my[hp][max];
-      #SHOW [debug_heartbeat] SP: $my[sp][current]/$my[sp][max];
-      #SHOW [debug_heartbeat] GP1: $my[gp1][current]/$my[gp1][max];
-      #SHOW [debug_heartbeat] GP2: $my[gp2][current]/$my[gp2][max];
-    };
-};
-
-#act {^[[%*]]} {
-    #line gag;
-    #var powers %1;
-    #NOP -- String for HPBAR;
-    #var powers_string %1;
-    #replace powers {:}{};
-    #replace powers { }{;};
-    #list powers create $powers;
-
-    #var i 1;
-    #list {powers} {size} {size};    
-
-    #var my[powers] [];
-    #var my[powers_time] [];
-    #while {$i <= $size} {
-        #math {time_index} {$i + 1};
-        #list {powers} {get} {$i} {power};
-        #list {powers} {get} {$time_index} {time};
-
-        #NOP -- If the regex finds a number, the power has a duration.  If it doesn't, it's the next power in the list;
-        #NOP -- Powers with a timer we use the timer, if not we make it an 11;
-
-        #regex {$time} {%+d} {
-            #var time &0;
-            #if {$time > 0} {
-                #math {i} {$i + 2};
-            } {
-                #var time 11;
-                #math {i} {$i + 1};
-            };
-        } {
-            #var time 11;
-            #math {i} {$i + 1};
-        };
-        #var my[powers][$power] 1;
-        #var my[powers_time][$power] $time;
-    };
-};
-
 #alias {_guild_heartbeat} {
   #var hbp 0;
 
