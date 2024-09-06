@@ -10,6 +10,24 @@
     #if $gags[hpbar] {
         #line gag;
     };
+    #VAR {my[hp][current]} {%1};
+    #VAR {my[hp][max]} {%2};
+    #math my[hp][percent] {1.00 * $my[hp][current] / $my[hp][max]};
+    
+    #VAR {my[sp][current]} {%3};
+    #VAR {my[sp][max]} {%4};
+    #math my[sp][percent] {1.00 * $my[sp][current] / $my[sp][max]};
+    
+    #VAR {my[gp1][current]} {%5};
+    #VAR {my[gp1][max]} {%6};
+    #math my[gp1][percent] {1.00 * $my[gp1][current] / $my[gp1][max]};
+    
+    #VAR {my[gp2][current]} {%7};
+    #VAR {my[gp2][max]} {%8};
+    #math my[gp2][percent] {1.00 * $my[gp2][current] / $my[gp2][max]};
+
+    #var my[aa] %10;
+    
     #line oneshot #action {^POW: %*} {
         #if $gags[hpbar] {
             #line gag;
