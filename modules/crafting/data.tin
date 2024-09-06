@@ -1,7 +1,7 @@
 #class crafting_data kill;
 #class crafting_data open;
 
-#NOP -- Useless heart types;
+#NOP -- Heart types that are not used in any +stat recipes;
 #NOP -- damnation, rage, rejuvenation, water;
 
 
@@ -13,20 +13,20 @@
         #format listName {%l} $gem[effect];
         #regex {$listName} {%*${tempName}%*} {
             #var foundGem 1;
-            #showme <ece>-----  $gem[gem] Information  -----;
-            #showme <fff>  Minimum Level: $gem[min-level];
-            #showme <fff>  Maximum Level: $gem[min-level];
-            #showme <fff>  Gem Effects: $gem[effect];
-            #showme <fff>  Jewels Required:;
+            #echo {<ece>-----  $gem[gem] Information  -----};
+            #echo {<fff>  Minimum Level: $gem[min-level]};
+            #echo {<fff>  Maximum Level: $gem[min-level]};
+            #echo {<fff>  Gem Effects: $gem[effect]};
+            #echo {<fff>  Jewels Required:};
             #foreach $gem[jewels] jewel {
-                #showme <fff>           $jewel;
+                #echo {<fff>           $jewel};
             };
-            #showme <fff>  Fragments Required: $gem[fragment];
-            #showme <ece>-----------------------------------;
+            #echo {<fff>  Fragments Required: $gem[fragment]};
+            #echo {<ece>-----------------------------------};
         };
     };
     #if !$foundGem {
-        #showme <edd>-----   UNABLE TO FIND A GEM MATCHING <fff> %0  <edd>   -----;
+        #echo {<edd>-----   UNABLE TO FIND A GEM MATCHING <fff> %0  <edd>   -----};
     };
 };
 
@@ -40,20 +40,20 @@
         #format listName {%l} $gem[gem];
         #regex {$listName} {%*${tempName}%*} {
             #var foundGem 1;
-            #showme <ece>-----  $gem[gem] Information  -----;
-            #showme <fff>  Minimum Level: $gem[min-level];
-            #showme <fff>  Maximum Level: $gem[min-level];
-            #showme <fff>  Gem Effects: $gem[effect];
-            #showme <fff>  Jewels Required:;
+            #echo {<ece>-----  $gem[gem] Information  -----};
+            #echo {<fff>  Minimum Level: $gem[min-level]};
+            #echo {<fff>  Maximum Level: $gem[min-level]};
+            #echo {<fff>  Gem Effects: $gem[effect]};
+            #echo {<fff>  Jewels Required:};
             #foreach $gem[jewels] jewel {
-                #showme <fff>           $jewel;
+                #echo {<fff>           $jewel};
             };
-            #showme <fff>  Fragments Required: $gem[fragment];
-            #showme <ece>-----------------------------------;
+            #echo {<fff>  Fragments Required: $gem[fragment]};
+            #echo {<ece>-----------------------------------};
         };
     };
     #if !$foundGem {
-        #showme <edd>-----   UNABLE TO FIND A GEM MATCHING <fff> %0  <edd>   -----;
+        #echo {<edd>-----   UNABLE TO FIND A GEM MATCHING <fff> %0  <edd>   -----};
     };
 };
 
