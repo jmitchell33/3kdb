@@ -1,51 +1,172 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
-#var use_body_fuel 0;
-#var use_chain 0;
+#var found_chain 0;
 #var _adapt_body edged;
 #var current_adapt_body none;
 #var hbp 0; /* has a heartbeat power been used this heartbeat */
 #var power_override none; /* if not equal to "none", uses this power immediately once */
 #var _DEBUG_HB 0;
 
+
+#NOP -- Body Adjustment action thresholds as a percent of total HP;
+#var {hp_heal_threshold_body_adjustment} {.70};
+#var {hp_heal_threshold_chain_body_adjustment} {.50};
+#var {hp_heal_threshold_chain_stamina_threshold} {.20};
+
+#NOP -- Body Fuel Action Thresholds;
+#NOP -- This means spend a max of x% of your HPs for bodyfuel;
+#var {max_hp_to_spend_ratio} {0.20};
+#var {bfuel_min_psi_missing} {100};
+
+#NOP -- Guild Healing Ratio for Convert (SP -> Psi) and Bodyfuel (HP -> Psi);
+#var {sp_to_psi_ratio} {0.2};
+#var {hp_to_psi_ratio} {0.36};
+
+
 #NOP -- Power helpers;
+#alias {_guild_heartbeat} {
+	#var hbp 0;
+
+	#if {"$power_override" != "none"} {
+		@use_power{$power_override};
+		#var power_override none;
+	};
+
+	#NOP -- Use the best Body Adjustment you have inserted and use chain if inserted/necessary;
+	#list gs_powers FIND {Chain} {found_chain};
+	#list gs_powers FIND {Lesser Body Adjustment} {found_lba};
+	#list gs_powers FIND {Body Adjustment} {found_ba};
+	#list gs_powers FIND {Greater Body Adjustment} {found_gba};
+
+	#if $found_lba {#var ba_use lesser body adjustment};
+	#if $found_ba {#var ba_use body adjustment};
+	#if $found_gba {#var ba_use greater body adjustment};
+	
+	#NOP -- Calculate HP/SP/GP Metrics and Percentages;
+	#math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
+
+	#NOP -- Determine if you use use chain or just body adjustment;
+	#NOP -- Chain will be used if it is loaded and if you take a bad round;
+	#math {should_use_chain_body_adjustment} {$my[hp][percent] <= $hp_heal_threshold_chain_body_adjustment && $my[gp2][percent] >= $hp_heal_threshold_chain_stamina_threshold && $found_chain};
+	#math {should_use_body_adjustment} {$my[hp][percent] <= $hp_heal_threshold_body_adjustment};
+
+	#if {$should_use_chain_body_adjustment} {
+		checkStrategy {body_adj} {@use_power{chain $ba_use, $ba_use}};
+	};
+	#elseif {$should_use_body_adjustment} {
+		checkStrategy {body_adj} {@use_power{$ba_use}};
+	};
+	
+	#NOP -- Check which Animal Affinity to be running;
+	checkStrategy {bear} {#regex {$my[aa]} {bear} {#NOP} {@check_power{AA;animal affinity bear}}};
+	checkStrategy {cat} {#regex {$my[aa]} {cat} {#NOP} {@check_power{AA;animal affinity cat}}};
+	checkStrategy {owl} {#regex {$my[aa]} {owl} {#NOP} {@check_power{AA;animal affinity owl}}};
+	checkStrategy {fox} {#regex {$my[aa]} {fox} {#NOP} {@check_power{AA;animal affinity fox}}};
+	checkStrategy {bull} {#regex {$my[aa]} {bull} {#NOP} {@check_power{AA;animal affinity bull}}};
+	checkStrategy {eagle} {#regex {$my[aa]} {eagle} {#NOP} {@check_power{AA;animal affinity eagle}}};
 
 
-#alias {gp_round_maintenance} {
-  #var pe_per_round 0;
-  #var stam_per_round 0;
-  #var maintenance_check $powers_string;
-  #replace maintenance_check { } {;};
-  #list maintenance_check create $maintenance_check;
-  #foreach $maintenance_check power {
-    #list psi_powers indexate key;
-    #list psi_powers find {$power} {power_index};
-    #if {$power_index} {
-      #math pe_per_round {$pe_per_round + $psi_powers[$power_index][psi_maint]};
-      #math stam_per_round {$stam_per_round + $psi_powers[$power_index][stam_maint]};
-    };
-  };
-  #math pe_burn_rate {$pe_regen - $pe_per_round};
-  #math stam_burn_rate {$stam_regen - $stam_per_round};
-  #if {$pe_burn_rate < 0} {
-    #var pe_burn_string <dcc>=== PE $pe_burn_rate ($pe_per_round/rnd) =<088>;
-  } {
-    #var pe_burn_string <dfb>=== PE +$pe_burn_rate ($pe_per_round/rnd) =<088>;
-  };
+	#NOP -- Defense;
+	@check_adapt_body{};
+	@check_power{Bf;biofeedback};
+	@check_power{Cp;combat precognition};
+	@check_power{D;dodge};
+	@check_power{Eb;energy barrier};
+	@check_power{Ib;inertial barrier};
+	@check_power{IB;improved biofeedback};
+	@check_power{Iv;improved verve};
+	@check_power{IV;improved valor};
+	@check_power{Vg;vigor};
+	@check_power{Vr;valor};
+	@check_power{Vv;verve};
+	@check_power{Di;displacement};
 
-  #if {$stam_burn_rate < 0} {
-    #var stam_burn_string <dcc>= Stam $stam_burn_rate ($stam_per_round/rnd) === <088>;
-  } {
-    #var stam_burn_string <dfb>= Stam +$stam_burn_rate ($stam_per_round/rnd) === <088>;
-  };
-  #var gp_round_maintenance_string ${pe_burn_string}${stam_burn_string};
+	#NOP -- Offense;
+  
+	@check_power{Bo;bolt};
+	@check_power{Tl;talons};
+	@check_power{CP;combat prescience};
+	@check_power{E;expertise};
+	@check_power{Ij;iron jaw};
+	@check_power{Sj;steel jaw};
+
+	#NOP -- Targeted powers;
+
+	@check_power{Ac2;astral construct 2};
+	@check_power{Ac3;astral construct 3};
+	@check_power{Ac4;astral construct 4};
+	@check_power{Ac5;astral construct 5};
+	@check_power{bc;biocurrent};
+	@check_power{BC;greater biocurrent};
+	@check_power{Cg;conductive grasp};
+
+  	#NOP --- Demoralize, Recall Pain & Recall Agony;
+	
+	#if {!$hbp} {
+		#list gs_powers FIND {Demoralize} {found_dm};
+		#if {$found_dm && !$mob[demoralize] && $incombat} {
+			checkStrategy {demoralize} {@use_power{demoralize}};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[gp1][percent] > 80.0} {
+			#if {$rpain_cnt == 0} {
+				checkStrategy {rPain} {@use_power{recall pain}};
+				#math {rpain_cnt} {$rpain_cnt + 1};
+			};
+			#else {#math {rpain_cnt} {$rpain_cnt - 1};};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[gp1][percent] > 80.0} {
+		#if {$ragony_cnt == 0} {
+			checkStrategy {rAgony} {@use_power{recall agony}};
+			#math {ragony_cnt} {$ragony_cnt + 5};
+		};
+		#else {
+			#math {ragony_cnt} {$ragony_cnt - 1};
+		};
+		};
+	};
+
+	#NOP -- GP1 Healing and Decision Tree to use Convert or Body Fuel;
+	#NOP -- If you've yet to use a power this round, we'll use body fuel to replenish psi or convert;
+
+	#if {!$hbp} {
+		#NOP -- If you dont have biofuel, only convert is available;
+		#NOP -- If convert and bioful strategies are both enabled, we will use convert if available to save HPs;
+		
+		#NOP -- Convert calcs;
+		#if {$my[sp][percent] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
+			checkStrategy {convert} {@use_power{convert}};
+		};
+
+		#if {$psi_missing > $bfuel_min_psi_missing} {
+			#nop -- Body fuel calcs;
+			#math {max_hp_to_spend} {$my[hp][max] * $max_hp_to_spend_ratio};
+			#math {hp_to_spend} {$psi_missing / $hp_to_psi_ratio};
+			#if {$hp_to_spend > $max_hp_to_spend} {
+				#var {hp_to_spend} {$max_hp_to_spend};
+			};
+
+			#math {safe_hp_threshold} {1 - $max_hp_to_spend_ratio};
+			#math {can_safely_use_body_fuel} {$my[hp][percent] >= $safe_hp_threshold};
+
+			#if {$can_safely_use_body_fuel} {
+				checkStrategy {bFuel} {@use_power{body fuel $hp_to_spend}};
+			};
+		};
+	};
+  gp_round_maintenance;
 };
 
-/* 
- %1 - power short name
- %2 - full power name
-*/
+
+#NOP -- Functions to check and use powers;
+#NOP -- %1 - power short name;
+#NOP -- %2 - full power name;
 #function {check_power} {
   #if {!$hbp} {
     #regex {$my[powers]} {%1} {
@@ -129,12 +250,17 @@
 #function {use_power} {
   #var tmp_last_power_used %0;
   #act {{You must wait %d round%w before you can use this power again.|You may only use one power per round.}} {
-    #show <069>==> Failed to use $tmp_last_power_used<900>;
+	#show <069>==> Failed to use $tmp_last_power_used<900>;
   } {5};
+
   #NOP -- Check if you have enough PSI / Stamina to use the power;
   #NOP -- Check if you are in combat for powers that should only be used in combat;
+  
+  #NOP -- If we're using a power with parameters, like body fuel, update the power check name;
+  #regex {%0} {body fuel %*} {#var tmp_last_power_used body fuel};
+
   #foreach $psi_powers[%*] power {
-    #if {"%0" == "$power[power]"} {
+    #if {"$tmp_last_power_used" == "$power[power]"} {
       #if {$power[combat]} {
         #if {$mip[round] > 0 && !$hbp} {
           #NOP -- Only use the power if we have at least 10 rounds of maintenance cost;
@@ -167,212 +293,36 @@
   #return #nop;
 };
 
-#NOP -- Heartbeat;
+#alias {gp_round_maintenance} {
+	#NOP -- Regen rates are set in the chars/your-name.tin file;
 
-#act {^HP: %d/%d  SP: %d/%d  PE: %d/%d  ST: %d/%d} {
-    #line gag;
-    #var my[hp][current] %1;
-    #var my[hp][max] %2;
-    #var my[sp][current] %3;
-    #var my[sp][max] %4;
-    #var my[gp1][current] %5;
-    #var my[gp1][max] %6;
-    #var my[gp2][current] %7;
-    #var my[gp2][max] %8;
-    
-    #if {$_DEBUG_HB} { 
-      #SHOW [debug_heartbeat] HP: $my[hp][current]/$my[hp][max];
-      #SHOW [debug_heartbeat] SP: $my[sp][current]/$my[sp][max];
-      #SHOW [debug_heartbeat] GP1: $my[gp1][current]/$my[gp1][max];
-      #SHOW [debug_heartbeat] GP2: $my[gp2][current]/$my[gp2][max];
-    };
-};
+	#var pe_per_round 0;
+	#var stam_per_round 0;
+	#var maintenance_check $powers_string;
+	#replace maintenance_check { } {;};
+	#list maintenance_check create $maintenance_check;
+	#foreach $maintenance_check power {
+		#list psi_powers indexate key;
+		#list psi_powers find {$power} {power_index};
+		#if {$power_index} {
+			#math pe_per_round {$pe_per_round + $psi_powers[$power_index][psi_maint]};
+			#math stam_per_round {$stam_per_round + $psi_powers[$power_index][stam_maint]};
+		};
+	};
+	#math pe_burn_rate {$pe_regen - $pe_per_round};
+	#math stam_burn_rate {$stam_regen - $stam_per_round};
+	#if {$pe_burn_rate < 0} {
+		#var pe_burn_string <dcc>=== PE $pe_burn_rate ($pe_per_round/rnd) =<088>;
+	} {
+		#var pe_burn_string <dfb>=== PE +$pe_burn_rate ($pe_per_round/rnd) =<088>;
+	};
 
-#act {^[[%*]]} {
-    #line gag;
-    #var powers %1;
-    #NOP -- String for HPBAR;
-    #var powers_string %1;
-    #replace powers {:}{};
-    #replace powers { }{;};
-    #list powers create $powers;
-
-    #var i 1;
-    #list {powers} {size} {size};    
-
-    #var my[powers] [];
-    #var my[powers_time] [];
-    #while {$i <= $size} {
-        #math {time_index} {$i + 1};
-        #list {powers} {get} {$i} {power};
-        #list {powers} {get} {$time_index} {time};
-
-        #NOP -- If the regex finds a number, the power has a duration.  If it doesn't, it's the next power in the list;
-        #NOP -- Powers with a timer we use the timer, if not we make it an 11;
-
-        #regex {$time} {%+d} {
-            #var time &0;
-            #if {$time > 0} {
-                #math {i} {$i + 2};
-            } {
-                #var time 11;
-                #math {i} {$i + 1};
-            };
-        } {
-            #var time 11;
-            #math {i} {$i + 1};
-        };
-        #var my[powers][$power] 1;
-        #var my[powers_time][$power] $time;
-    };
-};
-
-#alias {_guild_heartbeat} {
-  #var hbp 0;
-
-  #if {"$power_override" != "none"} {
-    @use_power{$power_override};
-    #var power_override none;
-  };
-
-  #nop -- Healing;
-
-  #math {hp_percent} {$my[hp][current] / $my[hp][max] * 100.0};
-  #math {stamina_percent} {$my[gp2][current] / $my[gp2][max] * 100.0};
-  #var {hp_heal_threshold_body_adjustment} {85.0};
-  #var {hp_heal_threshold_chain_body_adjustment} {70.0};
-  #var {hp_heal_threshold_chain_stamina_threshold} {2.0};
-
-  #math {should_use_chain_body_adjustment} {$hp_percent <= $hp_heal_threshold_chain_body_adjustment && $stamina_percent >= $hp_heal_threshold_chain_stamina_threshold && $use_chain};
-  #math {should_use_body_adjustment} {$hp_percent <= $hp_heal_threshold_body_adjustment};
-
-  #if {$should_use_chain_body_adjustment} {
-    @use_power{chain body adjustment, body adjustment};
-  };
-  #elseif {$should_use_body_adjustment} {
-    #list gs_powers FIND {Body Adjustment} {found_ba};
-    #list gs_powers FIND {Greater Body Adjustment} {found_gba};
-    #list gs_powers FIND {Lesser Body Adjustment} {found_lba};
-    #if $found_ba {@use_power{body adjustment}};
-    #if $found_gba {@use_power{greater body adjustment}};
-    #if $found_lba {@use_power{lesser body adjustment}};
-  };
-
-  #nop -- Defense;
-
-  @check_power{AA;animal affinity bull};
-  @check_adapt_body{};
-  @check_power{Bf;biofeedback};
-  @check_power{Cp;combat precognition};
-  @check_power{D;dodge};
-  @check_power{Eb;energy barrier};
-  @check_power{Ib;inertial barrier};
-  @check_power{IB;improved biofeedback};
-  @check_power{Iv;improved verve};
-  @check_power{IV;improved valor};
-  @check_power{Vg;vigor};
-  @check_power{Vr;valor};
-  @check_power{Vv;verve};
-  @check_power{Di;displacement};
-
-  #nop -- Offense;
-  
-  @check_power{Bo;bolt};
-  @check_power{Tl;talons};
-  @check_power{CP;combat prescience};
-  @check_power{E;expertise};
-  @check_power{Ij;iron jaw};
-  @check_power{Sj;steel jaw};
-
-  #nop -- Targeted powers;
-
-  @check_power{Ac2;astral construct 2};
-  @check_power{Ac3;astral construct 3};
-  @check_power{Ac4;astral construct 4};
-  @check_power{Ac5;astral construct 5};
-  @check_power{bc;biocurrent};
-  @check_power{BC;greater biocurrent};
-  @check_power{Cg;conductive grasp};
-
-  #nop --- Recall pain;
-
-  #if {$combat[rpain]} {
-    #if {!$hbp} {
-      #math {gp1_percent} {$my[gp1][current] / $my[gp1][max] * 100.0};
-      #if {$gp1_percent > 80.0} {
-        #if {$rpain_cnt == 0} {
-          @use_power{recall pain};
-          #math {rpain_cnt} {$rpain_cnt + 1};
-        };
-        #else {
-          #math {rpain_cnt} {$rpain_cnt - 1};
-        };
-      };
-    };
-  };
-
-  #if {$combat[ragony]} {
-    #if {!$hbp} {
-      #math {gp1_percent} {$my[gp1][current] / $my[gp1][max] * 100.0};
-      #if {$gp1_percent > 80.0} {
-        #if {$ragony_cnt == 0} {
-          @use_power{recall agony};
-          #math {ragony_cnt} {$ragony_cnt + 5};
-        };
-        #else {
-          #math {ragony_cnt} {$ragony_cnt - 1};
-        };
-      };
-    };
-  };
-
-  #nop -- Demoralize;
-  #if {!$hbp} {
-    #list gs_powers FIND {Demoralize} {found_dm};
-    #if {$found_dm && !$mob[demoralize] && $mip[round] > 0} {
-      @use_power{demoralize};
-    };
-  };
-
-  #nop -- GP1 healing;
-
-  #if {!$hbp} {
-    #nop -- If you dont have biofuel, only convert is available;
-    #var {sp_to_psi_ratio} {0.2};
-    #var {hp_to_psi_ratio} {0.36};
-    #var {max_hp_to_spend_ratio} {0.15};
-    #if {$combat[Bfuel]} {
-      #nop -- Convert calcs;
-      #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
-      
-      #nop -- Body fuel calcs;
-      #math {max_hp_to_spend} {$my[hp][max] * $max_hp_to_spend_ratio};
-      #math {hp_to_spend} {$psi_missing / $hp_to_psi_ratio};
-      #if {$hp_to_spend > $max_hp_to_spend} {
-        #var {hp_to_spend} {$max_hp_to_spend};
-      };
-
-      #math {safe_hp_threshold} {1 - $max_hp_to_spend_ratio};
-      #math {can_safely_use_body_fuel} {$my[hp][current] / $my[hp][max] >= $safe_hp_threshold};
-
-      #nop -- Pick GP1 heal power;
-
-      #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
-        @use_power{convert};
-      };
-      #elseif {$can_safely_use_body_fuel && $use_body_fuel} {
-        @use_power{body fuel $hp_to_spend};
-      };
-    } {
-      #nop -- Convert calcs;
-      #math {psi_missing} {$my[gp1][max] - $my[gp1][current]};
-
-      #if {$my[sp][current] / $my[sp][max] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
-        @use_power{convert};
-      };
-    };
-  };
-  gp_round_maintenance;
+	#if {$stam_burn_rate < 0} {
+		#var stam_burn_string <dcc>= Stam $stam_burn_rate ($stam_per_round/rnd) === <088>;
+	} {
+		#var stam_burn_string <dfb>= Stam +$stam_burn_rate ($stam_per_round/rnd) === <088>;
+	};
+	#var gp_round_maintenance_string ${pe_burn_string}${stam_burn_string};
 };
 
 #class {guild_heartbeat} {close}

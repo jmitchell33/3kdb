@@ -28,19 +28,4 @@
     };
 };
 
-#NOP -- cast haste on golem;
-#action {^You throw your golem construction materials to the ground and$} {
-    #if {!$idle_flag} {
-        #delay 2 {cast haste on golem};
-        #var golem[haste] 1
-    };
-} {2};
-
-#action {^%* (%* Golem) seems to slow down...$} {
-    #if {!$idle_flag && $golem[haste] && $incombat} {
-        cast haste on golem;
-        #var golem[haste] 1
-    };
-};
-
 #class {player_actions} {close}

@@ -125,6 +125,7 @@
 #list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
 #list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Summon Tanking}}};
 #list strategyList add {{{guild} {mage} {name} {summon_cull}  {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
+#list strategyList add {{{guild} {mage} {name} {summon_select}  {active} {0} {description} {Summoner: Shoo unwanted summons}}};
 #list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
 #list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
 #list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
@@ -142,9 +143,22 @@
 #list strategyList add {{{guild} {fremen} {name} {voicefeeble} {active} {0} {description} {Fremen: Mind AC shred}}};
 #list strategyList add {{{guild} {fremen} {name} {spicebeer} {active} {0} {description} {Fremen: Drink spice beer}}};
 #list strategyList add {{{guild} {fremen} {name} {focus} {active} {0} {description} {Fremen: Concentrate your attacks on a single mob}}};
+#list strategyList add {{{guild} {psicorps} {name} {bFuel} {active} {0} {description} {Psicorps: Body Fuel}}};
+#list strategyList add {{{guild} {psicorps} {name} {convert} {active} {0} {description} {Psicorps: Convert}}};
+#list strategyList add {{{guild} {psicorps} {name} {body_adj} {active} {0} {description} {Psicorps: Body Adjustment}}};
+#list strategyList add {{{guild} {psicorps} {name} {bear} {active} {0} {description} {Psicorps: AA - Bear (+Con)}}};
+#list strategyList add {{{guild} {psicorps} {name} {cat} {active} {0} {description} {Psicorps: AA - Cat (+Dex)}}};
+#list strategyList add {{{guild} {psicorps} {name} {owl} {active} {0} {description} {Psicorps: AA - Owl (+Wis)}}};
+#list strategyList add {{{guild} {psicorps} {name} {fox} {active} {0} {description} {Psicorps: AA - Fox (+Cha)}}};
+#list strategyList add {{{guild} {psicorps} {name} {bull} {active} {0} {description} {Psicorps: AA - Bull (+Str)}}};
+#list strategyList add {{{guild} {psicorps} {name} {eagle} {active} {0} {description} {Psicorps: AA - Eagle (+Int)}}};
+#list strategyList add {{{guild} {psicorps} {name} {rPain} {active} {0} {description} {Psicorps: Recall Pain}}};
+#list strategyList add {{{guild} {psicorps} {name} {rAgony} {active} {0} {description} {Psicorps: Recall Agony}}};
+#list strategyList add {{{guild} {psicorps} {name} {demoralize} {active} {0} {description} {Psicorps: Demoralize}}};
 #list strategyList indexate name;
 
 #alias checkStrategy {
+    #if $debug[strategy] {#echo {<efc>RECEIVED %0<088>}};
     #var strategy_found 0;
     #if {&strategyActive[] > 0} {
         #foreach $strategyActive[%*] item {
@@ -159,7 +173,14 @@
     #NOP -- This is useful for items like gemino preservations where you stil want to do;
     #NOP -- a different action if the strategy isn't active;
     #if {!$strategy_found && "%3" !== ""} {
+        #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %3<088>}};
         %3;
+    };
+};
+
+#if {"$guild" == "psicorps"} {
+    #alias {_strategy_psicorps} {
+        #NOP
     };
 };
 
@@ -244,6 +265,19 @@
             };
         };
 
+        checkStrategy {summon_select} {
+            #if {!$idle_flag} {
+                #local tmpCount 0;
+                #local index {};
+                #loop 1 &my[summons][] index {
+                    #if {"$my[summons][$index][keyName]" == "Golem"} {#NOP} {#math tmpCount {$tmpCount + $my[summons][$index][count]}};
+                };
+                #if {$tmpCount < 4} {
+                    cast monster summoning 10 as wraith;
+                };
+            };
+        };
+
         checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor}};
 
         checkStrategy {gstrength} {#if $my[prots][GS] {#NOP} {cast giant strength on $user;cast strength on $user}};
@@ -275,7 +309,6 @@
         };
     };
 };
-
 
 #NOP -- First round strategies;
 #if {"$guild" == "necromancer"} {

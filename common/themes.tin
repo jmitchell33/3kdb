@@ -2,19 +2,27 @@
 #class 3kdb_themes open;
 
 #NOP -- Use the "colors" alias to see available colors;
-#var theme[name] default;
 
-#NOP -- If no theme exists, just hide the room ansi variables;
+#NOP -- If no theme is set, use default;
 #if {"${theme[name]}" === ""} {
-    #SUBSTITUTE {-R-_} {};
-    #SUBSTITUTE {-X-_} {};
-    #SUBSTITUTE {-D-_} {};
+    #var theme[name] default;
 };
 
 
 #if {"$theme[name]" == "default"} {
     #NOP Chatbox Color;
     #var theme[chatbox] <cee>;
+
+    #NOP Chat Header Colors;
+    #var theme[chatHeader][party] <dbe>;
+    #var theme[chatHeader][tells] <dbe>;
+    #var theme[chatHeader][clan] <dbe>;
+    #var theme[chatHeader][guild] <dbe>;
+    #var theme[chatHeader][hm] <dbe>;
+    #var theme[chatcolor][party] <ffb>;
+    #var theme[chatcolor][gjugg] <cfb>;
+    #var theme[chatcolor][hm] <fad>;
+    #var theme[chatcolor][auction] <fef>;
 
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
@@ -47,22 +55,50 @@
 };
 
 #if {"$theme[name]" == "bright"} {
+    #NOP Chatbox Color;
+    #var theme[chatbox] <cee>;
+
+    #NOP Chat Header Colors;
+    #var theme[chatHeader][party] <dbe>;
+    #var theme[chatHeader][tells] <dbe>;
+    #var theme[chatHeader][clan] <dbe>;
+    #var theme[chatHeader][guild] <dbe>;
+    #var theme[chatHeader][hm] <dbe>;
+    #var theme[chatcolor][party] <ffb>;
+    #var theme[chatcolor][gjugg] <cfb>;
+    #var theme[chatcolor][hm] <fad>;
+    #var theme[chatcolor][auction] <cea>;
+
     #NOP Room Short;
     #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
+    
     #NOP Room exits;
     #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
+    
     #NOP Room description -- not really good to do here since it's multiline;
     #SUBSTITUTE {-D-_} {%1};
+
+    #NOP Mage Summons;
+    #SUBSTITUTE {^-M-_%1[summons]%2.$} {<dcd>%1[summons]%2.<088>} {3};
+    #SUBSTITUTE {^-M-_$my[familiar].$} {<cda>$my[familiar] [familiar].<088>} {3};
+
+    #SUBSTITUTE {^-M-_%1.$} {<fcb>%1<088>} {4};
+    
     #NOP Mobs;
     #SUBSTITUTE {^-M-_%1} {<fcb>%1<088>};
+    
     #NOP Players;
 	#SUBSTITUTE {^-P-_%1} {<ffa>%1<088>};
+    
     #NOP Weapons;
 	#SUBSTITUTE {^-w-%1} {<cda>%1<088>};
+    
     #NOP Objects;
 	#SUBSTITUTE {^-o-%1} {%1};
+    
     #NOP Armours;
 	#SUBSTITUTE {^-a-%1} {<fff>%1<088>};
+    
     #NOP Items;
 	#SUBSTITUTE {^-i-%1} {<fae>%1<088>};
 };

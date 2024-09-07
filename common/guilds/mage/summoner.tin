@@ -31,7 +31,7 @@
 
 #NOP -- Monster Summoning 7;
 #list summon_types_list add {10-headed hydra};
-#list summon_types_list add {Night Hag};
+#list summon_types_list add {Night hag};
 #list summon_types_list add {Neo-otyugh};
 #list summon_types_list add {Roper};
 #list summon_types_list add {Mind flayer};
@@ -70,8 +70,18 @@
 #NOP -- Monster Summoning 5;
 #list summon_types_list add {Minotaur};
 
-
-
+#NOP -- Monster Summoning 4;
+#list summon_types_list add {Hell hound};
+#list summon_types_list add {Ghast};
+#list summon_types_list add {Ape};
+#list summon_types_list add {5-headed hydra};
+#list summon_types_list add {Gargoyle};
+#list summon_types_list add {Giant snake};
+#list summon_types_list add {Owlbear};
+#list summon_types_list add {Werewolf};
+#list summon_types_list add {Ice toad};
+#list summon_types_list add {Poisonous toad};
+#list summon_types_list add {Shadow};
 
 #gag {  --> %*};
 #gag {%*-hp-};
@@ -268,6 +278,34 @@
 #action {^%* says: I can't do this anymore, someone else take over!$} {
 	#math mob[summons_killed] {$mob[summons_killed] + 1};
 };
+
+
+#var summons[summoned] 0;
+#var my[summon_selected] An Undead Wraith;
+#action {^You wave your hands calling forth summoning magics and draw %*\n%a (100%) into the room!$} {
+	#var summonSCA 0;
+	#math summons[summoned] {$summons[summoned] + 1};
+	#format tmp1 {%p} {%1};
+	#format tmp2 {%p} {%2};
+	#var summonCalled {$tmp1 $tmp2};
+	#replace summonCalled {\n} { };
+	#if {"$my[summon_selected]" != ""} {
+		#if {"$my[summon_selected]" != "$summonCalled"} {
+			#list summonCalled {explode} { };
+			#format summonShort {%l} $summonCalled[&summonCalled[]];
+			shoo $summonShort;
+		} {
+			#list summonCalled {explode} { };
+			#format summonShort {%l} $summonCalled[&summonCalled[]];
+			#delay 1 {#if !$summonSCA {say $summonShort, you are now in group summons;#var summonSCA 0};};
+		};
+	};
+} {2};
+
+#NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
+#NOP -- If not, then it was manually summoned and needs to be assigned to 'summons' group so casting haste/mf on the group works;
+#var summonSCA 0;
+#action {^You are creating a summon, with:} {#var summonSCA 1};
 
 
 #class {guild_summoner} close

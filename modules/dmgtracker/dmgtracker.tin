@@ -711,47 +711,6 @@
 #ACTION {^%* deftly slips away from your attack!$} {#math {dc[mob_dodges][count]} {$dc[mob_dodges][count] +1};#math {dc[total][attempts]} {$dc[total][attempts] +1}};
 
 
-#var gag_dmg 0;
-#alias gag_dmg {
-    #if $gag_dmg {
-        #echo <bfa> --- MELEE EMOTES NO LONGER GAGGED ---<088>;
-        #class dmg_gag kill;
-    } {
-        #echo <bfa> --- MELEE EMOTES NOW GAGGED ---<088>;
-        #var gag_dmg 1;
-        #class dmg_gag open;
-        #GAG {^Your blow was deflected.$};
-        #GAG {^Your strike was ineffective.$};
-        #GAG {^You bobble your swing.$};
-        #GAG {^You missed %%1.$};
-        #GAG {^You tickled %%1 in the stomach.$};
-        #GAG {^You grazed %%1.$};
-        #GAG {^You hit %%1.};
-        #GAG {^You hit %%1 hard.$};
-        #GAG {^You hit %%1 very hard.$};
-        #GAG {^You struck %%1 a mighty blow.$};
-        #GAG {^You smashed %%1 with a bone crushing sound.$};
-        #GAG {^You pulverized %%1 with a powerful attack.$};
-        #GAG {^You trounced %%1 up and down.$};
-        #GAG {^You pummeled %%1 into small fragments.$};
-        #GAG {^You massacred %%1 into tiny fragments.$};
-        #GAG {^You utterly annihilated %%1.$};
-        #GAG {^You completely devastated %%1 with awesome force.$};
-        #GAG {^You destroyed %%1.$};
-        #GAG {^You absolutely massacred %%1.$};
-        #GAG {^You thrashed %%1 completely.$};
-        #GAG {^You demolished %%1.$};
-        #GAG {^You nearly exterminated %%1.$};
-        #GAG {^You obliterated %%1.$};
-        #GAG {^You eradicated %%1.$};
-        #GAG {^You decimated %%1.};
-        #GAG {^You beat %%1 like a rented mule.$};
-        #GAG {^You exsanguinated %%1.$};
-        #GAG {^You atomized %%1.$};
-        #GAG {^You beat %%1 like a red-headed step child.$};
-        #GAG {^You drop-kicked %%1.$};
-        #class dmg_gag close;
-    };
-};
+
 
 #class {damage_tracker} {close}
