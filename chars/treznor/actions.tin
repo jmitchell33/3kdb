@@ -2,19 +2,23 @@
 #class {player_actions} {open}
 
 #NOP --- BARD MISC;
+#action {You begin a soft incantation.} {#delay 2 {cast soul bead}};
 #action {The regenerative mist surrounding Askum dissipates.} {regenerate askum};
 #action {Askum attacks} {rift;beckon};
 #action {Model} {enthrall robot;say NAP TIME};
 #action {to shake off the effects of your cacophonous blast.} {#if {!$idle_flag} {cacophony}};
 #action {Your skin relaxes to a more normal state.} {#if {!$idle_flag} {cast hardened skin}};
 #action {The coffin expels your selected corpse!} {perform dirge};
+#gag {You've already cast a spell this round!};
+#gag {You can't cast a spell while singing!};
 
 #NOP --- GENERAL MISC;
+#action {Untouchable smacks you upside the head} {enthrall}
 #action {There is no reason to 'heal' here.} {invigorate askum};#LINE GAG;
 #action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {perform dirge};
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 #action {Responding to Brianna's call} {#if {!$idle_flag} {rallycry heal}};
-#action {Status of} {#if {!$idle_flag} {heal brianna}};
+#action {Status of} {#if {!$idle_flag} {soothe untouchable}};
 
 #var corpse_delay 0;
 

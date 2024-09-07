@@ -82,6 +82,22 @@
 
 
 #NOP -- misc;
+#alias .rep 
+{
+        #if { "%0" == "" }
+        {
+                reps;
+        };
+        #else
+        {
+                #highlight {%%i%0%%*\|%%*} {<338>};reps;
+
+                #delay {2} 
+                {
+                        #unhighlight {%%i%0%%*\|%%*} {<338>};
+                } {1};
+        };
+};
 
 #list brianna3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight Tour Game: 6x6}}};
 #list brianna3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight Tour Game: 8x8}}};
