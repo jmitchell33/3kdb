@@ -24,10 +24,35 @@
     };
 };
 
+
 #NOP -- Update if there is a player in the room not in friends list;
 #act {{^-P-_(.*)}} {
-    #if $bot[playercheck] {
-        #var bot[foundplayer] 1;
+    #local tmpPlayer {};
+    #loop 1 &players[] tmpPlayer {
+        #if {"%1" == "%*$players[$tmpPlayer]%*"} {
+            #list room[players] add $players[$tmpPlayer];
+        };
+    };
+
+    #if $bot[active] {
+        #if $bot[playercheck] {
+            #unvar item {};
+            #var noPlayerCheck 1;
+            #if {"$whitelist" !== ""} {
+                #if {&whitelist[] > 0} {
+                    #loop 1 &whitelist[] item {
+                        #regex {"%1"} {"$whitelist[$item]"} {
+                            #var noPlayerCheck 0;
+                        };
+                    };
+                } {
+                    #var bot[foundplayer] 1;
+                };
+            } {
+                #var bot[foundplayer] 1;
+            };
+            #if $noPlayerCheck {#var bot[foundplayer] 1};
+        };
     };
 } {2};
 
