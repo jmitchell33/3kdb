@@ -89,13 +89,16 @@
         #var players $tmpList;
         #unvar tmpList;
         #class tmp kill;
+        #if {&players > 0} {#echo {<ffd>3kdb -- Successfully updated players list with &players[] players added.}};
     };
 };
 
 #action {^[%w disconnects]$} {
     #unvar tmpItem;
-    #list players find %1 tmpItem;
-    #list players delete $tmpItem;
+    #if {&players[] > 0} {
+        #list players find %1 tmpItem;
+        #list players delete $tmpItem;
+    };
 } {2};
 #action {^[%w reconnects]$} {
     #list players add {%1};
@@ -105,8 +108,10 @@
 } {2};
 #action {^[%w leaves the game]$} {
     #unvar tmpItem;
-    #list players find %1 tmpItem;
-    #list players delete $tmpItem;
+    #if {&players > 0} {
+        #list players find %1 tmpItem;
+        #list players delete $tmpItem;
+    };
 } {2};
 
 #class common_config close;
