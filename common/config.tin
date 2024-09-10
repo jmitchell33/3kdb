@@ -26,6 +26,8 @@
 #NOP -- so this ticker will send a "non-command" to the mud if you're in combat and not deadman;
 #ticker {noise} {#if {$incombat && !$idle_flag} {#cr}} {240};
 
+#NOP -- Load variables from last session;
+
 #alias {defaults_on} {
     _variable_import;
 	mipon;
@@ -45,7 +47,8 @@
      #map flag unicodegraphics on;
      #map flag terrain on;
      #map flag direction on;
-     #delay {1} {hp}
+     #delay {1} {hp};
+     #delay {4} {who2};
 };
 
 #alias {load_guild} {
@@ -54,9 +57,61 @@
 };
 
 #alias setup_3kdb {
+    #echo {Type 'setup_3kdb_hpbar' to configure your guild hpbar.  If this alias exists, it will setup your guild hpbar to provide information to 3kdb.};
+    #echo {If it doesn't exist, please contact your local 3kdb dealer.};
     forcehp;
+    notify on;
     init_screen;
     #read common/bot/defaults.tin;
+    #line oneshot {^You will no longer see the HP bar on the main screen.$} {forcehp};
+    #line oneshot {^Notify off for all.$} {notify on};
 };
+
+#NOP -- Welcome banner with info and updates;
+#alias 3kdb_banner {
+    #echo {};
+};
+
+#NOP -- Get online players and monitor as they fall off/on with notify;
+#alias who2 {
+    #send {who2};
+    #var players {};
+    #class tmp open;
+    #unvar tmpList;
+    #action {^%+1..d%s %*} {
+        #cat tmpList {%%3};
+    };
+    #class tmp close;
+    #line oneshot #action {This list is sorted by level, type: who2 <xp/age>} {
+        #list tmpList explode { };
+        #list tmpList filter {} {%d};
+        #list tmpList filter {} {%w@3s};
+        #var players $tmpList;
+        #unvar tmpList;
+        #class tmp kill;
+        #if {&players > 0} {#echo {<ffd>3kdb -- Successfully updated players list with &players[] players added.}};
+    };
+};
+
+#action {^[%w disconnects]$} {
+    #unvar tmpItem;
+    #if {&players[] > 0} {
+        #list players find %1 tmpItem;
+        #list players delete $tmpItem;
+    };
+} {2};
+#action {^[%w reconnects]$} {
+    #list players add {%1};
+} {2};
+#action {^[%w enters the game]$} {
+    #list players add {%1};
+} {2};
+#action {^[%w leaves the game]$} {
+    #unvar tmpItem;
+    #if {&players > 0} {
+        #list players find %1 tmpItem;
+        #list players delete $tmpItem;
+    };
+} {2};
 
 #class common_config close;

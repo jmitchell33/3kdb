@@ -146,19 +146,20 @@
         #port zap port_mapFull;
     } {
         #NOP -- We will start a dummy server port with the map layout and send commands for seed data;
+        #echo {<ffc>------------------ INITIALIZING FULL MAP ------------------<088>};
         #var mapFullScreen 1;
         #math map[fullLower] {$screen[height] - 2};
         #map get roomvnum map[full][startVnum];
 
-        #event {PORT CONNECTION} {
+        #port {init} {port_mapFull} {0};
+        #delay 1 {
+            #{port_mapFull} {#var area $area;};
             #{port_mapFull} {#var area $area;};
             #{port_mapFull} {#var map {${map}};};
             #{port_mapFull} {#read common/draw_mapFull.tin};
             #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
-            #ses {port_mapFull};
+            #delay 1.5 {#ses {port_mapFull}};
         };
-
-        #port {init} {port_mapFull} {0};
     };
 };
 

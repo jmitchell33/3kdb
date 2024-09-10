@@ -289,16 +289,17 @@
 	#format tmp2 {%p} {%2};
 	#var summonCalled {$tmp1 $tmp2};
 	#replace summonCalled {\n} { };
-	#if {"$my[summon_selected]" != "$summonCalled"} {
-		#list summonCalled {explode} { };
-    	#format summonShort {%l} $summonCalled[&summonCalled[]];
-		shoo $summonShort;
-	} {
-		#list summonCalled {explode} { };
-    	#format summonShort {%l} $summonCalled[&summonCalled[]];
-		#delay 1 {#if !$summonSCA {say $summonShort, you are now in group summons;#var summonSCA 0};};
+	#if {"$my[summon_selected]" != ""} {
+		#if {"$my[summon_selected]" != "$summonCalled"} {
+			#list summonCalled {explode} { };
+			#format summonShort {%l} $summonCalled[&summonCalled[]];
+			shoo $summonShort;
+		} {
+			#list summonCalled {explode} { };
+			#format summonShort {%l} $summonCalled[&summonCalled[]];
+			#delay 1 {#if !$summonSCA {say $summonShort, you are now in group summons;#var summonSCA 0};};
+		};
 	};
-	
 } {2};
 
 #NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
