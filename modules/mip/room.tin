@@ -6,8 +6,10 @@
 
 #ALIAS {.mipProcessDDD} {
     #var exitStr %1;
-    #replace exitStr {~} {,};
-    #var {room[exits]} {%1};
+	#if {"${exitStr}" === ""} {#NOP} {
+		#replace exitStr {~} {,};
+    	#var {room[exits]} {%1};
+	};
 };
 
 #NOP ***** Room Nouns Handling *****;
