@@ -49,7 +49,7 @@
      #map flag direction on;
      #delay {1} {hp};
      #delay {4} {who2};
-     #delay {6} {_area_speedruns;_area_bots};
+     #delay {6} {_area_speedruns;_area_bots;3kdb_banner};
 };
 
 #alias {load_guild} {
@@ -70,7 +70,12 @@
 
 #NOP -- Welcome banner with info and updates;
 #alias 3kdb_banner {
-    #echo {};
+    #unvar db3k[banner];
+    #list db3k[banner] add {<dfc>   ---------   WELCOME TO 3kdb   ---------<088>  };
+    #list db3k[banner] add {<ddd>      'library3kdb' to see a list of aliases <088>};
+    #list db3k[banner] add {<ddd>      'mapgo cot' to set your position to Center of Town (cot) <088>};
+    #list db3k[banner] add {<ddd>       Be sure to check out <ffd>botlist<ddd>, <ffd>speedruns<ddd>, and <ffd>strategies<088>};
+    #draw $theme[chatbox] left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..4];
 };
 
 #NOP -- Get online players and monitor as they fall off/on with notify;
