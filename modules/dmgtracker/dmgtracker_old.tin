@@ -3,6 +3,11 @@
 
 #var dmgtracker 1;
 
+#alias .trackExtraAttack {
+    #math cmbt[extra_attacks][round] {$cmbt[extra_attacks][round] + 1};
+    #math cmbt[extra_attacks][total] {$cmbt[extra_attacks][total] + 1};
+};
+
 #alias dmgTrack {
     #format newBest {%u} {NEW BEST %1 ROUND: };
     #var cmbt[category][%1][name] %1;
@@ -75,7 +80,6 @@
     };
 };
 
-
 #alias dmgFormat {
     #math tmpPercent {1.00 * $cmbt[category][%1][rnd] / $cmbt[category][total][rnd] * 100};
     #format dmgName {%n} {%1};
@@ -85,7 +89,7 @@
     #format dmgBest {%g} {$cmbt[category][%1][high]};
     #format dmgActive {%d} {$tmpPercent};
     #format dmgSummary {%+12s %+9s %+9s %+9s %+9s} {$dmgName} {$dmgAvg} {$dmgTotal} {$dmgBest} {${dmgActive}%};
-    #echo $dmgSummary
+    #echo $dmgSummary;
 };
 
 #alias dmgFormatHits {
@@ -97,7 +101,7 @@
         #format dmgAvg {%g} {$cmbt[category][%1][freq][$freq][avg]};
         #format dmgRounds {%g} {$cmbt[category][%1][freq][$freq][count]};
         #format dmgSummary {%+12s %+9s %+9s} {$freq} {$dmgAvg} {$dmgRounds};
-        #echo $dmgSummary
+        #echo $dmgSummary;
     };
 };
 
@@ -128,6 +132,10 @@
     #var cmbt[affects][bloodfuse] 0;
     #var cmbt[affects][clutch] 0;
     #var cmbt[affects][jump] 0;
+    #var cmbt[penetration][round] 0;
+    #var cmbt[penetration][total] 0;
+    #var cmbt[extra_attacks][round] 0;
+    #var cmbt[extra_attacks][total] 0;
     #var ewell_round 0;
 
     #var dmgt[curr] 0;
@@ -204,6 +212,14 @@ dreset;
     
 } {2};
 
+#action {^You drive your attack past %* resistances!$} {
+    #math cmbt[penetration][round] {$cmbt[penetration][round] + 1};
+    #math cmbt[penetration][total] {$cmbt[penetration][total] + 1};
+} {2};
+
+#action {^Your great speed allows you to attack again!$} {
+    .trackExtraAttack;
+} {2};
 
 #NOP -- Damage modifier captures;
 #action {^You bash %* with your shield%*} {
@@ -238,7 +254,7 @@ dreset;
     #var ewell_round 1;
 } {2}
 
-#alias dmg_mod_reset {
+#alias .dmg_round_reset {
     #var cmbt[affects][shield_bash] 0;
     #var cmbt[affects][witch_hat] 0;
     #var cmbt[affects][iprime] 0;
@@ -248,6 +264,8 @@ dreset;
     #var cmbt[affects][bloodarc] 0;
     #var cmbt[affects][skullfire] 0;
     #var cmbt[affects][lucanus_cloak] 0;
+    #var cmbt[penetration][round] 0;
+    #var cmbt[extra_attacks][round] 0;
     #var ewell_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
 };
@@ -333,7 +351,7 @@ dreset;
             };
         };
 
-        dmg_mod_reset;
+        .dmg_round_reset;
     }
 } {2};
 

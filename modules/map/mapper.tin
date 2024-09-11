@@ -115,18 +115,24 @@
 #act {AREA NAME: %1 [%2]} {
 	#var area %1;
 	#var room[area] %1;
+	#delay {area_banner} {
+		.rooms_mapped %1;
+		.area_speedruns;
+		.area_bots;
+	} {2};
 } {2};
 
 
-/* Aliases */
-#NOP count the # of rooms mapped
-#NOP #alias {area_mapped %1} {
-#NOP 	#unvar area_mapped;
-#NOP 	#map list {} {} {} {%1} {variable} {area_mapped};
-#NOP 	#showme {&area_mapped[] rooms mapped.};
-#NOP }
+#NOP -- Count the # of rooms mapped;
+#alias {.rooms_mapped} {
+	#local tmpItem %0;
+	#local area_mapped {};
+	#map list {} {} {} {$tmpItem} {variable} {area_mapped};
+	#format rooms_mapped {%g} {&area_mapped[]};
+	#echo {   <bfc>Rooms Mapped:  $rooms_mapped <088>};
+};
 
-#NOP Color rooms that have no area set (unexplored)
+#NOP -- Color rooms that have no area set (unexplored);
 #alias nacolor {
 	#loop 1 20000 {cnt} {
 		#map at {$cnt} {

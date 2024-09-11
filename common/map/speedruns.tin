@@ -3,16 +3,16 @@
 #alias format_speedrun {
     #format {speed_name} {%-25s} {%1};
     #format {speed_desc} {%-30s} {%2};
-    #showme $speed_name $speed_desc;
+    #echo {$speed_name $speed_desc};
 };
 
 #alias speedruns {
     #var tempflag 0;
     #var number &speedruns[];
-    #showme {<ccf>  -------     CURRENT SPEEDRUNS ($number)   -------    <088>  };
-    #showme {    Filters:  <ccf>shop  mob  area  eq  misc      <088>  };
-    #showme {<ccf>  ---------------------------------------    <088>  };
-    #showme {<ccf>     Name                 Description        <088>  };
+    #echo {<ccf>  -------     CURRENT SPEEDRUNS ($number)   -------    <088>  };
+    #echo {    Filters:  <ccf>shop  mob  area  eq  misc      <088>  };
+    #echo {<ccf>  ---------------------------------------    <088>  };
+    #echo {<ccf>     Name                 Description        <088>  };
     #list speedruns index name;
     #list speedruns sort;
     #foreach $speedruns[%*] index {
@@ -25,6 +25,40 @@
         #foreach $speedruns[%*] index {
             format_speedrun {     $index[name]} {$index[desc]};
         };
+    };
+};
+
+#NOP -- This alias updates the record with the area name;
+#alias _area_speedruns {
+	#local tmpItem {};
+    #local tmpArea {};
+	#loop 1 &speedruns[] tmpItem {
+		#var tmpArea {};
+		#map at $speedruns[$tmpItem][vnum] {#map get roomarea tmpArea};
+		#list speedruns set $tmpItem {
+			{vnum} {$speedruns[$tmpItem][vnum]}
+			{desc} {$speedruns[$tmpItem][desc]}
+			{name} {$speedruns[$tmpItem][name]}
+			{type} {$speedruns[$tmpItem][type]}
+			{area} {$tmpArea}
+		};
+	};
+};
+
+#NOP -- This alias shows the available speed runs based on the area you're in;
+#alias .area_speedruns {
+    #local tmpList {};
+    #local tmpList $speedruns;
+    #list tmpList index area;
+    #list tmpList sort;
+    #list tmpList filter {$area};
+    #if {&tmpList[] > 0} {
+        #echo {   <cfc>Speedruns in $area include:<088>};
+        #local tmpItem {};
+        #loop 1 &tmpList[] tmpItem {
+            format_speedrun {     $tmpList[$tmpItem][name]} {$tmpList[$tmpItem][desc]};
+        };
+        #echo {};
     };
 };
 
@@ -206,7 +240,7 @@
 #list speedruns add {{{name} {sopem}          {type} {misc} {vnum} {28275} {desc} {Serinth: Sopem (Greaves, Boots, Breastplate of Lucanus)}}};
 #list speedruns add {{{name} {dorth}          {type} {mob} {vnum} {28764} {desc} {Serinth: Dorthinick (Boots of Lucanus)}}};
 #list speedruns add {{{name} {sabrena}        {type} {mob} {vnum} {28392} {desc} {Serinth: Sabrena (Sword of Fate)}}};
-#list speedruns add {{{name} {dragon_isle}    {type} {mob} {vnum} {28300}  {desc} {Serinth: Dragon Isle Traveler/Entrance}}};
+#list speedruns add {{{name} {dragon_isle}    {type} {area} {vnum} {28300}  {desc} {Serinth: Dragon Isle Traveler/Entrance}}};
 #list speedruns add {{{name} {banshee}        {type} {area} {vnum} {27701} {desc} {Erah: Banshee's Lair Entrance}}};
 #list speedruns add {{{name} {banshee2}       {type} {area} {vnum} {27713} {desc} {Erah: Banshee's Lair - Lvl 2}}};
 #list speedruns add {{{name} {banshee3}       {type} {area} {vnum} {53230} {desc} {Erah: Banshee's Lair - Lvl 3}}};
@@ -341,7 +375,6 @@
 #list speedruns add {{{name} {satchel}   {type} {item}{vnum} {24379}  {desc} {TMT Satchel/Bag}}};
 #list speedruns add {{{name} {cha-desert}   {type} {item}{vnum} {20056}  {desc} {Stats: Cha/Int Scrolls}}};
 #list speedruns add {{{name} {necro_old}   {type} {misc}{vnum} {7523}  {desc} {Neco: Old Guildhall}}};
-
 
 
 #class map_speedruns {close}

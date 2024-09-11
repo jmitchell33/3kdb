@@ -1,0 +1,87 @@
+#class {3kdb_whitelist} {kill}
+#class {3kdb_whitelist} {open}
+
+#var whitelist {};
+
+#NOP -- Player & Follow whitelist;
+#alias whitelist_default {
+    #list whitelist add {El Jefe};
+    #list whitelist add {Señor Meow-meow the fluffy persian cat};
+    #list whitelist add {Jugger Support Mech};
+    #list whitelist add {A tank named};
+};
+
+
+#alias whitelist {
+    #if {&whitelist[] > 0} {
+        #unvar item;
+        #echo {<caa>----        <fff> CURRENTLY ON THE VIP LIST <caa>        ----<088>};
+        #loop 1 &whitelist[] item {
+            #echo {   <cec>$item   <fbc>$whitelist[$item]<088>};
+        };
+    } {
+        #echo {<caa>----                  <fff> THE VIP LIST IS EMPTY <caa>                  ----<088>};
+    };
+    #echo {};
+    #echo {<caa>----    <ced> whitelist+ name <dac>to add someone to the VIP list <caa>       ----<088>};
+    #echo {<caa>----    <ced> whitelist- name <dac>to remove someone from the VIP list <caa>  ----<088>};
+    #echo {<caa>----    <ced> whitelist-clear <dac>to clear the VIP list <caa>                ----<088>};
+    #echo {};
+    #echo {<caa>----    <ced> whitelist-room <dac> to add the room to the the VIP list <caa>  ----<088>};
+    #echo {<caa>----    <ced> whitelist-party <dac>to add your party to the VIP list <caa>    ----<088>};
+}
+
+#alias whitelist-clear {
+    #list whitelist clear;
+    #echo {<caa>----  <fff> Whitelist has been cleared <caa>  ----<088>};
+};
+
+#alias whitelist-party {
+    whitelist-clear;
+    whitelist_default;
+    members;
+    #line oneshot #action {Total XP gain since party creation :} {
+        #local item {};
+        #foreach $party[member][%*] item {
+            #unvar tmpItem;
+            #format tmpItem {%n} {$item[name]};
+            #list whitelist add {$tmpItem};
+            #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+        };
+    };
+};
+
+#alias whitelist-room {
+    whitelist-clear;
+    whitelist_default;
+    who2;
+    look;
+    #delay 4 {
+        #unvar item {};
+        #foreach $room[players][%*] item {
+            #format tmpItem {%n} {$item};
+            #list whitelist add {$tmpItem};
+            #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+        };
+    };
+};
+
+#alias whitelist+ {
+    #if {"%0" != ""} {
+        #format tmpItem {%n} {%0};
+        #list whitelist add {$tmpItem};
+        #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+    };
+};
+        
+#alias whitelist- {
+    #if {"%0" != ""} {
+        #format tmpItem {%n} {%0};
+        #list whitelist find {$tmpItem} {index};
+        #list whitelist delete $index;
+        #echo {==> <eab> Removed $tmpItem from VIP List <088> <==};
+    };
+};
+
+
+#class {3kdb_whitelist} {close}
