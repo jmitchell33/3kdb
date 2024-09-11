@@ -150,13 +150,49 @@
     };
 };
 
+#alias _area_bots {
+	#local tmpItem {};
+    #local tmpArea {};
+	#loop 1 &botlist[] tmpItem {
+		#var tmpArea {};
+		#map at $botlist[$tmpItem][start_vnum] {#map get roomarea tmpArea};
+		#list botlist set $tmpItem {
+			{alias} {$botlist[$tmpItem][alias]}
+			{desc} {$botlist[$tmpItem][desc]}
+			{file} {$botlist[$tmpItem][file]}
+			{loop} {$botlist[$tmpItem][loop]}
+            {playercheck} {$botlist[$tmpItem][playercheck]}
+            {start_vnum} {$botlist[$tmpItem][start_vnum]}
+			{area} {$tmpArea}
+		};
+	};
+};
+
+#NOP -- This alias shows the available bots based on the area you're in;
+#alias .area_bots {
+    #local tmpList {};
+    #local tmpList $botlist;
+    #list tmpList index area;
+    #list tmpList sort;
+    #list tmpList filter {$area};
+    #if {&tmpList[] > 0} {
+        #echo {   <cfc>Bots in $area include:<088>};
+        #local tmpItem {};
+        #loop 1 &tmpList[] tmpItem {
+            format_botlist {     $tmpList[$tmpItem][alias]} {$tmpList[$tmpItem][desc]};
+        };
+        #echo {};
+    };
+};
+
+
 #list botlist clear;
 #list botlist add {{{file} {android} {alias} {android} {desc} {Androids} {start_vnum} {5223} {loop} {0} {playercheck} {0}}};
-#list botlist add {{{file} {abyss} {alias} {abyss} {desc} {Abyss (Built for lvls 150+)} {start_vnum} {} {loop} {1} {playercheck} {0}}};
+#list botlist add {{{file} {abyss} {alias} {abyss} {desc} {Abyss (Built for lvls 150+)} {start_vnum} {5159} {loop} {1} {playercheck} {0}}};
 #list botlist add {{{file} {aegis} {alias} {aegis} {desc} {Aegis Global: Lvls 1-6} {start_vnum} {2476} {loop} {0} {playercheck} {0}}};
 #list botlist add {{{file} {sectionz} {alias} {sectionz} {desc} {Section Z Long Path} {start_vnum} {24787} {loop} {0} {playercheck} {0} {rating} {Section Z}}};
 #list botlist add {{{file} {sectionz-fast} {alias} {sectionz-fast} {desc} {Section Z Fast Path} {start_vnum} {24787} {loop} {0} {playercheck} {0} {rating} {Section Z}}};
-#list botlist add {{{file} {sectionz-20} {alias} {sectionz-20} {desc} {Section Z Sec 20 Start} {start_vnum} {} {loop} {0} {playercheck} {0} {rating} {Section Z}}};
+#list botlist add {{{file} {sectionz-20} {alias} {sectionz-20} {desc} {Section Z Sec 20 Start} {start_vnum} {24948} {loop} {0} {playercheck} {0} {rating} {Section Z}}};
 #list botlist add {{{file} {sectionz-40} {alias} {sectionz-40} {desc} {Section Z Sec 40 Start} {start_vnum} {25088} {loop} {0} {playercheck} {0} {rating} {Section Z}}};
 #list botlist add {{{file} {mahjong} {alias} {mahjong} {desc} {Mahjong} {start_vnum} {1900} {loop} {0} {playercheck} {0}}};
 #list botlist add {{{file} {treehouse} {alias} {treehouse} {desc} {Treehouse - All Mobs} {start_vnum} {25462} {loop} {0} {playercheck} {0}}};
