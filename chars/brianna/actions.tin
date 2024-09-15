@@ -24,6 +24,13 @@
     mywhosync
 };
 
+#NOP -- emergency airdrop;
+#action {The computer chirps 'WARNING Stim energy levels too low to compensate} {
+    #if {!$idle_flag} {
+        airdrop
+    };
+};
+
 #NOP --- JUGGERNAUT AMMO
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 10 1 40000}};
 
@@ -31,8 +38,8 @@
 #action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend for party accept badger let him DIE.}
 
 #NOP --- GENERAL MISC;
+#actopm {The computer chirps 'WARNING Stim energy} {support defend};
 #action {The Daemon Blade screams at you} {steal};
-#action {The sticky cocoon absorbs part of the attack!} {support defend};
 #action {You attack} {#delay 3 {support assault fire}};
 #action {As you dive through the} {s;s;e;charter ao};
 #action {Although the door is open, a magical barrier is preventing} {d};
