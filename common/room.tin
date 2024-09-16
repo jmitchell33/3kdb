@@ -27,11 +27,24 @@
 
 #NOP -- Update if there is a player in the room not in friends list;
 #act {{^-P-_(.*)}} {
+    
+    #NOP -- If the player is in the room/players list, use that name.  Otherwise use the string from the room;
     #local tmpPlayer {};
+    #local foundPlayer 0;
     #loop 1 &players[] tmpPlayer {
         #if {"%1" == "%*$players[$tmpPlayer]%*"} {
             #list room[players] add $players[$tmpPlayer];
-        };
+            #var foundPlayer 1;
+        }
+    };
+    #if !$foundPlayer {
+        #var tmpPlayer %1;
+        #replace tmpPlayer {-P-_} {};
+        #NOP -- Remove the prefix before the player and period from the end of the player string;
+        #format tmpLength {%L} {$tmpPlayer};
+        #math tmpLength {$tmpLength - 1};
+        #format tmpPlayer {%.${tmpLength}s} {$tmpPlayer};
+        #list room[players] add {$tmpPlayer};
     };
 
     #if $bot[active] {
@@ -60,7 +73,6 @@
 #act {{^-R-_(.*)-R-_}} {
     .clearRoomData;
     #var room_short %%1;
-    
     
     #line oneshot #action {^>$} {
         #var room[updated] 1;
