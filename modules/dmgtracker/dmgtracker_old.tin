@@ -136,6 +136,8 @@
     #var cmbt[penetration][total] 0;
     #var cmbt[extra_attacks][round] 0;
     #var cmbt[extra_attacks][total] 0;
+    #var cmbt[crit][round] 0;
+    #var cmbt[crit][total] 0;
     #var ewell_round 0;
 
     #var dmgt[curr] 0;
@@ -217,6 +219,16 @@ dreset;
     #math cmbt[penetration][total] {$cmbt[penetration][total] + 1};
 } {2};
 
+#action {^***THAWHACK*** You critically hit %*!$} {
+    #math cmbt[crit][round] {$cmbt[crit][round] + 1};
+    #math cmbt[crit][total] {$cmbt[crit][total] + 1};
+} {2};
+
+#action {^**THWACK** You critically hit %*!$} {
+    #math cmbt[crit][round] {$cmbt[crit][round] + 1};
+    #math cmbt[crit][total] {$cmbt[crit][total] + 1};
+} {2};
+
 #action {^Your great speed allows you to attack again!$} {
     .trackExtraAttack;
 } {2};
@@ -266,21 +278,34 @@ dreset;
     #var cmbt[affects][lucanus_cloak] 0;
     #var cmbt[penetration][round] 0;
     #var cmbt[extra_attacks][round] 0;
+    #var cmbt[crit][round] 0;
     #var ewell_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
 };
-    
+
+#action {^%* hits you for %d damage!$} {
+    #local dmgAmount {};
+    #format dmgAmount {%d} {%2};
+    #math mob[damage_output] {$mob[damage_output] + $dmgAmount};
+    #format dmgDisplay {%g} {$dmgAmount};
+    #line gag;
+    #echo {%1 hits you for $dmgDisplay damage!};
+} {2};
+
 #NOP -- If you've just conjured undeads with necromancer, ignore those;
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
-    #if {"$guild" == "necromancer" && "%2" != "Undead"} {
+    #if {"$guild" == "necromancer" && "%2" == "Undead"} {#NOP} {
         #var vaf[numbers] 1;
         #var incombat 1;
+        #local dmgAmount {};
         #format enemy[name_numbers] {%l} {%2};
         #format dmgTimes {%d} %3;
         #format dmgAmount {%d} %5;
         #format dmgDisplay {%g} {$dmgAmount};
         #line gag;
         #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+
+        #math mob[damage_dealt] {$mob[damage_dealt] + $dmgAmount};
 
         #if {$vaf[numbers]} {#var incombat 1};
 
