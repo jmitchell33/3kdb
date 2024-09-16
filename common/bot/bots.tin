@@ -170,18 +170,20 @@
 
 #NOP -- This alias shows the available bots based on the area you're in;
 #alias .area_bots {
-    #local tmpList {};
-    #local tmpList $botlist;
-    #list tmpList index area;
-    #list tmpList sort;
-    #list tmpList filter {$area};
-    #if {&tmpList[] > 0} {
-        #echo {   <cfc>Bots in $area include:<088>};
-        #local tmpItem {};
-        #loop 1 &tmpList[] tmpItem {
-            format_botlist {     $tmpList[$tmpItem][alias]} {$tmpList[$tmpItem][desc]};
+    #if {"$area" == ""} {#NOP} {
+        #local tmpList {};
+        #local tmpList $botlist;
+        #list tmpList index area;
+        #list tmpList sort;
+        #list tmpList filter {$area};
+        #if {&tmpList[] > 0} {
+            #echo {   <cfc>Bots in $area include:<088>};
+            #local tmpItem {};
+            #loop 1 &tmpList[] tmpItem {
+                format_botlist {     $tmpList[$tmpItem][alias]} {$tmpList[$tmpItem][desc]};
+            };
+            #echo {};
         };
-        #echo {};
     };
 };
 
