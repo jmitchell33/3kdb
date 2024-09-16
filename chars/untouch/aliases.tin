@@ -1,0 +1,115 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- EXAMINING/SEARCHING
+#alias {x} {exa};
+
+#NOP -- Misc aliases
+#alias {mm} {method melee};
+#alias {md} {stance def;mm;shieldblock on;parry on;};
+#alias {kb} {go knight_box}
+#alias {fw} {unwield %1;fix %1; wield %1;}
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+        n;w;n;n;e;n;
+        enter;
+        e;e;e;s;s;e;e;n;n;n;
+        trail;ne;climb gate;
+        w;search tree;
+        e;e;n;n;enter;
+        unlock paperholder;
+        turn paperholder;
+        climb bench;stagedive;
+        climb down;out;
+        s;s;w;unlock door;open door;n
+    };
+
+#NOP -- KNIGHT TOUR GAMES
+#alias {knight6} {play;start;dt6}
+#alias {knight8} {play;start;dt8}
+#alias {winaxe} {play;start;#5 throw axe}
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n
+};
+
+#NOP -- Ticker
+#alias {ston} #ticker {hpon} {staunch};
+#alias {stoff} {#unticker hpon};
+
+#NOP --NUMPAD ON OR OFF
+#alias {numoff} {#class numpad kill}
+#alias {numon} {#read chars/brianna/numpad.tin}
+
+
+#NOP -- KNIGHT HORSE
+#alias {ph} {#10 pet phaethon};
+#alias {ce} {callesquire};
+#ALIAS {fcc}
+{
+	call esquire;
+	esq goshop tack carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot/carrot;
+	#delay {2} {ge;#15 give carrot to ace;send away}
+};
+
+#ALIAS {mmc}
+{
+	method charge
+}
+
+#ALIAS {sb}
+{
+	keep bag;
+	get bag from horse;
+	dispose bag;
+	unkeep bag;
+	give bag to horse
+}
+
+#ALIAS {gh}
+{
+	ce;
+	esq fetch horse;
+	horse follow;
+	mount;
+	mch;
+	send away
+}
+{6}
+
+#alias {_player_deadmanActions} {
+    .pause;
+} {1};
+
+#alias .rep 
+{
+        #if { "%0" == "" }
+        {
+                reps;
+        };
+        #else
+        {
+                #highlight {%%i%0%%*\|%%*} {<338>};reps;
+
+                #delay {2} 
+                {
+                        #unhighlight {%%i%0%%*\|%%*} {<338>};
+                } {1};
+        };
+};
+
+
+
+#class {player_aliases} {close}
