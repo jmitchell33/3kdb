@@ -1,0 +1,31 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+
+#alias sackit {#loop 1 20 i {put all in bag $i};};
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#alias gxp_reset {
+    #var my[round_gxp] 0;
+    #var total_gxp 0;
+    #var average_total_gxp 0;
+    #var total_fight_gxp 0;
+    #var average_fight_gxp 0;
+    #var total_rounds 0;
+}
+
+#alias corpse_trig {
+    #if {$my[gp1][current] < 300} {
+        offer corpse;wrap all;slab all;
+    } {
+        wrap all;slab all;get corpse;get corpse;
+    };
+    get coins;
+    meditate;
+};
+
+
+#class {player_aliases} {close}
