@@ -2,35 +2,33 @@
 #class {player_actions} {open}
 
 #NOP -- REFLEXES
-#action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}}
-
-#NOP -- AIRDROP
-#action {The computer chirps 'WARNING Stim energy levels too low to compensate} {#if {!$idle_flag} {airdrop}}
+#action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}};
 
 #NOP --- ROLM and ETERNAL ENERGY WELL
 #action {The %* slightly in your grip...} {#if {$bot[active] == 1 && !$idle_flag} {touch owl rune;ewell}}
 
 #NOP -- ETERNAL WHO REFRESHED ROOM TRIG
-#action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1}
+#action {With a swirl of energy from %*, everything in the room looks shiny and} {ptell room refreshed by %1};
 
 #NOP -- REFLEXES
-#action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}}
+#action {You have no pants.} {#if {!$idle_flag} {unwrap 1;fdeener}};
 
 #NOP -- COUPLE LOGIN TRIGS
 #action {unload room} {deadman 200};
 
-#NOP -- auto update linktell list;
-#action {[%w enters the game]} {
-    mywhosync
-};
-
 #NOP --- JUGGERNAUT AMMO
-#action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 9 1 40000}}
+
+#action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {#if {!$idle_flag} {truck ammo vbuy missile 10 1 40000}};
 
 #NOP -- JUGGERNAUT CDEFEND FOR PARTY
 #action {The computer chirps 'Switching to PARTY defense mode.'} {ptell cdefend for party accept badger let him DIE.}
 
 #NOP --- GENERAL MISC;
+#actopm {The computer chirps 'WARNING Stim energy} {support defend};
+#action {The Daemon Blade screams at you} {steal};
+#action {You attack} {#delay 3 {support assault fire}};
+#action {As you dive through the} {s;s;e;charter ao};
+#action {Although the door is open, a magical barrier is preventing} {d};
 #action {dealt the} {support defend};
 #action {Out of nowhere a crazed hockey} {#if {!$idle_flag} {whisper wannabe fan}};
 #action {Your dog looks very hungry.} {#if {!$idle_flag} {unwrap 1;unwrap 1;dog eat;dog eat}};

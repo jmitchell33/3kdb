@@ -64,6 +64,7 @@
     notify on;
     init_screen;
     #read common/bot/defaults.tin;
+    #send {aset world_drop_pref -!!!-};
     #line oneshot {^You will no longer see the HP bar on the main screen.$} {forcehp};
     #line oneshot {^Notify off for all.$} {notify on};
 };
@@ -75,7 +76,7 @@
     #list db3k[banner] add {<ddd>      'library3kdb' to see a list of aliases <088>};
     #list db3k[banner] add {<ddd>      'mapgo cot' to set your position to Center of Town (cot) <088>};
     #list db3k[banner] add {<ddd>       Be sure to check out <ffd>botlist<ddd>, <ffd>speedruns<ddd>, and <ffd>strategies<088>};
-    #draw $theme[chatbox] left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..4];
+    #draw $theme[chatbox] lalign ralign left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..4];
 };
 
 #NOP -- Get online players and monitor as they fall off/on with notify;
@@ -99,24 +100,27 @@
     };
 };
 
-#action {^[%w disconnects]$} {
-    #unvar tmpItem;
-    #if {&players[] > 0} {
-        #list players find %1 tmpItem;
-        #list players delete $tmpItem;
-    };
-} {2};
+#NOP -- Add players to online tracking;
 #action {^[%w reconnects]$} {
     #list players add {%1};
 } {2};
 #action {^[%w enters the game]$} {
     #list players add {%1};
 } {2};
+
+#NOP -- Remove players from online tracking;
+#action {^[%w disconnects]$} {
+    #unvar tmpItem;
+    #if {&players[] > 0} {
+        #list players find %1 tmpItem;
+        #if {$tmpItem} {#list players delete $tmpItem};
+    };
+} {2};
 #action {^[%w leaves the game]$} {
     #unvar tmpItem;
     #if {&players > 0} {
         #list players find %1 tmpItem;
-        #list players delete $tmpItem;
+        #if {$tmpItem} {#list players delete $tmpItem};
     };
 } {2};
 

@@ -19,9 +19,9 @@
         };
 
         #alias {heals} {
-        cast mystic guardian at hp/500/(heal;
-        setpanic hmheal at 1800;
-        reflex add hp 5400 cast healing hands
+        cast mystic guardian at hp/1000/(heal;
+        setpanic hmheal at 2500;
+        reflex add hp 10500 cast healing hands
         };
 
         #alias {dmgoff} {reflex remove sp >400};
@@ -53,7 +53,7 @@
             hmheal;
         };
         #if {$my[eternal][heal] && !$my[immersion][active]} {
-            (heal oscar;
+            (heal nix;
         };
     };
 
@@ -141,18 +141,16 @@
 
 
 #alias {dmg_stats} {
-        #math {cmbt[avg]} {$cmbt[dmg] / $cmbt[rnd]};
-        #math {dog[avg]} {$dog[dmg] / $dog[rnd]};
-        #showme {Average damage : $cmbt[avg] over $cmbt[rnd] rounds.  Total: $cmbt[dmg] damage.};
-        #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
-        #showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
-        };
+    dstats;
+    #echo {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
+};
 
-#alias {dmg_reset} {#var {cmbt[dmg]} 0;#var {cmbt[rnd]} 0;#var dog[dmg] 0;#var dog[rnd] 0;};
+#alias {dmg_reset} {
+    dreset;
+    #var {cmbt[dmg]} 0;#var {cmbt[rnd]} 0;#var dog[dmg] 0;#var dog[rnd] 0;
+};
 
-#act {^You hit %1 times for %2 damage.$} {#math cmbt[dmg] {$cmbt[dmg] + %2};#math cmbt[rnd] {$cmbt[rnd] + 1};};
-
-#act {^Ripley hit %1. \{%2\}} {#math dog[dmg] {$dog[dmg] + %2};#math dog[rnd] {$dog[rnd] + 1};};
+#act {^Ripley hit %1. \{%2\}} {#math dog[dmg] {$dog[dmg] + %2};#math dog[rnd] {$dog[rnd] + 1};} {2};
 
 #alias {shankey} {
         search bed;

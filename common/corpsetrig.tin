@@ -25,6 +25,7 @@
         #case {"Undead Wraith"} {#var kbIgnore 1};
         #case {"Shadow Panther"} {#var kbIgnore 1};
         #case {"Something"} {#var kbIgnore 1};
+        #case {"Undead"} {#if {"$guild" == "necromancer"} {#var kbIgnore 1}};
     };
 };
 
@@ -33,6 +34,12 @@
     #format tmpName {%l} $deathReport[mob_killer];
     #regex {$tmpName} {$enemy[target]} {#var fakeKill 1};
 };
+
+#NOP -- This is to ignore necromancers killing their undead horde of summons;
+#action {^Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
+
+#NOP -- Ignore juggernaut mech dying;
+#action {^%* Jugger Support Mech{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
 
 #NOP -- The next line after this will have the killing blow message, which we'll capture as well;
 #action {%* {screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies}.} {
@@ -64,6 +71,10 @@
             #var deathReport[damage_dealt] 0;
             #var deathReport[corpses_used] $mob[corpses_used];
             #var deathReport[summons_killed] $mob[summons_killed];
+            #var deathReport[songs_lost] $cmbt[songs][lost][fight];
+            #var deathReport[damage_dealt] $mob[damage_dealt];
+            #var deathReport[damage_output] $mob[damage_output];
+            #var deathReport[mob_dodges] $mob[mob_dodges];
 
             mob_status_clear;
             
@@ -81,6 +92,10 @@
                     {coins_earned} {$deathReport[coins_earned]}
                     {corpses_used} {$deathReport[corpses_used]}
                     {summons_killed} {$deathReport[summons_killed]}
+                    {songs_lost} {$deathReport[songs_lost]}
+                    {damage_dealt} {$deathReport[damage_dealt]}
+                    {damage_output} {$deathReport[damage_output]}
+                    {mob_dodges} {$deathReport[mob_dodges]}
                 }};
             };
         };

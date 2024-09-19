@@ -5,7 +5,7 @@
 #action {^%w expresses %* feelings about you rocking the mud.} {
     #format playerLower {%l} {%1};
     #send {say DAMN RIGHT BARDS ROCK THE MUD!!!};
-    #send {say Currently on rotation in the jukebox include:};
+    #send {say Currently on rotation in the Best Bard Boonbox include:};
     #send {say hero --> +con boost and takes 56 rounds to perform};
     #send {say son of man --> +str/wis boost and takes 40 rounds to perform};
     #send {say memory --> +int boost and takes 38 rounds to perform};
@@ -29,13 +29,24 @@
 
 
 #NOP --- Use corpses/perform actions between songs so you're more karma efficient;
-#action {{^You finish your performance with a bow.$|^You lose your song.$|^You cease your performance of %*.$}} {
+#action {{^You finish your performance with a bow.$|^You cease your performance of %*.$}} {
     #var song_selected 0;
     #var my[song][rounds] 0;
     #if {$actions_stacked && $mip[round] > 0} {
         do_action;
     };
-} {1};
+} {2};
+
+#NOP --- Bard combat status tracking;
+#action {You lose your song.} {
+    #math cmbt[songs][lost][fight] {$cmbt[songs][lost][fight] + 1};
+    #math cmbt[songs][lost][total] {$cmbt[songs][lost][total] + 1};
+    #var song_selected 0;
+    #var my[song][rounds] 0;
+    #if {$actions_stacked && $mip[round] > 0} {
+        do_action;
+    };
+} {2};
 
 
 #NOP --- BARD DEFENSIVE SONGS AND SPELLS;
@@ -65,6 +76,5 @@
     #var my[guild][donate_items] %1;
     #math my[guild][donate_total] {$my[guild][donate_coins] + $my[guild][donate_items]};
 } {2};
-
 
 #class {guild_actions} {close}

@@ -7,6 +7,9 @@
 #NOP -- EXAMINING/SEARCHING
 #alias {x} {exa}
 
+#NOP -- Nktrig
+#alias {nktrig} {ktrig preserve remains/preserve remainas/get all};
+
 #NOP -- ATTACKING
 #alias {ass} {call;scythe;psibleed;corrode;convoke ravens;rabies}
 #action {Brianna unloads one of his long range missiles and carefully removes} {load core;say CORE LOADED LET'R"RIP}
@@ -16,10 +19,44 @@
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
 
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n
+};
+
 #NOP --KNIGHT TOUR GAMES
 #alias {knight6} {play;start;dt6}
 #alias {knight8} {play;start;dt8}
 #alias {winaxe} {play;start;#5 throw axe}
+
+#NOP -- substitute hell dirs for something more manageable ('reload' to unsub);
+#alias {helldirs} {
+	#sub {yonder} {ne};
+	#sub {overhere} {s};
+	#sub {anotherway} {sw};
+	#sub {overthere} {n};
+	#sub {thisway} {se};
+	#sub {thatway} {nw};
+
+	#alias {ne} {yonder};
+	#alias {s} {overhere};
+	#alias {sw} {anotherway};
+	#alias {n} {overthere};
+	#alias {se} {thisway};
+	#alias {nw} {thatway};
+
+	#show Hell directions substituted. Go!
+};
 
 #NOP --NUMPAD ON OR OFF
 #alias {numoff} {#class numpad kill}
