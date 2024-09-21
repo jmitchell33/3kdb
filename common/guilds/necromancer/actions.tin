@@ -60,22 +60,24 @@
 #act {You have already skullfired this repower %w.} {#var my[necromancer][skullfire] 0};
 #act {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;}
 #act {Before the repowering, you attempt a last minute %*} {
-    #var my[necromancer][invoke-prime] 0;
-    #var my[necromancer][spirit-howl] 0;
-    #var my[necromancer][maim] 0;
-    #var my[necromancer][diurnum] 0;
-    #var my[necromancer][nocturnum] 0;
-    #var my[necromancer][bloodfuse] 0;
-    #var my[necromancer][harvest] 0;
-    #var my[necromancer][altered] 0;
-    #var my[necromancer][bloodarc] 0;
-    #var my[necromancer][conjure_undead] 0;
-    #var my[necromancer][soulbind] 0;
-    #var my[necromancer][souls] 0;
-    #var my[necromancer][skullfire] 0;
-    #var my[necromancer][unholy_ground] 0;
-    #math my[necromancer][repowers] {$my[necromancer][repowers] + 1};
-    #send {!repower};
+    #if {!$idle_flag} {
+        #var my[necromancer][invoke-prime] 0;
+        #var my[necromancer][spirit-howl] 0;
+        #var my[necromancer][maim] 0;
+        #var my[necromancer][diurnum] 0;
+        #var my[necromancer][nocturnum] 0;
+        #var my[necromancer][bloodfuse] 0;
+        #var my[necromancer][harvest] 0;
+        #var my[necromancer][altered] 0;
+        #var my[necromancer][bloodarc] 0;
+        #var my[necromancer][conjure_undead] 0;
+        #var my[necromancer][soulbind] 0;
+        #var my[necromancer][souls] 0;
+        #var my[necromancer][skullfire] 0;
+        #var my[necromancer][unholy_ground] 0;
+        #math my[necromancer][repowers] {$my[necromancer][repowers] + 1};
+        #send {!repower};
+    };
 };
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
 

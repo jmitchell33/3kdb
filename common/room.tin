@@ -38,9 +38,9 @@
         }
     };
     #if !$foundPlayer {
+        #NOP -- Remove the prefix before the player and period from the end of the player string;
         #var tmpPlayer %1;
         #replace tmpPlayer {-P-_} {};
-        #NOP -- Remove the prefix before the player and period from the end of the player string;
         #format tmpLength {%L} {$tmpPlayer};
         #math tmpLength {$tmpLength - 1};
         #format tmpPlayer {%.${tmpLength}s} {$tmpPlayer};
@@ -54,7 +54,7 @@
             #if {"$whitelist" !== ""} {
                 #if {&whitelist[] > 0} {
                     #loop 1 &whitelist[] item {
-                        #regex {"%1"} {"$whitelist[$item]"} {
+                        #regex {"%1"} {"%*$whitelist[$item]%*"} {
                             #var noPlayerCheck 0;
                         };
                     };

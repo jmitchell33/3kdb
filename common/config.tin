@@ -87,6 +87,7 @@
     #unvar tmpList;
     #action {^%+1..d%s %*} {
         #cat tmpList {%%3};
+        #replace tmpList {A ghostly form} {};
     };
     #class tmp close;
     #line oneshot #action {This list is sorted by level, type: who2 <xp/age>} {
@@ -123,5 +124,29 @@
         #if {$tmpItem} {#list players delete $tmpItem};
     };
 } {2};
+
+
+#NOP -- Alias to load common/guilds/character-specific files;
+#alias {_load_3kdb_common} {
+    #NOP -- Load previous sessions variables;
+    #read chars/$user/vars.tin;
+
+    #NOP -- Load Common;
+    #read common/bot/bots.tin;
+    #read modules/helpers/helpers.tin;
+
+    #NOP -- Load Guilds;
+    #read common/guilds/$guild/index.tin;
+    #read common/guilds/eternal/eternal.tin;
+
+    #NOP -- Load Character specific;
+    #read chars/$user/actions.tin;
+    #read chars/$user/aliases.tin;
+    #read chars/$user/config.tin;
+    #read chars/$user/heartbeat.tin;
+    #read chars/$user/miphp.tin;
+    #read chars/$user/private.tin;
+    #read chars/$user/tickers.tin;
+};
 
 #class common_config close;
