@@ -66,6 +66,10 @@
             #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
             #if $dmgtracker {.dmg_round_reset;#var cmbt[affects][convoke] 0};
 
+            #NOP -- Pull data from (cstats for how much damage was received;
+            #NOP _update_cstats;
+            #NOP _update_partykills;
+
             #var deathReport[mob_killed] %1;
             #var deathReport[mob_rounds_to_kill] $mip[round];
             #var deathReport[damage_dealt] 0;
@@ -73,13 +77,13 @@
             #var deathReport[summons_killed] $mob[summons_killed];
             #var deathReport[songs_lost] $cmbt[songs][lost][fight];
             #var deathReport[damage_dealt] $mob[damage_dealt];
-            #var deathReport[damage_output] $mob[damage_output];
+            #var deathReport[damage_received] $mob[damage_received];
             #var deathReport[mob_dodges] $mob[mob_dodges];
-
-            mob_status_clear;
+            #var deathReport[xp_gained] $fight_xp;
             
             #NOP -- Small delay to make sure we get the variables from the updates;
             #delay 1 {
+                _mob_status_clear;
                 #var deathReport[xp_earned] $fight_xp;
                 #var deathReport[coins_earned] $fight_coins;
 
@@ -94,8 +98,9 @@
                     {summons_killed} {$deathReport[summons_killed]}
                     {songs_lost} {$deathReport[songs_lost]}
                     {damage_dealt} {$deathReport[damage_dealt]}
-                    {damage_output} {$deathReport[damage_output]}
+                    {damage_received} {$deathReport[damage_received]}
                     {mob_dodges} {$deathReport[mob_dodges]}
+                    {class} {$deathReport[class]}
                 }};
             };
         };
@@ -104,11 +109,51 @@
     #if $bot[active] {#showme {----- BOT REGISTERED KILL -----}};
 } {1};
 
+#NOP -- Get the class off of partykills;
+#alias _update_partykills {
+    #class tmpCapture open;
+    #local tmpClassKilled 0;
+    #var tmpLineNo 1;
+
+    #action {%s # %s Name %s Class} {
+        #echo {caught partykills};
+        #local tmpLastKill 0;
+        #event {CATCH PROCESSED LINE} {
+            #local tmpLine {%%%1};
+            #local tmpNumber 0;
+            #math tmpLineNo {$tmpLineNo + 1};
+            #NOP -- 4th Line has the most recent kill;
+            #if {$tmpLineNo == 4} {
+                #echo {on line 4 content is $tmpLine};
+                #list tmpLine explode {  };
+                #format tmpNumber {%d} {$tmpLine[&tmpLine[]]};
+                #var mob[class] $tmpNumber;
+                #var deathReport[class] $mob[class];
+            };
+        };
+    } {1};
+    
+    #action {   1  %*} {
+        #var tmpClassKilled 1;
+        #class {tmpCapture} kill;
+        #line gag;
+    } {1};
+     
+
+    #delay 2 {
+        #if !$tmpClassKilled {
+            #class tmpCapture kill;
+            #unaction {   1  %*};
+        };
+    };
+    #send {!partykills};
+};
+
 
 
 #NOP -- This section manages the corpsetrig aliases and moving items in the actual corpsetrig;
 #alias corpsetrig {
-    #echo {<ffb>   Current Corpse Trigger Actions   <088>\n};
+    #echo {<ffb>   Current Corpse Trigger Actions   <088>};
     #if {&corpseActions[] > 0} {
         formatItem {Priority:} {Name};
         #loop 1 &corpseActions[] item {
@@ -116,6 +161,7 @@
         };
         #echo {\n <dfa>corpse_trig<088> will execute the corpsetrig actions.};
         #echo { <dfa>corpsetrig-help <088> to see all available commands.};
+        #echo { <efa>corpsetrig-all<088> to see available actions};
     } {
         #echo { There are currently no actions added to corpse_trig};
         #echo {\n <efa>corpsetrig+<088> <bcc>name<088> to add an action};
@@ -329,7 +375,8 @@
 
 
 #list corpseList clear;
-#list corpseList add {{{name} {ted} {guild} {all} {action} {love bear;cuddle bear} {active} {0} {description} {Love & cuddle freeway bear}}};
+#list corpseList add {{{name} {ted} {guild} {all} {action} {love bear} {active} {0} {description} {Love Freeway Bear (+Con)}}};
+#list corpseList add {{{name} {ted2} {guild} {all} {action} {cuddle bear} {active} {0} {description} {Cuddle freeway Bear (+Int)}}};
 #list corpseList add {{{name} {bRemains} {guild} {all} {action} {burn remains} {active} {0} {description} {burn priest remains in Necropolis}}};
 #list corpseList add {{{name} {aoe} {guild} {all} {action} {immolate corpse} {active} {0} {description} {AOE Armor: Immolate Corpse}}};
 #list corpseList add {{{name} {divvy} {guild} {all} {action} {divvy gold} {active} {0} {description} {Gold: Divvy gold}}};

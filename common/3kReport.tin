@@ -1,6 +1,47 @@
 #class 3kReport kill;
 #class 3kReport open;
 
+#alias _update_cstats {
+    #local tmpClassKilled 0;
+    #action {---------------------------  Combat Statistics  ---------------------} {
+        #echo {caught combat stats};
+        #class tmpCapture open;
+        #local tmpNumber 0;
+        #event {CATCH PROCESSED LINE} {
+            #format tmpLine {%p} {%%%1};
+            #regex {$tmpLine} {Damage Taken:%*} {
+                #format tmpNumber {%d} {&1};
+                #NOP -- T1 is the prior total so we can see the difference since last fight;
+                #if {$cmbt[damage_taken] > 0} {
+                    #var cmbt[damage_taken_t1] $cmbt[damage_taken];
+                    #var cmbt[damage_taken] $tmpNumber;
+                    
+                } {
+                    #var cmbt[damage_taken_t1] $tmpNumber;
+                    #var cmbt[damage_taken] $tmpNumber;
+                }
+            };
+            #line gag;
+        };
+        #class {tmpCapture} {close};
+    } {1};
+    
+    #action {Total Time Spent online : %*} {
+        #class tmpCapture kill;
+        #unaction {---------------------------  Combat Statistics  ---------------------};
+        #var tmpClassKilled 1;
+        #line gag;
+    } {1};
+
+    #delay 2 {
+        #if !$tmpClassKilled {
+            #class tmpCapture kill;
+            #unaction {---------------------------  Combat Statistics  ---------------------};
+        };
+    };
+    #send {!(cstats};
+};
+
 #alias update_xp {
     #if {"%1" == "start"} {
         #action {^You have %* total xp.$} {
@@ -41,6 +82,11 @@
         xp;
         #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
     };
+
+    #action {^At this rate you will level in %*} {
+        #class tmpCapture kill;
+        #line gag;
+    } {2};
 };
 
 #alias update_coins {
