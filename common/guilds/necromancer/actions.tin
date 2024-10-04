@@ -60,22 +60,24 @@
 #act {You have already skullfired this repower %w.} {#var my[necromancer][skullfire] 0};
 #act {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;}
 #act {Before the repowering, you attempt a last minute %*} {
-    #var my[necromancer][invoke-prime] 0;
-    #var my[necromancer][spirit-howl] 0;
-    #var my[necromancer][maim] 0;
-    #var my[necromancer][diurnum] 0;
-    #var my[necromancer][nocturnum] 0;
-    #var my[necromancer][bloodfuse] 0;
-    #var my[necromancer][harvest] 0;
-    #var my[necromancer][altered] 0;
-    #var my[necromancer][bloodarc] 0;
-    #var my[necromancer][conjure_undead] 0;
-    #var my[necromancer][soulbind] 0;
-    #var my[necromancer][souls] 0;
-    #var my[necromancer][skullfire] 0;
-    #var my[necromancer][unholy_ground] 0;
-    #math my[necromancer][repowers] {$my[necromancer][repowers] + 1};
-    #send {!repower};
+    #if {!$idle_flag} {
+        #var my[necromancer][invoke-prime] 0;
+        #var my[necromancer][spirit-howl] 0;
+        #var my[necromancer][maim] 0;
+        #var my[necromancer][diurnum] 0;
+        #var my[necromancer][nocturnum] 0;
+        #var my[necromancer][bloodfuse] 0;
+        #var my[necromancer][harvest] 0;
+        #var my[necromancer][altered] 0;
+        #var my[necromancer][bloodarc] 0;
+        #var my[necromancer][conjure_undead] 0;
+        #var my[necromancer][soulbind] 0;
+        #var my[necromancer][souls] 0;
+        #var my[necromancer][skullfire] 0;
+        #var my[necromancer][unholy_ground] 0;
+        #math my[necromancer][repowers] {$my[necromancer][repowers] + 1};
+        #send {!repower};
+    };
 };
 #act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
 
@@ -144,7 +146,6 @@
 #action {You scream with the power of the netherworld and thrust your hands toward} {
     stat_record;
     #var my[necromancer][unholy_ground] 0;
-    #var stats[unholy_ground][hits] 0;
 } {2};
 
 #action {  You must wait until repower to rend flesh again %w.} {
@@ -189,51 +190,6 @@
 
 #action {The energies of the bloodarc crackle quietly as they dissipate into the air.} {
     #if $bot[active] {#var bot[paused] 0};
-} {2};
-
-#NOP -- Track how many hits unholy ground lands;
-#action {Black lightning races along %* body into %*!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {Deathly black energy sizzles through %* flesh!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {Dark energy crackles from %w to %*!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {Purple lightning arcs from %w to %*!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {A black bolt of energy blasts into %*!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {%* strikes %w and is dealt a blast of dark energy!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {%* is scorched by the dark energy surrounding %w!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {Jet black bolts of dark lightning slam into %*!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {%* recoils in a shock from striking %w!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {An explosion of black energy engulfs %*!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-
-#action {Cool black lightning scorches across %* body!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2};
-#action {Cold, purple lightning crackles into %* body!} {
-    #math stats[unholy_ground][hits] {$stats[unholy_ground][hits] + 1};
-} {2}:
-
-#NOP -- Report how many hits unholy ground landed;
-#action {Your grounding to the negative material plane dissipates in a sparkle.} {
-    #echo {<ffa>UNHOLY GROUND LANDED $stats[unholy_ground][hits] TIMES<088>};
-    #list stats[unholy_ground][history] add {{{hits} {$stats[unholy_ground][hits]} {stats} {$tempStat[1]}}};
 } {2};
 
 #NOP -- Tracking Vampire abilities (bloodlet/bloodfuse potions);

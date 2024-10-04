@@ -119,7 +119,9 @@
     } {1};
     #delay 10 {
         #if $mask[active] {#math undeadKilled {$undeadKilled * 2}};
-        #${undeadKilled} preserve_remains;
+        #NOP -- We specifically wont' use gemino since that produces a corpse less than the vault will take;
+        #${undeadKilled} preserve get;
+        keep all preservation;
         #unaction {%* dealt the killing blow to Undead.};
         ktrig ON;
     };

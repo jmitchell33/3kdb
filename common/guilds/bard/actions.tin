@@ -21,7 +21,12 @@
 
 
 #NOP --------------------------------------- BARD SPECIFIC ACTIONS ------------------------------------------;
-#ACTION {%w gives you a low-five!} {#if !$idle_flag {#format {lower} {%l} {%1};it $lower};} {6};
+#ACTION {%w gives you a low-five!} {
+    #if !$idle_flag {
+        #format {lower} {%l} {%1};
+        add_action {{{name} {it $lower} {action} {perform invigorating tune for $lower}}}
+    };
+} {6};
 #ACTION {%w eeps at you.} {#if !$idle_flag {#format {lower} {%l} {%1};defend $lower};} {6};
 #ACTION {%w grovels shamelessly before you.} {#if !$idle_flag {#format {lower} {%l} {%1};soothe $lower};} {6};
 #action {%w acks at you.} {#if !$idle_flag {heartening laugh};} {6};
