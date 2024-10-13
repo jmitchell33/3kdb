@@ -51,17 +51,17 @@ n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;s
 	#if {"%1" == "White web" && $corpses[total] > 10} {
         #var bot[foundobject] 1;#var object_action {shake web}
     } {
-        #path walk;.bot
+        .botStep
     };
-} {3}
+} {1};
 
 #act {^Vibrations shake the web, and fade to stillness.} {
     #if {$bot[foundmob]} {
         #nop
     } {
-        #path walk;
-        .bot
-    }} {1};
+        .botStep
+    }
+} {1};
 
 #act {^Vibrations shake the web, the owner pounces!} {
     #undelay bot_kick;
@@ -72,7 +72,26 @@ n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;s
 	#var mob[long] Furtive;
 	kill furtive;
 	ewell;
-} {1}
+} {1};
+
+#if {"$guild" == "mage"} {
+    #ticker checkCasting {
+        #switch {"$enemy[name]"} {
+            #case {"Impediment"} {
+                #if {"$my[casting]" != "incinerate"} {cast perform as cast incinerate};
+            };
+            #case {"Mud"} {
+                #if {"$my[casting]" == "mind warp"} {cast perform as cast sunspear};
+            };
+            #case {"Snare"} {
+                #if {"$my[casting]" == "mind warp"} {cast perform as cast sunspear};
+            };
+            #default {
+                #if {"$my[casting]" != "mind warp"} {cast perform as cast mind warp};
+            };
+        };
+    } {2};
+};
 
 #class {bot} {close}
 
