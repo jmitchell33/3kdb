@@ -20,7 +20,7 @@
     coins;
 };
 
-#alias mob_status_clear {
+#alias _mob_status_clear {
     #if {"$guild" == "bard"} {
         #var mob[lightning-vortex] 0;
         #var mob[noxious-cloud] 0;
@@ -60,8 +60,9 @@
     #var mob[lucanus_amulet] 0;
     #var mob[corpses_used] 0;
     #var mob[damage_dealt] 0;
-    #var mob[damage_output] 0;
+    #var mob[damage_received] 0;
     #var mob[mob_dodges] 0;
+    #var mob[class] 0;
 
     #var enemy[last_round] 1;
     #var enemy[round_change] 0;
@@ -88,6 +89,7 @@
     #var xrolm $rolm;
     #var xtheme $theme;
     #var xgags $gags;
+    #var xmy $my;
     #var xchat[log][emotes] $chat[log][emotes];
 
     #NOP -- These variables are at a minimum used to draw somewhere;
@@ -115,6 +117,7 @@
     #var lastBot $xlastBot;
     #var theme $xtheme;
     #var gags $xgags;
+    #var my $xmy;
     #var chat[log][emotes] $xchat[log][emotes];
     
     #var split $split;
@@ -134,6 +137,7 @@
     #if {"$lastBot" == "$xlastBot"} {#var lastBot {}};
     #if {"$theme" == "$xtheme"} {#var theme {}};
     #if {"$gags" == "$xgags"} {#var gags {}};
+    #if {"$my" == "$xmy"} {#var my {}};
     #if {"$chat[log][emotes]" == "$xchat[log][emotes]"} {#var chat[log][emotes] 1};
 };
 

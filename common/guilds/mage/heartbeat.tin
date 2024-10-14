@@ -53,6 +53,8 @@
             #var bot_toggle 1;
             .pause;
             #ticker mcBotResume {
+                #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
+                hp;
                 #if {$hpbar_mc > $mc_threshold} {
                     #var bot_toggle 0;
                     #if {!$incombat} {..} {.unpause};
@@ -67,6 +69,8 @@
                 #var bot_toggle 1;
                 .pause;
                 #ticker spBotResume {
+                    #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
+                    hp;
                     #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
                         #var bot_toggle 0;
                         #if {!$incombat} {..} {.unpause};

@@ -4,11 +4,145 @@
 #gag {  --> %*};
 #gag {%*-hp-};
 
+#NOP -- Alias to view summon info;
+#alias summon_types {
+	#local tmpItem {};
+	#local tmpList {};
+	#local tmpString {};
+	#NOP strategy summon_select;
+	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+	#echo {<dbc>-+--+-       <dfc>Summoner!<088>  <dbc>Behold your Monsters!          <dbc>-+--+-<088>};
+	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+	#loop 1 14 tmpItem {
+		#var tmpString <efb>       $tmpItem:;
+		#var tmpNumber 0;
+		#var tmpIter 1;
+		#var tmpBar 40;
+		#var tmpList $summon_types;
+		#list tmpList indexate ms;
+		#list tmpList filter {$tmpItem};
+		#if {&tmpList[] > 0} {
+			#foreach $tmpList[%*] item {
+				#if {"$item[key]" == "golem"} {#NOP} {
+					#math isOdd {$tmpIter % 2};
+					#if $isOdd {#var tmpColor <dfc>} {#var tmpColor <ccc>};
+					#format curLength {%L} $tmpString;
+					#if {"$item[dtype]" == ""} {
+						#var itemDesc $item[key];
+					} {
+						#var itemDesc $item[key] <eee>($item[dtype])<088>;
+					};
+					#format tmpLength {%L} $itemDesc;
+					#math tmpNumber {$tmpLength + $curLength};
+					#if {$tmpNumber > $tmpBar} {
+						#math tmpBar {$tmpBar + 40};
+						#cat tmpString {\n$tmpColor          $itemDesc<088>};
+					} {
+						#cat tmpString {$tmpColor $itemDesc<088>};
+					};
+					#math tmpIter {$tmpIter + 1};
+				};
+			};
+			#format tmpLength {%L} $tmpString;
+			#if {$tmpLength > 15} {
+				#format tmpString {%-50s} {$tmpString};
+				#draw scroll scale tile 1 1 1 1 {$tmpString};
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+			};
+		};
+	};
+	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+};
+
+
 #NOP -- Aliases to select your summon for Mage summon_select strategy;
-#alias select_summon {
-	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+-<088>};
-	#echo {<dbc>-+--+-    <dfc>Summoner!<088>  <ecc>Select<088> <fbd>your Monster!       <dbc>-+--+-<088>};
-	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+-<088>};
+#alias summon_select {
+	#if {"%0" == "clear"} {
+		#var summon_select[ms] {};
+		#var summon_select[active] 0;
+		#var summon_select[key] {};
+		#var summon_select[name] {};
+		checkStrategy {summon_select} {strategy summon_select};
+		#format tmpString {%-50s} {<dbc>-+--+-         summon_select has been cleared.};
+		#echo {$tmpString     -+--+-<088>};
+	} {
+		#if {"%0" == "off"} {
+			#var summon_active 0;
+			checkStrategy {summon_select} {strategy summon_select};
+			#format tmpString {%-50s} {<dbc>-+--+-         summon_select has been turned off.};
+			#echo {$tmpString     -+--+-<088>};
+		} {
+			#if {"%0" == ""} {
+				#local tmpItem {};
+				#local tmpList {};
+				#local tmpString {};
+				#NOP strategy summon_select;
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+				#echo {<dbc>-+--+-       <dfc>Summoner!<088>  <dbc>Select your Monster!           <dbc>-+--+-<088>};
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+				#loop 1 14 tmpItem {
+					#var tmpString <efb>       $tmpItem:;
+					#var tmpNumber 0;
+					#var tmpIter 1;
+					#var tmpBar 40;
+					#var tmpList $summon_types;
+					#list tmpList indexate ms;
+					#list tmpList filter {$tmpItem};
+					#if {&tmpList[] > 0} {
+						#foreach $tmpList[%*] item {
+							#if {"$item[key]" == "golem"} {#NOP} {
+								#math isOdd {$tmpIter % 2};
+								#if $isOdd {#var tmpColor <dfc>} {#var tmpColor <ccc>};
+								#format curLength {%L} $tmpString;
+								#format tmpLength {%L} $item[key];
+								#math tmpNumber {$tmpLength + $curLength};
+								#if {$tmpNumber > $tmpBar} {
+									#math tmpBar {$tmpBar + 40};
+									#cat tmpString {\n$tmpColor          $item[key]<088>};
+								} {
+									#cat tmpString {$tmpColor $item[key]<088>};
+								};
+								#math tmpIter {$tmpIter + 1};
+							};
+						};
+						#format tmpLength {%L} $tmpString;
+						#if {$tmpLength > 15} {
+							#format tmpString {%-50s} {$tmpString};
+							#draw scroll scale tile 1 1 1 1 {$tmpString};
+							#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+						};
+					};
+				};
+				#format tmpString {%-50s} {<dbc>-+--+-  <dfc>summon_select<088> <bff>monster<088> <dbc>to make your choice!};
+				#echo {$tmpString     <dbc>-+--+-<088>};
+				#if $summon_select[active] {
+					#format tmpString {%-50s} {<dbc>-+--+-  <dfc>summon_select<088> <bff>off<088> <dbc>to turn off.};
+					#echo {$tmpString     -+--+-<088>};
+					#format tmpString {%-50s} {<dbc>-+--+-  <dfc>summon_select<088> <bff>clear<088> <dbc>to clear selection.};
+					#echo {$tmpString     -+--+-<088>};
+					#format tmpString {%-50s} {<dbc>-+--+-  <bff>$summon_select[key]<088> <dbc>is currently selected.};
+					#echo {$tmpString     -+--+-<088>};
+				};
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+			} {
+				#local tmpList {};
+				#var tmpList $summon_types;
+				#list tmpList indexate key;
+				#list tmpList filter {%0};
+				#if {&tmpList[] > 0} {
+					#format tmpString {%n} {$tmpList[1][name]};
+					#var summon_select[active] 1;
+					#var summon_select[ms] $tmpList[1][ms];
+					#var summon_select[key] $tmpList[1][key];
+					#var summon_select[name] $tmpList[1][name];
+					checkStrategy {summon_select} {#NOP} {strategy summon_select};
+					#echo {<dbc>-+--+-  You have selected <dfc>$tmpString.<088>  <dbc>Go forth child! -+--+-<088>};
+				} {
+					#echo {<dbc>-+--+-  No summon named %0 found.  Please check spelling or the list again.    <dbc>-+--+-<088>};
+				};		
+			};
+		};
+	};
 };
 
 #alias _prepSummonString {
@@ -20,7 +154,7 @@
 
 #alias summon_str {
 	#foreach $my[summons][%*] item {
-		#format lowerName {%l} $item[keyName];
+		#format lowerName {%l} $item[key];
 		#loop 1 $item[count] index {
 			cast giant strength on $lowerName $index;
 		};
@@ -41,26 +175,26 @@
 				#var tempName &1;
 				#list tempName explode { };
 				#format summon_name {%n} {$tempName[&tempName[]]};
-				#var keyName $summon_name;
+				#var key $summon_name;
 		};
 		#regex {$summonList[$index]} {~} {#var summon_tanking 1} {#var summon_tanking 0};
 		#regex {$summonList[$index]} {!} {#var summon_haste 1} {
 			#var summon_haste 0;
 			checkStrategy {summon_haste} {
 				#NOP -- We can't haste phantasmal killer or other illusions;
-				#if {"$keyName" == "Something"} {#NOP} {#var summon_renew_haste 1}};
+				#if {"$key" == "Something"} {#NOP} {#var summon_renew_haste 1}};
 		};
 		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
 			#var summon_mf 0;
 			checkStrategy {summon_mf} {#var summon_renew_mf 1};
-			#if {"$keyName" == "Something"} {
+			#if {"$key" == "Something"} {
 				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something}};
 		};
 
 		#var found_summon 0;
 		#list my[summons] {size} {tempSize};
 		#loop 1 $tempSize item {
-			#if {"$my[summons][${item}][keyName]" == "$keyName"} {#var found_summon 1;#var itemIndex $item};
+			#if {"$my[summons][${item}][key]" == "$key"} {#var found_summon 1;#var itemIndex $item};
 		};
 
 		#if {$found_summon} {
@@ -70,7 +204,7 @@
 			#var my[summons][${itemIndex}][mf] $summon_mf;
 			#if $summon_tanking {#var my[summons][${itemIndex}][tanking] 1};
 		} {
-			#list my[summons] add {{{keyName} {$keyName} {name} {$summon_name} {haste} {$summon_haste} {mf} {$summon_mf} {count} {1} {tanking} {$summon_tanking}}};
+			#list my[summons] add {{{key} {$key} {name} {$summon_name} {haste} {$summon_haste} {mf} {$summon_mf} {count} {1} {tanking} {$summon_tanking}}};
 		};
 	};
 
@@ -85,10 +219,10 @@
 	
 	#foreach $my[summons][%*] item {
 		#NOP -- If phantasmal killer is in the summon list, we can update the mob status report;
-		#if {"$item[keyName]" == "Something"} {#var mob[phantasmal] 1};
+		#if {"$item[key]" == "Something"} {#var mob[phantasmal] 1};
 
 		#NOP -- Check if your golem is out;
-		#if {"$item[keyName]" == "Golem"} {#var my[golem][active] 1};
+		#if {"$item[key]" == "Golem"} {#var my[golem][active] 1};
 
 		#unvar summonItemName;
 		#if $item[mf] {#var summonItemName <eab>};
@@ -200,7 +334,6 @@
 };
 
 #var summons[summoned] 0;
-#var my[summon_selected] An Undead Wraith;
 #action {^You wave your hands calling forth summoning magics and draw %*\n%a (100%) into the room!$} {
 	#var summonSCA 0;
 	#math summons[summoned] {$summons[summoned] + 1};
@@ -208,16 +341,22 @@
 	#format tmp2 {%p} {%2};
 	#var summonCalled {$tmp1 $tmp2};
 	#replace summonCalled {\n} { };
+	#format summonCalled {%l} {$summonCalled};
 	checkStrategy {summon_select} {
-		#if {"$my[summon_selected]" != ""} {
-			#if {"$my[summon_selected]" != "$summonCalled"} {
+		#if {"$summon_select[name]" != ""} {
+			#format tmpStr {%l} {$summon_select[name]};
+			#regex {"$summonCalled"} {"%*$tmpStr%*"} {
 				#list summonCalled {explode} { };
-				#format summonShort {%l} $summonCalled[&summonCalled[]];
-				shoo $summonShort;
+				#delay 1 {#if !$$summonSCA {say $tmpStr, you are now in group summons;#var summonSCA 0};};
 			} {
 				#list summonCalled {explode} { };
-				#format summonShort {%l} $summonCalled[&summonCalled[]];
-				#delay 1 {#if !$summonSCA {say $summonShort, you are now in group summons;#var summonSCA 0};};
+				#list summonCalled {size} {tmpLength};
+				#local summonDismiss $$summonCalled[$tmpLength];
+				#var tmpLength 0;
+				#format tmpLength {%L} $summonDismiss;
+				#delay 3 {
+					#if {$tmpLength > 0} {say $summonDismiss, begone};
+				};
 			};
 		};
 	};
@@ -225,8 +364,7 @@
 
 #NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
 #NOP -- If not, then it was manually summoned and needs to be assigned to 'summons' group so casting haste/mf on the group works;
-#var summonSCA 0;
-#action {^You are creating a summon, with:} {#var summonSCA 1};
+#action {^You are creating a summon, with:} {#var summonSCA 1} {2};
 
 
 #class {guild_summoner} close
