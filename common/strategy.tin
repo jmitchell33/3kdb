@@ -266,14 +266,17 @@
         };
 
         checkStrategy {summon_select} {
-            #if {!$idle_flag} {
-                #local tmpCount 0;
-                #local index {};
-                #loop 1 &my[summons][] index {
-                    #if {"$my[summons][$index][keyName]" == "Golem"} {#NOP} {#math tmpCount {$tmpCount + $my[summons][$index][count]}};
+            #if {!$idle_flag && $summon_select[active]} {
+                #local tmpSummCount 0;
+                #local tmpSummIndex 1;
+                #loop 1 &my[summons][] tmpSummIndex {
+                        #if {"$$my[summons][$tmpSummIndex][key]" == "Golem"} {#NOP} {#math tmpSummCount {$tmpSummCount + $$my[summons][$tmpSummIndex][count]}};
                 };
-                #if {$tmpCount < 4} {
-                    cast monster summoning 10 as wraith;
+
+                #echo {summ count is $tmpSummCount};
+                #if {$tmpSummCount < 4} {
+                    #echo {not enough summons - summoning more};
+                    cast monster summoning $summon_select[ms] as $summon_select[key];
                 };
             };
         };
