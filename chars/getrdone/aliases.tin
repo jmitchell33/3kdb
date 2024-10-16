@@ -1,30 +1,115 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#var pickle_farming 0;
+#var aoe_immo 0;
+
+
 #alias {_player_deadmanActions} {
     .pause;
 };
 
-#NOP -- MONK STUFF
-#alias {boot} {method serpent;stun;crit;chifocus thought};
-#alias {firethorn} {s;w;d;e;s;sw;sw;examine;search;get all;put all in bag;w;examine crack;search crack;get all;put all in bag;w;w;examine water;search water;examine snow;search snow;get all;i;put all in bag;e;examine water;search water;l;i;n;examine water;search water;get all;keep all;i;s;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle};
-#alias {firethorn2} {s;w;d;e;s;sw;sw;examine;search;get all;put all in bag;w;examine crack;search crack;get all;put all in bag;w;w;w;examine snow;search snow;get all;put all in bag;e;n;examine water;search water;get all;keep all;i;s;e;jump get icicle;w;jump get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;jump and get icicle;put sharp icicle in bag;s};
-#NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
+#alias k {
+    kill %1;
+}
 
-#NOP --KNIGHT TOUR GAMES
-#alias {knight6} {play;start;dt6}
-#alias {knight8} {play;start;dt8}
-#alias {winaxe} {play;start;#5 throw axe}
+#alias {.mob_kill_action} {
+    kill $mob[target];
+};
 
-#NOP --NUMPAD ON OR OFF
-#alias {numoff} {#class numpad kill}
-#alias {numon} {#read chars/brianna/numpad.tin}
+#alias {psi_donate} {
+  #var psi_donate 1;
+  #map get roomvnum donate_go_back;
+  fold reality;
+};
 
-#NOP -- QUICK WALKS TO ROOMVNUMS
-#alias {wa} {#map run %1}
+#alias {refill_apump} {
+  fold reality;d;n;e;e;e;ne;e;deposit all;withdraw 50000;
+  w;sw;w;w;w;w;w;w;refill;
+  e;e;e;e;e;e;ne;e;deposit all;withdraw 25000;
+  fold reality;
+};
 
-#NOP -- SEARCHING & EXAMINING
-#alias {x} {exa}
+#NOP --- Botting configurations;
 
-#class {player_aliases} {close}
+#alias {.pre_fight_check} {
+  #var _bb 0;
+  #var _dm 0;
+};
+
+
+
+#NOP --- Psicorps power configurations;
+
+#alias {defense} {
+  #var psiwield 1;
+  #var psiwield_1 shard;
+  #var psiwield_2 shard 2;
+  #var use_expertise 0;
+  #var combat {};
+
+  #nop -- Defense buffs;
+
+  #var combat[ab] 0;
+  #var combat[Cp] 0;
+  #var combat[Eb] 0;
+  #var combat[IB] 0;
+  #var combat[IV] 0;
+  #var combat[Ib] 0;
+  #var combat[Iv] 0;
+  #var combat[Vg] 0;
+  #var combat[Vr] 0;
+  #var combat[Vv] 0;
+
+  #nop -- Combat buffs;
+
+  #var combat[AA] 0;
+  #var combat[Bo] 0;
+  #var combat[CP] 0;
+  #var combat[pf] 0;
+  #var combat[Sj] 0;
+
+  #nop -- Combat powers;
+
+  #var combat[bb] 0;
+  #var combat[bc] 0;
+  #var combat[BC] 0;
+  #var combat[dm] 0;
+};
+
+#alias {attack} {
+  #var psiwield 1;
+  #var psiwield_1 shard;
+  #var psiwield_2 shard 2;
+  #var use_expertise 0;
+  #var combat {};
+
+  #nop -- Defense buffs;
+
+  #var combat[Vr] 0;
+  #var combat[Eb] 0;
+  #var combat[Cp] 0;
+  #var combat[Iv] 0;
+  #var combat[IV] 0;
+  #var combat[Ib] 0;
+  #var combat[IB] 0;
+  #var combat[Vg] 1;
+  #var combat[Vv] 0;
+  #var combat[ab] 0;
+
+  #nop -- Combat buffs;
+
+  #var combat[AA] 1;
+  #var combat[Ac4] 0;
+  #var combat[Bo] 1;
+  #var combat[Cg] 0;
+  #var combat[CP] 1;
+  #var combat[Sj] 1;
+  #var combat[pf] 1;
+
+  #nop -- Combat powers;
+
+  #var combat[bc] 0;
+  #var combat[BC] 1;
+  #var combat[E] 1;
+};

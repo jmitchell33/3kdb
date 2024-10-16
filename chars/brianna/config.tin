@@ -5,6 +5,24 @@
 #alias {.pre_fight_check} {#nop};
 #alias {.pre_bot_check} {#nop};
 
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+} {1};
+
+#action {[%w reconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+} {1};
+
+#action {[%w disconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+} {1};
 
 
 #alias .mob_kill_action {

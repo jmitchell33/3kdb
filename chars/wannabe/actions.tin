@@ -9,11 +9,33 @@
     };
 };
 
+#NOP -- auto update linktell list;
+#action {[%w enters the game]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#action {[%w reconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#action {[%w disconnects]} {
+    #if {!$idle_flag} {
+        mywhosync
+    };
+};
+
+#class {player_actions} {close}
+
 #NOP -- MAGE ACTIONS;
+#action {You say: golem, ibc} {say golem, you are now in group summons;say golem, defend always};
 #action {A Baller the spherical black 8-ball hands something to Wannabe.} {keep all};
 #action {Brianna leaves into the game.} {press start};
 #action {Brianna leaves by pausing their game.} {pause game};
-#action {whispers to you: fan} {#if {!$idle_flag} {cast corpse blast;cast corpse blast}};
+#action {whispers to you: fan} {#if {!$idle_flag} {cast spell tap on corpse;cast corpse blast}};
 #action {dealt the killing} {cast spell tap on corpse};
 #action {Responding to Brianna's call for support} {cast secure shelter;#delay 8 {out}};
 #action {The coffin expels your selected corpse!} {cast corpse blast};
@@ -22,43 +44,21 @@
 #action {Wannabe kicks you. OUCH!} {#if {!$idle_flag} {shoo}};
 #action {Your armor spell has dissipated!} {cast armor};
 #action {Your shield is shattered} {cast shield};
-#action #LINE GAG {is already hasted.};
 #action {Poisonous Snake (100%) into the room!} {shoo snake};
+#action {I'll be give'n this back to ya.} {drop charm;give charm to lucky};
+#action #LINE GAG {is already hasted.};
+#action #LINE GAG {Cast a implosion at whom?};
+#action #LINE GAG {You already have a globe spell functioning.};
+#GAG {That is not here or it is uninteresting.}
+#GAG {Cast a prismatic spray at whom?};
+#GAG {Cast a implosion at whom?};
 
-#NOP -- MAGE ALIASES;
-#alias {ha} {cast haste on summons};
-#alias {sat} {uncooler corpse;cast corpse blast};
-#alias {scon} {cast remove summon config as 1;cast summon config as monster summoning 3#Wererat#3#500#15#defend#MeMbRaIn};
-
-#NOP -- COUPLE LOGIN TRIGS
+#NOP -- COUPLE LOGIN TRIGS;
 #action {unload room} {deadman 200};
 
 #NOP -- auto update linktell list;
 #action {[%w enters the game]} {
     mywhosync
-};
-
-#NOP --NUMPAD ON OR OFF
-#alias {numoff} {#class numpad kill}
-#alias {numon} {#read chars/brianna/numpad.tin}
-
-#NOP -- setup contingency with defenses;
-#alias {setup_c} {
-    cast contingency as armor#cast armor;
-    cast contingency as shield#cast magnificent shield;
-    cast contingency as major globe#cast major globe;
-    cast contingency as stoneskin#cast stoneskin;
-    #delay 2 {prots_armor};
-    #delay 4 {prots_ms};
-    #delay 6 {prots_mg};
-    #delay 8 {prots_pfe};
-    #delay 10 {prots_mb}
-};
-
-#NOP -- clear contingency;
-#alias {clear_c} {
-    #10 {cast remove contingency as 1};
-    clear_prots
 };
 
 #class {player_actions} {close}
