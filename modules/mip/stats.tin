@@ -121,6 +121,7 @@
 			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
 			#CASE {"fremen"}        {.mipProcessGlineFremen {%1}};
+			#CASE {"priest"}        {.mipProcessGlinePriest {%1}};
 		}
 	};
 };
@@ -155,6 +156,8 @@
 		#REGEX {$mip[gline][1]}	{Gem:%d\%}  		{#VAR {my[gem]}				   {&1}	}	{#VAR {my[gem]}					{0}	};
 		#REGEX {$mip[gline][1]}	{MC:%d}				{#VAR {my[mental_cognition]}   {&1}	}	{#NOP};
 		#REGEX {$mip[gline][1]}	{*I%d*}				{#VAR {my[immersion][rounds]}  {&1}	}	{#VAR {my[immersion][rounds]}	{0}	};
+		#REGEX {$mip[gline][1]} {ST:%d\/%d}			{#VAR {my[spelltap][bonus]}    {&1};
+                                                     #VAR {my[spelltap][corpses]}  {&2}};
 
 		#format hpbar_prots_active {%L} {${hpbar_prots}};
 		#NOP #if {$hpbar_prots_active > 0} {#NOP} {	;
@@ -365,6 +368,15 @@
 	};
 };
 
+#ALIAS {.mipProcessGlinePriest} {
+	#IF {%1 == 1} {
+		#NOP;
+	}; #ELSEIF {%1 == 2} {
+		#NOP;
+	}; #ELSE {
+		#ECHO {<171> Invalid Gline Number <088>};
+	};
+};
 
 #ALIAS {.mipProcessGlineBard} {
 	#IF {%1 == 1} {

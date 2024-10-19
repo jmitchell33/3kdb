@@ -11,6 +11,17 @@
 	#replace hpbar_gline_2 {    } {  };
 	#replace hpbar_gline_2 {%* <869>Chi} {<869>Chi};
 	#cat hpbar_gline_2 {  <839>GXP<099>: <eaa>$my[monk][gxp] <099>};
-}
+
+	#list temp clear;
+
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Chi:$gp1/$gp1_max  Mind:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Chi:$my[gp1][graph] Mind:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {$hpbar_gline_1};
+	#list temp add {$hpbar_gline_2};
+	#list temp add {<eeb>Gxp $my[gxp][str_time]: <ffe>$my[gxp][str_t30_per_hr] <dea>T-30 <dfe>|<ffe>$my[gxp][str_average_per_hr]<dea>/Hr <dfe>| <ffe>$my[gxp][last_round]<dea>/Rnd <dfe>| <ffe>$my[gxp][str_total] <dea>Total<088>};
+	#var hpbar[prompt] $temp;
+};
+
+
 
 #class {guild_miphp} close;

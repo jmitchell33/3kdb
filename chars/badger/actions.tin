@@ -1,24 +1,34 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
+#NOP -- switch mech from assault to defend;
+#action {dealt the killing blow} {
+    #if {!$idle_flag && $mechswitchtoggle} {
+        #send {support defend}
+    };
+} {1};
+
+#NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
+#act {^-M-_A Colossal Inductor} {(immortality} {1};
+
 #NOP -- auto update linktell list;
 #action {[%w enters the game]} {
     #if {!$idle_flag} {
         mywhosync
     };
-};
+} {1};
 
 #action {[%w reconnects]} {
     #if {!$idle_flag} {
         mywhosync
     };
-};
+} {1};
 
 #action {[%w disconnects]} {
     #if {!$idle_flag} {
         mywhosync
     };
-};
+} {1};
 
 #NOP -- hurinteons tome;
 #action {Hurinteon's tome vibrates and flashes brightly for a moment.} {

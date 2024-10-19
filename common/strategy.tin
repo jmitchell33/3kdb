@@ -155,6 +155,8 @@
 #list strategyList add {{{guild} {psicorps} {name} {rpain} {active} {0} {description} {Psicorps: Recall Pain}}};
 #list strategyList add {{{guild} {psicorps} {name} {ragony} {active} {0} {description} {Psicorps: Recall Agony}}};
 #list strategyList add {{{guild} {psicorps} {name} {demoralize} {active} {0} {description} {Psicorps: Demoralize}}};
+#list strategyList add {{{guild} {monk} {name} {palm} {active} {0} {description} {Monk: Palm}}};
+#list strategyList add {{{guild} {monk} {name} {pressure} {active} {0} {description} {Monk: Pressure}}};
 #list strategyList indexate name;
 
 #alias checkStrategy {
@@ -175,6 +177,21 @@
     #if {!$strategy_found && "%3" !== ""} {
         #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %3<088>}};
         %3;
+    };
+};
+
+#if {"$guild" == "monk"} {
+    #alias {_strategy_monk} {
+        #if {!$idle_flag} {
+            #if {$mip[round] == 1} {
+                #var mob[palm] 0;
+                #var mob[pressure] 0;
+            };
+            #if {$action_round < $mip[round]} {
+                checkStrategy {palm} {#if {!$mob[palm] && $my[monk][ae][current] > 0} {palm}};
+                checkStrategy {pressure} {#if {!$mob[pressure]} {pressure}};
+            };
+        };
     };
 };
 
@@ -518,6 +535,7 @@
         #if {"$guild" == "mage"} {_strategy_mage};
         #if {"$guild" == "juggernaut"} {_strategy_juggernaut};
         #if {"$guild" == "fremen"} {_strategy_fremen};
+        #if {"$guild" == "monk"} {_strategy_monk};
     };
 };
 
