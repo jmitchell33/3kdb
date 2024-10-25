@@ -5,7 +5,8 @@
 #action {You have no pants.} {
     #if {!$idle_flag} {
         unwrap 1;
-        offer
+        envelop corpse;
+        collect dna from corpse
     };
 };
 
@@ -27,13 +28,6 @@
         mywhosync;
     };
 } {1};
-
-#NOP -- heal other players;
-#action {^%1 gives you an air-five!$} {#format {heal_target} {%l} {%1};radiance $heal_target};
-#action {^%1 gives you a high-five!$} {#format {heal_target} {%l} {%1};invigorate $heal_target};
-
-
-
 
 
 
