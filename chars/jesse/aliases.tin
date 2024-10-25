@@ -9,6 +9,11 @@
     };
 };
 
+#alias {gxp_reset} {
+    #var total_rounds 0;
+    #var total_gxp 0;
+};
+
 #alias sackit {#loop 1 20 i {put all in bag $i};};
 
 #NOP -- turn gags on;
@@ -24,6 +29,8 @@
 
 #NOP -- reforge with mage forge;
 #alias {refmage2} {
+    reforger recover;
+    keep reforger kit;
     unkeep forge;
     drop forge;
     refd;
@@ -60,23 +67,23 @@
 #NOP -- solo kill trig;
 #alias {mycorpsetrig} {
     corpsetrig-clear;
-    corpsetrig+ wrap;
-    corpsetrig+ offer;
-    corpsetrig+ offer;
+    corpsetrig+ envelop corpse;
+    corpsetrig+ envelop corpse;
+    corpsetrig+ collect dna from corpse;
+    corpsetrig+ collect dna from corpse;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
-    corpsetrig+ crafting;
-    corpsetrig+ szCaps;
-    corpsetrig+ szGreenCap
+    corpsetrig+ crafting
 };
 
 #NOP -- solo kill trig without get all;
 #alias {mycorpsetrig-noget} {
     corpsetrig-clear;
-    corpsetrig+ wrap;
-    corpsetrig+ offer;
-    corpsetrig+ offer;
-    corpsetrig+ divvy;
+    corpsetrig+ envelop corpse;
+    corpsetrig+ envelop corpse;
+    corpsetrig+ collect dna from corpse;
+    corpsetrig+ collect dna from corpse;
+    corpsetrig+ divvy
 };
 
 #alias {corpseoff} {

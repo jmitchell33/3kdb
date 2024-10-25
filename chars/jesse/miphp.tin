@@ -1,23 +1,12 @@
 #class {miphp} {kill}
 #class {miphp} {open}
 
-#NOP -- override default miphp;
-#var guild_miphp 0;
 
 #alias {_player_miphp} {
-
-	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
-
-	#replace hpbar_gline_2 {    } {  };
-
-    #list temp clear;
-	#list temp add {<eeb>HP:<ffe>$my[hp][current]/$my[hp][max] <eeb>SP:<ffe>$my[sp][current]/$my[sp][max] <eeb>Mana:<ffe>$my[gp1][current]/$my[gp1][max]  <eeb>Piety:<ffe>$my[gp2][current]/$my[gp2][max]  <eeb>E:<ffe>$ehealth<088>};
-	#list temp add {<eeb>H:$my[hp][graph] <eeb>S:$my[sp][graph] <eeb>Mana:$my[gp1][graph] <eeb>Piety:$my[gp2][graph] <eeb>E:$enemy[graph]<088>};
-	#list temp add {<fee>PROT: <faa>$my[effects][protection] <fee>CL: [<fcd>$my[priest][beseech]<fee>/<fcd>$my[priest][cleansing][reset]<fee>] <fee>GXP%: [<aad>$my[priest][gxp]%<fee>] <fee>(DHP: <dea>$my[hp][change] <fee>DSP: <dea>$my[sp][change] <fee>DMA: <dea>$my[mana][change]<fee>)<088>};
-	#list temp add {$hpbar_gline_2 <fee>FAV: <bfc>$my[priest][favor] <fee>MEND: <dbf>$my[priest][mend]<088>};
-	#list temp add {<fee>VEST: <faa>$my[effects][vestment] <fee>ELE: <faa>$my[effects][protection_from_elements] <fee>POW: <faa>$my[effects][protection_from_power] <fee>BLESS: <faa>$my[effects][bless] <fee>BARK: <faa>$my[effects][barkskin] <fee>HASTE: <faa>$my[effects][haste] <fee>BENE: <faa>$my[effects][bene] <fee>INVIN: <faa>$my[effects][invin]<088>};
-	#list temp add {<dcb>Total Gxp: <dea>$total_gxp <dcb>Gxp/Rnd: <dea>$my[round_gxp] <fee>(<dea>$average_total_gxp <dcb>Avg. / <dea>$total_rounds <dcb>Rounds<fee>)<088>};
-    #var hpbar[prompt] $temp;
+    #NOP
 };
+
+
+
 
 #class {miphp} {close}
