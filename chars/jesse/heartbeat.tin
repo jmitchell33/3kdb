@@ -5,7 +5,7 @@
 #var corpse_use 200;
 
 #alias {_player_heartbeat} {
-    #if {!$idle_flag && !$incombat} {
+    #if {!$idle_flag && "$incombat" == "1"} {
         #if {$my[perceptions][current] > 0} {
             #if !$my[perceptions][active] {perceive};
             #if {"${my[perceptions][active]}" === ""} {perceive};
