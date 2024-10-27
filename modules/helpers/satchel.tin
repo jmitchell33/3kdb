@@ -1,32 +1,35 @@
 #class helpers open
 
-#action {%1|%2|%3|%4|%5|%6|%7|%8|%9|} {
-    #format {lower} {%l} {%1};
-    #format {lower} {%p} {$lower};
-    #math {satchel_total} {%2};
-    #math {satchel_legendary} {%3};
-    #math {satchel_superior} {%4};
-    #math {satchel_good} {%5};
-    #math {satchel_average} {%6};
-    #math {satchel_poor} {%7};
-    #math {satchel_crude} {%8};
-    #math {satchel_worthless} {%9};
+#action {^Component Name            |   T |  L |  S |  G |  A |  P |  C |  W |} {
+    #action {%1|%2|%3|%4|%5|%6|%7|%8|%9|} {
+        #format {lower} {%l} {%1};
+        #format {lower} {%p} {$lower};
+        #math {satchel_total} {%2};
+        #math {satchel_legendary} {%3};
+        #math {satchel_superior} {%4};
+        #math {satchel_good} {%5};
+        #math {satchel_average} {%6};
+        #math {satchel_poor} {%7};
+        #math {satchel_crude} {%8};
+        #math {satchel_worthless} {%9};
 
-    #list temp_satchel add {{
-        {name} {$lower}
-        {total} {$satchel_total}
-        {legendary} {$satchel_legendary}
-        {superior} {$satchel_superior}
-        {good} {$satchel_good}
-        {average} {$satchel_average}
-        {poor} {$satchel_poor}
-        {crude} {$satchel_crude}
-        {worthless} {$satchel_worthless}
-    }};
-};
+        #list temp_satchel add {{
+            {name} {$lower}
+            {total} {$satchel_total}
+            {legendary} {$satchel_legendary}
+            {superior} {$satchel_superior}
+            {good} {$satchel_good}
+            {average} {$satchel_average}
+            {poor} {$satchel_poor}
+            {crude} {$satchel_crude}
+            {worthless} {$satchel_worthless}
+        }};
+    } {2};
+} {2}
 
 #alias update_satchel {
     #list temp_satchel clear;
+    #unaction {%1|%2|%3|%4|%5|%6|%7|%8|%9|};
     #send {stashlist};
     #line oneshot #action {You have %d/%d items in your satchel.} {#var craft[satchel] $temp_satchel};
 };

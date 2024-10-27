@@ -182,6 +182,7 @@
     .mobNameClean %1;
     #var mobIndex 1;
     #var botTarget 0;
+    #var mobFamiliar 0;
 
     #NOP -- Auto ask/solve/return missions;
     #regex {%1} {<?>} {mission ask};
@@ -192,75 +193,101 @@
     #var tmpHealth 100;
     #regex {$mob[long]} {(%d%)} {#var tmpHealth &1};
 
-    #if $bot[active] {
-        #foreach $bot[mobs][%*] botmob {
-            #regexp {$mob[long]} {$botmob[long]} {
-                #var bot[foundmob] 1;
-                #var mob[target] $botmob[target];
-                #var botTarget 1;
-            };
-        };
-        #undelay {bot_kick};
-        #undelay {bot_restart};
-    } {
-        #var mob[target] $mob[autoName];
-    };
+    #NOP -- If the mob is a familiar, we put it into a room[familiars];
+    #NOP -- There's a risk of this grouping mobs that aren't familiars (like skeleton, wight for necro undeads);
+    #regex {$mob[long]} {^%w the Skeleton$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Greesh$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Zombie$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Wight$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Ghoul$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Heucuva$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Valpur$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Tholen$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Ghast$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Bayen$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Manshi$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Quarin$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Bolwyn$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Mohrg$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Grimare$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^%w the Valithyn$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^$my[familiar].$} {#var mobFamiliar 1};
 
-    #NOP -- Separate mage summons into their own group/exclude from room[mobs];
-    #regex {$mob[long]} {%* [summons] (%d%)%*} {
-        #var summonIndex 1;
-        #if $debug[room] {#echo {<cfa>DEBUG ROOM: Summon found &0}};
-        #format tmpSummonName {%p} {&0};
-        #replace tmpSummonName { [summons]%*} {};
-        #var summonTankIndex 1;
-        
-        #NOP -- We don't want to assign the Golem to tanking since it's damage drops if it's tanking;
-        #var skipSummon 0;
-        
-        #if {$foundTimes == 1} {
-            #if {&room[summons] > 0} {
-                #var tmpFound 0;
-                #foreach $room[summons][%*] tmpItem {
-                    #if {"$tmpItem[name]" == "$tmpSummonName"} {
-                        #math summonIndex {$tmpItem[index] + 1};
-                    };
+    #if $mobFamiliar {
+        #list room[familiars] add {{{name} {$mob[long]}}};
+    } {
+        #if $bot[active] {
+            #foreach $bot[mobs][%*] botmob {
+                #regexp {$mob[long]} {$botmob[long]} {
+                    #var bot[foundmob] 1;
+                    #var mob[target] $botmob[target];
+                    #var botTarget 1;
                 };
-                #list room[summons] add {{{name} {$tmpSummonName} {health} {&2} {index} {$summonIndex}}};
             };
+            #undelay {bot_kick};
+            #undelay {bot_restart};
         } {
-            #loop 1 $foundTimes tmpIndex {
-                #list room[summons] add {{{name} {$tmpSummonName} {health} {&2} {index} {$tmpIndex}}};
-            };
+            #var mob[target] $mob[autoName];
         };
 
-        #if $summonTankCheck {
-            #regex {"$tmpSummonName"} {"%*Golem%*"} {#var skipSummon 1};
-            #if !$skipSummon {
-                #var summonTankIndex 1;
-                #foreach $summonTankList[%*] item {
-                    #if {"$item[name]" == "$tmpSummonName"} {#math summonTankIndex {$summonTankIndex + 1}};
-                };
-                #list summonTankList add {{{name} {$tmpSummonName} {health} {&2} {index} {$summonTankIndex}}};
-            };
-        };
-    } {
-        #NOP -- THIS SECTION HANDLES MOBS OTHER THAN MAGE SUMMONS;
-        #if {$foundTimes == 1} {
-            #if {&room[mobs] > 0} {
-                #var tmpFound 0;
-                #foreach $room[mobs][%*] tmpItem {
-                    #if {"$tmpItem[name]" == "$mob[long]"} {
-                        #math mobIndex {$tmpItem[index] + 1};
+        #NOP -- Separate mage summons into their own group/exclude from room[mobs];
+        #regex {$mob[long]} {%* [summons] (%d%)%*} {
+            #var summonIndex 1;
+            #if $debug[room] {#echo {<cfa>DEBUG ROOM: Summon found &0}};
+            #format tmpSummonName {%p} {&0};
+            #replace tmpSummonName { [summons]%*} {};
+            #var summonTankIndex 1;
+            
+            #NOP -- We don't want to assign the Golem to tanking since it's damage drops if it's tanking;
+            #var skipSummon 0;
+            
+            #if {$foundTimes == 1} {
+                #if {&room[summons] > 0} {
+                    #var tmpFound 0;
+                    #foreach $room[summons][%*] tmpItem {
+                        #if {"$tmpItem[name]" == "$tmpSummonName"} {
+                            #math summonIndex {$tmpItem[index] + 1};
+                        };
                     };
+                    #list room[summons] add {{{name} {$tmpSummonName} {health} {&2} {index} {$summonIndex}}};
                 };
-                #list room[mobs] add {{{autoName} {$mob[autoName]} {name} {$mob[long]} {health} {$tmpHealth} {index} {$mobIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+            } {
+                #loop 1 $foundTimes tmpIndex {
+                    #list room[summons] add {{{name} {$tmpSummonName} {health} {&2} {index} {$tmpIndex}}};
+                };
+            };
+
+            #if $summonTankCheck {
+                #regex {"$tmpSummonName"} {"%*Golem%*"} {#var skipSummon 1};
+                #if !$skipSummon {
+                    #var summonTankIndex 1;
+                    #foreach $summonTankList[%*] item {
+                        #if {"$item[name]" == "$tmpSummonName"} {#math summonTankIndex {$summonTankIndex + 1}};
+                    };
+                    #list summonTankList add {{{name} {$tmpSummonName} {health} {&2} {index} {$summonTankIndex}}};
+                };
             };
         } {
-            #loop 1 $foundTimes tmpIndex {
-                #list room[mobs] add {{{autoName} {$mob[autoName]} {name} {$mob[long]} {health} {$tmpHealth} {index} {$tmpIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+            #NOP -- THIS SECTION HANDLES MOBS OTHER THAN MAGE SUMMONS;
+            #if {$foundTimes == 1} {
+                #if {&room[mobs] > 0} {
+                    #var tmpFound 0;
+                    #foreach $room[mobs][%*] tmpItem {
+                        #if {"$tmpItem[name]" == "$mob[long]"} {
+                            #math mobIndex {$tmpItem[index] + 1};
+                        };
+                    };
+                    #list room[mobs] add {{{autoName} {$mob[autoName]} {name} {$mob[long]} {health} {$tmpHealth} {index} {$mobIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+                };
+            } {
+                #loop 1 $foundTimes tmpIndex {
+                    #list room[mobs] add {{{autoName} {$mob[autoName]} {name} {$mob[long]} {health} {$tmpHealth} {index} {$tmpIndex} {botTarget} {$botTarget} {botName} {$mob[target]}}};
+                };
             };
         };
-    };
+    }
+
+    
 } {2};
 
 #class common_room close;

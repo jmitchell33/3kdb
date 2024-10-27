@@ -1,11 +1,10 @@
 #class {bot} {open}
 
 #var {area} {Night of Colour};
-#var check_death 1;
-#var check_room 1;
+#var check_room 0;
 
-#var bot_message_1 '---- NIGHT OF COLORS STEPPER ----';
-#var bot_message_2 '---- HIGH VALUE TARGET MODE  ----';
+#var bot_message_1 '---- NIGHT OF COLORS STEPPER     ----';
+#var bot_message_2 '--- HIGH VALUE TARGETS ONLY ----';
 
 #var {bot[path]} {n;n;w;n;n;n;s;s;s;s;s;s;sw;s;n;n;n;n;n;n;n;n;n;n;ne;climb;u;u;d;d;d;sw;s;s;s;s;s;w;n;s;s;s;s;s;sw;s;s;n;n;n;n;n;n;n;n;n;nw;s;s
 ;s;s;s;s;s;s;s;n;nw;n;n;n;n;n;n;sw;s;s;s;s;nw;n;n;sw;e;e;e;e;e;e;e;e;e;s;n;n;e;s;s;s;se;n;n;n;n;n;w;n;e;n;ne;s;s;s;s;s;s;s;s;s;se;n;n;n;n;n;n;n;n;n;n;n;s;e;n;n;s;s;s;s;s;s;s;s;s;s;s;ne;n;n;n;n;n;
@@ -15,38 +14,23 @@ n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;s
 #list botmobs add {{{long} {Furtive} {target} {furtive}}};
 #list botmobs add {{{long} {Bulwark} {target} {bulwark}}};
 #list botmobs add {{{long} {Impediment} {target} {impediment}}};
-
     
-#alias {.check_room} {
-    consider shadow;
-	#var foundshadow 0;
-    #act {^Monster class: Really Big (18).$} {
-        #undelay bot_kick;
-        #var bot[walk] 0;
-        #var bot[foundmob] 1;
-        #var mob[target] shadow;
-        #var mob[foundtimes] 1;
-        kill $mob[target];
-        #unaction {^Monster class: Really Big (18).$}
-    };
-	#delay {.4} {#if {!$foundshadow && !$bot[foundmob]} {#path walk;#var bot[walk] 1;};}
-}
 
 #act {^-i-{White web}} {
 	#if {"%1" == "White web" && $corpses[total] > 10} {
         #var bot[foundobject] 1;#var object_action {shake web}
     } {
-        #path walk;.bot
+        .botStep
     };
-} {3}
+} {1};
 
 #act {^Vibrations shake the web, and fade to stillness.} {
     #if {$bot[foundmob]} {
         #nop
     } {
-        #path walk;
-        .bot
-    }} {1};
+        .botStep
+    }
+} {1};
 
 #act {^Vibrations shake the web, the owner pounces!} {
     #undelay bot_kick;
@@ -57,8 +41,39 @@ n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;s
 	#var mob[long] Furtive;
 	kill furtive;
 	ewell;
-} {1}
+} {1};
+
+#ticker checkRolm {
+    #if {"$enemy[name]" == "Impediment"} {
+        #if {"$rolm[type]" != "Sword/Fire"} {
+            #action {Perform touch at whom?} {#unticker checkRolm} {1};
+            touch moon rune;
+            rolm fire;
+            #delay 1 {#unaction {Perform touch at whom?}};
+            corpsetrig+ touch sun rune;
+        };
+    };
+} {2};
+
+#if {"$guild" == "mage"} {
+    #ticker checkCasting {
+        #switch {"$enemy[name]"} {
+            #case {"Impediment"} {
+                #if {"$my[casting]" != "incinerate"} {cast perform as cast incinerate};
+            };
+            #case {"Mud"} {
+                #if {"$my[casting]" == "mind warp"} {cast perform as cast sunspear};
+            };
+            #case {"Snare"} {
+                #if {"$my[casting]" == "mind warp"} {cast perform as cast sunspear};
+            };
+            #default {
+                #if {"$my[casting]" != "mind warp"} {cast perform as cast mind warp};
+            };
+        };
+    } {2};
+};
 
 #class {bot} {close}
 
-#read common/bot/generic.tin;
+#read common/bot/generic.tin
