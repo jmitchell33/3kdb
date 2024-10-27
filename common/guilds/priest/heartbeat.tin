@@ -4,13 +4,16 @@
 
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
-		#if {"$my[effects][barkskin]" == "OFF"} {barkskin};
-		#if {"$my[effects][haste]" == "OFF"} {haste};
-		#if {"$my[effects][protection]" == "OFF"} {protection};
-		#if {"$my[effects][vestment]" == "OFF"} {vestment};
-		#if {"$my[effects][bene]" == "OFF"} {beneficence};
-		#if {"$my[effects][blade]" == "OFF"} {blade};
-		#if {"$my[effects][bless]" == "OFF"} {bless};
+		checkStrategy {bark} {#if {"$my[effects][barkskin]" == "OFF"} {barkskin}};
+		checkStrategy {haste} {#if {"$my[effects][haste]" == "OFF"} {haste}};
+		checkStrategy {pro} {#if {"$my[effects][protection]" == "OFF"} {protection}};
+		checkStrategy {vest} {#if {"$my[effects][vestment]" == "OFF"} {vestment}};
+		checkStrategy {bene} {#if {"$my[effects][bene]" == "OFF"} {beneficence}};
+		checkStrategy {blade} {#if {"$my[effects][blade]" == "OFF"} {blade}};
+		checkStrategy {blessing} {#if {"$my[effects][bless]" == "OFF"} {bless}};
+		checkStrategy {poe} {#if {"$my[effects][protection_from_elements]" == "OFF"} {proelem}};
+		checkStrategy {power} {#if {"$my[effects][protection_from_power]" == "OFF"} {propower}};
+		checkStrategy {invin} {#if {"my[effects][invin]" == "OFF"} {#NOP}};
 	};
 };
 

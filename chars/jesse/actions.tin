@@ -5,7 +5,8 @@
 #action {You have no pants.} {
     #if {!$idle_flag} {
         unwrap 1;
-        cast corpse blast
+        envelop corpse;
+        collect dna from corpse
     };
 };
 
@@ -14,18 +15,20 @@
     #if {!$idle_flag} {
         mywhosync;
     };
-};
+} {1};
 
 #action {[%w reconnects]} {
     #if {!$idle_flag} {
         mywhosync;
     };
-};
+} {1};
 
 #action {[%w disconnects]} {
     #if {!$idle_flag} {
         mywhosync;
     };
-};
+} {1};
+
+
 
 #class {player_actions} {close}

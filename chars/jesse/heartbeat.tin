@@ -3,21 +3,18 @@
 
 #var corpse_delay 1;
 #var corpse_use 200;
-#var pausedtoregen 1;
 
 #alias {_player_heartbeat} {
-    #if !$idle_flag {
-        #if {$my[super][current] > 0 && $my[super][reset] > 95} {
-            cast explosive release;
+    #if {!$idle_flag && "$incombat" == "1"} {
+        #if {$my[perceptions][current] > 0} {
+            #if !$my[perceptions][active] {perceive};
+            #if {"${my[perceptions][active]}" === ""} {perceive};
         };
-        #if {$bot[active] && $my[mental_cognition] < 85 && $pausedtoregen} {
-            .pause;
-            #var pausedtoregen 0;
-        };
-        #if {$bot[paused] && $my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-            .unpause;
-            ..;
-            #var pausedtoregen 1;
+        #if {$my[boost] > 0} {boost};
+        #if {$my[bloodrush] > 0} {bloodrush};
+        #if {$my[roots][current] > 0 && $my[brood] > 0} {
+            #if !$my[roots][active] {root broodlings};
+            #if {"${my[roots][active]}" === ""} {root broodlings};
         };
     };
 };

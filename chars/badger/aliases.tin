@@ -9,6 +9,34 @@
     };
 };
 
+#NOP -- turn on and off mech switching;
+#alias {mechon} {
+    mka+ mechswitch;
+    mka+ mechswitch;
+    #var mechswitchtoggle 1
+};
+
+#alias {mechoff} {
+    mka- mechswitch;
+    #var mechswitchtoggle 0
+};
+
+#NOP -- switch mech from defend to assault;
+#alias {mechswitch} {
+    #delay {6} {#send {support assault fire}}
+};
+
+#NOP -- turn gags on and off;
+#alias {gagson} {
+    gag+ combat_area;
+    gag+ combat_items
+};
+
+#alias {gagsoff} {
+    gag- combat_area;
+    gag- combat_items
+};
+
 #NOP -- jugger suit swapping;
 #alias {swapsuit %d} {
     enhance %1;

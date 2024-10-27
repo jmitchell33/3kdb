@@ -1,9 +1,13 @@
 #class {guild_hpbar} {kill}
 #class {guild_hpbar} {open}
 
-
 #NOP Jugger HP Bar Configuration;
-#NOP hp set HP:[$HP$] SP:[$SP$] S:[$STIM$%] HE:[$HEAT$%] HT:[$HITS$] M/C:[$NUKES$/$MNUKES$][$CP$/$MCP$][$RESET$%] G:$GXP$%$N$Ammo:[$AMMO$] SHP:[$SHP$] SNL:[$SNL$] SM:[$SMD$] SA:[$SMF$] SD:[$SAF$] E:$STATUS$;
+#NOP -- HPBAR For Copy/Paste Is;
+#NOP hp set HP:[$HP$] SP:[$SP$] S:[$STIM$%] HE:[$HEAT$%] HT:[$HITS$] M/C:[$NUKES$/$MNUKES$][$CP$/$MCP$][$RESET$%] G:$GXP$%$N$Ammo:[$AMMO$] [$SHP$] [$SNL$] [$SMD$] [$SMF$] [$SAF$] [$JJ$] [$LL$] [$TSTIM$] E:$STATUS$;
+
+#alias {setup_3kdb_hpbar} {
+	#send {hp set HP:[$HP$] SP:[$SP$] S:[$STIM$%] HE:[$HEAT$%] HT:[$HITS$] M/C:[$NUKES$/$MNUKES$][$CP$/$MCP$][$RESET$%] G:$GXP$%$N$Ammo:[$AMMO$] [$SHP$] [$SNL$] [$SMD$] [$SMF$] [$SAF$] [$JJ$] [$LL$] [$TSTIM$] E:$STATUS$};
+};
 
 #act {HP:\[{\d+}/{\d+}\] SP:\[{\d+}/{\d+}\] S:\[{\d+}\%\] HE:\[{\d+}\%\] HT:\[{\d+}\] M/C:\[{\d+}/{\d+}\]\[{\d+}/{\d+}\]\[{\d+}\%\] G:{[\d\.]+}\%} {
     #line gag;
@@ -22,19 +26,24 @@
 	#var {gxp}		{%13};    
 };
 
-#act {{^Ammo:\[(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?\] SHP:\[\s*(\d+)\] SNL:\[([\d\.]*)\] SM:\[(\w+)\] SA:\[(\w+)\] SD:\[(\w+)\] E:([\d\w]+)?\%?}} {
+#act {{^Ammo:\[(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?\] \[\s*(\d+)\] \[([\d\.]*)\] \[(\w+)\] \[(\w+(?:\s\w+)*)\] \[(\w+(?:\s\w+)*)\] \[(\w+)\] \[(\w+)\] \[\s*(\d+)\] E:([\d\w]+)?\%?}} {
     #line gag;
 	#var {ammo[1]}	{%2};
 	#var {ammo[2]}	{%3};
 	#var {ammo[3]}	{%4};
 	#var {ammo[4]}	{%5};
 	#var {ammo[5]}	{%6};
+	#format {ammo} {%d} {$ammo};
 	#var {shp}	{%7};
 	#var {snl}	{%8};
-	#var {smd}	{%9};
-	#var {saf}	{%10};
-	#var {sdf}	{%11};
-	#var {ehealth}	{%12};
+	#regex {%9} {De} {#var smd Defend};
+	#regex {%9} {As} {#var smd Assault};
+	#var {saf} {%10};
+	#var {sdf} {%11};
+	#var {jumpjets} {%12};
+	#var {lowlights} {%13};
+	#var {truckstim} {%14};
+	#var {ehealth}	{%15};
 	#var ammo_len &ammo[];
 };
 

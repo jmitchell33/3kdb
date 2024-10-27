@@ -155,6 +155,18 @@
 #list strategyList add {{{guild} {psicorps} {name} {rpain} {active} {0} {description} {Psicorps: Recall Pain}}};
 #list strategyList add {{{guild} {psicorps} {name} {ragony} {active} {0} {description} {Psicorps: Recall Agony}}};
 #list strategyList add {{{guild} {psicorps} {name} {demoralize} {active} {0} {description} {Psicorps: Demoralize}}};
+#list strategyList add {{{guild} {monk} {name} {palm} {active} {0} {description} {Monk: Palm}}};
+#list strategyList add {{{guild} {monk} {name} {pressure} {active} {0} {description} {Monk: Pressure}}};
+#list strategyList add {{{guild} {priest} {name} {bark} {active} {0} {description} {Priest: Barkskin}}};
+#list strategyList add {{{guild} {priest} {name} {haste} {active} {0} {description} {Priest: Haste}}};
+#list strategyList add {{{guild} {priest} {name} {pro} {active} {0} {description} {Priest: Protection}}};
+#list strategyList add {{{guild} {priest} {name} {vest} {active} {0} {description} {Priest: Vestment}}};
+#list strategyList add {{{guild} {priest} {name} {bene} {active} {0} {description} {Priest: Beneficence}}};
+#list strategyList add {{{guild} {priest} {name} {blade} {active} {0} {description} {Priest: Blade Barrier}}};
+#list strategyList add {{{guild} {priest} {name} {blessing} {active} {0} {description} {Priest: Bless}}};
+#list strategyList add {{{guild} {priest} {name} {poe} {active} {0} {description} {Priest: Protection of Elements}}};
+#list strategyList add {{{guild} {priest} {name} {power} {active} {0} {description} {Priest: Protection of Power}}};
+#list strategyList add {{{guild} {priest} {name} {invin} {active} {0} {description} {Priest: N/A}}};
 #list strategyList indexate name;
 
 #alias checkStrategy {
@@ -175,6 +187,29 @@
     #if {!$strategy_found && "%3" !== ""} {
         #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %3<088>}};
         %3;
+    };
+};
+
+#if {"$guild" == "priest"} {
+    #alias {_strategy_priest} {
+        #if {!idle_flag} {
+            #NOP
+        };
+    };
+};
+
+#if {"$guild" == "monk"} {
+    #alias {_strategy_monk} {
+        #if {!$idle_flag} {
+            #if {$mip[round] == 1} {
+                #var mob[palm] 0;
+                #var mob[pressure] 0;
+            };
+            #if {$action_round < $mip[round]} {
+                checkStrategy {palm} {#if {!$mob[palm] && $my[monk][ae][current] > 0} {palm}};
+                checkStrategy {pressure} {#if {!$mob[pressure]} {pressure}};
+            };
+        };
     };
 };
 
@@ -518,6 +553,8 @@
         #if {"$guild" == "mage"} {_strategy_mage};
         #if {"$guild" == "juggernaut"} {_strategy_juggernaut};
         #if {"$guild" == "fremen"} {_strategy_fremen};
+        #if {"$guild" == "monk"} {_strategy_monk};
+        #if {"$guild" == "priest"} {_strategy_priest};
     };
 };
 
