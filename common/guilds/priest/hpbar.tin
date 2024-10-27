@@ -1,26 +1,25 @@
 #class {guild_hpbar} {kill}
 #class {guild_hpbar} {open}
 
-#NOP --- HPBAR CONFIG;
-#NOP hpbar hp#sp#mana#sto#pgx#dgxp#NL#bark#haste#prot#vest
+#NOP Priest HP Bar Configuration;
+#NOP -- HPBAR For Copy/Paste Is;
+#NOP hpbar hp#sp#mana#pgx#dgxp;
 
-#act {HP: %d/%d SP: %d/%d MANA: %d/%d STO: %d/%d GXP%: [%d\%] <DGX>: %d} {
-    #var my[acolyte][mana] %7;
-    #var my[g2n] %9;
-    #var my[round_gxp] %10;
+#alias {setup_3kdb_hpbar} {
+    #send {hpbar hp#sp#mana#pgx#dgxp};
+};
+
+#act {HP: %d/%d SP: %d/%d MANA: %d/%d GXP%: [%d\%] <DGX>: %d} {
+    #line gag;
+    #var my[g2n] %7;
+    #var my[round_gxp] %8;
     #math total_gxp {$total_gxp + $my[round_gxp]};
     #math average_total_gxp {$total_gxp / $total_rounds};
 
     #math total_fight_gxp {$total_fight_gxp + $my[round_gxp]};
     #math average_fight_gxp {$total_fight_gxp / $mip[round]};
-}
-#act {BARK: %w HASTE: %w PROT: %w VEST: %w} {
-    #var my[effects][barkskin] %1;
-    #var my[effects][haste] %2;
-    #var my[effects][protection] %3;
-    #var my[effects][vestment] %4;
-}
-#GAG {BARK: %w HASTE: %w PROT: %w VEST: %w}
-#GAG {HP: %d/%d SP: %d/%d MANA: %d/%d STO: %d/%d GXP%: [%d\%] <DGX>: %d}
+};
+
+
 
 #class {guild_hpbar} {close}

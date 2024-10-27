@@ -1,25 +1,55 @@
 #class {guild_hpbar} kill
 #class {guild_hpbar} open
 
+#NOP Sii HP Bar Configuration;
+#NOP -- HPBAR For Copy/Paste Is;
+#NOP gset hpbar [HP: $HP$ OVER: $OVER$ SP: $SP$ FO: $FORT$]$NL$[GL: $CL$ Brood: $BROOD$ CON: $CON$ GXP/rnd: $GXP$]$NL$[Bst: $BST$ SH: $PS$ BR: $BR$ Roots: $RT$ PE: $PERC$ EN: $FOE$]$NL$[CHO: $CHO$ REGEN: $REG$ PC: $PC$ PG: $PG$ AMP: $AMP$ MIT: $MIT$];
 
-#act {^HP:%d\/%d %d.%d \(%w\) SP:%d\/%d FO:%d\/%d} {
+#alias {setup_3kdb_hpbar} {
+    #send {gset hpbar [HP: $HP$ OVER: $OVER$ SP: $SP$ FO: $FORT$]$NL$[GL: $CL$ Brood: $BROOD$ CON: $CON$ GXP/rnd: $GXP$]$NL$[Bst: $BST$ SH: $PS$ BR: $BR$ Roots: $RT$ PE: $PERC$ EN: $FOE$]$NL$[CHO: $CHO$ REGEN: $REG$ PC: $PC$ PG: $PG$ AMP: $AMP$ MIT: $MIT$]};
+    #send {gset client 1 control};
+    #send {gset client 2 fortitude};
+};
+
+
+#act {\[HP: %d\/%d OVER: %d.%d \(%w\) SP: %d\/%d FO: %d/%d\]} {
     #line gag;
+    #var {my[hp][current]} {%1};
+    #var {my[hp][max]} {%2};
+    #var {my[sp][current]} {%6};
+    #var {my[sp][max]} {%7};
+    #var {my[gp2][current]} {%8};
+    #var {my[gp2][max]} {%9};
+};
+
+#act {\[GL: %p Brood: %d CON: %d\/%d GXP\/rnd: %d\]} {
+    #line gag;
+    #var {my[brood]} {%2};
+    #var {my[gp1][current]} {%3};
+    #var {my[gp1][max]} {%4};
+
     #math total_gxp {$total_gxp + $my[gxp][round]};
     #math my[gxp][round_avg] {$total_gxp / $total_rounds};
 };
 
-#act {^GL:%* Brood:%d CON:%d\/%d %d} {
+#act {\[Bst: %d \(%*\) SH: %w BR: %d Roots: %d PE: %d EN: %*\]} {
     #line gag;
-    #var my[brood] %2;
+    #var {my[boost]} {%1};
+    #var {my[shield]} {%3};
+    #var {my[bloodrush]} {%4};
+    #var {my[roots][current]} {%5};
+    #var {my[perceptions][current]} {%6};
 };
 
-#act {^Bst: %d \(%*\) SH: %w BR: %d Roots: %d PE: %d EN} {
+#act {\[CHO: %d REGEN: %w PC: %w PG: %w AMP: %d MIT: %d\]} {
     #line gag;
-    #var my[boost] %1;
-    #var my[shield] %3;
-    #var my[bloodrush] %4;
-    #var my[roots][current] %5;
-    #var my[perceptions][current] %6;
+    #var {my[choose]} {%1};
+    #var {my[amplifies]} {%5};
+    #var {my[mitigations]} {%6};
 };
+
+
+
+
 
 #class {guild_hpbar} close

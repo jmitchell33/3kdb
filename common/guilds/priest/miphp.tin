@@ -1,0 +1,23 @@
+#class {guild_miphp} {kill}
+#class {guild_miphp} {open}
+
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+	#var hpbar_gline_1 @fMipColourConv{$mip[gline][1]};
+	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
+
+	#replace hpbar_gline_1 {    } {  };
+	#replace hpbar_gline_2 {    } {  };
+	
+    #list temp clear;
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Mana:$gp1/$gp1_max  Piety:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Mana:$my[gp1][graph] Piety:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {$hpbar_gline_1};
+	#list temp add {$hpbar_gline_2};
+	#list temp add {<eeb>Gxp/Rnd: <dea>$my[round_gxp] ($average_total_gxp Avg. / $total_rounds Rounds)<088>};
+    #var hpbar[prompt] $temp;
+};
+
+
+#class {guild_miphp} {close}

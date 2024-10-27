@@ -4,8 +4,28 @@
 #act {%*HP: %d/%d PP: %d/%d Chi: %d/%d G2:%d Mind: %d AE:%d/%d%} {
     #line gag;
     #var my[monk][gxp] %8;
+    #if {!$my[monk][gxp]} {#var g2n_last_round $my[monk][gxp]};
     #var my[monk][ae][current] %10;
     #var my[monk][ae][reset] %11;
-};
+
+    #if {!$idle_flag} {
+        #math {my[gxp][last_round]} {$g2n_last_round - $my[monk][gxp]};
+        #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
+        #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
+        #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
+        #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+        #if {$my[gxp][best] < $my[gxp][last_round]} {#var my[gxp][best] $my[gxp][last_round]};
+        #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
+        #format {my[gxp][str_total]} {%M} {$my[gxp][total]};
+        #format {my[gxp][str_total]} {%p} {$my[gxp][str_total]};
+        #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
+        .gxp_t30_add;
+        .gxp_time;
+    };
+
+    #var g2n_last_round $my[monk][gxp];
+} {2};
+
+
 
 #class {guild_hpbar} close;

@@ -9,6 +9,17 @@
      };
 };
 
+#NOP -- turn gags on;
+#alias {gagson} {
+     gag+ combat_area;
+     gag+ combat_items
+ };
+ 
+ #alias {gagsoff} {
+     gag- combat_area;
+     gag- combat_items
+ };
+
 #NOP -- cast subjugate (lowers amount of concentration summons require to control);
 #alias {sub} {
      cast subjugate
@@ -197,6 +208,7 @@
 
 #NOP -- greater contingency;
 #alias {setup_gc} {
+     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
      cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
      cast greater contingency as major globe#cast major globe;
      cast greater contingency as stoneskin#cast stoneskin;
@@ -241,24 +253,32 @@
      clear_sconfig;
      shoo;
      mystrategy;
-     ms 9##2#1500#70#defend#summons#always;
-     ms 8##2#1500#70#assist#summons#always
+     ms 10##2#1500#70#defend#summons#always;
+     ms 9##2#1500#70#assist#summons#always
 };
 
 #alias {killmode2} {
      clear_sconfig;
      shoo;
      mystrategy;
-     ms 9##2#1500#70#assist#summons#always;
-     ms 8##2#1500#70#assist#summons#always
+     ms 10##2#1500#70#assist#summons#always;
+     ms 9##2#1500#70#assist#summons#always
 };
 
 #alias {killmode3} {
      clear_sconfig;
      shoo;
      mystrategy;
+     ms 10##2#1500#70#defend#summons#always;
+     ms 9##2#1500#70#defend#summons#always
+};
+
+#alias {killmode4} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
      ms 9##2#1500#70#defend#summons#always;
-     ms 8##2#1500#70#defend#summons#always
+     ms 10##2#1500#70#assist#summons#always
 };
 
 #NOP -- aliases to setup strategies for phantasmal killer;
@@ -282,7 +302,8 @@
      corpsetrig+ divvy;
      corpsetrig+ getAll;
      corpsetrig+ crafting;
-     corpsetrig+ spellbook;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook;
      corpsetrig+ szCaps;
      corpsetrig+ szGreenCap
 };
@@ -294,15 +315,16 @@
      corpsetrig+ wrap;
      corpsetrig+ cBlast2;
      corpsetrig+ divvy;
-     corpsetrig+ spellbook
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook
 };
 
 #NOP -- party kill trig;
 #alias {mycorpsetrig-party} {
      corpsetrig-clear;
      corpsetrig+ spelltap;
-     corpsetrig+ spellbook;
-     corpsetrig+ ted
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook
 };
 
 #alias {corpseoff} {
@@ -426,6 +448,7 @@
 #list vivi3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (highest ms tanking)}}};
 #list vivi3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
 #list vivi3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
+#list vivi3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (highest ms assisting)}}};
 
 #NOP -- spells;
 #list vivi3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
