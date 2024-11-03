@@ -167,4 +167,17 @@
 	#return $tmpResult;
 };
 
+#NOP -- Unique ID that is reasonably random enough for mudding;
+#function makeID {
+	#local randomAlphabet abcdefghijklmnopqrstuvwxyz1234567890;
+	#local tmpAlphabetList {};
+	#list tmpAlphabetList tokenize $randomAlphabet;
+	#local result {};
+	#local i 1;
+	#loop 1 15 i {
+		#var result {${result}${tmpAlphabetList[@rnd{1;36}]}};
+	};
+	#return $result;
+};
+
 #class helpers close;

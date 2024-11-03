@@ -111,17 +111,18 @@
 	#NOP GUILD SPECIFIC GLINE PROCESSING;
 	#IF {"%2" != ""} {
 		#SWITCH {"$guild"} {
+			#CASE {"bard"}			{.mipProcessGlineBard {%1}};
+			#CASE {"breed"}			{#if $processBreedGline {.mipProcessGlineBreed {%1}}};
 			#CASE {"changeling"}	{.mipProcessGlineChangeling {%1}};
 			#CASE {"elemental"}		{.mipProcessGlineElemental {%1}};
+			#CASE {"fremen"}        {.mipProcessGlineFremen {%1}};
+			#CASE {"gentech"}		{.mipProcessGlineGentech {%1}};
 			#CASE {"juggernaut"}	{.mipProcessGlineJuggernaut {%1}};
 			#CASE {"necromancer"}	{.mipProcessGlineNecromancer {%1}};
-			#CASE {"bard"}			{.mipProcessGlineBard {%1}};
-			#CASE {"gentech"}		{.mipProcessGlineGentech {%1}};
 			#CASE {"mage"}			{.mipProcessGlineMage {%1}};
-			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
-			#CASE {"fremen"}        {.mipProcessGlineFremen {%1}};
 			#CASE {"priest"}        {.mipProcessGlinePriest {%1}};
+			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
 		}
 	};
 };
