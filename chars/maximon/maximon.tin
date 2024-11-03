@@ -1,27 +1,14 @@
 #NOP -- Set Player specific variables;
-#var guild priest;
 #var user maximon;
-#var mob_kill_action 1;
 #read chars/$user/vars.tin;
+#var guild priest;
 
-/* load common */
-#read common/index.tin;
-#read common/bot/bots.tin;
+#NOP -- If discord hooks are setup set this to 1;
+#var discordPost 1;
 
-/* load specific modules for this character */
-#read modules/corpsemanager/corpsemanager.tin;
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
+_load_3kdb_common;
+
+#NOP -- Load specific professions for this character;
 #read modules/professions/reforger.tin;
-#read modules/helpers/helpers.tin;
-
-/* load guild */
-#read common/guilds/$guild/index.tin;
-#read common/guilds/eternal/eternal.tin;
-
-/* load character-specific */
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-#read chars/$user/private.tin;
-#read chars/$user/styles.tin;
-#read chars/$user/tickers.tin;
