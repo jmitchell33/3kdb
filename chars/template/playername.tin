@@ -1,6 +1,3 @@
-#NOP - 3k Session;
-#SESSION {3k} {3k.org} {3000};
-
 #NOP -- This file is the "driver".  Change the filename from playername to your character's name 
 #NOP -- and replace the variable below with your playername and guild;
 
@@ -10,24 +7,15 @@
 
 #read chars/$user/vars.tin;
 
-/* load common */
-#read common/index.tin;
-#read modules/helpers/helpers.tin;
+#NOP -- If discord hooks are setup set this to 1;
+#var discordPost 0;
 
-/* load specific modules for this character */
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
+#read common/index.tin;
+_load_3kdb_common;
+
+
+#NOP -- Load specific profession for this character;
 #NOP -- You want to call other modules as well.  If you are a reforger, you would load:
 #NOP        #read modules/professions/reforger.tin
-#read modules/corpsemanager/corpsemanager.tin;
-
-/* load guild */
-#read common/guilds/$guild/index.tin;
-#read common/guilds/eternal/eternal.tin;
-
-/* load character-specific */
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-#read chars/$user/miphp.tin;
-#read chars/$user/private.tin;
-#read chars/$user/tickers.tin;

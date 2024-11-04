@@ -48,16 +48,16 @@
 #NOP -- This alias shows the available speed runs based on the area you're in;
 #alias .area_speedruns {
     #if {"$area" == ""} {#NOP} {
-        #local tmpList {};
-        #local tmpList $speedruns;
-        #list tmpList index area;
-        #list tmpList sort;
-        #list tmpList filter {$area};
-        #if {&tmpList[] > 0} {
+        #local speedruns_tmp {};
+        #local speedruns_tmp $speedruns;
+        #list speedruns_tmp index area;
+        #list speedruns_tmp sort;
+        #list speedruns_tmp filter {$area};
+        #if {&speedruns_tmp[] > 0} {
             #echo {   <cfc>Speedruns in $area include:<088>};
             #local tmpItem {};
-            #loop 1 &tmpList[] tmpItem {
-                format_speedrun {     $tmpList[$tmpItem][name]} {$tmpList[$tmpItem][desc]};
+            #loop 1 &speedruns_tmp[] tmpItem {
+                format_speedrun {     $speedruns_tmp[$tmpItem][name]} {$speedruns_tmp[$tmpItem][desc]};
             };
             #echo {};
         };
