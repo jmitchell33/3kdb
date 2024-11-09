@@ -1,36 +1,11 @@
-#NOP - 3k Session;
-
-#SESSION {3k - Nix} {3k.org} {3000};
-
-/* Set player specific variables */
-#var guild bard;
+#NOP -- Set Player specific variables;
 #var user nix;
 #read chars/$user/vars.tin;
-#var vaf[numbers] 1;
-#var scaler[tacos] 91;
-#var scaler[hotel] 150;
-#var scaler[zelligar] 131;
+#var guild bard;
 
-/* load common */
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
 #read common/index.tin;
-#read common/bot/bots.tin;
 
-/* load specific modules for this character */
+#NOP -- Load specific modules for this character;
 #read modules/dmgtracker/dmgtracker_old.tin;
-#read modules/professions/reforger.tin;
-#read modules/corpsemanager/corpsemanager.tin;
-#read modules/helpers/helpers.tin;
-
-/* load guild */
-#read common/guilds/$guild/index.tin;
-#read common/guilds/eternal/eternal.tin;
-
-/* load character-specific */
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-#read chars/$user/private.tin;
-#read chars/$user/styles.tin;
-
-#alias {reload} {#kill all;#show \n;#read chars/nix/nix.tin;};

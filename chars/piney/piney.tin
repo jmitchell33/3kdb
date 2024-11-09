@@ -1,34 +1,8 @@
-#NOP - 3k Session
-
-#SESSION {3k - Piney} {3k.org} {3000}
-
-#conf pack 1;
-#conf color on;
-
-
-/* Set player specific variables */
-#var guild elemental;
+#NOP -- Set Player specific variables;
 #var user piney;
 #read chars/$user/vars.tin;
+#var guild juggernaut;
 
-/* load common */
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
 #read common/index.tin;
-#read common/bot/bots.tin;
-
-/* load specific modules for this character */
-#read modules/corpsemanager/corpsemanager.tin;
-
-/* load guild */
-#read common/guilds/$guild/index.tin;
-
-/* load character-specific */
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-#read chars/$user/private.tin;
-#read chars/$user/styles.tin;
-#read chars/$user/tickers.tin;
-
-
-#alias {reload} {#kill all;#show \n;#read chars/piney/piney.tin;};
