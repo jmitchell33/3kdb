@@ -1,6 +1,8 @@
 #class common_config kill;
 #class common_config open;
 
+#SESSION {3k - $user} {3k.org} {3000};
+
 #config {packet patch} 1;
 #config {color} on;
 #config {repeat enter} on;
@@ -68,16 +70,20 @@
     #send {aset world_drop_pref -!!!-};
     #line oneshot #action {^You will no longer see the HP bar on the main screen.$} {forcehp};
     #line oneshot #action {^Notify off for all.$} {notify on};
+    mka-on;
+    mka-clear;
+    mka+ kill;
 };
 
 #NOP -- Welcome banner with info and updates;
 #alias 3kdb_banner {
     #unvar db3k[banner];
     #list db3k[banner] add {<dfc>   ---------   WELCOME TO 3kdb   ---------<088>  };
-    #list db3k[banner] add {<ddd>      'library3kdb' to see a list of aliases <088>};
-    #list db3k[banner] add {<ddd>      'mapgo cot' to set your position to Center of Town (cot) <088>};
+    #list db3k[banner] add {<ddd>      If this is your first time, type <ffd>setup_3kdb<088>};
+    #list db3k[banner] add {<ddd>      <ffd>library3kdb<088> to see a list of aliases <088>};
+    #list db3k[banner] add {<ddd>      <ffd>mapgo cot<088> to set your position to Center of Town (cot) <088>};
     #list db3k[banner] add {<ddd>       Be sure to check out <ffd>botlist<ddd>, <ffd>speedruns<ddd>, and <ffd>strategies<088>};
-    #draw $theme[chatbox] lalign ralign left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..4];
+    #draw $theme[chatbox] lalign ralign left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..5];
 };
 
 #NOP -- Get online players and monitor as they fall off/on with notify;
@@ -149,6 +155,37 @@
     #read chars/$user/miphp.tin;
     #read chars/$user/private.tin;
     #read chars/$user/tickers.tin;
+
+    #NOP -- Load Profession;
+    _load_profession;
 };
+
+#NOP -- Choose which profession to load;
+#alias {_load_profession} {
+    #class tmp_profession open;
+    #action {Profession #1 : Transmuter%s\(Level %d\)%s\[%*\]} {
+        #read modules/professions/transmuter.tin;
+        #var transmuter[level] %%2;
+    } {1};
+
+    #action {Profession #1 : Reforger%s\(Level %d\)%s\[%*\]} {
+        #read modules/professions/reforger.tin;
+        #var reforger[level] %%2;
+    } {1};
+
+    #action {Profession #1 : Golem Master%s\(Level %d\)%s\[%*\]} {
+        #read modules/professions/golem_master.tin;
+        #var golem_master[level] %%2;
+    } {1};
+    #class tmp_profession close;
+
+    #send {profs};
+    #delay 3 {#class tmp_profession kill};
+};
+
+#NOP -- Auto defaults_on - the primary reason for turning this off is to debug things since the mip;
+#NOP -- scripts are so spammy;
+#action {^3Kingdoms welcomes you!} {_load_3kdb_common;defaults_on;#delay 2 {#map goto 6220}} {1};
+#action {^3Kingdoms welcomes you back from linkdeath.} {_load_3kdb_common;defaults_on} {1};
 
 #class common_config close;

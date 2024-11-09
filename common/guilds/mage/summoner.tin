@@ -1,9 +1,6 @@
 #class {guild_summoner} kill
 #class {guild_summoner} open
 
-#gag {  --> %*};
-#gag {%*-hp-};
-
 #NOP -- Alias to view summon info;
 #alias summon_types {
 	#local tmpItem {};
@@ -241,6 +238,10 @@
 
 
 #action {  --> %*\n%a-hp-} {
+	#var tmpGagLines 1;
+	#var tmpHpbar %0;
+	#list tmpHpbar explode {\n};
+	#if $gags[hpbar] {#line gag &tmpHpbar[]};
 	#list summonList clear;
 	#format summon1 {%p} {%1};
 	#format summon2 {%p} {%2};
@@ -250,6 +251,7 @@
 } {1};
 
 #action {  --> %*-hp-} {
+	#if $gags[hpbar] {#line gag};
 	#list summonList clear;
 	#format summon1 {%p} {%1};
 	#var summonList $summon1;

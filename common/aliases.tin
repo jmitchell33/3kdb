@@ -75,22 +75,48 @@
     };
 };
 
+#alias .kill_guild_classes {
+    #class guild_actions kill;
+    #class guild_aliases kill;
+    #class guild_data kill;
+    #class guild_gags kill;
+    #class guild_heartbeat kill;
+    #class guild_hpbar kill;
+    #class guild_mage_defense_tracker kill;
+    #class guild_miphp kill;
+    #class guild_summoner kill;
+    #class guild_tickers kill;
+};
+
+#alias .kill_player_classes {
+    #class player_actions kill;
+    #class player_aliases kill;
+    #class player_config kill;
+    #class player_heartbeat kill;
+    #class player_miphp kill;
+    #class player_private kill;
+    #class player_status kill;
+    #class player_tickers kill;
+};
 
 #alias reload {
-    #class player_%* kill;
-    #class guild_%* kill;
+    .kill_guild_classes;
+    .kill_player_classes;
+    #read chars/$user/vars.tin;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
     #read chars/$user/config.tin;
     #read chars/$user/heartbeat.tin;
+    #read chars/$user/miphp.tin;
     #read chars/$user/private.tin;
-    #read chars/$user/vars.tin;
+    #read chars/$user/tickers.tin;
     #read common/guilds/$guild/index.tin;
     #read common/guilds/eternal/eternal.tin;
 };
 
-#var actions_stacked 0;
 
+#NOP -- Generic action queue;
+#var actions_stacked 0;
 #alias do_action {
     #foreach $actionStack[%*] action {
         $action[action];

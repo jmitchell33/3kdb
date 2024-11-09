@@ -3,8 +3,16 @@
 
 #var guild_miphp 1;
 
+#NOP -- Due to 3k rules surrounding, no guild-side variables or information is included here;
+#NOP -- Add a processBreedGline variable and set it to 1 and update breed_gline1_string;
+#NOP -- and breed_gline2_string via a ticker in your character's private.tin;
+
 #alias {_guild_miphp} {
-	#NOP
-}
+	#list temp clear;
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max GP1: $gp1/$gp1_max GP2: $gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] GP1:$my[gp1][graph] GP2:$my[gp2][graph] E:$enemy[graph]};
+	#if $processBreedGline {#list temp add {$breed_gline1_string};#list temp add {$breed_gline2_string};};
+	#var hpbar[prompt] $temp;
+};
 
 #class {guild_miphp} close;
