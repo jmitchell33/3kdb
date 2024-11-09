@@ -1,6 +1,8 @@
 #class common_config kill;
 #class common_config open;
 
+#SESSION {3k - $user} {3k.org} {3000};
+
 #config {packet patch} 1;
 #config {color} on;
 #config {repeat enter} on;
@@ -68,16 +70,20 @@
     #send {aset world_drop_pref -!!!-};
     #line oneshot #action {^You will no longer see the HP bar on the main screen.$} {forcehp};
     #line oneshot #action {^Notify off for all.$} {notify on};
+    mka-on;
+    mka-clear;
+    mka+ kill;
 };
 
 #NOP -- Welcome banner with info and updates;
 #alias 3kdb_banner {
     #unvar db3k[banner];
     #list db3k[banner] add {<dfc>   ---------   WELCOME TO 3kdb   ---------<088>  };
-    #list db3k[banner] add {<ddd>      'library3kdb' to see a list of aliases <088>};
-    #list db3k[banner] add {<ddd>      'mapgo cot' to set your position to Center of Town (cot) <088>};
+    #list db3k[banner] add {<ddd>      If this is your first time, type <ffd>setup_3kdb<088>};
+    #list db3k[banner] add {<ddd>      <ffd>library3kdb<088> to see a list of aliases <088>};
+    #list db3k[banner] add {<ddd>      <ffd>mapgo cot<088> to set your position to Center of Town (cot) <088>};
     #list db3k[banner] add {<ddd>       Be sure to check out <ffd>botlist<ddd>, <ffd>speedruns<ddd>, and <ffd>strategies<088>};
-    #draw $theme[chatbox] lalign ralign left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..4];
+    #draw $theme[chatbox] lalign ralign left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..5];
 };
 
 #NOP -- Get online players and monitor as they fall off/on with notify;
