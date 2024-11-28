@@ -159,7 +159,8 @@
     #var rolm[owl] 0;
     #line oneshot #action {The owl rune flashes briefly on the artifact.} {
         #math rolm[charges] {$rolm[charges] - 1};
-        #delay rolm_owl {#var rolm[owl] 1} 3610;
+        #delay rolm_owl {#var rolm[owl] 1;#var rolm[owl_active] 0} 3610;
+        #var rolm[owl_active] 1;
     } {1};
 };
 #action {You touch the Raven rune on the artifact and hear a soft *click*} {
@@ -206,5 +207,8 @@
 
 #NOP -- Flip to crown/psimace upon first wielding, check charges, and brief;
 #action {The grace of an ancient god courses through you.} {touch crown rune;touch diamond rune};
+
+#action {The sun rune sparks as it flips over, its face changing to that of the moon.} {#var rolm[sun] 1};
+#action {The moon rune flashes as it flips over, its face changing to that of the sun.} {#var rolm[sun] 0};
 
 #class eq_rolm close
