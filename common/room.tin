@@ -6,6 +6,17 @@
 #action {^-M-_A tank named %*.} {#list room[familiars] add {A tank named %1}} {1};
 #action {^-M-_%* Jugger Support Mech%*.} {#list room[familiars] add {%1 Jugger Support Mech}} {1};
 
+#alias .getMapRoomData {
+    #map {get} {ROOMVNUM} {roomvnum};
+    #map {get} {ROOMAREA} {roomarea};
+    #map {get} {ROOMNAME} {roomname};
+    #map {get} {ROOMDESC} {roomdesc};
+    #format {roomname_len}	{%L} {${roomname}};
+    #format {roomvnum_len}	{%L} {${roomvnum}};
+    #format {roomarea_len}	{%L} {${roomarea}};
+    #format {roomdesc_len}	{%L} {${roomdesc}};
+};
+
 #alias .clearRoomData {
     #list room[mobs] clear;
     #list room[familiars] clear;
@@ -13,7 +24,6 @@
     #list room[items] clear;
     #list room[players] clear;
     #list room[botmobs] clear;
-    #var room[long]  ;
     #var room[updated] 0;
 
     #if $bot[active] {
@@ -72,7 +82,7 @@
 
 #act {{^-R-_(.*)-R-_}} {
     .clearRoomData;
-    #var room_short %%1;
+    #var room_short %1;
     
     #line oneshot #action {^>$} {
         #var room[updated] 1;
@@ -86,18 +96,23 @@
             apiPostAll;
             #delay 2 {#var explore[walk] 1};
         };
+        #if {"$mapping" == "on"} {
+            .getMapRoomData;
+            #if {$roomname_len == 0} {#map set roomname {$room[name]}};
+            #if {$roomarea_len == 0} {#map set roomarea {$area}};
+            #if {$roomdesc_len == 0} {#map set roomdesc {$room[long]}};
+        };
     } {1};
 } {2};
 
 #action {^-D-_%*\n%a-D-_$} {
-    #delay .1 {
-        #unvar long;
-        #format long1 {%p} {%1};
-        #format long2 {%p} {%2};
-        #var long {$long1 $long2};
-        #replace long {\n} { };
-        #var room[long] {${long}};
-    };
+    #unvar room[long];
+    #unvar long;
+    #format long1 {%p} {%1};
+    #format long2 {%p} {%2};
+    #var long {$long1 $long2};
+    #replace long {\n} { };
+    #var room[long] {${long}};
 } {2};
 
 

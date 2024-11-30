@@ -1,10 +1,6 @@
 #class eq_rolm kill
 #class eq_rolm open
 
-#var rolm[owl] 1;
-#var rolm[raven] 1;
-#var rolm[gremlin] 1;
-#var rolm[cairn] 1;
 
 #alias update_rolm_string {
     #var rolm_string <fff>ROLM (${rolm[charges]}):;
@@ -159,7 +155,8 @@
     #var rolm[owl] 0;
     #line oneshot #action {The owl rune flashes briefly on the artifact.} {
         #math rolm[charges] {$rolm[charges] - 1};
-        #delay rolm_owl {#var rolm[owl] 1} 3610;
+        #delay rolm_owl {#var rolm[owl] 1;#var rolm[owl_active] 0} 3610;
+        #var rolm[owl_active] 1;
     } {1};
 };
 #action {You touch the Raven rune on the artifact and hear a soft *click*} {
@@ -205,6 +202,67 @@
 #action {^The light fades and you materialize elsewhere....} {rating} {2};
 
 #NOP -- Flip to crown/psimace upon first wielding, check charges, and brief;
-#action {The grace of an ancient god courses through you.} {touch crown rune;touch diamond rune};
+#action {The grace of an ancient god courses through you.} {touch diamond rune;exa runes};
+
+#action {The sun rune sparks as it flips over, its face changing to that of the moon.} {#var rolm[sun] 1};
+#action {The moon rune flashes as it flips over, its face changing to that of the sun.} {#var rolm[sun] 0};
+
+
+#NOP -- This automatically checks which runes are active or not;
+#alias .checkRolmAnsi {
+    #var tmpAnsi %1;
+    #var tmpRune %2;
+    #if {"$tmpAnsi" == "\e[36;1m" || "$tmpAnsi" == "\e[0m\e[36;1m"} {#var rolm[$tmpRune] 1} {#var rolm[$tmpRune] 0};
+};
+
+#alias .callCaptureRolm {
+    #class {rolmCapture} {open};
+    #event {PROCESSED LINE}{
+        #format tmpLine {%p} {%%0};
+        #regex {$tmpLine} {%cstar} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {star}} {#NOP};
+        #regex {$tmpLine} {%cdragon} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {dragon}} {#NOP};
+        #regex {$tmpLine} {%cfrost} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {frost}} {#NOP};
+        #regex {$tmpLine} {%clightning} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {lightning}} {#NOP};
+        #regex {$tmpLine} {%ccomet} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {comet}} {#NOP};
+        #regex {$tmpLine} {%caurora} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {aurora}} {#NOP};
+        #regex {$tmpLine} {%cviper} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {viper}} {#NOP};
+        #regex {$tmpLine} {%carachne} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {arachne}} {#NOP};
+        #regex {$tmpLine} {%creaper} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {reaper}} {#NOP};
+        #regex {$tmpLine} {%ccrown} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {crown}} {#NOP};
+        #regex {$tmpLine} {%csun} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {sun}} {#NOP};
+        #regex {$tmpLine} {%cashes} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {ashes}} {#NOP};
+        #regex {$tmpLine} {%cangel} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {angel}} {#NOP};
+        #regex {$tmpLine} {%cdiamond} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {diamond}} {#NOP};
+        #regex {$tmpLine} {%cheart} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {heart}} {#NOP};
+        #regex {$tmpLine} {%cspark} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {spark}} {#NOP};
+        #regex {$tmpLine} {%cscroll} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {scroll}} {#NOP};
+        #regex {$tmpLine} {%canchor} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {anchor}} {#NOP};
+        #regex {$tmpLine} {%cwinch} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {winch}} {#NOP};
+        #regex {$tmpLine} {%ceye} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {eye}} {#NOP};
+        #regex {$tmpLine} {%classo} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {lasso}} {#NOP};
+        #regex {$tmpLine} {%cdove} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {dove}} {#NOP};
+        #regex {$tmpLine} {%cskull} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {skull}} {#NOP};
+        #regex {$tmpLine} {%cghost} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {ghost}} {#NOP};
+        #regex {$tmpLine} {%ceagle} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {eagle}} {#NOP};
+        #regex {$tmpLine} {%cowl} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {owl}} {#NOP};
+        #regex {$tmpLine} {%cscales} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {scales}} {#NOP};
+        #regex {$tmpLine} {%craven} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {raven}} {#NOP};
+        #regex {$tmpLine} {%cgremlin} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {gremlin}} {#NOP};
+        #regex {$tmpLine} {%ccairn} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {cairn}} {#NOP};
+        #regex {$tmpLine} {%carmillary} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {armillary}} {#NOP};
+        #regex {$tmpLine} {%caegis} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {aegis}} {#NOP};
+        #regex {$tmpLine} {%correry} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {orrery}} {#NOP};
+        #regex {$tmpLine} {%cinfinity} {#var tmpAnsi {&1};.checkRolmAnsi {$tmpAnsi} {infinity};#unevent {PROCESSED LINE};#class rolmCapture kill} {#NOP};
+    };
+    #class {rolmCapture} {close};
+};
+
+
+#action {^There are many intricate runes marvelously inlaid with platinum etching upon polished gold fields} {
+    .callCaptureRolm;
+    #delay 2 {#class rolmCapture kill};
+} {2};
+
+examine runes;
 
 #class eq_rolm close

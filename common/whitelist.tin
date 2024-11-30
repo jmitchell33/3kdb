@@ -1,16 +1,13 @@
 #class {3kdb_whitelist} {kill}
 #class {3kdb_whitelist} {open}
 
-#var whitelist {};
-
 #NOP -- Player & Follow whitelist;
 #alias whitelist_default {
-    #list whitelist add {El Jefe};
-    #list whitelist add {Señor Meow-meow the fluffy persian cat};
-    #list whitelist add {Jugger Support Mech};
-    #list whitelist add {A tank named};
+    whitelist+ El Jefe;
+    whitelist+ Señor Meow-meow the fluffy persian cat;
+    whitelist+ Jugger Support Mech;
+    whitelist+ A tank named;
 };
-
 
 #alias whitelist {
     #if {&whitelist[] > 0} {
@@ -29,7 +26,7 @@
     #echo {};
     #echo {<caa>----    <ced> whitelist-room <dac> to add the room to the the VIP list <caa>  ----<088>};
     #echo {<caa>----    <ced> whitelist-party <dac>to add your party to the VIP list <caa>    ----<088>};
-}
+};
 
 #alias whitelist-clear {
     #list whitelist clear;
@@ -37,7 +34,6 @@
 };
 
 #alias whitelist-party {
-    whitelist-clear;
     whitelist_default;
     members;
     #line oneshot #action {Total XP gain since party creation :} {
@@ -45,32 +41,45 @@
         #foreach $party[member][%*] item {
             #unvar tmpItem;
             #format tmpItem {%n} {$item[name]};
-            #list whitelist add {$tmpItem};
-            #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+            #var tmpItemExists 0;
+            #list whitelist find {$tmpItem} tmpItemExists;
+            #if !$tmpItemExists {
+                #list whitelist add {$tmpItem};
+                #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+            };
         };
     };
 };
 
 #alias whitelist-room {
-    whitelist-clear;
     whitelist_default;
     who2;
+    #if $bot[active] {.pause}
     look;
     #delay 4 {
         #unvar item {};
         #foreach $room[players][%*] item {
             #format tmpItem {%n} {$item};
-            #list whitelist add {$tmpItem};
-            #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+            #var tmpItemExists 0;
+            #list whitelist find {$tmpItem} tmpItemExists;
+            #if !$tmpItemExists {
+                #list whitelist add {$tmpItem};
+                #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+            };   
         };
+        #if $bot[active] {.unpause};
     };
 };
 
 #alias whitelist+ {
     #if {"%0" != ""} {
         #format tmpItem {%n} {%0};
-        #list whitelist add {$tmpItem};
-        #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+        #var tmpItemExists 0;
+        #list whitelist find {$tmpItem} tmpItemExists;
+        #if !$tmpItemExists {
+            #list whitelist add {$tmpItem};
+            #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
+        };
     };
 };
         

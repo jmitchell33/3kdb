@@ -1,0 +1,103 @@
+#class guild_strategy kill;
+#class guild_strategy open;
+
+#list strategyList add {{{guild} {bard} {name} {hammer}  {active} {0} {description} {Hammer Smashed Face}}};
+#list strategyList add {{{guild} {bard} {name} {rainbow} {active} {0} {description} {Rainbow of Death}}};
+#list strategyList add {{{guild} {bard} {name} {cloud}   {active} {0} {description} {Noxious Cloud}}};
+#list strategyList add {{{guild} {bard} {name} {vortex}  {active} {0} {description} {Lightning Vortex}}};
+#list strategyList add {{{guild} {bard} {name} {assault} {active} {0} {description} {Martial Assault}}};
+#list strategyList add {{{guild} {bard} {name} {cshot} {active} {0} {description} {Called Shot}}};
+#list strategyList add {{{guild} {bard} {name} {enrage}  {active} {0} {description} {Enrage}}};
+#list strategyList indexate name;
+
+#alias _strategy_guild {
+    checkStrategy {assault} {
+        #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
+            martial assault;
+            martial assault;
+            martial assault;
+        };
+    };
+
+    checkStrategy {cshot} {
+        #if {$corpses[total] > 10 && $my[gp1][current] > 600} {
+            #if {!$my[defs][cs]} {called shot ALWAYS ON};
+        };
+        #if {$corpses[total] < 10} {
+            #if {$my[defs][cs]} {breset called shot};
+        };
+    };
+
+    checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
+    checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
+    checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
+
+    #NOP -- Bard Song-Bot Strategies;
+    #if {$mip[round] > 1} {
+            
+        #NOP --- If we're above the level we should use a corpse, remove the action to use the corpse;
+        #if {$my[gp1][current] > $karma_use_corpse_between_songs && $actions_stacked} {remove_action corpse-between-songs;};
+
+        #NOP --- The song bots shouldn't attempt to keep rolling if we're near using a corpse;
+        checkStrategy {rainbow} {
+            #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
+            #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
+                add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+            };
+
+            #if {$my[gp1][current] > $karma_heal} {
+                #if {$my[song][rounds] > 1} {#NOP;} {
+                    #if {!$actions_stacked} {
+                        #if $resume_song {perform rainbow of death}
+                    } {
+                        do_action
+                    };
+                };
+                #if !$my[defs][fr] {cast focus the rainbow};
+            };
+        };
+
+        checkStrategy {hammer} {
+            #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
+            #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
+                add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
+            };
+            #if {$my[gp1][current] > $karma_heal} {
+                #if {$my[song][rounds] > 1} {#NOP;} {
+                    #if {$my[gp2][current] > 20} {
+                        #if {$mip[round] > 10} {
+                            #if {!$actions_stacked} {
+                                #if {$resume_song} {
+                                    perform hammer smashed face
+                                };
+                            } {
+                                do_action;
+                            };
+                            
+                        } {
+                            #if !$my[defs][fr] {cast focus the rainbow};
+                            #if {!$actions_stacked} {
+                                #if {$resume_song} {
+                                    perform rainbow of death;
+                                };
+                            } {
+                                do_action;
+                            };
+                        };
+                    } {
+                        #if !$my[defs][fr] {cast focus the rainbow};
+                        #if {!$actions_stacked} {
+                            #if {$resume_song} {
+                                perform rainbow of death;
+                            };
+                        } {
+                            do_action;
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
+
+#class guild_strategy close;
