@@ -1,6 +1,18 @@
 #class {3kdb_whitelist} {kill}
 #class {3kdb_whitelist} {open}
 
+#action {^[PARTY] %w joins the party.$} {
+    whitelist+ %1;
+} {2};
+
+#action {^[PARTY] %w: whitelist room} {
+    whitelist-room;
+} {2};
+
+#action {^[PARTY] %w: whitelist me} {
+    whitelist+ %1;
+} {2};
+
 #NOP -- Player & Follow whitelist;
 #alias whitelist_default {
     whitelist+ El Jefe;
