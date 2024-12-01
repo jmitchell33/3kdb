@@ -238,7 +238,6 @@
 
 
 #action {  --> %*\n%a-hp-} {
-	#echo {matched line};
 	#line gag;
 } {1};
 
@@ -337,9 +336,7 @@
 	#replace summonCalled {\n} { };
 	#format summonCalled {%l} {$summonCalled};
 	#list summonCalled {explode} { };
-	
-	#NOP -- Use the golem for overflow hits, but move tanking back to MS when new summon enters;
-	checkStrategy {golem_rotate} {#delay 2 {say $summonCalled[-1], defend me}};
+	#var summonCalled $summonCalled[-1];
 } {2};
 
 #NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
