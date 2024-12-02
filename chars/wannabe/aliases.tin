@@ -9,6 +9,23 @@
      };
 };
 
+#NOP -- turn gags on;
+#alias {gagson} {
+     gag+ combat_area;
+     gag+ combat_items;
+     gag+ hpbar;
+     #gag {  --> %*};
+     #gag {%*-hp-}
+ };
+ 
+ #alias {gagsoff} {
+     gag- combat_area;
+     gag- combat_items;
+     gag- hpbar;
+     #ungag {  --> %*};
+     #ungag {%*-hp-}
+ };
+
 #NOP -- Random aliases for mage;
 #alias {tap} {unwrap 1;cast spell tap on corpse;cast corpse blast};
 
@@ -103,6 +120,18 @@
      #class numpad kill
 };
 
+#NOP -- greater contingency;
+#alias {setup_gc} {
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+     cast greater contingency as major globe#cast major globe;
+     cast greater contingency as stoneskin#cast stoneskin;
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as armor#cast armor
+};
+
+#NOP -- clear greater contingency;
+#alias {clear_gc} {#10 cast remove greater contingency as 1};
+
 #alias {numon} {
      #read chars/$user/numpad.tin
 };
@@ -112,6 +141,97 @@
 
 #alias {stclear} {
      strategy-clear
+};
+
+#NOP - aliases for setting up summon config & strategies;
+#alias {killmode} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 10##2#1500#70#defend#summons#always;
+     ms 9##2#1500#70#assist#summons#always
+};
+
+#alias {killmode2} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 10##2#1500#70#assist#summons#always;
+     ms 9##2#1500#70#assist#summons#always
+};
+
+#alias {killmode3} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 10##2#1500#70#defend#summons#always;
+     ms 9##2#1500#70#defend#summons#always
+};
+
+#alias {killmode4} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 9##2#1500#70#defend#summons#always;
+     ms 10##2#1500#70#assist#summons#always
+};
+
+#NOP -- aliases to setup strategies for phantasmal killer;
+#NOP -- toggle phantasmal killer on and off;
+#alias {pkiller} {
+     strategy phantasmal
+};
+
+#NOP -- toggle casting monstrous fortitude on phantasmal killer on and off;
+#alias {pkmf} {
+     strategy phantasmal_mf
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#NOP -- solo kill trig;
+#alias {mycorpsetrig} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast2;
+     corpsetrig+ divvy;
+     corpsetrig+ getAll;
+     corpsetrig+ crafting;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook;
+     corpsetrig+ szCaps;
+     corpsetrig+ szGreenCap
+};
+
+#NOP -- solo kill trig without get all;
+#alias {mycorpsetrig-noget} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast2;
+     corpsetrig+ divvy;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook
+};
+
+#NOP -- party kill trig;
+#alias {mycorpsetrig-party} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook
+};
+
+#alias {corpseoff} {
+     corpsetrig-off
+};
+ 
+#alias {corpseon} {
+     corpsetrig-on
+};
+ 
+#alias {corpseclear} {
+     corpsetrig-clear
 };
 
 #NOP -- aliases to setup corpsetrigs;
