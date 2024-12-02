@@ -1,0 +1,104 @@
+#class guild_strategy kill;
+#class guild_strategy open;
+
+#list strategyList add {{{guild} {mage} {name} {anchor}  {active} {0} {description} {Anchor Yourself During Combat}}};
+#list strategyList add {{{guild} {mage} {name} {slow}  {active} {0} {description} {Slow Mob}}};
+#list strategyList add {{{guild} {mage} {name} {atrophy}  {active} {0} {description} {Atrophy Mob (Nukes Special)}}};
+#list strategyList add {{{guild} {mage} {name} {edrain}  {active} {0} {description} {Edrain Mob (Removes 1 lvl from Mob)}}};
+#list strategyList add {{{guild} {mage} {name} {spelltap}  {active} {0} {description} {Spelltap Toggling}}};
+#list strategyList add {{{guild} {mage} {name} {feeblemind}  {active} {0} {description} {Feeblemind (-int)}}};
+#list strategyList add {{{guild} {mage} {name} {phantasmal}  {active} {0} {description} {Phantasmal Killer}}};
+#list strategyList add {{{guild} {mage} {name} {phantasmal_mf} {active} {0} {description} {Cast Monstrous Fortitude on Phantasmal}}};
+#list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
+#list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
+#list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Summon Tanking}}};
+#list strategyList add {{{guild} {mage} {name} {summon_cull}  {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
+#list strategyList add {{{guild} {mage} {name} {summon_select}  {active} {0} {description} {Summoner: Shoo unwanted summons}}};
+#list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
+#list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
+#list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
+#list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
+#list strategyList add {{{guild} {mage} {name} {golem_rotate} {active} {0} {description} {Golem: Re-assign to MS after golem takes hits}}};
+#list strategyList add {{{guild} {mage} {name} {gstrength}  {active} {0} {description} {Giant Strength}}};
+
+#list strategyList indexate name;
+
+#var toggle_spelltap 1;
+
+#alias _strategy_guild {
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #if {$mob[slow] < 1 || $mip[round] < 2} {
+            checkStrategy {slow} {cast slow};
+        };
+        
+        #if {$mob[edrain] < 1} {
+            checkStrategy {edrain} {cast energy drain};
+        };
+
+        #if {$mob[atrophy] < 1} {
+            checkStrategy {atrophy} {cast mystic atrophy};
+        };
+
+        #if {$mob[feeblemind] < 1} {
+            checkStrategy {feeblemind} {cast feeblemind};
+        };
+
+        #if {$mob[phantasmal] < 1} {
+            checkStrategy {phantasmal} {
+                cast phantasmal killer;
+                #NOP -- You can't haste any illusions, so we'll cast MF on it;
+                checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
+            };
+        };
+    };
+
+    checkStrategy {summon_select} {
+        #if {!$idle_flag && $summon_select[active]} {
+            #local tmpSummCount 0;
+            #local tmpSummIndex 1;
+            #loop 1 &my[summons][] tmpSummIndex {
+                    #if {"$$my[summons][$tmpSummIndex][key]" == "Golem"} {#NOP} {#math tmpSummCount {$tmpSummCount + $$my[summons][$tmpSummIndex][count]}};
+            };
+
+            #echo {summ count is $tmpSummCount};
+            #if {$tmpSummCount < 4} {
+                #echo {not enough summons - summoning more};
+                cast monster summoning $summon_select[ms] as $summon_select[key];
+            };
+        };
+    };
+
+    checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor}};
+
+    checkStrategy {gstrength} {#if $my[prots][GS] {#NOP} {cast giant strength on $user;cast strength on $user}};
+
+    #if {$toggle_spelltap && $sp_percent > 70} {
+        checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}
+    };
+
+    #if {!$toggle_spelltap && $sp_percent < 30} {
+        checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
+    };
+
+    checkStrategy {golem_assist} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
+    checkStrategy {golem_defend} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
+
+    #if {$sp_percent > 30} {
+        #if {$summon_renew_mf} {cast monstrous fortitude on summons;#var summon_renew_mf 0;};
+        #if {$summon_renew_haste} {cast haste on summons;#var summon_renew_haste 0};
+    };
+
+    checkStrategy {super_sub} {
+        #NOP -- We'll use this when we don't have MI available since we don't really care about conc;
+        #NOP -- when we have MI available;
+        #if {$my[super][current] && !$my[immersion][count] && !$my[immersion][active] && $subjugate_toggle} {
+            #var subjugate_toggle 0;
+            cast subjugate;
+            #delay 30 {#var subjugate_toggle 1};
+        };
+    };
+};
+
+
+
+#class guild_strategy close;

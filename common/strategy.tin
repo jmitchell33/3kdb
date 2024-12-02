@@ -81,13 +81,8 @@
 #list strategyList add {{{guild} {all} {name} {lucanus} {active} {0} {description} {Automatically uses amulet and ring}}};
 #list strategyList add {{{guild} {all} {name} {epowers} {active} {0} {description} {Automatically use fry, shred, ewell}}};
 #list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {description} {Automatically use owl & raven runes}}};
+#list strategyList add {{{guild} {all} {name} {rolm1}   {active} {0} {description} {ROLM Auto-Use Runes + Offhand Weapon}}};
 #list strategyList add {{{guild} {all} {name} {bplate}  {active} {0} {description} {Blood Plate: Automatically feed}}};
-#list strategyList add {{{guild} {bard} {name} {hammer}  {active} {0} {description} {Hammer Smashed Face}}};
-#list strategyList add {{{guild} {bard} {name} {rainbow} {active} {0} {description} {Rainbow of Death}}};
-#list strategyList add {{{guild} {bard} {name} {cloud}   {active} {0} {description} {Noxious Cloud}}};
-#list strategyList add {{{guild} {bard} {name} {vortex}  {active} {0} {description} {Lightning Vortex}}};
-#list strategyList add {{{guild} {bard} {name} {assault} {active} {0} {description} {Martial Assault}}};
-#list strategyList add {{{guild} {bard} {name} {enrage}  {active} {0} {description} {Enrage}}};
 #list strategyList add {{{guild} {necromancer} {name} {snare}  {active} {0} {description} {Vamp/Were: Snare}}};
 #list strategyList add {{{guild} {necromancer} {name} {call}  {active} {0} {description} {Call Familiar}}};
 #list strategyList add {{{guild} {necromancer} {name} {maim}  {active} {0} {description} {Were: Maim}}};
@@ -113,24 +108,6 @@
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them}}};
 #list strategyList add {{{guild} {necromancer} {name} {gemino}  {active} {0} {description} {Preserve Gemino Corpses}}};
-#list strategyList add {{{guild} {mage} {name} {anchor}  {active} {0} {description} {Anchor Yourself During Combat}}};
-#list strategyList add {{{guild} {mage} {name} {slow}  {active} {0} {description} {Slow Mob}}};
-#list strategyList add {{{guild} {mage} {name} {atrophy}  {active} {0} {description} {Atrophy Mob (Nukes Special)}}};
-#list strategyList add {{{guild} {mage} {name} {edrain}  {active} {0} {description} {Edrain Mob (Removes 1 lvl from Mob)}}};
-#list strategyList add {{{guild} {mage} {name} {spelltap}  {active} {0} {description} {Spelltap Toggling}}};
-#list strategyList add {{{guild} {mage} {name} {feeblemind}  {active} {0} {description} {Feeblemind (-int)}}};
-#list strategyList add {{{guild} {mage} {name} {phantasmal}  {active} {0} {description} {Phantasmal Killer}}};
-#list strategyList add {{{guild} {mage} {name} {phantasmal_mf} {active} {0} {description} {Cast Monstrous Fortitude on Phantasmal}}};
-#list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
-#list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
-#list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Summon Tanking}}};
-#list strategyList add {{{guild} {mage} {name} {summon_cull}  {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
-#list strategyList add {{{guild} {mage} {name} {summon_select}  {active} {0} {description} {Summoner: Shoo unwanted summons}}};
-#list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
-#list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
-#list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
-#list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
-#list strategyList add {{{guild} {mage} {name} {gstrength}  {active} {0} {description} {Giant Strength}}};
 #list strategyList add {{{guild} {juggernaut} {name} {frenzy}  {active} {0} {description} {Before Reset: Use Frenzy}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateA}  {active} {0} {description} {Before Reset: Donate Airdrops}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateF}  {active} {0} {description} {Before Reset: Donate Frenzy}}};
@@ -183,7 +160,7 @@
         };
     };
     #NOP -- If there is a 3rd arguement, do this if the strategy isn't listed;
-    #NOP -- This is useful for items like gemino preservations where you stil want to do;
+    #NOP -- This is useful for items like gemino preservations where you still want to do;
     #NOP -- a different action if the strategy isn't active;
     #if {!$strategy_found && "%3" !== ""} {
         #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %3<088>}};
@@ -271,83 +248,6 @@
     };
 };
 
-#if {"$guild" == "mage"} {
-    #var toggle_spelltap 1;
-
-    #alias _strategy_mage {
-        #if {!$idle_flag && $action_round < $mip[round]} {
-            #if {$mob[slow] < 1 || $mip[round] < 2} {
-                checkStrategy {slow} {cast slow};
-            };
-            
-            #if {$mob[edrain] < 1} {
-                checkStrategy {edrain} {cast energy drain};
-            };
-
-            #if {$mob[atrophy] < 1} {
-                checkStrategy {atrophy} {cast mystic atrophy};
-            };
-
-            #if {$mob[feeblemind] < 1} {
-                checkStrategy {feeblemind} {cast feeblemind};
-            };
-
-            #if {$mob[phantasmal] < 1} {
-                checkStrategy {phantasmal} {
-                    cast phantasmal killer;
-                    #NOP -- You can't haste any illusions, so we'll cast MF on it;
-                    checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
-                };
-            };
-        };
-
-        checkStrategy {summon_select} {
-            #if {!$idle_flag && $summon_select[active]} {
-                #local tmpSummCount 0;
-                #local tmpSummIndex 1;
-                #loop 1 &my[summons][] tmpSummIndex {
-                        #if {"$$my[summons][$tmpSummIndex][key]" == "Golem"} {#NOP} {#math tmpSummCount {$tmpSummCount + $$my[summons][$tmpSummIndex][count]}};
-                };
-
-                #echo {summ count is $tmpSummCount};
-                #if {$tmpSummCount < 4} {
-                    #echo {not enough summons - summoning more};
-                    cast monster summoning $summon_select[ms] as $summon_select[key];
-                };
-            };
-        };
-
-        checkStrategy {anchor} {#if {!$my[anchor] && $mip[round] > 0} {cast anchor}};
-
-        checkStrategy {gstrength} {#if $my[prots][GS] {#NOP} {cast giant strength on $user;cast strength on $user}};
-
-        #if {$toggle_spelltap && $sp_percent > 70} {
-            checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}
-        };
-
-        #if {!$toggle_spelltap && $sp_percent < 30} {
-            checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
-        };
-
-        checkStrategy {golem_assist} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
-        checkStrategy {golem_defend} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
-
-        #if {$sp_percent > 30} {
-            #if {$summon_renew_mf} {cast monstrous fortitude on summons;#var summon_renew_mf 0;};
-            #if {$summon_renew_haste} {cast haste on summons;#var summon_renew_haste 0};
-        };
-
-        checkStrategy {super_sub} {
-            #NOP -- We'll use this when we don't have MI available since we don't really care about conc;
-            #NOP -- when we have MI available;
-            #if {$my[super][current] && !$my[immersion][count] && !$my[immersion][active] && $subjugate_toggle} {
-                #var subjugate_toggle 0;
-                cast subjugate;
-                #delay 30 {#var subjugate_toggle 1};
-            };
-        };
-    };
-};
 
 #NOP -- First round strategies;
 #if {"$guild" == "necromancer"} {
@@ -426,85 +326,6 @@
     };
 };
 
-#if {"$guild" == "bard"} {
-    #alias _strategy_bard {
-        checkStrategy {assault} {
-            #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
-                martial assault;
-                martial assault;
-                martial assault;
-            };
-        };
-
-        #NOP -- Bard Song-Bot Strategies;
-        #if {$mip[round] > 1} {
-                
-            #NOP --- If we're above the level we should use a corpse, remove the action to use the corpse;
-            #if {$my[gp1][current] > $karma_use_corpse_between_songs && $actions_stacked} {remove_action corpse-between-songs;};
-
-            #NOP --- The song bots shouldn't attempt to keep rolling if we're near using a corpse;
-            checkStrategy {rainbow} {
-                #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
-                #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
-                    add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
-                };
-
-                #if {$my[gp1][current] > $karma_heal} {
-                    #if {$my[song][rounds] > 1} {#NOP;} {
-                        #if {!$actions_stacked} {
-                            #if $resume_song {perform rainbow of death}
-                        } {
-                            do_action
-                        };
-                    };
-                    #if !$my[defs][fr] {cast focus the rainbow};
-                };
-            };
-
-            checkStrategy {hammer} {
-                #if {$defs[hr] != 1} {#NOP} {#var defs[hr] 1};
-                #if {$my[gp1][current] < $karma_use_corpse_between_songs && $my[song][rounds] > 1} {
-                    add_action {{{name} {corpse-between-songs} {action} {#var resume_song 0;corpse_select;#delay 2 {perform dirge;perform dirge;#var resume_song 1}}}};
-                };
-                #if {$my[gp1][current] > $karma_heal} {
-                    #if {$my[song][rounds] > 1} {#NOP;} {
-                        #if {$my[gp2][current] > 20} {
-                            #if {$mip[round] > 10} {
-                                #if {!$actions_stacked} {
-                                    #if {$resume_song} {
-                                        perform hammer smashed face
-                                    };
-                                } {
-                                    do_action;
-                                };
-                                
-                            } {
-                                #if !$my[defs][fr] {cast focus the rainbow};
-                                #if {!$actions_stacked} {
-                                    #if {$resume_song} {
-                                        perform rainbow of death;
-                                    };
-                                } {
-                                    do_action;
-                                };
-                            };
-                        } {
-                            #if !$my[defs][fr] {cast focus the rainbow};
-                            #if {!$actions_stacked} {
-                                #if {$resume_song} {
-                                    perform rainbow of death;
-                                };
-                            } {
-                                do_action;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-    };
-};
-
 #alias _strategy_heartbeat {
     #if {!$idle_flag && $action_round < $mip[round]} {
 
@@ -513,7 +334,7 @@
             #if {"$guild" == "necromancer"} {_strategy_necro_start};
         };
         #NOP -- Actions to perform only once in first round;
-        #if {$mip[round] >= 1 && $mip[round] <= 1} {
+        #if {$mip[round] == 1} {
             #if {"$guild" == "fremen"} {_strategy_fremen_start};
         };
         #NOP -- Actions to perform only in the beginning of the fight;
@@ -530,13 +351,22 @@
                 #if $lucanus_amulet {push symbol};
             };
 
-            #if {$rolm[owl]} {checkStrategy {rolm} {touch owl rune}};
-            #if {$rolm[raven] && $rolm[charges] > 50} {checkStrategy {rolm} {touch raven rune}};
-            #if {$rolm[gremlin] && $rolm[charges] > 50} {checkStrategy {rolm} {touch gremlin rune}};
-            #if {"$guild" == "bard"} {
-                checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
-                checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
-                checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
+            #if {$rolm[owl]} {
+                checkStrategy {rolm} {touch owl rune};
+                checkStrategy {rolm1} {
+                    unwield;
+                    wield rod of lordly might;
+                    touch owl rune;
+                    #delay 610 {unwield;wield $rolm[offhand]};
+                };
+            };
+            #if {$rolm[raven] && $rolm[charges] > 50} {
+                checkStrategy {rolm} {touch raven rune};
+                checkStrategy {rolm1} {touch raven rune};
+            };
+            #if {$rolm[gremlin] && $rolm[charges] > 50} {
+                checkStrategy {rolm} {touch gremlin rune};
+                checkStrategy {rolm1} {touch gremlin rune};
             };
         };
 
@@ -550,8 +380,8 @@
 
         #NOP -- Actions to perform at any time in the fight;
         #if {"$guild" == "necromancer"} {_strategy_necro};
-        #if {"$guild" == "bard"} {_strategy_bard};
-        #if {"$guild" == "mage"} {_strategy_mage};
+        #if {"$guild" == "bard"} {_strategy_guild};
+        #if {"$guild" == "mage"} {_strategy_guild};
         #if {"$guild" == "juggernaut"} {_strategy_juggernaut};
         #if {"$guild" == "fremen"} {_strategy_fremen};
         #if {"$guild" == "monk"} {_strategy_monk};

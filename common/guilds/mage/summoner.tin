@@ -238,16 +238,7 @@
 
 
 #action {  --> %*\n%a-hp-} {
-	#var tmpGagLines 1;
-	#var tmpHpbar %0;
-	#list tmpHpbar explode {\n};
-	#if $gags[hpbar] {#line gag &tmpHpbar[]};
-	#list summonList clear;
-	#format summon1 {%p} {%1};
-	#format summon2 {%p} {%2};
-	#var summonList $summon1 $summon2;
-	#list summonList explode {, };
-	_handleSummonString;
+	#line gag;
 } {1};
 
 #action {  --> %*-hp-} {
@@ -344,24 +335,8 @@
 	#var summonCalled {$tmp1 $tmp2};
 	#replace summonCalled {\n} { };
 	#format summonCalled {%l} {$summonCalled};
-	checkStrategy {summon_select} {
-		#if {"$summon_select[name]" != ""} {
-			#format tmpStr {%l} {$summon_select[name]};
-			#regex {"$summonCalled"} {"%*$tmpStr%*"} {
-				#list summonCalled {explode} { };
-				#delay 1 {#if !$$summonSCA {say $tmpStr, you are now in group summons;#var summonSCA 0};};
-			} {
-				#list summonCalled {explode} { };
-				#list summonCalled {size} {tmpLength};
-				#local summonDismiss $$summonCalled[$tmpLength];
-				#var tmpLength 0;
-				#format tmpLength {%L} $summonDismiss;
-				#delay 3 {
-					#if {$tmpLength > 0} {say $summonDismiss, begone};
-				};
-			};
-		};
-	};
+	#list summonCalled {explode} { };
+	#var summonCalled $summonCalled[-1];
 } {2};
 
 #NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
