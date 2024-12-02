@@ -236,9 +236,17 @@
 	#format {summon_string} {%.${summon_string_size}s} {$summon_string};
 };
 
-
 #action {  --> %*\n%a-hp-} {
-	#line gag;
+    #var tmpGagLines 1;
+    #var tmpHpbar %0;
+    #list tmpHpbar explode {\n};
+    #NOP #if $gags[hpbar] {#line gag &tmpHpbar[]};
+    #list summonList clear;
+    #format summon1 {%p} {%1};
+    #format summon2 {%p} {%2};
+    #var summonList $summon1 $summon2;
+    #list summonList explode {, };
+    _handleSummonString;
 } {1};
 
 #action {  --> %*-hp-} {
