@@ -21,7 +21,8 @@
 
 #act {^An intricate digital key: Ok.$} {#math kayos[key] {$kayos[key]+1}} {1};
 #act {^key: Taken.$} {#math kayos[key] {$kayos[key]+1}} {1};
-#act {^You grab the power cell from the locker.$} {#math kayos[cell] {$kayos[cell] + 1}} {1};
+#act {^You grab the power cell from the locker.$} {#math kayos[cell] {$kayos[cell] + 1};#math kayos_bunker {$kayos_bunker + 1}} {1};
+#act {^There's no longer a power cell here.  Someone must have already grabbed it.$} {#math kayos_bunker {$kayos_bunker + 1}} {1};
 
 #NOP -- When the bot completes the main field, loop the 3 bunkers and then the spaceship;
 #act {^------- BOT COMPLETE -----} {
@@ -72,7 +73,6 @@
                 ..;
             }
         };
-        #math kayos_bunker {$kayos_bunker + 1};
     };
 } {1};
 
@@ -114,11 +114,6 @@
         #replace tempVar { } {};
         #replace tempVar {*} {};
         #var kayos[cell] $tempVar;
-    };
-    #delay 1 {
-        #if {$kayos[cell] >= 1} {
-            #math kayos_bunker {$kayos[cell] + 1};
-        };
     };
 } {6};
 
@@ -166,14 +161,19 @@
     #if $checkBunker {
         #map get roomvnum bunkerVnum;
         #if {&kayos[bunker][] == 0} {
+            #echo {SETTING 1st BUNKER to $bunkerVnum};
             #var kayos[bunker][1] $bunkerVnum;
         } {
             #if {$kayos[bunker][1] == $bunkerVnum} {#NOP} {
                 #if {&kayos[bunker][] == 1} {
+                    #echo {SETTING 2nd BUNKER to $bunkerVnum};
                     #var kayos[bunker][2] $bunkerVnum;
                 } {
                     #if {{$kayos[bunker][1] == $bunkerVnum} || {$kayos[bunker][2] == $bunkerVnum}} {#NOP} {
-                        #var kayos[bunker][3] $bunkerVnum;
+                        #if {&kayos[bunker][] == 2} {
+                            #echo {SETTING 3rd BUNKER to $bunkerVnum};
+                            #var kayos[bunker][3] $bunkerVnum;
+                        };
                     };
                 };
             };

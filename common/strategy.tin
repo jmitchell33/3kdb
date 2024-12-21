@@ -4,6 +4,8 @@
 #NOP -- Set some variables for multi-round actions or toggles;
 #var iprime_round 1;
 #var subjugate_toggle 1;
+#var botTickler 1;
+
 
 #alias formatStrategy {
     #format result {<acf>-----<fff> %+15s  %s<088>} {%1} {%2};
@@ -83,6 +85,7 @@
 #list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {description} {Automatically use owl & raven runes}}};
 #list strategyList add {{{guild} {all} {name} {rolm1}   {active} {0} {description} {ROLM Auto-Use Runes + Offhand Weapon}}};
 #list strategyList add {{{guild} {all} {name} {bplate}  {active} {0} {description} {Blood Plate: Automatically feed}}};
+#list strategyList add {{{guild} {all} {name} {tickler}  {active} {0} {description} {Bot: Leave mobs at 3%}}};
 #list strategyList add {{{guild} {necromancer} {name} {snare}  {active} {0} {description} {Vamp/Were: Snare}}};
 #list strategyList add {{{guild} {necromancer} {name} {call}  {active} {0} {description} {Call Familiar}}};
 #list strategyList add {{{guild} {necromancer} {name} {maim}  {active} {0} {description} {Were: Maim}}};
@@ -326,8 +329,20 @@
     };
 };
 
+
 #alias _strategy_heartbeat {
     #if {!$idle_flag && $action_round < $mip[round]} {
+
+        #NOP -- Mob Tickler/Leave them at 3%;
+        #if {$bot[active] && $incombat} {
+            checkStrategy {tickler} {
+                #if {$enemy[hp] < 4 && $botTickler} {
+                    #var botTickler 0;
+                    .botStep;
+                    #delay 4 {#var botTickler 1};
+                };
+            };
+        };
 
         #NOP -- Actions to perform the first rounds of combat;
         #if {$mip[round] >= 1 && $mip[round] <= 3} {
