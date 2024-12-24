@@ -281,6 +281,12 @@ dreset;
     #var cmbt[crit][round] 0;
     #var ewell_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
+    #if {"$guild" == "mage"} {
+        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+            #var summon_dmg[vaf][$tmpSummonItem][round][damage] 0;
+            #var summon_dmg[vaf][$tmpSummonItem][round][hits] 0;
+        };
+    };
 };
 
 #action {^%* hits you for %d damage!$} {
@@ -427,8 +433,17 @@ dreset;
     };
     
     #if {"$guild" == "mage"} {
-        #echo {\nAverage Spell damage : $spell_dmg[avg] over $spell_dmg[rnd] rounds.  Total: $spell_dmg[dmg] damage.};
-        #echo {\High Spell damage : $spell_dmg[high]};
+        #format spell_dmg[avg] {%g} {$spell_dmg[avg]};
+        #local tempTotalSpellDmg 0;
+        #format tempTotalSpellDmg {%M} {$spell_dmg[dmg]};
+        #replace tempTotalSpellDmg {G} {B};
+
+        #local tempHighSpellDmg 0;
+        #format tempHighSpellDmg {%M} {$spell_dmg[high]};
+        #replace tempHighSpellDmg {G} {B};
+
+        #echo {\nAverage Spell damage : $spell_dmg[avg] over $spell_dmg[rnd] rounds.  Total: $tempTotalSpellDmg damage.};
+        #echo {\High Spell damage : $tempHighSpellDmg};
         #echo {\nAverage Golem damage : $golem_dmg[avg] over $golem_dmg[rnd] rounds.  Total: $golem_dmg[dmg] damage.};
         #echo {\High Golem damage : $golem_dmg[high]};
     };

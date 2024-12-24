@@ -109,7 +109,7 @@
 
 #alias spellDmgRecord {
 
-}
+};
 
 #ACTION {^%* blow was deflected.$} {summonDmgRecord {%1} deflected};
 #ACTION {^%* strike was ineffective.$} {summonDmgRecord {%1} ineffective};
@@ -142,9 +142,10 @@
 #ACTION {^%* beat %* like a red-headed step child.$} {summonDmgRecord {%1} step_child};
 #ACTION {^%* drop-kicked %*.$} {summonDmgRecord {%1} dropkick};
 
-#NOP #action {} {spellDmgRecord de};
-#NOP #action {} {spellDmgRecord murderominates};
-#NOP #action {} {spellDmgRecord obliterificatifies};
+#NOP #action {%* de-%*!!!} {spellDmgRecord de};
+#NOP #action {%* wtfpwns %*.} {spellDmgRecord wtfpwns};
+#NOP #action {%* murderominates %*.} {spellDmgRecord murderominates};
+#NOP #action {%* obliterificatifies %*.} {spellDmgRecord obliterificatifies};
 #NOP #action {%* gives %* COVID-19.} {spellDmgRecord covid};
 #NOP #action {%* royally %!@'s %* up!!!} {spellDmgRecord fucks};
 #NOP #action {%* slams into %* so hard, your downgrade gets closer!!!} {spellDmgRecord downgrade};
@@ -173,6 +174,55 @@
 #NOP #action {The %* utterly destroyed %*!} {spellDmgRecord destroyed};
 #NOP #action {Your %* thundered into %*!} {spellDmgRecord thundered};
 
+
+#alias summonDmgRecordVaf {
+    #var foundItem 0;
+    #format summonType {%p} {%1};
+    #format summonDmg {%d} {%2};
+    #list summon_types_list find {%i$summonType} {foundItem};
+    #var tmpRound $total_rounds;
+    #if $foundItem {
+        #math summon_dmg[vaf][$summonType][round][hits] {$summon_dmg[vaf][$summonType][round][hits] + 1};
+        #math summon_dmg[vaf][$summonType][round][damage] {$summon_dmg[vaf][$summonType][round][damage] + $summonDmg};
+        #math summon_dmg[vaf][$summonType][total][hits] {$summon_dmg[vaf][$summonType][total][hits] + 1};
+        #math summon_dmg[vaf][$summonType][total][damage] {$summon_dmg[vaf][$summonType][total][damage] + $summonDmg};
+        #if {$summon_dmg[vaf][$summonType][last_round] == $total_rounds} {#NOP} {
+            #math summon_dmg[vaf][$summonType][total][rounds] {$summon_dmg[vaf][$summonType][total][rounds] + 1};
+            #var summon_dmg[vaf][$summonType][last_round] $total_rounds;
+        };
+    };
+};
+
+#alias summonDmgVaf {
+    #format dmgSummary {<dfa>%+20s %+9s %+9s %+9s %+9s<088>} {Summon} {Hits/Rnd} {Dmg/Hit} {Dmg/Rnd} {Total};
+    #echo $dmgSummary;
+
+    #var summon_dmg[current_round] $total_rounds;
+    #math summon_dmg[tracked_rounds] {$summon_dmg[current_round] - $summon_dmg[first_round]};
+    #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+        #math summonPerHitDmg {$summon_dmg[vaf][$tmpSummonItem][total][damage] / $summon_dmg[vaf][$tmpSummonItem][total][hits]};
+        #math summonHitsPerRnd {$summon_dmg[vaf][$tmpSummonItem][total][hits] / $summon_dmg[vaf][$tmpSummonItem][total][rounds] * 1.0};
+        #math summonPerRoundDmg {$summon_dmg[vaf][$tmpSummonItem][total][damage] / $summon_dmg[vaf][$tmpSummonItem][total][rounds] * 1.0};
+        
+        #format summonPerHitDmg {%d} {$summonPerHitDmg};
+        #format summonPerHitDmg {%g} {$summonPerHitDmg};
+        #format summonTotalDmg {%M} {$summon_dmg[vaf][$tmpSummonItem][total][damage]};
+        #replace summonTotalDmg {G} {B};
+        #format summonPerRoundDmg {%d} {$summonPerRoundDmg};
+        #format summonPerRoundDmg {%g} {$summonPerRoundDmg};
+        #format summon_dmg[tracked_rounds_rep] {%g} {$summon_dmg[tracked_rounds]};
+
+        #if {$summonTotalDmg > 0} {
+            #if {"$summon" == "Something"} {#var summon Phantasmal Killer};
+            #format dmgSummary {%+20s %+9s %+9s %+9s %+9s} {$tmpSummonItem} {$summonHitsPerRnd} {$summonPerHitDmg} {$summonPerRoundDmg} {$summonTotalDmg};
+            #echo $dmgSummary;
+        };
+    };
+    #echo {<dfa>---------- TOTAL ROUNDS: $summon_dmg[tracked_rounds_rep] ----------<088>};
+};
+
+#action {A %* hit for %d damage!$} {summonDmgRecordVaf {%1} {%2}};
+#action {^0 hit for %d damage!$} {summonDmgRecordVaf {Something} {%1}};
 
 
 #class dmgtracker_mage close;
