@@ -196,6 +196,12 @@
     #if $foundItem {
         #math summon_dmg[vaf][$summonType][round][hits] {$summon_dmg[vaf][$summonType][round][hits] + 1};
         #math summon_dmg[vaf][$summonType][round][damage] {$summon_dmg[vaf][$summonType][round][damage] + $summonDmg};
+        #if {$summon_dmg[vaf][$summonType][total][best] > 0} {#NOP} {#var summon_dmg[vaf][$summonType][total][best] 0};
+        #math new_best {$summonDmg > $summon_dmg[vaf][$summonType][total][best]};
+        #if $new_best {
+            #var summon_dmg[vaf][$summonType][total][best] $summonDmg;
+            #echo {<dfa>NEW BEST $summonType ROUND: $summon_dmg[vaf][$summonType][total][best]<088>};
+        };
         #math summon_dmg[vaf][$summonType][total][hits] {$summon_dmg[vaf][$summonType][total][hits] + 1};
         #math summon_dmg[vaf][$summonType][total][damage] {$summon_dmg[vaf][$summonType][total][damage] + $summonDmg};
         #if {$summon_dmg[vaf][$summonType][last_round] == $total_rounds} {#NOP} {
@@ -211,7 +217,7 @@
 };
 
 #alias summonDmgVaf {
-    #format dmgSummary {<dfa>%+20s %+9s %+9s %+9s %+9s<088>} {Summon} {Hits/Rnd} {Dmg/Hit} {Dmg/Rnd} {Total};
+    #format dmgSummary {<dfa>%+20s %+9s %+9s %+9s %+9s %+9s<088>} {Summon} {Hits/Rnd} {Dmg/Hit} {Dmg/Rnd} {Best} {Total};
     #echo $dmgSummary;
 
     
@@ -228,17 +234,25 @@
         #format summonPerRoundDmg {%d} {$summonPerRoundDmg};
         #format summonPerRoundDmg {%g} {$summonPerRoundDmg};
         #format summon_dmg[tracked_rounds_rep] {%g} {$summon_dmg[rnd]};
+        #format summonBestDmg {%g} {$summon_dmg[vaf][$tmpSummonItem][total][best]};
 
         #if {$summonTotalDmg > 0} {
             #if {"$summon" == "Something"} {#var summon Phantasmal Killer};
-            #format dmgSummary {%+20s %+9s %+9s %+9s %+9s} {$tmpSummonItem} {$summonHitsPerRnd} {$summonPerHitDmg} {$summonPerRoundDmg} {$summonTotalDmg};
+            #format dmgSummary {%+20s %+9s %+9s %+9s %+9s %+9s} {$tmpSummonItem} {$summonHitsPerRnd} {$summonPerHitDmg} {$summonPerRoundDmg} {$summonBestDmg} {$summonTotalDmg};
             #echo $dmgSummary;
         };
     };
     #echo {<dfa>---------- TOTAL ROUNDS: $summon_dmg[tracked_rounds_rep] ----------<088>};
 };
 
-#action {A %* hit for %d damage!$} {summonDmgRecordVaf {%1} {%2}};
+#NOP -- Some mob names are very different from their name on summon list/normal melee - we'll manually override these;
+#action {A %* hit for %d damage!$} {
+    #format summonType {%p} {%1};
+    #if {"$summonType" == "Shimmering Black Displacer Beast"} {
+        #var summonType Displacer Beast;
+    };
+    summonDmgRecordVaf {$summonType} {%2}
+};
 #action {^%* (%w Golem) hit for %d damage!$} {summonDmgRecordVaf {%2 golem} {%3}};
 #action {^0 hit for %d damage!$} {summonDmgRecordVaf {Something} {%1}};
 
