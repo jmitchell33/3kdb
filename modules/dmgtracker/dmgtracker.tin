@@ -106,18 +106,6 @@
 };
 
 #alias {dreset} {
-    #var golem_dmg[curr] 0;
-    #var golem_dmg[avg] 0;
-    #var golem_dmg[rnd] 0;
-    #var golem_dmg[high] 0;
-    #var golem_dmg[dmg] 0;
-
-    #var spell_dmg[curr] 0;
-    #var spell_dmg[avg] 0;
-    #var spell_dmg[rnd] 0;
-    #var spell_dmg[dmg] 0;
-    #var spell_dmg[high] 0;
-
     #var dmgt[curr] 0;
     #var dmgt[avg] 0;
     #var dmgt[count] 0;
@@ -154,20 +142,13 @@
         #var cmbt[category][${item[name]}][high] 0;
     };
 
-    #var golem_dmg[curr] 0;
-    #var golem_dmg[avg] 0;
-    #var golem_dmg[rnd] 0;
-    #var golem_dmg[high] 0;
-    #var golem_dmg[dmg] 0;
-
-    #var spell_dmg[curr] 0;
-    #var spell_dmg[avg] 0;
-    #var spell_dmg[rnd] 0;
-    #var spell_dmg[dmg] 0;
-    #var spell_dmg[high] 0;
-
     #var dog[rnd] 0;
     #var dog[dmg] 0;
+
+    #if {"$guild" == "mage"} {
+        summonDmg-clear;
+        spellDmg-clear;
+    };
 };
 
 dreset;
@@ -300,6 +281,17 @@ dreset;
 
 #NOP -- If you've just conjured undeads with necromancer, ignore those;
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
+    #if {"$guild" == "mage"} {
+        #var summonDmgNewRound 1;
+        #var tempHighSummonDmg 0;
+        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+            #math tempHighSummonDmg {$tempHighSummonDmg + $summon_dmg[vaf][$tmpSummonItem][round][damage]};
+        };
+        #if {$tempHighSummonDmg > $summon_dmg[high]} {
+            #var summon_dmg[high] $tempHighSummonDmg;
+            #echo {<eaa>NEW BEST SUMMON ROUND: $tempHighSummonDmg<088>};
+        };
+    };
     #if {"$guild" == "necromancer" && "%2" == "Undead"} {#NOP} {
         #var vaf[numbers] 1;
         #var incombat 1;
@@ -385,16 +377,6 @@ dreset;
         .dmg_round_reset;
     }
 } {2};
-
-#act {{^El Jefe (.*) hit for (\d+) damage.$}} {
-    #var incombat 1;
-    #var golem_dmg[curr] %3;#math golem_dmg[dmg] {$golem_dmg[dmg] + %3};
-    #math golem_dmg[rnd] {$golem_dmg[rnd] + 1};
-    #math {golem_dmg[avg]} {$golem_dmg[dmg] / $golem_dmg[rnd]};
-
-    #math new_best {$golem_dmg[curr] > $golem_dmg[high]};
-    #if $new_best {#var golem_dmg[high] $golem_dmg[curr]};
-} {2};
     
 
 #act {{^(.*) hits you for (\d+) damage\!$}} {
@@ -433,18 +415,31 @@ dreset;
     };
     
     #if {"$guild" == "mage"} {
+
         #format spell_dmg[avg] {%g} {$spell_dmg[avg]};
         #local tempTotalSpellDmg 0;
         #format tempTotalSpellDmg {%M} {$spell_dmg[dmg]};
         #replace tempTotalSpellDmg {G} {B};
 
-        #local tempHighSpellDmg 0;
         #format tempHighSpellDmg {%g} {$spell_dmg[high]};
+
+        #var tempTotalSummonDmg 0;
+        #var tempAvgSummonDmg 0;
+        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+            #math tempTotalSummonDmg {$tempTotalSummonDmg + $summon_dmg[vaf][$tmpSummonItem][total][damage]};
+        };
+        #math tempAvgSummonDmg {$tempTotalSummonDmg / $summon_dmg[rnd]};
+        #format tempAvgSummonDmg {%g} {$tempAvgSummonDmg};
+
+        #format tempTotalSummonDmg {%M} {$tempTotalSummonDmg};
+        #replace tempTotalSummonDmg {G} {B};
+
+        #format tempHighSummonDmg {%g} {$summon_dmg[high]};
 
         #echo {\nAverage Spell damage : $spell_dmg[avg] over $spell_dmg[rnd] rounds.  Total: $tempTotalSpellDmg damage.};
         #echo {\High Spell damage : $tempHighSpellDmg};
-        #echo {\nAverage Golem damage : $golem_dmg[avg] over $golem_dmg[rnd] rounds.  Total: $golem_dmg[dmg] damage.};
-        #echo {\High Golem damage : $golem_dmg[high]};
+        #echo {\nAverage Summon damage : $tempAvgSummonDmg over $summon_dmg[rnd] rounds.  Total: $tempTotalSummonDmg damage.};
+        #echo {\High Summon damage : $tempHighSummonDmg};
     };
     
     #echo {\n------- DAMAGE BY # OF HTIS -------};
