@@ -9,6 +9,23 @@
      };
 };
 
+#NOP -- turn gags on;
+#alias {gagson} {
+     gag+ combat_area;
+     gag+ combat_items;
+     gag+ hpbar;
+     #gag {  --> %*};
+     #gag {%*-hp-}
+ };
+ 
+ #alias {gagsoff} {
+     gag- combat_area;
+     gag- combat_items;
+     gag- hpbar;
+     #ungag {  --> %*};
+     #ungag {%*-hp-}
+ };
+
 #NOP -- Random aliases for mage;
 #alias {tap} {unwrap 1;cast spell tap on corpse;cast corpse blast};
 
@@ -18,25 +35,85 @@
      cast activate c
 };
 
-#NOP -- einsteins brain (+3 int);
-#alias {ein_brain} {
-     n;w;n;n;e;n;
-     enter;
-     e;e;e;s;s;e;e;n;n;n;
-     trail;ne;climb gate;
-     w;search tree;
-     e;e;n;n;enter;
-     unlock paperholder;
-     turn paperholder;
-     climb bench;stagedive;
-     climb down;out;
-     s;s;w;unlock door;open door;n
- };
-
 #NOP -- offensive single target damage spell (acid arrow - acid dmg);
 #alias {acid1} {
      cast perform as cast acid arrow;
      cast activate c
+};
+
+#NOP -- offensive single target damage spell (prismatic spray - multi non e/b damage);
+#alias {multi-dmg} {
+     cast perform as cast prismatic spray;
+     cast activate c
+};
+
+#NOP -- offensive single target damage spell (burning hands - fire damage);
+#alias {fire1} {
+     cast perform as cast burning hands;
+     cast activate c
+};
+
+#alias ref2 {make-forge;make-daggers;refmage};
+
+#NOP -- fabricate (make daggers x12);
+#alias {make-daggers} {
+     #12 {cast fabricate as dagger#dagger#dagger};
+     #12 {get dagger}
+};
+
+#NOP -- fabricate (forge);
+#alias {make-forge} {
+     cast fabricate as item#forge#forge;
+     get forge;
+     keep forge
+};
+
+#NOP -- reforger pxp for mages;
+#alias {refmage} {
+     #12 {cast fabricate as dagger#dagger#dagger};
+     cast fabricate as item#forge#forge;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get dagger;
+     reforge dagger with little from edged to penetrate;
+     dispose dagger;
+     get forge;
+     dispose forge
+};
+
+#alias {refd} {
+     #12 {reforge dagger with little from edged to penetrate;dispose dagger}
 };
 
 #NOP -- mage identify;
@@ -70,48 +147,157 @@
      cast identify on %0 27;
      cast identify on %0 28;
      cast identify on %0 29;
-     cast identify on %0 30;
-};
-
-#NOP -- setup contingency with defenses;
-#alias {setup_c} {
-     cast contingency as armor#cast armor;
-     cast contingency as shield#cast magnificent shield;
-     cast contingency as major globe#cast major globe;
-     cast contingency as stoneskin#cast stoneskin
+     cast identify on %0 30
 };
 
 #NOP -- setup defense;
-#alias {setup_defense} {clear_c;setup_c;
+#alias {setup_defense} {
+     clear_gc;
+     clear_c;
+     setup_gc;
+     setup_c;
      #delay 2 {prots_armor};
      #delay 4 {prots_ms};
      #delay 6 {prots_MG};
      #delay 8 {prots_ss};
      #delay 10 {prots_mb};
      #delay 12 {prots_pfe};
-     #delay 14 {prots_pa};
-     #delay 16 {prots_blink}};
+     #delay 14 {prots_ps}
+};
+
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+     cast contingency as protection from evil#cast protection from evil
+};
 
 #NOP -- clear contingency;
 #alias {clear_c} {
-     #10 {cast remove contingency as 1};
-     clear_prots
+     #10 {cast remove contingency as 1}
 };
 
-#NOP -- numpad off & on;
-#alias {numoff} {
-     #class numpad kill
+#NOP -- greater contingency;
+#alias {setup_gc} {
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+     cast greater contingency as major globe#cast major globe;
+     cast greater contingency as stoneskin#cast stoneskin;
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as armor#cast armor
 };
+
+#NOP -- clear greater contingency;
+#alias {clear_gc} {#10 cast remove greater contingency as 1};
 
 #alias {numon} {
      #read chars/$user/numpad.tin
 };
  
 #NOP -- aliases to setup strategies;
-#alias {mystrat} {strategy-clear;strategy slow;strategy super_sub;strategy super_er;strategy golem_assist;strategy summon_haste;strategy phantasmal;strategy edrain;strategy feeblemind};
+#NOP -- default strategy;
+#alias {mystrategy} {
+     strategy-clear;
+     strategy slow;
+     strategy super_er;
+     strategy golem_assist;
+     strategy summon_mf;
+     strategy spelltap;
+     strategy gstrength;
+     strategy rolm
+};
 
+#NOP -- clear strategies;
 #alias {stclear} {
      strategy-clear
+};
+
+#NOP - aliases for setting up summon config & strategies;
+#alias {killmode} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 10##2#1500#70#defend#summons#always;
+     ms 9##2#1500#70#assist#summons#always
+};
+
+#alias {killmode2} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 10##2#1500#70#assist#summons#always;
+     ms 9##2#1500#70#assist#summons#always
+};
+
+#alias {killmode3} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 10##2#1500#70#defend#summons#always;
+     ms 9##2#1500#70#defend#summons#always
+};
+
+#alias {killmode4} {
+     clear_sconfig;
+     shoo;
+     mystrategy;
+     ms 9##2#1500#70#defend#summons#always;
+     ms 10##2#1500#70#assist#summons#always
+};
+
+#NOP -- aliases to setup strategies for phantasmal killer;
+#NOP -- toggle phantasmal killer on and off;
+#alias {pkiller} {
+     strategy phantasmal
+};
+
+#NOP -- toggle casting monstrous fortitude on phantasmal killer on and off;
+#alias {pkmf} {
+     strategy phantasmal_mf
+};
+
+#NOP -- aliases to setup corpsetrigs;
+#NOP -- solo kill trig;
+#alias {mycorpsetrig} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast2;
+     corpsetrig+ divvy;
+     corpsetrig+ getAll;
+     corpsetrig+ crafting;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook;
+     corpsetrig+ szCaps;
+     corpsetrig+ szGreenCap
+};
+
+#NOP -- solo kill trig without get all;
+#alias {mycorpsetrig-noget} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast2;
+     corpsetrig+ divvy;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook
+};
+
+#NOP -- party kill trig;
+#alias {mycorpsetrig-party} {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ study spellbook;
+     corpsetrig+ study spellbook
+};
+
+#alias {corpseoff} {
+     corpsetrig-off
+};
+ 
+#alias {corpseon} {
+     corpsetrig-on
+};
+ 
+#alias {corpseclear} {
+     corpsetrig-clear
 };
 
 #NOP -- aliases to setup corpsetrigs;
@@ -168,10 +354,115 @@
      exa
 };
 
+#NOP -- QUICK WALKS TO ROOMVNUMS
+#alias {wa} {#map run %1}
 
-#NOP --KNIGHT TOUR GAMES
-#alias {knight6} {play;start;dt6};
-#alias {knight8} {play;start;dt8};
-#alias {winaxe} {play;start;#5 throw axe};
+#NOP -- knight tour games;
+#alias {knight6} {
+     play;
+     start;
+     #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
+ 
+#alias {knight8} {
+     play;
+     start;
+     #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+ 
+#alias {winaxe} {
+     play;
+     start;
+     #5 throw axe
+};
 
-#class {player_aliases} {close};
+#NOP -- wannabe 3kdb aliases;
+
+#alias format_wannabesaliases {
+     #format {wannaalias_name} {%-25s} {%1};
+     #format {wannaalias_desc} {%-30s} {%2};
+     #showme $wannaalias_name $wannaalias_desc;
+};
+ 
+#alias wanna3kdb {
+     #var tempflag 0;
+     #var number &wanna3kdb[];
+     #showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+     #showme {<ccf>  -------    <ffa>WANNABE'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+     #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
+     #showme {                  <eaf>guild spells<088>                        };
+     #showme {<ccf>  ----------------------------------------   <088>  };
+     #showme {<ccf>     Name                 Usage              <088>  };
+     #list wanna3kdb index name;
+     #list wanna3kdb sort;
+     #foreach $wanna3kdb[%*] index {
+         #regexp {"%1"} {"$index[type]"} {
+             #var tempflag 1;
+             format_wannabesaliases {     $index[name]} {$index[desc]};
+         }
+     };
+     #if !$tempflag {
+         #foreach $wanna3kdb[%*] index {
+             format_wannabesaliases {     $index[name]} {$index[desc]};
+         };
+     };
+};
+ 
+#list wanna3kdb clear;
+ 
+#NOP -- corpses;
+#list wanna3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Corpsetrig for soloing}}};
+#list wanna3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list wanna3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list wanna3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list wanna3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list wanna3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
+ 
+#NOP -- boosts;
+#list wanna3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list wanna3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
+ 
+#NOP - combat;
+#list wanna3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies}}};
+#list wanna3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
+ 
+#NOP -- misc;
+#list wanna3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list wanna3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list wanna3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list wanna3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list wanna3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list wanna3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+ 
+#NOP -- guild;
+#list wanna3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
+#list wanna3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
+#list wanna3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
+#list wanna3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
+#list wanna3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
+#list wanna3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (highest ms tanking)}}};
+#list wanna3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
+#list wanna3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
+#list wanna3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (highest ms assisting)}}};
+
+#NOP -- spells;
+#list wanna3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
+#list wanna3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison dmg)}}};
+#list wanna3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg)}}};
+#list wanna3kdb add {{{name} {multi-dmg} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b damage)}}};
+#list wanna3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
+#list wanna3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg)}}};
+#list wanna3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
+#list wanna3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+#list wanna3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
+#list wanna3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
+#list wanna3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
+#list wanna3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+#list wanna3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg)}}};
+#list wanna3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
+#list wanna3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
+#list wanna3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
+#list wanna3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+#list wanna3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
+
+#class {player_aliases} {close}
