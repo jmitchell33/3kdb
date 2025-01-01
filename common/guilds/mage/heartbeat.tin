@@ -45,7 +45,11 @@
 
     #if !$idle_flag {
         #if {$my[coins] > 2100} {#var ffetch_coins 1} {#var ffetch_coins 0};
-        #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {#var go_fetch 1;ffetch gem};
+        #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {
+            #var go_fetch 1;
+            ffetch gem;
+            #list stats[gem] add $total_rounds;
+        };
 
         #NOP -- Conditions to stop bot (low sps or low mental cognition (MC));
         #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {

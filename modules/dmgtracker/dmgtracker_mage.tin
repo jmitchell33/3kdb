@@ -182,36 +182,38 @@
 #NOP #action {Your %* thundered into %*!} {spellDmgRecord thundered};
 
 
-#alias summonDmgRecordVaf { 
-    #if {$summonDmgNewRound} {
-        #var summonDmgNewRound 0;
-        #math summon_dmg[rnd] {$summon_dmg[rnd] + 1};
-    };
-
-    #var foundItem 0;
-    #format summonType {%p} {%1};
-    #format summonDmg {%d} {%2};
-    #list summon_types_list find {%i$summonType} {foundItem};
-    #var tmpRound $total_rounds;
-    #if $foundItem {
-        #math summon_dmg[vaf][$summonType][round][hits] {$summon_dmg[vaf][$summonType][round][hits] + 1};
-        #math summon_dmg[vaf][$summonType][round][damage] {$summon_dmg[vaf][$summonType][round][damage] + $summonDmg};
-        #if {$summon_dmg[vaf][$summonType][total][best] > 0} {#NOP} {#var summon_dmg[vaf][$summonType][total][best] 0};
-        #math new_best {$summonDmg > $summon_dmg[vaf][$summonType][total][best]};
-        #if $new_best {
-            #var summon_dmg[vaf][$summonType][total][best] $summonDmg;
-            #echo {<dfa>NEW BEST $summonType ROUND: $summon_dmg[vaf][$summonType][total][best]<088>};
+#alias summonDmgRecordVaf {
+    #if !$ewell_round {
+        #if {$summonDmgNewRound} {
+            #var summonDmgNewRound 0;
+            #math summon_dmg[rnd] {$summon_dmg[rnd] + 1};
         };
-        #math summon_dmg[vaf][$summonType][total][hits] {$summon_dmg[vaf][$summonType][total][hits] + 1};
-        #math summon_dmg[vaf][$summonType][total][damage] {$summon_dmg[vaf][$summonType][total][damage] + $summonDmg};
-        #if {$summon_dmg[vaf][$summonType][last_round] == $total_rounds} {#NOP} {
-            #loop 1 &my[summons][] tmpSummonIndex {
-                #regex {$summonType} {%i$my[summons][$tmpSummonIndex][name]} {
-                    #math summon_dmg[vaf][$summonType][count] {$summon_dmg[vaf][$summonType][count] + $my[summons][$tmpSummonIndex][count]};
-                };
+
+        #var foundItem 0;
+        #format summonType {%p} {%1};
+        #format summonDmg {%d} {%2};
+        #list summon_types_list find {%i$summonType} {foundItem};
+        #var tmpRound $total_rounds;
+        #if $foundItem {
+            #math summon_dmg[vaf][$summonType][round][hits] {$summon_dmg[vaf][$summonType][round][hits] + 1};
+            #math summon_dmg[vaf][$summonType][round][damage] {$summon_dmg[vaf][$summonType][round][damage] + $summonDmg};
+            #if {$summon_dmg[vaf][$summonType][total][best] > 0} {#NOP} {#var summon_dmg[vaf][$summonType][total][best] 0};
+            #math new_best {$summonDmg > $summon_dmg[vaf][$summonType][total][best]};
+            #if $new_best {
+                #var summon_dmg[vaf][$summonType][total][best] $summonDmg;
+                #echo {<dfa>NEW BEST $summonType ROUND: $summon_dmg[vaf][$summonType][total][best]<088>};
             };
-            #math summon_dmg[vaf][$summonType][total][rounds] {$summon_dmg[vaf][$summonType][total][rounds] + 1};
-            #var summon_dmg[vaf][$summonType][last_round] $total_rounds;
+            #math summon_dmg[vaf][$summonType][total][hits] {$summon_dmg[vaf][$summonType][total][hits] + 1};
+            #math summon_dmg[vaf][$summonType][total][damage] {$summon_dmg[vaf][$summonType][total][damage] + $summonDmg};
+            #if {$summon_dmg[vaf][$summonType][last_round] == $total_rounds} {#NOP} {
+                #loop 1 &my[summons][] tmpSummonIndex {
+                    #regex {$summonType} {%i$my[summons][$tmpSummonIndex][name]} {
+                        #math summon_dmg[vaf][$summonType][count] {$summon_dmg[vaf][$summonType][count] + $my[summons][$tmpSummonIndex][count]};
+                    };
+                };
+                #math summon_dmg[vaf][$summonType][total][rounds] {$summon_dmg[vaf][$summonType][total][rounds] + 1};
+                #var summon_dmg[vaf][$summonType][last_round] $total_rounds;
+            };
         };
     };
 };
