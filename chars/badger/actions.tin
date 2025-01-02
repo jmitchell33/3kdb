@@ -3,7 +3,7 @@
 
 #NOP -- switch mech from assault to defend;
 #action {dealt the killing blow} {
-    #if {!$idle_flag && $mechswitchtoggle} {
+    #if {!$idle_flag && "$guild" == "juggernaut" && $mechswitchtoggle} {
         #send {support defend}
     };
 } {1};
@@ -49,8 +49,14 @@
 #NOP -- reflexes;
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        stimheal1;
-        fdeener
+        #if {"$guild" == "juggernaut"} {
+            stimheal1;
+            fdeener;
+        };
+        #if {"$guild" == "mage"} {
+            unwrap;
+            cast corpse blast
+        };
     };
 };
 
