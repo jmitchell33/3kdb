@@ -6,10 +6,10 @@
 
 /* Set numbers ansi for tracking */
 #NOP aset numbers_pref [31;1m[Dmg]: [0m
-#alias {dmgaset} {#send {aset numbers_pref [31;1m[Dmg]: [0m}}
+#NOP #alias {dmgaset} {#send {aset numbers_pref [31;1m[Dmg]: [0m}}
 
 /* Hightlight Numbers */
-#substitute {[Dmg]: You hit %* %d time%*for %d damage.} {<faa>[DMG]:<088> <fff>You hit %1 %2 time%3for<088> <faf>%4<088> <fff>damage.<088>}
+#NOP #substitute {[Dmg]: You hit %* %d time%*for %d damage.} {<faa>[DMG]:<088> <fff>You hit %1 %2 time%3for<088> <faf>%4<088> <fff>damage.<088>}
 
 /* Initialize variables */
 #var dmg[rnd][cur] 0
@@ -22,7 +22,7 @@
 #var dmg[tot] 0
 
 /* Action to capture dmg msg */
-#action {^[Dmg]: You hit %* %d time%*for %d damage.$} {
+#action {^You hit %* %d time%*for %d damage.$} {
 	#NOP Set current hit dmg;
 	#var dmg[cur][hit] %4;
 
@@ -54,7 +54,7 @@
 
 	#NOP Calculate new average;
 	#math {dmg[avg]} {$dmg[tot]/$dmg[rnd][tot]}
-}
+} {2};
 
 /* Alias to display dmg data */
 #alias {dmg} {

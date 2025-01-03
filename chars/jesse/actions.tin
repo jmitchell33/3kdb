@@ -4,31 +4,32 @@
 #NOP -- reflexes;
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        unwrap 1;
-        envelop corpse;
-        collect dna from corpse
+        unwrap;
+        cast corpse blast
     };
 };
+
+#NOP -- Touch aegis rune immediately on seeing inductor;
+#act {^-M-_A Colossal Inductor} {touch aegis rune} {1};
 
 #NOP -- auto update linktell list;
 #action {[%w enters the game]} {
     #if {!$idle_flag} {
-        mywhosync;
+        mywhosync
     };
 } {1};
 
 #action {[%w reconnects]} {
     #if {!$idle_flag} {
-        mywhosync;
+        mywhosync
     };
 } {1};
 
 #action {[%w disconnects]} {
     #if {!$idle_flag} {
-        mywhosync;
+        mywhosync
     };
 } {1};
-
 
 
 #class {player_actions} {close}

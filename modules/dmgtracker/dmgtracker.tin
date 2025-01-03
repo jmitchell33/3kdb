@@ -120,6 +120,8 @@
     #var cmbt[affects][bloodfuse] 0;
     #var cmbt[affects][clutch] 0;
     #var cmbt[affects][jump] 0;
+    #var cmbt[affects][punch] 0;
+    #var cmbt[affects][kick] 0;
     #var cmbt[penetration][round] 0;
     #var cmbt[penetration][total] 0;
     #var cmbt[extra_attacks][round] 0;
@@ -127,6 +129,7 @@
     #var cmbt[crit][round] 0;
     #var cmbt[crit][total] 0;
     #var ewell_round 0;
+    #var fry_round 0;
 
     #var dmgt[curr] 0;
     #var dmgt[avg] 0;
@@ -174,7 +177,7 @@ dreset;
 #action {^Your tactical advantage ends.$} {#var cmbt[affects][tactician] 0} {2};
 
 
-#ACTION {^[%d] %* {mind warp|sunspear|incinerate|frostbite}%*} {
+#ACTION {^[%d] %* {mind warp|sunspear|incinerate|frostbite|burning hands|acid arrow|disintegrate|prismatic spray|venomous spray}%*} {
     #var incombat 1;
     #var spell_dmg[curr] %1;
     #math spell_dmg[dmg] {$spell_dmg[dmg] + %1};
@@ -252,6 +255,15 @@ dreset;
 } {2};
 
 #alias .dmg_round_reset {
+    #var cmbt[affects][big_game_hunter] 0;
+    #var cmbt[affects][assassin] 0;
+    #var cmbt[affects][tactician] 0;
+    #var cmbt[affects][magician] 0;
+    #var cmbt[affects][drunken_master] 0;
+    #var cmbt[affects][bloodfuse] 0;
+    #var cmbt[affects][jump] 0;
+    #var cmbt[affects][punch] 0;
+    #var cmbt[affects][kick] 0;
     #var cmbt[affects][shield_bash] 0;
     #var cmbt[affects][witch_hat] 0;
     #var cmbt[affects][iprime] 0;
@@ -379,6 +391,15 @@ dreset;
                         dmgTrack convoke_${cmbt[affects][convoke]} $dmgAmount $dmgTimes;
                         #math cmbt[affects][convoke] {$cmbt[affects][convoke] + 1};
                     };
+                    #if {$cmbt[affects][jump]} {
+                        dmgTrack jump $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][punch]} {
+                        dmgTrack punch $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][kick]} {
+                        dmgTrack kick $dmgAmount $dmgTimes;
+                    };
                 };
             };
         };
@@ -388,10 +409,10 @@ dreset;
 } {2};
     
 
-#act {{^(.*) hits you for (\d+) damage\!$}} {
+#act {%1 hits you for %2 damage!} {
     #var incombat 1;
-    #var dmgt[curr] %3;
-    #math dmgt[dmg] {$dmgt[dmg] + %3};
+    #var dmgt[curr] %2;
+    #math dmgt[dmg] {$dmgt[dmg] + %2};
     #math dmgt[count] {$dmgt[count] + 1};
     #math {dmgt[avg]} {$dmgt[dmg] / $dmgt[count]};
 } {2};
@@ -456,7 +477,7 @@ dreset;
         #echo {$item[name] hits : @formatThousands{$item[avg]} Avg. achieved $item[count] times};
     };
 
-    #echo {\nDamage taken   : @formatThousands{$dmgt[avg]} over @formatThousands{$dmgt[count]} hits.  Total: @formatThousands{$dmgt[dmg]} damage.\n};
+    #echo {\nDamage taken   : Average @formatThousands{$dmgt[avg]} over @formatThousands{$dmgt[count]} hits.  Total: @formatThousands{$dmgt[dmg]} damage.\n};
 
     #math {dog[avg]} {$dog[dmg] / $dog[rnd]};
     #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
@@ -469,11 +490,38 @@ dreset;
 } {2};
 
 #NOP Juggernaut Dmg report;
+#NOP -- death from above;
 #action {You jump attack %* for %*. \{%d\}} {
     #var dmgTimes 1;
     #var dmgAmount %3;
     dmgTrack jump $dmgAmount $dmgTimes;
 } {2};
+
+#NOP -- punch;
+#action {You punch %* for %* damage. \{%d\}} {
+    #var dmgTimes 1;
+    #var dmgAmount %3;
+    dmgTrack punch $dmgAmount $dmgTimes;
+} {2};
+
+#NOP -- kick;
+#action {You kick %* for %* damage. \{%d\}} {
+    #var dmgTimes 1;
+    #var dmgAmount %3;
+    dmgTrack kick $dmgAmount $dmgTimes;
+} {2};
+
+#NOP -- jugger crititcal hit;
+#NOP #action {The computer chirps 'A critical hit was scored!'};
+
+#NOP -- truck;
+#NOP #action {%* is %* by your tank. \{%d\}};
+
+#NOP -- mount;
+#NOP #action {%* is %* by your %*. \{%d\}};
+
+#NOP -- support;
+#NOP #action {%*'s Jugger Support Mech fires at %* and %*. \{%d\}};
 
 #NOP Mob Dodge Tracking;
 #action {%* deftly slips away from your attack!$} {dodgeTrack};
