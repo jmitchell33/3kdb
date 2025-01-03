@@ -301,12 +301,14 @@ dreset;
     #if {"$guild" == "mage"} {
         #var summonDmgNewRound 1;
         #var tempHighSummonDmg 0;
-        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
-            #math tempHighSummonDmg {$tempHighSummonDmg + $summon_dmg[vaf][$tmpSummonItem][round][damage]};
-        };
-        #if {$tempHighSummonDmg > $summon_dmg[high]} {
-            #var summon_dmg[high] $tempHighSummonDmg;
-            #echo {<eaa>NEW BEST SUMMON ROUND: $tempHighSummonDmg<088>};
+        #if {!$ewell_round && !$fry_round} {
+            #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+                #math tempHighSummonDmg {$tempHighSummonDmg + $summon_dmg[vaf][$tmpSummonItem][round][damage]};
+            };
+            #if {$tempHighSummonDmg > $summon_dmg[high]} {
+                #var summon_dmg[high] $tempHighSummonDmg;
+                #echo {<eaa>NEW BEST SUMMON ROUND: $tempHighSummonDmg<088>};
+            };
         };
     };
     #if {"$guild" == "necromancer" && "%2" == "Undead"} {#NOP} {
