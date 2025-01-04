@@ -83,9 +83,12 @@
     #class guild_heartbeat kill;
     #class guild_hpbar kill;
     #class guild_mage_defense_tracker kill;
+    #class dmgtracker_mage kill;
     #class guild_miphp kill;
     #class guild_summoner kill;
     #class guild_tickers kill;
+    #class guild_vars kill;
+    #class guild_strategy kill;
 };
 
 #alias .kill_player_classes {
@@ -246,7 +249,7 @@
     #if {"%1" == "assemble"} {
         #read modules/crafting/assemble.tin;
         #send stashlist;
-        #delay 2 {killassembler};
+        #delay 2 {#class {autoassemble} {kill}};
     };
 };
 
@@ -266,40 +269,34 @@
     };
 };
 
-#alias .gswap {
+#NOP -- gswap;
+#alias {.gswap} {
+    #NOP -- kill guild classes;
+    .kill_guild_classes;
+    #NOP -- kill dmgtracker;
+    #class dmgtracker kill;
+    #NOP -- load new guild variable;
     #var guild %0;
-
     #NOP -- load common;
     #read common/index.tin;
-    #read common/bot/bots.tin;
-    #read modules/helpers/helpers.tin;
-
-    #NOP -- Kill existing guild classes;
-    #class {guild_actions} kill;
-    #class {guild_aliases} kill;
-    #class {guild_gags} kill;
-    #class {guild_heartbeat} kill;
-    #class {guild_miphp} kill;
-    #class {guild_tickers} kill;
-    #class {guild_vars} kill;
-
     #NOP -- load new guild;
     #read common/guilds/$guild/index.tin;
-    
-    #NOP -- load character-specific;
+    #NOP -- load character;
+    #read chars/$user/vars.tin;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
     #read chars/$user/config.tin;
     #read chars/$user/heartbeat.tin;
     #read chars/$user/miphp.tin;
     #read chars/$user/private.tin;
-    #read chars/$user/styles.tin;
-
+    #read chars/$user/tickers.tin;
     #delay 4 {
-        mipon;
-        init_screen;
-        (powers;
+        postload;
+        init_screen
     };
 };
+
+
+
 
 #class {default_aliases} {close}

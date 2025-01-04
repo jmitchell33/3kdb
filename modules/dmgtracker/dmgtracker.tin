@@ -120,6 +120,8 @@
     #var cmbt[affects][bloodfuse] 0;
     #var cmbt[affects][clutch] 0;
     #var cmbt[affects][jump] 0;
+    #var cmbt[affects][punch] 0;
+    #var cmbt[affects][kick] 0;
     #var cmbt[penetration][round] 0;
     #var cmbt[penetration][total] 0;
     #var cmbt[extra_attacks][round] 0;
@@ -127,6 +129,7 @@
     #var cmbt[crit][round] 0;
     #var cmbt[crit][total] 0;
     #var ewell_round 0;
+    #var fry_round 0;
 
     #var dmgt[curr] 0;
     #var dmgt[avg] 0;
@@ -174,7 +177,7 @@ dreset;
 #action {^Your tactical advantage ends.$} {#var cmbt[affects][tactician] 0} {2};
 
 
-#ACTION {^[%d] %* {mind warp|sunspear|incinerate|frostbite}%*} {
+#ACTION {^[%d] %* {mind warp|sunspear|incinerate|frostbite|burning hands|acid arrow|disintegrate|prismatic spray|venomous spray}%*} {
     #var incombat 1;
     #var spell_dmg[curr] %1;
     #math spell_dmg[dmg] {$spell_dmg[dmg] + %1};
@@ -245,9 +248,22 @@ dreset;
  
 #action {^The brilliant sphere of energy explodes!} {
     #var ewell_round 1;
-} {2}
+} {2};
+
+#action {Energy flashes down from the sky, frying %*!} {
+    #var fry_round 1;
+} {2};
 
 #alias .dmg_round_reset {
+    #var cmbt[affects][big_game_hunter] 0;
+    #var cmbt[affects][assassin] 0;
+    #var cmbt[affects][tactician] 0;
+    #var cmbt[affects][magician] 0;
+    #var cmbt[affects][drunken_master] 0;
+    #var cmbt[affects][bloodfuse] 0;
+    #var cmbt[affects][jump] 0;
+    #var cmbt[affects][punch] 0;
+    #var cmbt[affects][kick] 0;
     #var cmbt[affects][shield_bash] 0;
     #var cmbt[affects][witch_hat] 0;
     #var cmbt[affects][iprime] 0;
@@ -261,6 +277,7 @@ dreset;
     #var cmbt[extra_attacks][round] 0;
     #var cmbt[crit][round] 0;
     #var ewell_round 0;
+    #var fry_round 0;
     #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
     #if {"$guild" == "mage"} {
         #foreach *summon_dmg[vaf][%*] tmpSummonItem {
@@ -284,12 +301,14 @@ dreset;
     #if {"$guild" == "mage"} {
         #var summonDmgNewRound 1;
         #var tempHighSummonDmg 0;
-        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
-            #math tempHighSummonDmg {$tempHighSummonDmg + $summon_dmg[vaf][$tmpSummonItem][round][damage]};
-        };
-        #if {$tempHighSummonDmg > $summon_dmg[high]} {
-            #var summon_dmg[high] $tempHighSummonDmg;
-            #echo {<eaa>NEW BEST SUMMON ROUND: $tempHighSummonDmg<088>};
+        #if {!$ewell_round && !$fry_round} {
+            #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+                #math tempHighSummonDmg {$tempHighSummonDmg + $summon_dmg[vaf][$tmpSummonItem][round][damage]};
+            };
+            #if {$tempHighSummonDmg > $summon_dmg[high]} {
+                #var summon_dmg[high] $tempHighSummonDmg;
+                #echo {<eaa>NEW BEST SUMMON ROUND: $tempHighSummonDmg<088>};
+            };
         };
     };
     #if {"$guild" == "necromancer" && "%2" == "Undead"} {#NOP} {
@@ -307,69 +326,82 @@ dreset;
 
         #if {$vaf[numbers]} {#var incombat 1};
 
-        #if !$ewell_round {
-            dmgTrack total $dmgAmount $dmgTimes;
-
-            #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
-                dmgTrack fury $dmgAmount $dmgTimes;
-            };
-
-            #if {"$guild" == "necromancer" && $my[necromancer][glamors][raging]} {
-                dmgTrack rage $dmgAmount $dmgTimes;
-            };
-
-            #NOP -- If it's an iprime or eradication round, pull those out;
-            #if {$cmbt[affects][eradication] || $cmbt[affects][iprime]} {
-                #if {$cmbt[affects][eradication]} {
-                    dmgTrack eradication $dmgAmount $dmgTimes;
-                };
-
-                #if {$cmbt[affects][iprime]} {
-                    dmgTrack iprime $dmgAmount $dmgTimes;
-                };
+        #if {!$ewell_round} {
+            #if $fry_round {
+                dmgTrack Fry $dmgAmount $dmgTimes;
             } {
-                #if {$mob[lucanus_ring]} {
-                    dmgTrack lucanus $dmgAmount $dmgTimes;
+                dmgTrack total $dmgAmount $dmgTimes;
+
+                #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
+                    dmgTrack fury $dmgAmount $dmgTimes;
                 };
-                #if {$cmbt[affects][lucanus_cloak]} {
-                    dmgTrack lucan_cloak $dmgAmount $dmgTimes;
+
+                #if {"$guild" == "necromancer" && $my[necromancer][glamors][raging]} {
+                    dmgTrack rage $dmgAmount $dmgTimes;
                 };
-                #if {$cmbt[affects][big_game_hunter]} {
-                    dmgTrack BGH $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][assassin]} {
-                    dmgTrack assassin $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][tactician]} {
-                    dmgTrack tactician $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][magician]} {
-                    dmgTrack magician $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][drunken_master]} {
-                    dmgTrack DM $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][bloodfuse]} {
-                    dmgTrack bloodfuse $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][bloodarc]} {
-                    dmgTrack bloodarc $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][clutch]} {
-                    dmgTrack clutch $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][grasp]} {
-                    dmgTrack grasp $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][skullfire]} {
-                    dmgTrack skullfire $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][witch_hat]} {
-                    dmgTrack WitchHat $dmgAmount $dmgTimes;
-                };
-                #if {$cmbt[affects][convoke]} {
-                    dmgTrack convoke_${cmbt[affects][convoke]} $dmgAmount $dmgTimes;
-                    #math cmbt[affects][convoke] {$cmbt[affects][convoke] + 1};
+
+                #NOP -- If it's an iprime or eradication round, pull those out;
+                #if {$cmbt[affects][eradication] || $cmbt[affects][iprime]} {
+                    #if {$cmbt[affects][eradication]} {
+                        dmgTrack eradication $dmgAmount $dmgTimes;
+                    };
+
+                    #if {$cmbt[affects][iprime]} {
+                        dmgTrack iprime $dmgAmount $dmgTimes;
+                    };
+                } {
+                    #if {$mob[lucanus_ring]} {
+                        dmgTrack lucanus $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][lucanus_cloak]} {
+                        dmgTrack lucan_cloak $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][big_game_hunter]} {
+                        dmgTrack BGH $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][assassin]} {
+                        dmgTrack assassin $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][tactician]} {
+                        dmgTrack tactician $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][magician]} {
+                        dmgTrack magician $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][drunken_master]} {
+                        dmgTrack DM $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][bloodfuse]} {
+                        dmgTrack bloodfuse $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][bloodarc]} {
+                        dmgTrack bloodarc $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][clutch]} {
+                        dmgTrack clutch $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][grasp]} {
+                        dmgTrack grasp $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][skullfire]} {
+                        dmgTrack skullfire $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][witch_hat]} {
+                        dmgTrack WitchHat $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][convoke]} {
+                        dmgTrack convoke_${cmbt[affects][convoke]} $dmgAmount $dmgTimes;
+                        #math cmbt[affects][convoke] {$cmbt[affects][convoke] + 1};
+                    };
+                    #if {$cmbt[affects][jump]} {
+                        dmgTrack jump $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][punch]} {
+                        dmgTrack punch $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][kick]} {
+                        dmgTrack kick $dmgAmount $dmgTimes;
+                    };
                 };
             };
         };
@@ -379,10 +411,10 @@ dreset;
 } {2};
     
 
-#act {{^(.*) hits you for (\d+) damage\!$}} {
+#act {%1 hits you for %2 damage!} {
     #var incombat 1;
-    #var dmgt[curr] %3;
-    #math dmgt[dmg] {$dmgt[dmg] + %3};
+    #var dmgt[curr] %2;
+    #math dmgt[dmg] {$dmgt[dmg] + %2};
     #math dmgt[count] {$dmgt[count] + 1};
     #math {dmgt[avg]} {$dmgt[dmg] / $dmgt[count]};
 } {2};
@@ -447,7 +479,7 @@ dreset;
         #echo {$item[name] hits : @formatThousands{$item[avg]} Avg. achieved $item[count] times};
     };
 
-    #echo {\nDamage taken   : @formatThousands{$dmgt[avg]} over @formatThousands{$dmgt[count]} hits.  Total: @formatThousands{$dmgt[dmg]} damage.\n};
+    #echo {\nDamage taken   : Average @formatThousands{$dmgt[avg]} over @formatThousands{$dmgt[count]} hits.  Total: @formatThousands{$dmgt[dmg]} damage.\n};
 
     #math {dog[avg]} {$dog[dmg] / $dog[rnd]};
     #math {cmbt[totalavg]} {$dog[avg] + $cmbt[avg]};
@@ -460,11 +492,38 @@ dreset;
 } {2};
 
 #NOP Juggernaut Dmg report;
+#NOP -- death from above;
 #action {You jump attack %* for %*. \{%d\}} {
     #var dmgTimes 1;
     #var dmgAmount %3;
     dmgTrack jump $dmgAmount $dmgTimes;
 } {2};
+
+#NOP -- punch;
+#action {You punch %* for %* damage. \{%d\}} {
+    #var dmgTimes 1;
+    #var dmgAmount %3;
+    dmgTrack punch $dmgAmount $dmgTimes;
+} {2};
+
+#NOP -- kick;
+#action {You kick %* for %* damage. \{%d\}} {
+    #var dmgTimes 1;
+    #var dmgAmount %3;
+    dmgTrack kick $dmgAmount $dmgTimes;
+} {2};
+
+#NOP -- jugger crititcal hit;
+#NOP #action {The computer chirps 'A critical hit was scored!'};
+
+#NOP -- truck;
+#NOP #action {%* is %* by your tank. \{%d\}};
+
+#NOP -- mount;
+#NOP #action {%* is %* by your %*. \{%d\}};
+
+#NOP -- support;
+#NOP #action {%*'s Jugger Support Mech fires at %* and %*. \{%d\}};
 
 #NOP Mob Dodge Tracking;
 #action {%* deftly slips away from your attack!$} {dodgeTrack};

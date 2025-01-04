@@ -47,7 +47,10 @@
 #ACTION {^You will not cast spell tap every round in combat.$} {#var spelltap 0} {1};
 
 #ACTION {^%* darts out of the room.$} {#var go_fetch 1} {1};
-#ACTION {^%* darts into the room.$} {#var go_fetch 0} {1};
+#ACTION {^%* darts into the room.$} {
+    #NOP -- When your familiar comes back, give it 2 rounds to update your stat lines before sending it out again if necessary;
+    #delay 5 {#var go_fetch 0};
+} {1};
 
 #action {^You wave your hands and anchor yourself to the spot!$} {#var my[anchor] 1;};
 #action {^Your anchor has been dispelled!$} {#var my[anchor] 0;};

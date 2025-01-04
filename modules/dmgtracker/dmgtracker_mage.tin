@@ -182,36 +182,38 @@
 #NOP #action {Your %* thundered into %*!} {spellDmgRecord thundered};
 
 
-#alias summonDmgRecordVaf { 
-    #if {$summonDmgNewRound} {
-        #var summonDmgNewRound 0;
-        #math summon_dmg[rnd] {$summon_dmg[rnd] + 1};
-    };
-
-    #var foundItem 0;
-    #format summonType {%p} {%1};
-    #format summonDmg {%d} {%2};
-    #list summon_types_list find {%i$summonType} {foundItem};
-    #var tmpRound $total_rounds;
-    #if $foundItem {
-        #math summon_dmg[vaf][$summonType][round][hits] {$summon_dmg[vaf][$summonType][round][hits] + 1};
-        #math summon_dmg[vaf][$summonType][round][damage] {$summon_dmg[vaf][$summonType][round][damage] + $summonDmg};
-        #if {$summon_dmg[vaf][$summonType][total][best] > 0} {#NOP} {#var summon_dmg[vaf][$summonType][total][best] 0};
-        #math new_best {$summonDmg > $summon_dmg[vaf][$summonType][total][best]};
-        #if $new_best {
-            #var summon_dmg[vaf][$summonType][total][best] $summonDmg;
-            #echo {<dfa>NEW BEST $summonType ROUND: $summon_dmg[vaf][$summonType][total][best]<088>};
+#alias summonDmgRecordVaf {
+    #if !$ewell_round {
+        #if {$summonDmgNewRound} {
+            #var summonDmgNewRound 0;
+            #math summon_dmg[rnd] {$summon_dmg[rnd] + 1};
         };
-        #math summon_dmg[vaf][$summonType][total][hits] {$summon_dmg[vaf][$summonType][total][hits] + 1};
-        #math summon_dmg[vaf][$summonType][total][damage] {$summon_dmg[vaf][$summonType][total][damage] + $summonDmg};
-        #if {$summon_dmg[vaf][$summonType][last_round] == $total_rounds} {#NOP} {
-            #loop 1 &my[summons][] tmpSummonIndex {
-                #regex {$summonType} {%i$my[summons][$tmpSummonIndex][name]} {
-                    #math summon_dmg[vaf][$summonType][count] {$summon_dmg[vaf][$summonType][count] + $my[summons][$tmpSummonIndex][count]};
-                };
+
+        #var foundItem 0;
+        #format summonType {%p} {%1};
+        #format summonDmg {%d} {%2};
+        #list summon_types_list find {%i$summonType} {foundItem};
+        #var tmpRound $total_rounds;
+        #if $foundItem {
+            #math summon_dmg[vaf][$summonType][round][hits] {$summon_dmg[vaf][$summonType][round][hits] + 1};
+            #math summon_dmg[vaf][$summonType][round][damage] {$summon_dmg[vaf][$summonType][round][damage] + $summonDmg};
+            #if {$summon_dmg[vaf][$summonType][total][best] > 0} {#NOP} {#var summon_dmg[vaf][$summonType][total][best] 0};
+            #math new_best {$summonDmg > $summon_dmg[vaf][$summonType][total][best]};
+            #if $new_best {
+                #var summon_dmg[vaf][$summonType][total][best] $summonDmg;
+                #echo {<dfa>NEW BEST $summonType ROUND: $summon_dmg[vaf][$summonType][total][best]<088>};
             };
-            #math summon_dmg[vaf][$summonType][total][rounds] {$summon_dmg[vaf][$summonType][total][rounds] + 1};
-            #var summon_dmg[vaf][$summonType][last_round] $total_rounds;
+            #math summon_dmg[vaf][$summonType][total][hits] {$summon_dmg[vaf][$summonType][total][hits] + 1};
+            #math summon_dmg[vaf][$summonType][total][damage] {$summon_dmg[vaf][$summonType][total][damage] + $summonDmg};
+            #if {$summon_dmg[vaf][$summonType][last_round] == $total_rounds} {#NOP} {
+                #loop 1 &my[summons][] tmpSummonIndex {
+                    #regex {$summonType} {%i$my[summons][$tmpSummonIndex][name]} {
+                        #math summon_dmg[vaf][$summonType][count] {$summon_dmg[vaf][$summonType][count] + $my[summons][$tmpSummonIndex][count]};
+                    };
+                };
+                #math summon_dmg[vaf][$summonType][total][rounds] {$summon_dmg[vaf][$summonType][total][rounds] + 1};
+                #var summon_dmg[vaf][$summonType][last_round] $total_rounds;
+            };
         };
     };
 };
@@ -246,13 +248,221 @@
 };
 
 #NOP -- Some mob names are very different from their name on summon list/normal melee - we'll manually override these;
-#action {A %* hit for %d damage!$} {
+#action {^A %* hit for %d damage!$} {
     #format summonType {%p} {%1};
+    #NOP -- monster summoning 11;
+    #if {"$summonType" == "Fey Sprite"} {
+        #var summonType Fey sprite;
+    };
+    #if {"$summonType" == "Chain Devil"} {
+        #var summonType Chain devil;
+    };
+    #if {"$summonType" == "Celestial Hawk"} {
+        #var summonType Celestial hawk;
+    };
+    #NOP -- monster summoning 10;
+    #if {"$summonType" == "Celestial Lion"} {
+        #var summonType Celestial lion;
+    };
+    #if {"$summonType" == "Shadow Panther"} {
+        #var summonType Shadow panther;
+    };
+    #NOP -- monster summoning 9;
+    #if {"$summonType" == "Beast Owlbear"} {
+        #var summonType Beast owlbear;
+    };
+    #if {"$summonType" == "Demon Hellhound"} {
+        #var summonType Demon hellhound;
+    };
+    #if {"$summonType" == "Fey Dryad"} {
+        #var summonType Fey dryad;
+    };
+    #NOP -- monster summoning 7;
+    #if {"$summonType" == "Hu-goddamn-mongous 10-headed Hydra"} {
+        #var summonType 10-headed hydra;
+    };
+    #if {"$summonType" == "Huge Flaming Phoenix"} {
+        #var summonType Phoenix;
+    };
+    #if {"$summonType" == "Damn Ugly Mind-flayer"} {
+        #var summonType Mind-flayer;
+    };
+    #if {"$summonType" == "Crimson-red Fire Lizard"} {
+        #var summonType Fire lizard;
+    };
+    #if {"$summonType" == "Obsidian-black Gorgon"} {
+        #var summonType Gorgon;
+    };
+    #if {"$summonType" == "Shimmering Spectre"} {
+        #var summonType Spectre;
+    };
+    #if {"$summonType" == "Gargantuan Roper"} {
+        #var summonType Roper;
+    };
+    #if {"$summonType" == "2-headed Ettin"} {
+        #var summonType Ettin;
+    };
+    #if {"$summonType" == "Rock-encrusted Xorn"} {
+        #var summonType Xorn;
+    };
+    #if {"$summonType" == "Fugly Night Hag"} {
+        #var summonType Night hag;
+    };
+    #if {"$summonType" == "Giant Umber Hulk"} {
+        #var summonType Umber hulk;
+    };
+    #if {"$summonType" == "3-headed Chimera"} {
+        #var summonType Chimera;
+    };
+    #if {"$summonType" == "Giant Slug"} {
+        #var summonType Giant slug;
+    };
+    #if {"$summonType" == "Rotting Mummy"} {
+        #var summonType Mummy;
+    };
+    #NOP -- monster summoning 6;
+    #if {"$summonType" == "Disfigured Jackalwere"} {
+        #var summonType Jackalwere;
+    };
+    #if {"$summonType" == "Shimmering Phase Spider"} {
+        #var summonType Phase spider;
+    };
+    #if {"$summonType" == "Stinky-assed Otyugh"} {
+        #var summonType Otyugh;
+    };
+    #if {"$summonType" == "Disfigured Weretiger"} {
+        #var summonType Weretiger;
+    };
+    #if {"$summonType" == "Firey Salamander"} {
+        #var summonType Salamander;
+    };
+    #if {"$summonType" == "Dangerous Rakshasa"} {
+        #var summonType Rakshasa;
+    };
+    #if {"$summonType" == "Near-invisible Wraith"} {
+        #var summonType Wraith;
+    };
+    #if {"$summonType" == "Terrifying Manticore"} {
+        #var summonType Manticore;
+    };
+    #if {"$summonType" == "Terrible Wyvern"} {
+        #var summonType Wyvern;
+    };
+    #if {"$summonType" == "Powerful Ogre Magi"} {
+        #var summonType Ogre magi;
+    };
+    #if {"$summonType" == "Disgusting Carrion Crawler"} {
+        #var summonType Carrion crawler;
+    };
+    #if {"$summonType" == "Rotting Wight"} {
+        #var summonType Wight;
+    };
+    #NOP -- monster summoning 5;
     #if {"$summonType" == "Shimmering Black Displacer Beast"} {
-        #var summonType Displacer Beast;
+        #var summonType Displacer beast;
+    };
+    #if {"$summonType" == "Gnarly 7-headed Hydra"} {
+        #var summonType 7-headed hydra;
+    };
+    #if {"$summonType" == "Giant Poisonous Snake"} {
+        #var summonType Poisonous snake;
+    };
+    #if {"$summonType" == "Disfigured Wereboar"} {
+        #var summonType Wereboar;
+    };
+    #if {"$summonType" == "Nasty Cockatrice"} {
+        #var summonType Cockatrice;
+    };
+    #if {"$summonType" == "Giant Spider"} {
+        #var summonType Giant spider;
+    };
+    #if {"$summonType" == "Swift Leucrotta"} {
+        #var summonType Leucrotta;
+    };
+    #NOP -- monster summoning 4;
+    #if {"$summonType" == "Dark Shadow"} {
+        #var summonType Dark shadow;
+    };
+    #if {"$summonType" == "Huge Owlbear"} {
+        #var summonType Huge owlbear;
+    };
+    #if {"$summonType" == "Giant Constrictive Snake"} {
+        #var summonType Constrictive snake;
+    };
+    #if {"$summonType" == "Carnivorous Ape"} {
+        #var summonType Carnivorous ape;
+    };
+    #if {"$summonType" == "Rotting Ghast"} {
+        #var summmonType Rotting ghast;
+    };
+    #if {"$summonType" == "Disfigured Werewolf"} {
+        #var summonType Werewolf;
+    };
+    #if {"$summonType" == "5-headed Hydra"} {
+        #var summonType 5-headed hydra;
+    };
+    #if {"$summonType" == "Froth-mouthed Hell Hound"} {
+        #var summonType Hell hound;
+    };
+    #if {"$summonType" == "Large Ice Toad"} {
+        #var summonType Ice toad;
+    };
+    #if {"$summonType" == "Stony Gargoyle"} {
+        #var summonType Gargoyle;
     };
     summonDmgRecordVaf {$summonType} {%2}
 };
+
+#action {^An %* hit for %d damage!$} {
+    #format summonType {%p} {%1};
+    #NOP -- monster summoning 10;
+    #if {"$summonType" == "Undead Wraith"} {
+        #var summonType Wraith;
+    };
+    #NOP -- monster summoning 8;
+    #if {"$summonType" == "Enormous Storm Giant"} {
+        #var summonType Storm giant;
+    };
+    #if {"$summonType" == "Enormous Cloud Giant"} {
+        #var summonType Cloud giant;
+    };
+    #NOP -- monster summoning 7;
+    #if {"$summonType" == "Enormous, 8-headed Pyro-hydra"} {
+        #var summonType pyro-hydra;
+    };
+    #if {"$summonType" == "Enormous Fire Giant"} {
+        #var summonType Fire giant;
+    };
+    #if {"$summonType" == "Enormous Frost Giant"} {
+        #var summonType Frost giant;
+    };
+    #if {"$summonType" == "Enormous Stone Giant"} {
+        #var summonType Stone giant;
+    };
+    #if {"$summonType" == "Enormous Hill Giant"} {
+        #var summonType Hill giant;
+    };
+    #if {"$summonType" == "Enormous Neo-otyugh"} {
+        #var summonType Neo-otyugh;
+    };
+    #NOP -- monster summoning 6;
+    #if {"$summonType" == "Enormous Troll"} {
+        #var summonType Troll;
+    };
+    #if {"$summonType" == "Enormous 8-headed Hydra"} {
+        #var summonType 8-headed hydra;
+    };
+    #NOP -- monster summoning 5;
+    #if {"$summonType" == "Enormous Minotaur"} {
+        #var summonType Minotaur;
+    };
+    #NOP -- monster summoning 4;
+    #if {"$summonType" == "Enormous Poisonous Toad"} {
+        #var summonType Poisonous toad;
+    };
+    summonDmgRecordVaf {$summonType} {%2}
+};
+
 #action {^%* (%w Golem) hit for %d damage!$} {summonDmgRecordVaf {%2 golem} {%3}};
 #action {^0 hit for %d damage!$} {summonDmgRecordVaf {Something} {%1}};
 

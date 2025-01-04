@@ -9,6 +9,293 @@
     };
 };
 
+#NOP -- summon damage summary;
+#alias {sdmg1} {
+    summonDmg
+};
+
+#alias {sdmg2} {
+    summonDmgVaf
+};
+
+#NOP -- aliases to setup strategies for phantasmal killer;
+#NOP -- toggle phantasmal killer on and off;
+#alias {pkiller} {
+    strategy phantasmal
+};
+
+#NOP -- toggle casting monstrous fortitude on phantasmal killer on and off;
+#alias {pkmf} {
+    strategy phantasmal_mf
+};
+
+#NOP -- aliases for setting up summon config & strategies;
+#NOP -- 2 defending & 2 assisting;
+#alias {killmode} {
+    clear_sconfig;
+    shoo;
+    shoo golem;
+    mystrategy;
+    ms 5##2#1500#70#defend#summons#always;
+    ms 5##2#1500#70#assist#summons#always;
+    #delay {4} {cg}
+};
+
+#NOP -- 4 assisting;
+#alias {killmode2} {
+    clear_sconfig;
+    shoo;
+    shoo golem;
+    mystrategy;
+    ms 5##4#1500#70#assist#summons#always;
+    ms golema
+};
+
+#NOP -- 4 defending;
+#alias {killmode3} {
+    clear_sconfig;
+    shoo;
+    shoo golem;
+    mystrategy;
+    ms 5##4#1500#70#defend#summons#always;
+    ms golema
+};
+
+#NOP -- 3 assisting & 1 defending;
+#alias {killmode4} {
+    clear_sconfig;
+    shoo;
+    shoo golem;
+    mystrategy;
+    ms 5##3#1500#70#assist#summons#always;
+    ms 5##1#1500#70#defend#summons#always;
+    #delay {4} {cg}
+};
+
+#NOP -- setup summon configs with custom summons;
+#NOP -- defending summons;
+#alias {summd %1 %2 %3} {
+    cast summon config as monster summoning %1#%2#%3#1500#70#defend#summons#always;
+    cast summon config activate
+};
+
+#NOP -- assisting summons;
+#alias {summa %1 %2 %3} {
+    cast summon config as monster summoning %1#%2#%3#1500#70#assist#summons#always;
+    cast summon config activate
+};
+
+#NOP -- setup defense;
+#alias {setup_defense} {
+    clear_gc;
+    clear_c;
+    setup_gc;
+    setup_c;
+    #delay 2 {prots_armor};
+    #delay 4 {prots_ms};
+    #delay 6 {prots_MG};
+    #delay 8 {prots_ss};
+    #delay 10 {prots_mb};
+    #delay 12 {prots_pfe};
+    #delay 14 {prots_ps}
+};
+
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
+    cast contingency as protection from evil#cast protection from evil
+};
+
+#NOP -- clear contingency;
+#alias {clear_c} {
+    #10 {cast remove contingency as 1}
+};
+
+#NOP -- greater contingency;
+#alias {setup_gc} {
+    cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+    cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+    cast greater contingency as major globe#cast major globe;
+    cast greater contingency as stoneskin#cast stoneskin;
+    cast greater contingency as shield#cast magnificent shield;
+    cast greater contingency as armor#cast armor
+};
+
+#NOP -- clear greater contingency;
+#alias {clear_gc} {
+    #10 {cast remove greater contingency as 1}
+};
+
+#NOP -- mage identify;
+#alias {id} {
+    cast identify on %0 1;
+    cast identify on %0 2;
+    cast identify on %0 3;
+    cast identify on %0 4;
+    cast identify on %0 5;
+    cast identify on %0 6;
+    cast identify on %0 7;
+    cast identify on %0 8;
+    cast identify on %0 9;
+    cast identify on %0 10;
+    cast identify on %0 11;
+    cast identify on %0 12;
+    cast identify on %0 13;
+    cast identify on %0 14;
+    cast identify on %0 15;
+    cast identify on %0 16;
+    cast identify on %0 17;
+    cast identify on %0 18;
+    cast identify on %0 19;
+    cast identify on %0 20;
+    cast identify on %0 21;
+    cast identify on %0 22;
+    cast identify on %0 23;
+    cast identify on %0 24;
+    cast identify on %0 25;
+    cast identify on %0 26;
+    cast identify on %0 27;
+    cast identify on %0 28;
+    cast identify on %0 29;
+    cast identify on %0 30
+};
+
+#NOP -- fabricate (make daggers x12);
+#alias {make-daggers} {
+    #12 {cast fabricate as dagger#dagger#dagger};
+    #12 {get dagger}
+};
+
+#NOP -- fabricate (forge);
+#alias {make-forge} {
+    cast fabricate as item#forge#forge;
+    get forge
+};
+
+#NOP -- cast subjugate (lowers amount of concentration summons require to control);
+#alias {sub} {
+    cast subjugate
+};
+
+#NOP -- cast strength and giant strength (+str);
+#alias {caststr} {
+    cast giant strength on %0;
+    cast strength on %0
+};
+
+#NOP -- monstrous fortitude;
+#alias {mf} {
+    cast monstrous fortitude on %0
+};
+
+#NOP -- charm monster (mob peace);
+#alias {charm} {
+    cast charm monster
+};
+
+#NOP -- mystic immersion (regen sp at twice the normal rate - lasts 3min);
+#alias {cmi} {
+    cast mystic immersion
+};
+
+#NOP -- explosive release (reduce sat);
+#alias {cer} {
+    cast explosive release
+};
+
+#NOP -- polymorph other (turn mobs against each other);
+#alias {pmo} {
+    cast polymorph other on %0
+};
+
+#NOP -- offensive single target damage spell (sunspear - radiation damage);
+#alias {rad1} {
+    repeat off;
+    cast perform as cast sunspear;
+    cast activate c
+};
+
+#alias {rad2} {
+    cast deactivate;
+    repeat combat/cast sunspear/0
+};
+
+#NOP -- offensive single target damage spell (mind warp - mind damage);
+#alias {mind1} {
+    repeat off;
+    cast perform as cast mind warp;
+    cast activate c
+};
+
+#alias {mind2} {
+    cast deactivate;
+    repeat combat/cast mind warp/0
+};
+
+#NOP -- offensive single target damage spell (disintegrate - energy dmg);
+#alias {energy1} {
+    repeat off;
+    cast perform as cast disintegrate;
+    cast activate c
+};
+
+#alias {energy2} {
+    cast deactivate;
+    repeat combat/cast disintegrate/0
+};
+
+#NOP -- offensive single target damage spell (venomous spray - poison dmg);
+#alias {poison1} {
+    repeat off;
+    cast perform as cast venomous spray;
+    cast activate c
+};
+
+#alias {poison2} {
+    cast deactivate;
+    repeat combat/cast venomous spray
+};
+
+#NOP -- offensive single target damage spell (acid arrow - acid dmg);
+#alias {acid1} {
+    repeat off;
+    cast perform as cast acid arrow;
+    cast activate c
+};
+
+#alias {acid2} {
+    cast deactivate;
+    repeat combat/cast acid arrow/0
+};
+
+#NOP -- offensive single target damage spell (prismatic spray - multi non e/b damage);
+#alias {multi-dmg1} {
+    repeat off;
+    cast perform as cast prismatic spray;
+    cast activate c
+};
+
+#alias {multi-dmg2} {
+    cast deactivate;
+    repeat combat/cast prismatic spray/0
+};
+
+#NOP -- offensive single target damage spell (burning hands - fire damage);
+#alias {fire1} {
+    repeat off;
+    cast perform as cast burning hands;
+    cast activate c
+};
+
+#alias {fire2} {
+    cast deactivate;
+    repeat combat/cast burning hands/0
+};
+
+#NOP -- cast find familiar;
+#alias {findfam} {
+    cast find familiar
+};
+
 #NOP -- turn on and off mech switching;
 #alias {mechon} {
     mka+ mechswitch;
@@ -26,25 +313,96 @@
     #delay {6} {#send {support assault fire}}
 };
 
-#NOP -- turn gags on and off;
+#NOP -- turn gags on;
 #alias {gagson} {
-    gag+ combat_area;
-    gag+ combat_items
+    #if {"$guild" == "juggernaut"} {
+        gag+ combat_area;
+    };
+    #if {"$guild" == "mage"} {
+        gag+ combat_area;
+        gag+ hpbar;
+        #gag {  --> %*};
+        #gag {%*-hp-}
+    };
 };
 
+#NOP -- turn gags off;
 #alias {gagsoff} {
-    gag- combat_area;
-    gag- combat_items
+    #if {"$guild" == "juggernaut"} {
+        gag- combat_area;
+        gag- combat_items;
+    };
+    #if {"$guild" == "mage"} {
+        gag- combat_area;
+        gag- hpbar;
+        #ungag {  --> %*};
+        #ungag {%*-hp-}
+    };
+};
+
+#NOP -- reflexes;
+#alias {setup_reflex} {
+    #if {"$guild" == "juggernaut"} {
+        #delay 10 {
+            reflex clear;
+            reflex add sp <50% airdrop;
+            reflex add sp <10% eternal heal badger;
+            reflex add gp1 <90% transpose max;
+            reflex add gp1 <5% drop pants;
+            reflex start;
+        };
+    };
+    #if {"$guild" == "mage"} {
+        #delay 10 {
+            reflex clear;
+            reflex add sp <10% eternal heal badger;
+            reflex add sp <20% cast mystic immersion;
+            reflex add gp2 >40% cast focus mind;
+            reflex add gp2 >90% shoo summons;
+            reflex start
+        };
+    };
+};
+
+#NOP -- setup configs;
+#alias {setup_config} {
+    #if {"$guild" == "juggernaut"} {
+        #delay 15 {
+            mystrategy-mech;
+            mycorpsetrig;
+            gagson;
+            p2;
+        };
+    };
+    #if {"$guild" == "mage"} {
+        #delay 15 {
+            mystrategy;
+            mycorpsetrig;
+            gagson;
+            p2;
+            ash
+        };
+    };
 };
 
 #NOP -- jugger suit swapping;
-#alias {swapsuit %d} {
-    enhance %1;
+#alias {swapsuit} {
+    enhance %0;
     cassist +clear;
     #delay 2 {calltruck};
     #delay 4 {tp};
     #delay 6 {empower};
     #delay 8 {cdefend clear};
+};
+
+#NOP -- rcost;
+#alias {rc} {
+    #if {"$guild" == "juggernaut"} {
+        rcost;
+    };
+    #if {"$guild" == "mage"} {
+        cast rcost
+    };
 };
 
 #NOP -- airdrop;
@@ -104,17 +462,32 @@
 
 #NOP -- guild light;
 #alias {ll} {
-    lowlight
+    #if {"$guild" == "juggernaut"} {
+        lowlight;
+    };
+    #if {"$guild" == "mage"} {
+        cast light
+    };
 };
 
-#NOP -- login jugger exp & gxp progress;
+#NOP -- login exp & gxp progress;
 #alias {p} {
-    gs4
+    #if {"$guild" == "juggernaut"} {
+        gs4;
+    };
+    #if {"$guild" == "mage"} {
+        lstats
+    };
 };
 
-#NOP -- reset login jugger exp & gxp progress;
+#NOP -- reset login exp & gxp progress;
 #alias {p2} {
-    gs4 reset
+    #if {"$guild" == "juggernaut"} {
+        gs4 reset;
+    };
+    #if {"$guild" == "mage"} {
+        lstats reset
+    };
 };
 
 #NOP -- check costs of techs in the field;
@@ -147,20 +520,30 @@
 };
 
 #NOP -- aliases to setup strategies;
-#NOP -- default;
+#NOP -- default strategies;
 #alias {mystrategy} {
-    strategy-clear;
-    strategy rolm;
-    strategy epowers;
-    strategy frenzy;
-    strategy nukes;
+    #if {"$guild" == "juggernaut"} {
+        strategy-clear;
+        strategy rolm;
+        strategy frenzy;
+        strategy nukes;
+    };
+    #if {"$guild" == "mage"} {
+        strategy-clear;
+        strategy slow;
+        strategy super_er;
+        strategy golem_assist;
+        strategy summon_mf;
+        strategy spelltap;
+        #NOP strategy gstrength;
+        strategy rolm
+    };
 };
 
 #NOP -- mech tanking;
 #alias {mystrategy-mech} {
     strategy-clear;
     strategy rolm;
-    strategy epowers;
     strategy frenzy;
     strategy nukes;
     strategy mech_resummon
@@ -173,50 +556,163 @@
 #NOP -- aliases to setup corpsetrigs;
 #NOP -- default corpse trig;
 #alias {mycorpsetrig} {
-    corpsetrig-clear;
-    corpsetrig+ wrap;
-    corpsetrig+ fdeener2;
-    corpsetrig+ bRemains;
-    corpsetrig+ divvy;
-    corpsetrig+ getAll;
-    corpsetrig+ crafting
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ fdeener2;
+        corpsetrig+ bRemains;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig+ spelltap;
+        corpsetrig+ wrap;
+        corpsetrig+ cBlast2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook
+    };
 };
-
+        
 #NOP -- default corpse trig with sz cap eating;
 #alias {mycorpsetrig-sz} {
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ fdeener2;
+        corpsetrig+ bRemains;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ szCaps;
+        corpsetrig+ szGreenCap;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig+ spelltap;
+        corpsetrig+ wrap;
+        corpsetrig+ cBlast2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ szCaps;
+        corpsetrig+ szGreenCap;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook
+    };
+};
+
+#NOP -- corpsetrig without get All;
+#alias {mycorpsetrig-noget} {
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ fdeener2;
+        corpsetrig+ bRemains;
+        corpsetrig+ divvy;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig+ spelltap;
+        corpsetrig+ wrap;
+        corpsetrig+ cBlast2;
+        corpsetrig+ divvy;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook
+    };
+};
+
+#NOP -- party corpsetrig;
+#alias {mycorpsetrig-party} {
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig+ spelltap;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook
+    };
+};
+
+#NOP -- party corpsetrig without spelltap;
+#alias {mycorpsetrig-partynotap} {
     corpsetrig-clear;
-    corpsetrig+ wrap;
-    corpsetrig+ fdeener2;
-    corpsetrig+ bRemains;
-    corpsetrig+ divvy;
-    corpsetrig+ getAll;
-    corpsetrig+ crafting;
-    corpsetrig+ szCaps
+    corpsetrig+ ted2;
+    corpsetrig+ study spellbook;
+    corpsetrig+ study spellbook
 };
 
 #NOP -- corpsetrig for partying with mages;
 #alias {mycorpsetrig-mage} {
-    corpsetrig-clear;
-    corpsetrig+ delay;
-    corpsetrig+ wrap;
-    corpsetrig+ fdeener2;
-    corpsetrig+ bRemains;
-    corpsetrig+ divvy;
-    corpsetrig+ getAll;
-    corpsetrig+ crafting
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ delay;
+        corpsetrig+ wrap;
+        corpsetrig+ fdeener2;
+        corpsetrig+ bRemains;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig- delay;
+        corpsetrig+ spelltap;
+        corpsetrig+ wrap;
+        corpsetrig+ cBlast2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook
+    };
 };
 
 #NOP -- corpsetrig for partying with mages & sz cap eating;
 #alias {mycorpsetrig-magesz} {
-    corpsetrig-clear;
-    corpsetrig+ delay;
-    corpsetrig+ wrap;
-    corpsetrig+ fdeener2;
-    corpsetrig+ bRemains;
-    corpsetrig+ divvy;
-    corpsetrig+ getAll;
-    corpsetrig+ crafting;
-    corpsetrig+ szCaps
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ delay;
+        corpsetrig+ wrap;
+        corpsetrig+ fdeener2;
+        corpsetrig+ bRemains;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ szCaps;
+        corpsetrig+ szGreencap;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig- delay;
+        corpsetrig+ spelltap;
+        corpsetrig+ wrap;
+        corpsetrig+ cBlast2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ szCaps;
+        corpsetrig+ szGreencap;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook
+    };
 };
 
 #alias {corpseoff} {
@@ -266,8 +762,10 @@
     exa
 };
 
-#NOP -- QUICK WALKS TO ROOMVNUMS
-#alias {wa} {#map run %1}
+#NOP -- QUICK WALKS TO ROOMVNUMS;
+#alias {wa} {
+    #map run %1
+};
 
 #NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
 #alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
@@ -304,6 +802,16 @@
     #5 throw axe
 };
 
+#NOP -- gswap;
+#alias {gw} {
+    #switch {"%0"} {
+         #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;despamrod;.gswap juggernaut}};
+         #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;despamrod;.gswap mage}};
+         #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
+         #default {reflex stop;gagsoff;gswap %0;#delay {6} {get all;keep all;wear all;wield rod;despamrod;.gswap %0}};
+    };
+};
+
 #NOP -- badgers 3kdb aliases;
 
 #alias format_badgersaliases {
@@ -318,7 +826,7 @@
 	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
     #showme {<ccf>  -------    <ffa>BADGERS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
     #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
-    #showme {                  <eaf>guild<088>                        };
+    #showme {                  <eaf>guild spells<088>                 };
     #showme {<ccf>  ----------------------------------------   <088>  };
     #showme {<ccf>     Name                 Usage              <088>  };
     #list badger3kdb index name;
@@ -346,6 +854,9 @@
 #list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list badger3kdb add {{{name} {mycorpsetrig-mage} {type} {corpses} {desc} {Corpsetrig for partying with mages}}};
 #list badger3kdb add {{{name} {mycorpsetrig-magesz} {type} {corpses} {desc} {Corpsetrig for partying with mages & sz cap eating}}};
+#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Corpsetrig without get All}}};
+#list badger3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list badger3kdb add {{{name} {mycorpsetrig-partynotap} {type} {corpses} {desc} {Corpsetrig for partying without spelltap}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -364,26 +875,72 @@
 #list badger3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
 #list badger3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
 #list badger3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+#list badger3kdb add {{{name} {wa} {type} {misc} {desc} {Quick walk to roomvnum}}};
+#list badger3kdb add {{{name} {p} {type} {misc} {desc} {login exp & gxp progress}}};
+#list badger3kdb add {{{name} {p2} {type} {misc} {desc} {reset login exp & gxp progress}}};
+#list badger3kdb add {{{name} {ll} {type} {misc} {desc} {Guild light}}};
+#list badger3kdb add {{{name} {rc} {type} {misc} {desc} {Rcost}}};
 
-#NOP -- guild;
-#list badger3kdb add {{{name} {air} {type} {guild} {desc} {Airdrop: heal stim, hp and sp}}};
-#list badger3kdb add {{{name} {ana} {type} {guild} {desc} {Analyze armour AC to self: ana <armour>}}};
-#list badger3kdb add {{{name} {rana} {type} {guild} {desc} {Ranalyze armour AC to room: rana <armour>}}};
-#list badger3kdb add {{{name} {b} {type} {guild} {desc} {Fdeener: use a corpse to heal stim}}};
-#list badger3kdb add {{{name} {cr} {type} {guild} {desc} {Creport: casualty report}}};
-#list badger3kdb add {{{name} {def} {type} {guild} {desc} {Defend a player manually: def <player>}}};
-#list badger3kdb add {{{name} {en} {type} {guild} {desc} {Enhance at a certain percentage of hp: en <hp%>}}};
-#list badger3kdb add {{{name} {gi} {type} {guild} {desc} {Give all items to truck}}};
-#list badger3kdb add {{{name} {gii} {type} {guild} {desc} {Get all items from truck}}};
-#list badger3kdb add {{{name} {fly1} {type} {guild} {desc} {Jumpjet: toggle levitate using jumpjets}}};
-#list badger3kdb add {{{name} {kk} {type} {guild} {desc} {Retarget attacks to another mob: kk <mob>}}};
-#list badger3kdb add {{{name} {ll} {type} {guild} {desc} {Guild light}}};
-#list badger3kdb add {{{name} {p} {type} {guild} {desc} {Gs4: login jugger exp & gxp progress}}};
-#list badger3kdb add {{{name} {p2} {type} {guild} {desc} {Gs4 reset: reset login jugger exp & gxp progress}}};
-#list badger3kdb add {{{name} {rt} {type} {guild} {desc} {Rtech: check costs of techs in the field}}};
-#list badger3kdb add {{{name} {tp} {type} {guild} {desc} {Truck pfocus: toggle plasma focusing for truck}}};
-#list badger3kdb add {{{name} {ts} {type} {guild} {desc} {Truck status: check level of truck}}};
-#list badger3kdb add {{{name} {xm} {type} {guild} {desc} {Examine truck}}};
-#list badger3kdb add {{{name} {swapsuit} {type} {guild} {desc} {Swapping suits: setup basic powers after swapping}}};
+#NOP -- guild -- juggernaut;
+#if {"$guild" == "juggernaut"} {
+    #list badger3kdb add {{{name} {air} {type} {guild} {desc} {Airdrop: heal stim, hp and sp}}};
+    #list badger3kdb add {{{name} {ana} {type} {guild} {desc} {Analyze armour AC to self: ana <armour>}}};
+    #list badger3kdb add {{{name} {rana} {type} {guild} {desc} {Ranalyze armour AC to room: rana <armour>}}};
+    #list badger3kdb add {{{name} {b} {type} {guild} {desc} {Fdeener: use a corpse to heal stim}}};
+    #list badger3kdb add {{{name} {cr} {type} {guild} {desc} {Creport: casualty report}}};
+    #list badger3kdb add {{{name} {def} {type} {guild} {desc} {Defend a player manually: def <player>}}};
+    #list badger3kdb add {{{name} {en} {type} {guild} {desc} {Enhance at a certain percentage of hp: en <hp%>}}};
+    #list badger3kdb add {{{name} {gi} {type} {guild} {desc} {Give all items to truck}}};
+    #list badger3kdb add {{{name} {gii} {type} {guild} {desc} {Get all items from truck}}};
+    #list badger3kdb add {{{name} {fly1} {type} {guild} {desc} {Jumpjet: toggle levitate using jumpjets}}};
+    #list badger3kdb add {{{name} {kk} {type} {guild} {desc} {Retarget attacks to another mob: kk <mob>}}};
+    #list badger3kdb add {{{name} {rt} {type} {guild} {desc} {Rtech: check costs of techs in the field}}};
+    #list badger3kdb add {{{name} {tp} {type} {guild} {desc} {Truck pfocus: toggle plasma focusing for truck}}};
+    #list badger3kdb add {{{name} {ts} {type} {guild} {desc} {Truck status: check level of truck}}};
+    #list badger3kdb add {{{name} {xm} {type} {guild} {desc} {Examine truck}}};
+    #list badger3kdb add {{{name} {swapsuit} {type} {guild} {desc} {Swapping suits: setup basic powers after swapping}}};
+};
+
+#NOP -- guild -- mage;
+#if {"$guild" == "mage"} {
+    #list badger3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
+    #list badger3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
+    #list badger3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
+    #list badger3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
+    #list badger3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
+    #list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (assisting & defending)}}};
+    #list badger3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
+    #list badger3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
+    #list badger3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend)}}};
+};
+    
+#NOP -- spells;
+#list badger3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
+#list badger3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
+#list badger3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
+#list badger3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+#list badger3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
+#list badger3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
+#list badger3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+#list badger3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
+#list badger3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
+#list badger3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
+#list badger3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+#list badger3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
+#list badger3kdb add {{{name} {mind1} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on perform)}}};
+#list badger3kdb add {{{name} {mind2} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on repeat)}}};
+#list badger3kdb add {{{name} {rad1} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on perform)}}};
+#list badger3kdb add {{{name} {rad2} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on repeat)}}};
+#list badger3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison  -- on perform)}}};
+#list badger3kdb add {{{name} {poison2} {type} {spells} {desc} {Offensive: venomous spray (poison dmg -- on repeat)}}};
+#list badger3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on perform)}}};
+#list badger3kdb add {{{name} {acid2} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on repeat)}}};
+#list badger3kdb add {{{name} {multi-dmg1} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on perform)}}};
+#list badger3kdb add {{{name} {multi-dmg2} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on repeat)}}};
+#list badger3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on perform)}}};
+#list badger3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
+#list badger3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
+#list badger3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
+
 
 #class {player_aliases} {close}

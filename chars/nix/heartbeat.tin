@@ -41,9 +41,19 @@
             };
         };
     };
+};
 
+#if {"$guild" == "breed"} {
+    #alias {_player_heartbeat} {
 
+        #if !$idle_flag {
+            #NOP;
+        };
 
+        #if {!$idle_flag && $action_round < $mip[round]} {
+            #NOP;
+        };
+    };
 };
 
 #class {player_heartbeat} {close}

@@ -32,6 +32,13 @@
 	#replace prot_string  {*} { };
 
 	#if {$my[song][rounds] > 0} {#var song_string <CCC><dae>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
+	
+	#list temp clear;
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Karma:$gp1/$gp1_max  Voice:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Karma:$my[gp1][graph] Voice:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {<fff>Prots: $prot_string};
+	#list temp add {$song_string};
+	#var hpbar[prompt] $temp;
 }
 
 #class guild_miphp close;

@@ -78,20 +78,20 @@
     #action {Pfffzzzt!  You transmute:} {#math transmute_count {$transmute_count + 1};};
     #delay .5 {
         #if {"%1" == ""} {
-            #showme {<ddd>    No parameters were provided, please provide a valid parameter such as:  <088>};
-            #showme {<ddd>     transmute_burn consolidate  <088>};
-            #showme {                                                                                         };
-            #showme {<ddd>     Valid parameters include:                                                  <088>  };
-            #showme {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp)          <088>  };
-            #showme {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp)          <088>  };
+            #echo {<ddd>    No parameters were provided, please provide a valid parameter such as:  <088>};
+            #echo {<ddd>     transmute_burn consolidate  <088>};
+            #echo {                                                                                         };
+            #echo {<ddd>     Valid parameters include:                                                  <088>  };
+            #echo {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp)          <088>  };
+            #echo {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp)          <088>  };
 
-            #showme {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp)     <088>  };
-            #showme {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp)     <088>  };
+            #echo {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp)     <088>  };
+            #echo {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp)     <088>  };
         } {
             #send profs;
-            #showme {<ccf>  -------------------------------------------    <088>  };
-            #showme {<ccf>  -------    TRANSMUTING MATERIALS    -------    <088>  };
-            #showme {<ccf>  -------------------------------------------    <088>  };
+            #echo {<ccf>  -------------------------------------------    <088>  };
+            #echo {<ccf>  -------    TRANSMUTING MATERIALS    -------    <088>  };
+            #echo {<ccf>  -------------------------------------------    <088>  };
             update_satchel;
             #delay 4 {
                 #switch {"%1"} {
@@ -110,7 +110,7 @@
                             };
                         };
                         #delay 4 {
-                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
                         };
                     };
@@ -130,7 +130,7 @@
                             };
                         };
                         #delay 4 {
-                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
                         };
                     };
@@ -157,7 +157,7 @@
                             };
                         };
                         #delay 4 {
-                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS  <ccf>  -------    <088>  };
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS  <ccf>  -------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
                         };
                     };
@@ -177,12 +177,12 @@
                             };
                         };
                         #delay 4 {
-                            #showme {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS <ccf>   -------    <088>  };
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS <ccf>   -------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
                         };
                     };
                     #default {
-                        #showme {<ccf>  -------    <faa>No match found, did you mispell %1?         <ccf>  -------    <088>  };
+                        #echo {<ccf>  -------    <faa>No match found, did you mispell %1?         <ccf>  -------    <088>  };
                     };
                 }
                 stash all;

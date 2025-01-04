@@ -1,19 +1,17 @@
 #class helpers open
 
 #action {^Component Name            |   T |  L |  S |  G |  A |  P |  C |  W |} {
-    #action {%*|%d|%d|%d|%d|%d|%d|%d|%d|} {
-        #echo {matched};
-        #format {lower} {%l} {%1};
+    #action {%* |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |} {
+        #format {lower} {%l} {%%1};
         #format {lower} {%p} {$lower};
-        #math {satchel_total} {%2};
-        #math {satchel_legendary} {%3};
-        #math {satchel_superior} {%4};
-        #math {satchel_good} {%5};
-        #math {satchel_average} {%6};
-        #math {satchel_poor} {%7};
-        #math {satchel_crude} {%8};
-        #math {satchel_worthless} {%9};
-
+        #format {satchel_total} {%d} {%%3};
+        #format {satchel_legendary} {%d} {%%5};
+        #format {satchel_superior} {%d} {%%7};
+        #format {satchel_good} {%d} {%%9};
+        #format {satchel_average} {%d} {%%11};
+        #format {satchel_poor} {%d} {%%13};
+        #format {satchel_crude} {%d} {%%15};
+        #format {satchel_worthless} {%d} {%%17};
         #list temp_satchel add {{
             {name} {$lower}
             {total} {$satchel_total}
@@ -30,9 +28,11 @@
 
 #alias update_satchel {
     #list temp_satchel clear;
-    #unaction {%1|%2|%3|%4|%5|%6|%7|%8|%9|};
     #send {stashlist};
-    #line oneshot #action {You have %d/%d items in your satchel.} {#var craft[satchel] $temp_satchel};
+    #line oneshot #action {You have %d/%d items in your satchel.} {
+        #var craft[satchel] $temp_satchel;
+        #unaction {%*|%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |};
+    };
 };
 
 #alias unstash_2 {

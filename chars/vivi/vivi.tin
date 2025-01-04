@@ -1,34 +1,16 @@
-#NOP - 3k Session
-
-#SESSION {3k - Vivi} {3k.org} {3000}
-
-#NOP -- Set player specific variables;
-#var guild mage;
+#NOP -- Set Player specific variables;
 #var user vivi;
-#var theme[name] bright;
-#var my[familiar] Lucky the brown gopher;
 #read chars/$user/vars.tin;
+#var guild mage;
+#var theme[name] bright;
+#var my[familiar] Diablo the brown gopher;
 
-#NOP -- load common;
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
 #read common/index.tin;
 
-#NOP -- load specific modules for this character;
-#read modules/corpsemanager/corpsemanager.tin;
-#read modules/professions/reforger.tin;
-#read modules/helpers/helpers.tin;
-#read modules/dmgtracker/dmgtracker_mage.tin
-
-#NOP -- load guild;
-#read common/guilds/$guild/index.tin;
-#read common/guilds/eternal/eternal.tin;
-
-#NOP -- load character-specific;
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
+#NOP -- Load specific modules for this character;
+#read modules/dmgtracker/dmgtracker_mage.tin;
 #read chars/$user/gags.tin;
 #read chars/$user/subs.tin;
-
-gagson;
-reset_gxp;
+#read chars/$user/private.tin;
