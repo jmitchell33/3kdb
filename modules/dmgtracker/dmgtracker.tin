@@ -122,6 +122,7 @@
     #var cmbt[affects][jump] 0;
     #var cmbt[affects][punch] 0;
     #var cmbt[affects][kick] 0;
+    #var cmbt[affects][point_defense] 0;
     #var cmbt[penetration][round] 0;
     #var cmbt[penetration][total] 0;
     #var cmbt[extra_attacks][round] 0;
@@ -147,6 +148,12 @@
 
     #var dog[rnd] 0;
     #var dog[dmg] 0;
+
+    #if {"$guild" == "juggernaut"} {
+        mountDmg-clear;
+        truckDmg-clear;
+        supportDmg-clear;
+    };
 
     #if {"$guild" == "mage"} {
         summonDmg-clear;
@@ -258,6 +265,7 @@ dreset;
     #var cmbt[affects][jump] 0;
     #var cmbt[affects][punch] 0;
     #var cmbt[affects][kick] 0;
+    #var cmbt[affects][point_defense] 0;
     #var cmbt[affects][shield_bash] 0;
     #var cmbt[affects][witch_hat] 0;
     #var cmbt[affects][iprime] 0;
@@ -396,6 +404,9 @@ dreset;
                     #if {$cmbt[affects][kick]} {
                         dmgTrack kick $dmgAmount $dmgTimes;
                     };
+                    #if {$cmbt[affects][point_defense]} {
+                        dmgTrack pointDefense $dmgAmount $dmgTimes;
+                    };
                 };
             };
         };
@@ -439,6 +450,42 @@ dreset;
             };
         };
     };
+
+    #if {"$guild" == "juggernaut"} {
+
+        #NOP -- mount dmg;
+        #format mount_dmg[avg] {%g} {$mount_dmg[avg]};
+        #local tempTotalMountDmg 0;
+        #format tempTotalMountDmg {%M} {$mount_dmg[dmg]};
+        #replace tempTotalMountDmg {G} {B};
+
+        #format tempHighMountDmg {%g} {$mount_dmg[high]};
+
+        #NOP -- truck dmg;
+        #format truck_dmg[avg] {%g} {$truck_dmg[avg]};
+        #local tempTotalTruckDmg 0;
+        #format tempTotalTruckDmg {%M} {$truck_dmg[dmg]};
+        #replace tempTotalTruckDmg {G} {B};
+
+        #format tempHighTruckDmg {%g} {$truck_dmg[high]};
+
+        #NOP -- support mech dmg;
+        #format support_dmg[avg] {%g} {$support_dmg[avg]};
+        #local tempTotalSupportDmg 0;
+        #format tempTotalSupportDmg {%M} {$support_dmg[dmg]};
+        #replace tempTotalSupportDmg {G} {B};
+
+        #format tempHighSupportDmg {%g} {$support_dmg[high]};
+
+        #echo {\nAverage Mount damage : $mount_dmg[avg] over $mount_dmg[rnd] rounds.  Total: $tempTotalMountDmg damage.};
+        #echo {\High Mount damage : $tempHighMountDmg};
+
+        #echo {\nAverage Truck damage : $truck_dmg[avg] over $truck_dmg[rnd] rounds.  Total: $tempTotalTruckDmg damage.};
+        #echo {\High Truck damage : $tempHighTruckDmg};
+
+        #echo {\nAverage Support Mech damage : $support_dmg[avg] over $support_dmg[rnd] rounds.  Total: $tempTotalSupportDmg damage.};
+        #echo {\High Support Mech damage : $tempHighSupportDmg};
+    };
     
     #if {"$guild" == "mage"} {
 
@@ -480,44 +527,132 @@ dreset;
     #nop showme {Dog Avg: $dog[avg] over $dog[rnd] rounds.  Total dog: $dog[dmg] damage.  Total average: $cmbt[totalavg] damage/rnd.};
 };
 
-#NOP;
+#NOP -- lucanus cloak;
 #action {Your cloak glows as the attack strikes it and suddenly sends a blast of} {
     #var cmbt[affects][lucanus_cloak] 1;
 } {2};
 
-#NOP Juggernaut Dmg report;
+#NOP Juggernaut Dmg tracking;
 #NOP -- death from above;
-#action {You jump attack %* for %*. \{%d\}} {
+#action {^You jump attack %* for %*. \{%d\}$} {
     #var dmgTimes 1;
     #var dmgAmount %3;
     dmgTrack jump $dmgAmount $dmgTimes;
 } {2};
 
 #NOP -- punch;
-#action {You punch %* for %* damage. \{%d\}} {
+#action {^You punch %* for %* damage. \{%d\}$} {
     #var dmgTimes 1;
     #var dmgAmount %3;
     dmgTrack punch $dmgAmount $dmgTimes;
 } {2};
 
 #NOP -- kick;
-#action {You kick %* for %* damage. \{%d\}} {
+#action {^You kick %* for %* damage. \{%d\}$} {
     #var dmgTimes 1;
     #var dmgAmount %3;
     dmgTrack kick $dmgAmount $dmgTimes;
 } {2};
 
+#NOP -- point defense;
+#action {^Point defenses %* target. \{%d\}$} {
+    #var dmgTimes 1;
+    #var dmgAmount %2;
+    dmgTrack pointDefense $dmgAmount $dmgTimes;
+};
+
+#NOP -- point defense debuff;
+#action {^The target is engulfed in flames from your flamethrower.  %* seems distracted by the flames. \{%d\}$} {
+    #var dmgTimes 1;
+    #var dmgAmount %2;
+    dmgTrack pointDefense $dmgAmount $dmgTimes;
+};
+
 #NOP -- jugger crititcal hit;
 #NOP #action {The computer chirps 'A critical hit was scored!'};
 
 #NOP -- truck;
-#NOP #action {%* is %* by your tank. \{%d\}};
+#action {^%* is %* by your tank. \{%d\}$} {
+    #var incombat 1;
+    #var truck_dmg[curr] %3;
+    #math truck_dmg[dmg] {$truck_dmg[dmg] + %3};
+    #math truck_dmg[rnd] {$truck_dmg[rnd] + 1};
+    #math truck_dmg[avg] {$truck_dmg[dmg] / $truck_dmg[rnd]};
+    #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
+    #if $new_best {
+        #var truck_dmg[high] $truck_dmg[curr];
+        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+    };
+
+    #math truck_dmg[%2][dmg] {$truck_dmg[%2][dmg] + $truck_dmg[dmg]};
+    #math truck_dmg[%2][rnd] {$truck_dmg[%2][rnd] + 1};
+    #math truck_dmg[%2][avg] {$truck_dmg[%2][dmg] / $truck_dmg[%2][rnd]};
+
+    #math new_best {$truck_dmg[curr] > $truck_dmg[%2][high]};
+    #if $new_best {#var truck_dmg[%2][high] $truck_dmg[curr]};
+} {2};
+
+#action {^You %* with your tank. \{%d\}$} {
+    #var incombat 1;
+    #var truck_dmg[curr] %2;
+    #math truck_dmg[dmg] {$truck_dmg[dmg] + %2};
+    #math truck_dmg[rnd] {$truck_dmg[rnd] + 1};
+    #math truck_dmg[avg] {$truck_dmg[dmg] / $truck_dmg[rnd]};
+    #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
+    #if $new_best {
+        #var truck_dmg[high] $truck_dmg[curr];
+        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+    };
+
+    #math truck_dmg[%1][dmg] {$truck_dmg[%1][dmg] + $truck_dmg[dmg]};
+    #math truck_dmg[%1][rnd] {$truck_dmg[%1][rnd] + 1};
+    #math truck_dmg[%1][avg] {$truck_dmg[%1][dmg] / $truck_dmg[%1][rnd]};
+
+    #math new_best {$truck_dmg[curr] > $truck_dmg[%1][high]};
+    #if $new_best {#var truck_dmg[%1][high] $truck_dmg[curr]};
+} {2};
 
 #NOP -- mount;
-#NOP #action {%* is %* by your %*. \{%d\}};
+#action {^%* is %* by your {ER PPC|Lrg pulse laser|ER Lrg laser|Mdm pulse laser|ER Mdm Laser|Sml Pulse Laser|ER Sml Laser|Lrm 20|Lrm 15|SSrm 6|Lrm 10|SSrm 4|Lrm 5|SSrm 2|Gauss Rifle|Micro Gauss Rifle|Ultra Ac 10|Ultra Ac 5|Ultra Ac 2|Machine gun}. \{%d\}$} {
+    #var incombat 1;
+    #var mount_dmg[curr] %4;
+    #math mount_dmg[dmg] {$mount_dmg[dmg] + %4};
+    #math mount_dmg[rnd] {$mount_dmg[rnd] + 1};
+    #math mount_dmg[avg] {$mount_dmg[dmg] / $mount_dmg[rnd]};
+    #math new_best {$mount_dmg[curr] > $mount_dmg[high]};
+    #if $new_best {
+        #var mount_dmg[high] $mount_dmg[curr];
+        #ECHO {NEW BEST MOUNT DMG: $mount_dmg[high]};
+    };
 
-#NOP -- support;
-#NOP #action {%*'s Jugger Support Mech fires at %* and %*. \{%d\}};
+    #math mount_dmg[%2][%3][dmg] {$mount_dmg[%2][%3][dmg] + $mount_dmg[dmg]};
+    #math mount_dmg[%2][%3][rnd] {$mount_dmg[%2][%3][rnd] + 1};
+    #math mount_dmg[%2][%3][avg] {$mount_dmg[%2][%3][dmg] / $mount_dmg[%2][%3][rnd]};
+
+    #math new_best {$mount_dmg[curr] > $mount_dmg[%2][%3][high]};
+    #if $new_best {#var mount_dmg[%2][%3][high] $mount_dmg[curr]};
+} {2};
+
+#NOP -- support mech;
+#action {%*'s Jugger Support Mech fires at %* and %*. \{%d\}} {
+    #var incombat 1;
+    #var support_dmg[curr] %4;
+    #math support_dmg[dmg] {$support_dmg[dmg] + %4};
+    #math support_dmg[rnd] {$support_dmg[rnd] + 1};
+    #math support_dmg[avg] {$support_dmg[dmg] / $support_dmg[rnd]};
+    #math new_best {$support_dmg[curr] > $support_dmg[high]};
+    #if $new_best {
+        #var support_dmg[high] $support_dmg[curr];
+        #ECHO {NEW BEST SUPPORT MECH DMG: $support_dmg[high]};
+    };
+
+    #math support_dmg[%3][dmg] {$support_dmg[%3][dmg] + $support_dmg[dmg]};
+    #math support_dmg[%3][rnd] {$support_dmg[%3][rnd] + 1};
+    #math support_dmg[%3][avg] {$support_dmg[%3][dmg] / $support_dmg[%3][rnd]};
+
+    #math new_best {$support_dmg[curr] > $support_dmg[%3][high]};
+    #if $new_best {#var support_dmg[%3][high] $support_dmg[curr]};
+} {2};
 
 #NOP Mob Dodge Tracking;
 #action {%* deftly slips away from your attack!$} {dodgeTrack};
