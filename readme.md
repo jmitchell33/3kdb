@@ -19,7 +19,7 @@ Feel free to contact me on 3k if you have any questions or would like to contrib
 * logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... you would create a folder called logs/jerry
 
 **How does this all work?**
-The name.tin file (byron.tin for example) is where you set the guild and select all of the 'addons' that player has.  
+The name.tin file (byron.tin for example) is where you set the player name, guild, and some other addons like discord webhooks (pushing your tells/chats to a private discord).
 Using Byron as an example:
 
     *#var guild bard;
@@ -29,27 +29,12 @@ Using Byron as an example:
     #var scaler[hotel] 150;
     #var scaler[zelligar] 131;
 
-    /* load common */
-    #read common/index.tin; -- Generic helpers
-    #read common/bot/bots.tin; -- Byron would like access to all the bots
-    #read modules/helpers/helpers.tin; -- More helper functions
+    #NOP -- If discord hooks are setup set this to 1;
+    #var discordPost 1;
 
-    /* load specific modules for this character */
-    #read modules/professions/golem_master.tin;  --Byron is a golem master
-    #read modules/corpsemanager/corpsemanager.tin;  --Byron would like to use the corpse manager module (tracks # of corpses)
-
-    /* load guild */
-    #read common/guilds/$guild/index.tin;   --This loads the bard guild, the #var guild bard; on the first line determines which guild to load
-    #read common/guilds/eternal/eternal.tin; -- Byron is an Eternal and will load the eternal guild
-
-    /* load character-specific */
-    #read chars/$user/actions.tin; -- Actions are "triggers"
-    #read chars/$user/aliases.tin;  -- Byron specific aliases
-    #read chars/$user/config.tin;   --Config.tin
-    #read chars/$user/heartbeat.tin;    -- Heartbeat is executed every round, and is where you put logic like when to heal, use a corpse, etc.
-    #read chars/$user/private.tin; -- This is where you keep your top secret stuff, like the alias to assemble Durskaen.
-
-
+    #NOP -- Load Common files;
+    #NOP -- _load_3kdb_common is located in common/config.tin;
+    #read common/index.tin;
 
 
 # Assumed Guild Defaults
