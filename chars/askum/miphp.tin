@@ -1,0 +1,29 @@
+#class {player_miphp} {kill}
+#class {player_miphp} {open}
+
+#NOP -- This is a custom player hpbar if you do not like the default or want to customize your own; 
+
+#var guild_miphp 0;
+
+#alias {_player_miphp} {
+	#var hpbar_gline_1 @fMipColourConv{$mip[gline][1]};
+	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
+	
+	#replace hpbar_gline_1 {    } {  };
+	#replace hpbar_gline_2 {    } {  };
+	
+	#list temp clear;
+	
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Gp1:$gp1/$gp1_max  Gp2:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Gp1:$my[gp1][graph] Gp2:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {$hpbar_gline_1};
+	#list temp add {$hpbar_gline_2};
+	#var hpbar[prompt] $temp;
+	};
+
+
+#action {^HP} {#line GAG};
+#action {^A:} {#line GAG};
+
+
+#class {player_miphp} {close}
