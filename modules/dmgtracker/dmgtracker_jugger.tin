@@ -6,16 +6,12 @@
 #unvar mount_dmg;
 #unvar truck_dmg;
 #unvar support_dmg;
-#var mount_dmg[first_round] $total_rounds;
-#var truck_dmg[first_round] $total_rounds;
-#var support_dmg[first_round] $total_rounds;
 
 #delay 10 {mountDmg-clear;truckDmg-clear;supportDmg-clear};
 
 #NOP -- reset mount dmg tracking;
 #alias mountDmg-clear {
     #unvar mount_dmg;
-    #var mount_dmg[first_round] $total_rounds;
     #var mount_dmg[curr] 0;
     #var mount_dmg[avg] 0;
     #var mount_dmg[rnd] 0;
@@ -27,7 +23,6 @@
 #NOP -- reset truck dmg tracking;
 #alias truckDmg-clear {
     #unvar truck_dmg;
-    #var truck_dmg[first_round] $total_rounds;
     #var truck_dmg[curr] 0;
     #var truck_dmg[avg] 0;
     #var truck_dmg[rnd] 0;
@@ -39,7 +34,6 @@
 #NOP -- reset support mech dmg tracking;
 #alias supportDmg-clear {
     #unvar support_dmg;
-    #var support_dmg[first_round] $total_rounds;
     #var support_dmg[curr] 0;
     #var support_dmg[avg] 0;
     #var support_dmg[rnd] 0;
