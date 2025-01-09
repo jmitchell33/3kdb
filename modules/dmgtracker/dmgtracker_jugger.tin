@@ -1,0 +1,50 @@
+#class {dmgtracker_jugger} {kill}
+#class {dmgtracker_jugger} {open}
+
+#read $cwd/modules/dmgtracker/data.tin;
+
+#unvar mount_dmg;
+#unvar truck_dmg;
+#unvar support_dmg;
+
+#delay 10 {mountDmg-clear;truckDmg-clear;supportDmg-clear};
+
+#NOP -- reset mount dmg tracking;
+#alias mountDmg-clear {
+    #unvar mount_dmg;
+    #var mount_dmg[curr] 0;
+    #var mount_dmg[avg] 0;
+    #var mount_dmg[rnd] 0;
+    #var mount_dmg[dmg] 0;
+    #var mount_dmg[high] 0;
+    #echo {<dfa> +-+-+-    MOUNT DAMAGE TRACKER RESET    -+-+-+<088>};
+};
+
+#NOP -- reset truck dmg tracking;
+#alias truckDmg-clear {
+    #unvar truck_dmg;
+    #var truck_dmg[curr] 0;
+    #var truck_dmg[avg] 0;
+    #var truck_dmg[rnd] 0;
+    #var truck_dmg[dmg] 0;
+    #var truck_dmg[high] 0;
+    #echo {<dfa> +-+-+-    TRUCK DAMAGE TRACKER RESET    -+-+-+<088>};
+};
+
+#NOP -- reset support mech dmg tracking;
+#alias supportDmg-clear {
+    #unvar support_dmg;
+    #var support_dmg[curr] 0;
+    #var support_dmg[avg] 0;
+    #var support_dmg[rnd] 0;
+    #var support_dmg[dmg] 0;
+    #var support_dmg[high] 0;
+    #var dmg[cur][rnd] 0;
+    #var dmg[rnd][cur] 0;
+    #var dmg[rnd][total] 0;
+    #echo {<dfa> +-+-+-    SUPPORT MECH DAMAGE TRACKER RESET    -+-+-+<088>};
+};
+
+
+
+#class {dmgtracker_jugger} {close}

@@ -9,7 +9,7 @@ touch demon rune;
 #var bot_message_1 '----  CARE BEARS - GOOD ALIGN MOBS ONLY   ----';
 #showme $bot_message_1;
 
-#var {bot[path]} {path;n;e;e;{enter;shake lump};out;w;s;n;n;e;{pull latch;d;search bed};u;w;s;w;w;n;e;n;n;s;s;e;rollout;{search forest;path};w;w;n;s;s;s;enter;w;n;s;e;e;e;n;n;{pry board;d;bend bars;n;turn latch;open door;poke embers;grab diamond};s;u;n;n;w;e;s;s;s;s;w;w;out;n;n;e;e;e;rollout;w;w;s;e;s;path};
+#var {bot[path]} {path;n;e;e;{enter;shake lump;.pause};out;w;s;n;n;e;{pull latch;d;search bed;.pause};u;w;s;w;w;n;e;n;n;s;s;e;rollout;{search forest;path};w;w;n;s;s;s;enter;w;n;s;e;e;e;n;n;{pry board;d;bend bars;n;turn latch;open door;poke embers;grab diamond;.pause};s;u;n;n;w;e;s;s;s;s;w;w;out;n;n;e;e;e;rollout;w;w;s;e;s;path};
 
 #list botmobs clear;
 #list botmobs add {{{long} {Birthday Bear} {target} {birthday bear}}};
@@ -44,6 +44,19 @@ touch demon rune;
 #list botmobs add {{{long} {Bathroom Bear} {target} {bathroom bear}}};
 #list botmobs add {{{long} {Tugs} {target} {tugs}}};
 #list botmobs add {{{long} {Hugs} {target} {hugs}}};
+
+#NOP -- bedtime bear room;
+#action {^As you shake the lump you hear a gutteral growl come from} {#delay 5 {.unpause}} {1};
+#action {^Heh, it was just a pillow.} {.unpause;..} {1};
+
+#NOP -- hugs and tugs bear room;
+#action {^As you approach the bed you can clearly hear muffled sobs coming from} {#delay 5 {.unpause;..}} {1};
+#action {^The bed and blanket appear to have been recently disturbed.} {.unpause;..} {1};
+
+#NOP -- burning bear room;
+#action {^begins to move among the embers and a burning ball of fur jumps out at you.} {#delay 5 {.unpause}} {1};
+#action {^You reach inside and grasp the diamond greedily. You drop it quickly and} {.unpause;..} {1};
+
 
 #class {bot} {close}
 #read common/bot/generic.tin;
