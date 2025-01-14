@@ -4,53 +4,14 @@
 #NOP -- reflexes;
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        unwrap 1;
+        unwrap;
         cast corpse blast
     };
 };
 
-#NOP -- MAGE ACTIONS;
-#action {You devastate the room with a sulfurous stench.} {.pause};
-#action {Brianna attacks} {cast summon config activate};
-#action {Brianna leaves into the game.} {press start};
-#action {Brianna leaves by pausing their game.} {pause game};
-#action {whispers to you: fan} {#if {!$idle_flag} {cast corpse blast;cast corpse blast}};
-#action {Responding to Brianna's call for support} {cast secure shelter;#delay 8 {out}};
-#action {The coffin expels your selected corpse!} {cast corpse blast};
-#action {That corpse has already been tapped.} {cast corpse blast};
-#action {dealt the killing blow} {study spellbook};
-#action {Wannabe kicks you. OUCH!} {#if {!$idle_flag} {shoo}};
-#action #LINE GAG {is already hasted.};
+#action {There is no reason to 'mine' here.} {spelunk};
 
-#NOP -- MAGE ALIASES;
-#alias {ha} {cast haste on summons};
-#alias {sat} {uncooler corpse;cast corpse blast};
-#action {There is no reason to 'mine' here} {spelunk};
-
-#NOP -- COUPLE LOGIN TRIGS
-#action {unload room} {deadman 200};
-
-#NOP --NUMPAD ON OR OFF
-#alias {numoff} {#class numpad kill}
-#alias {numon} {#read chars/utmage/numpad.tin}
-
-#NOP -- setup contingency with defenses;
-#alias {setup_c} {
-    cast contingency as armor#cast armor;
-    cast contingency as shield#cast magnificent shield;
-    cast contingency as major globe#cast major globe;
-    cast contingency as stoneskin#cast stoneskin;
-    #delay 2 {prots_armor};
-    #delay 4 {prots_ms};
-    #delay 6 {prots_mg};
-    #delay 8 {prots_pfe};
-    #delay 10 {prots_mb}
-};
-
-#NOP -- clear contingency;
-#alias {clear_c} {
-    #10 {cast remove contingency as 1};
-    clear_prots
-};
+#NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
+#act {^-M-_A Colossal Inductor} {eternal immortality} {1};
 
 #class {player_actions} {close}

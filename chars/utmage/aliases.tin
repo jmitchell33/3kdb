@@ -1,15 +1,6 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
-#ALIAS {x2# Alias: x2
-# This alias performs an unspecified action.
-}
-{
-  #NOP %1;
-  #SEND {!exa %0};
-  #SEND {!search %0};
-};
-
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
      #if {$bot[active]} {
@@ -33,36 +24,127 @@
      gag- hpbar;
      #ungag {  --> %*};
      #ungag {%*-hp-}
- };
+};
 
-#NOP -- Random aliases for mage;
-#alias {tap} {unwrap 1;cast spell tap on corpse;cast corpse blast};
+#NOP -- cast subjugate (lowers amount of concentration summons require to control);
+#alias {sub} {
+     cast subjugate
+};
+
+#NOP -- cast strength and giant strength (+str);
+#alias {caststr} {
+     cast giant strength on %0;
+     cast strength on %0
+};
+
+#NOP -- monstrous fortitude;
+#alias {mf} {
+     cast monstrous fortitude on %0
+};
+
+#NOP -- charm monster (mob peace);
+#alias {charm} {
+     cast charm monster
+};
+
+#NOP -- mystic immersion (regen sp at twice the normal rate - lasts 3min);
+#alias {cmi} {
+     cast mystic immersion
+};
+
+#NOP -- explosive release (reduce sat);
+#alias {cer} {
+     cast explosive release
+};
+
+#NOP -- polymorph other (turn mobs against each other);
+#alias {pmo} {
+     cast polymorph other on %0
+};
+
+#NOP -- offensive single target damage spell (sunspear - radiation damage);
+#alias {rad1} {
+     repeat off;
+     cast perform as cast sunspear;
+     cast activate c
+};
+
+#alias {rad2} {
+     cast deactivate;
+     repeat combat/cast sunspear/0
+};
+
+#NOP -- offensive single target damage spell (mind warp - mind damage);
+#alias {mind1} {
+     repeat off;
+     cast perform as cast mind warp;
+     cast activate c
+};
+
+#alias {mind2} {
+     cast deactivate;
+     repeat combat/cast mind warp/0
+};
+
+#NOP -- offensive single target damage spell (disintegrate - energy dmg);
+#alias {energy1} {
+     repeat off;
+     cast perform as cast disintegrate;
+     cast activate c
+};
+
+#alias {energy2} {
+     cast deactivate;
+     repeat combat/cast disintegrate/0
+};
 
 #NOP -- offensive single target damage spell (venomous spray - poison dmg);
 #alias {poison1} {
+     repeat off;
      cast perform as cast venomous spray;
      cast activate c
 };
 
+#alias {poison2} {
+     cast deactivate;
+     repeat combat/cast venomous spray
+};
+
 #NOP -- offensive single target damage spell (acid arrow - acid dmg);
 #alias {acid1} {
+     repeat off;
      cast perform as cast acid arrow;
      cast activate c
 };
 
+#alias {acid2} {
+     cast deactivate;
+     repeat combat/cast acid arrow/0
+};
+
 #NOP -- offensive single target damage spell (prismatic spray - multi non e/b damage);
-#alias {multi-dmg} {
+#alias {multi-dmg1} {
+     repeat off;
      cast perform as cast prismatic spray;
      cast activate c
 };
 
+#alias {multi-dmg2} {
+     cast deactivate;
+     repeat combat/cast prismatic spray/0
+};
+
 #NOP -- offensive single target damage spell (burning hands - fire damage);
 #alias {fire1} {
+     repeat off;
      cast perform as cast burning hands;
      cast activate c
 };
 
-#alias ref2 {make-forge;make-daggers;refmage};
+#alias {fire2} {
+     cast deactivate;
+     repeat combat/cast burning hands/0
+};
 
 #NOP -- fabricate (make daggers x12);
 #alias {make-daggers} {
@@ -186,6 +268,7 @@
 
 #NOP -- greater contingency;
 #alias {setup_gc} {
+     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
      cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
      cast greater contingency as major globe#cast major globe;
      cast greater contingency as stoneskin#cast stoneskin;
@@ -194,7 +277,14 @@
 };
 
 #NOP -- clear greater contingency;
-#alias {clear_gc} {#10 cast remove greater contingency as 1};
+#alias {clear_gc} {
+     #10 {cast remove greater contingency as 1}
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+     #class numpad kill
+};
 
 #alias {numon} {
      #read chars/$user/numpad.tin
@@ -206,9 +296,10 @@
      strategy-clear;
      strategy slow;
      strategy super_er;
-     strategy golem_assist;
+     strategy golem_defend;
      strategy summon_mf;
      strategy spelltap;
+     strategy super_sub;
      strategy rolm
 };
 
@@ -217,38 +308,77 @@
      strategy-clear
 };
 
-#NOP - aliases for setting up summon config & strategies;
+#NOP -- aliases for setting up summon config & strategies;
+#NOP -- 2 defending & 2 assisting;
 #alias {killmode} {
      clear_sconfig;
      shoo;
+     shoo golem;
      mystrategy;
      ms 8##2#1500#70#defend#summons#always;
-     ms 7##2#1500#70#assist#summons#always
-};
-
-#alias {killmode2} {
-     clear_sconfig;
-     shoo;
-     mystrategy;
      ms 7##2#1500#70#assist#summons#always;
-     ms 7##2#1500#70#defend#summons#always;
-};
-
-#alias {killmode3} {
+     #delay {4} {cg}
+ };
+ 
+ #NOP -- 4 assisting;
+ #alias {killmode2} {
      clear_sconfig;
      shoo;
+     shoo golem;
      mystrategy;
-     ms 10##2#1500#70#defend#summons#always;
-     ms 9##2#1500#70#defend#summons#always
-};
-
-#alias {killmode4} {
+     ms 7##4#1500#70#assist#summons#always;
+     ms golema
+ };
+ 
+ #NOP -- 4 defending;
+ #alias {killmode3} {
      clear_sconfig;
      shoo;
+     shoo golem;
      mystrategy;
-     ms 9##2#1500#70#defend#summons#always;
-     ms 10##2#1500#70#assist#summons#always
+     ms 7##4#1500#70#defend#summons#always;
+ };
+ 
+ #NOP -- 3 assisting & 1 defending;
+ #alias {killmode4} {
+     clear_sconfig;
+     ms 7##3#1500#70#assist#summons#always;
+     ms 7##1#1500#70#defend#summons#always;
+     #delay {4} {cg}
+ };
+ 
+ #NOP -- setup summon configs with custom summons;
+ #NOP -- defending summons;
+ #alias {summd %1 %2 %3} {
+     cast summon config as monster summoning %1#%2#%3#1500#70#defend#summons#always;
+     cast summon config activate
+ };
+ 
+ #NOP -- assisting summons;
+ #alias {summa %1 %2 %3} {
+     cast summon config as monster summoning %1#%2#%3#1500#70#assist#summons#always;
+     cast summon config activate
+ };
+ 
+
+#alias {killmode6 %1} {
+     clear_sconfig;
+     shoo;
+     ms %1##4#1500#70#defend#summons#always
 };
+
+#NOP -- setup summon configs with custom summons;
+#NOP -- defending summons;
+#alias {summd %1 %2 %3} {
+     cast summon config as monster summoning %1#%2#%3#1500#70#defend#summons#always;
+     cast summon config activate
+ };
+ 
+ #NOP -- assisting summons;
+ #alias {summa %1 %2 %3} {
+     cast summon config as monster summoning %1#%2#%3#1500#70#assist#summons#always;
+     cast summon config activate
+ };
 
 #NOP -- aliases to setup strategies for phantasmal killer;
 #NOP -- toggle phantasmal killer on and off;
@@ -308,40 +438,6 @@
      corpsetrig-clear
 };
 
-#NOP -- aliases to setup corpsetrigs;
-#alias corpsetrig1 {
-     corpsetrig-clear;
-     corpsetrig+ spelltap;
-     corpsetrig+ slab;
-     corpsetrig+ wrap;
-     corpsetrig+ cBlast;
-     corpsetrig+ getAll;
-     corpsetrig+ crafting;
-     corpsetrig+ cocoon;
-     corpsetrig+ spellbook;
-};
-
-#alias {mycorpsetrig-party} {
-     corpsetrig-clear;
-     corpsetrig+ spelltap;
-     corpsetrig+ spellbook;
-};
-
-#alias {corpseoff} {
-     corpsetrig-off
-};
- 
-#alias {corpseon} {
-     corpsetrig-on
-};
- 
-#alias {corpseclear} {
-     corpestrig-clear
-};
-
-#NOP -- Monster summon 5;
-#alias {ms5} {cast monster summoning 5;say all, you are now in group summons;say all, defend always};
-
 #NOP -- einsteins brain (+3 int);
 #alias {ein_brain} {
      n;w;n;n;e;n;
@@ -384,93 +480,105 @@
      #5 throw axe
 };
 
-#NOP -- wannabe 3kdb aliases;
+#NOP -- vivis 3kdb aliases;
 
-#alias format_wannabesaliases {
-     #format {wannaalias_name} {%-25s} {%1};
-     #format {wannaalias_desc} {%-30s} {%2};
-     #showme $wannaalias_name $wannaalias_desc;
+#alias format_vivisaliases {
+     #format {vivialias_name} {%-25s} {%1};
+     #format {vivialias_desc} {%-30s} {%2};
+     #showme $vivialias_name $vivialias_desc;
 };
  
-#alias wanna3kdb {
+#alias vivi3kdb {
      #var tempflag 0;
-     #var number &wanna3kdb[];
+     #var number &vivi3kdb[];
      #showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
-     #showme {<ccf>  -------    <ffa>WANNABE'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+     #showme {<ccf>  -------    <ffa>VIVI'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
      #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
      #showme {                  <eaf>guild spells<088>                        };
      #showme {<ccf>  ----------------------------------------   <088>  };
      #showme {<ccf>     Name                 Usage              <088>  };
-     #list wanna3kdb index name;
-     #list wanna3kdb sort;
-     #foreach $wanna3kdb[%*] index {
+     #list vivi3kdb index name;
+     #list vivi3kdb sort;
+     #foreach $vivi3kdb[%*] index {
          #regexp {"%1"} {"$index[type]"} {
              #var tempflag 1;
-             format_wannabesaliases {     $index[name]} {$index[desc]};
+             format_vivisaliases {     $index[name]} {$index[desc]};
          }
      };
      #if !$tempflag {
-         #foreach $wanna3kdb[%*] index {
-             format_wannabesaliases {     $index[name]} {$index[desc]};
+         #foreach $vivi3kdb[%*] index {
+             format_vivisaliases {     $index[name]} {$index[desc]};
          };
      };
 };
  
-#list wanna3kdb clear;
+#list vivi3kdb clear;
  
 #NOP -- corpses;
-#list wanna3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Corpsetrig for soloing}}};
-#list wanna3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
-#list wanna3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
-#list wanna3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
-#list wanna3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
-#list wanna3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
+#list vivi3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Corpsetrig for soloing}}};
+#list vivi3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list vivi3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list vivi3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list vivi3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list vivi3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
  
 #NOP -- boosts;
-#list wanna3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
-#list wanna3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
+#list vivi3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list vivi3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
  
 #NOP - combat;
-#list wanna3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies}}};
-#list wanna3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
+#list vivi3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies}}};
+#list vivi3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
  
 #NOP -- misc;
-#list wanna3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
-#list wanna3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
-#list wanna3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
-#list wanna3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
-#list wanna3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
-#list wanna3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+#list vivi3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list vivi3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list vivi3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
+#list vivi3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list vivi3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list vivi3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
  
 #NOP -- guild;
-#list wanna3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
-#list wanna3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
-#list wanna3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
-#list wanna3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
-#list wanna3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
-#list wanna3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (highest ms tanking)}}};
-#list wanna3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
-#list wanna3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
-#list wanna3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (highest ms assisting)}}};
+#list vivi3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
+#list vivi3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
+#list vivi3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
+#list vivi3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
+#list vivi3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
+#list vivi3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (assisting & defending)}}};
+#list vivi3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
+#list vivi3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
+#list vivi3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assisting & 1 defend)}}};
 
 #NOP -- spells;
-#list wanna3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
-#list wanna3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison dmg)}}};
-#list wanna3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg)}}};
-#list wanna3kdb add {{{name} {multi-dmg} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b damage)}}};
-#list wanna3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
-#list wanna3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg)}}};
-#list wanna3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
-#list wanna3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
-#list wanna3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
-#list wanna3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
-#list wanna3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
-#list wanna3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
-#list wanna3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg)}}};
-#list wanna3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
-#list wanna3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
-#list wanna3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
-#list wanna3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
-#list wanna3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
+#list vivi3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
+#list vivi3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
+#list vivi3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
+#list vivi3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+#list vivi3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
+#list vivi3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
+#list vivi3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
+#list vivi3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+#list vivi3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
+#list vivi3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
+#list vivi3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
+#list vivi3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+#list vivi3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
+#list vivi3kdb add {{{name} {mind1} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on perform)}}};
+#list vivi3kdb add {{{name} {mind2} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on repeat)}}};
+#list vivi3kdb add {{{name} {rad1} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on perform)}}};
+#list vivi3kdb add {{{name} {rad2} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on repeat)}}};
+#list vivi3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison  -- on perform)}}};
+#list vivi3kdb add {{{name} {poison2} {type} {spells} {desc} {Offensive: venomous spray (poison dmg -- on repeat)}}};
+#list vivi3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on perform)}}};
+#list vivi3kdb add {{{name} {acid2} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on repeat)}}};
+#list vivi3kdb add {{{name} {multi-dmg1} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on perform)}}};
+#list vivi3kdb add {{{name} {multi-dmg2} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on repeat)}}};
+#list vivi3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on perform)}}};
+#list vivi3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
+#list vivi3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
+#list vivi3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
+
+
+
 
 #class {player_aliases} {close}
