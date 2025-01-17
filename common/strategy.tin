@@ -27,17 +27,17 @@
 };
 
 #alias strategy {
-    #list {strategyList} {find} {%0} {tempListIndex};
+    #list {strategyList} {find} {%i%0} {tempListIndex};
     #var tempList $strategyList[+$tempListIndex];
     #if {&tempList[] > 0} {
         #NOP -- If the strategyActive list exists, check if the selected strategy is a member and toggle it;
         #NOP -- Otherwise, if there is no strategyActive list, we add it;
         #if {&strategyActive[] > 0} {
             #list strategyActive indexate name;
-            #list {strategyActive} {find} {%0} {strategyExists};
+            #list {strategyActive} {find} {%i%0} {strategyExists};
             #if {$strategyExists} {
                 #showme <caa>----  <fff> %0 is now an <baa>inactive<088> <fff>strategy <caa>  ----<088>;
-                #list strategyActive filter {} {%0};
+                #list strategyActive filter {} {%i%0};
             } {
                 #list strategyActive add {{{name} {$tempList[name]} {active} {1}}};
                 #showme <caa>----  <fff> %0 is now an <bfd>active<088> <fff>strategy  <caa>  ----<088>;

@@ -29,7 +29,7 @@
 	#var hbp 0;
 
 	#if {"$power_override" != "none"} {
-		@use_power{$power_override};
+		_use_power $power_override;
 		#var power_override none;
 	};
 
@@ -52,68 +52,68 @@
 	#math {should_use_body_adjustment} {$my[hp][percent] <= $hp_heal_threshold_body_adjustment};
 
 	#if {$should_use_chain_body_adjustment} {
-		checkStrategy {body_adj} {@use_power{chain $ba_use, $ba_use}};
+		checkStrategy {body_adj} {_use_power chain $ba_use, $ba_use};
 	};
 	#elseif {$should_use_body_adjustment} {
-		checkStrategy {body_adj} {@use_power{$ba_use}};
+		checkStrategy {body_adj} {_use_power $ba_use};
 	};
 	
 	#NOP -- Check which Animal Affinity to be running;
-	checkStrategy {bear} {#regex {$my[aa]} {bear} {#NOP} {@check_power{AA;animal affinity bear}}};
-	checkStrategy {cat} {#regex {$my[aa]} {cat} {#NOP} {@check_power{AA;animal affinity cat}}};
-	checkStrategy {owl} {#regex {$my[aa]} {owl} {#NOP} {@check_power{AA;animal affinity owl}}};
-	checkStrategy {fox} {#regex {$my[aa]} {fox} {#NOP} {@check_power{AA;animal affinity fox}}};
-	checkStrategy {bull} {#regex {$my[aa]} {bull} {#NOP} {@check_power{AA;animal affinity bull}}};
-	checkStrategy {eagle} {#regex {$my[aa]} {eagle} {#NOP} {@check_power{AA;animal affinity eagle}}};
+	checkStrategy {bear} {#regex {$my[aa]} {bear} {#NOP} {_check_power {AA} {animal affinity bear}}};
+	checkStrategy {cat} {#regex {$my[aa]} {cat} {#NOP} {_check_power {AA} {animal affinity cat}}};
+	checkStrategy {owl} {#regex {$my[aa]} {owl} {#NOP} {_check_power {AA} {animal affinity owl}}};
+	checkStrategy {fox} {#regex {$my[aa]} {fox} {#NOP} {_check_power {AA} {animal affinity fox}}};
+	checkStrategy {bull} {#regex {$my[aa]} {bull} {#NOP} {_check_power {AA} {animal affinity bull}}};
+	checkStrategy {eagle} {#regex {$my[aa]} {eagle} {#NOP} {_check_power {AA} {animal affinity eagle}}};
 
 
 	#NOP -- Defense;
-	@check_adapt_body{};
-	@check_power{Bf;biofeedback};
-	@check_power{Cp;combat precognition};
-	@check_power{D;dodge};
-	@check_power{Eb;energy barrier};
-	@check_power{Ib;inertial barrier};
-	@check_power{IB;improved biofeedback};
-	@check_power{Iv;improved verve};
-	@check_power{IV;improved valor};
-	@check_power{Vg;vigor};
-	@check_power{Vr;valor};
-	@check_power{Vv;verve};
-	@check_power{Di;displacement};
+	_check_adapt_body;
+	_check_power {Bf} {biofeedback};
+	_check_power {Cp} {combat precognition};
+	_check_power {D} {dodge};
+	_check_power {Eb} {energy barrier};
+	_check_power {Ib} {inertial barrier};
+	_check_power {IB} {improved biofeedback};
+	_check_power {Iv} {improved verve};
+	_check_power {IV} {improved valor};
+	_check_power {Vg} {vigor};
+	_check_power {Vr} {valor};
+	_check_power {Vv} {verve};
+	_check_power {Di} {displacement};
 
 	#NOP -- Offense;
   
-	@check_power{Bo;bolt};
-	@check_power{Tl;talons};
-	@check_power{CP;combat prescience};
-	@check_power{E;expertise};
-	@check_power{Ij;iron jaw};
-	@check_power{Sj;steel jaw};
+	_check_power {Bo} {bolt};
+	_check_power {Tl} {talons};
+	_check_power {CP} {combat prescience};
+	_check_power {E} {expertise};
+	_check_power {Ij} {iron jaw};
+	_check_power {Sj} {steel jaw};
 
 	#NOP -- Targeted powers;
 
-	@check_power{Ac2;astral construct 2};
-	@check_power{Ac3;astral construct 3};
-	@check_power{Ac4;astral construct 4};
-	@check_power{Ac5;astral construct 5};
-	@check_power{bc;biocurrent};
-	@check_power{BC;greater biocurrent};
-	@check_power{Cg;conductive grasp};
+	_check_power {Ac2} {astral construct 2};
+	_check_power {Ac3} {astral construct 3};
+	_check_power {Ac4} {astral construct 4};
+	_check_power {Ac5} {astral construct 5};
+	_check_power {bc} {biocurrent};
+	_check_power {BC} {greater biocurrent};
+	_check_power {Cg} {conductive grasp};
 
   	#NOP --- Demoralize, Recall Pain & Recall Agony;
 	
 	#if {!$hbp} {
 		#list gs_powers FIND {Demoralize} {found_dm};
 		#if {$found_dm && !$mob[demoralize] && $incombat} {
-			checkStrategy {demoralize} {@use_power{demoralize}};
+			checkStrategy {demoralize} {_use_power demoralize};
 		};
 	};
 
 	#if {!$hbp} {
 		#if {$my[gp1][percent] > 80.0} {
 			#if {$rpain_cnt == 0} {
-				checkStrategy {rpain} {@use_power{recall pain}};
+				checkStrategy {rpain} {_use_power recall pain};
 				#math {rpain_cnt} {$rpain_cnt + 1};
 			};
 			#else {#math {rpain_cnt} {$rpain_cnt - 1};};
@@ -123,7 +123,7 @@
 	#if {!$hbp} {
 		#if {$my[gp1][percent] > 80.0} {
 		#if {$ragony_cnt == 0} {
-			checkStrategy {ragony} {@use_power{recall agony}};
+			checkStrategy {ragony} {_use_power recall agony};
 			#math {ragony_cnt} {$ragony_cnt + 5};
 		};
 		#else {
@@ -141,7 +141,7 @@
 		
 		#NOP -- Convert calcs;
 		#if {$my[sp][percent] > 0.99 && $psi_missing >= $my[sp][max] * $sp_to_psi_ratio} {
-			checkStrategy {convert} {@use_power{convert}};
+			checkStrategy {convert} {_use_power convert};
 		};
 
 		#if {$psi_missing > $bfuel_min_psi_missing} {
@@ -157,7 +157,7 @@
 
 			#if {$can_safely_use_body_fuel} {
 				#format hp_to_spend {%d} $hp_to_spend;
-				checkStrategy {bfuel} {@use_power{body fuel $hp_to_spend}};
+				checkStrategy {bfuel} {_use_power body fuel $hp_to_spend};
 			};
 		};
 	};
@@ -165,93 +165,87 @@
 };
 
 
-#NOP -- Functions to check and use powers;
+#NOP -- Alias to check and use powers;
 #NOP -- %1 - power short name;
 #NOP -- %2 - full power name;
-#function {check_power} {
+#alias {_check_power} {
   #if {!$hbp} {
-    #regex {$my[powers]} {%1} {
+    #regex {$my[powers]} {%i%1} {
       #if {!$combat[%1] && $my[powers][%1]} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] turning off %1};
+        #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] combat value of "%1" is $combat[%1] and my[powers] value of "%1" is $my[powers][%1] -- turning off %1<088>}};
         %2 off;
-        #return #nop;
       };
       #elseif {$my[powers_time][%1] < 10} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] refreshing %2};
-        @use_power{%2};
-        #return #nop;
+        #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] my[powers_time] of "%1" is $my[powers_time][%1] --  refreshing %2<088>}};
+        _use_power %2;
       };
       #else {
-        #return #nop
+        #NOP;
       };
     } {
       #if {$combat[%1]} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] turning on %2};
-        @use_power{%2};
-        #return #nop;
+        #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] combat value of "%1" is $combat[%1] -- turning on %2<088>}};
+		#if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] my powers value is $my[powers]<088>}};
+        _use_power %2;
       };
       #else {
-        #return #nop;
+        #NOP;
       };
     };
   };
   #else {
-    #return #nop;
+    #NOP;
   };
-  #return #nop;
+  #NOP;
 };
 
-#function {check_adapt_body} {
+#alias {_check_adapt_body} {
   #if {!$hbp} {
     #regex {$my[powers]} {ab} {
       #if {!$combat[ab] && $my[powers][ab]} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] turning off ab};
+        #if {$_DEBUG_HB} {#echo {[debug_heartbeat] turning off ab}};
         adapt body off;
         #var {current_adapt_body} {none};
-        #return #nop;
       };
       #elseif {$my[powers_time][ab] < 10} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] refreshing adapt body};
-        @use_adapt_body{};
-        #return #nop;
+        #if {$_DEBUG_HB} {#echo {[debug_heartbeat] refreshing adapt body}};
+        _use_adapt_body;
       };
       #elseif {"$current_adapt_body" != "$_adapt_body"} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] changing adapt body dmg type to $_adapt_body};
-        @use_adapt_body{};
-        #return #nop;
+        #if {$_DEBUG_HB} {#echo {[debug_heartbeat] changing adapt body dmg type to $_adapt_body}};
+        _use_adapt_body;
       };
       #else {
-        #return #nop
+        #NOP;
       };
     } {
       #if {$combat[ab]} {
-        #if {$_DEBUG_HB} {#show [debug_heartbeat] turning on adapt body};
-        @use_adapt_body{};
-        #return #nop;
+        #if {$_DEBUG_HB} {#echo {[debug_heartbeat] turning on adapt body}};
+        _use_adapt_body;
       };
       #else {
-        #return #nop;
+        #NOP;
       };
     };
   };
   #else {
-    #return #nop;
+    #NOP;
   };
-  #return #nop;
+  #NOP;
 };
 
-#function {use_adapt_body} {
-  @use_power{adapt body $_adapt_body};
+#alias {_use_adapt_body} {
+  _use_power adapt body $_adapt_body;
   #act {confident that your body has adapted to be resistant} {
     #var {current_adapt_body} {$_adapt_body};
     #unact {confident that your body has adapted to be resistant};
   };
 };
 
-#function {use_power} {
+#alias {_use_power} {
   #var tmp_last_power_used %0;
-  #act {{You must wait %d round%w before you can use this power again.|You may only use one power per round.}} {
-	#show <069>==> Failed to use $tmp_last_power_used<900>;
+  #line oneshot #action {{You must wait %d round%w before you can use this power again.|You may only use one power per round.}} {
+	#echo {<069>==> Failed to use $tmp_last_power_used<900>};
   } {5};
 
   #NOP -- Check if you have enough PSI / Stamina to use the power;
@@ -259,6 +253,7 @@
   
   #NOP -- If we're using a power with parameters, like body fuel, update the power check name;
   #regex {%0} {body fuel %*} {#var tmp_last_power_used body fuel};
+  #regex {%0} {adapt body %*} {#var tmp_last_power_used adapt body};
 
   #foreach $psi_powers[%*] power {
     #if {"$tmp_last_power_used" == "$power[power]"} {
@@ -279,19 +274,17 @@
             #if {$my[gp2][current] >= $power[stam] && $stam_maint} {
               #var hbp 1;
               %0;
-              #show <069>==> %0<900>;
-              #return #nop;
+              #echo {<069>==> %0<900>};
             } {
-              #if {$_DEBUG_HB} {#show [debug_heartbeat] <069>==> Not enough Stam to use %0<900>};
+              #if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Not enough Stam to use %0<900>}};
             };
           } {
-            #if {$_DEBUG_HB} {#show [debug_heartbeat] <069>==> Not enough Psi to use %0<900>};
+            #if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Not enough Psi to use %0<900>}};
           };
         };
       };
     };
   };
-  #return #nop;
 };
 
 #alias {gp_round_maintenance} {

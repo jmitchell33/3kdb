@@ -37,14 +37,12 @@
   }
 };
 
-#function {show_power} {
+#alias {_show_power} {
   #regex {*combat[]} {%1} {
       #if {$combat[%1]} {#showme %1 - %2;};
-      #return #nop;
     } {
-      #return #nop;
+      #NOP;
     };
-  #return #nop;
 };
 
 #alias {usep} {
@@ -52,60 +50,60 @@
 };
 
 #alias {showp} {
-  #showme ----------------;
-  #showme --- Defense ----;
-  #showme ----------------;
+  #echo {----------------};
+  #echo {--- Defense ----};
+  #echo {----------------};
 
-  @show_power{AA;animal affinity bull};
-  @show_power{ab;adapt body};
-  @show_power{Bf;biofeedback};
-  @show_power{Cp;combat precognition};
-  @show_power{D;dodge};
-  @show_power{Di;displacement};
-  @show_power{Eb;energy barrier};
-  @show_power{Ib;inertial barrier};
-  @show_power{IB;improved biofeedback};
-  @show_power{IV;improved valor};
-  @show_power{Vg;vigor};
-  @show_power{Vr;valor};
-  @show_power{Vv;verve};
-  @show_power{Iv;Improved verve};
-  @show_power{BFuel;Body Fuel};
+  _show_power {AA} {animal affinity bull};
+  _show_power {ab} {adapt body};
+  _show_power {Bf} {biofeedback};
+  _show_power {Cp} {combat precognition};
+  _show_power {D} {dodge};
+  _show_power {Di} {displacement};
+  _show_power {Eb} {energy barrier};
+  _show_power {Ib} {inertial barrier};
+  _show_power {IB} {improved biofeedback};
+  _show_power {IV} {improved valor};
+  _show_power {Vg} {vigor};
+  _show_power {Vr} {valor};
+  _show_power {Vv} {verve};
+  _show_power {Iv} {Improved verve};
+  _show_power {BFuel} {Body Fuel};
 
-  #showme ----------------;
-  #showme --- Offense ----;
-  #showme ----------------;
+  #echo {----------------};
+  #echo {--- Offense ----};
+  #echo {----------------};
   
-  @show_power{Bo;bolt};
-  @show_power{Tl;talons};
-  @show_power{CP;combat prescience};
-  @show_power{Cg;conductive grasp};
-  @show_power{E;expertise};
-  @show_power{Ij;iron jaw};
-  @show_power{Sj;steel jaw};
-  @show_power{pf;psychofeedback};
+  _show_power {Bo} {bolt};
+  _show_power {Tl} {talons};
+  _show_power {CP} {combat prescience};
+  _show_power {Cg} {conductive grasp};
+  _show_power {E} {expertise};
+  _show_power {Ij} {iron jaw};
+  _show_power {Sj} {steel jaw};
+  _show_power {pf} {psychofeedback};
   
-  #showme ----------------;
-  #showme --- Targeted ---;
-  #showme ----------------;
+  #echo {----------------};
+  #echo {--- Targeted ---};
+  #echo {----------------};
 
-  @show_power{Ac2;astral construct 2};
-  @show_power{Ac3;astral construct 3};
-  @show_power{Ac4;astral construct 4};
-  @show_power{Ac5;astral construct 5};
-  @show_power{bc;biocurrent};
-  @show_power{BC;greater biocurrent};
-  @show_power{Cg;conductive grasp};
-  @show_power{rpain;recall pain};
-  @show_power{ragony;recall agony};
+  _show_power {Ac2} {astral construct 2};
+  _show_power {Ac3} {astral construct 3};
+  _show_power {Ac4} {astral construct 4};
+  _show_power {Ac5} {astral construct 5};
+  _show_power {bc} {biocurrent};
+  _show_power {BC} {greater biocurrent};
+  _show_power {Cg} {conductive grasp};
+  _show_power {rpain} {recall pain};
+  _show_power {ragony} {recall agony};
 
-  #showme ----------------;
-  #showme ---  Group   ---;
-  #showme ----------------;
+  #echo {----------------};
+  #echo {---  Group   ---};
+  #echo {----------------};
 
-  @show_power{ML;greater mindlink $greater_mind_link_target};
+  _show_power {ML} {greater mindlink $greater_mind_link_target};
 
-  #showme ----------------;
+  #echo {----------------};
 };
 
 #class {guild_aliases} {close}

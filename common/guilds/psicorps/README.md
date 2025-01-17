@@ -42,9 +42,9 @@ This is useful for things like `pset` (guild config) or evaluating a mob.
 
 ### Adding a new power
 
-In the guild heartbeat file, add the new power in the appropriate section. Ex. `@check_power{Vr;valor};` will check that valor is turned on every heartbeat using the logic specified above.
+In the guild heartbeat file, add the new power in the appropriate section. Ex. `_check_power {Vr} {valor};` will check that valor is turned on every heartbeat using the logic specified above.
 
-In the guild aliases file, add the new power in the appropriate section to the show power configuration alias. Ex.   `@show_power{Vr;valor};` so when you use `showp` it will show if valor is configured or not.
+In the guild aliases file, add the new power in the appropriate section to the show power configuration alias. Ex.   `_show_power {Vr} {valor};` so when you use `showp` it will show if valor is configured or not.
 
 ### Creating an alias to create a power configuration set
 
