@@ -10,7 +10,13 @@
 };
 
 #action {There is no reason to 'mine' here.} {spelunk};
-
+#action {The coffin expels your selected corpse!} {cast corpse blast};
+#ACTION {You don't have any basic construction materials} {
+    #SEND !ffetch materials;
+    #DELAY {5} {
+        #SEND !cast create golem as crystal;
+    };
+};
 #NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
 #act {^-M-_A Colossal Inductor} {eternal immortality} {1};
 
