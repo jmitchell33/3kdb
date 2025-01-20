@@ -16,21 +16,16 @@
 #NOP --- GENERAL MISC;
 #action {Untouchable smacks you upside the head} {enthrall}
 #action {There is no reason to 'heal' here.} {invigorate askum};#LINE GAG;
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {perform dirge};
+#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {immolate corpse};
 #action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
 #action {Responding to Brianna's call} {#if {!$idle_flag} {rallycry heal}};
 #action {Status of} {#if {!$idle_flag} {soothe untouchable}};
+#action {You're in mid performance!} {cease};
+#action {The Daemon Blade screams at you} {steal};
 
+#NOP -- trigger to fire powers at start of combat
+#action {{Untouchable attacks|attacking Untouchable!.}} {#if {!$idle_flag && $Powers[startOfcombat]} {#delay 2 steal}};
 #var corpse_delay 0;
-
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {immolate corpse};
-	#if {$my[song][rounds] > 1} {
-		#var randNumber @rnd{1;200};
-		add_action {{{name} {$randNumber} {action} {perform dirge} {priority} {3}}};
-	} {
-		perform dirge
-	};
-
 
 #ACTION {^Owie. That hurt!} {
 	#if !$corpse_delay {
