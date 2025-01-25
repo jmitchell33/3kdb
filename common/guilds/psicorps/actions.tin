@@ -81,8 +81,8 @@
 	#math gxp[avg-gxp-per-round] {$gxp[total-gxp] / $gxp[total-rounds]};
 	
 	#math gxp[last-fight-per-round] {$gxp[last-fight] / $last_fight_rounds};
-	#showme LAST FIGHT GXP: $gxp[last-fight-per-round] per rnd from $gxp[last-fight-mob];
-	#showme TOTAL GXP: $gxp[total-gxp] ($gxp[avg-gxp-per-round] per round);
+	#echo {LAST FIGHT GXP: $gxp[last-fight-per-round] per rnd from $gxp[last-fight-mob]};
+	#echo {TOTAL GXP: $gxp[total-gxp] ($gxp[avg-gxp-per-round] per round)};
 
 } {1};
 
@@ -102,7 +102,7 @@
 
 #NOP ---- Implants;
 
-#act {^Implant: Shutdown complete.} {#var my[powers] = []};
+#act {^Implant: Shutdown complete.} {#var my[powers] []};
 
 #NOP ---- Damage type
 
@@ -117,13 +117,12 @@
 	#regex {%2} {{(mostly )?energy}} {#var _adapt_body energy};
 	#regex {%2} {{(mostly )?poison}} {#var _adapt_body poison};
 	#regex {%2} {{(mostly )?radiation}}	{#var _adapt_body radiation};
-	checkStrategy {ab} {[adapt body $_adapt_body};
 } {2};
 
 #NOP ---- Offense
 
-#act {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1};
-#act {^You demoralize} {#var mob[demoralize] 1};
-#act {^That target cannot be re-demoralized.} {#var mob[demoralize] 1};
+#act {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1} {2};
+#act {^You demoralize} {#var mob[demoralize] 1} {2};
+#act {^That target cannot be re-demoralized.} {#var mob[demoralize] 1} {2};
 
 #class {guild_actions} {close}

@@ -75,11 +75,16 @@
             #var deathReport[damage_dealt] 0;
             #var deathReport[corpses_used] $mob[corpses_used];
             #var deathReport[summons_killed] $mob[summons_killed];
-            #var deathReport[songs_lost] $cmbt[songs][lost][fight];
             #var deathReport[damage_dealt] $mob[damage_dealt];
             #var deathReport[damage_received] $mob[damage_received];
             #var deathReport[mob_dodges] $mob[mob_dodges];
             #var deathReport[xp_gained] $fight_xp;
+
+            #if {"$guild" == "bard"} {
+                #var deathReport[songs_lost] $cmbt[songs][lost][fight];
+            } {
+                #var deathReport[songs_lost] 0;
+            };
             
             #NOP -- Small delay to make sure we get the variables from the updates;
             #delay 1 {
