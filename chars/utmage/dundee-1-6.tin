@@ -1,0 +1,69 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Dundee Swamp};
+#var check_room 0;
+
+#var bot_message_1 '---- DUNDEE STEPPER ----';
+#var bot_message_2 '----  ALL TARGETS   ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#alias .pre_fight_check {#nop;};
+
+.pre_bot_check;
+
+#alias playercheck {
+    #if $bot[playercheck] {
+        #var bot[playercheck] 0;
+        #delay .2 {#echo {<BAF><ffe>------ PLAYERCHECK IS NOW OFF --------<088>}};
+    } {
+        #var bot[playercheck] 1;
+        #delay .2 {#echo {<BAF><ffe>------ PLAYERCHECK IS NOW ON --------<088>}};
+    };
+};
+
+#NOP A dropbear falls from a tree latches onto you, hindering your movement!
+
+#var {bot[path]} {e;s;s;s;s;s;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;s;s;e;e;e;e;e;e;e;e;e;e;e;e;e;w;n;n;nw;w;n;n;w;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;e;w;e;s;w;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;e;e;e;n;n;n;n;n;e;se;ne;e;n;n;e;e;e;e;e;e;e;e;e;e;s;s;s;s;s;s;s;s;w;n;n;n;n;n;n;n;w;s;s;s;s;s;s;s;w;n;n;n;n;n;n;n;w;s;s;s;s;s;s;s;w;n;n;n;n;n;n;w;s;s;s;s;s;s;w;n;n;n;n;n;n;n;w;s;s;s;s;s;s;s;w;n;n;n;n;n;n;n;w;s;s;s;s;s;s;s;n;n;n;n;n;w;sw;s;s;s;e;e;e;n;n;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;s;e;e;e;e;e;e;se;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;n;n;ne;ne;e;n;s;w;sw;sw;s;n;se;se;e;n;n;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;s;w;w;w;w;w;w;w;s;e;e;e;e;e;e;e;w;w;w;w;w;w;w;n;n;w;nw;nw;w;w;w;w;w;w;w;w;w;w;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w}
+
+#list botmobs clear;
+#list botmobs add {{{long} {Three-Headed Anaconda} {target} {anaconda}}};
+#list botmobs add {{{long} {Bobcat} {target} {bobcat}}};
+#list botmobs add {{{long} {Spring Peeper} {target} {peeper}}};
+#list botmobs add {{{long} {Yellow-Faced Whip Snake} {target} {whip snake}}};
+#list botmobs add {{{long} {Bobcat} {target} {bobcat}}};
+#list botmobs add {{{long} {Star-nosed Mole} {target} {mole}}};
+#list botmobs add {{{long} {Three-toed Amphiuma} {target} {amphiuma}}};
+#list botmobs add {{{long} {Golden-Crowned Snake} {target} {snake}}};
+#list botmobs add {{{long} {Purple Swamphen} {target} {swamphen}}};
+#list botmobs add {{{long} {Butcherbird} {target} {bird}}};
+#list botmobs add {{{long} {Fire Lizard} {target} {lizard}}};
+#list botmobs add {{{long} {Red-bellied Watersnake} {target} {watersnake}}};
+#list botmobs add {{{long} {Drop Bear} {target} {bear}}};
+#list botmobs add {{{long} {Cane Toad} {target} {toad}}};
+#list botmobs add {{{long} {Marbled Reed Frog} {target} {frog}}};
+#list botmobs add {{{long} {Swamp Sparrow} {target} {sparrow}}};
+#list botmobs add {{{long} {Tricolored Heron} {target} {heron}}};
+#list botmobs add {{{long} {Swamp Crocodile} {target} {crocodile}}};
+#list botmobs add {{{long} {Marsh Rat} {target} {rat}}};
+#list botmobs add {{{long} {Caecilian} {target} {caecilian}}};
+#list botmobs add {{{long} {Anhinga} {target} {anhinga}}};
+#list botmobs add {{{long} {Short-tailed Shrew} {target} {shrew}}};
+#list botmobs add {{{long} {Marsh Snake} {target} {marsh snake}}};
+#list botmobs add {{{long} {Marsh Frog} {target} {frog}}};
+#list botmobs add {{{long} {Armadillo} {target} {armadillo}}};
+#list botmobs add {{{long} {Platypus} {target} {platypus}}};
+#list botmobs add {{{long} {Black-bellied Snake} {target} {snake}}};
+#list botmobs add {{{long} {Osprey} {target} {osprey}}};
+#list botmobs add {{{long} {Mature Swamp Crocodile} {target} {crocodile}}};
+#list botmobs add {{{long} {Great Egret} {target} {egret}}};
+#list botmobs add {{{long} {Salamander} {target} {salamander}}};
+#list botmobs add {{{long} {Crane} {target} {crane}}};
+#list botmobs add {{{long} {Crikey} {target} {crikey}}};
+#list botmobs add {{{long} {Anaconda} {target} {snake}}};
+#list botmobs add {{{long} {Orinoco Crocodile} {target} {crocodile}}};
+#var bot[mobs] $botmobs;
+
+#class {bot} {close}
+
+#read common/bot/generic.tin

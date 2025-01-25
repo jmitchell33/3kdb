@@ -21,7 +21,22 @@
 #NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
 #act {^-M-_A Colossal Inductor} {(immortality} {1};
 
+#NOP -- Tacos
+#alias taco2 {#read common/areas/tacos.tin};grab shell;
+#action {You try to grab a taco shell} {get all;e;repeat nocombat/grab lettuce};
+#action {You try to grab some lettuce} {get all;e;repeat nocombat/grab tomatoes};
+#action {You try to grab some tomatoes} {get all;e;repeat nocombat/grab cheese};
+#action {You try to grab a handful of cheese} {get all;s;repeat nocombat/grab meat};
+#action {You try to grab some meat} {w;repeat nocombat/grab cream};
+#action {You try to grab a scoop of the sour cream} {get all;w;repeat nocombat/grab guacamole};
+#action {You try to grab a scoop of the guacamole} {get all;w;repeat nocombat/grab sauce};
+#action {You try to grab a packet of hot sauce} {repeat off;w;#delay 3 #show <cba>READY FOR FIGHT!};
+
+
 #NOP -- NECRO POWERS;
+#action {Brianna unwraps a corpse from her coffin.} {give corpse to brianna};
+#action {Although the door is open, a magical barrier is preventing} {jump};
+#action {As you dive through the opening it shimmers momentarily.} {w;home;magic;portal eforest;s;s;sw;w;nw;enter mist};
 #action {A closed door blocks your way.} {unlock door;open door};
 #action {an angelic temptress standing before you.} {present tyras gem to velica;present raqnas gem to velica;present brenans gem to velica};
 #action {Treznor says: NAP TIME} {.botStep};
@@ -40,7 +55,8 @@
 #action {Zombie arrives hunting Untouchable.} {.pause};
 #action {Aegis Sentry arrives hunting Untouchable.} {sleep robot};
 #action {You must assume your beast form to do that master.} {#if !idle_flag {alter hybrid}};
-
+#NOP -- #action {^body divides in the magical, emerald light.} {#2 preserve remains;get all};
+#action {There is no reason to 'mine' here.} {look};
 #NOP -- TRACKING STUFF;
 #act {^Duncan says: Thank you for donating %d corpses.$} {#system {echo Donated %1 corpses >> chars/toren/donates.log}};
 
