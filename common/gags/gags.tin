@@ -39,6 +39,8 @@
 
     #echo {\n <efa>gag+<088> <bcc>name<088> to <efc>gag<088> a group};
     #echo { <efa>gag-<088> <bcc>name<088> to <fac>ungag<088> a group};
+    #echo { <efa>gag-all<088> to <fac>gag everything<088>};
+    #echo { <efa>gag-clear<088> to <fac>ungag everything<088>};
 };
 
 #alias gag+ {
@@ -75,8 +77,18 @@
 
 #alias gag-all {
     #local tmpItem 1;
+    #echo {<faa>---------- 🔇🔇 QUIET TIME - EVERYTHING GAGGED 🔇🔇 ----------<088>};
     #loop 1 &gagList[] tmpItem {
         #var gagList[$tmpItem][active] 1;
+        $gagList[$tmpItem][action];
+    };
+};
+
+#alias gag-clear {
+    #local tmpItem 1;
+    #echo {<cfb>---------- 📢📢  VERBOSE MODE - GAGS CLEARED   📢📢 ----------<088>};
+    #loop 1 &gagList[] tmpItem {
+        #var gagList[$tmpItem][active] 0;
         $gagList[$tmpItem][action];
     };
 };
