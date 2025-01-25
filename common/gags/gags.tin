@@ -73,6 +73,14 @@
     };
 };
 
+#alias gag-all {
+    #local tmpItem 1;
+    #loop 1 &gagList[] tmpItem {
+        #var gagList[$tmpItem][active] 1;
+        $gagList[$tmpItem][action];
+    };
+};
+
 #NOP -- If the gag requires an action
 #unvar gagList
 #list gagList add {{{name} {hpbar} {active} {0} {action} {#NOP} {description} {Generic: Gag HPBar}}};
@@ -84,18 +92,9 @@
 #alias .update_gags {
     #if {&gagList[] > 0} {
         #local item {};
-        #loop 1 &gagList[] item {
-            #if $gagList[$item][active] {
-                gag+ $gagList[$item][name];
-                #echo {<faa>---------- GAGGED: $gagList[$item][name] <088>};
-            } {
-                gag- $gagList[$item][name];
-                #echo {<efd>---------- VERBOSE: $gagList[$item][name] <088>};
-            };
-        };
+        #loop 1 &gagList[] item {$gagList[$item][action]};
     };
 };
-
 
 #NOP -- Mud Combat Gags;
 #alias _gag_combat_generic {
