@@ -47,10 +47,10 @@
 	};
 
 	#NOP -- Use the best Body Adjustment you have inserted and use chain if inserted/necessary;
-	#list gs_powers FIND {Chain} {found_chain};
-	#list gs_powers FIND {Lesser Body Adjustment} {found_lba};
-	#list gs_powers FIND {Body Adjustment} {found_ba};
-	#list gs_powers FIND {Greater Body Adjustment} {found_gba};
+	#if $my[implants][chain][active] {#var found_chain 1};
+	#if $my[implants][lba][active] {#var found_lba 1};
+	#if $my[implants][ba][active] {#var found_ba 1};
+	#if $my[implants][gba][active] {#var found_gba 1};
 
 	#if $found_lba {#var ba_use lesser body adjustment};
 	#if $found_ba {#var ba_use body adjustment};
@@ -132,8 +132,7 @@
   	#NOP --- Blur, Demoralize, Recall Pain & Recall Agony;
 
 	#if {!$hbp} {
-		#list gs_powers FIND {Blur} {found_blur};
-		#if {$found_blur && $incombat} {
+		#if {$my[implants][Bl][active] && $incombat} {
 			#if {"$my[powers][Bl]" == ""} {
 				checkStrategy {blur} {_use_power blur}
 			};
@@ -141,8 +140,7 @@
 	};
 
 	#if {!$hbp} {
-		#list gs_powers FIND {Demoralize} {found_dm};
-		#if {$found_dm && !$mob[demoralize] && $incombat} {
+		#if {$my[implants][dm][active] && !$mob[demoralize] && $incombat} {
 			checkStrategy {demoralize} {_use_power demoralize};
 		};
 	};
@@ -220,7 +218,7 @@
   #if {!$hbp} {
 	_check_powers_list %1;
 	#if $found_power {
-      #if {!$combat[%1] && $my[powers][%1][active]} {
+      #if {!$my[implants][%1][active] && $my[powers][%1][active]} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] turning off %1<088>}};
         %2 off;
       };
@@ -232,7 +230,7 @@
         #NOP;
       };
     } {
-      #if {$combat[%1]} {
+      #if {$my[implants][%1][active]} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] turning on %2<088>}};
         _use_power %2;
       };
@@ -251,7 +249,7 @@
   #if {!$hbp} {
 	_check_powers_list ab;
     #if $found_power {
-      #if {!$combat[ab] && $my[powers][ab][active]} {
+      #if {!$my[implants][%1][active] && $my[powers][ab][active]} {
         #if {$_DEBUG_HB} {#echo {[debug_heartbeat] turning off ab}};
         adapt body off;
       };
@@ -267,7 +265,7 @@
         #NOP;
       };
     } {
-      #if {$combat[ab]} {
+      #if {$my[implants][%1][active]} {
 		#echo {powers are $my[powers]};
         #if {$_DEBUG_HB} {#echo {[debug_heartbeat] turning on adapt body}};
 		#if {$_DEBUG_HB} {#echo {[debug_heartbeat] my powers are $my[powers]}};
