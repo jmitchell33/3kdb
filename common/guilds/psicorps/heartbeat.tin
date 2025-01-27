@@ -23,16 +23,21 @@
 #var {sp_to_psi_ratio} {0.2};
 #var {hp_to_psi_ratio} {0.36};
 
+#NOP -- Minimum GP1 for recall pain;
+#var my[psicorps][recall_pain_min_gp1] .5;
+
 
 #NOP -- Alias to swap animal affinity;
 #var aa_used 1;
 #alias aa_swap {
 	#if $aa_used {
-		#if {"$my[aa]" == "%1"} {#NOP} {
-			#var aa_used 0;
-			actuate animal affinity off;
-			usep {animal affinity %1};
-			#delay 4 {#var aa_used 1};
+		#if {$my[implants][AA][active]} {
+			#if {"$my[aa]" != "%1"} {
+				#var aa_used 0;
+				actuate animal affinity off;
+				usep {animal affinity %1};
+				#delay 4 {#var aa_used 1};
+			};
 		};
 	};
 };
@@ -74,7 +79,7 @@
 	#NOP -- Check which Animal Affinity to be running;
 	#NOP -- Psicorps have a bug with animal affinity sticking to the hpbar even if it's off;
 	#NOP -- We'll clear animal affinity if it's on the hpbar but not actually up;
-	#if {"$my[aa]" != "(none)"} {
+	#if {"$my[aa]" != "(none)" && $my[implants][AA][active]} {
 		#if {"$my[powers][AA]" == ""} {
 			#delay aa_toggle {actuate animal affinity off} {4};
 		} {
@@ -146,26 +151,15 @@
 	};
 
 	#if {!$hbp} {
-		#if {$my[gp1][percent] > 80.0} {
-			#if {$rpain_cnt == 0} {
+		#if {$my[gp1][percent] > $my[psicorps][recall_pain_min_gp1] && $mip[round] > 3} {
+			#if {$mob[recall_pain] == 0} {
 				checkStrategy {rpain} {_use_power recall pain};
-				#math {rpain_cnt} {$rpain_cnt + 1};
+				checkStrategy {ragony} {_use_power recall agony};
+				checkStrategy {rtorment} {_use_power recall torment};
 			};
-			#else {#math {rpain_cnt} {$rpain_cnt - 1};};
 		};
 	};
 
-	#if {!$hbp} {
-		#if {$my[gp1][percent] > 80.0} {
-		#if {$ragony_cnt == 0} {
-			checkStrategy {ragony} {_use_power recall agony};
-			#math {ragony_cnt} {$ragony_cnt + 5};
-		};
-		#else {
-			#math {ragony_cnt} {$ragony_cnt - 1};
-		};
-		};
-	};
 
 	#NOP -- GP1 Healing and Decision Tree to use Convert or Body Fuel;
 	#NOP -- If you've yet to use a power this round, we'll use body fuel to replenish psi or convert;
@@ -266,7 +260,6 @@
       };
     } {
       #if {$my[implants][%1][active]} {
-		#echo {powers are $my[powers]};
         #if {$_DEBUG_HB} {#echo {[debug_heartbeat] turning on adapt body}};
 		#if {$_DEBUG_HB} {#echo {[debug_heartbeat] my powers are $my[powers]}};
         _use_adapt_body;

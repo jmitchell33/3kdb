@@ -35,8 +35,8 @@
 
 #action {^- Tour Number : %d %*} {
 	#var psi_tour_base 5;
-	#var psi_tour %1;
-	#math gxp[tour] {$psi_tour/$psi_tour_base * $psi_tour_base};
+	#var my[psi_tour] %1;
+	#math gxp[tour] {$my[psi_tour]/$psi_tour_base * $psi_tour_base};
 	#foreach $psi_gxp[%*] index {#if {$index[tour] == $gxp[tour]} {#var gxp[round-max] $index[max_gxp_per_round];}};
 } {1};
 
@@ -99,10 +99,21 @@
 #sub {^{A blue light engulfs your body as you use psionic energy to repair damage|to your cells.}$} {
 	<159>%0<900>
 };
+#action {You convert %d spell points into %d psionic energy.} {
+	#var my[sp][current] 0;
+	#var my[sp][percent] 0;
+} {2};
 
 #NOP ---- Implants;
 
-#act {^Implant: Shutdown complete.} {#var my[powers] []};
+#action {^Implant: Shutdown complete.} {
+	#var my[powers] {};
+	#var my[implants] {};
+} {2};
+
+#action {^Implant: Startup sequence initiated.$} {
+	gs_powers;
+} {2};
 
 #NOP ---- Damage type
 
@@ -121,13 +132,20 @@
 
 #NOP ---- Offense
 
-#act {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1} {2};
-#act {^You demoralize} {#var mob[demoralize] 1} {2};
-#act {^That target cannot be re-demoralized.} {#var mob[demoralize] 1} {2};
-#act {^You open a rift in the astral plane and summon a large construct} {#var my[powers][Ac4] 1;} {2};
-#act {^Your large construct fades back to the astral plane.$} {#var my[powers][Ac4] 0;} {2};
-#act {^You become a blur of motion allowing you to attack more often.$} {#var my[powers][Bl] 1};
-
+#action {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1} {2};
+#action {^You demoralize} {#var mob[demoralize] 1} {2};
+#action {^That target cannot be re-demoralized.} {#var mob[demoralize] 1} {2};
+#action {^You open a rift in the astral plane and summon a large construct} {#var my[powers][Ac4] 1;} {2};
+#action {^Your large construct fades back to the astral plane.$} {#var my[powers][Ac4] 0;} {2};
+#action {^You become a blur of motion allowing you to attack more often.$} {#var my[powers][Bl] 1} {2};
+#action {^You extend your arms out to the sides and create a psychic field} {#var my[powers][CP] 1} {2};
+#action {^You cause %* to retransmit pain} {
+	#var mob[recall_pain] 1;
+	#if $gags[combat_guild] {#line gag};
+	checkStrategy {rpain} {#delay 3 {#var mob[recall_pain] 0}};
+	checkStrategy {ragony} {#delay 11 {#var mob[recall_pain] 0}};
+	checkStrategy {rtorment} {#delay 11 {#var mob[recall_pain] 0}};
+} {2};
 
 
 #class {guild_actions} {close}

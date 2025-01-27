@@ -28,6 +28,13 @@
     #math my[gp2][percent] {1.00 * $my[gp2][current] / $my[gp2][max]};
 
     #var my[aa] %10;
+
+    #line oneshot #action {^POW: $} {
+        #if $gags[hpbar] {#line gag;};
+        #NOP -- If you just see a POW, there are no powers online;
+        #var powers_string <ebc>NONE<088>;
+        #var my[powers] {}; 
+    };
     
     #line oneshot #action {^POW: [[ %* ]]$} {
         #NOP -- Unaction the last power check _use_power in heartbeat.tin so we're only notified on a new round;
