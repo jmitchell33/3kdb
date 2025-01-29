@@ -6,7 +6,7 @@
 #var pausedtoregen 1;
 
 #alias {_player_heartbeat} {
-    #if !$idle_flag {
+    #if {!$idle_flag && "$guild" == "mage"} {
         #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
             cast explosive release;
         };
