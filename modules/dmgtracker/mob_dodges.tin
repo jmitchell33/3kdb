@@ -1,4 +1,6 @@
-#class dmgtracker open;
+#NOP -----------------------------------------------------;
+#NOP -- Mob Dodge Tracking;
+#NOP -----------------------------------------------------;
 
 #alias dodgeMobTrack {
     #if $gags[combat_generic] {#line gag};
@@ -15,18 +17,6 @@
     };
 };
 
-#alias dodgeSelfTrack {
-    #if $gags[combat_generic] {#line gag};
-    #NOP;
-};
-
-#NOP -- Guild Dodge Tracking;
-
-#NOP -- Psicorps;
-#action {^You avoid an attack that strikes at your displaced image!$} {dodgeSelfTrack} {2};
-#action {^Your nervous system shrugs off some damage.$} {dodgeSelfTrack} {2};
-
-#NOP -- Mob Dodge Tracking;
 #action {%* deftly slips away from your attack!$} {dodgeMobTrack} {2};
 #action {%* blinks out in time to evade your attack.$} {dodgeMobTrack} {2};
 #action {%* parries the attack.$} {dodgeMobTrack} {2};
@@ -34,7 +24,4 @@
 
 #NOP -- Event Mobs
 #ACTION {^%* phases into the ethereal realm and your attack passes right through!$} {dodgeMobTrack} {2};
-    
 
-
-#class dmgtracker close;
