@@ -81,15 +81,17 @@
     #echo {<faa>---------- 🔇🔇 QUIET TIME - EVERYTHING GAGGED 🔇🔇 ----------<088>};
     #loop 1 &gagList[] tmpItem {
         #var gagList[$tmpItem][active] 1;
+        #var gags[$gagList[$tmpItem][name]] 1;
         $gagList[$tmpItem][action];
     };
 };
 
-#alias gag-clear {
+#alias gag-clear {  
     #local tmpItem 1;
     #echo {<cfb>---------- 📢📢  VERBOSE MODE - GAGS CLEARED   📢📢 ----------<088>};
     #loop 1 &gagList[] tmpItem {
         #var gagList[$tmpItem][active] 0;
+        #var gags[$gagList[$tmpItem][name]] 0;
         $gagList[$tmpItem][action];
     };
 };
@@ -101,19 +103,25 @@
 #list gagList add {{{name} {combat_area} {active} {0} {action} {_gag_combat_area} {description} {Combat: Spammy Mobs}}};
 #list gagList add {{{name} {combat_guild} {active} {0} {action} {_gag_combat_guild} {description} {Combat: Spammy Guild Attacks (Cyborgs, Necros, etc.)}}};
 #list gagList add {{{name} {combat_items} {active} {0} {action} {_gag_combat_items} {description} {Combat: Spammy Items (CMC, Erah Shield, etc.)}}};
+#list gagList indexate name;
 
 #alias .update_gags {
     #if {&gagList[] > 0} {
         #local item {};
-        #loop 1 &gagList[] item {$gagList[$item][action]};
+        #local foundItem 0;
+        #loop 1 &gagList[] item {
+            #if $gags[$gagList[$item][name]] {
+                #list gagList find $item foundItem;
+                #var gagList[$foundItem][active] 1;
+                $gagList[$foundItem][action];
+            } {
+                #list gagList find $item foundItem;
+                #var gagList[$foundItem][active] 0;
+                $gagList[$foundItem][action];
+            };
+        };
     };
 };
-
-
-
-
-
-
 
 #alias _gag_combat_guild {
     #if $gags[combat_guild] {
@@ -348,6 +356,8 @@
         #gag {^You lose yourself in the vampire's hypnotic gaze.$};
         #gag {^The vampire sinks its fangs in you!$};
         #gag {^The duke of vampires rakes his talons across your chest!$};
+        #gag {^The vampire rakes razor sharp talons across your chest!$};
+        #gag {^The Vampire yells: Death to all the ghouls!$};
 
         #NOP -- Mahjong;
         #gag {^The tiger swipes at you with its giant paw!$};
