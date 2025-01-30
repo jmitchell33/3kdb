@@ -1,0 +1,120 @@
+#class defense_tracker kill;
+#class defense_tracker open;
+
+#unvar defense;
+
+#alias blockFormat {
+    #local blockName %1;
+    #local blockTotal %2;
+    
+    #math pctOfTotal {1.00 * $blockTotal / $defense[blocks][total] * 100};
+    #math pctOfHits {1.00 * $blockTotal / $defense[mob_attempts][total] * 100};
+    #format blockName {%n} {$blockName};
+    #format blockTotal {%g} {$blockTotal};
+    #format pctOfTotal {%d} {$pctOfTotal};
+    #format pctOfHits {%d} {$pctOfHits};
+    #format blockSummary {%+12s    %+9s    %+9s    %+9s} {$blockName} {$blockTotal} {${pctOfHits}%} {${pctOfTotal}%};
+    #echo $blockSummary;
+};
+
+
+#alias {defStats} {
+    #format tmpMobHits {%g} {$defense[mob_attempts][total]};
+    #format tmpHeader {%+12s    %+9s    %+9s    %+9s} {} {Total} {% Blocked} {% of Total};
+    #format tmpTitle  {%+48s} {DEFENSE REPORT ($tmpMobHits Total Mob Attacks)};
+    #echo {<faa>$tmpTitle<088>};
+    #echo $tmpHeader;
+
+    #foreach *defense[blocks][] category {
+        #foreach *defense[blocks][$category][] type {
+            blockFormat $type $defense[blocks][$category][$type];
+        };
+    };
+};
+
+#alias blockSelfTrack {
+    #if $gags[combat_generic] {#line gag};
+    #if {$defense[blocks][%1][%2] > 0} {
+        #math defense[blocks][%1][%2] {$defense[blocks][%1][%2] + 1};
+    } {
+        #var defense[blocks][%1][%2] 1;
+    };
+    #if {$defense[blocks][total] > 0} {
+        #math defense[blocks][total] {$defense[blocks][total] + 1};    
+    } {
+        #var defense[blocks][total] 1;
+    };
+};
+
+#alias mobAttackTrack {
+    #if $gags[combat_generic] {#line gag};
+    #local mobAttackType %1;
+    #if {$defense[mob_attempts][$mobAttackType] > 0} {
+        #math defense[mob_attempts][$mobAttackType] {$defense[mob_attempts][$mobAttackType] + 1};
+    } {
+        #var defense[mob_attempts][$mobAttackType] 1;
+    };
+    #if {$defense[mob_attempts][total] > 0} {
+        #math defense[mob_attempts][total] {$defense[mob_attempts][total] + 1};
+    } {
+        #var defense[mob_attempts][total] 1;
+    };
+};
+
+#NOP -----------------------------------------------------;
+#NOP -- Mob attacks vs. player;
+#NOP -- Format to track is mobAttackTrack melee/special;
+#NOP -----------------------------------------------------;
+#NOP -- Melee Attacks;
+#action {^%1 blow was deflected.$} {mobAttackTrack melee};
+#action {^%1 strike was ineffective.$} {mobAttackTrack melee};
+#action {^%1 bobble your swing.$} {mobAttackTrack melee};
+#action {^%1 missed you.$} {mobAttackTrack melee};
+#action {^%1 struck, but did no damage to you.$} {mobAttackTrack melee};
+#action {^%1 tickled you in the stomach.$} {mobAttackTrack melee};
+#action {^%1 grazed you.$} {mobAttackTrack melee};
+#action {^%1 hit you.} {mobAttackTrack melee};
+#action {^%1 hit you hard.$} {mobAttackTrack melee};
+#action {^%1 hit you very hard.$} {mobAttackTrack melee};
+#action {^%1 struck you a mighty blow.$} {mobAttackTrack melee};
+#action {^%1 smashed you with a bone crushing sound.$} {mobAttackTrack melee};
+#action {^%1 pulverized you with a powerful attack.$} {mobAttackTrack melee};
+#action {^%1 trounced you up and down.$} {mobAttackTrack melee};
+#action {^%1 pummeled you into small fragments.$} {mobAttackTrack melee};
+#action {^%1 massacred you into tiny fragments.$} {mobAttackTrack melee};
+#action {^%1 utterly annihilated you.$} {mobAttackTrack melee};
+#action {^%1 completely devastated you with awesome force.$} {mobAttackTrack melee};
+#action {^%1 destroyed you.$} {mobAttackTrack melee};
+#action {^%1 absolutely massacred you.$} {mobAttackTrack melee};
+#action {^%1 thrashed you completely.$} {mobAttackTrack melee};
+#action {^%1 demolished you.$} {mobAttackTrack melee};
+#action {^%1 nearly exterminated you.$} {mobAttackTrack melee};
+#action {^%1 obliterated you.$} {mobAttackTrack melee};
+#action {^%1 eradicated you.$} {mobAttackTrack melee};
+#action {^%1 decimated you.} {mobAttackTrack melee};
+#action {^%1 beat you like a rented mule.$} {mobAttackTrack melee};
+#action {^%1 exsanguinated you.$} {mobAttackTrack melee};
+#action {^%1 atomized you.$} {mobAttackTrack melee};
+#action {^%1 beat you like a red-headed step child.$} {mobAttackTrack melee};
+#action {^%1 drop-kicked you.$} {mobAttackTrack melee};
+
+
+#NOP -----------------------------------------------------;
+#NOP -- Guild Dodge/Block Tracking;
+#NOP -- Format to track is blockSelfTrack <category> <power/thing doing the blocking>;
+#NOP -----------------------------------------------------;
+
+#NOP -- Generic;
+#action {^Your shield blocks %* attack!$} {blockSelfTrack general shield};
+#action {^You nimbly dodge %* attack!$} {blockSelfTrack general dodge};
+
+#NOP -- Eternal Powers;
+#action {^The assault glances harmlessly off your aura.$} {blockSelfTrack eternal immunity};
+#action {^Your form shimmers and becomes impenetrable.$} {blockSelfTrack eternal immunity};
+
+#NOP -- Psicorps;
+#action {^You avoid an attack that strikes at your displaced image!$} {blockSelfTrack guild displacement} {2};
+#action {^Your nervous system shrugs off some damage.$} {blockSelfTrack guild biofeedback} {2};
+    
+
+#class defense_tracker close;

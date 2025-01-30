@@ -75,11 +75,17 @@
             #var deathReport[damage_dealt] 0;
             #var deathReport[corpses_used] $mob[corpses_used];
             #var deathReport[summons_killed] $mob[summons_killed];
-            #var deathReport[songs_lost] $cmbt[songs][lost][fight];
             #var deathReport[damage_dealt] $mob[damage_dealt];
             #var deathReport[damage_received] $mob[damage_received];
             #var deathReport[mob_dodges] $mob[mob_dodges];
-            #var deathReport[xp_gained] $fight_xp;
+            #var deathReport[xp_earned] $fight_xp;
+            #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
+
+            #if {"$guild" == "bard"} {
+                #var deathReport[songs_lost] $cmbt[songs][lost][fight];
+            } {
+                #var deathReport[songs_lost] 0;
+            };
             
             #NOP -- Small delay to make sure we get the variables from the updates;
             #delay 1 {
@@ -92,6 +98,7 @@
                     {killer} {$deathReport[mob_killer]}
                     {rounds} {$deathReport[mob_rounds_to_kill]}
                     {xp_earned} {$deathReport[xp_earned]}
+                    {gxp_earned} {$deathReport[gxp_earned]};
                     {damage_dealt} {$deathReport[damage_dealt]}
                     {coins_earned} {$deathReport[coins_earned]}
                     {corpses_used} {$deathReport[corpses_used]}
@@ -106,7 +113,15 @@
         };
     };
 
-    #if $bot[active] {#showme {----- BOT REGISTERED KILL -----}};
+    #if $bot[active] {
+        #showme {----- BOT REGISTERED KILL -----};
+        #NOP #local lastItem &deathSummary[];    ;
+        #NOP #foreach *deathSummary[$lastItem][] key {    ;
+        #NOP     #if {"$deathSummary[$lastItem][$key]" > 0} {    ;
+        #NOP         #echo {$key : $deathSummary[$lastItem][$key]}    ;
+        #NOP     };    ;
+        #NOP };    ;
+    };
 } {1};
 
 #NOP -- Get the class off of partykills;

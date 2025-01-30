@@ -1,0 +1,130 @@
+#class {general_gags} kill;
+#class {general_gags} open;
+
+#read common/gags/gags_area.tin;
+#read common/gags/gags_combat.tin;
+#read common/gags/gags_combat_items.tin;
+#read common/gags/gags_combat_guild.tin;
+#read common/gags/gags_area.tin;
+
+
+#NOP -- Always on Gags;
+#NOP -- Prompt and empty lines;
+#gag {^$};
+#gag {^>$};
+
+#NOP -- Ewell spam;
+#var ewell_gag 1;
+#act {^The brilliant sphere flashes brightly.$} {
+    #line gag;
+    #if $ewell_gag {
+        #showme <efd>+++++++++    EWELL IS ACTIVE    +++++++++<088>;
+        #var ewell_gag 0;
+        #delay 4 #var ewell_gag 1;
+    };
+};
+
+
+#NOP -- 'gags' alias will toggle groups of gags;
+#alias gags {
+    #echo { ================ <dfa>  ACTIVE GAGS<088>  ================ };
+    #format gagName {%-20s} {Name};
+    #echo {<dfb>$gagName Description<088>};
+    #loop 1 &gagList[] item {
+        #format gagName {%-20s} {$gagList[$item][name]};
+        #if $gagList[$item][active] {#echo {<ddd>$gagName $gagList[$item][description]<088>};};
+    };
+    #echo {\n};
+    #echo { ================ <dfa>AVAILABLE GAGS<088> ================ };
+    #format gagName {%-20s} {Name};
+    #echo {<dfb>$gagName Description<088>};
+    #loop 1 &gagList[] item {
+        #format gagName {%-20s} {$gagList[$item][name]};
+        #if !$gagList[$item][active] {#echo {<ddd>$gagName $gagList[$item][description]<088>};};
+    };
+
+    #echo {\n <efa>gag+<088> <bcc>name<088> to <efc>gag<088> a group};
+    #echo { <efa>gag-<088> <bcc>name<088> to <fac>ungag<088> a group};
+    #echo { <efa>gag-all<088> to <fac>gag everything<088>};
+    #echo { <efa>gag-clear<088> to <fac>ungag everything<088>};
+};
+
+#alias gag+ {
+    #if {"%0" == ""} {
+        #echo {<efd> No gag name provided.  Type 'gags' to see available options.<088>};
+    } {
+        #local tmpItem %0;
+        #loop 1 &gagList[] item {
+            #if {"$gagList[$item][name]" == "$tmpItem"} {
+                #var gagList[$item][active] 1;
+                #var gags[$gagList[$item][name]] 1;
+                $gagList[$item][action];
+                #echo {<efd>---------- $gagList[$item][name] NOW GAGGED  ----------<efd>};
+            };
+        };
+    };
+};
+
+#alias gag- {
+    #if {"%0" == ""} {
+        #echo {<efd> No gag name provided.  Type 'gags' to see available options.<088>};
+    } {
+        #local tmpItem %0;
+        #loop 1 &gagList[] item {
+            #if {"$gagList[$item][name]" == "$tmpItem"} {
+                #var gagList[$item][active] 0;
+                #var gags[$gagList[$item][name]] 0;
+                $gagList[$item][action];
+                #echo {<faa>---------- $gagList[$item][name] NO LONGER GAGGED ----------<088>};
+            };
+        };
+    };
+};
+
+#alias gag-all {
+    #local tmpItem 1;
+    #echo {<faa>---------- 🔇🔇 QUIET TIME - EVERYTHING GAGGED 🔇🔇 ----------<088>};
+    #loop 1 &gagList[] tmpItem {
+        #var gagList[$tmpItem][active] 1;
+        #var gags[$gagList[$tmpItem][name]] 1;
+        $gagList[$tmpItem][action];
+    };
+};
+
+#alias gag-clear {  
+    #local tmpItem 1;
+    #echo {<cfb>---------- 📢📢  VERBOSE MODE - GAGS CLEARED   📢📢 ----------<088>};
+    #loop 1 &gagList[] tmpItem {
+        #var gagList[$tmpItem][active] 0;
+        #var gags[$gagList[$tmpItem][name]] 0;
+        $gagList[$tmpItem][action];
+    };
+};
+
+#NOP -- If the gag requires an action
+#unvar gagList
+#list gagList add {{{name} {hpbar} {active} {0} {action} {#NOP} {description} {Generic: Gag HPBar}}};
+#list gagList add {{{name} {combat_generic} {active} {0} {action} {_gag_combat_generic} {description} {Combat: Generic (melee, dodges, blocks, etc.)}}};
+#list gagList add {{{name} {combat_area} {active} {0} {action} {_gag_combat_area} {description} {Combat: Spammy Mobs}}};
+#list gagList add {{{name} {combat_guild} {active} {0} {action} {_gag_combat_guild} {description} {Combat: Spammy Guild Attacks (Cyborgs, Necros, etc.)}}};
+#list gagList add {{{name} {combat_items} {active} {0} {action} {_gag_combat_items} {description} {Combat: Spammy Items (CMC, Erah Shield, etc.)}}};
+#list gagList indexate name;
+
+#alias .update_gags {
+    #if {&gagList[] > 0} {
+        #local item {};
+        #loop 1 &gagList[] item {
+            #if $gags[$gagList[$item][name]] {
+                #var gagList[$item][active] 1;
+                $gagList[$item][action];
+            } {
+                #var gagList[$item][active] 0;
+                $gagList[$item][action];
+            };
+        };
+    };
+};
+
+
+
+#class {general_gags} close;

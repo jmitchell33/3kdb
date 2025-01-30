@@ -1,0 +1,17 @@
+#class guild_strategy kill;
+#class guild_strategy open;
+
+#list strategyList add {{{guild} {changeling} {name} {relinquish}  {active} {0} {description} {Relinquish at 33/66/99}}};
+#list strategyList indexate name;
+
+#alias _strategy_guild {
+    checkStrategy {relinquish} {
+        #if {!$my[relinquish][active] && $my[relinquish][current] > 0} {
+            #if {$my[relinquish][reset] == 33} {#send {!relinquish}};
+            #if {$my[relinquish][reset] == 66} {#send {!relinquish}};
+            #if {$my[relinquish][reset] == 99} {#send {!relinquish}};
+        };
+    };
+};
+
+#class guild_strategy close;

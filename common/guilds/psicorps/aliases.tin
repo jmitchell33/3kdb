@@ -16,30 +16,31 @@
 };
 
 #alias {addp} {
-  #var combat[%1] 1;
+  #var my[implants][%1][active] 1;
 };
 
 #alias {remp} {
   #if {"%1" == "offense"} {
-    #var combat[Bo] 0;
-    #var combat[Tl] 0;
-    #var combat[CP] 0;
-    #var combat[Cg] 0;
-    #var combat[E] 0;
-    #var combat[Ij] 0;
-    #var combat[Sj] 0;
-    #var combat[pf] 0;
-    #var combat[bc] 0;
-    #var combat[BC] 0;
-    #var combat[Cg] 0;
+    #var my[implants][Bo][active] 0;
+    #var my[implants][Tl][active] 0;
+    #var my[implants][CP][active] 0;
+    #var my[implants][Cg][active] 0;
+    #var my[implants][E][active] 0;
+    #var my[implants][Ij][active] 0;
+    #var my[implants][Sj][active] 0;
+    #var my[implants][pf][active] 0;
+    #var my[implants][bc][active] 0;
+    #var my[implants][BC][active] 0;
+    #var my[implants][Cg][active] 0;
+    #var my[implants][Bl][active] 0;
   } {
-    #var combat[%1] 0;
+    #var my[implants][%1][active] 0;
   }
 };
 
 #alias {_show_power} {
-  #regex {*combat[]} {%1} {
-      #if {$combat[%1]} {#showme %1 - %2;};
+  #regex {*my[implants][]} {%1} {
+      #if {$my[implants][%1][active]} {#showme %1 - %2;};
     } {
       #NOP;
     };
@@ -82,6 +83,7 @@
   _show_power {Ij} {iron jaw};
   _show_power {Sj} {steel jaw};
   _show_power {pf} {psychofeedback};
+  _show_power {Bl} {blur};
   
   #echo {----------------};
   #echo {--- Targeted ---};

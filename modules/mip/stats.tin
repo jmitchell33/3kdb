@@ -53,11 +53,11 @@
 			#NOP -- There's also a ticker to check this since this doesn't always fire at the end of a fight if no;
 			#NOP -- new MIP line is received;
 			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
-				#var incombat 0
+				#var incombat 0;
 			} {
 				#var incombat 1;
-				#var last_fight_rounds %2;
 			};
+			#if {$mip[round] < $mip[last_round]} {#var last_fight_rounds $mip[last_round]};
 			
 			#NOP Combat Round Counter;
 			#if !$total_rounds {#var total_rounds 1} {#math total_rounds {$total_rounds + 1};};
@@ -140,9 +140,14 @@
 		#REGEX {$mip[gline][1]}	{\[{FF|IL}\(%d\): %d.%d\%\]>  \[%D\]} {
 			#VAR {my[ff][current]}		{&3.&4};
 			#VAR {my[form]}			{&5}
-		}
+		};
 	}; #ELSEIF {%1 == 2} {
-		#REGEX {$mip[gline][2]}	{\[Bioplasts: %d\]} {#VAR {my[bioplasts]}	{&1}}
+		#REGEX {$mip[gline][2]}	{\[Bioplasts: %d\]} {#VAR {my[bioplasts]}	{&1}};
+		#REGEX {$mip[gline][2]} {REL: %d\%} {
+			#VAR {my[relinquish][active]}	{1};
+		} {
+			#VAR {my[relinquish][active]}	{0};
+		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>}
 	}

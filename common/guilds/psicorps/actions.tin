@@ -32,18 +32,28 @@
 #var gxp[total-rounds] 0;
 #var gxp[total-gxp] 0;
 
+#alias {gxp_reset} {
+	#var gxp[total-kills] 0;
+	#var gxp[total-rounds] 0;
+	#var gxp[total-gxp] 0;
+	#var gxp[total-kills] 0;
+	#var gxp[total-gxp] 0;
+	#var gxp[total-rounds] 0;
+	#var gxp[avg-gxp-per-round] 0;
+	gs;
+};
 
 #action {^- Tour Number : %d %*} {
 	#var psi_tour_base 5;
-	#var psi_tour %1;
-	#math gxp[tour] {$psi_tour/$psi_tour_base * $psi_tour_base};
+	#var my[psi_tour] %1;
+	#math gxp[tour] {$my[psi_tour]/$psi_tour_base * $psi_tour_base};
 	#foreach $psi_gxp[%*] index {#if {$index[tour] == $gxp[tour]} {#var gxp[round-max] $index[max_gxp_per_round];}};
 } {1};
 
 #alias gs_powers {
 	#var add_powers 1;
 	#unvar gs_powers;
-	#unvar combat;
+	#unvar my[implants];
 	#list gs_powers clear;
 	#var powers_added {Added the following powers: };
 	#send gs;
@@ -81,8 +91,8 @@
 	#math gxp[avg-gxp-per-round] {$gxp[total-gxp] / $gxp[total-rounds]};
 	
 	#math gxp[last-fight-per-round] {$gxp[last-fight] / $last_fight_rounds};
-	#showme LAST FIGHT GXP: $gxp[last-fight-per-round] per rnd from $gxp[last-fight-mob];
-	#showme TOTAL GXP: $gxp[total-gxp] ($gxp[avg-gxp-per-round] per round);
+	#echo {LAST FIGHT GXP: $gxp[last-fight-per-round] per rnd from $gxp[last-fight-mob]};
+	#echo {TOTAL GXP: $gxp[total-gxp] ($gxp[avg-gxp-per-round] per round)};
 
 } {1};
 
@@ -99,10 +109,21 @@
 #sub {^{A blue light engulfs your body as you use psionic energy to repair damage|to your cells.}$} {
 	<159>%0<900>
 };
+#action {You convert %d spell points into %d psionic energy.} {
+	#var my[sp][current] 0;
+	#var my[sp][percent] 0;
+} {2};
 
 #NOP ---- Implants;
 
-#act {^Implant: Shutdown complete.} {#var my[powers] = []};
+#action {^Implant: Shutdown complete.} {
+	#var my[powers] {};
+	#var my[implants] {};
+} {2};
+
+#action {^Implant: Startup sequence initiated.$} {
+	gs_powers;
+} {2};
 
 #NOP ---- Damage type
 
@@ -117,13 +138,24 @@
 	#regex {%2} {{(mostly )?energy}} {#var _adapt_body energy};
 	#regex {%2} {{(mostly )?poison}} {#var _adapt_body poison};
 	#regex {%2} {{(mostly )?radiation}}	{#var _adapt_body radiation};
-	checkStrategy {ab} {[adapt body $_adapt_body};
 } {2};
 
 #NOP ---- Offense
 
-#act {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1};
-#act {^You demoralize} {#var mob[demoralize] 1};
-#act {^That target cannot be re-demoralized.} {#var mob[demoralize] 1};
+#action {^You agitate the molecules in the air into a blast of brilliant light} {#var _bb 1} {2};
+#action {^You demoralize} {#var mob[demoralize] 1} {2};
+#action {^That target cannot be re-demoralized.} {#var mob[demoralize] 1} {2};
+#action {^You open a rift in the astral plane and summon a large construct} {#var my[powers][Ac4] 1;} {2};
+#action {^Your large construct fades back to the astral plane.$} {#var my[powers][Ac4] 0;} {2};
+#action {^You become a blur of motion allowing you to attack more often.$} {#var my[powers][Bl] 1} {2};
+#action {^You extend your arms out to the sides and create a psychic field} {#var my[powers][CP] 1} {2};
+#action {^You cause %* to retransmit pain} {
+	#var mob[recall_pain] 1;
+	#if $gags[combat_guild] {#line gag};
+	checkStrategy {rpain} {#delay 3 {#var mob[recall_pain] 0}};
+	checkStrategy {ragony} {#delay 11 {#var mob[recall_pain] 0}};
+	checkStrategy {rtorment} {#delay 11 {#var mob[recall_pain] 0}};
+} {2};
+
 
 #class {guild_actions} {close}

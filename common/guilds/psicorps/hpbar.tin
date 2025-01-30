@@ -4,9 +4,10 @@
 #NOP -- Psicorps hpbar with all options below;
 #alias setup_3kdb_hpbar {
     #send {pset custom_hp HP: &$HP$&/&$MHP$& SP: &$SP$&/&$MSP$& PE: &$PE$&/&$MPE$& ST: &$ST$&/&$MST$& EC: &$EC$& AAT: &$AAT$& Gold: &$AU$& &$NL$&POW: &$AS$&};
+    #send {pset active_brief 0};
 };
 
-#action {HP: %d/%d SP: %d/%d PE: %d/%d ST: %d/%d EC: %d AAT: %* Gold: %d} {
+#action {^HP: %d/%d SP: %d/%d PE: %d/%d ST: %d/%d EC: %d AAT: %* Gold: %d} {
     #if $gags[hpbar] {
         #line gag;
     };
@@ -27,8 +28,17 @@
     #math my[gp2][percent] {1.00 * $my[gp2][current] / $my[gp2][max]};
 
     #var my[aa] %10;
+
+    #line oneshot #action {^POW: $} {
+        #if $gags[hpbar] {#line gag;};
+        #NOP -- If you just see a POW, there are no powers online;
+        #var powers_string <ebc>NONE<088>;
+        #var my[powers] {}; 
+    };
     
-    #line oneshot #action {^POW: %*} {
+    #line oneshot #action {^POW: [[ %* ]]$} {
+        #NOP -- Unaction the last power check _use_power in heartbeat.tin so we're only notified on a new round;
+        #unaction {{You must wait %d round%w before you can use this power again.|You may only use one power per round.}};
         #if $gags[hpbar] {
             #line gag;
         };
@@ -38,47 +48,57 @@
             #var my[powers] {};
         } {
             #var powers %%1;
-
-            #NOP -- String for HPBAR;
-            #var powers_string %%1;
-
-            #NOP -- Replacements;
-            #replace powers {[[} {};
-            #replace powers {]]} {};
-            #replace powers_string {[[} {};
-            #replace powers_string {]]} {};
-            #replace powers {:}{};
-            #replace powers { }{;};
-            #list powers create $powers;
-
-            #local i 1;
-
-            #var my[powers] [];
-            #var my[powers_time] [];
-            #while {$i <= &powers[]} {
-                #math {time_index} {$i + 1};
-                #list {powers} {get} {$i} {power};
-                #list {powers} {get} {$time_index} {time};
-
-                #NOP -- If the regex finds a number, the power has a duration.  If it doesn't, it's the next power in the list;
-                #NOP -- Powers with a timer we use the timer, if not we make it an 11;
-                #regex {$time} {%+d} {
-                    #var time &0;
-                    #if {$time > 0} {
-                        #math {i} {$i + 2};
-                    } {
-                        #var time 11;
-                        #math {i} {$i + 1};
-                    };
-                } {
-                    #var time 11;
-                    #math {i} {$i + 1};
-                };
-                #var my[powers][$power] 1;
-                #var my[powers_time][$power] $time;
-            };
+            _hpbar_handle_powers {$powers};
         };
     };
 } {2};
+
+#alias {_hpbar_handle_powers} {
+    #NOP -- Move hpbar handler here and add support if it multi-lines;
+    #NOP -- String for HPBAR;
+    #var powers_string %0;
+    #var powers %0;
+
+    #local key_index 1;
+
+    #NOP -- Replacements;
+    #replace powers_string {: %* } { };
+    #replace powers_string {ab: %*} {ab};
+
+    #var powers_keys $powers_string;
+
+    #format powers_keys {%p} {$powers_keys};
+    #list powers_keys explode { };
+
+    #NOP -- Remove powers that are no longer on the powers list;
+    #foreach *my[powers][] tmpKey {
+        #regex $powers {%i${tmpKey}} {#NOP} {
+            #unvar my[powers][$tmpKey];
+        };
+    };
+
+    #NOP -- Add new powers or update time on existing ones;
+    #loop 1 &powers_keys[] key_index {
+        #regex $powers {$powers_keys[$key_index]: %d} {
+            #var my[powers][$powers_keys[$key_index]][active] 1;
+            #var my[powers][$powers_keys[$key_index]][time] &1;
+        };
+    };
+
+    #NOP -- Get the active adapt body type if available;
+    #regex $powers {ab: %dJag} {#var current_adapt_body edged};
+    #regex $powers {ab: %dSmo} {#var current_adapt_body blunt};
+    #regex $powers {ab: %dBur} {#var current_adapt_body fire};
+    #regex $powers {ab: %dFri} {#var current_adapt_body ice};
+    #regex $powers {ab: %dMel} {#var current_adapt_body acid};
+    #regex $powers {ab: %dEne} {#var current_adapt_body electric};
+    #regex $powers {ab: %dMen} {#var current_adapt_body mind};
+    #regex $powers {ab: %dMag} {#var current_adapt_body energy};
+    #regex $powers {ab: %dPut} {#var current_adapt_body poison};
+    #regex $powers {ab: %dGlo} {#var current_adapt_body radiation};
+
+    #format _adapt_body_short {%.1s} {$current_adapt_body};
+    #replace powers_string {ab} {ab<dfc>($_adapt_body_short)<088>};
+};
 
 #class guild_hpbar close;
