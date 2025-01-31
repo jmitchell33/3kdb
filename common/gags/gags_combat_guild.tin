@@ -1,3 +1,5 @@
+#class gags_combat_guild kill;
+
 #NOP -- Guild Combat Gags;
 #alias _gag_combat_guild {
     #if $gags[combat_guild] {
@@ -152,6 +154,12 @@
         #gag {^  You escaped my grasp this time %w... this time.$};
         #gag {^  Live onward my son.$};
         #gag {^  We will be together soon enough %w.$};
+
+        #NOP #action {^-You activate your atrance-\n%a%*-Your atrance is complete-$} {
+        #NOP     #local tmpNewLineCount %%1;
+        #NOP     #list tmpNewLineCount explode {\n};
+        #NOP     #line substitute variables #gag &tmpNewLineCount[];
+        #NOP } {2};
 
         #NOP -- Specific Necro Familiar Gags;
         #gag {^*.,'`'SaTaN'`',.* %*!$};
