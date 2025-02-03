@@ -3,7 +3,6 @@
 
 #list dgraft clear;
 #var my[necromancer][repowers] 0;
-#var my[necromancer][spark-corpse] 0;
 #var spark_corpse 0;
 
 #NOP --------------------------------------- NECROMANCER SPECIFIC ACTIONS ------------------------------------------;
@@ -26,6 +25,8 @@
 #unvar moonSparkList;
 #unvar planeSparkList;
 #var stats[corpses][preserved] 0;
+#var stats[corpses][spark-corpse] 0;
+
 #NOP --------------------------------------- NECROMANCER STATUS TRACKING  ------------------------------------------;
 
 #action {You prepare the corpse with your innate, necromantic energies.} {
@@ -33,22 +34,7 @@
 } {2};
 #action {A spark of red energy appears out of nowhere and enters the corpse.} {
     #var spark_corpse 1;
-    #list moonSparkList find {$my[necromancer][moon][current]} {foundMoon};
-    #list planeList find {$my[necromancer][plane][current]} {planeIndex};
-    #list planeSparkList find {$planeIndex} {foundPlane};
-    #if $foundMoon {
-        #math moonSparkList[$my[necromancer][moon][current]] {$moonSparkList[$my[necromancer][moon][current]] + 1};
-    } {
-        #var moonSparkList[$my[necromancer][moon][current]] 1;
-    };
-
-    #if $foundPlane {
-        #math planeSparkList[$planeIndex] {$planeSparkList[$planeIndex] + 1};
-    } {
-        #var planeSparkList[$planeIndex] 1;
-    };
-    
-    #math my[necromancer][spark-corpse] {$my[necromancer][spark-corpse] + 1};
+    #math stats[corpses][spark-corpse] {$stats[corpses][spark-corpse] + 1};
     #delay .5 {#var spark_corpse 0};
 } {2};
 #act {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1};
@@ -242,11 +228,6 @@
 
 #NOP -- Teleport helpers;
 #action {Visions of the guild appear first in your mind, then reality...} {mapgo necro_rr} {2};
-
-#NOP Make sure these things don't interfere with other triggers;
-#action {^-You activate your atrance-} {
-    #NOP
-} {1};
 
 #NOP -- Glamor maintenance;
 #NOP -- fury;

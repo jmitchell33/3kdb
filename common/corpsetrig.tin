@@ -66,50 +66,9 @@
             #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
             #if $dmgtracker {.dmg_round_reset;#var cmbt[affects][convoke] 0};
 
-            #NOP -- Pull data from (cstats for how much damage was received;
-            #NOP _update_cstats;
-            #NOP _update_partykills;
-
-            #var deathReport[mob_killed] %1;
-            #var deathReport[mob_rounds_to_kill] $mip[round];
-            #var deathReport[damage_dealt] 0;
-            #var deathReport[corpses_used] $mob[corpses_used];
-            #var deathReport[summons_killed] $mob[summons_killed];
-            #var deathReport[damage_dealt] $mob[damage_dealt];
-            #var deathReport[damage_received] $mob[damage_received];
-            #var deathReport[mob_dodges] $mob[mob_dodges];
-            #var deathReport[xp_earned] $fight_xp;
-            #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
-
-            #if {"$guild" == "bard"} {
-                #var deathReport[songs_lost] $cmbt[songs][lost][fight];
-            } {
-                #var deathReport[songs_lost] 0;
-            };
-            
-            #NOP -- Small delay to make sure we get the variables from the updates;
-            #delay 1 {
-                _mob_status_clear;
-                #var deathReport[xp_earned] $fight_xp;
-                #var deathReport[coins_earned] $fight_coins;
-
-                #list deathSummary add {{
-                    {mob} {$deathReport[mob_killed]}
-                    {killer} {$deathReport[mob_killer]}
-                    {rounds} {$deathReport[mob_rounds_to_kill]}
-                    {xp_earned} {$deathReport[xp_earned]}
-                    {gxp_earned} {$deathReport[gxp_earned]};
-                    {damage_dealt} {$deathReport[damage_dealt]}
-                    {coins_earned} {$deathReport[coins_earned]}
-                    {corpses_used} {$deathReport[corpses_used]}
-                    {summons_killed} {$deathReport[summons_killed]}
-                    {songs_lost} {$deathReport[songs_lost]}
-                    {damage_dealt} {$deathReport[damage_dealt]}
-                    {damage_received} {$deathReport[damage_received]}
-                    {mob_dodges} {$deathReport[mob_dodges]}
-                    {class} {$deathReport[class]}
-                }};
-            };
+            #NOP -- Pull data from (cstats for how much damage was received and mob class;
+            #if $eternal {_update_cstats};
+            .processDeathReport;
         };
     };
 
@@ -124,47 +83,48 @@
     };
 } {1};
 
-#NOP -- Get the class off of partykills;
-#alias _update_partykills {
-    #class tmpCapture open;
-    #local tmpClassKilled 0;
-    #var tmpLineNo 1;
+#alias .processDeathReport {
+    #var deathReport[mob_rounds_to_kill] $mip[round];
+    #var deathReport[damage_dealt] 0;
+    #var deathReport[corpses_used] $mob[corpses_used];
+    #var deathReport[summons_killed] $mob[summons_killed];
+    #var deathReport[damage_dealt] $mob[damage_dealt];
+    #var deathReport[mob_dodges] $mob[mob_dodges];
+    #var deathReport[xp_earned] $fight_xp;
+    #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
 
-    #action {%s # %s Name %s Class} {
-        #echo {caught partykills};
-        #local tmpLastKill 0;
-        #event {CATCH PROCESSED LINE} {
-            #local tmpLine {%%%1};
-            #local tmpNumber 0;
-            #math tmpLineNo {$tmpLineNo + 1};
-            #NOP -- 4th Line has the most recent kill;
-            #if {$tmpLineNo == 4} {
-                #echo {on line 4 content is $tmpLine};
-                #list tmpLine explode {  };
-                #format tmpNumber {%d} {$tmpLine[&tmpLine[]]};
-                #var mob[class] $tmpNumber;
-                #var deathReport[class] $mob[class];
-            };
-        };
-    } {1};
-    
-    #action {   1  %*} {
-        #var tmpClassKilled 1;
-        #class {tmpCapture} kill;
-        #line gag;
-    } {1};
-     
-
-    #delay 2 {
-        #if !$tmpClassKilled {
-            #class tmpCapture kill;
-            #unaction {   1  %*};
-        };
+    #if {"$guild" == "bard"} {
+        #var deathReport[songs_lost] $cmbt[songs][lost][fight];
+    } {
+        #var deathReport[songs_lost] 0;
     };
-    #send {!partykills};
+    
+    #NOP -- Small delay to make sure we get the variables from the updates;
+    #delay 1 {
+        #var deathReport[xp_earned] $fight_xp;
+        #var deathReport[coins_earned] $fight_coins;
+        #math deathReport[xp_to_class] {$fight_xp / $deathReport[class] * 1.00};
+
+        #list deathSummary add {{
+            {mob} {$deathReport[mob_killed]}
+            {killer} {$deathReport[mob_killer]}
+            {rounds} {$deathReport[mob_rounds_to_kill]}
+            {xp_earned} {$deathReport[xp_earned]}
+            {gxp_earned} {$deathReport[gxp_earned]};
+            {damage_dealt} {$deathReport[damage_dealt]}
+            {coins_earned} {$deathReport[coins_earned]}
+            {corpses_used} {$deathReport[corpses_used]}
+            {summons_killed} {$deathReport[summons_killed]}
+            {songs_lost} {$deathReport[songs_lost]}
+            {damage_dealt} {$deathReport[damage_dealt]}
+            {damage_received} {$deathReport[damage_received]}
+            {mob_dodges} {$deathReport[mob_dodges]}
+            {class} {$deathReport[class]}
+            {xp_to_class} {$deathReport[xp_to_class]}
+        }};
+        _mob_status_clear;
+    };
 };
-
-
 
 #NOP -- This section manages the corpsetrig aliases and moving items in the actual corpsetrig;
 #alias corpsetrig {
