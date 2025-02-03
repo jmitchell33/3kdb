@@ -1,6 +1,8 @@
-#class dmgtracker open;
+#NOP -----------------------------------------------------;
+#NOP -- Mob Dodge Tracking;
+#NOP -----------------------------------------------------;
 
-#alias dodgeTrack {
+#alias dodgeMobTrack {
     #if $gags[combat_generic] {#line gag};
     #if {$mob[mob_dodges] > 0} {
         #NOP -- need to eventually clean up so there's not multiple places tracking dodges, but for now this is where we are;
@@ -15,16 +17,11 @@
     };
 };
 
-
-#NOP Mob Dodge Tracking;
-#action {%* deftly slips away from your attack!$} {dodgeTrack} {2};
-#action {%* blinks out in time to evade your attack.$} {dodgeTrack} {2};
-#action {%* parries the attack.$} {dodgeTrack} {2};
-#action {%* quickly dodges your assault!$} {dodgeTrack} {2};
+#action {%* deftly slips away from your attack!$} {dodgeMobTrack} {2};
+#action {%* blinks out in time to evade your attack.$} {dodgeMobTrack} {2};
+#action {%* parries the attack.$} {dodgeMobTrack} {2};
+#action {%* quickly dodges your assault!$} {dodgeMobTrack} {2};
 
 #NOP -- Event Mobs
-#ACTION {^%* phases into the ethereal realm and your attack passes right through!$} {dodgeTrack} {2};
-    
+#ACTION {^%* phases into the ethereal realm and your attack passes right through!$} {dodgeMobTrack} {2};
 
-
-#class dmgtracker close;

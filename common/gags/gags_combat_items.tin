@@ -1,0 +1,54 @@
+#NOP -- Gags for Spammy Items;
+#alias _gag_combat_items {
+    #if $gags[combat_items] {
+        #class gags_combat_items open;
+
+        #NOP -- Item Gags;
+        #gag {^The sword pulses in your grasp!$};
+        #gag {%*Your body quakes violently as a sickly, mutated arm$};
+        #gag {%*spears forth from your torso and smashes%*!$};
+        #gag {%* quakes violently as a sickly, mutated arm spears};
+        #gag {forth from his torso and viciously smashes %*!};
+        #gag {^{The Spork Lance SLICES into (.*)\!}};
+        #gag {^{The Spork Lance tingles and you feel refreshed\.}};
+        #gag {{^A spork tine breaks off into (.*)\!}};
+        #gag {{^The Spork Lance GASHES (.*)\!}};
+        #gag {{^The spork tine falls out of (.*)\.}};
+        #gag {{^(.*) bleeds from where the spork tine is embedded in (.*)\!}};
+        #gag {^The aura surrounding you absorbs some of the incoming attack.$};
+        #gag {^Acid from the Queen's skin sizzles %* alive!$};
+        #gag {^The sharp spikes SHRED %* flesh like paper.$};
+        #gag {^A mighty pulse of strength wells in your arms!$};
+        #gag {^The gloves course a powerful strike through your arms!$};
+
+        #NOP CMC;
+        #action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {#line gag} {1};
+
+        #NOP Erah Shield;
+        #gag {%* bashes %* with %* shield, cutting it and sending it reeling backward.};
+        #action {%* bashes %* with %* shield, cutting it and sending it reeling backward} {
+            #line gag;
+            #line oneshot #act {backward.} {#line gag;};
+            #line oneshot #act {reeling backward.} {#line gag;};
+        } {1};
+
+        #gag {it reeling backward.};
+        #gag {sending it reeling backward.};
+
+        #NOP Blood Plate;
+        #gag {Your armour absorbs the blood from your wounds.};
+        #gag {Your armour extends a tendril of blood that deflects the incoming attack!};
+
+        #NOP -- Lucanus Gags;
+        #gag {^The power of the gods intervene to protect you from the attack.$};
+        #action {^The aura around %* amplifies%*} {
+            #line gag;
+            #line oneshot #action {%*attack.$} {#line gag;};
+        };
+        
+        
+        #class gags_combat_items close;
+    } {
+        #class gags_combat_items kill;
+    };
+};

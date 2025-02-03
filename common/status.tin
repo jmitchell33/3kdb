@@ -183,8 +183,10 @@
     #var dsave[log] {};
     #var dsave_round 1;
 
-    #act {^Death tells you:} {
+    #action {^Death tells you:} {
+        #if $gags[combat_guild] {#line gag};
         #line oneshot #action {My favor will cost you %d points of necromancy...} {
+            #if $gags[combat_guild] {#line gag};
             #math dsave[total][count] {$dsave[total][count] + 1};
             #math dsave[total][np] {$dsave[total][np] + %%1};
             #math dsave[total][avg] {$dsave[total][np] / $dsave[total][count]};
@@ -196,7 +198,8 @@
             #math dsave[mob][np] {$dsave[mob][np] + %%1};
             #math dsave[mob][avg] {$dsave[mob][np] / $dsave[mob][count]};
             #if {$dsave[max][np] < %%1} {#var dsave[max][np] %%1};
-        };
+        } {1};
+        #line oneshot #action {From afar, Death favors you.} {#if $gags[combat_guild] {#line gag}} {1};
         #if $dsave_round {
             #var dsave_round 0;
             #delay 1 {
@@ -205,15 +208,15 @@
                 #format dsave[round][np] {%g} {$dsave[round][np]};
                 #format dsave[round][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {RND: ${dsave[round][count]}x} {(NP: $dsave[round][np] Avg: $dsave[round][avg])} {<cab>💀<088>};
                 #format dsave[total][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {TOT: @formatThousands{${dsave[total][count]}}x} {(NP: @formatThousands{$dsave[total][np]} Avg: @formatThousands{$dsave[total][avg]})} {<cab>💀<088>};
-                #echo $dsave[round][string];
-                #echo $dsave[total][string];
+                #if !$gags[combat_guild] {#echo $dsave[round][string]};
+                #if !$gags[combat_guild] {#echo $dsave[total][string]};
                 #var dsave[round][avg] 0;
                 #var dsave[round][count] 0;
                 #var dsave[round][np] 0;
                 #var dsave_round 1;
             };
         };
-    };
+    } {1};
 
     #alias .dsaveMobSave {
         #list dsave[log] add {{{mob} {$enemy[name]} {count} {$dsave[mob][count]} {np} {$dsave[mob][np]} {avg} {$dsave[mob][avg]}}};
@@ -225,7 +228,7 @@
     #function formatDsaveLine {
         #format tmpString {%.30s} {%1};
         #format result {%+30s %+10s %+10s %+10s} {$tmpString} {%2} {%3} {%4};
-        #echo $result;
+        #echo {$result};
         #return #NOP;
     };
 

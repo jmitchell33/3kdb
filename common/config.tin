@@ -32,16 +32,19 @@
 #NOP -- Load variables from last session;
 
 #alias {defaults_on} {
+    #echo {<fff> CONNECTED TO 3KDB -- UPDATING SCREEN IN 3 seconds...};
     _variable_import;
 	mipon;
-	loadmap;
+    #read common/draw.tin;
+    loadmap;
     postload;
-	#read common/draw.tin;
 	i;
     examine cooler;
     touch diamond rune;
     #send {(powers};
     .update_gags;
+    init_screen;
+    draw_all;
 };
 
 #ALIAS {postload}
@@ -186,8 +189,18 @@
 
 #NOP -- Auto defaults_on - the primary reason for turning this off is to debug things since the mip;
 #NOP -- scripts are so spammy;
-#action {^3Kingdoms welcomes you!} {_load_3kdb_common;defaults_on;#delay 2 {#map goto 6220}} {1};
-#action {^3Kingdoms welcomes you back from linkdeath.} {_load_3kdb_common;defaults_on} {1};
+#var sessionActive 0;
+#action {^3Kingdoms welcomes you!} {
+    #var sessionActive 1;
+    _load_3kdb_common;
+    defaults_on;
+    #delay 2 {#map goto 6220}
+} {1};
+#action {^3Kingdoms welcomes you back from linkdeath.} {
+    #var sessionActive 1;
+    _load_3kdb_common;
+    defaults_on
+} {1};
 
 #NOP -- If numbers are detected, read in the damage tracker;
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
