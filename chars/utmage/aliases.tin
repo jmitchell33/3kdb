@@ -247,19 +247,18 @@
      cast identify on %0 30
 };
 
-#NOP -- setup defense;
 #alias {setup_defense} {
-     clear_gc;
      clear_c;
-     setup_gc;
+     clear_gc;
      setup_c;
-     #delay 2 {prots_armor};
-     #delay 4 {prots_ms};
-     #delay 6 {prots_MG};
-     #delay 8 {prots_ss};
-     #delay 10 {prots_mb};
-     #delay 12 {prots_pfe};
-     #delay 14 {prots_ps}
+     setup_gc;
+     #delay 2 {prots_ss};
+     #delay 4 {prots_MG};
+     #delay 6 {prots_ms};
+     #delay 8 {prots_armor};
+     #delay 10 {prots_ps};
+     #delay 12 {cast mantle};
+     #delay 14 {prots_pfe};
 };
 
 #NOP -- setup contingency with defenses;
@@ -323,7 +322,7 @@
      shoo golem;
      mystrategy;
      ms 7##2#1500#70#defend#summons#always;
-     ms 8##2#1500#70#assist#summons#always;
+     ms 7##2#1500#70#assist#summons#always;
      #delay {4} {cg}
 };
 
@@ -331,8 +330,8 @@
      clear_sconfig;
      shoo;
      mystrategy;
-     ms 7#10-headed hydra#2#1500#70#defend#summons#always;
-     ms 7#10-headed hydra#2#1500#70#assist#summons#always
+     ms 7#10-headed hydra#1#1500#70#defend#summons#always;
+     ms 7#10-headed hydra#3#1500#70#assist#summons#always
 };
 
  #NOP -- 4 assisting;
@@ -526,7 +525,7 @@
          };
      };
 };
- 
+
 #list utmage3kdb clear;
  
 #NOP -- corpses;
