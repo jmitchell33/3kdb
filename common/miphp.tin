@@ -33,6 +33,15 @@
     } {2};
 };
 
+#alias {_update_prof_stats} {
+	#var tmpProfString ASS BGH DM MAG TAC ;
+    #if !$cmbt[affects][assassin] {#replace tmpProfString {ASS } {}};
+    #if !$cmbt[affects][BGH] {#replace tmpProfString {BGH } {}};
+    #if !$cmbt[affects][DM] {#replace tmpProfString {DM } {}};
+    #if !$cmbt[affects][magician] {#replace tmpProfString {MAG } {}};
+    #if !$cmbt[affects][tactician] {#replace tmpProfString {TAC } {}};
+};
+
 #alias {_update_fight_status} {
 	#var mob_string[name] $enemy[name];
 	#var mob_string[round] $mip[round];

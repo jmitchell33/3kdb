@@ -356,12 +356,10 @@
         #NOP -- Actions to perform only in the beginning of the fight;
         #if {$mip[round] > 2 && $mip[round] < 6} {
             checkStrategy {epowers} {
-                #if {"${eternal}" != ""} {
+                #if {"${eternal}" != "" && "${my[eternal]}" != ""} {
                     #if $eternal {
-                        #if {"${my[eternal]}" != ""} {
-                            #if {$my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
-                            #if {$my[eternal][fry]} {(fry;};
-                        };
+                        #if {$my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
+                        #if {$my[eternal][fry]} {(fry;};
                     };
                 };
             };
