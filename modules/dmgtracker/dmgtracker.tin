@@ -164,14 +164,38 @@ dreset;
 #action {^You raise your palm forward and a %* skull of %*} {#var cmbt[affects][skullfire] 1} {2};
 
 #NOP -- Toggles for profession boosts;
-#action {^Your crazed ambition overflows!$} {#var cmbt[affects][BGH] 1} {2};
-#action {^Your wild ambition takes a back seat to prudence.$} {#var cmbt[affects][BGH] 0} {2};
-#action {^You feel a sudden wave of alcohol induced fury overcome you!$} {#var cmbt[affects][DM] 1} {2};
-#action {^Your alcohol fueled strength dissipates.} {#var cmbt[affects][DM] 0} {2};
-#action {^A flash of insidious insight strikes you!$} {#var cmbt[affects][assassin] 1} {2};
-#action {^Your insidious inspiration fades.$} {#var cmbt[affects][assassin] 0} {2};
-#action {^You outfox your opponent and take advantage of it!$} {#var cmbt[affects][tactician] 1} {2};
-#action {^Your tactical advantage ends.$} {#var cmbt[affects][tactician] 0} {2};
+#action {^Your crazed ambition overflows!$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][BGH] 1;
+} {2};
+#action {^Your wild ambition takes a back seat to prudence.$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][BGH] 0;
+} {2};
+#action {^You feel a sudden wave of alcohol induced fury overcome you!$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][DM] 1;
+} {2};
+#action {^Your alcohol fueled strength dissipates.} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][DM] 0;
+} {2};
+#action {^A flash of insidious insight strikes you!$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][assassin] 1;
+} {2};
+#action {^Your insidious inspiration fades.$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][assassin] 0;
+} {2};
+#action {^You outfox your opponent and take advantage of it!$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][tactician] 1;
+} {2};
+#action {^Your tactical advantage ends.$} {
+    #if $gags[combat_generic] {#line gag};
+    #var cmbt[affects][tactician] 0;
+} {2};
 
 
 #ACTION {^[%d] %* {mind warp|sunspear|incinerate|frostbite|burning hands|acid arrow|disintegrate|prismatic spray|venomous spray}%*} {
@@ -278,7 +302,6 @@ dreset;
 #action {^%* hits you for %d damage!$} {
     #local dmgAmount {};
     #format dmgAmount {%d} {%2};
-    #math mob[damage_received] {$mob[damage_received] + $dmgAmount};
     #format dmgDisplay {%g} {$dmgAmount};
     #line gag;
     #echo {%1 hits you for $dmgDisplay damage!};

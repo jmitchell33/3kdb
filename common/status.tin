@@ -208,8 +208,8 @@
                 #format dsave[round][np] {%g} {$dsave[round][np]};
                 #format dsave[round][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {RND: ${dsave[round][count]}x} {(NP: $dsave[round][np] Avg: $dsave[round][avg])} {<cab>💀<088>};
                 #format dsave[total][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {TOT: @formatThousands{${dsave[total][count]}}x} {(NP: @formatThousands{$dsave[total][np]} Avg: @formatThousands{$dsave[total][avg]})} {<cab>💀<088>};
-                #echo $dsave[round][string];
-                #echo $dsave[total][string];
+                #if !$gags[combat_guild] {#echo $dsave[round][string]};
+                #if !$gags[combat_guild] {#echo $dsave[total][string]};
                 #var dsave[round][avg] 0;
                 #var dsave[round][count] 0;
                 #var dsave[round][np] 0;
@@ -228,7 +228,7 @@
     #function formatDsaveLine {
         #format tmpString {%.30s} {%1};
         #format result {%+30s %+10s %+10s %+10s} {$tmpString} {%2} {%3} {%4};
-        #echo $result;
+        #echo {$result};
         #return #NOP;
     };
 

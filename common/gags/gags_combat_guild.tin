@@ -147,20 +147,34 @@
             #line gag;
         } {1};
 
-        #gag {^  I can wait for you %w.  I can wait a very long time.$};
-        #gag {^  Don't worry my son, I always collect my debts...eventually.$};
-        #gag {^  I can feel you moving closer to me, my child.$};
-        #gag {^  Your destiny will wait a bit longer %w.$};
-        #gag {^  You escaped my grasp this time %w... this time.$};
-        #gag {^  Live onward my son.$};
-        #gag {^  We will be together soon enough %w.$};
-        #gag {^  %w, my son, I will embrace you soon.$};
+        #gag {^  I can wait for you %w.  I can wait a very long time.};
+        #gag {^  Don't worry my son, I always collect my debts...eventually.};
+        #gag {^  I can feel you moving closer to me, my child.};
+        #gag {^  Your destiny will wait a bit longer %w.};
+        #gag {^  You escaped my grasp this time %w... this time.};
+        #gag {^  Live onward my son.};
+        #gag {^  We will be together soon enough %w.};
+        #gag {^  %w, my son, I will embrace you soon.};
 
-        #NOP #action {^-You activate your atrance-\n%a%*-Your atrance is complete-$} {
-        #NOP     #local tmpNewLineCount %%1;
-        #NOP     #list tmpNewLineCount explode {\n};
-        #NOP     #line substitute variables #gag &tmpNewLineCount[];
-        #NOP } {2};
+        #gag {^  You draw %* from the well of the trance.};
+        #action {^-You activate your atrance-} {
+            #line gag;
+            #class atrance_gag open;
+            #EVENT {CATCH PROCESSED LINE} {
+                #nop;
+            };
+            #class atrance_gag close;
+            #delay 1 {#class atrance_gag kill};
+        } {2};
+        #action {^-Your atrance is complete-} {
+            #line gag;
+            #class atrance_gag kill;
+        } {2};
+
+        #action {^  Your maximum dream factor is %* master, invoking that now.} {
+            #line gag 2;
+        } {2};
+
 
         #NOP -- Specific Necro Familiar Gags;
         #gag {^*.,'`'SaTaN'`',.* %*!$};

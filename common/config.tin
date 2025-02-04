@@ -194,12 +194,18 @@
     #var sessionActive 1;
     _load_3kdb_common;
     defaults_on;
-    #delay 2 {#map goto 6220}
+    #delay 1 {#map goto 6220};
 } {1};
 #action {^3Kingdoms welcomes you back from linkdeath.} {
     #var sessionActive 1;
     _load_3kdb_common;
-    defaults_on
+    defaults_on;
+    look;
+    #delay 1 {
+        #if {"$room[name]" == "Entrance Building to Pinnacle (jump)"} {
+            #map goto 6220;
+        };
+    };
 } {1};
 
 #NOP -- If numbers are detected, read in the damage tracker;
