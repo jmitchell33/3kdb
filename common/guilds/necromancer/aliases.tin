@@ -107,6 +107,23 @@
     };
 };
 
+#alias nukeUndead_noUG_Abs {
+    #var ogEnemy $enemy[name_numbers];
+    #var undeadKilled 0;
+    ktrig OFF;
+    #loop 1 $my[necromancer][conjure_undead] i {conjure undead;kill undead;rabies undead;corrode undead};
+    kill $ogEnemy;
+    #action {%* dealt the killing blow to Undead.} {
+        #math undeadKilled {$undeadKilled + 1};
+    } {1};
+    #delay 10 {
+        #if $mask[active] {#math undeadKilled {$undeadKilled * 2}};
+        #${undeadKilled} qtrance preserve remains/absorb;
+        #unaction {%* dealt the killing blow to Undead.};
+        ktrig ON;
+    };
+};
+
 #alias nukeUndeadPres {
     #var ogEnemy $enemy[name_numbers];
     #var undeadKilled 0;
@@ -114,6 +131,25 @@
     #loop 1 $my[necromancer][conjure_undead] i {conjure undead;kill undead;rabies undead;corrode undead};
     kill $ogEnemy;
     unholy ground;
+    #action {%* dealt the killing blow to Undead.} {
+        #math undeadKilled {$undeadKilled + 1};
+    } {1};
+    #delay 10 {
+        #if $mask[active] {#math undeadKilled {$undeadKilled * 2}};
+        #NOP -- We specifically wont' use gemino since that produces a corpse less than the vault will take;
+        #${undeadKilled} preserve get;
+        keep all preservation;
+        #unaction {%* dealt the killing blow to Undead.};
+        ktrig ON;
+    };
+};
+
+#alias nukeUndead_noUG_Pres {
+    #var ogEnemy $enemy[name_numbers];
+    #var undeadKilled 0;
+    ktrig OFF;
+    #loop 1 $my[necromancer][conjure_undead] i {conjure undead;kill undead;rabies undead;corrode undead};
+    kill $ogEnemy;
     #action {%* dealt the killing blow to Undead.} {
         #math undeadKilled {$undeadKilled + 1};
     } {1};

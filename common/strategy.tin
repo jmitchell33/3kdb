@@ -110,8 +110,10 @@
 #list strategyList add {{{guild} {necromancer} {name} {diurnum}  {active} {0} {description} {Necro: Diurnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {nocturnum}  {active} {0} {description} {Necro: Nocturnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
-#list strategyList add {{{guild} {necromancer} {name} {conjure}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them}}};
+#list strategyList add {{{guild} {necromancer} {name} {conjure}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (Unholy Ground)}}};
+#list strategyList add {{{guild} {necromancer} {name} {conjure1}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (No Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {gemino}  {active} {0} {description} {Preserve Gemino Corpses}}};
+#list strategyList add {{{guild} {necromancer} {name} {ug}  {active} {0} {description} {Unholy Ground}}};
 #list strategyList add {{{guild} {juggernaut} {name} {frenzy}  {active} {0} {description} {Before Reset: Use Frenzy}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateA}  {active} {0} {description} {Before Reset: Donate Airdrops}}};
 #list strategyList add {{{guild} {juggernaut} {name} {donateF}  {active} {0} {description} {Before Reset: Donate Frenzy}}};
@@ -294,6 +296,10 @@
                 };
             };
 
+            #if {$my[necromancer][unholy_ground]} {
+                checkStrategy {ug} {unholy ground};
+            };
+
             #if {$my[necromancer][soulbind] && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
                 checkStrategy {soulbind} {soulbind};
             };
@@ -313,9 +319,10 @@
             #if {$my[necromancer][conjure_undead] > 0} {
                 #if {$my[gp1][current] < 50000} {
                     checkStrategy {conjure} {nukeUndeadAbs};
+                    checkStrategy {conjure1} {nukeUndead_noUG_Abs};
                 };
                 #if {$my[gp1][current] > 50000 || $my[gp2][current] > 90} {
-                    checkStrategy {conjure} {nukeUndeadPres};
+                    checkStrategy {conjure1} {nukeUndead_noUG_Pres};
                 };
             };
         };
