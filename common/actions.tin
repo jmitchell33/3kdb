@@ -1,8 +1,8 @@
 #class {default_actions} {kill}
 #class {default_actions} {open}
 
-#var my[hmheal][self] 1;
-#var my[hmheal][others] 1;
+#var my[hm][heal] 1;
+#var my[hm][heal_other] 1;
 
 
 #NOP -- Hockey corpse defaults;
@@ -136,11 +136,6 @@
         #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
         #delay 2 {#unaction {^You must wait %* to use that ability.$}};
     };
-} {2};
-
-#action {^You call forth high mortal energies to heal yourself!$} {
-    #var my[hmheal][self] 0;
-    #delay hmheal-self {#var my[hmheal][self] 1} {3600};
 } {2};
 
 #action {^%w says, 'Greetings, Comrade!' to you.$} { 
