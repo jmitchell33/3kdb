@@ -8,7 +8,7 @@
 #NOP Dodge/Dr - This <> has mystical defenses.
 #NOP Fearable - this <> has the heart of a lion.
 
-#var bardEval[cols] 28;
+#var bardEval[cols] 14;
 #var bardEval[Poor] 1;
 #var bardEval[Fair] 2;
 #var bardEval[Decent] 3;
@@ -35,44 +35,59 @@
   #format bardEvalType1Len {%L} {%1};
   #format bardEvalType2Len {%L} {%2};
   #math bardEvalType1fmt $bardEval[cols] - $bardEvalType1Len;
-  #echo {$bardEval[%1]%1<170>%+${bardEvalType1fmt}s<100> | $bardEval[%2]%2<170>%+${bardEvalType2fmt}s} {$bardEval[$bardEval[mob][%1]] <170>\/ 10} {$bardEval[$bardEval[mob][%2]] <170>\/ 10};  #math bardEvalType2fmt $bardEval[cols] - $bardEvalType2Len;
+  #math bardEvalType2fmt $bardEval[cols] - $bardEvalType2Len;
+  #format bardEvalType1No {%+2s} {$bardEval[mob][%1]};
+  #format bardEvalType2No {%+2s} {$bardEval[mob][%2]};
+  #var bardEvalStr1 {$bardEval[%1]%1<170>%+${bardEvalType1fmt}s<100> $bardEvalType1No <170>\/ 10 |};
+  #var bardEvalStr2 {$bardEval[%2]%2<170>%+${bardEvalType2fmt}s<100> $bardEvalType2No <170>\/ 10};
+  #echo {$bardEvalStr1 $bardEvalStr2};
 };
 
 #action {^You focus in on the thought waves of %*.} {
   #var bardEval[name] %1;
-};
+} {2};
 
 #action {^      - D E F E N S I V E   E V A L U A T I O N -} {
   #var bardEval[mob] {};
   #var bardEval[mob][name] $bardEval[name];
-};
+  #var bardEval[mob][Edged] 0;
+  #var bardEval[mob][Fire] 0;
+  #var bardEval[mob][Acid] 0;
+  #var bardEval[mob][Mind] 0;
+  #var bardEval[mob][Acid] 0;
+  #var bardEval[mob][Blunt] 0;
+  #var bardEval[mob][Ice] 0;
+  #var bardEval[mob][Electric] 0;
+  #var bardEval[mob][Energy] 0;
+  #var bardEval[mob][Radiation] 0;
+} {2};
 
 #action {^{Edged|Blunt|Fire|Ice|Acid|Electric|Mind|Energy|Poison|Radiation}%s: {Poor|Fair|Decent|Average|Great|Superb|Outstanding|Heroic|Godly|Legendary|Immune}} {
   #line gag;
-  #var bardEval[mob][%1] %3;
-};
+  #var bardEval[mob][%1] $bardEval[%3];
+} {2};
 
 #action {^This %+ is best defended against} {
   #NOP -- Report the Mob Eval to the room;
   #send {say ----------- $bardEval[mob][name] Evaluation -----------};
-  bardEvalPrint {Edged} {Electric};
-  bardEvalPrint {Blunt} {Mind};
-  bardEvalPrint {Fire} {Energy};
-  bardEvalPrint {Ice} {Poison};
-  bardEvalPrint {Acid} {Radiation};
+  #if {$bardEval[mob][Edged] > 0 && $bardEval[mob][Blunt] > 0} {bardEvalPrint {Edged} {Blunt}};
+  #if {$bardEval[mob][Fire] > 0 && $bardEval[mob][Ice] > 0} {bardEvalPrint {Fire} {Ice}};
+  #if {$bardEval[mob][Acid] > 0 && $bardEval[mob][Electric] > 0} {bardEvalPrint {Acid} {Electric}};
+  #if {$bardEval[mob][Mind] > 0 && $bardEval[mob][Energy] > 0} {bardEvalPrint {Mind} {Energy}};
+  #if {$bardEval[mob][Poison] > 0 && $bardEval[mob][Radiation] > 0} {bardEvalPrint {Poison} {Radiation}};
 
   #var reportString AC out of 10 -- ;
-  #cat reportString { E($bardEval[$bardEval[mob][Edged]])};
-  #cat reportString { B($bardEval[$bardEval[mob][Blunt]])};
-  #cat reportString { F($bardEval[$bardEval[mob][Fire]])};
-  #cat reportString { I($bardEval[$bardEval[mob][Ice]])};
-  #cat reportString { A($bardEval[$bardEval[mob][Acid]])};
-  #cat reportString { E($bardEval[$bardEval[mob][Electric]])};
-  #cat reportString { M($bardEval[$bardEval[mob][Mind]])};
-  #cat reportString { E($bardEval[$bardEval[mob][Energy]])};
-  #cat reportString { P($bardEval[$bardEval[mob][Poison]])};
-  #cat reportString { R($bardEval[$bardEval[mob][Radiation]])};
+  #cat reportString { E($bardEval[mob][Edged])};
+  #cat reportString { B($bardEval[mob][Blunt])};
+  #cat reportString { F($bardEval[mob][Fire])};
+  #cat reportString { I($bardEval[mob][Ice])};
+  #cat reportString { A($bardEval[mob][Acid])};
+  #cat reportString { Elec($bardEval[mob][Electric])};
+  #cat reportString { M($bardEval[mob][Mind])};
+  #cat reportString { Nrg($bardEval[mob][Energy])};
+  #cat reportString { P($bardEval[mob][Poison])};
+  #cat reportString { R($bardEval[mob][Radiation])};
   say $reportString;
-};
+} {2};
 
 #class {eval} close

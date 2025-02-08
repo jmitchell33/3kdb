@@ -3,24 +3,29 @@
 
 #NOP #event {MAP REGION PRESSED MOUSE BUTTON ONE} {#echo {CLICKED MAP REGION (%0,%1) vnum %4 [%5]}};
 
+#var mapLeftCol 32;
+#var mapAreaRightCol 30;
+#var mapDriverTopRow 30;
+
 #alias _init_mapFull {
     #buffer clear;
     #screen clear all;
-    #split 0 0;
-    #unmacro %d;
-    #read modules/helpers/functions.tin;
+    #split 0 8 $mapAreaRightCol 0 1;
+    #unmacro %*;
     #map read common/map/3k_shared.map;
     #var buttons[area_selected][text] $area;
     #map goto $map[full][startVnum];
     #map map;
     #map flag vtmap on;
-    #Map offset 1 32 -15 -15;
+    #Map offset 1 $mapLeftCol -15 -15;
     #config mouse on;
     #read common/data/areas.tin;
     #macro {q} {#{ats} {#port {untilialize}};#zap {port_mapFull}};
-    _draw_mapAreas_initiate;
+    #delay 3 {_draw_mapAreas_initiate};
 };
 
+#function {min} {#if {%1 < %2} {#return %1} {#return %2}};
+#function {max} {#if {%1 > %2} {#return %1} {#return %2}};
 
 #alias {_draw_mapAreas_initiate} {
     #NOP -- Set how large of a slice we should be taking;
@@ -59,8 +64,8 @@
 };
 
 #alias {_draw_mapAreas} {
-    #line sub var #line sub esc #draw green left right bottom side 2 1 -10 30 $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
-    #draw <fba> box -9 1 -6 30 {$buttons[area_selected][text]};
+    #line sub var #line sub esc #draw green left right bottom side 2 1 -10 25 $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
+    #draw <fba> box -9 1 -6 25 {$buttons[area_selected][text]};
     #draw green calign jeweled line 1 1 1 30  {    AREA LIST    };
 };
 
@@ -110,8 +115,12 @@
 };
 
 #EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
-    #if $mapClick {;#NOP} {
+    #if $mapClick {#NOP} {
+        #showme 0 (%0) 1 (%1) 2 (%2) 3 (%3) 4 (%4) 5 (%5);
+        #NOP -- %0 is row from the top, %1 is column
+        
         #math map[full][list][selected][index] {$map[full][list][start] + %0 - 2};
+        #echo {index is $map[full][list][selected][index]};
         #var map[full][list][selected][name] $tmpMapAreaList[$map[full][list][selected][index]];
 
         #var buttons[area_selected][text] $map[full][list][selected][name];
@@ -130,7 +139,8 @@
     #map get roomname buttons[room_selected][text];
     #replace buttons[area_selected][text] {\n%*} {};
     #var buttons[area_selected][text] {$buttons[area_selected][text] \n $buttons[room_selected][text]};
-    _draw_mapAreas
+    _draw_mapAreas;
+    #delay .2 {#var mapClick 0};
 };
 
 
