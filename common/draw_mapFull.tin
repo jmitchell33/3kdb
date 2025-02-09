@@ -3,21 +3,38 @@
 
 #NOP #event {MAP REGION PRESSED MOUSE BUTTON ONE} {#echo {CLICKED MAP REGION (%0,%1) vnum %4 [%5]}};
 
-#var mapLeftCol 32;
-#var mapAreaRightCol 30;
-#var mapDriverTopRow 30;
+#screen get rows screen[height];
+#screen get cols screen[width];
+
+#math mapAreaRightCol {.2 * $screen[width]};
+#format mapAreaRightCol {%d} $mapAreaRightCol;
+
+#NOP -- The map area picks up 2 cols after the area section;
+#math mapLeftCol {$mapAreaRightCol + 2};
+#math mapInfoTop {.28 * $screen[height]};
+#format mapInfoTop {%d} {$mapInfoTop};
+
+#math mapAreaBotRow {$mapInfoTop + 2};
+
+#math mapOffset {$screen[height] / 2.5 * -1};
+#format mapOffset {%d} {$mapOffset};
+
+#NOP -- The area describer in the bottom area summary;
+#math mapInfoButtonTop {$mapAreaBotRow - 1};
+
+#var tmpRoomSelected {};
 
 #alias _init_mapFull {
     #buffer clear;
     #screen clear all;
-    #split 0 8 $mapAreaRightCol 0 1;
+    #split 0 $mapInfoTop $mapAreaRightCol 0 1;
     #unmacro %*;
     #map read common/map/3k_shared.map;
-    #var buttons[area_selected][text] $area;
+    #var tmpRoomSelected[area] $area;
     #map goto $map[full][startVnum];
     #map map;
     #map flag vtmap on;
-    #Map offset 1 $mapLeftCol -15 -15;
+    #Map offset 1 $mapLeftCol $mapOffset $mapOffset;
     #config mouse on;
     #read common/data/areas.tin;
     #macro {q} {#{ats} {#port {untilialize}};#zap {port_mapFull}};
@@ -64,9 +81,15 @@
 };
 
 #alias {_draw_mapAreas} {
-    #line sub var #line sub esc #draw green left right bottom side 2 1 -10 25 $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
-    #draw <fba> box -9 1 -6 25 {$buttons[area_selected][text]};
-    #draw green calign jeweled line 1 1 1 30  {    AREA LIST    };
+    #var tmpString  ;
+    #if {"$tmpRoomSelected[area]" != ""} {#var tmpString $tmpRoomSelected[area]};
+    #if {"$tmpRoomSelected[roomname]" != ""} {#var tmpString {$tmpString \n  <fff>Room : $tmpRoomSelected[roomname]<088>}};
+    #if {"$tmpRoomSelected[exits]" != ""} {#var tmpString {$tmpString \n  <fff>Exits: $tmpRoomSelected[exits]<088>}};
+    #if {"$tmpRoomSelected[roomnote]" != ""} {#var tmpString {$tmpString \n  <fff>Notes: $tmpRoomSelected[roomnote]<088>}};
+    #line sub var #line sub esc #draw green left right bottom side 2 1 -$mapAreaBotRow $mapAreaRightCol $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
+    #draw <fba> box -$mapInfoButtonTop 1 -2 $mapAreaRightCol {$tmpString};
+    #draw <fba> box -$mapInfoButtonTop $mapAreaRightCol -2 -1 {<fff>$tmpRoomSelected[roomdesc]<088>};
+    #draw green calign jeweled line 1 1 1 ${mapAreaRightCol}  {    AREA LIST    };
 };
 
 #alias {_draw_mapAreasScrollUp} {
@@ -97,13 +120,13 @@
 #NOP     #var {o_y} %1;   ;
 #NOP };   ;
 
-#NOP #event {MAP REGION MOVED MOUSE BUTTON ONE} {   ;
-#NOP     #var d_x %0;   ;
-#NOP     #var d_y %1;   ;
-#NOP     #math {c_x} {$o_x - $d_x};   ;
-#NOP     #math {c_y} {$d_y - $o_y};   ;
-#NOP     #map center $c_y $c_x 0   ;
-#NOP };   ;
+#event {MAP REGION MOVED MOUSE BUTTON ONE} {
+    #var d_x %0;
+    #var d_y %1;
+    #math {c_x} {$o_x - $d_x};
+    #math {c_y} {$d_y - $o_y};
+    #map center $c_y $c_x 0;
+};
 
 
 #EVENT {SCROLLED MOUSE WHEEL UP} {
@@ -116,30 +139,48 @@
 
 #EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
     #if $mapClick {#NOP} {
-        #showme 0 (%0) 1 (%1) 2 (%2) 3 (%3) 4 (%4) 5 (%5);
-        #NOP -- %0 is row from the top, %1 is column
+        #NOP -- %0 is row from the top, %1 is column;
         
-        #math map[full][list][selected][index] {$map[full][list][start] + %0 - 2};
-        #echo {index is $map[full][list][selected][index]};
+        #math map[full][list][selected][index] {$map[full][list][start] + %0 + 5};
         #var map[full][list][selected][name] $tmpMapAreaList[$map[full][list][selected][index]];
 
-        #var buttons[area_selected][text] $map[full][list][selected][name];
+        #var tmpRoomSelected[area] $map[full][list][selected][name];
+        #var tmpRoomSelected[roomname]  ;
+        #var tmpRoomSelected[roomdesc]  ;
+        #var tmpRoomSelected[roomexits]  ;
         _draw_mapAreas;
 
         #map list {roomarea}{$map[full][list][selected][name]} {variable}{arealist};
         #map goto *arealist[+1];
         #map map;
-        _draw_mapAreas
+        _draw_mapAreas;
     };
 };
 
 #EVENT {MAP REGION PRESSED MOUSE BUTTON ONE} {
     #var mapClick 1;
-    #map goto %4;
-    #map get roomname buttons[room_selected][text];
-    #replace buttons[area_selected][text] {\n%*} {};
-    #var buttons[area_selected][text] {$buttons[area_selected][text] \n $buttons[room_selected][text]};
-    _draw_mapAreas;
+    #var {o_x} %0;
+    #var {o_y} %1;
+
+    #if {"%4" == "0"} {#NOP} {
+        #map goto %4;
+        #map get roomname tmpRoomSelected[roomname];
+        #map get roomdesc tmpRoomSelected[roomdesc];
+        #map get roomnote tmpRoomSelected[roomnote];
+        #map get roomexits tmpRoomExits;
+        #var tmpRoomSelected[exits]  ;
+        #foreach *tmpRoomExits[] key {
+            #cat tmpRoomSelected[exits] {$key,};
+        };
+        #format exitLen {%L} {$tmpRoomSelected[exits]};
+        #math exitLen {$exitLen - 1};
+        
+        #format tmpRoomSelected[exits] {%.${exitLen}s} {$tmpRoomSelected[exits]};
+        
+        #replace tmpRoomSelected[roomdesc] {\n} { };
+        #replace tmpRoomSelected[roomname] {\n%*} {};
+        _draw_mapAreas;
+    };
     #delay .2 {#var mapClick 0};
 };
 
