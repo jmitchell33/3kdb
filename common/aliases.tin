@@ -21,7 +21,7 @@
 #alias {dwitch} {
     dc;
     dove;
-    kill witch
+    kill witch 1
 };
 
 #alias {bagall} {
@@ -278,13 +278,17 @@
 #alias {.gswap} {
     #NOP -- kill guild classes;
     .kill_guild_classes;
+    #NOP -- kill player classes;
+    .kill_player_classes;
     #NOP -- kill dmgtrackers;
     .kill_dmg_trackers;
+    #NOP -- kill botcycle;
+    #class botcycle kill;
     #NOP -- load new guild variable;
     #var guild %0;
     #NOP -- load common;
     #read common/index.tin;
-    #NOP -- load new guild;
+    #NOP -- load guild;
     #read common/guilds/$guild/index.tin;
     #NOP -- load character;
     #read chars/$user/vars.tin;
@@ -295,9 +299,18 @@
     #read chars/$user/miphp.tin;
     #read chars/$user/private.tin;
     #read chars/$user/tickers.tin;
-    #delay 4 {
-        postload;
-        init_screen
+    #NOP -- load defaults;
+	mipon;
+	loadmap;
+    postload;
+	i;
+    examine cooler;
+    touch diamond rune;
+    #send {(powers};
+    .update_gags;
+    #delay 3 {
+        init_screen;
+        #map goto 65
     };
 };
 
