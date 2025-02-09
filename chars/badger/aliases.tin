@@ -9,6 +9,20 @@
     };
 };
 
+#NOP -- clear all damage trackers;
+#alias {cleardmg} {
+    dreset;
+    #if {"$guild" == "juggernaut"} {
+        mountDmg-clear;
+        truckDmg-clear;
+        supportDmg-clear;
+    };
+    #if {"$guild" == "mage"} {
+        spellDmg-clear;
+        summonDmg-clear
+    };
+};
+
 #NOP -- summon damage summary;
 #alias {sdmg1} {
     summonDmg
@@ -292,7 +306,7 @@
 };
 
 #NOP -- cast find familiar;
-#alias {findfam} {
+#alias {ff} {
     cast find familiar
 };
 
@@ -313,77 +327,68 @@
     #delay {6} {#send {support assault fire}}
 };
 
-#NOP -- turn gags on;
-#alias {gagson} {
+#NOP -- reflexes;
+#alias {setup_reflex} {
     #if {"$guild" == "juggernaut"} {
-        gag+ combat_area;
+        reflex clear;
+        reflex add sp <50% airdrop;
+        reflex add sp <10% eternal heal badger;
+        reflex add gp1 <90% transpose max;
+        reflex add gp1 <5% drop pants;
+        reflex start;
     };
     #if {"$guild" == "mage"} {
-        gag+ combat_area;
-        gag+ hpbar;
+        reflex clear;
+        reflex add sp <10% eternal heal badger;
+        reflex add sp <20% cast mystic immersion;
+        reflex add gp2 >40% cast focus mind;
+        reflex add gp2 >90% shoo summons;
+        reflex start
+    };
+};
+
+#NOP -- turn gags on;
+#alias {gagson} {
+    #if {"$guild" == "mage"} {
         #gag {  --> %*};
-        #gag {%*-hp-}
+        #gag {%*-hp-};
     };
 };
 
 #NOP -- turn gags off;
 #alias {gagsoff} {
-    #if {"$guild" == "juggernaut"} {
-        gag- combat_area;
-        gag- combat_items;
-    };
     #if {"$guild" == "mage"} {
-        gag- combat_area;
-        gag- hpbar;
         #ungag {  --> %*};
         #ungag {%*-hp-}
-    };
-};
-
-#NOP -- reflexes;
-#alias {setup_reflex} {
-    #if {"$guild" == "juggernaut"} {
-        #delay 10 {
-            reflex clear;
-            reflex add sp <50% airdrop;
-            reflex add sp <10% eternal heal badger;
-            reflex add gp1 <90% transpose max;
-            reflex add gp1 <5% drop pants;
-            reflex start;
-        };
-    };
-    #if {"$guild" == "mage"} {
-        #delay 10 {
-            reflex clear;
-            reflex add sp <10% eternal heal badger;
-            reflex add sp <20% cast mystic immersion;
-            reflex add gp2 >40% cast focus mind;
-            reflex add gp2 >90% shoo summons;
-            reflex start
-        };
     };
 };
 
 #NOP -- setup configs;
 #alias {setup_config} {
     #if {"$guild" == "juggernaut"} {
-        #delay 15 {
-            #unvar my[familiar];
-            mystrategy-mech;
-            mycorpsetrig;
-            gagson;
-            p2;
-        };
+        #unvar my[familiar];
+        gagson;
+        mystrategy-mech;
+        mycorpsetrig;
+        p2;
+        look;
     };
     #if {"$guild" == "mage"} {
-        #delay 15 {
-            mystrategy;
-            mycorpsetrig;
-            gagson;
-            p2;
-            #var my[familiar] Lucky the beautiful swan;
-            ash
-        };
+        #var my[familiar] Lucky the beautiful swan;
+        gagson;
+        mystrategy;
+        mycorpsetrig;
+        p2;
+        ash;
+        look
+    };
+};
+
+#NOP -- config alias;
+#alias {.configStart} {
+    #DELAY {14} {
+        setup_reflex;
+        setup_config
     };
 };
 
@@ -424,7 +429,13 @@
 
 #NOP -- heal stim with corpse;
 #alias {b} {
-    fdeener
+    #if {"guild" == "juggernaut"} {
+        fdeener;
+    };
+    #if {"$guild" == "mage"} {
+        cast spell tap on corpse;
+        cast corpse blast
+    };
 };
 
 #NOP -- casualty report;
@@ -825,12 +836,12 @@
 #alias badger3kdb {
     #var tempflag 0;
     #var number &badger3kdb[];
-	#showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
-    #showme {<ccf>  -------    <ffa>BADGERS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
-    #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
-    #showme {                  <eaf>guild spells<088>                 };
-    #showme {<ccf>  ----------------------------------------   <088>  };
-    #showme {<ccf>     Name                 Usage              <088>  };
+	#echo {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
+    #echo {<ccf>  -------    <ffa>BADGERS ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
+    #echo {    Filters:  <eaf>corpses boosts combat misc<088>       };
+    #echo {                  <eaf>guild spells<088>                 };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<ccf>     Name                 Usage              <088>  };
     #list badger3kdb index name;
     #list badger3kdb sort;
     #foreach $badger3kdb[%*] index {
@@ -859,6 +870,7 @@
 #list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Corpsetrig without get All}}};
 #list badger3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
 #list badger3kdb add {{{name} {mycorpsetrig-partynotap} {type} {corpses} {desc} {Corpsetrig for partying without spelltap}}};
+#list badger3kdb add {{{name} {b} {type} {corpse} {desc} {fdeener corpse if jugger - spelltap/corpse blast if mage}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -868,6 +880,9 @@
 #list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
 #list badger3kdb add {{{name} {mystrategy-mech} {type} {combat} {desc} {Mystrategy: mech tanking}}};
 #list badger3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+#list badger3kdb add {{{name} {sdmg1} {type} {combat} {desc} {summon damage report}}};
+#list badger3kdb add {{{name} {sdmg2} {type} {combat} {desc} {summon damage report for vaf numbers perk}}};
+#list badger3kdb add {{{name} {cleardmg} {type} {combat} {desc} {clear all damage trackers}}};
 
 #NOP -- misc;
 #list badger3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -882,13 +897,14 @@
 #list badger3kdb add {{{name} {p2} {type} {misc} {desc} {reset login exp & gxp progress}}};
 #list badger3kdb add {{{name} {ll} {type} {misc} {desc} {Guild light}}};
 #list badger3kdb add {{{name} {rc} {type} {misc} {desc} {Rcost}}};
+#list badger3kdb add {{{name} {gagson} {type} {misc} {desc} {turn gags on}}};
+#list badger3kdb add {{{name} {gagsoff} {type} {misc} {desc} {turn gags off}}};
 
 #NOP -- guild -- juggernaut;
 #if {"$guild" == "juggernaut"} {
     #list badger3kdb add {{{name} {air} {type} {guild} {desc} {Airdrop: heal stim, hp and sp}}};
     #list badger3kdb add {{{name} {ana} {type} {guild} {desc} {Analyze armour AC to self: ana <armour>}}};
     #list badger3kdb add {{{name} {rana} {type} {guild} {desc} {Ranalyze armour AC to room: rana <armour>}}};
-    #list badger3kdb add {{{name} {b} {type} {guild} {desc} {Fdeener: use a corpse to heal stim}}};
     #list badger3kdb add {{{name} {cr} {type} {guild} {desc} {Creport: casualty report}}};
     #list badger3kdb add {{{name} {def} {type} {guild} {desc} {Defend a player manually: def <player>}}};
     #list badger3kdb add {{{name} {en} {type} {guild} {desc} {Enhance at a certain percentage of hp: en <hp%>}}};
@@ -914,35 +930,37 @@
     #list badger3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
     #list badger3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
     #list badger3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend)}}};
-};
+    #list badger3kdb add {{{name} {ff} {type} {guild} {desc} {cast find familiar}}};
+
     
-#NOP -- spells;
-#list badger3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
-#list badger3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
-#list badger3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
-#list badger3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
-#list badger3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
-#list badger3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
-#list badger3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
-#list badger3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
-#list badger3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
-#list badger3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
-#list badger3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
-#list badger3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
-#list badger3kdb add {{{name} {mind1} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on perform)}}};
-#list badger3kdb add {{{name} {mind2} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on repeat)}}};
-#list badger3kdb add {{{name} {rad1} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on perform)}}};
-#list badger3kdb add {{{name} {rad2} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on repeat)}}};
-#list badger3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison  -- on perform)}}};
-#list badger3kdb add {{{name} {poison2} {type} {spells} {desc} {Offensive: venomous spray (poison dmg -- on repeat)}}};
-#list badger3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on perform)}}};
-#list badger3kdb add {{{name} {acid2} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on repeat)}}};
-#list badger3kdb add {{{name} {multi-dmg1} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on perform)}}};
-#list badger3kdb add {{{name} {multi-dmg2} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on repeat)}}};
-#list badger3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on perform)}}};
-#list badger3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
-#list badger3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
-#list badger3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
+    #NOP -- spells;
+    #list badger3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
+    #list badger3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
+    #list badger3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
+    #list badger3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+    #list badger3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
+    #list badger3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
+    #list badger3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+    #list badger3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
+    #list badger3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
+    #list badger3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
+    #list badger3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
+    #list badger3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
+    #list badger3kdb add {{{name} {mind1} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {mind2} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {rad1} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {rad2} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison  -- on perform)}}};
+    #list badger3kdb add {{{name} {poison2} {type} {spells} {desc} {Offensive: venomous spray (poison dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {acid2} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {multi-dmg1} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {multi-dmg2} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
+};
 
 
 #class {player_aliases} {close}
