@@ -114,11 +114,11 @@
                 ..;
             };
         } {
-            #showme <dfa>--- YOU ARE NOT IN THE CORRECT START ROOM ---;
-            #showme <dfa>   Press (1) If you are not in the correct room, and would like to run there.;
-            #showme <dfa>   Press (2) If you are in the correct room, but the map needs to be relocated.;
-            #showme <dfa>   Press (3) To STFU and run the bot.;
-            #showme <dfa>--- These options expire in 5 seconds ---;
+            #showme <dfa>--- YOU ARE NOT IN THE CORRECT START ROOM ---<088>;
+            #showme <dfa>   Press (1) If you are not in the correct room, and would like to run there.<088>;
+            #showme <dfa>   Press (2) If you are in the correct room, but the map needs to be relocated.<088>;
+            #showme <dfa>   Press (3) To STFU and run the bot.<088>;
+            #showme <dfa>--- These options expire in 5 seconds ---<088>;
         };
     };
 
@@ -132,19 +132,20 @@
 #alias format_botlist {
     #format {bot_name} {%-25s} {%1};
     #format {bot_desc} {%-30s} {%2};
-    #showme $bot_name $bot_desc;
+    #echo $bot_name $bot_desc;
 };
 
 #alias botlist {
     #var tempflag 0;
     #var number &botlist[];
-    #showme {<ccf>  -------     CURRENT BOTS ($number)    -------    <088>  };
-    #showme {<ccf>  ---------------------------------------    <088>  };
-    #showme {<ccf>  -------   <faa>-alias <fff>to load a bot<ccf>  -------    <088>  };
-    #showme {<ccf>  ---------------------------------------    <088>  };
+    #echo {<ccf>  -------     CURRENT BOTS ($number)    -------    <088>  };
+    #echo {<ccf>  ---------------------------------------    <088>  };
+    #echo {<ccf>  <faa>-alias <fff>to load a bot with options <088>  };
+    #echo {<ccf> <faa>+alias <fff>to auto run to start & begin bot <088>};
+    #echo {<ccf>  ---------------------------------------    <088>  };
     #list botlist index desc;
     #list botlist sort;
-    #showme {<ccf>     Alias                Description        <088>  };
+    #echo {<ccf>     Alias                Description        <088>  };
     #foreach $botlist[%*] index {
         format_botlist {     $index[alias]} {$index[desc]};
     };

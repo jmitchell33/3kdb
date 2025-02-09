@@ -143,12 +143,6 @@
 
     #var dog[rnd] 0;
     #var dog[dmg] 0;
-
-    #if {"$guild" == "juggernaut"} {
-        mountDmg-clear;
-        truckDmg-clear;
-        supportDmg-clear;
-    };
 };
 
 dreset;
@@ -543,7 +537,7 @@ dreset;
 
 #NOP Juggernaut Dmg tracking;
 #NOP -- death from above;
-#action {^You jump attack %* for %*. \{%d\}} {
+#action {^You jump attack %* for %* damage. \{%d\}} {
     #var dmgTimes 1;
     #var dmgAmount %3;
     dmgTrack jump $dmgAmount $dmgTimes;
@@ -581,6 +575,19 @@ dreset;
 #NOP #action {The computer chirps 'A critical hit was scored!'};
 
 #NOP -- truck;
+#action {^Your tank %*. \{%d\}$} {
+    #var incombat 1;
+    #var truck_dmg[curr] %2;
+    #math truck_dmg[dmg] {$truck_dmg[dmg] + %2};
+    #math truck_dmg[rnd] {$truck_dmg[rnd] + 1};
+    #math truck_dmg[avg] {$truck_dmg[dmg] / $truck_dmg[rnd]};
+    #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
+    #if $new_best {
+        #var truck_dmg[high] $truck_dmg[curr];
+        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+    };
+} {2};
+
 #action {^%* is %* by your tank. \{%d\}$} {
     #var incombat 1;
     #var truck_dmg[curr] %3;
@@ -621,26 +628,52 @@ dreset;
     };
 } {2};
 
-#NOP Tracks current round;
-#var support_current_round "";
-
-#action {%*'s Jugger Support Mech fires at %* and %*. \{%d\}} {
+#NOP support mech;
+#action {^%*'s Jugger Support Mech fires at %* and %*. \{%d\}$} {
     #var incombat 1;
-    #var support_dmg[curr] %4;
-    #NOP Use mip as the round identifier;
-    #var support_new_round_identifier {$mip[round]}; 
+    #NOP current damage from hit;
+    #local support_dmg_curr %4;
+    #NOP round identifier;
+    #local support_new_round_identifier {$total_rounds};
+    #NOP set a maximum limit for hits per round;
+    #local max_hits_per_round 5;
+
+    #NOP Validate total_rounds before processing to ensure it is not missing or invalid; 
+	#if {!$total_rounds || !$ismath($total_rounds)} {
+		#echo {Error: Invalid or missing total_rounds. Skipping processing.};
+		#return;
+	};
+
     #if {$support_new_round_identifier != $support_current_round} {
-        #var support_current_round $support_new_round_identifier;
-        #NOP Increment rounds only once;
+        #NOP New round detected, finalize the previous round BEFORE processing the current hit;
+        #math new_best {$support_round_dmg > $support_dmg[high]};
+        #if $new_best {
+            #NOP update highest round damage;
+            #var support_dmg[high] $support_round_dmg;
+            #ECHO {NEW BEST SUPPORT MECH ROUND DMG: $support_dmg[high]};
+        };
+        #NOP increment round counter;
         #math support_dmg[rnd] {$support_dmg[rnd] + 1};
+        #NOP update current round;
+        #var support_current_round $support_new_round_identifier;
+        #NOP reset round damage;
+        #var support_round_dmg 0;
+        #NOP reset hit counter for the new round;
+        #var hits_this_round 0;
     };
 
-    #math support_dmg[dmg] {$support_dmg[dmg] + %4};
-    #math support_dmg[avg] {$support_dmg[dmg] / $support_dmg[rnd]};
-    #math new_best {$support_dmg[curr] > $support_dmg[high]};
-    #if $new_best {
-        #var support_dmg[high] $support_dmg[curr];
-        #ECHO {NEW BEST SUPPORT MECH DMG: $support_dmg[high]};
+    #if {$hits_this_round < $max_hits_per_round} {
+        #NOP accumulate damage for the current round;
+        #math support_round_dmg {$support_round_dmg + $support_dmg_curr};
+        #NOP update total damage;
+        #math support_dmg[dmg] {$support_dmg[dmg] + $support_dmg_curr};
+        #NOP increment hit counter for the current round;
+        #math hits_this_round {$hits_this_round + 1};
+        #NOP update average damage;
+        #math support_dmg[avg] {$support_dmg[dmg] / $support_dmg[rnd]};
+    } {
+        #NOP Maximum hits for this round reached, ignoring additional hits;
+        #ECHO {DEBUG: Hit ignored as it exceeds the max hits per round.};
     };
 } {2};
 

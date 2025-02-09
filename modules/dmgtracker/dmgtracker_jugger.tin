@@ -31,19 +31,31 @@
     #echo {<dfa> +-+-+-    TRUCK DAMAGE TRACKER RESET    -+-+-+<088>};
 };
 
-#NOP -- reset support mech dmg tracking;
 #alias supportDmg-clear {
     #unvar support_dmg;
+    #NOP current hit damage;
     #var support_dmg[curr] 0;
+    #NOP average damage;
     #var support_dmg[avg] 0;
+    #NOP total rounds tracked;
     #var support_dmg[rnd] 0;
+    #NOP total damage;
     #var support_dmg[dmg] 0;
+    #NOP highest round damage;
     #var support_dmg[high] 0;
-    #var dmg[cur][rnd] 0;
-    #var dmg[rnd][cur] 0;
-    #var dmg[rnd][total] 0;
+    #NOP damage for the current round;
+    #var support_round_dmg 0;
+    #NOP current round identifier;
+    #var support_current_round 0;
+    #NOP counter for hits in the current round;
+    #var hits_this_round 0;
+    #NOP maximum hits per round - default is 5;
+    #var max_hits_per_round 5;
     #echo {<dfa> +-+-+-    SUPPORT MECH DAMAGE TRACKER RESET    -+-+-+<088>};
 };
+
+
+
 
 
 
