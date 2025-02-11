@@ -1,26 +1,20 @@
 #class {player_config} {kill}
 #class {player_config} {open}
 
-#NOP -- Rotate mobs if in Section Z;
+#NOP -- Bot Config;
+#NOP -- These actions are all ways to customize the bot or add "extra" steps the client should take before:
+#NOP 1) Running the bot --> .pre_bot_check;
+#NOP 2) Engaging a mob -->  .pre_fight_check;
 
-          #if {"$area" == "Section Z"} {
-          #class bot open;
-          #ticker gool1 {#if !$idle_flag {kill balangool}} 10;
-          #ticker gool2 {#if !$idle_flag {kill balangool 2}} 20;
-          #ticker gool3 {#if !$idle_flag {kill balangool 3}} 30;
-          #class bot close;
-     };
+#NOP -- This alias is run when the bot begins.  Use it to set specific reflexes, strategies, defense variables, etc.;
+#alias {.pre_bot_check} {
+    #NOP
+};
 
-     #alias {.pre_fight_check} {
-          #var defs[es] 1;
-          #var defs[blink] 1;
-          #var defs[hs] 1;
-          #var defs[pe] 1;
-          #var defs[pg] 1;
-          #var defs[pn] 1;
-     };
-     echo_divider2;
-
+#NOP -- This alias is called immediately before engaging a mob;
+#alias {.pre_fight_check} {
+     #nop
+};
 
 
 #class {player_config} {close}
