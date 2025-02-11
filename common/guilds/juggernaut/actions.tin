@@ -13,6 +13,13 @@
 	};
 };
 
+#NOP -- Get your max enhance #;
+#if {$my[jugg_enhance_max] == ""} {#var my[jugg_enhance_max] 100};
+#action {The computer chirps 'Syntax : enhance <1-%d>.'} {
+	#format my[jugg_enhance_max] {%d} {%1};
+	#math my[jugg_enhance_max] {$my[jugg_enhance_max] * .01};
+} {2};
+
 #NOP -- Disable ammo_buy for energy mounts;
 #act {^That gun is full already.} {
 	#var ammo_buy off
