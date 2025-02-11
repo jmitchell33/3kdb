@@ -243,8 +243,9 @@
             thousandsFormatNumber temp_xp;
             ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
             #echo {<dfa>Coins Earned: $bot[stats][coins]<088>};
-            #if {&{botcycle[]} > 1} {
-                nextarea
+            #if {&{botcycle[]} > 0} {
+                .stop;
+                nextarea;
             } {
                 .stop;
             };
@@ -275,8 +276,9 @@
                 thousandsFormatNumber temp_xp;
                 ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
                 #echo {Coins Earned: $bot[stats][coins]};
-                #if {&{botcycle[]} > 1} {
-                    nextarea
+                #if {&{botcycle[]} > 0} {
+                    .stop;
+                    nextarea;
                 } {
                     .stop;
                 };
