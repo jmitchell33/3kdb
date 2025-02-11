@@ -10,7 +10,7 @@
 };
 
 #act {HP:\[{\d+}/{\d+}\] SP:\[{\d+}/{\d+}\] S:\[{\d+}\%\] HE:\[{\d+}\%\] HT:\[{\d+}\] M/C:\[{\d+}/{\d+}\]\[{\d+}/{\d+}\]\[{\d+}\%\] G:{[\d\.]+}\%} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
 	#var {my[hp][current]}		{%1};
 	#var {my[hp][max]}		{%2};
 	#var {my[sp][current]}		{%3};
@@ -27,7 +27,7 @@
 };
 
 #act {{^Ammo:\[(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?/?(\d+)?\] \[\s*(\d+)\] \[([\d\.]*)\] \[(\w+)\] \[(\w+(?:\s\w+)*)\] \[(\w+(?:\s\w+)*)\] \[(\w+)\] \[(\w+)\] \[\s*(\d+)\] E:([\d\w]+)?\%?}} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
 	#var {ammo[1]}	{%2};
 	#var {ammo[2]}	{%3};
 	#var {ammo[3]}	{%4};
