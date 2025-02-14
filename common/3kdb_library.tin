@@ -8,6 +8,32 @@
     #echo $command_name;
 };
 
+#alias format_3kdblibrary1 {
+    #format {command_name} {  <cff>%-20s  <deb>%-60s<088>} {%1} {%2};
+    #echo $command_name;
+};
+
+#alias library3kdb1 {
+    #NOP Reset variables;
+    #var tempflag 0;
+    #var number &library3kdb[];
+
+    #NOP Display header;
+    #echo {<ccf>  -------<088>           <ffa>3kdb<088>          <ccf>-------<088>};
+    #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>($number)<088>  <ccf>-------    <088>};
+    #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
+    #echo {<ccf>  ---------------------------------------    <088>};
+
+    #NOP Sort and display aliases with descriptions;
+    #list library3kdb index name;
+    #list library3kdb sort;
+    format_3kdblibrary1 {Alias} {Description};
+    #foreach $library3kdb[%*] index {
+        format_3kdblibrary1 {$index[name]} {$index[desc]};
+    };
+};
+
+
 #alias library3kdb {
     #NOP Reset variables;
     #var tempflag 0;
@@ -23,11 +49,13 @@
     #echo {                   <eaf>corpse combat profession<088>};
     #echo {                      <eaf>trackers bot<088>};
     #echo {<ccf>  ---------------------------------------    <088>};
+    #echo {<ceb> Use <bfb>library3kdb1<088> <ceb> for all aliases + description<088>};
     #echo {<ffa>     Alias: <088>};
 
     #NOP Sort and display aliases without descriptions;
     #list library3kdb index name;
     #list library3kdb sort;
+
     #foreach $library3kdb[%*] index {
         #regexp {"%1"} {"$index[type]"} {
             #var tempflag 1;
