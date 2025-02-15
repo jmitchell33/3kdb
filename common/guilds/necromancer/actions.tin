@@ -163,6 +163,7 @@
 #action {^Your eyes burn with an unholy crimson flame.$} {
     #if {$bot[active]} {.pause;#delay 12 {#var bot[paused] 0}};
     #var mob[bloodarc] 0;
+    #var bloodarc_active 1;
     #math my[necromancer][bloodarc] {$my[necromancer][bloodarc] - 1};
 } {2};
 
@@ -171,11 +172,17 @@
 } {2}
 
 #action {The bloodarc crackles quietly as it dissipates into the ground.} {
+    #var bloodarc_active 0;
     #if $bot[active] {#var bot[paused] 0};
 } {2};
 
 #action {The energies of the bloodarc crackle quietly as they dissipate into the air.} {
+    #var bloodarc_active 0;
     #if $bot[active] {#var bot[paused] 0};
+} {2};
+
+#action {You left the room master!  The bloodarc is broken!} {
+    #var bloodarc_active 0;
 } {2};
 
 #NOP -- Tracking Vampire abilities (bloodlet/bloodfuse potions);

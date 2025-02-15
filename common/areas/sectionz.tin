@@ -1,0 +1,57 @@
+#class area_misc open;
+
+#NOP -- SECTIONZ WHITE CAPSULE
+#action {a bright white capsule: Ok.} {#if {!$idle_flag} {ptell found white capsule}}
+
+#NOP -- SECTIONZ CAPSULE EATING FOR TIMED LIMITED MSKILL/REGEN/STAT BOOSTS
+#alias {eat-caps3} {swallow blue capsule;swallow orange capsule;swallow green capsule};
+#alias {eat-caps2} {swallow blue capsule;swallow orange capsule};
+#alias {eat-caps1} {swallow blue capsule};
+
+#NOP -- SECTIONZ CONTINUE CODES FOR LVL 20 & 40
+#alias {continue40} {enter $s40};
+#alias {continue20} {enter $s20};
+#action {Just a reminder, your continue code for Section 40 is %w} {#var s40 %1} {2};
+#action {Just a reminder, your continue code for Section 20 is %w} {#var s20 %1} {2};
+
+#NOP -- ALIAS'S TO SAVE YOU TO SECTIONZ
+#alias {set40} {
+    press start;
+    #delay {1} {pause game};
+    #delay {2} {play};
+    #delay {3} {continue40};
+    #delay {4} {pause game};
+    #delay {5} {play};
+    #delay {6} {unpause}
+};
+
+#alias {set20} {
+    press start;
+    #delay {1} {pause game};
+    #delay {2} {play};
+    #delay {3} {continue20};
+    #delay {4} {pause game};
+    #delay {5} {play};
+    #delay {6} {unpause}
+};
+
+#NOP -- MAKE BALANGOOL GEAR FROM SECTIONZ
+#alias {gool} {
+	#switch {"%0"} {
+		#case {"green-armour"} {open figurine;insert green capsule near chest;close figurine;insert green capsule;keep armour};
+		#case {"green-helmet"} {open figurine;insert green capsule near head;close figurine;insert green capsule;keep helmet};
+		#case {"green-gloves"} {open figurine;insert green capsule near hands;close figurine;insert green capsule;keep gloves};
+        #case {"green-boots"} {open figurine;insert green capsule near feet;close figurine;insert green capsule;keep boots};
+        #case {"orange-armour"} {open figurine;insert orange stone near chest;insert orange capsule near chest;close figurine;insert orange stone;insert orange capsule;keep armour};
+        #case {"orange-helmet"} {open figurine;insert orange stone near head;insert orange capsule near head;close figurine;insert orange stone;insert orange capsule;keep helmet};
+        #case {"orange-gloves"} {open figurine;insert orange stone near hands;insert orange capsule near hands;close figurine;insert orange stone;insert orange capsule;keep gloves};
+        #case {"orange-boots"} {open figurine;insert orange stone near feet;insert orange capsule near feet;close figurine;insert orange stone;insert orange capsule;keep boots};
+        #case {"blue-armour"} {open figurine;insert blue stone near chest;insert blue capsule near chest;close figurine;insert blue stone;insert blue capsule;keep armour};
+        #case {"blue-helmet"} {open figurine;insert blue stone near head;insert blue capsule near head;close figurine;insert blue stone;insert blue capsule;keep helmet};
+        #case {"blue-gloves"} {open figurine;insert blue stone near hands;insert blue capsule near hands;close figurine;insert blue stone;insert blue capsule;keep gloves};
+        #case {"blue-boots"} {open figurine;insert blue stone near feet;insert blue capsule near feet;close figurine;insert blue stone;insert blue capsule;keep boots};
+        #case {""}   {#echo {<efb>==========<088> <faa>NO GEAR PROVIDED<088> <efb>==========<088>}};
+	};
+};
+
+#class area_misc close;
