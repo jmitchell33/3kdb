@@ -4,6 +4,8 @@
 #NOP -- Random aliases
 #alias {rcup} {eternal reload item Lord Stanley's Cup};
 #alias {dmike} {eternal duplicate creature mike bolt};
+#alias {cdd2} {cast summon config deactivate};
+#action {Accept by typing <yes>} {yes};
 
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
@@ -251,7 +253,6 @@
      clear_gc;
      clear_c;
      setup_gc;
-     setup_c;
      #delay 2 {prots_ss};
      #delay 4 {prots_MG};
      #delay 6 {prots_ms};
@@ -262,9 +263,14 @@
      #delay 16 {prots_mb};
 };
 
-#NOP -- setup contingency with defenses;
-#alias {setup_c} {
+#NOP -- setup contingency with evil;
+#alias {setup_evil} {
      cast contingency as protection from evil#cast protection from evil
+};
+
+#NOP -- setup contingency with good;
+#alias {setup_good} {
+     cast contingency as protection from good#cast protection from good
 };
 
 #NOP -- clear contingency;
@@ -307,7 +313,8 @@
      strategy summon_mf;
      strategy spelltap;
      strategy super_sub;
-     strategy rolm
+     strategy rolm;
+     strategy no_ash;
 };
 
 #NOP -- clear strategies;
@@ -340,7 +347,7 @@
      clear_sconfig;
      shoo;
      mystrategy;
-     ms 7##4#1500#70#assist#summons#always;
+     ms 7#10-headed hydra#4#1500#70#assist#summons#always;
 };
  
  #NOP -- 4 defending;
