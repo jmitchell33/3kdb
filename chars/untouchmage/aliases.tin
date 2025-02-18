@@ -6,6 +6,7 @@
 #alias {dmike} {eternal duplicate creature mike bolt};
 #alias {cdd2} {cast summon config deactivate};
 #action {Accept by typing <yes>} {yes};
+#alias hmon {hmonitor treznor 4000 6000};
 
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
@@ -249,28 +250,24 @@
      cast identify on %0 30
 };
 
+#NOP -- setup defense;
 #alias {setup_defense} {
      clear_gc;
      clear_c;
      setup_gc;
-     #delay 2 {prots_ss};
-     #delay 4 {prots_MG};
-     #delay 6 {prots_ms};
-     #delay 8 {prots_armor};
-     #delay 10 {prots_ps};
-     #delay 12 {cast mantle};
-     #delay 14 {prots_pfe};
-     #delay 16 {prots_mb};
+     setup_c;
+     #delay 2 {prots_armor};
+     #delay 4 {prots_ms};
+     #delay 6 {prots_MG};
+     #delay 8 {prots_ss};
+     #delay 10 {prots_mb};
+     #delay 12 {prots_pfe};
+     #delay 14 {prots_ps}
 };
 
-#NOP -- setup contingency with evil;
-#alias {setup_evil} {
+#NOP -- setup contingency with defenses;
+#alias {setup_c} {
      cast contingency as protection from evil#cast protection from evil
-};
-
-#NOP -- setup contingency with good;
-#alias {setup_good} {
-     cast contingency as protection from good#cast protection from good
 };
 
 #NOP -- clear contingency;
@@ -347,7 +344,7 @@
      clear_sconfig;
      shoo;
      mystrategy;
-     ms 7#10-headed hydra#4#1500#70#assist#summons#always;
+     ms 7##4#1500#70#assist#summons#always;
 };
  
  #NOP -- 4 defending;
