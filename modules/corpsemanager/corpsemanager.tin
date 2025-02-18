@@ -21,8 +21,39 @@
 	#if $corpse_check_toggle {
 		#var corpse_check_toggle 0;
 		#delay 3 {#var corpse_check_toggle 1};
-		i;
-		examine cooler;
+		#class corpseCapture open;
+		#action {# Item} {
+			#line gag;
+			#event {CATCH PROCESSED LINE} {
+				#format tmpLine {%p} {%%%1};
+				#if $inventory[cooler] {
+					#regex {$tmpLine} {It looks very light.} {#class corpseCapture kill};
+					#regex {$tmpLine} {It looks light.} {#class corpseCapture kill};
+					#regex {$tmpLine} {It doesn't look too heavy.} {#class corpseCapture kill};
+					#regex {$tmpLine} {It looks heavy.} {#class corpseCapture kill};
+					#regex {$tmpLine} {It would take considerable effort to lift this.} {#class corpseCapture kill};
+					#regex {$tmpLine} {You'll most likely herniate a disc lifting this} {#class corpseCapture kill};
+				} {
+					#regex {$tmpLine} {You are lightly burdened.} {#class corpseCapture kill};
+					#regex {$tmpLine} {You are burdened.} {#class corpseCapture kill};
+					#regex {$tmpLine} {You are encumbered.} {#class corpseCapture kill};
+					#regex {$tmpLine} {You are heavily loaded.} {#class corpseCapture kill};
+					#regex {$tmpLine} {You are over taxed.} {#class corpseCapture kill};
+					#regex {$tmpLine} {You are collapsing under your load. } {#class corpseCapture kill};
+				};
+				#NOP;
+			};
+		};
+		#if {"$guild" == "necromancer"} {
+			#var corpse_check 1;
+        	#var corpses[inventory] 0;
+        	#send i3;
+        	#delay 2 {#var corpse_check 0;#var inventory_check 0;};
+		} {
+			i;
+		};
+		#if $inventory[cooler] {examine cooler};
+		#delay 2 {#class corpseCapture kill};
 	};
 };
 

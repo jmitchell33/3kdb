@@ -200,6 +200,20 @@
             #line gag 2;
         } {2};
 
+        #action {You charge forward and close your jaws on %*} {
+            #line gag;
+            #class rabies_gag open;
+            #EVENT {CATCH PROCESSED LINE} {
+                #nop;
+            };
+            #class rabies_gag close;
+            #delay 1 {#class rabies_gag kill};
+        } {2};
+
+        #action {^septic saliva to infect it with rabies!} {
+            #line gag;
+            #class rabies_gag kill;
+        } {2};
 
         #NOP -- Specific Necro Familiar Gags;
         #gag {^*.,'`'SaTaN'`',.* %*!$};
