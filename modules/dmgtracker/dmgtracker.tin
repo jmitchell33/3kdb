@@ -69,7 +69,12 @@
     };
     
     #if {"${cmbt[category][%1][high]}" === ""} {#var cmbt[category][%1][high] 0};
-    #if {$cmbt[category][%1][curr] > $cmbt[category][%1][high]} {#var cmbt[category][%1][high] $cmbt[category][%1][curr];#echo {$newBest $dmgDisplay};};
+    #if {$cmbt[category][%1][curr] > $cmbt[category][%1][high]} {
+        #var cmbt[category][%1][high] $cmbt[category][%1][curr];
+        #if $gags[combat_numbers] {#NOP} {
+            #echo {$newBest $dmgDisplay};
+        };
+    };
 };
 
 
@@ -118,6 +123,7 @@
     #var cmbt[affects][punch] 0;
     #var cmbt[affects][kick] 0;
     #var cmbt[affects][pointDefense] 0;
+    #var cmbt[affects][CMC] 0;
     #var cmbt[penetration][round] 0;
     #var cmbt[penetration][total] 0;
     #var cmbt[extra_attacks][round] 0;
@@ -146,6 +152,13 @@
 };
 
 dreset;
+
+#NOP -- Toggles for items;
+#action {The CMC-660 REFLECTS the entire attack!!} {
+    #if $gags[combat_items] {#line gag};
+    #var cmbt[affects][CMC] 1;
+} {2};
+
 
 #NOP -- Toggles for necro powers;
 #action {^B:You grab your enemy with your talons in a clutch of death!$} {#var cmbt[affects][clutch] 1} {2};
@@ -325,7 +338,9 @@ dreset;
         #format dmgAmount {%d} %5;
         #format dmgDisplay {%g} {$dmgAmount};
         #line gag;
-        #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+        #if $gags[combat_numbers] {#NOP} {
+            #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+        };
 
         #math mob[damage_dealt] {$mob[damage_dealt] + $dmgAmount};
 
@@ -409,6 +424,9 @@ dreset;
                     };
                     #if {$cmbt[affects][pointDefense]} {
                         dmgTrack pointDefense $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][CMC]} {
+                        dmgTrack CMC $dmgAmount $dmgTimes;
                     };
                 };
             };
@@ -584,7 +602,9 @@ dreset;
     #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
     #if $new_best {
         #var truck_dmg[high] $truck_dmg[curr];
-        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        };
     };
 } {2};
 
@@ -597,7 +617,9 @@ dreset;
     #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
     #if $new_best {
         #var truck_dmg[high] $truck_dmg[curr];
-        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        };
     };
 } {2};
 
@@ -610,7 +632,9 @@ dreset;
     #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
     #if $new_best {
         #var truck_dmg[high] $truck_dmg[curr];
-        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        };
     };
 } {2};
 
@@ -624,7 +648,9 @@ dreset;
     #math new_best {$mount_dmg[curr] > $mount_dmg[high]};
     #if $new_best {
         #var mount_dmg[high] $mount_dmg[curr];
-        #ECHO {NEW BEST MOUNT DMG: $mount_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST MOUNT DMG: $mount_dmg[high]};
+        };
     };
 } {2};
 
@@ -650,7 +676,9 @@ dreset;
         #if $new_best {
             #NOP update highest round damage;
             #var support_dmg[high] $support_round_dmg;
-            #ECHO {NEW BEST SUPPORT MECH ROUND DMG: $support_dmg[high]};
+            #if $gags[combat_numbers] {#NOP} {
+                #ECHO {NEW BEST SUPPORT MECH ROUND DMG: $support_dmg[high]};
+            };
         };
         #NOP increment round counter;
         #math support_dmg[rnd] {$support_dmg[rnd] + 1};
