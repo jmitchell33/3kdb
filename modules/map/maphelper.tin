@@ -22,17 +22,22 @@
 };
 
 #alias {go} {
-	#if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
-	#map get roomvnum go_back;
-	#var roomfound 0;
-	#foreach $speedruns[%*] index {
-        #regexp {"%1"} {"$index[name]"} {
-			#var roomfound 1;
-            #showme {Found room %1 - here we go!};
-			#map run $index[vnum];
-        }
-    };
-	#if !$roomfound {#showme {Unable to find %1}};
+	#if {$bloodarc_active} {
+		#echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
+		#var bloodarc_active 0;
+	} {
+		#if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
+		#map get roomvnum go_back;
+		#var roomfound 0;
+		#foreach $speedruns[%*] index {
+			#regexp {"%1"} {"$index[name]"} {
+				#var roomfound 1;
+				#showme {Found room %1 - here we go!};
+				#map run $index[vnum];
+			}
+		};
+		#if !$roomfound {#showme {Unable to find %1}};
+	};
 };
 
 #NOP -- Slowwalks based on getting new rooms;
@@ -263,6 +268,9 @@
 
 #NOP The Lost Village of Willothorn
 #act {^You swim for your life for the surface and end up back where} {#map goto 14087}
+
+#NOP Mystic Seal;
+#act {^The Elemental steps in the way as you attempt to go %*!$} {mapUndo} {2};
 
 #NOP Necromancers
 #act {^You tumble down the river and find yourself on a rocky bank inside} {#map goto 7613}

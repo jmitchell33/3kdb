@@ -66,7 +66,7 @@
 			#NOP -- Average the first 10 rounds of combat to see if it'll be a fast or longer fight;
 			#NOP -- This is useful for some powers to save if it's a very fast fight;
 			#NOP -- If it's a long fight (>100 rounds) it will default to 100;
-			#if {$mip[round] <= 10 && $mip[round] > 1} {
+			#if {$mip[round] <= 10 && $mip[round] > 1 && $mip[round] > $mip[last_round]} {
 				#var enemy[hp_change] @max{$enemy[hp_change];1};
 				#math enemy[kill_rate][${enemy[kill_rate_avg_count]}] {100 / $enemy[hp_change]};
 				#format {enemy[last_round]} {%d} {$mip[round]};
