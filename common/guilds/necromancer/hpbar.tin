@@ -4,7 +4,9 @@
 /* Collect HP Bar line */
 #ACTION {{^(\S:|)((HP|SP|NP|E|HSN|HSN%|Status|Cr|Corpses|Exp|TG|Moon|Planes|Reag|\$|Memory)\[.*\].*$)}}
 {
-    #if {$debug[hpbar] == 1} {#NOP} {#line gag};
+    #if {$debug[hpbar] == 1} {#NOP} {
+        #if $gags[hpbar] {#line gag};
+    };
     handler_necro_hpbar {%3};
 };
 
