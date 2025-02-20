@@ -283,27 +283,29 @@ dreset;
 } {2};
 
 #alias .dmg_round_reset {
-    #var cmbt[affects][shield_bash] 0;
-    #var cmbt[affects][witchHat] 0;
-    #var cmbt[affects][iprime] 0;
-    #var cmbt[affects][eradication] 0;
-    #var cmbt[affects][clutch] 0;
-    #var cmbt[affects][grasp] 0;
-    #var cmbt[affects][bloodarc] 0;
-    #var cmbt[affects][skullfire] 0;
-    #var cmbt[affects][lucanus_cloak] 0;
-    #var cmbt[penetration][round] 0;
-    #var cmbt[extra_attacks][round] 0;
-    #var cmbt[crit][round] 0;
-    #var ewell_round 0;
-    #var fry_round 0;
-    #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
-    #if {"$guild" == "mage"} {
-        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
-            #var summon_dmg[vaf][$tmpSummonItem][round][damage] 0;
-            #var summon_dmg[vaf][$tmpSummonItem][round][hits] 0;
+    #delay {dmg_round_reset} {
+        #var cmbt[affects][shield_bash] 0;
+        #var cmbt[affects][witchHat] 0;
+        #var cmbt[affects][iprime] 0;
+        #var cmbt[affects][eradication] 0;
+        #var cmbt[affects][clutch] 0;
+        #var cmbt[affects][grasp] 0;
+        #var cmbt[affects][bloodarc] 0;
+        #var cmbt[affects][skullfire] 0;
+        #var cmbt[affects][lucanus_cloak] 0;
+        #var cmbt[penetration][round] 0;
+        #var cmbt[extra_attacks][round] 0;
+        #var cmbt[crit][round] 0;
+        #var ewell_round 0;
+        #var fry_round 0;
+        #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
+        #if {"$guild" == "mage"} {
+            #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+                #var summon_dmg[vaf][$tmpSummonItem][round][damage] 0;
+                #var summon_dmg[vaf][$tmpSummonItem][round][hits] 0;
+            };
         };
-    };
+    } {.3};
 };
 
 #action {^%* hits you for %d damage!$} {
@@ -432,7 +434,6 @@ dreset;
                 };
             };
         };
-
         .dmg_round_reset;
     }
 } {2};
