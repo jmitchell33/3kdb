@@ -15,12 +15,33 @@
 } {2};
 
 #NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
-#act {^You charge forward and close your jaws on %*} {#var opponent[effects][rabies] 1} {2};
-#act {%* has overcome the effects of your rabies.$} {#var opponent[effects][rabies] 0;rabies;} {2};
+#act {^You charge forward and close your jaws on %*} {
+    #if $gags[combat_guild] {#line gag};
+    #var opponent[effects][rabies] 1
+} {2};
+#act {%* has overcome the effects of your rabies.$} {
+    #if $gags[combat_guild] {#line gag};
+    #var opponent[effects][rabies] 0;
+    rabies;
+} {2};
 #act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1} {2};
-#act {The creature has been permanently maimed!} {#var mob[maim] 1;#math my[necromancer][maim] {$my[necromancer][maim] - 1}} {2};
-#action {>>>The psibleed upon %* has dissipated.} {psibleed} {2};
-#action {>>>The sickle attacking %* has dissipated.} {scythe} {2};
+#act {The creature has been permanently maimed!} {
+    #if $gags[combat_guild] {#line gag};
+    #var mob[maim] 1;
+    #math my[necromancer][maim] {$my[necromancer][maim] - 1}
+} {2};
+#action {>>>The psibleed upon %* has dissipated.} {
+    #if $gags[combat_guild] {#line gag};
+    psibleed
+} {2};
+#action {>>>The sickle attacking %* has dissipated.} {
+    #if $gags[combat_guild] {#line gag};
+    scythe
+} {2};
+#action {>>>The corrosion upon %* has faded.} {
+    #if $gags[combat_guild] {#line gag};
+    corrode
+} {2};
 
 
 #unvar moonSparkList;
