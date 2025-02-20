@@ -54,8 +54,12 @@
 			#NOP -- new MIP line is received;
 			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
 				#var incombat 0;
+				#var dmgTrackerNewRound 0;
+				#var summonDmgNewRound 0;
 			} {
 				#var incombat 1;
+				#var summonDmgNewRound 1;
+				#var dmgTrackerNewRound 1;
 			};
 			#if {$mip[round] < $mip[last_round]} {#var last_fight_rounds $mip[last_round]};
 			
