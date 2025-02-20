@@ -10,18 +10,18 @@
 
 #alias {_player_heartbeat} {
     #if !$idle_flag {
-        #if {$beads && $hp_percent < 450 && sp_percent > 90} {
-            check_beads;
-        };
-    };
+        #NOP -- Actions that timing does not matter;
 
-    #if {!$idle_flag && $action_round < $mip[round]} {
-        #if {$my[sp][current] < $sp_danger && !$my[immersion][count]} {
-            useHeal;
+
+        #NOP -- Actions to only attempt once/round go in this section;
+        #if {$action_round < $mip[round]} {
+            #NOP
         };
-    };
+
+    
+    #NOP -- All actions above this line;
+    } {#NOP};
 };
-
 
 
 #class {player_heartbeat} {close}

@@ -6,7 +6,7 @@
 #alias {dmike} {eternal duplicate creature mike bolt};
 #alias {cdd2} {cast summon config deactivate};
 #action {Accept by typing <yes>} {yes};
-#alias hmon {hmonitor treznor 4000 6000};
+#alias hmon {hmonitor treznor 4000 7000};
 
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
@@ -252,42 +252,41 @@
 
 #NOP -- setup defense;
 #alias {setup_defense} {
-     clear_gc;
      clear_c;
+     clear_gc;
      setup_gc;
-     setup_c;
-     #delay 2 {prots_armor};
-     #delay 4 {prots_ms};
-     #delay 6 {prots_MG};
-     #delay 8 {prots_ss};
-     #delay 10 {prots_mb};
-     #delay 12 {prots_pfe};
-     #delay 14 {prots_ps}
+     #delay 2 {prots_ss};
+     #delay 4 {prots_MG};
+     #delay 6 {prots_ms};
+     #delay 8 {prots_armor};
+     #delay 10 {prots_ps};
+     #delay 12 {cast mantle};
+     #delay 14 {prots_pfe};
+     #delay 16 {prots_mb};
+     
 };
 
-#NOP -- setup contingency with defenses;
 #alias {setup_c} {
-     cast contingency as protection from evil#cast protection from evil
+     cast contingency as prot_evil#cast protection from evil;
+     cast contingency as mantle#500#cast mantle;
+     cast contingency as prismatic sphere#500#cast prismatic sphere;
 };
 
-#NOP -- clear contingency;
-#alias {clear_c} {
-     #10 {cast remove contingency as 1}
-};
-
-#NOP -- greater contingency;
 #alias {setup_gc} {
      cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
      cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
      cast greater contingency as major globe#cast major globe;
      cast greater contingency as stoneskin#cast stoneskin;
      cast greater contingency as shield#cast magnificent shield;
-     cast greater contingency as armor#cast armor
+     cast greater contingency as armor#cast armor;
 };
 
-#NOP -- clear greater contingency;
+#alias {clear_c} {
+     #10 {cast remove contingency as 1};
+};
+
 #alias {clear_gc} {
-     #10 {cast remove greater contingency as 1}
+     #10 {cast remove greater contingency as 1};
 };
 
 #NOP -- numpad off & on;
@@ -498,103 +497,23 @@
 
 #NOP -- utmage 3kdb aliases;
 
-#alias format_utmagealiases {
-     #format {utmagealias_name} {%-25s} {%1};
-     #format {utmagealias_desc} {%-30s} {%2};
-     #showme $utmagealias_name $utmagealias_desc;
-};
- 
-#alias utmage3kdb {
-     #var tempflag 0;
-     #var number &utmage3kdb[];
-     #showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
-     #showme {<ccf>  -------    <ffa>UNTOUCHABLE'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
-     #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
-     #showme {                  <eaf>guild spells<088>                        };
-     #showme {<ccf>  ----------------------------------------   <088>  };
-     #showme {<ccf>     Name                 Usage              <088>  };
-     #list utmage3kdb index name;
-     #list utmage3kdb sort;
-     #foreach $utmage3kdb[%*] index {
-         #regexp {"%1"} {"$index[type]"} {
-             #var tempflag 1;
-             format_utmagesaliases {     $index[name]} {$index[desc]};
-         }
+#alias {calculate_grasp_beads} {
+     #math hp_overmax {$my[hp][max] * 5};
+     #math hp_shortfall {$hp_overmax_max - $my[hp][current]};
+     #math grasps_needed {$hp_shortfall / 33};
+
+     #math sp_min_threshold {$my[sp][max] * .20};
+     #math sp_extra {$my[sp][current] - $sp_min_threshold};
+     #math grasps_possible {$sp_extra / 100};
+
+     #if {$grasps_needed < $grasps_possible} {
+          #var grasp_beads $grasps_needed;
+     } {
+          #var grasp_beads $grasps_possible;
      };
-     #if !$tempflag {
-         #foreach $utmage3kdb[%*] index {
-             format_utmagesaliases {     $index[name]} {$index[desc]};
-         };
-     };
+
+     #$grasp_beads {grasp beads};
 };
-
-#list utmage3kdb clear;
- 
-#NOP -- corpses;
-#list utmage3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Corpsetrig for soloing}}};
-#list utmage3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
-#list utmage3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
-#list utmage3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
-#list utmage3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
-#list utmage3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Solo kill trig without get all}}};
- 
-#NOP -- boosts;
-#list utmage3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
-#list utmage3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
- 
-#NOP - combat;
-#list utmage3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies}}};
-#list utmage3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
- 
-#NOP -- misc;
-#list utmage3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
-#list utmage3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
-#list utmage3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
-#list utmage3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
-#list utmage3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
-#list utmage3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
- 
-#NOP -- guild;
-#list utmage3kdb add {{{name} {setup_defense} {type} {guild} {desc} {Setup defenses}}};
-#list utmage3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
-#list utmage3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
-#list utmage3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
-#list utmage3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
-#list utmage3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (assisting & defending)}}};
-#list utmage3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
-#list utmage3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
-#list utmage3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assisting & 1 defend)}}};
-
-#NOP -- spells;
-#list utmage3kdb add {{{name} {pmo} {type} {spells} {desc} {Polymorph other: pmo <mob> (turn mobs against each other)}}};
-#list utmage3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
-#list utmage3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
-#list utmage3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
-#list utmage3kdb add {{{name} {refmage} {type} {spells} {desc} {Fabricate: reforger pxp for mages}}};
-#list utmage3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
-#list utmage3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
-#list utmage3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
-#list utmage3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
-#list utmage3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
-#list utmage3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
-#list utmage3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
-#list utmage3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
-#list utmage3kdb add {{{name} {mind1} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on perform)}}};
-#list utmage3kdb add {{{name} {mind2} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on repeat)}}};
-#list utmage3kdb add {{{name} {rad1} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on perform)}}};
-#list utmage3kdb add {{{name} {rad2} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on repeat)}}};
-#list utmage3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison  -- on perform)}}};
-#list utmage3kdb add {{{name} {poison2} {type} {spells} {desc} {Offensive: venomous spray (poison dmg -- on repeat)}}};
-#list utmage3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on perform)}}};
-#list utmage3kdb add {{{name} {acid2} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on repeat)}}};
-#list utmage3kdb add {{{name} {multi-dmg1} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on perform)}}};
-#list utmage3kdb add {{{name} {multi-dmg2} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on repeat)}}};
-#list utmage3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on perform)}}};
-#list utmage3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
-#list utmage3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
-#list utmage3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
-
-
 
 
 #class {player_aliases} {close}
