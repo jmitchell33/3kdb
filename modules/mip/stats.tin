@@ -81,6 +81,9 @@
 				#math enemy[kill_rate_avg] {$tempAvg / &enemy[kill_rate][%*]};
 				#math enemy[kill_rate_avg_count] {$enemy[kill_rate_avg_count] + 1};
 			};
+
+			#NOP -- Redunandant "round reset" for the damage tracker in case the You hit x for y string is botched;
+			#if $dmgtracker {.dmg_round_reset};
 		};
 		#DEFAULT {#NOP Every other non-handled flag};
 	}

@@ -1,0 +1,30 @@
+#class item_tracker kill;
+#class item_tracker open;
+
+#NOP -- This is a generic tracker for any item that also hooks into the item gag;
+#NOP -- Soon to be added reports, but for the moment you can inspect the variable and also gag;
+
+#NOP -- Inputs are %1 item/keyname %2 category
+#alias .trackItem {
+    #if $gags[combat_items] {#line gag};
+    #math itemTracker[%1][%2] {$itemTracker[%1][%2] + 1};
+};
+
+#action {A flicker in the containment field surrounding the CMC's plasma tank} {
+    #line oneshot #action {results in a plasma leak within your suit, causing you great pain.} {#line gag} {1};
+    .trackItem cmc leak;
+} {2};
+
+#action {The armour infuses you with chemicals, augmenting your abilities.} {
+    .trackItem cmc stats;
+} {2}; 
+
+#action {The CMC-660 infuses you with adrenaline!} {
+    .trackItem cmc heal;
+} {2};
+
+#action {The healing power of the phoenix restores your mind and body.} {
+    .trackItem rolm phoenix-heal;
+} {2};
+
+#class item_tracker close;
