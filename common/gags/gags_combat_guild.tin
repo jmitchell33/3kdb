@@ -139,12 +139,41 @@
         #gag {%* mind is sapped into the crimson field of energy.};
         #gag {The crimson energy field drains the mind of %*.};
         #gag {%* is painfully drained by the crimson mist.};
+        #gag {%* eyes burn with a crimson fire.};
+        #gag {The creature rakes at you with its misty talons.};
         #gag {%* hands some coins to %* familiar.$};
-        #action {%* rakes dark claw-like nails across the face of %*!$} {#line gag} {1};
+        #gag {The creature french kisses you. Oh sick!!};
+        #gag {%* rakes dark claw-like nails across the face of %*!$};
         #gag {%* eyes glow red as %* stares at %*.};
         #gag {%* unleashes %* vengeance upon %* foe!$};
         #gag {%* affects %* with a dark, necromantic touch.$};
-
+        #gag {%* dark soul burns in the golden light!};
+        #gag {You must wait a moment to convoke.};
+        #gag {%* appears to have shaken %* sickness.};
+        #gag {The swarming birds of death murderously tear into the flesh of %*!};
+        #gag {The crimson spectres wrap their talons around %* in agony.};
+        #gag {%* staggers from the crimson spectral mist.};
+        #gag {The ravens peck and rend viciously upon %* one last time.};
+        #gag {With a %* strike, %* enemy %*!};
+        #gag {Your mind is refreshed from the power of the spectral psibleed.};
+        #gag {The crimson misty spectres fill and refresh your yearning mind.};
+        #gag {The spectral crimson energy field drains the mind of %*.};
+        #gag {A crimson, spectral mist then appears and engulfs %*!};
+        #gag {Your iron will calls forth the powers of the material planes of energy.};
+        #gag {The crimson energy feeds directly into your willing mind.};
+        #gag {%* shadowy ravens flutter away into the night sky.};
+        #gag {^B:%*.$};
+        #gag {O=|======> %*!};
+        #gag {An unkindness of dark ravens viciously swarms upon %* enemy!};
+        #gag {The magical spear blinks out of reality.};
+        #gag {Your magical energies are refreshed by the spectral psibleed.};
+        #gag {  The %* is already infected with your deterioration.};
+        #gag {  The creature is already affected by your psibleed.};
+        #gag {The life essence infused in your %* flows into your body.};
+        #gag {Life and magical energy flows from your enemy into your soul.};
+        #gag {The spectres deliver the power directly into your mind.};
+        #gag {The spectral crimson power flows directly into your open mind.};
+        
         #action {%* snarls like a wild beast, %* brow beaded%*} {
             #line gag;
             #line oneshot #action {%*which ravages %* body.$} {#line gag;};
@@ -200,11 +229,26 @@
             #line gag 2;
         } {2};
 
+        #action {You charge forward and close your jaws on %*} {
+            #line gag;
+            #class rabies_gag open;
+            #EVENT {CATCH PROCESSED LINE} {
+                #nop;
+            };
+            #class rabies_gag close;
+            #delay 1 {#class rabies_gag kill};
+        } {2};
+
+        #action {^septic saliva to infect it with rabies!} {
+            #line gag;
+            #class rabies_gag kill;
+        } {2};
 
         #NOP -- Specific Necro Familiar Gags;
         #gag {^*.,'`'SaTaN'`',.* %*!$};
         #gag {^Solar %*!$};
         #gag {^Ashen-Shugar %*!};
+
 
         #class gags_combat_guild close;
     } {

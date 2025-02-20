@@ -16,12 +16,14 @@
 #NOP -- Ewell spam;
 #var ewell_gag 1;
 #act {^The brilliant sphere flashes brightly.} {
-    #if $gags[combat_generic] {#line gag};
-    #if $ewell_gag {
-        #echo {<efd>+++++++++    EWELL IS ACTIVE    +++++++++<088>};
-        #var ewell_gag 0;
-        #delay 4 #var ewell_gag 1;
+    #if $gags[combat_generic] {#line gag} {
+        #if $ewell_gag {
+            #echo {<efd>+++++++++    EWELL IS ACTIVE    +++++++++<088>};
+            #var ewell_gag 0;
+            #delay 4 #var ewell_gag 1;
+        };
     };
+    
 };
 
 
@@ -108,6 +110,7 @@
 #list gagList add {{{name} {combat_area} {active} {0} {action} {_gag_combat_area} {description} {Combat: Spammy Mobs}}};
 #list gagList add {{{name} {combat_guild} {active} {0} {action} {_gag_combat_guild} {description} {Combat: Spammy Guild Attacks (Cyborgs, Necros, etc.)}}};
 #list gagList add {{{name} {combat_items} {active} {0} {action} {_gag_combat_items} {description} {Combat: Spammy Items (CMC, Erah Shield, etc.)}}};
+#list gagList add {{{name} {combat_numbers} {active} {0} {action} {#NOP} {description} {Combat: Vaf Numbers}}};
 #list gagList indexate name;
 
 #alias .update_gags {

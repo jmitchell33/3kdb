@@ -69,7 +69,12 @@
     };
     
     #if {"${cmbt[category][%1][high]}" === ""} {#var cmbt[category][%1][high] 0};
-    #if {$cmbt[category][%1][curr] > $cmbt[category][%1][high]} {#var cmbt[category][%1][high] $cmbt[category][%1][curr];#echo {$newBest $dmgDisplay};};
+    #if {$cmbt[category][%1][curr] > $cmbt[category][%1][high]} {
+        #var cmbt[category][%1][high] $cmbt[category][%1][curr];
+        #if $gags[combat_numbers] {#NOP} {
+            #echo {$newBest $dmgDisplay};
+        };
+    };
 };
 
 
@@ -118,6 +123,7 @@
     #var cmbt[affects][punch] 0;
     #var cmbt[affects][kick] 0;
     #var cmbt[affects][pointDefense] 0;
+    #var cmbt[affects][CMC] 0;
     #var cmbt[penetration][round] 0;
     #var cmbt[penetration][total] 0;
     #var cmbt[extra_attacks][round] 0;
@@ -146,6 +152,13 @@
 };
 
 dreset;
+
+#NOP -- Toggles for items;
+#action {The CMC-660 REFLECTS the entire attack!!} {
+    #if $gags[combat_items] {#line gag};
+    #var cmbt[affects][CMC] 1;
+} {2};
+
 
 #NOP -- Toggles for necro powers;
 #action {^B:You grab your enemy with your talons in a clutch of death!$} {#var cmbt[affects][clutch] 1} {2};
@@ -270,27 +283,29 @@ dreset;
 } {2};
 
 #alias .dmg_round_reset {
-    #var cmbt[affects][shield_bash] 0;
-    #var cmbt[affects][witchHat] 0;
-    #var cmbt[affects][iprime] 0;
-    #var cmbt[affects][eradication] 0;
-    #var cmbt[affects][clutch] 0;
-    #var cmbt[affects][grasp] 0;
-    #var cmbt[affects][bloodarc] 0;
-    #var cmbt[affects][skullfire] 0;
-    #var cmbt[affects][lucanus_cloak] 0;
-    #var cmbt[penetration][round] 0;
-    #var cmbt[extra_attacks][round] 0;
-    #var cmbt[crit][round] 0;
-    #var ewell_round 0;
-    #var fry_round 0;
-    #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
-    #if {"$guild" == "mage"} {
-        #foreach *summon_dmg[vaf][%*] tmpSummonItem {
-            #var summon_dmg[vaf][$tmpSummonItem][round][damage] 0;
-            #var summon_dmg[vaf][$tmpSummonItem][round][hits] 0;
+    #delay {dmg_round_reset} {
+        #var cmbt[affects][shield_bash] 0;
+        #var cmbt[affects][witchHat] 0;
+        #var cmbt[affects][iprime] 0;
+        #var cmbt[affects][eradication] 0;
+        #var cmbt[affects][clutch] 0;
+        #var cmbt[affects][grasp] 0;
+        #var cmbt[affects][bloodarc] 0;
+        #var cmbt[affects][skullfire] 0;
+        #var cmbt[affects][lucanus_cloak] 0;
+        #var cmbt[penetration][round] 0;
+        #var cmbt[extra_attacks][round] 0;
+        #var cmbt[crit][round] 0;
+        #var ewell_round 0;
+        #var fry_round 0;
+        #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
+        #if {"$guild" == "mage"} {
+            #foreach *summon_dmg[vaf][%*] tmpSummonItem {
+                #var summon_dmg[vaf][$tmpSummonItem][round][damage] 0;
+                #var summon_dmg[vaf][$tmpSummonItem][round][hits] 0;
+            };
         };
-    };
+    } {.3};
 };
 
 #action {^%* hits you for %d damage!$} {
@@ -303,6 +318,7 @@ dreset;
 
 #NOP -- If you've just conjured undeads with necromancer, ignore those;
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
+    #var dmgTrackerNewRound 1;
     #if {"$guild" == "mage"} {
         #var summonDmgNewRound 1;
         #var tempHighSummonDmg 0;
@@ -325,7 +341,9 @@ dreset;
         #format dmgAmount {%d} %5;
         #format dmgDisplay {%g} {$dmgAmount};
         #line gag;
-        #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+        #if $gags[combat_numbers] {#NOP} {
+            #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+        };
 
         #math mob[damage_dealt] {$mob[damage_dealt] + $dmgAmount};
 
@@ -410,10 +428,12 @@ dreset;
                     #if {$cmbt[affects][pointDefense]} {
                         dmgTrack pointDefense $dmgAmount $dmgTimes;
                     };
+                    #if {$cmbt[affects][CMC]} {
+                        dmgTrack CMC $dmgAmount $dmgTimes;
+                    };
                 };
             };
         };
-
         .dmg_round_reset;
     }
 } {2};
@@ -584,7 +604,9 @@ dreset;
     #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
     #if $new_best {
         #var truck_dmg[high] $truck_dmg[curr];
-        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        };
     };
 } {2};
 
@@ -597,7 +619,9 @@ dreset;
     #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
     #if $new_best {
         #var truck_dmg[high] $truck_dmg[curr];
-        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        };
     };
 } {2};
 
@@ -610,7 +634,9 @@ dreset;
     #math new_best {$truck_dmg[curr] > $truck_dmg[high]};
     #if $new_best {
         #var truck_dmg[high] $truck_dmg[curr];
-        #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST TRUCK DMG: $truck_dmg[high]};
+        };
     };
 } {2};
 
@@ -624,7 +650,9 @@ dreset;
     #math new_best {$mount_dmg[curr] > $mount_dmg[high]};
     #if $new_best {
         #var mount_dmg[high] $mount_dmg[curr];
-        #ECHO {NEW BEST MOUNT DMG: $mount_dmg[high]};
+        #if $gags[combat_numbers] {#NOP} {
+            #ECHO {NEW BEST MOUNT DMG: $mount_dmg[high]};
+        };
     };
 } {2};
 
@@ -650,7 +678,9 @@ dreset;
         #if $new_best {
             #NOP update highest round damage;
             #var support_dmg[high] $support_round_dmg;
-            #ECHO {NEW BEST SUPPORT MECH ROUND DMG: $support_dmg[high]};
+            #if $gags[combat_numbers] {#NOP} {
+                #ECHO {NEW BEST SUPPORT MECH ROUND DMG: $support_dmg[high]};
+            };
         };
         #NOP increment round counter;
         #math support_dmg[rnd] {$support_dmg[rnd] + 1};

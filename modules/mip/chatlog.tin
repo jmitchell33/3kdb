@@ -318,7 +318,6 @@
 
 #NOP ***** 2 Way Communication (Tell/Emote) *****;
 
-
 #NOP -- This toggle will allow you to log just tells or emotes + tells;
 #NOP -- Flag specifically if it's a tell using action;
 #NOP -- If it matches the MIP sender, we'll log it so mobs/echo's don't get logged;
@@ -328,6 +327,18 @@
 
 #NOP -- Linktells;
 #action {^%w LTs \(%*\)} {#var chat[act_tell][from] %1;#delay 10 {#unvar chat[act_tell][from]}} {2};
+
+#NOP -- Jedi think;
+#action {^%w thinks . o O \(  %*  \)} {
+	#var mip[comm][twoway] {from};
+	#var chat[act_tell][from] %1;
+	#var mip[comm][source] %1;
+	#var mip[comm][data] %2;
+	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+	#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+	update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+	#delay 10 {#unvar chat[act_tell][from]}
+} {2};
 
 #alias {chatlog %1} {
 	#if {"%1" == "emotes"} {
@@ -573,19 +584,12 @@
 
 #alias {clearChatHeader} {
 
-#NOP    Moving color settings into themes.tin;
-#NOP	#var partyString <ffc>PARTY<088>;
-#NOP	#var tellString <fac>TELLS<088>;
-#NOP	#var clanString <ffe>CLAN<088>;
-#NOP	#var guildString <cfe>GUILD<088>;
-#NOP	#var hmString <faf>HM<088>;
-
-#NOP Adding control of colors to themes.tin file;
-#var partyString ${theme[chatHeader][party]}PARTY<088>;
-#var tellString ${theme[chatHeader][tells]}TELLS<088>;
-#var clanString ${theme[chatHeader][clan]}CLAN<088>;
-#var guildString ${theme[chatHeader][guild]}GUILD<088>;
-#var hmString ${theme[chatHeader][hm]}HM<088>;
+	#NOP    Moving color settings into themes.tin;
+	#NOP	#var partyString <ffc>PARTY<088>;
+	#NOP	#var tellString <fac>TELLS<088>;
+	#NOP	#var clanString <ffe>CLAN<088>;
+	#NOP	#var guildString <cfe>GUILD<088>;
+	#NOP	#var hmString <faf>HM<088>;
 
 	#NOP Colors are set in common/themes.tin;
 	#var partyString ${theme[chatHeader][party]}PARTY<088>;

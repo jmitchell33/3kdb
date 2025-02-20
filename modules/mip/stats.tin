@@ -47,6 +47,7 @@
 		#CASE {"L"} {#NOP Mob Health;#math enemy[hp_change] {$enemy[hp] - %2};#format {enemy[hp]} {%d} {%2};};
 		#CASE {"M"} {#NOP Mob Image File};
 		#CASE {"N"} {
+			.dmg_round_reset;
 			#var {mip[last_round]} {$mip[round]};
 			#VAR {mip[round]} {%2};
 			#NOP -- If round is the same or 0, you're no longer in combat;
@@ -54,8 +55,12 @@
 			#NOP -- new MIP line is received;
 			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
 				#var incombat 0;
+				#var dmgTrackerNewRound 0;
+				#var summonDmgNewRound 0;
 			} {
 				#var incombat 1;
+				#var summonDmgNewRound 1;
+				#var dmgTrackerNewRound 1;
 			};
 			#if {$mip[round] < $mip[last_round]} {#var last_fight_rounds $mip[last_round]};
 			
@@ -66,7 +71,7 @@
 			#NOP -- Average the first 10 rounds of combat to see if it'll be a fast or longer fight;
 			#NOP -- This is useful for some powers to save if it's a very fast fight;
 			#NOP -- If it's a long fight (>100 rounds) it will default to 100;
-			#if {$mip[round] <= 10 && $mip[round] > 1} {
+			#if {$mip[round] <= 10 && $mip[round] > 1 && $mip[round] > $mip[last_round]} {
 				#var enemy[hp_change] @max{$enemy[hp_change];1};
 				#math enemy[kill_rate][${enemy[kill_rate_avg_count]}] {100 / $enemy[hp_change]};
 				#format {enemy[last_round]} {%d} {$mip[round]};
