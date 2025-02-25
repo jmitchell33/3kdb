@@ -1,0 +1,54 @@
+#class guild_hpbar kill
+#class guild_hpbar open
+
+#NOP -- hpbar for copy and paste;
+#NOP confighp hp H: $+CHP$/$MHP$ S: $+CSP$/$MSP$ W: $+CWT$/$MWT$/$SWT$ L: $+LMB$% P: [$PSN$/$+PSR$%] A: $ATT$ E: $+TRG$ $CRT$Li: $+LTF$ S: $SPC$ Pa: $+LBP$ M: $MPA$ Cl: $MPC$ St: $DES$ Wr: $WCR$ C: $+CCP$ B: $BTW$ $CRT$Pr: $MPR$ As: $MAS$ Lt: $MLT$ At: $MAT$ $CRT$Bi: $MBI$ Pn: $MPI$ Wd: $MWE$ Rf: $MRE$ $CRT$Gxp: [$GXA$] G: [$GXP$/Rnd]
+
+#action {H: %d\/%d S: %d\/%d W: %d\/%d\/%d L: %d\% P: \[%d\/%p\%\] A: %d E: %p} {
+    #line gag;
+    #var my[hp][current] %1;
+    #var my[hp][max] %2;
+    #var my[sp][current] %3;
+    #var my[sp][max] %4;
+    #var my[gp1][current] %5;
+    #var my[gp1][max] %6;
+    #var my[gp2][current] %7;
+    #var my[gp2][max] $gp2_max;
+    #var my[attackers] %11;
+    #var ehealth %12
+};
+
+#action {Li: %w S: %w Pa: %d\% M: %p Cl: %d St: %p Wr: %d C: %p B: %d} {
+    #line gag;
+    #var my[spice][status] %2;
+    #var my[pain][stored] %3;
+    #var my[maula][pistol] %4;
+    #var my[maula][clips] %5;
+    #var my[sandtrout][reset] %6;
+    #var my[water][round] %7;
+    #var corpses[coffin] %8;
+    #var my[belt][water] %9
+};
+
+#action {Pr: %p As: %p Lt: %p At: %p} {
+    #line gag;
+    #var my[prana][mode] %1;
+    #var my[assault][mode] %2;
+    #var my[litany][mode] %3;
+    #var my[attacks][mode] %4
+};
+
+#action {Bi: %p Pn: %p Wd: %p Rf: %p} {
+    #line gag;
+    #var my[bindu][mode] %1;
+    #var my[pain][mode] %2;
+    #var my[weirding][mode] %3;
+    #var my[reflexes][mode] %4
+};
+
+#action {Gxp: \[%p\] G: \[%d/Rnd\]} {
+    #line gag;
+    #format {my[fremen][gxp][spend]} {%p} {%1};
+};
+
+#class guild_hpbar close

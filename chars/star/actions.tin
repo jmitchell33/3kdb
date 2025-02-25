@@ -5,6 +5,8 @@
 
 #action {^%1 gives you an air-five!$} {#format {heal_target} {%l} {%1};radiance $heal_target};
 #action {^%1 gives you a high-five!$} {#format {heal_target} {%l} {%1};invigorate $heal_target};
+#action {You focus intently and begin} {rift;beckon};
+#action {You cannot cast a spell that quickly.} {#delay 2 {beckon}};
 
 #action {There is no corpse here to offer up to %*.} {
     #if $corpse_confirm {
@@ -63,8 +65,7 @@
 } {1};
 
 #NOP --- GENERAL MISC;
-#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
-
+#action {The regenerative mist surrounding %w dissipates.} {regenerate $lower} {1};
 
 
 #class {player_actions} {close}
