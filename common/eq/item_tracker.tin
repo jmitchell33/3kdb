@@ -10,6 +10,17 @@
     #math itemTracker[%1][%2] {$itemTracker[%1][%2] + 1};
 };
 
+#NOP -- Witch hat;
+#action {A bolt of electricity streams from your hat into A %*!} {
+    .trackItem witch-hat dmg;
+} {2};
+
+#NOP -- Spirit Bracers;
+#action {The bracers flare, and the attack misses you!} {
+    .trackItem spirit-bracers block;
+} {2};
+
+#NOP -- CMC;
 #action {A flicker in the containment field surrounding the CMC's plasma tank} {
     #line oneshot #action {results in a plasma leak within your suit, causing you great pain.} {#line gag} {1};
     .trackItem cmc leak;
@@ -22,6 +33,10 @@
 #action {The CMC-660 infuses you with adrenaline!} {
     .trackItem cmc heal;
 } {2};
+
+#action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {
+    .trackItem cmc party-heal;
+} {1};
 
 #action {The healing power of the phoenix restores your mind and body.} {
     .trackItem rolm phoenix-heal;

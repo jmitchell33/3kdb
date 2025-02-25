@@ -1,10 +1,17 @@
 #class {player_heartbeat} {kill}
 #class {player_heartbeat} {open}
 
+#var corpse_drop 1;
+
 #alias {_player_heartbeat} {
-    #if !$idle_flag {
-        #NOP;
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #if {$my[gp1][current] < 4000 && $corpse_drop && $corpses[total] > 0} {
+            #var corpse_drop 0;
+            unwrap;
+            #delay 2 {recharge;reclaim;recharge;reclaim;#var corpse_drop 1};
+        };
     };
 };
+
 
 #class {player_heartbeat} {close}
