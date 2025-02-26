@@ -284,49 +284,51 @@
 };
 
 #alias {_use_power} {
-  	#var tmp_last_power_used %0;
-	#action {{You must wait %d round%w before you can use this power again.|You may only use one power per round.}} {
-		#echo {<069>==> Failed to use $tmp_last_power_used<900>};
-	} {2};
+	#if $my[dead] {#NOP} {
+		#var tmp_last_power_used %0;
+		#action {{You must wait %d round%w before you can use this power again.|You may only use one power per round.}} {
+			#echo {<069>==> Failed to use $tmp_last_power_used<900>};
+		} {2};
 
-	  #NOP -- Check if you have enough PSI / Stamina to use the power;
-  	#NOP -- Check if you are in combat for powers that should only be used in combat;
-  
-	#NOP -- If we're using a power with parameters, like body fuel, update the power check name;
-	#regex {%0} {body fuel %*} {#var tmp_last_power_used body fuel};
-	#regex {%0} {adapt body %*} {#var tmp_last_power_used adapt body};
-	#regex {%0} {animal affinity %*} {#var tmp_last_power_used animal affinity};
+		#NOP -- Check if you have enough PSI / Stamina to use the power;
+		#NOP -- Check if you are in combat for powers that should only be used in combat;
+	
+		#NOP -- If we're using a power with parameters, like body fuel, update the power check name;
+		#regex {%0} {body fuel %*} {#var tmp_last_power_used body fuel};
+		#regex {%0} {adapt body %*} {#var tmp_last_power_used adapt body};
+		#regex {%0} {animal affinity %*} {#var tmp_last_power_used animal affinity};
 
-	#foreach $psi_powers[%*] power {
-		#if {"$tmp_last_power_used" == "$power[power]"} {
-			#if {$power[combat]} {
-				#if {$mip[round] > 0 && !$hbp} {
-					#NOP -- Only use the power if we have at least 10 rounds of maintenance cost;
-					#var psi_maint 1;
-					#var stam_maint 1;
-					#if $power[psi_maint] {
-						#math psi_maint {$power[psi_maint] * 10};
-						#if {$my[gp1][current] <= $psi_maint} {#var psi_maint 0;};
-					};
-					#if $power[stam_maint] {
-						#math stam_maint {$power[stam_maint] * 10};
-						#if {$my[gp2][current] <= $stam_maint} {#var stam_maint 0;};
-					};
-					#if {$my[gp1][current] >= $power[psi] && $psi_maint} {
-						#if {$my[gp2][current] >= $power[stam] && $stam_maint} {
-						#if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Using %0<900>}};
-						#var hbp 1;
-						%0;
-						
-						#NOP -- last_psi_power is manually set in the hpbar file since there is a lag between the;
-						#NOP -- power being used and the mud including it on the hpbar/MIP;
-						#var last_psi_power_key $power[key];
-						#echo {<069>==> %0<900>};
-						} {
-						#if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Not enough Stam to use %0<900>}};
+		#foreach $psi_powers[%*] power {
+			#if {"$tmp_last_power_used" == "$power[power]"} {
+				#if {$power[combat]} {
+					#if {$mip[round] > 0 && !$hbp} {
+						#NOP -- Only use the power if we have at least 10 rounds of maintenance cost;
+						#var psi_maint 1;
+						#var stam_maint 1;
+						#if $power[psi_maint] {
+							#math psi_maint {$power[psi_maint] * 10};
+							#if {$my[gp1][current] <= $psi_maint} {#var psi_maint 0;};
 						};
-					} {
-						#if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Not enough Psi to use %0<900>}};
+						#if $power[stam_maint] {
+							#math stam_maint {$power[stam_maint] * 10};
+							#if {$my[gp2][current] <= $stam_maint} {#var stam_maint 0;};
+						};
+						#if {$my[gp1][current] >= $power[psi] && $psi_maint} {
+							#if {$my[gp2][current] >= $power[stam] && $stam_maint} {
+							#if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Using %0<900>}};
+							#var hbp 1;
+							%0;
+							
+							#NOP -- last_psi_power is manually set in the hpbar file since there is a lag between the;
+							#NOP -- power being used and the mud including it on the hpbar/MIP;
+							#var last_psi_power_key $power[key];
+							#echo {<069>==> %0<900>};
+							} {
+							#if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Not enough Stam to use %0<900>}};
+							};
+						} {
+							#if {$_DEBUG_HB} {#echo {[debug_heartbeat] <069>==> Not enough Psi to use %0<900>}};
+						};
 					};
 				};
 			};

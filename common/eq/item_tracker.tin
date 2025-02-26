@@ -10,8 +10,38 @@
     #math itemTracker[%1][%2] {$itemTracker[%1][%2] + 1};
 };
 
+#var itemTracker[start_round] $total_rounds;
+
+#alias iStats-reset {
+    #unvar itemTracker;
+    #var itemTracker[start_round] $total_rounds;
+};
+
+#alias iStats {
+    #math tmpRounds {$total_rounds - $itemTracker[start_round]};
+    #format fmtTmpRounds {%g} {$tmpRounds};
+    #echo {<efe>   ----    ITEM TRACKER EXTRAORDINAIRE   ----    <088>};
+    #format fmtTmpHeader { %-15s     %-10s  %-10s} {Item} {Count} {% of Rnds};
+    #echo {<efe>$fmtTmpHeader<088>};
+    #foreach *itemTracker[] tmpKey {
+        #if {"$tmpKey" == "start_round"} {#NOP} {
+            #format fmtTmpKey {%n} {$tmpKey};
+            #format fmtTmpKey {%-15s} {$fmtTmpKey};
+            #echo {<efb>  $fmtTmpKey<088>};
+            #foreach *itemTracker[$tmpKey][] tmpSubItem {
+                #format fmtTmpKey {%n} {$tmpSubItem};
+                #format fmtTmpCnt {%g} {$itemTracker[$tmpKey][$tmpSubItem]};
+                #math tmpSubPct {$itemTracker[$tmpKey][$tmpSubItem] / $tmpRounds * 100.0};
+                #format fmtTmpItem {    %-15s   %-10s  %-10s} {$fmtTmpKey} {$fmtTmpCnt} {${tmpSubPct}%};
+                #echo {<bdf>$fmtTmpItem <088>};
+            };
+        };
+    };
+    #echo {<efe>   ----    TRACKING OVER $fmtTmpRounds ROUNDS   ----    <088>};
+};
+
 #NOP -- Witch hat;
-#action {A bolt of electricity streams from your hat into A %*!} {
+#action {A bolt of electricity streams from your hat into %*!} {
     .trackItem witch-hat dmg;
 } {2};
 
