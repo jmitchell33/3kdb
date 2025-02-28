@@ -2,22 +2,41 @@
 #class eq_bloodplate open;
 
 #NOP -- Assume blood plate is full when we start so it doesn't spam corpses nonstop if it can't find the variable;
+#NOP -- Blood Plate needs to be unbriefed for this to work;
+
 #var blood_plate[status] 100;
 #var blood_plate_toggle 1;
 
-#action {Your armour senses your near-death experience and infuses you with blood!} {
-    #math blood_plate[status] {$blood_plate[status] - 10};
-    #line gag;
-    #var blood_plate_toggle 1;
+#action {1 Blood Plate \{%* stained\} \(worn\).} {
+    #if {"%1" != "completely"} {
+        #var blood_plate[status] 90;
+        #var blood_plate_toggle 1;
+    } {
+        #var blood_plate[status] 100;
+    };
 } {2};
 
-#action {Tendrils from %* armour reach for the corpse and absorb its blood\n%a.$} {
-    #line gag;
+#action {Your armour senses your near-death experience and infuses you with blood!} {
+    #if $gags[combat_items] {#line gag};
+    #math blood_plate[status] {$blood_plate[status] - 10};
+    #var blood_plate_toggle 1;
+    .trackItem blood-plate dsave;
+} {2};
+
+#action {Your armour extends a tendril of blood that deflects the incoming attack!} {
+    #if $gags[combat_items] {#line gag};
+    #math blood_plate[status] {$blood_plate[status] - 10};
+    #var blood_plate_toggle 1;
+    .trackItem blood-plate block;
+} {2};
+
+#action {Tendrils from ${user_cap}'s armour reach for the corpse and absorb %*} {
+    #if $gags[combat_items] {#line gag};
     #if {$blood_plate[status] < 100} {#var blood_plate_toggle 1;};
 } {2};
 
-#ACTION {Your armour has reached its maximum saturation level.} {
-    #line gag;
+#action {Your armour has reached its maximum saturation level.} {
+    #if $gags[combat_items] {#line gag};
     #var blood_plate[status] 100;
     #var blood_plate_toggle 0;
 } {2};
