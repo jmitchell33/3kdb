@@ -21,19 +21,23 @@
         #gag {^A mighty pulse of strength wells in your arms!$};
         #gag {^The gloves course a powerful strike through your arms!$};
 
-        #NOP CMC;
-        #action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {#line gag} {1};
+        #gag {The sticky cocoon absorbs part of the attack!};
 
         #NOP Erah Shield;
-        #gag {%* bashes %* with %* shield, cutting it and sending it reeling backward.};
-        #action {%* bashes %* with %* shield, cutting it and sending it reeling backward} {
+        #gag {%* bashes %* with %* shield, cutting %* and sending %* reeling backward.};
+        #action {%* bashes %* with %* shield, cutting %* and sending %*} {
             #line gag;
             #line oneshot #act {backward.} {#line gag;};
             #line oneshot #act {reeling backward.} {#line gag;};
-        } {1};
+        } {2};
 
-        #gag {it reeling backward.};
-        #gag {sending it reeling backward.};
+        #gag {You bash %* with your shield, cutting into %* while %* reels backward.};
+        #action {You bash %* with your shield, cutting into %* while} {
+            #line gag;
+            #line oneshot #act {backward.} {#line gag;};
+            #line oneshot #act {reeling backward.} {#line gag;};
+        } {2};
+        
 
         #NOP Blood Plate;
         #gag {Your armour absorbs the blood from your wounds.};
