@@ -7,6 +7,8 @@
 #alias {cdd2} {cast summon config deactivate};
 #action {Accept by typing <yes>} {yes};
 #alias hmon {hmonitor treznor 4000 7000};
+#alias dc {eternal duplicate creature};
+#alias prots2 {eternal protection};
 
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
@@ -250,27 +252,24 @@
      cast identify on %0 30
 };
 
-#NOP -- setup defense;
 #alias {setup_defense} {
      clear_c;
      clear_gc;
+     setup_c;
      setup_gc;
      #delay 2 {prots_ss};
      #delay 4 {prots_MG};
      #delay 6 {prots_ms};
      #delay 8 {prots_armor};
+     #delay 10 {prots_mantle};
      #delay 10 {prots_ps};
-     #delay 12 {cast mantle};
      #delay 14 {prots_pfe};
-     #delay 16 {prots_mb};
-     
 };
 
 #alias {setup_c} {
      cast contingency as prot_evil#cast protection from evil;
-     cast contingency as mantle#200#cast mantle;
-     cast contingency as prismatic sphere#799#cast prismatic sphere;
 };
+
 
 #alias {setup_gc} {
      cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
