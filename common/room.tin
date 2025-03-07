@@ -231,20 +231,6 @@
     #if $mobFamiliar {
         #list room[familiars] add {{{name} {$mob[long]}}};
     } {
-        #if $bot[active] {
-            #foreach $bot[mobs][%*] botmob {
-                #regexp {$mob[long]} {$botmob[long]} {
-                    #var bot[foundmob] 1;
-                    #var mob[target] $botmob[target];
-                    #var botTarget 1;
-                };
-            };
-            #undelay {bot_kick};
-            #undelay {bot_restart};
-        } {
-            #var mob[target] $mob[autoName];
-        };
-
         #NOP -- Separate mage summons into their own group/exclude from room[mobs];
         #regex {$mob[long]} {%* [summons] (%d%)%*} {
             #var summonIndex 1;
@@ -283,7 +269,23 @@
                 };
             };
         } {
-            #NOP -- THIS SECTION HANDLES MOBS OTHER THAN MAGE SUMMONS;
+            #NOP -- THIS SECTION HANDLES BOT MOBS AND MOBS OTHER THAN MAGE SUMMONS;
+            #if $bot[active] {
+                #foreach $bot[mobs][%*] botmob {
+                    #if !$bot[foundmob] {
+                        #regexp {$mob[long]} {$botmob[long]} {
+                            #var bot[foundmob] 1;
+                            #var mob[target] $botmob[target];
+                            #var botTarget 1;
+                        };
+                    };
+                };
+                #undelay {bot_kick};
+                #undelay {bot_restart};
+            } {
+                #var mob[target] $mob[autoName];
+            };
+
             #if {$foundTimes == 1} {
                 #if {&room[mobs] > 0} {
                     #var tmpFound 0;
@@ -301,8 +303,6 @@
             };
         };
     }
-
-    
 } {2};
 
 #class common_room close;

@@ -169,26 +169,62 @@
     #delay 1 {#end};
 };
 
-#alias {go_donate1} {
+#alias {donate_house} {
     #var bot[paused] 1;
+    keep all equip;
     #map get roomvnum donate_go_back;
-    #path save forward path;
-    #path get position pos;
     go house_box;
-    keep all corpse;
-    keep all preservation;
-    put all in box;
-    go morgue;
-    unkeep all corpse;unkeep all preservation;donate coffin;donate all;unwrap all;get all;donate all;
-    #if {"$guild" == "necromancer"} {
+    #line oneshot #action {Byron's Treetop Gambling Emporium (d)} {
+        put all in box;
+        go morgue;
+    } {1};
+
+    #line oneshot #action {Pinnacle Morgue (n)} {
+        donate all;
+        donate coffin;
+        #map run $donate_go_back;
+        #delay 10 {
+            #var bot[paused] 0;
+        };
+    } {1};
+};
+
+
+#alias {donate_necro} {
+    #var bot[paused] 1;
+    keep all equip;
+    #map get roomvnum donate_go_back;
+    #Map run 49586;
+    #line oneshot #action {The Manager's Office (s,sw)} {
+        qtrance {unkeep flask/put flask in box>50};
+        go necro_box;
+    } {1};
+
+    #line oneshot #action {Theela the Necromancer (moral).} {
+        #10 donate all;
         go necro_corpse;
+    } {1};
+
+    #line oneshot #action {Duncan, Keeper of the Dead.} {
+        unwrap all;
+        #if $inventory[freezer] {deslab all};
+        #if $inventory[cooler] {#50 uncooler corpse};
+        unkeep all corpse;
         store all;
-    };
-    go bank;deposit all;
-    #map run $donate_go_back;
-    #path load $path;
-    #path goto $pos;
-    #var bot[paused] 0;
+        #delay 6 {
+            qtrance preserve gemino/get corpse>50;
+            get all;
+            store all;
+            qtrance preserve gemino/get corpse>50;
+            get all;
+            store all;
+            qtrance preserve gemino/get corpse>50;
+            get all;
+            store all;
+        };
+        #delay 10 {#map run $donate_go_back};
+        #delay 20 {#var bot[paused] 0;};
+    } {1};
 };
 
 #alias {sell_catacombs} {
