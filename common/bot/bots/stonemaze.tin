@@ -1,0 +1,36 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var check_room 0;
+
+#NOP -- mobs are good, set rolm to demon;
+touch demon rune;
+
+#var bot_message_1 '---- STONEMAZE PASS STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {bot[path]} {ne;ne;w;n;ne;s;e;e;e;s;se;n;s;nw;sw;nw;e;n;w;w;n;sw;s;w;w;s;n;se;sw;ne;nw;nw;sw;sw;nw;se;ne;se;ne;e;e;e;sw;sw};
+
+#list botmobs clear;
+#list botmobs add {{{long} {Stonebound Enchantress} {target} {stonebound enchantress}}};
+#list botmobs add {{{long} {Molten Shardling} {target} {molten shardling}}};
+#list botmobs add {{{long} {Gargoyle Sentinel} {target} {gargoyle sentinel}}};
+#list botmobs add {{{long} {Quartz Specter} {target} {quartz specter}}};
+#list botmobs add {{{long} {Lurking Boulderfiend} {target} {boulderfiend}}};
+#list botmobs add {{{long} {Spectral Guardian} {target} {spectral guardian}}};
+#list botmobs add {{{long} {Obsidian Serpent} {target} {obsidian serpent}}};
+#list botmobs add {{{long} {Stoneform Mimic} {target} {stoneform mimic}}};
+#list botmobs add {{{long} {Crystalline Skulker} {target} {crystalline skulker}}};
+
+#action {^-i-A treasure chest.$} {
+    .pause;
+    open chest;
+    #delay 5 {
+        .unpause
+    };
+} {1};
+
+
+#class {bot} {close}
+#read common/bot/generic.tin;
