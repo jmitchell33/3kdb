@@ -1,0 +1,22 @@
+#class {player_miphp} {kill}
+#class {player_miphp} {open}
+
+#NOP -- This is a custom player hpbar if you do not like the default or want to customize your own; 
+#alias {_player_miphp} {
+	#NOP
+};
+    
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+	
+	#list temp clear;
+	#list temp add {<eeb>HP:<ffe>$my[hp][current]/$my[hp][max] <eeb>SP:<ffe>$my[sp][current]/$my[sp][max] <eeb>Water:<ffe>$my[gp1][current]/$my[gp1][max]  <eeb>Wcycle:<ffe>$my[gp2][current]/$my[gp2][max]  <eeb>E:<ffe>$ehealth<088>};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Water:$my[gp1][graph] Wcycle:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {<dea>L:<fff>$my[limberness]% <dea>P:<fff>$my[fremen][poisons]/$my[poisons][reset]% <dea>A:<fff>$my[attackers] <dea>Li:<fff>$my[litany][focus] <dea>S:<fff>$my[spice][status] ($spiceBeers) <dea>Pa:<fff>$my[pain][stored]% <dea>M:<fff>$my[maula][pistol] ($my[maula][clips]) <dea>St:<fff>$my[sandtrout][reset] <dea>Wr:<fff>$my[water][round] <dea>B:<fff>$my[belt][water]<088>};
+	#list temp add {<caf>Pr:<fff>$my[prana][mode] <caf>Bi:<fff>$my[bindu][mode] <caf>As:<fff>$my[assault][mode] <caf>Pn:<fff>$my[pain][mode] <caf>Lt:<fff>$my[litany][mode] <caf>Wd:<fff>$my[weirding][mode] <caf>At:<fff>$my[attacks][mode] <caf>Rf:<fff>$my[reflexes][mode]<088>};
+	#list temp add {<eeb>Gxp $my[gxp][str_time]: <dea>$my[gxp][str_average_per_hr]/AvgHr <dfe>| <dea>$my[gxp][last_round]/Rnd <dfe>| <dea>$my[gxp][str_total]/Earned <dfe>| <dea>$my[fremen][gxp][spend]/Saved<088>};
+	#var hpbar[prompt] $temp;
+};
+
+#class {player_miphp} {close}

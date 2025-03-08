@@ -1,55 +1,10 @@
 #class {player_actions} {kill}
 #class {player_actions} {open}
 
-#NOP --- BARD MISC;
-#action {You begin a soft incantation.} {#delay 2 {cast soul bead}};
-#action {The regenerative mist surrounding Askum dissipates.} {regenerate askum};
-#action {Askum attacks} {rift;beckon};
-#action {Model} {enthrall robot;say NAP TIME};
-#action {to shake off the effects of your cacophonous blast.} {#if {!$idle_flag} {cacophony}};
-#action {Your skin relaxes to a more normal state.} {#if {!$idle_flag} {cast hardened skin}};
-#action {The coffin expels your selected corpse!} {perform dirge};
-#gag {You've already cast a spell this round!};
-#gag {You can't cast a spell while singing!};
-#action {Noxious vapors form} {#if {!$idle_flag} {#delay 5 {perform devil went down to georgia}}};
-
-#NOP --- GENERAL MISC;
-#action {Untouchable smacks you upside the head} {enthrall}
-#action {There is no reason to 'heal' here.} {invigorate askum};#LINE GAG;
-#action {Out of nowhere a crazed hockey fan leaps towards the Cup.} {immolate corpse};
-#action {Gargoyle <cgame>: The remaining roles were:} {#if {$cultjoin && !$idle_flag} {#delay 6 {cult join}}};
-#action {Responding to Brianna's call} {#if {!$idle_flag} {rallycry heal}};
-#action {Status of} {#if {!$idle_flag} {soothe untouchable}};
-#action {You're in mid performance!} {cease};
-#action {The Daemon Blade screams at you} {steal};
-
-#NOP -- trigger to fire powers at start of combat
-#action {{Untouchable attacks|attacking Untouchable!.}} {#if {!$idle_flag && $Powers[startOfcombat]} {#delay 2 steal}};
-#var corpse_delay 0;
-
-#ACTION {^Owie. That hurt!} {
-	#if !$corpse_delay {
-		#var corpse_delay 1;
-		corpse_select;
-		#delay {4} {cease;pd;pd;wrap};
-		#delay {4} {#var corpse_delay 0};
-	}
-} {1};
-
-
-#action {You feel a sudden wave of alcohol induced fury overcome you!} {
-	#var drunken_master 1;
-};
-
-#action {Your alcohol fueled strength dissipates.  Buuurp  .} {
-	#var drunken_master 0;
-};
-
-#NOP -- Charge stuff while Sholitia is gone;
-#act {Sholitia appears out of nowhere!} {cease;};
-#act {Sholitia utters a word of mystical power. She vanishes from sight,} {
-	#NOP;
-};
-
+#NOP --- Player specific actions;
+#gag {Whom would you like to target?};
+#action {You have been offered the mission} {mission accept};
+#action {Untouchable gives corpse to you.} {perform dirge};
+#action {You munch on yourself like a Keebler Cookie (TM).} {unwrap 1;z};
+#action {Aegis Sentry} {enthrall};
 #class {player_actions} {close}
-
