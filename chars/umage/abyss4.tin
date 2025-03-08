@@ -1,0 +1,59 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var area {Abyss};
+
+#action {The entire area seems to shudder and rumble as if the Abyss is begining} {{killbot;tell $char Abyss broken!}};
+
+#action {^-M-_A small fire mite$}{{#nop}} {1};
+#alias k kill;
+#action {There is no demon here.}{..};
+#action {The creature must be present.}{..};
+#action {The blast of fire is so intense it forces you from the room!}{..}{1};
+ 
+#action {^-M-_$} {
+    #var mobname demon;
+    #if {"$mobname" == ""} {
+            #var mobname mite;
+        } #else {
+            _check_mob
+        }
+} {1};
+
+#action {The %1th Plane of The Abyss (%2)} {
+    #var abysslevel %1;
+    #math thirdabyss {$abysslevel/3}; 
+    #math abyssplane {$thirdabyss*2};
+    #math abysshalf {$thirdabyss/2};
+} {1};
+
+#alias {abysspath} {
+    #path create;
+    #{$thirdabyss} #path insert w;
+    #{$thirdabyss}  #path insert n;
+    #{$abysshalf} {#$abyssplane #path insert e;#path insert s;#{$abyssplane} #path insert w;#path insert s}};
+    #path goto 1;
+    #path show;
+
+#delay {2} {abysspath};
+
+#action {The blast of fire is so intense it forces you from the room!} { 
+    #action {Your legs run away with you %1.} {
+        #regex {%1} {east} {west;.bot};
+        #regex {%1} {west} {east;.bot};
+        #regex {%1} {north} {south;.bot};
+        #regex {%1} {south} {north;.bot};
+    }{2};
+    
+#delay 1 {#unact #action {Your legs run away with you %1.}};
+        #regex {%1} {east} {west;.bot};
+        #regex {%1} {west} {east;.bot};
+        #regex {%1} {north} {south;.bot};
+        #regex {%1} {south} {north;.bot};
+    };
+    
+#delay 1 {#unact {Your legs run away with you %1.}};
+#action {You cannot go} {#path walk};
+
+#class {bot} {close}
+#read common/bot/generic.tin;

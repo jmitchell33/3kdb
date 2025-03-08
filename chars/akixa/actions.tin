@@ -1,0 +1,56 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#NOP --- Player specific actions;
+#NOP -- fremen skills;
+#action {You are in the yali of the Reverend Mother Jessica} {
+    #if {!$idle_flag} {
+        #echo {<caf>Trainable skills: <fff>litany, pain, prescience, voice, weirding<088>};
+    };
+};
+
+#action {This is the yali of the legendary Otheym} {
+    #if {!$idle_flag} {
+        #echo {<caf>Trainable skills: <fff>ambush, assault, chaumary, crysknife, desert hardening, devices, hide, projectile<088>};
+    };
+};
+
+#action {Inside this fremen yali} {
+    #if {!$idle_flag} {
+        #echo {<caf>Trainable skills: <fff>bindu, fiqh, ilm, nerve, prana<088>};
+    };
+};
+
+#action {You stand before a vast lake of water deep under the sietch.} {
+    #if {!$idle_flag} {
+        #echo {<caf>Trainable skills: <fff>fai, huanui, water discipline<088>};
+    };
+};
+
+#NOP -- spice;
+#var spiceBeers 0;
+#action {You pay %d gold coins for spice beer.} {
+    #if {!$idle_flag} {
+        #math {spiceBeers} {$spiceBeers + 1};
+    };
+};
+
+#action {^You drink the spice beer.} {
+    #if {!$idle_flag} {
+        #var spicebeertoggle 0;
+        #math {spiceBeers} {$spiceBeers - 1};
+    };
+};
+
+#action {^The effects of the spice wear off.} {
+    #if {!$idle_flag} {
+        #if {$spiceBeers > 0} {
+            #var spicebeertoggle 1;
+        };  #else {
+            #var spicebeertoggle 0;
+        };
+    };
+};
+
+
+#class {player_actions} {close}
