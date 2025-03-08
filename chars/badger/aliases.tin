@@ -9,6 +9,44 @@
     };
 };
 
+#NOP -- forest of charms;
+#alias {charm1} {
+    search trees
+};
+
+#alias {charm2} {
+    #2 search rocks
+};
+
+#alias {charm3} {
+    search tree
+};
+
+#alias {charm4} {
+    search rock
+};
+
+#alias {charm5} {
+    kill guardian
+};
+
+#alias {charm6} {
+    search trees;
+    get charm
+};
+
+#alias {charm7} {
+    kill squirrel
+};
+
+#alias {charm8} {
+    snatch moon
+};
+
+#alias {charmkey} {
+    search river
+};
+
 #NOP -- clear all damage trackers;
 #alias {cleardmg} {
     dreset;
@@ -50,8 +88,8 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 6##2#1500#70#defend#summons#always;
-    ms 6##2#1500#70#assist#summons#always;
+    ms 7##2#1500#70#defend#summons#always;
+    ms 7##2#1500#70#assist#summons#always;
     #delay {4} {cg}
 };
 
@@ -61,7 +99,7 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 6##4#1500#70#assist#summons#always;
+    ms 7##4#1500#70#assist#summons#always;
     ms golema
 };
 
@@ -71,7 +109,7 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 6##4#1500#70#defend#summons#always;
+    ms 7##4#1500#70#defend#summons#always;
     ms golema
 };
 
@@ -81,8 +119,8 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 6##3#1500#70#assist#summons#always;
-    ms 6##1#1500#70#defend#summons#always;
+    ms 7##3#1500#70#assist#summons#always;
+    ms 7##1#1500#70#defend#summons#always;
     #delay {4} {cg}
 };
 
@@ -126,7 +164,7 @@
 
 #NOP -- greater contingency;
 #alias {setup_gc} {
-    cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+    #NOP cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
     cast greater contingency as major globe#cast major globe;
     cast greater contingency as stoneskin#cast stoneskin;
@@ -219,6 +257,18 @@
 #NOP -- polymorph other (turn mobs against each other);
 #alias {pmo} {
     cast polymorph other on %0
+};
+
+#NOP -- offensive single target damage spell (implosion - blunt damage);
+#alias {blunt1} {
+    repeat off;
+    cast perform as cast implosion;
+    cast activate c
+};
+
+#alias {blunt2} {
+    cast deactivate;
+    repeat combat/cast implosion/0
 };
 
 #NOP -- offensive single target damage spell (sunspear - radiation damage);
@@ -818,10 +868,10 @@
 #NOP -- gswap;
 #alias {gw} {
     #switch {"%0"} {
-         #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;despamrod;.gswap juggernaut}};
-         #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;despamrod;.gswap mage}};
+         #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap juggernaut}};
+         #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap mage}};
          #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
-         #default {reflex stop;gagsoff;gswap %0;#delay {6} {get all;keep all;wear all;wield rod;despamrod;.gswap %0}};
+         #default {reflex stop;gagsoff;gswap %0;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap %0}};
     };
 };
 
@@ -960,6 +1010,8 @@
     #list badger3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
     #list badger3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
     #list badger3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
+    #list badger3kdb add {{{name} {blunt1} {type} {spells} {desc} {Offensive: implosion (blunt dmg -- on perform)}}};
+    #list badger3kdb add {{{name} {blunt2} {type} {spells} {desc} {Offensive: implosion (blunt dmg -- on repeat)}}};
 };
 
 
