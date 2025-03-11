@@ -47,6 +47,20 @@
     draw_all;
 };
 
+#alias {reset_trackers} {
+    istats_reset;
+    #if $vaf[numbers] {dreset};
+    #if {"$guild" == "juggernaut"} {
+        mountDmg-clear;
+        truckDmg-clear;
+        supportDmg-clear;
+    };
+    #if {"$guild" == "mage"} {
+        spellDmg-clear;
+        summonDmg-clear
+    };
+};
+
 #ALIAS {postload}
 {
      #map flag static on;

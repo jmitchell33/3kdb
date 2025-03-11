@@ -1,4 +1,4 @@
-Welcome to Byron's Repo.  It is built with a modular approach to plug and play guilds, professions, strategies, etc. while attempting to limit dependencies (although there are quite a few).  The MIP foundation was built by Balthus with bits and pieces stolen from other repos (Inix and Krat).  
+Welcome to Byron's Repo.  It is built with a modular approach to plug and play guilds, professions, strategies, etc. while attempting to limit dependencies (although there are quite a few).  The MIP foundation was built by Balthus with bits and pieces stolen from other repos (Inix and Krat).
 
 Feel free to contact me on 3k if you have any questions or would like to contribute.  Enjoy!
 
@@ -7,6 +7,7 @@ Feel free to contact me on 3k if you have any questions or would like to contrib
 * Krat: https://github.com/Krattimus/3k/
 * Flooby (3scapes) https://github.com/daagar/3Steps
 
+Instructions on installing Tin-Tin are at the bottom.
 
 **CONNECTING TO 3K / BASIC PLAYING**
 #read chars/name/name.tin  -- For example, to play Byron, I would do #read chars/byron/byron.tin from the 'root' directory.
@@ -25,9 +26,6 @@ Using Byron as an example:
     *#var guild bard;
     #var user byron;
     #read chars/$user/vars.tin;
-    #var scaler[tacos] 91;
-    #var scaler[hotel] 150;
-    #var scaler[zelligar] 131;
 
     #NOP -- If discord hooks are setup set this to 1;
     #var discordPost 1;
@@ -70,3 +68,20 @@ A few notes on mudside defaults are assumed for each guild.
         }
 
 Then you can sync and edit the mud tintin scripts from your local VSCode, and it will upload on save. C++ language syntax for highlighting in VSCode, works decently, until someone writes a tintin highlighter for vscode. 
+
+**Installing Tin-Tin**
+
+# The following is for Ubuntu, but may work for your flavor of Linux:
+From the shell, enter:
+    mkdir tintin
+    cd tintin
+    sudo apt-get update
+    sudo apt-get install build-essential zlib1g-dev libpcre3-dev libgnutls28-dev
+    sudo apt-get build-dep tintin++
+    wget https://github.com/scandum/tintin/releases/download/2.02.42/tintin-2.02.42.tar.gz
+    tar -zxvf tintin-2.02.42.tar.gz
+    cd tt/src
+    ./configure
+    sudo make install
+
+Once TinTin is installed, type 'tt++' to open it.

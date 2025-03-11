@@ -12,12 +12,12 @@
 
 #var itemTracker[start_round] $total_rounds;
 
-#alias iStats-reset {
+#alias istats_reset {
     #unvar itemTracker;
     #var itemTracker[start_round] $total_rounds;
 };
 
-#alias iStats {
+#alias itats {
     #math tmpRounds {$total_rounds - $itemTracker[start_round]};
     #format fmtTmpRounds {%g} {$tmpRounds};
     #echo {<efe>   ----    ITEM TRACKER EXTRAORDINAIRE   ----    <088>};
@@ -67,6 +67,11 @@
 #action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {
     .trackItem cmc party-heal;
 } {1};
+
+#action {The CMC-660 REFLECTS the entire attack!!} {
+    .trackItem cmc reflect;
+    #var cmbt[affects][CMC] 1;
+} {2};
 
 #action {The healing power of the phoenix restores your mind and body.} {
     .trackItem rolm phoenix-heal;
