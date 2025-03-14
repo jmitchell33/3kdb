@@ -520,7 +520,7 @@
 					#NOP -- If the MIP data source matches the tell source registered by the action, we log the chat;
 					#NOP -- Make sure we have a source, otherwise it's likely an action/emote triggering the MIP;
 					#if {"$mip[comm][source]" != ""} {
-						#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
+						#if {$chat[log][emotes]} {
 							#var mip[comm][twoway] {from};
 							#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
 							#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
@@ -530,7 +530,20 @@
 								update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
 							};
 							#bell;
-						};
+						} {
+							#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
+								#var mip[comm][twoway] {from};
+								#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+								#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+								#if {"$chat[group]" === ""} {
+									update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+								} {
+									update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
+								};
+								#bell;
+							};
+						}
+						
 					};
 				};
 			};

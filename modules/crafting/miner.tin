@@ -92,19 +92,22 @@
 		#regex {%%1} {voidstone} {#if {$mine[voidstone]} {mine} {#path walk}};
 		#regex {%%1} {phasemetal} {#if {$mine[phasemetal]} {mine} {#path walk}};
 		#regex {%%1} {chaostone} {#if {$mine[chaostone]} {mine} {#path walk}};
-		};
+	};
 	
-        #act {You have exhausted the supply of } {get all;_step_room};
-        #act {It appears this part of the shaft has already been searched.} {_step_room};
-        #act {You have found nothing.} {_step_room};
-        #act {You are not skilled enough to mine this.} {_step_room};
+	#act {You have exhausted the supply of } {get all;_step_room};
+	#act {It appears this part of the shaft has already been searched.} {_step_room};
+	#act {You have found nothing.} {_step_room};
+	#act {You are not skilled enough to mine this.} {_step_room};
 
-        #alias {_check_mine} {#act {^>$} {spelunk;#unact {^>$}}};
-        #alias {_step_room} {#act {^>$} {#path walk;#unact {^>$}}};
-        #class {miner} {close}
-        }
+	#alias {_check_mine} {#act {^>$} {spelunk;#unact {^>$}}};
+	#alias {_step_room} {
+		#act {^>$} {#path walk;#unact {^>$}};
+	};
+	
+	#class {miner} {close}
+}
 
-#act {dealt the killing blow} {corpse_trig;glance}
+#act {dealt the killing blow} {corpse_trig;glance} {1};
 
 #act {You hop in the exit chute and fly out of the mine shaft!} {
 	#if {$curr_level < $num_levels} {
