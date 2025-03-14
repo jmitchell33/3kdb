@@ -134,33 +134,6 @@
 	_check_power {BC} {greater biocurrent};
 	_check_power {Cg} {conductive grasp};
 
-  	#NOP --- Blur, Demoralize, Recall Pain & Recall Agony;
-
-	#if {!$hbp} {
-		#if {$my[implants][Bl][active] && $incombat} {
-			#if {"$my[powers][Bl]" == ""} {
-				checkStrategy {blur} {_use_power blur}
-			};
-		};
-	};
-
-	#if {!$hbp} {
-		#if {$my[implants][dm][active] && !$mob[demoralize] && $incombat} {
-			checkStrategy {demoralize} {_use_power demoralize};
-		};
-	};
-
-	#if {!$hbp} {
-		#if {$my[gp1][percent] > $my[psicorps][recall_pain_min_gp1] && $mip[round] > 3} {
-			#if {$mob[recall_pain] == 0} {
-				checkStrategy {rpain} {_use_power recall pain};
-				checkStrategy {ragony} {_use_power recall agony};
-				checkStrategy {rtorment} {_use_power recall torment};
-			};
-		};
-	};
-
-
 	#NOP -- GP1 Healing and Decision Tree to use Convert or Body Fuel;
 	#NOP -- If you've yet to use a power this round, we'll use body fuel to replenish psi or convert;
 
@@ -187,6 +160,41 @@
 			#if {$can_safely_use_body_fuel} {
 				#format hp_to_spend {%d} $hp_to_spend;
 				checkStrategy {bfuel} {_use_power body fuel $hp_to_spend};
+			};
+		};
+	};
+
+	#NOP -- The "if I haven't done anything yet and have Psi/Stam Section;
+	#NOP --- Blur, Demoralize, Recall Pain & Recall Agony;
+
+	#if {!$hbp} {
+		#if {$my[implants][dm][active] && !$mob[demoralize] && $incombat} {
+			checkStrategy {demoralize} {_use_power demoralize};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[implants][Bl][active] && $incombat} {
+			#if {"$my[powers][Bl]" == ""} {
+				checkStrategy {blur} {_use_power blur}
+			};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[gp1][percent] > $my[psicorps][recall_pain_min_gp1] && $mip[round] > 3} {
+			#if {$mob[recall_pain] == 0} {
+				checkStrategy {rpain} {_use_power recall pain};
+				checkStrategy {ragony} {_use_power recall agony};
+				checkStrategy {rtorment} {_use_power recall torment};
+			};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[implants][Burst][active] && $incombat} {
+			#if {$my[gp1][current] > 1000 && $my[gp2][percent] > .1} {
+				checkStrategy {burst} {_use_power burst}
 			};
 		};
 	};
