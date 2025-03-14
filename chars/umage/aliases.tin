@@ -255,14 +255,10 @@
 #alias {setup_defense} {
      clear_c;
      clear_gc;
-     setup_c;
-     setup_gc;
      #delay 2 {prots_ss};
      #delay 4 {prots_MG};
      #delay 6 {prots_ms};
      #delay 8 {prots_armor};
-     #delay 10 {prots_mantle};
-     #delay 10 {prots_ps};
      #delay 14 {prots_pfe};
 };
 
@@ -275,12 +271,15 @@
 };
 
 #alias {setup_gc} {
-     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
-     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
      cast greater contingency as major globe#cast major globe;
      cast greater contingency as stoneskin#cast stoneskin;
      cast greater contingency as shield#cast magnificent shield;
      cast greater contingency as armor#cast armor;
+};
+
+#alias {setup_gc2} {
+     cast greater contingency as mantle#100#cast mantle;
+     cast greater contingency as prismatic sphere#100#cast prismatic sphere;
 };
 
 #alias {clear_c} {
@@ -307,7 +306,7 @@
      strategy slow;
      strategy golem_rotate;
      strategy super_er;
-     strategy golem_assist;
+     strategy golem_defend;
      strategy summon_mf;
      strategy super_sub;
      strategy rolm;
@@ -326,9 +325,8 @@
      shoo;
      shoo golem;
      mystrategy;
-     ms 7##2#1500#70#defend#summons#always;
-     ms 7##2#1500#70#assist#summons#always;
-     #delay {4} {cg}
+     ms 8##1#1500#70#defend#summons#always;
+     ms 8##3#1500#70#assist#summons#always;
 };
 
  #alias {hydra2} {
