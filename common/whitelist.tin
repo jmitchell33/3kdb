@@ -5,6 +5,20 @@
     whitelist+ %1;
 } {2};
 
+#action {^[PARTY] %w has been booted from the party.} {
+    whitelist- %1;
+} {2};
+
+#action {^[PARTY] %w has quit the party.$} {
+    #NOP -- If you quit the party, clear whitelist and update to default;
+    #if {"%1" == "$user_cap"} {
+        whitelist-clear;
+        whitelist_default;
+    } {
+        whitelist- %1;
+    };
+} {2};
+
 #action {^[PARTY] %w: whitelist room} {
     whitelist-room;
 } {2};
@@ -13,12 +27,9 @@
     whitelist+ %1;
 } {2};
 
-#NOP -- Player & Follow whitelist;
+#NOP -- Player whitelist;
 #alias whitelist_default {
-    whitelist+ El Jefe;
-    whitelist+ Señor Meow-meow the fluffy persian cat;
-    whitelist+ Jugger Support Mech;
-    whitelist+ A tank named;
+    #NOP;
 };
 
 #alias whitelist {

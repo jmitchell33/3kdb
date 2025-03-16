@@ -29,8 +29,7 @@
 #NOP -- so this ticker will send a "non-command" to the mud if you're in combat and not deadman;
 #ticker {noise} {#if {$incombat && !$idle_flag} {#cr}} {240};
 
-#NOP -- Load variables from last session;
-
+#NOP -- Load variables from last session and reset all the things;
 #alias {defaults_on} {
     #echo {<fff> CONNECTED TO 3KDB -- UPDATING SCREEN IN 3 seconds...};
     _variable_import;
@@ -45,6 +44,8 @@
     .update_gags;
     init_screen;
     draw_all;
+    _mob_status_clear;
+    reset_trackers
 };
 
 #alias {reset_trackers} {
