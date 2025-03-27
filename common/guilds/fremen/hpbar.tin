@@ -5,7 +5,7 @@
 #NOP confighp hp H: $+CHP$/$MHP$ S: $+CSP$/$MSP$ W: $+CWT$/$MWT$/$SWT$ L: $+LMB$% P: [$PSN$/$+PSR$%] A: $ATT$ E: $+TRG$ $CRT$Li: $+LTF$ S: $SPC$ Pa: $+LBP$ M: $MPA$ Cl: $MPC$ St: $DES$ Wr: $WCR$ C: $+CCP$ B: $BTW$ $CRT$Pr: $MPR$ As: $MAS$ Lt: $MLT$ At: $MAT$ $CRT$Bi: $MBI$ Pn: $MPI$ Wd: $MWE$ Rf: $MRE$ $CRT$Gxp: [$GXA$] G: [$GXP$/Rnd]
 
 #action {H: %d\/%d S: %d\/%d W: %d\/%d\/%d L: %d\% P: \[%d\/%p\%\] A: %d E: %p} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
     #var my[hp][current] %1;
     #var my[hp][max] %2;
     #var my[sp][current] %3;
@@ -19,7 +19,7 @@
 };
 
 #action {Li: %w S: %w Pa: %d\% M: %p Cl: %d St: %p Wr: %d C: %p B: %d} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
     #var my[spice][status] %2;
     #var my[pain][stored] %3;
     #var my[maula][pistol] %4;
@@ -31,7 +31,7 @@
 };
 
 #action {Pr: %p As: %p Lt: %p At: %p} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
     #var my[prana][mode] %1;
     #var my[assault][mode] %2;
     #var my[litany][mode] %3;
@@ -39,7 +39,7 @@
 };
 
 #action {Bi: %p Pn: %p Wd: %p Rf: %p} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
     #var my[bindu][mode] %1;
     #var my[pain][mode] %2;
     #var my[weirding][mode] %3;
@@ -47,7 +47,7 @@
 };
 
 #action {Gxp: \[%p\] G: \[%d/Rnd\]} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
     #format {my[fremen][gxp][spend]} {%p} {%1};
 };
 
