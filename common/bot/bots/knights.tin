@@ -26,15 +26,16 @@
 #action {%*|  Defeat a grand commander class knight in arena : %d/5} {#math knight3_2 {%2 / 5}};
 
 #action {-i-The Challenger Board.} {
-    #NOP We treat the board like a mob;
+    #NOP We treat the board like an aggro mob so we direct all logic to here instead of the generic;
     #var bot[foundmob] 1;
+    #var bot[aggro-mob] 1;
     examine board;
 } {1};
 
 #action {There is no reason to 'challenge' here.} {examine board} {1};
 #action {There {is|are} %w {challenger|challengers} awaiting a noble challenger.} {
     #var knights_left @word_to_number{%2};
-    challenge;
+    #if {$knights_left > 0} {challenge};
 } {1};
 #action {There are no challengers remaining here.} {
     #var knights_left 0;
@@ -51,12 +52,13 @@
 } {1};
 
 #action {%* shifts %* combat style to the %*.} {
+    #var incombat 1;
     #var bot[foundmob] 1;
     #var mob[target] knight;
     #math knights_left {$knights_left - 1};
     .pre_fight_check;
     #if $mob_kill_action {
-        .mob_kill_action;
+        mka knight;
     } {
         kill knight;
     };
@@ -64,13 +66,8 @@
 
 #action {Congratulations!  You have completed the mission} {mission ask;};
 #action {You have been offered the mission} {mission accept;};
-
-#action {You have a challenger right in front of you - focus!} {mapUndo} {1};
-#action {You cannot leave while your challenge partner is present.} {mapUndo} {1};
-
-#list botmobs clear;
-#list botmobs add {{{long} {An%*Knight%*} {target} {knight}}};
-#list botmobs add {{{long} {A%*Knight%*} {target} {knight}}};
+    
+#action {You cannot leave while your challenge partner is present.} {#map undo} {1};
 
 #class {bot} {close}
 #read common/bot/generic.tin;

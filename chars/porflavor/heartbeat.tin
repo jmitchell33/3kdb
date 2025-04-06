@@ -1,10 +1,23 @@
 #class {heartbeat} {kill}
 #class {heartbeat} {open}
 
+#var corpse_delay 1;
+#var corpse_use 200;
+
 #alias {_player_heartbeat} {
-	#if {!$idle_flag} {
-		#NOP;
-	};
+    #if !$idle_flag {
+        #if {$my[gp1][current] < $corpse_use && $corpses[total] > 0 && $corpse_delay} {
+            #var corpse_delay 0;
+            corpse_select;
+            #act {eyes glow bright green upon the fallen} {
+                #if {$my[gp1][current] < $corpse_use} {reclaim} {fai};
+            } {1};
+            #delay 2 {#if {$my[gp1][current] < $corpse_use} {reclaim} {fai}};
+            #delay 2 {#var corpse_delay 1;#unact {eyes glow bright green upon the fallen};};
+        };
+    };
 };
+
+
 
 #class {heartbeat} {close}
