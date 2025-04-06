@@ -10,7 +10,7 @@
 };
 
 #act {HP: %d/%d SP: %d/%d MANA: %d/%d GXP%: [%d\%] <DGX>: %d} {
-    #line gag;
+    #if $gags[hpbar] {#line gag};
     #var my[g2n] %7;
     #var my[round_gxp] %8;
     #math total_gxp {$total_gxp + $my[round_gxp]};
@@ -18,7 +18,7 @@
 
     #math total_fight_gxp {$total_fight_gxp + $my[round_gxp]};
     #math average_fight_gxp {$total_fight_gxp / $mip[round]};
-};
+} {2};
 
 
 
