@@ -93,9 +93,17 @@
     };
 };
 
+
+#alias {.backupBot} {
+    #map get roomvnum bot[pause_room];
+    #var lastBot[file] $bot[file];
+    #var lastBot[curVnum] $bot[curVnum];
+    #var lastBot[pause_room] $bot[pause_room];
+};
+
 /* kill the bot */
 #alias {.stop} {
-    #var lastBot $bot;
+    .backupBot;  
     #unvar bot;
     #unalias {..};
     #class {bot} {kill};
@@ -104,8 +112,7 @@
 };
 
 #alias .pause {
-    #map get roomvnum bot[pause_room];
-    #var lastBot $bot;
+    .backupBot;
     #undelay bot_kick;
     #var bot[paused] 1;
     #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
@@ -189,13 +196,15 @@
         #var bot[foundmob] 0;
         #var bot[aggro-mob] 0;
         #if !$idle_flag {
-            #if $actions_stacked {
-                do_action;
-                #delay 2 {
-                    .bot;
+            #if {"$bot[alias]" == "knights"} {#NOP} {
+                #if $actions_stacked {
+                    do_action;
+                    #delay 2 {
+                        .bot;
+                    };
+                } {
+                    #delay .5 {.bot};
                 };
-            } {
-                #delay .5 {.bot};
             };
         };
     };

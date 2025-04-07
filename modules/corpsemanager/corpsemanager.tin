@@ -114,8 +114,6 @@
 	#if {$corpses[smuggle] < 0} {#var corpses[smuggle] 0;};
 	#if {$corpses[freezer]  < 0} {#var corpses[freezer] 0;};
 	#if {$corpses[cooler] < 0} {#var corpses[cooler] 0;};
-	#if {$corpses[servant] < 0} {#var corpses[servant] 0;};
-	#if {$corpses[golem] < 0} {#var corpses[golem] 0;};
 	#math corpses[total] {$corpses[coffin] + $corpses[inventory] + $corpses[smuggle] + $corpses[freezer] + $corpses[cooler] + $corpses[servant] + $corpses[golem]};
 	#delay 0.1 {
 		#var corpse_string <088>💀 <ceb>$corpses[total] <088>Corpses 💀\n;
@@ -149,7 +147,7 @@
 					#if $corpses[golem] {
 						golem drop corpse;
 					} {
-						#NOP -- I forget what the command for servant to drop is;
+						=drop corpse;
 					}
 				} {
 					unkeep corpse;drop corpse;
@@ -319,12 +317,16 @@
 } {2};
 
 #NOP -- Corpse Management PRIEST SERVANT;
-#act {%* swirls slowly and reveals that it is carrying:$} {
+#action {%* swirls slowly and reveals that it is carrying:$} {
 	#var corpses[servant] 0;
 	#act {^%s%d\)%* corpse%*.$} {#math {corpses[servant]} {$corpses[servant] + 1};};
 	#delay 4 {#unact {^%s%d\)%* corpse%*.$}};
 } {2};
-#act {^You take %* corpse %* from ElBefe.$} {#math {corpses[servant]} {$corpses[servant] - 1};} {2};
+#action {^You take %* corpse %* from ElBefe.$} {#math {corpses[servant]} {$corpses[servant] - 1};} {2};
+#action {^Aerial servant takes: %* corpse.$} {#math {corpses[servant]} {$corpses[servant] + 1};} {2};
+#action {^The aerial servant drops a %* corpse.$} {#math {corpses[servant]} {$corpses[servant] - 1};} {2};
+#action {^Your aerial servant has no 'corpse' to drop.$} {#var corpses[servant] 0} {2};
+#action {^The aerial servant drops everything.$} {#var corpses[servant] 0} {2};
 
 #act {^> %* corpse%*} {#math {corpses[smuggle]} {$corpses[smuggle] + 1}} {2};
 #act {^You smuggle away: %* corpse%*} {

@@ -383,10 +383,18 @@
 };
 
 #ALIAS {.mipProcessGlinePriest} {
-	#IF {%1 == 1} {
-		#NOP;
-	}; #ELSEIF {%1 == 2} {
-		#NOP;
+	#IF {%1 == 1 || %1 == 2} {
+		#REGEX {$mip[gline][1]} {PROT: <rOFF>}	{#VAR {my[effects][protection]} OFF};
+		#REGEX {$mip[gline][1]} {PROT: <sON>}	{#VAR {my[effects][protection]} ON};
+		#REGEX {$mip[gline][1]} {CL: [<c%d\%>]}	{
+			#VAR {my[priest][beseech]} 0
+		};
+		#REGEX {$mip[gline][1]} {CL: [<g*><c%d\%>]}	{
+			#VAR {my[priest][beseech]} 1
+		};
+		#REGEX {$mip[gline][2]} {STO: <c%d>/<b%d>} {
+			#var my[acolyte][mana_stored] &1;
+		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};

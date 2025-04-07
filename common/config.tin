@@ -85,13 +85,27 @@
     forcehp;
     notify on;
     init_screen;
-    #read common/bot/defaults.tin;
+    #send {aset look_monster_pref -M-_};
+	#send {aset look_player -P-_};
+	#send {aset room_short_pref -R-_};
+	#send {aset room_short_suff -R-_};
+	#send {aset room_exits_pref -X-_};
+	#send {aset room_exits_suff -X-_};
+	#send {aset room_long_pref -D-_};
+	#send {aset room_long_suff -D-_};
+	#send {aset look_weapon -w-};
+	#send {aset look_object -o-};
+	#send {aset look_armor -a-};
+	#send {aset look_armour -a-};
+	#send {aset look_other -i-};
+	#send {prompt >$nl$};
     #send {aset world_drop_pref -!!!-};
     #line oneshot #action {^You will no longer see the HP bar on the main screen.$} {forcehp};
     #line oneshot #action {^Notify off for all.$} {notify on};
     mka-on;
     mka-clear;
     mka+ kill;
+	#echo {Setup successful!};
 };
 
 #NOP -- Welcome banner with info and updates;
