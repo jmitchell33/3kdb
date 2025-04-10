@@ -5,16 +5,78 @@
 #NOP --- 3kReport to see the report            ---;
 
 #NOP -- dreport is the object we use to select/customize which items to include in the report;
-#list dReport clear;
-#list dReport add {{{key} {killer} {lookup} {tmpKiller} {header_text} {Killer} {width} {15}}};
-#list dReport add {{{key} {rounds} {lookup} {tmpRounds} {header_text} {Rounds} {width} {6}}};
-#list dReport add {{{key} {class} {lookup} {tmpClass} {header_text}   {Class} {width} {6}}};
-#list dReport add {{{key} {xp_to_class} {lookup} {tmpRatio} {header_text}   {% of XP} {width} {7}}};
-#list dReport add {{{key} {xp_earned} {lookup} {tmpRatio} {header_text}   {XP} {width} {6}}};
-#list dReport add {{{key} {coins_earned} {lookup} {tmpCoins} {header_text}   {Coins} {width} {6}}};
-#list dReport add {{{key} {damage_dealt} {lookup} {tmpDmg} {header_text}   {Dmg Dlt} {width} {7}}};
-#list dReport add {{{key} {damage_received} {lookup} {tmpDmgRecieved} {header_text}   {Dmg Rcd} {width} {7}}};
-#list dReport add {{{key} {corpses_used} {lookup} {tmpCorpses} {header_text}   {Corpses} {width} {6}}};
+#list dReportList clear;
+#list dReportList add {{{key} {killer} {lookup} {tmpKiller} {header_text} {Killer} {totals} {} {width} {15} {active} {1}}};
+#list dReportList add {{{key} {rounds} {lookup} {tmpRounds} {header_text} {Rounds} {totals} {tmpTotalRnds} {width} {6} {active} {1}}};
+#list dReportList add {{{key} {class} {lookup} {tmpClass} {header_text}   {Class} {totals} {tmpTotalClass} {width} {6} {active} {1}}};
+#list dReportList add {{{key} {xp} {lookup} {tmpXP} {header_text}   {XP} {totals} {tmpTotalXp} {width} {6} {active} {0}}};
+#list dReportList add {{{key} {xp_ratio} {lookup} {tmpRatio} {header_text}   {% of XP} {totals} {tmpTotalRatio} {width} {7} {active} {0}}};
+#list dReportList add {{{key} {coins} {lookup} {tmpCoins} {header_text}   {Coins} {totals} {tmpTotalCoins} {width} {6} {active} {1}}};
+#list dReportList add {{{key} {dmg_dealt} {lookup} {tmpDmg} {header_text}   {Dmg Dlt} {totals} {tmpTotalDmg} {width} {10} {active} {0}}};
+#list dReportList add {{{key} {dmg_received} {lookup} {tmpDmgReceived} {header_text}   {Dmg Rcd} {totals} {tmpTotalDmgRec} {width} {15} {active} {0}}};
+#list dReportList add {{{key} {corpses} {lookup} {tmpCorpses} {header_text}   {Corpses} {totals} {tmpTotalCorpses} {width} {6} {active} {0}}};
+#list dReportList indexate key;
+
+#NOP -- This section manages the aliases and toggling items in 3kReport;
+#alias format3kReportItem {
+    #format result {<acf>%+10s  %s<088>} {%1} {%2};
+    #echo { $result};
+};
+
+#alias 3kReport-config {
+    #echo {<ffb>   Current 3kReport Settings   <088>\n};
+    format3kReportItem {Active} {Key};
+    #loop 1 &dReportList[] item {
+        #if $dReportList[$item][active] {#var tmpActive <afb>ON<088>;} {#var tmpActive <caa>OFF<088>};
+        format3kReportItem {$tmpActive} {$dReportList[$item][key]};
+    };
+    
+    #echo {\n  <cdc>3kReport<088> to view the 3k Kill Report};
+    #echo {\n  <efa>3kReport+<088> <bcc>key<088> to add an item to the Report};
+    #echo {  <efa>3kReport-<088> <bcc>key<088> to remove an item from the Report};
+};
+
+#alias 3kReport- {
+    #list dReportList indexate key;
+    #if {"%0" != ""} {
+        #list dReportList {find} {%0} {tempListIndex};
+
+        #if {$tempListIndex > 0} {
+            #var tempList $dReportList[+$tempListIndex];
+
+            #if $tempList[key][active] {
+                #var dReportList[+$tempListIndex][active] 0;
+                #echo {<caa>----  <fff> %0 <faa>removed <eee>from the <fff>3kReport <caa>  ----<088>};
+            } {
+                #var dReportList[+$tempListIndex][active] 0;
+                #echo {<caa>----  <fff> %0 <eee>is not currently on the <fff>3kReport  <caa>  ----<088>}   
+            };
+        } {
+            #echo { <caa>----  <fff> %0 <eee>is not an option.  Please check spelling of the "key" field.  <caa>  ----<088>};
+        };
+    };
+};
+
+#alias 3kReport+ {
+    #list dReportList indexate key;
+    #if {"%0" != ""} {
+        #list dReportList {find} {%0} {tempListIndex};
+
+        #if {$tempListIndex > 0} {
+            #var tempList $dReportList[+$tempListIndex];
+
+            #if $tempList[key][active] {
+                #echo {<caa>----  <fff> %0 is already in the <fff>3kReport <caa>  ----<088>};
+            } {
+                #var dReportList[+$tempListIndex][active] 1;
+                #echo {<caa>----  <fff> %0 has been <bfd>added<088> to the <fff>3kReport  <caa>  ----<088>}   
+            };
+        } {
+            #echo { <caa>----  <fff> %0 is not an option.  Please check spelling of the "key" field.  <caa>  ----<088>};
+        };
+    };
+};
+
 
 
 #alias _update_cstats {
@@ -168,41 +230,54 @@
     #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>           <eaa>3k KILL REPORT           <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
 };
 
+#alias _reportHeader1 {
+    #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>    <cdc>3kReport-config<088> to customize    <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
+};
+
 #alias 3kReport-clear {
-    #list deathSummary clear;
-    #list tmpList clear;
+    #list deathSummary_mob clear;
+    #list deathSummary_killer clear;
+    #list deathSummary_rounds clear;
+    #list deathSummary_xp_earned clear;
+    #list deathSummary_gxp_earned clear;
+    #list deathSummary_damage_dealt clear;
+    #list deathSummary_coins_earned clear;
+    #list deathSummary_corpses_used clear;
+    #list deathSummary_damage_received clear;
+    #list deathSummary_mob_dodges clear;
+    #list deathSummary_class clear;
+    #list deathSummary_xp_to_class clear;
     #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>3k KILL REPORT CLEARED          <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
 };
 
 #alias 3kReport {
-    #if {"${deathSummary}" == ""} {
+    #if {&deathSummary_mob[] == 0} {
         #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>NO KILLS YET YOU PACIFIST     <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
+        _reportHeader1;
     } {
-        #list tmpList copy deathSummary;
-        #list tmpList size tempReportSize;
+        #list deathSummary_mob size tempReportSize;
         #var tempReportStart 1;
         #format tmpTotalKills {%g} {$tempReportSize};
 
-        #NOP -- Filter the list either by # or mob name;
-        #if {"%1" != ""} {
-            #NOP -- If a # is provided, show the last # of kills - otherwise show the entire list;
-            #NOP -- If a word is provided, filter based on that monster;
-            #NOP -- Since tintin matches numbers as the word pattern, we'll have to rely on no digits being provided;
-            #regex {%1} {%+1..d} {
-                #math tempReportStart {$tempReportSize - %1};
-                #if {%1 > $tempReportSize} {
-                    #format tmpTotalKills {%g} {$tempReportSize}
-                } {
-                    #format tmpTotalKills {%g} {%1}
-                };
-            } {
-                #format tmpWord {%p} {%1};
-                #list tmpList indexate mob;
-                #list tmpList filter {%i%*{$tmpWord}%*};
-                #list tmpList size tempReportSize;
-                #format tmpTotalKills {%g} {$tempReportSize};
-            };
-        };
+        #NOP -- Filter the list either by # or mob name;            ;
+        #NOP #if {"%1" != ""} {         ;
+        #NOP     #NOP -- If a # is provided, show the last # of kills - otherwise show the entire list;         ;
+        #NOP     #NOP -- If a word is provided, filter based on that monster;           ;
+        #NOP     #NOP -- Since tintin matches numbers as the word pattern, we'll have to rely on no digits being provided;          ;
+        #NOP     #regex {%1} {%+1..d} {         ;
+        #NOP         #math tempReportStart {$tempReportSize - %1};          ;
+        #NOP         #if {%1 > $tempReportSize} {           ;
+        #NOP             #format tmpTotalKills {%g} {$tempReportSize}           ;
+        #NOP         } {            ;
+        #NOP             #format tmpTotalKills {%g} {%1}            ;
+        #NOP         };         ;
+        #NOP     } {            ;
+        #NOP         #format tmpWord {%p} {%1};         ;
+        #NOP         #list tmpList filter {%i%*{$tmpWord}%*};           ;
+        #NOP         #list tmpList size tempReportSize;         ;
+        #NOP         #format tmpTotalKills {%g} {$tempReportSize};          ;
+        #NOP     };         ;
+        #NOP };         ;
         
         _reportHeader;
         
@@ -211,6 +286,7 @@
         #var tmpTotalDmg 0;
         #var tmpTotalCoins 0;
         #var tmpTotalCorpses 0;
+        #var tmpTotalClass 0;
 
         #var tmpPerMobXp 0;
         #var tmpPerMobRnds 0;
@@ -219,29 +295,69 @@
         #var tmpPerMobCorpses 0;
 
         #if {$tempReportSize > 0} {
-            #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {Killer} {Mob} {} {Rounds} {} {XP} {} {Coins} {} {Dmg} {} {Corpses};
+            #var reportFormat1 {%-15s};
+            #var reportFormat2 {\{Mob\}};
+            #local tmpItem 1;
+            #loop 1 &dReportList[] tmpItem {
+                #if $dReportList[$tmpItem][active] {
+                    #line substitute variables #cat reportFormat1 {  %-$dReportList[$tmpItem][width]s};
+                    #cat reportFormat2 {  \{$dReportList[$tmpItem][header_text]\}};
+                };
+            };
+            #replace reportFormat2 {\\} {};
+            #replace reportFormat2 {\/} {};
+            #line substitute variables #format reportLine {${reportFormat1}} $reportFormat2;
             #echo { <dff>$reportLine<088>};
             #loop $tempReportStart $tempReportSize item {
-                #math tmpTotalXp {$tmpList[$item][xp_earned] + $tmpTotalXp};
-                #math tmpTotalRnds {$tmpList[$item][rounds] + $tmpTotalRnds};
-                #math tmpTotalDmg {$tmpList[$item][damage_dealt] + $tmpTotalDmg};
-                #math tmpTotalCoins {$tmpList[$item][coins_earned] + $tmpTotalCoins};
-                #math tmpTotalCorpses {$tmpList[$item][corpses_used] + $tmpTotalCorpses};
-                #format tmpMob {%.15s} {$tmpList[$item][mob]};
-                #format tmpKiller {%.15s} {$tmpList[$item][killer]};
-                #format tmpClass {%M} {$tmpList[$item][class]};
-                #math tmpRatio {$tmpList[$item][xp_to_class]};
-                #format tmpXP {%M} {$tmpList[$item][xp_earned]};
-                #format tmpCoins {%g} {$tmpList[$item][coins_earned]};
-                #format tmpDmg {%g} {$tmpList[$item][damage_dealt]};
-                #format tmpDmgReceived {%g} {$tmpList[$item][damage_received]};
-                #format tmpRounds {%g} {$tmpList[$item][rounds]};
-                #format tmpCorpses {%g} {$tmpList[$item][corpses_used]};
+                #math tmpTotalXp {$deathSummary_xp_earned[$item] + $tmpTotalXp};
+                #math tmpTotalRnds {$deathSummary_rounds[$item] + $tmpTotalRnds};
+                #math tmpTotalDmg {$deathSummary_damage_dealt[$item] + $tmpTotalDmg};
+                #math tmpTotalCoins {$deathSummary_coins_earned[$item] + $tmpTotalCoins};
+                #math tmpTotalCorpses {$deathSummary_corpses_used[$item] + $tmpTotalCorpses};
+                #math tmpTotalClass {$deathSummary_class[$item] + $tmpTotalClass};
+                #math tmpTotalDmgRec {$deathSummary_damage_received[$item] + $tmpTotalDmgRec};
+                
+                #math tmpTotalRatio {$tmpTotalXp / $tmpTotalClass * 100.00};
+                #format tmpTotalRatio {%d} $tmpTotalRatio;
+
+
+                #format tmpMob {%.15s} {$deathSummary_mob[$item]};
+                #format tmpKiller {%.15s} {$deathSummary_killer[$item]};
+                #format tmpClass {%M} {$deathSummary_class[$item]};
+                #math tmpRatio {$deathSummary_xp_to_class[$item] * 100};
+                #format tmpRatio {%d} $tmpRatio;
+                #var tmpRatio ${tmpRatio}%;
+                #format tmpXP {%M} {$deathSummary_xp_earned[$item]};
+                #format tmpCoins {%g} {$deathSummary_coins_earned[$item]};
+                #format tmpDmg {%g} {$deathSummary_damage_dealt[$item]};
+                #format tmpDmgReceived {%g} {$deathSummary_damage_received[$item]};
+                #format tmpRounds {%g} {$deathSummary_rounds[$item]};
+                #format tmpCorpses {%g} {$deathSummary_corpses_used[$item]};
+
+                #var tmpLookup[tmpMob] $tmpMob;
+                #var tmpLookup[tmpKiller] $tmpKiller;
+                #var tmpLookup[tmpClass] $tmpClass;
+                #var tmpLookup[tmpRatio] $tmpRatio;
+                #var tmpLookup[tmpXP] $tmpXP;
+                #var tmpLookup[tmpCoins] $tmpCoins;
+                #var tmpLookup[tmpDmg] $tmpDmg;
+                #var tmpLookup[tmpDmgReceived] $tmpDmgReceived;
+                #var tmpLookup[tmpRounds] $tmpRounds;
+                #var tmpLookup[tmpCorpses] $tmpCorpses;
                 
                 #if {$tmpCoins == 0} {#var tmpCoins -};
-                #if {$tmpList[$item][damage_dealt] == 0} {#var tmpDmg -};
-                #if {$tmpList[$item][corpses_used] == 0} {#var tmpCorpses -};
-                #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {$tmpKiller} {$tmpMob} {} {$tmpRounds} {} {$tmpXP} {} {$tmpCoins} {} {$tmpDmg} {} {$tmpCorpses};
+                #if {$deathSummary_damage_dealt[$item] == 0} {#var tmpDmg -};
+                #if {$deathSummary_corpses_used[$item] == 0} {#var tmpCorpses -};
+                
+                #var reportFormat3 {\{$tmpMob\}};
+                #loop 1 &dReportList[] tmpItem {
+                    #if $dReportList[$tmpItem][active] {
+                        #cat reportFormat3 {  \{$tmpLookup[$dReportList[$tmpItem][lookup]]\}};
+                    };
+                };
+                #replace reportFormat3 {\\} {};
+                #replace reportFormat3 {\/} {};
+                #line substitute variables #format reportLine {${reportFormat1}} $reportFormat3;
                 #echo { <eed>$reportLine<088>};
             };
             #math tmpPerMobCoins {$tmpTotalCoins / $tmpTotalKills};
@@ -260,19 +376,37 @@
             #format tmpTotalXp {%M} $tmpTotalXp;
             #replace tmpTotalXp {G} {B};
             #format tmpTotalRnds {%g} $tmpTotalRnds;
-            #format tmpTotalDmg {%g} $tmpTotalDmg;
+            #format tmpTotalDmg {%M} $tmpTotalDmg;
             #replace tmpTotalDmg {G} {B};
             #format tmpTotalCoins {%g} $tmpTotalCoins;
 
+            #format tmpTotalClass {%M} $tmpTotalClass;
+            #replace tmpTotalClass {G} {B};
+
+            #format tmpTotalDmgRec {%M} $tmpTotalDmgRec;
+            #replace tmpTotalDmgRec {G} {B};
+
+            #var tmpTotalRatio ${tmpTotalRatio}%;
+            
+
             _reportLine;
-            #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s} {TOTAL KILLS} {$tmpTotalKills} {} {$tmpTotalRnds} {} {$tmpTotalXp} {} {$tmpTotalCoins} {} {$tmpTotalDmg} {} {$tmpTotalCorpses};
-            #echo { <eab>$reportLine<088>};
-            #format reportLine {%-15s %-15s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-6s %+3s %-7s}  {PER MOB} {} {} {$tmpPerMobRnds} {} {$tmpPerMobXp} {} {$tmpPerMobCoins} {} {$tmpPerMobDmg} {} {$tmpPerMobCorpses};
+            
+            #var reportFormat3 {\{TOTALS\}};
+                #loop 1 &dReportList[] tmpItem {
+                    #if $dReportList[$tmpItem][active] {
+                        #cat reportFormat3 {  \${$dReportList[$tmpItem][totals]\}};
+                    };
+                };
+            #replace reportFormat3 {\\} {};
+            #replace reportFormat3 {\/} {};
+            #line substitute variables #format reportLine {${reportFormat1}} $reportFormat3;
             #echo { <eed>$reportLine<088>};
             _reportLine;
             _reportHeader;
+            _reportHeader1;
         } {
             #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>NO KILLS YET YOU PACIFIST     <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
+            _reportHeader1;
         };
     };
 };
