@@ -138,4 +138,48 @@
     cast summon config deactivate
 };
 
+#NOP -- setup perform with a single damage type spell;
+#alias {castper} {
+    #switch {"%0"} {
+        #NOP -- damage types;
+        #case {"blunt"} {cast perform as cast implosion;cast activate c};
+        #case {"radiation"} {cast perform as cast sunspear;cast activate c};
+        #case {"mind"} {cast perform as cast mind warp;cast activate c};
+        #case {"energy"} {cast perform as cast disintegrate;cast activate c};
+        #case {"poison"} {cast perform as cast venomous spray;cast activate c};
+        #case {"acid"} {cast perform as cast acid arrow;cast activate c};
+        #case {"noeb"} {cast perform as cast prismatic spray;cast activate c};
+        #case {"fire"} {cast perform as cast burning hands;cast activate c};
+        #case {"fire2"} {cast perform as cast incinerate;cast activate c};
+        #case {"ice"} {cast perform as cast frostbite;cast activate c};
+        #NOP -- spell names;
+        #case {"implosion"} {cast perform as cast implosion;cast activate c};
+        #case {"sunspear"} {cast perform as cast sunspear;cast activate c};
+        #case {"mind warp"} {cast perform as cast mind warp;cast activate c};
+        #case {"disintegrate"} {cast perform as cast disintegrate;cast activate c};
+        #case {"venomous spray"} {cast perform as cast venomous spray;cast activate c};
+        #case {"acid arrow"} {cast perform as cast acid arrow;cast activate c};
+        #case {"prismatic spray"} {cast perform as cast prismatic spray;cast activate c};
+        #case {"burning hands"} {cast perform as cast burning hands;cast activate c};
+        #case {"incinerate"} {cast perform as cast incinerate;cast activate c};
+        #case {"frostbite"} {cast perform as cast frostbite;cast activate c};
+        #NOP -- see available options;
+        #case {""} {
+            #echo {<cbf>Damage Type          Spell Name<088>};
+            #echo {<fff>-------------------------------<088>};
+            #echo {<bdc>blunt                implosion<088>};
+            #echo {<bdc>radiation            sunspear<088>};
+            #echo {<bdc>mind                 mind warp<088>};
+            #echo {<bdc>energy               disintegrate<088>};
+            #echo {<bdc>poison               venomous spray<088>};
+            #echo {<bdc>acid                 acid arrow<088>};
+            #echo {<bdc>noeb                 prismatic spray<088>};
+            #echo {<bdc>fire                 burning hands<088>};
+            #echo {<bdc>fire2                incinerate<088>};
+            #echo {<bdc>ice                  frostbite<088>};
+        };
+    };
+};
+
+
 #class {guild_aliases} {close}

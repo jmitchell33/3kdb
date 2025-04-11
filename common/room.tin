@@ -5,6 +5,7 @@
 #NOP -- Add anything to the familiar mix;
 #action {^-M-_A tank named %*.} {#list room[familiars] add {A tank named %1}} {1};
 #action {^-M-_%* Jugger Support Mech%*.} {#list room[familiars] add {%1 Jugger Support Mech}} {1};
+#action {^-M-_$my[golem][name] \(%w Golem\) %*.} {#list room[familiars] add {$my[golem][name] (%1 Golem) %2}} {1};
 
 #alias .getMapRoomData {
     #map {get} {ROOMVNUM} {roomvnum};
@@ -227,6 +228,7 @@
     #regex {$mob[long]} {^%w the Grimare$} {#var mobFamiliar 1};
     #regex {$mob[long]} {^%w the Valithyn$} {#var mobFamiliar 1};
     #regex {$mob[long]} {^$my[familiar].$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^$my[golem][name] \(%w Golem\) %*.$} {#var mobFamiliar 1};
 
     #if $mobFamiliar {
         #list room[familiars] add {{{name} {$mob[long]}}};

@@ -1,68 +1,199 @@
-#class {bot} {kill}
-#class {bot} {open}
+#class {bot} {kill};
+#class {bot} {open};
 
-#var {area} {Abyss};
-#var check_room 0;
-#var abyss_depth 22;
+#NOP -- this stepper works by grabbing room exits and picking 1 random exit at a time and stepping, ignoring up and down exits;
+#NOP -- until a step limit based on your current abyss level has been reached then it looks for the down exit and goes 1 floor down;
+#NOP -- for now it can take awhile to find the down exit as the stepper moves in random directions, but you find more mobs this way aswell;
+#NOP -- since a large path can make tintin crash there is a hard limit of 3000 steps then it resets your steps to your current levels step limit and continues stepping;
+#NOP -- you can start anywhere within abyss, no need to start on level 1 if you dont want too;
+#NOP -- if the stepper isnt moving or not attacking, odds are its your follower/familiar/golem and youl need to update that before using this stepper;
+#NOP -- room[familiars] can be updated in common/room.tin;
+#NOP -- if you need to debug abyss, #var debug[abyss] 1;
 
+#var {area} {The Abyss};
+#unvar abyss;
+#var check_room 1;
+#var abyss[findDown] 0;
+#var abyss[step_hard_limit] 0;
+
+#NOP since abyss isnt mapped we will set map to auction house to prevent issues;
 mapgo ahouse;
-#var {bot[path]} {};
 
-#var bot_message_1 '---- ABYSS STEPPER ----';
+#var bot_message_1 '---- BADGERS ABYSS STEPPER ----';
 #var bot_message_2 '---- ALL TARGETS ----';
 #show $bot_message_1;#show $bot_message_2;
 
-#act {You cannot go} {
-	.botStep
+#var {bot[path]} {};
+
+#alias .check_room {
+    #unvar abyss[tmpexits];
+    #unvar abyss[tmproomName];
+    #var abyss[foundDown] 0;
+    #var abyss[count] 0;
+    #var abyss[rand] 0;
+    #var abyss[current] 0;
+    #var abyss[tmpexits] $room[exits];
+    #var abyss[tmproomName] $room[name];
+    #replace abyss[tmpexits] {~} {;};
+    #if $debug[abyss] {#echo {abyss debug 1: ROOM EXITS: $abyss[tmpexits]}};
+    #replace abyss[tmproomName] {The } {};
+    #replace abyss[tmproomName] {st Plane of Abyss (%*)} {};
+    #replace abyss[tmproomName] {nd Plane of Abyss (%*)} {};
+    #replace abyss[tmproomName] {rd Plane of Abyss (%*)} {};
+    #replace abyss[tmproomName] {th Plane of Abyss (%*)} {};
+    #if $debug[abyss] {#echo {abyss debug 1: GETTING ABYSS LEVEL FROM ROOMNAME: $abyss[tmproomName]}};
+    #math {abyss[abysslevel]} {$abyss[tmproomName]};
+    #if $debug[abyss] {#echo {abyss debug 1: ABYSS LEVEL: $abyss[abysslevel]}};
+
+    #if {$abyss[abysslevel] < 5} {
+        #var abyss[step_limit] 25;
+    } {
+        #if {$abyss[abysslevel] < 10} {
+            #var abyss[step_limit] 50;
+        } {
+            #if {$abyss[abysslevel] < 20} {
+                #var abyss[step_limit] 100;
+            } {
+                #if {$abyss[abysslevel] < 30} {
+                    #var abyss[step_limit] 250;
+                } {
+                    #if {$abyss[abysslevel] < 40} {
+                        #var abyss[step_limit] 400;
+                    } {
+                        #var abyss[step_limit] 800;
+                    };
+                };
+            };
+        };
+    };
+
+    #if $debug[abyss] {#echo {abyss debug 2: STEP LIMIT: $abyss[step_limit]}};
+
+    #if {$bot[step] > $abyss[step_limit] || "$abyss[step_hard_limit]" == "1"} {
+        #var abyss[findDown] 1;
+        #if $debug[abyss] {#echo {abyss debug 2: STEP LIMIT REACHED - FINDDOWN SET TO 1: $abyss[findDown] STEP HARD LIMIT: $abyss[step_hard_limit]}};
+    };
+
+    #if {$bot[step] > 3000} {
+        #if $debug[abyss] {#echo {abyss debug 3: HARD LIMIT STEP COUNT REACHED - RESETTING STEPS - FINDDOWN STILL SET TO 1: $abyss[findDown]}};
+        #var abyss[step_hard_limit] 1;
+        #if $debug[abyss] {#echo {abyss debug 3: STEP HARD LIMIT SET TO 1: $abyss[step_hard_limit]}};
+        #list bot[steps] clear;
+        #var bot[path] {};
+        #var bot[step] 1;
+    };
+
+    #if {"$abyss[findDown]" == "1"} {
+        #regex {$abyss[tmpexits]} {d} {
+            #var abyss[foundDown] 1;
+            #var abyss[step_hard_limit] 0;
+            #var bot[walk] 1;
+            #var abyss[dir] {d};
+            #if $debug[abyss] {#echo {abyss debug 4: DOWN EXIT FOUND! - NEXT DIRECTION SHOULD BE SET TO d: $abyss[dir]}};
+            #var bot[path] {$bot[path]$abyss[dir];};
+            #list bot[steps] create {$bot[path]};
+            #var abyss[findDown] 0;
+            #if $debug[abyss] {#echo {abyss debug 4: DOWN EXIT FOUND! - FOUNDDOWN SET TO 1: $abyss[foundDown] FINDDOWN SET TO 0: $abyss[findDown]}};
+            .botStep;
+            #list bot[steps] clear;
+            #var bot[path] {};
+            #var bot[step] 1;
+        };
+    };
+
+    #if {"$abyss[foundDown]" == "0"} {
+        #foreach $abyss[tmpexits] abyss[dir] {
+            #if {"$abyss[dir]" != "u" && "$abyss[dir]" != "d"} {
+                #math abyss[count] {$abyss[count] + 1};
+            };
+        };
+    };
+
+    #if {"$abyss[foundDown]" == "0" && $abyss[count] > 0} {
+        #math abyss[rand] {1d$abyss[count]};
+        #var abyss[current] 0;
+        #foreach $abyss[tmpexits] abyss[dir] {
+            #if {"$abyss[dir]" != "u" && "$abyss[dir]" != "d"} {
+                #math abyss[current] {$abyss[current] + 1};
+                #if {"$abyss[current]" == "$abyss[rand]"} {
+                    #if $debug[abyss] {#echo {abyss debug 5: NEXT DIRECTION: $abyss[dir] NUMBER OF EXITS: $abyss[count] CURRENT: $abyss[current] RANDOM: $abyss[rand]}};
+                    #var bot[walk] 1;
+                    #var bot[path] {$bot[path]$abyss[dir];};
+                    #list bot[steps] create {$bot[path]};
+                    .botStep;
+                };
+            };
+        };
+    } {
+        #if $debug[abyss] {#echo {abyss debug 6: NO VALID EXITS AVAILABLE!}};
+    };
 };
-
-#alias depth {
-	#var depth %0;
-	#path unzip {${depth}d};
-	#path delete;
-	#path save forward {depth_path}
-}
-
-#alias square {
-	#local temp {};
-	#local temp2 {};
-	#local width {};
-	#local radius {};
-
-	#math {radius} {%0 / 3};
-	#math {width} {$radius * 2};
-
-	#local temp {${radius}w${radius}s};
-
-	#$width #cat temp2 ${width}e1n${width}w1n;
-
-	#path unzip {${temp};${temp2}};
-	#path delete;
-	#path save forward {abyss_path}
-}
-
-#alias abyss {
-	square %0;
-	#path unzip {${depth_path};${abyss_path}}
-}
-
-abyss $abyss_depth;
-#path save forward bot[path];
 
 #list botmobs clear;
 #list botmobs add {{{long} {A small fire mite} {target} {mite}}};
-#list botmobs add {{{long} {%*} {target} {demon}}};
+#list botmobs add {{{long} {%p} {target} {demon}}};
 
-#action {There is no demon here.} {.botStep};
+#action {Demon arrives} {.pause;#delay 3 {.unpause}};
 
-#action {The entire area seems to shudder and rumble as if the Abyss is begining} {3kdb;.stop;ptell Abyss broken!};
+#action {You cannot go} {
+    #if $debug[abyss] {#echo {abyss debug 7: YOU HIT A WALL!}};
+    #var bot[walk] 1;
+    .check_room;
+} {2};
 
-#action {Your legs run away with you %1.} {
-	#regex {%1} {east} {.pause;west;mapUndo;#delay 1 {..}};
-	#regex {%1} {west} {.pause;east;mapUndo;#delay 1 {..}};
-	#regex {%1} {north} {.pause;south;mapUndo;#delay 1 {..}};
-	#regex {%1} {south} {.pause;north;mapUndo;#delay 1 {..}}
-};
+#action {The entire area seems to shudder and rumble as if the Abyss is begining} {.stop;ptell Abyss broken!} {2};
+
+#var abyss[legs_run_away] 0;
+#action {The blast of fire is so intense it forces you from the room!} {
+    .pause;
+    #var check_room 0;
+    #var abyss[legs_run_away] 1;
+    #if $debug[abyss] {#echo {abyss debug 8: ABOUT TO BE KICKED FROM ROOM DUE TO FIRE - CHECK ROOM SET TO 0: $check_room LEGS RUN AWAY SET TO 1: $abyss[legs_run_away]}};
+} {2};
+
+#action {Your wit is sharp, but not sharp enough, you panic!} {
+    .pause;
+    #var check_room 0;
+    #var abyss[legs_run_away] 1;
+    #if $debug[abyss] {#echo {abyss debug 9: ABOUT TO BE KICKED FROM ROOM DUE TO WIT NOT SHARP ENOUGH - CHECK ROOM SET TO 0: $check_room LEGS RUN AWAY SET TO 1: $abyss[legs_run_away]}};
+} {2};
+
+#action {^Your legs run away with you!$} {
+    #if {"$abyss[legs_run_away]" == "1"} {
+        #math bot[step] {$bot[step] - 1};
+        #var check_room 1;
+        #var abyss[legs_run_away] 0;
+        #if $debug[abyss] {#echo {abyss debug 10: YOUR LEGS RUN AWAY IN AN UNKNOWN DIRECTION - CHECK ROOM SET TO 1: $check_room LEGS RUN AWAY SET TO 0: $abyss[legs_run_away]}};
+        #delay 3 {
+            ..;
+        };
+    };
+} {2};
+
+#action {Your legs run away with you %w.} {
+    #if $debug[abyss] {#echo {abyss debug 11: YOUR LEGS RUN AWAY WITH YOU: %1}};
+    #if {"$abyss[legs_run_away]" == "1"} { 
+	    #regex {%1} {east} {west;#math bot[step] {$bot[step] - 1};#var check_room 1;#var abyss[legs_run_away] 0;#delay 3 {..}};
+	    #regex {%1} {west} {east;#math bot[step] {$bot[step] - 1};#var check_room 1;#var abyss[legs_run_away] 0;#delay 3 {..}};
+	    #regex {%1} {north} {south;#math bot[step] {$bot[step] - 1};#var check_room 1;#var abyss[legs_run_away] 0;#delay 3 {..}};
+	    #regex {%1} {south} {north;#math bot[step] {$bot[step] - 1};#var check_room 1;#var abyss[legs_run_away] 0;#delay 3 {..}};
+        #if $debug[abyss] {#echo {abyss debug 11: BACK IN ROOM WE GOT KICKED FROM - LEGS RUN AWAY SET TO 0: $abyss[legs_run_away] CHECK ROOM SET TO 1: $check_room}};
+    };
+} {2};
+
+#action {^------- BOT COMPLETE -----} {
+    .pause;
+    #if $debug[abyss] {#echo {abyss debug 12: BOT BROKE -- RESTARTING}};
+    #var bot[walk] 1;
+    #var abyss[findDown] 0;
+    #list bot[steps] clear;
+    #var bot[path] {};
+    #var bot[step] 1;
+    #delay 3 {
+        .unpause;
+        .check_room;
+    };
+} {1};
 
 #class {bot} {close};
 #read common/bot/generic.tin;

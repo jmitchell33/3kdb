@@ -92,4 +92,20 @@
     };
 };
 
+#NOP - beloch bot;
+#action {^Beloch storms out to do battle!$} {
+	#if {$auto_beloch} {
+		challenge_all;
+        kill beloch;
+        arena_kill_all
+	};
+};
+
+#NOP -- hobbit pipe;
+#action {%*A small, intricately carved hobbit pipe} {#var pipe 1;};
+#action {You think so hard that smoke pours out of your ears.} {#var pipe 0;};
+
+#ticker pipe {#if {$pipe && !$idle_flag} {smoke pipe}} 63;
+#ticker pipe2 {#if {$pipe && !$idle_flag} {smoke pipe}} 75;
+
 #class {player_actions} {close}
