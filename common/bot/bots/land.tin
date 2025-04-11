@@ -1,0 +1,93 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {The Land};
+#var check_room 0;
+
+#var bot_message_1 '---- LAND STEPPER ----';
+#var bot_message_2 '---- ALL TARGETS ----';
+#show $bot_message_1;#show $bot_message_2;
+
+#var {bot[path]} {w;nw;s;n;w;s;n;sw;ne;w;e;e;e;w;n;e;w;ne;sw;n;s;w;w;e;nw;se;n;n;n;s;n;e;e;e;n;w;w;n;e;e;e;e;e;e;n;w;w;w;w;w;w;n;e;e;e;e;e;e;n;w;w;w;w;e;e;e;e;n;w;n;e;w;{cross bridge};e;n;w;e;e;s;e;n;n;n;n;w;n;w;w;s;e;s;s;w;n;s;e;n;n;w;n;e;{jump boat};{back};e;s;e;s;s;{lie down};se;{dig dirt};ne;{dig dirt};nw;{dig dirt};{search trees};{turn doorknob};n;s;s;w;n;w;s;w;{cross bridge};e;s;s;w;w;w;w;s;w;w;s;s;s;s;nw;n;n;s;w;s;w;w;w;s;e;e;e;s;w;w;e;s;e;s;s;s;w;s;n;w;{squeeze through};n;n;e;w;w;s;s;n;n;{enter staircase};e;e;s;s;w;{move tapestry};d;e;e;n;n;{squeeze crack};n;e;w;s;sw;s;s;w;w;u;s;w;n;n;u;e;s;e;e;n;n;n;n;n;n;n;nw;s;w;w;w;w;w;w;s;e;e;e;w;w;s;n;w;n;w;w;n;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;e;e;e;e;n;e;e;e;e;n;w;w;n;e;e;n;w;w;n;e;e;n;w;w;e;n;e;s;s;s;s;s;s;w;w;w;w;{ford};w;w;w;n;e;e;n;w;w;n;n;s;s;s;s;e;e;e;n;{ford};e;s;e;n;n;w;w;w;n;w;n;w;e;e;e;e;e;w;n;w;w;w;w;n;e;e;e;w;n;w;e;{row boat};w;e;s;e;e;e;s;w;w;e;s;e;n;n;n;w;w;w;n;e;e;n;w;w;e;n;e;n;s;s;s;s;w;w;{row boat};s;s;s;s;e;s;s;{ford};{climb vine};u;u;d;d;d;s;{ford};s;s;e;e;e;e;s;s;se;s;e;se;w;s;s;s;s;e;se;e};
+
+#list botmobs clear;
+
+#list botmobs add {{{long} {A Sad Ghost} {target} {sad ghost}}};
+#list botmobs add {{{long} {Vortex of Dread} {target} {vortex of dread}}};
+#list botmobs add {{{long} {Vortex of Terror} {target} {vortex of terror}}};
+#list botmobs add {{{long} {Vortex of Horror} {target} {vortex of horror}}};
+#list botmobs add {{{long} {Vortex of Trepidation} {target} {vortex of trepidation}}};
+#list botmobs add {{{long} {Ghost of Elena} {target} {ghost of elena}}};
+#list botmobs add {{{long} {Ghost of Bannor} {target} {ghost of bannor}}};
+#list botmobs add {{{long} {Ghost of Saltheart Foamfollower} {target} {foamfollower}}}; 
+#list botmobs add {{{long} {A Tornado} {target} {tornado}}};
+#list botmobs add {{{long} {Northron Wind} {target} {northron wind}}};
+#list botmobs add {{{long} {Eastron Wind} {target} {eastron wind}}};
+#list botmobs add {{{long} {Southron Wind} {target} {southron wind}}};
+#list botmobs add {{{long} {Westron Wind} {target} {westron wind}}};
+#list botmobs add {{{long} {A Healthy Fox} {target} {healthy fox}}};
+#list botmobs add {{{long} {A Healthy Mole} {target} {healthy mole}}};
+#list botmobs add {{{long} {A Healthy Hedgehog} {target} {healthy hedgehog}}};
+#list botmobs add {{{long} {A Healthy Badger} {target} {healthy badger}}};
+#list botmobs add {{{long} {A Healthy Rabbit} {target} {healthy rabbit}}};
+#list botmobs add {{{long} {A Healthy Dog} {target} {healthy dog}}};
+#list botmobs add {{{long} {A Healthy Weasel} {target} {healthy weasel}}};
+#list botmobs add {{{long} {A Demondim Raven} {target} {demondim raven}}};
+#list botmobs add {{{long} {A Demondim Rat} {target} {demondim rat}}};
+#list botmobs add {{{long} {A Demondim Spider} {target} {demondim spider}}};
+#list botmobs add {{{long} {A Demondim Rabbit} {target} {demondim rabbit}}};
+#list botmobs add {{{long} {A Demondim Badger} {target} {demondim badger}}};
+#list botmobs add {{{long} {A Demondim Fox} {target} {demondim fox}}};
+#list botmobs add {{{long} {A Demondim Hedgehog} {target} {demondim hedgehog}}};
+#list botmobs add {{{long} {A Demondim Mole} {target} {demondim mole}}};
+#list botmobs add {{{long} {Terrill, The Unfettered One} {target} {terrill}}};
+#list botmobs add {{{long} {Binas, The Unfettered One} {target} {binas}}};
+#list botmobs add {{{long} {Saltheart Foamfollower, Seareach Giant} {target} {seareach giant}}};
+#list botmobs add {{{long} {A Stonedowner Artisan} {target} {stonedowner artisan}}};
+#list botmobs add {{{long} {A Stonedowner Shepherd} {target} {stonedowner shepherd}}};
+#list botmobs add {{{long} {A Stonedowner Farmer} {target} {stonedowner farmer}}};
+#list botmobs add {{{long} {A Stonedowner Herder} {target} {stonedowner herder}}};
+#list botmobs add {{{long} {Triock} {target} {triock}}};
+#list botmobs add {{{long} {Lena} {target} {lena}}};
+#list botmobs add {{{long} {Atiaran} {target} {atiaran}}}
+#list botmobs add {{{long} {Trell} {target} {trell}}};
+#list botmobs add {{{long} {An Old Woman} {target} {old woman}}};
+#list botmobs add {{{long} {A Young Warhaft} {target} {warhaft}}};
+#list botmobs add {{{long} {A Warhaft} {target} {warhaft}}};
+#list botmobs add {{{long} {A Small Kresh Pack} {target} {kresh pack}}};
+#list botmobs add {{{long} {A Medium Kresh Pack} {target} {kresh pack}}};
+#list botmobs add {{{long} {A Kresh Pack Leader} {target} {pack leader}}};
+#list botmobs add {{{long} {A Small Cavewight Warparty} {target} {cavewight warparty}}};
+#list botmobs add {{{long} {A Cavewight Warrior} {target} {cavewight warrior}}}
+#list botmobs add {{{long} {A Big Cavewight Warrior} {target} {cavewight warrior}}};
+#list botmobs add {{{long} {An Urvile Lorewarden Wedge} {target} {lorewarden wedge}}};
+#list botmobs add {{{long} {An Urvile Warrior} {target} {urvile warrior}}};
+#list botmobs add {{{long} {An Urvile Lorewarden} {target} {urvile lorewarden}}};
+#list botmobs add {{{long} {A Griffin} {target} {griffin}}};
+#list botmobs add {{{long} {A Kresh} {target} {kresh}}};
+#list botmobs add {{{long} {A Wolf} {target} {wolf}}};
+#list botmobs add {{{long} {A Small Wolf Pack} {target} {wolf pack}}};
+#list botmobs add {{{long} {A Small Horse Herd} {target} {horse herd}}};
+#list botmobs add {{{long} {A Woodhelvenin Loresword Master} {target} {loresword master}}};
+#list botmobs add {{{long} {A Woodhelvenin Lorestaff Master} {target} {lorestaff master}}};
+#list botmobs add {{{long} {A Woodhelvenin Sword Apprentice} {target} {sword apprentice}}};
+#list botmobs add {{{long} {A Woodhelvenin Loresword Master} {target} {loresword master}}};
+#list botmobs add {{{long} {A Woodhelvenin Staff Apprentice} {target} {staff apprentice}}};
+#list botmobs add {{{long} {A Woodhelvenin Hirebrand} {target} {hirebrand}}};
+#list botmobs add {{{long} {A Woodhelvenin Sword Guard} {target} {sword guard}}};
+#list botmobs add {{{long} {A Woodhelvenin Staff Guard} {target} {staff guard}}};
+#list botmobs add {{{long} {A Medium Eoman} {target} {medium eoman}}};
+#list botmobs add {{{long} {A Small Eoman} {target} {small eoman}}};
+#list botmobs add {{{long} {A Veteran Warhaft} {target} {warhaft}}};
+#list botmobs add {{{long} {First Mark Bardol} {target} {mark bardol}}};
+
+#action {As you begin to dig up the mound, you are suddenly aware that} {#delay 1 {..}};
+#action {As you begin to dig up the mound, you realize with a start that} {..};
+#action {You back up and take a running jump.} {..};
+#action {As you lie down you fall into a deep sleep.} {..};
+#action {As you study the copse more closely, you notice a small bole in} {..};
+#action {As you turn the bole, you are suddenly pulled through a sudden} {..};
+#action {You awake with a start and find yourself back in the meadow.} {..};
+
+#class {bot} {close};
+#read common/bot/generic.tin;
