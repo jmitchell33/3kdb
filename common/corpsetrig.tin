@@ -105,23 +105,21 @@
         #var deathReport[coins_earned] $fight_coins;
         #math deathReport[xp_to_class] {$fight_xp / $deathReport[class] * 1.00};
 
-        #list deathSummary add {{
-            {mob} {$deathReport[mob_killed]}
-            {killer} {$deathReport[mob_killer]}
-            {rounds} {$deathReport[mob_rounds_to_kill]}
-            {xp_earned} {$deathReport[xp_earned]}
-            {gxp_earned} {$deathReport[gxp_earned]};
-            {damage_dealt} {$deathReport[damage_dealt]}
-            {coins_earned} {$deathReport[coins_earned]}
-            {corpses_used} {$deathReport[corpses_used]}
-            {summons_killed} {$deathReport[summons_killed]}
-            {songs_lost} {$deathReport[songs_lost]}
-            {damage_dealt} {$deathReport[damage_dealt]}
-            {damage_received} {$deathReport[damage_received]}
-            {mob_dodges} {$deathReport[mob_dodges]}
-            {class} {$deathReport[class]}
-            {xp_to_class} {$deathReport[xp_to_class]}
-        }};
+        #list deathSummary_mob add {$deathReport[mob_killed]};
+        #list deathSummary_killer add {$deathReport[mob_killer]};
+        #list deathSummary_rounds add {$deathReport[mob_rounds_to_kill]};
+        #list deathSummary_xp_earned add {$deathReport[xp_earned]};
+        #list deathSummary_gxp_earned add {$deathReport[gxp_earned]};;
+        #list deathSummary_damage_dealt add {$deathReport[damage_dealt]};
+        #list deathSummary_coins_earned add {$deathReport[coins_earned]};
+        #list deathSummary_corpses_used add {$deathReport[corpses_used]};
+        #list deathSummary_damage_received add {$deathReport[damage_received]};
+        #list deathSummary_mob_dodges add {$deathReport[mob_dodges]};
+        #list deathSummary_class add {$deathReport[class]};
+        #list deathSummary_xp_to_class add {$deathReport[xp_to_class]};
+        
+        #if {"$guild" == "mage"} {#list deathSummary_summons_killed add {$deathReport[summons_killed]};};
+        #if {"$guild" == "bard"} {#list deathSummary_songs_lost add {$deathReport[songs_lost]};};
         _mob_status_clear;
     };
 };
