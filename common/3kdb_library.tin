@@ -4,7 +4,7 @@
 #NOP -- 3kdb alias library with separated listing and description features;
 
 #alias format_3kdblibrary {
-    #format {command_name} {%-25s} {%1};
+    #format {command_name} {  <cff>%-20s  <deb>%-60s<088>} {%1} {%2};
     #echo $command_name;
 };
 
@@ -12,27 +12,6 @@
     #format {command_name} {  <cff>%-20s  <deb>%-60s<088>} {%1} {%2};
     #echo $command_name;
 };
-
-#alias library3kdb1 {
-    #NOP Reset variables;
-    #var tempflag 0;
-    #var number &library3kdb[];
-
-    #NOP Display header;
-    #echo {<ccf>  -------<088>           <ffa>3kdb<088>          <ccf>-------<088>};
-    #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>($number)<088>  <ccf>-------    <088>};
-    #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
-    #echo {<ccf>  ---------------------------------------    <088>};
-
-    #NOP Sort and display aliases with descriptions;
-    #list library3kdb index name;
-    #list library3kdb sort;
-    format_3kdblibrary1 {Alias} {Description};
-    #foreach $library3kdb[%*] index {
-        format_3kdblibrary1 {$index[name]} {$index[desc]};
-    };
-};
-
 
 #alias library3kdb {
     #NOP Reset variables;
@@ -49,22 +28,57 @@
     #echo {                   <eaf>corpse combat profession<088>};
     #echo {                      <eaf>trackers bot<088>};
     #echo {<ccf>  ---------------------------------------    <088>};
-    #echo {<ceb> Use <bfb>library3kdb1<088> <ceb> for all aliases + description<088>};
-    #echo {<ffa>     Alias: <088>};
+    #echo {<ceb> Use <bca>library3kdb1<ceb> for all aliases without description<088>};
+    #echo {};
 
-    #NOP Sort and display aliases without descriptions;
+    #NOP Sort and display aliases with descriptions;
     #list library3kdb index name;
     #list library3kdb sort;
-
+    format_3kdblibrary {Alias} {Description};
     #foreach $library3kdb[%*] index {
         #regexp {"%1"} {"$index[type]"} {
             #var tempflag 1;
-            format_3kdblibrary {     $index[name]};
+            format_3kdblibrary {$index[name]} {$index[desc]};
         };
     };
     #if !$tempflag {
         #foreach $library3kdb[%*] index {
-            format_3kdblibrary {     $index[name]};
+            format_3kdblibrary {$index[name]} {$index[desc]};
+        };
+    };
+};
+
+#alias library3kdb1 {
+    #NOP Reset variables;
+    #var tempflag 0;
+    #var number &library3kdb[];
+
+    #NOP Display header;
+    #echo {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>};
+    #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>($number)<088>  <ccf>-------    <088>};
+    #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
+    #echo {<cfc>  Sort using filters: library3kdb <filter> <088>};
+    #echo {    <fff>Filters:  <eaf>eternal rolm crafting town<088>};
+    #echo {                <eaf>chaos fantasy science guild misc<088>};
+    #echo {                   <eaf>corpse combat profession<088>};
+    #echo {                      <eaf>trackers bot<088>};
+    #echo {<ccf>  ---------------------------------------    <088>};
+    #echo {<ceb> Use <bca>library3kdb<ceb> for all aliases + description<088>};
+    #echo {};
+
+    #NOP Sort and display aliases without descriptions;
+    #list library3kdb index name;
+    #list library3kdb sort;
+    format_3kdblibrary {Alias};
+    #foreach $library3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_3kdblibrary1 {     $index[name]};
+        };
+    };
+    #if !$tempflag {
+        #foreach $library3kdb[%*] index {
+            format_3kdblibrary1 {     $index[name]};
         };
     };
 };
@@ -121,7 +135,7 @@
 #list library3kdb add {{{name} {ewell} {type} {eternal} {desc} {redirect all damage incoming to a mob until it explodes} {usage} {ewell <mob> or 'ewell'} {helpfile} {(info energy well} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {rload} {type} {eternal} {desc} {reload unique items} {usage} {rload <cup/cooler/freezer/glimmering/feather/item>} {helpfile} {(info reload item} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {imm} {type} {eternal} {desc} {immunity to all damaging attacks upto a max of 90 rounds} {usage} {'imm'} {helpfile} {(info immortality} {location} {common/guilds/eternal/eternal.tin}}};
-#list library3kdb add {{{name} {prot} {type} {eternal} {desc} {hits above a certain % of your max hp will be greatly diminished upto a max of 120 rounds} {usage} {'prot'} {helpfile} {(info protection} {location} {common/guilds/eternal/eternal.tin}}};
+#list library3kdb add {{{name} {prot} {type} {eternal} {desc} {hits above a certain % of your max hp will be greatly diminished - max of 120 rounds} {usage} {'prot'} {helpfile} {(info protection} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {fry} {type} {eternal} {desc} {room or single target damage with damage type equal to your mobs weakest AC} {usage} {fry <mob> or 'fry' for all targets} {helpfile} {(info fry} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {refresh} {type} {eternal} {desc} {refresh a room that was previously defiled} {usage} {'refresh'} {helpfile} {(info refresh room} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {unload} {type} {eternal} {desc} {unload a room completely} {usage} {'unload'} {helpfile} {(info unload room} {location} {common/guilds/eternal/eternal.tin}}};
@@ -157,48 +171,51 @@
 #list library3kdb add {{{name} {makering-red} {type} {chaos} {desc} {make a red ring - requires axe/2 red seeds/terras hammer} {usage} {'makering-red'} {area} {Terra's Terrific Treehouse} {item} {A strangely dense wooden ring \{radiant\}} {affects} {hp regen} {location} {common/areas/misc_common.tin}}};
 #list library3kdb add {{{name} {makering-white} {type} {chaos} {desc} {make a white ring - requires axe/2 white seeds/terras hammer} {usage} {'makering-white'} {area} {Terra's Terrific Treehouse} {item} {A strangely dense wooden ring \{radiant\}} {affects} {DR} {location} {common/areas/misc_common.tin}}};
 #list library3kdb add {{{name} {makering-green} {type} {chaos} {desc} {make a green ring - requires axe/2 green seeds/terras hammer} {usage} {'makering-green'} {area} {Terra's Terrific Treehouse} {item} {A strangely dense wooden ring \{radiant\}} {affects} {AC} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {charmbracelet} {type} {chaos} {desc} {view charm bracelet options} {usage} {'charmbracelet'} {area} {Forest of Charms} {location} {common/areas/charms.tin}}};
 
 #NOP -------------------------- Fantasy Aliases ----------------------------------;
 
-#list library3kdb add {{{name} {gmaster} {type} {fantasy} {desc} {Talk to the Grand Master} {usage} {'gmaster'} {area} {The Village of Erah} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {gmaster} {type} {fantasy} {desc} {Talk to the Grand Master} {usage} {'gmaster'} {area} {The Village of Erah} {location} {common/areas/erah.tin}}};
 #list library3kdb add {{{name} {shankey} {type} {fantasy} {desc} {shansabyks key to unlock door} {usage} {'shankey'} {area} {Shansabyk's Castle} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu1} {type} {fantasy} {desc} {Banu Step 1: search torch/get key} {usage} {'banu1'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu2} {type} {fantasy} {desc} {Banu Step 2: search trees/east with key from step 1} {usage} {'banu2'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu3} {type} {fantasy} {desc} {Banu Step 3: search pillar/fly/grab orb - orb 1} {usage} {'banu3'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu4} {type} {fantasy} {desc} {Banu Step 4: search fountain/get journal} {usage} {'banu4'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu5} {type} {fantasy} {desc} {Banu Step 5: search pathway/enter} {usage} {'banu5'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu6} {type} {fantasy} {desc} {Banu Step 6: chat with him/give journal to knight} {usage} {'banu6'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu7} {type} {fantasy} {desc} {Banu Step 7: open powder/sprinkle powder/enter} {usage} {'banu7'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu8} {type} {fantasy} {desc} {Banu Step 8: search ivy/get dynamite} {usage} {'banu8'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu9} {type} {fantasy} {desc} {Banu Step 9: ignite dynamite/drop dynamite} {usage} {'banu9'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu99} {type} {fantasy} {desc} {Banu Step 9 part 2: kill witch/search runes/get necklace - first tag} {usage} {'banu99'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}}; 
-#list library3kdb add {{{name} {banu10} {type} {fantasy} {desc} {Banu Step 10: enter with necklace from step 9 part 2} {usage} {'banu10'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu11} {type} {fantasy} {desc} {Banu Step 11: search statues/fly/pry orb/get orb - orb 2} {usage} {'banu11'} {area} {Necropolis} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {banu12} {type} {fantasy} {desc} {Banu Step 12: search sigil/north after giving orb 2 to guyahi} {usage} {'banu12'} {area} {Necropolis} {item} {Crimson Cloak of the Dark Mystic} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {queen1} {type} {fantasy} {desc} {reads runes for code word} {usage} {'queen1'} {area} {Banshee's Lair} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {guy1} {type} {fantasy} {desc} {enters code word} {usage} {'guy1'} {area} {Banshee's Lair} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {banu1} {type} {fantasy} {desc} {Banu Step 1: search torch/get key} {usage} {'banu1'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu2} {type} {fantasy} {desc} {Banu Step 2: search trees/east with key from step 1} {usage} {'banu2'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu3} {type} {fantasy} {desc} {Banu Step 3: search pillar/fly/grab orb - orb 1} {usage} {'banu3'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu4} {type} {fantasy} {desc} {Banu Step 4: search fountain/get journal} {usage} {'banu4'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu5} {type} {fantasy} {desc} {Banu Step 5: search pathway/enter} {usage} {'banu5'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu6} {type} {fantasy} {desc} {Banu Step 6: chat with him/give journal to knight} {usage} {'banu6'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu7} {type} {fantasy} {desc} {Banu Step 7: open powder/sprinkle powder/enter} {usage} {'banu7'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu8} {type} {fantasy} {desc} {Banu Step 8: search ivy/get dynamite} {usage} {'banu8'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu9} {type} {fantasy} {desc} {Banu Step 9: ignite dynamite/drop dynamite} {usage} {'banu9'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu99} {type} {fantasy} {desc} {Banu Step 9 part 2: kill witch/search runes/get necklace - first tag} {usage} {'banu99'} {area} {Necropolis} {location} {common/areas/erah.tin}}}; 
+#list library3kdb add {{{name} {banu10} {type} {fantasy} {desc} {Banu Step 10: enter with necklace from step 9 part 2} {usage} {'banu10'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu11} {type} {fantasy} {desc} {Banu Step 11: search statues/fly/pry orb/get orb - orb 2} {usage} {'banu11'} {area} {Necropolis} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {banu12} {type} {fantasy} {desc} {Banu Step 12: search sigil/north after giving orb 2 to guyahi} {usage} {'banu12'} {area} {Necropolis} {item} {Crimson Cloak of the Dark Mystic} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {queen1} {type} {fantasy} {desc} {reads runes for code word} {usage} {'queen1'} {area} {Banshee's Lair} {location} {common/areas/erah.tin}}};
+#list library3kdb add {{{name} {guy1} {type} {fantasy} {desc} {enters code word} {usage} {'guy1'} {area} {Banshee's Lair} {location} {common/areas/erah.tin}}};
 #list library3kdb add {{{name} {get-floaties} {type} {fantasy} {desc} {Ganderei Cae: picks up floaties potion} {usage} {'get-floaties'} {area} {Rabbit Fields} {item} {Dark Black Potion with Yellow Floaties} {affects} {+STR} {location} {common/areas/misc_common.tin}}};
 #list library3kdb add {{{name} {startfishing} {type} {fantasy} {desc} {start fishing} {usage} {'startfishing'} {area} {Westersea} {helpfile} {help solarpeak.wilderness.fishing} {location} {common/areas/wsea_fishing.tin}}};
 #list library3kdb add {{{name} {stopfishing} {type} {fantasy} {desc} {stop fishing} {usage} {'stopfishing'} {area} {Westersea} {helpfile} {help solarpeak.wilderness.fishing} {location} {common/areas/wsea_fishing.tin}}};
+#list library3kdb add {{{name} {sopem1} {type} {fantasy} {desc} {enter sopem part 1} {usage} {'sopem1'} {area} {Serinth 2.0} {location} {common/areas/serinth.tin}}};
+#list library3kdb add {{{name} {sopen1} {type} {fantasy} {desc} {enter sopem part 2} {usage} {'sopem2'} {area} {Serinth 2.0} {location} {common/areas/serinth.tin}}};
 
 #NOP -------------------------- Science Aliases ----------------------------------;
 
-#list library3kdb add {{{name} {continue20} {type} {science} {desc} {enter lvl 20 continue code} {usage} {'continue20'} {area} {Section Z} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {continue40} {type} {science} {desc} {enter lvl 40 continue code} {usage} {'continue40'} {area} {Section Z} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {set20} {type} {science} {desc} {save yourself to level 20} {usage} {'set20'} {area} {Section Z} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {set40} {type} {science} {desc} {save yourself to level 40} {usage} {'set40'} {area} {Section Z} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool green-armour} {type} {science} {desc} {make balangool green armour - requires 2 green capsules or stones} {usage} {'gool green-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool green-helmet} {type} {science} {desc} {make balangool green helmet - requires 2 green capsules or stones} {usage} {'gool green-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool green-gloves} {type} {science} {desc} {make balangool green gloves - requires 2 green capsules or stones} {usage} {'gool green-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool green-boots} {type} {science} {desc} {make balangool green boots - requires 2 green capsules or stones} {usage} {'gool green-boots'} {area} {Section Z} {item} {Balangool Boots (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool orange-armour} {type} {science} {desc} {make balangool orange armour - requires 2 orange capsules or stones} {usage} {'gool orange-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool orange-helmet} {type} {science} {desc} {make balangool orange helmet - requires 2 orange capsules or stones} {usage} {'gool orange-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool orange-gloves} {type} {science} {desc} {make balangool orange gloves - requires 2 orange capsules or stones} {usage} {'gool orange-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool orange-boots} {type} {science} {desc} {make balangool orange boots - requires 2 orange capsules or stones} {usage} {'gool orange-boots'} {area} {Section Z} {item} {Balangool Boots (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool blue-armour} {type} {science} {desc} {make balangool blue armour - requires 2 blue capsules or stones} {usage} {'gool blue-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool blue-helmet} {type} {science} {desc} {make balangool blue helmet - requires 2 blue capsules or stones} {usage} {'gool blue-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool blue-gloves} {type} {science} {desc} {make balangool blue gloves - requires 2 blue capsules or stones} {usage} {'gool blue-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {gool blue-boots} {type} {science} {desc} {make balangool blue boots - requires 2 blue capsules or stones} {usage} {'gool blue-boots'} {area} {Section Z} {item} {Balangool Boots (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {continue20} {type} {science} {desc} {enter lvl 20 continue code} {usage} {'continue20'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {continue40} {type} {science} {desc} {enter lvl 40 continue code} {usage} {'continue40'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {set20} {type} {science} {desc} {save yourself to level 20} {usage} {'set20'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {set40} {type} {science} {desc} {save yourself to level 40} {usage} {'set40'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool green-armour} {type} {science} {desc} {make balangool green armour - requires 2 green capsules or stones} {usage} {'gool green-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool green-helmet} {type} {science} {desc} {make balangool green helmet - requires 2 green capsules or stones} {usage} {'gool green-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool green-gloves} {type} {science} {desc} {make balangool green gloves - requires 2 green capsules or stones} {usage} {'gool green-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool green-boots} {type} {science} {desc} {make balangool green boots - requires 2 green capsules or stones} {usage} {'gool green-boots'} {area} {Section Z} {item} {Balangool Boots (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool orange-armour} {type} {science} {desc} {make balangool orange armour - requires 2 orange capsules or stones} {usage} {'gool orange-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool orange-helmet} {type} {science} {desc} {make balangool orange helmet - requires 2 orange capsules or stones} {usage} {'gool orange-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool orange-gloves} {type} {science} {desc} {make balangool orange gloves - requires 2 orange capsules or stones} {usage} {'gool orange-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool orange-boots} {type} {science} {desc} {make balangool orange boots - requires 2 orange capsules or stones} {usage} {'gool orange-boots'} {area} {Section Z} {item} {Balangool Boots (Bright Orange Aura)} {affects} {HP & SP Regen} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool blue-armour} {type} {science} {desc} {make balangool blue armour - requires 2 blue capsules or stones} {usage} {'gool blue-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool blue-helmet} {type} {science} {desc} {make balangool blue helmet - requires 2 blue capsules or stones} {usage} {'gool blue-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool blue-gloves} {type} {science} {desc} {make balangool blue gloves - requires 2 blue capsules or stones} {usage} {'gool blue-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool blue-boots} {type} {science} {desc} {make balangool blue boots - requires 2 blue capsules or stones} {usage} {'gool blue-boots'} {area} {Section Z} {item} {Balangool Boots (Bright Blue Aura)} {affects} {SMD} {location} {common/areas/sectionz.tin}}};
 
 #NOP -------------------------- Profession Aliases ----------------------------------;
 
@@ -243,6 +260,7 @@
 #list library3kdb add {{{name} {activate_sconfig} {type} {guild} {desc} {activate summon config} {usage} {'activate_sconfig'} {helpfile} {info summon config} {ctg} {summoning} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {clear_sconfig} {type} {guild} {desc} {clear summon config} {usage} {'clear_sconfig'} {helpfile} {info summon config} {ctg} {summoning} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {ms} {type} {guild} {desc} {setup summon config} {usage} {ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema'} {helpfile} {info summon config} {ctg} {summoning} {location} {common/guilds/mage/aliases.tin}}};
+#list library3kdb add {{{name} {castper} {type} {guild} {desc} {setup perform with a single target damage spell} {usage} {'castper' alone will show options - castper <option>} {helpfile} {info perform} {ctg} {enhancing} {location} {common/guilds/mage/aliases.tin}}};
 };
 
 #NOP -- guild (adventurer);
@@ -394,5 +412,7 @@
 #list library3kdb add {{{name} {mountDmg-clear} {type} {trackers} {desc} {reset mount damage tracking} {usage} {'mountDmg-clear'} {location} {modules/dmgtracker/dmgtracker_jugger.tin}}};
 #list library3kdb add {{{name} {supportDmg-clear} {type} {trackers} {desc} {reset support mech damage tracking} {usage} {'supportDmg-clear'} {location} {modules/dmgtracker/dmgtracker_jugger.tin}}};
 #list library3kdb add {{{name} {defStats} {type} {trackers} {desc} {defense tracking report} {usage} {'defStats'} {location} {modules/defense_tracker/defense_tracker.tin}}};
+#list library3kdb add {{{name} {istats} {type} {trackers} {desc} {item tracker extraordinaire} {usage} {'istats'} {location} {common/eq/item_tracker.tin}}};
+#list library3kdb add {{{name} {reset_trackers} {type} {trackers} {desc} {reset all damage & item tracking} {usage} {'reset_trackers'} {location} {common/config.tin}}};
 
 #class {3kdb_library} {close}

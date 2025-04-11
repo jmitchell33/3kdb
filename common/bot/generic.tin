@@ -95,10 +95,12 @@
 
 
 #alias {.backupBot} {
-    #map get roomvnum bot[pause_room];
-    #var lastBot[file] $bot[file];
-    #var lastBot[curVnum] $bot[curVnum];
-    #var lastBot[pause_room] $bot[pause_room];
+    #if {"$bot[alias]" != "abyss" && "$bot[alias]" != "sewers"} {
+        #map get roomvnum bot[pause_room];
+        #var lastBot[file] $bot[file];
+        #var lastBot[curVnum] $bot[curVnum];
+        #var lastBot[pause_room] $bot[pause_room];
+    };
 };
 
 /* kill the bot */
