@@ -514,5 +514,25 @@
      #$grasp_beads {grasp beads};
 };
 
+#VAR abnum {0};
+#VAR abmax {0};
+#VAR abdir {e};
+#var ablevel {0};
+
+#ALIAS initabs {
+     #MATH {ablevel} {${ablevel} + 1};
+     #SEND !cast fabricate as item#beacon#beacon;
+     #MATH {abmax} {%1 / 4};
+     #PATH unzip ${abmax}{${abdir}};
+     #SHOWME ABYSS RADIUS SET TO: ${abmax};
+};
+#ALIAS v {
+     #SEND !get beacon;
+     #PATH walk;
+     #SEND !drop beacon;
+     #MATH {abnum} {$abnum + 1};
+     #SHOWME LEVEL ${ablevel}: ${abnum} of ${abmax};
+};
+
 
 #class {player_aliases} {close}
