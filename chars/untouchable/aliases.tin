@@ -1,6 +1,13 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- ROUND COUNTER
+#alias necrounds {#system {echo ROUND COUNT: $rounds >> chars/umage/necroundcount.log}};
+#alias linkd {
+     necrounds;
+     ld;
+ };
+
 #NOP -- alias to fire powers at start of combat
 #alias {fire_powers} {#var Powers[startOfcombat] 0;psibleed;scythe;corrode;convoke ravens;call;rabies;con 100;#delay 1 #var Powers[startOfcombat] 1}
 
@@ -255,6 +262,16 @@
 
 #alias {necro_reset} {
     #NOP;
+};
+
+/* kill the bot */
+#alias {.stop2} {
+    .backupBot;  
+    #unvar bot;
+    #unalias {..};
+    #class {bot} {kill};
+    #echo {Bot killed.};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
 #alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
