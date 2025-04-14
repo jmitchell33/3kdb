@@ -42,9 +42,9 @@
 #action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down}
 
 #NOP -- program bash automatically after learning shield from erah grand master;
-#action {Your training from the Grand Master Knight reminds you to train} {
+/*#action {Your training from the Grand Master Knight reminds you to train} {
     program bash;exec l c;
-};
+};*/
 
 #NOP -- reflexes;
 #action {You have no pants.} {
@@ -56,6 +56,10 @@
         #if {"$guild" == "mage"} {
             unwrap;
             cast corpse blast
+        };
+        #if {"$guild" == "elemental"} {
+            unwrap 1;
+            evoke mental depletion on corpse;
         };
     };
 };
@@ -91,5 +95,22 @@
         #delay 6 {cult join}
     };
 };
+
+#NOP - beloch bot;
+#action {^Beloch storms out to do battle!$} {
+	#if {$auto_beloch} {
+		challenge_all;
+        kill beloch;
+        arena_kill_all
+	};
+};
+
+#NOP -- hobbit pipe;
+#action {%*A small, intricately carved hobbit pipe} {#var pipe 1;};
+#action {You think so hard that smoke pours out of your ears.} {#var pipe 0;};
+
+#ticker pipe {#if {$pipe && !$idle_flag} {smoke pipe}} 63;
+#ticker pipe2 {#if {$pipe && !$idle_flag} {smoke pipe}} 75;
+
 
 #class {player_actions} {close}

@@ -9,6 +9,169 @@
     };
 };
 
+#NOP -- fly;
+#alias {efly} {
+    evoke fly
+};
+
+#NOP -- regen energy;
+#alias {si} {
+    evoke siphon
+};
+
+#NOP -- sp regen;
+#alias {soulwave} {
+    evoke soul wave
+};
+
+#NOP -- heal your sps to full (once per mental reset);
+#alias {nc} {
+    evoke natural convergence
+};
+
+#NOP -- toggle room damage;
+#alias {kall} {
+    evoke equipollent
+};
+
+#NOP -- heal hps using sps;
+#alias {h} {
+    evoke rebuild
+};
+
+#NOP -- get all from vortex;
+#alias {gv} {
+    get all from vortex
+};
+
+#NOP -- put all in vortex;
+#alias {pv} {
+    put all in vortex
+};
+
+#NOP -- check whats in vortex;
+#alias {vl} {
+    vlist
+};
+
+#NOP -- evaluate mobs to check vital imformation about their power;
+#alias {eval} {
+    evoke evaluate at %1
+};
+
+#NOP -- drain nrg from enemies to replenish your own nrg;
+#alias {ed} {
+    evoke energy drain
+};
+
+#NOP -- strengthens your form to withstand more damage;
+#alias {buff} {
+    evoke solidify
+};
+
+#NOP -- cycle thru bags;
+#alias sackit {#loop 1 20 i {put all in bag $i};};
+#alias unsackit {#loop 1 20 i {get all from bag $i};};
+#alias unsackflask {#loop 1 20 i {#20 get flask from bag $i};};
+#alias unsackstone {#loop 1 20 i {#20 get demon stone from bag $i};};
+
+#NOP -- take 1 step in a random direction;
+#unvar test;
+#var test[findDown] 0;
+#alias testme {
+    #unvar test[tmpexits];
+    #unvar test[tmproomName];
+    #var test[foundDown] 0;
+    #var test[count] 0;
+    #var test[rand] 0;
+    #var test[tmpexits] $room[exits];
+    #var test[tmproomName] $room[name];
+    #replace test[tmpexits] {~} {;};
+    #replace test[tmproomName] {The } {};
+    #replace test[tmproomName] {st Plane of Abyss (%*)} {};
+    #replace test[tmproomName] {nd Plane of Abyss (%*)} {};
+    #replace test[tmproomName] {rd Plane of Abyss (%*)} {};
+    #replace test[tmproomName] {th Plane of Abyss (%*)} {};
+    #NOP #replace tmproomName {Section } {};
+    #NOP #replace tmproomName { (%*)} {};
+    #if $debug[test] {#echo {TEST DEBUG: ROOMNAME: $test[tmproomName]}};
+    #math {test[abysslevel]} {$test[tmproomName]};
+    #if $debug[test] {#echo {TEST DEBUG: ABYSS LEVEL: $test[abysslevel]}};
+
+    #if {$test[abysslevel] < 5} {
+        #var test[step_limit] 25;
+    } {
+        #if {$test[abysslevel] < 10} {
+            #var test[step_limit] 50;
+        } {
+            #if {$test[abysslevel] < 20} {
+                #var test[step_limit] 100;
+            } {
+                #if {$test[abysslevel] < 30} {
+                    #var test[step_limit] 250;
+                } {
+                    #if {$test[abysslevel] < 40} {
+                        #var test[step_limit] 400;
+                    } {
+                        #var test[step_limit] 800;
+                    };
+                };
+            };
+        };
+    };
+
+    #if $debug[test] {#echo {STEP LIMIT: $test[step_limit]}};
+
+    #if {$bot[step] > $test[step_limit]} {
+        #var test[findDown] 1;
+        #if $debug[test] {#echo {STEP LIMIT REACHED - findDown set to 1: $test[findDown]}};
+    };
+
+    #if {"$test[findDown]" == "1"} {
+        #regex {$test[tmpexits]} {d} {
+            #var test[foundDown] 1;
+            #NOP #var bot[walk] 1;
+            #var test[dir] {d};
+            #if $debug[test] {#echo {FOUND DIRECTION: $test[dir]}};
+            #NOP #var bot[path] {$bot[path]$test[dir];};
+            #NOP #list bot[steps] create {$bot[path]};
+            #var test[findDown] 0;
+            #if $debug[test] {#echo {DOWN EXIT FOUND! - FOUNDDOWN set to 1: $test[foundDown] FINDDOWN set to 0: $test[findDown]}};
+            #NOP .botStep;
+            #NOP #list bot[steps] clear;
+            #NOP #var bot[path] {};
+            #NOP #var bot[step] 1;
+        };
+    };
+
+    #if {"$test[foundDown]" == "0"} {
+        #foreach $test[tmpexits] test[dir] {
+            #if {"$test[dir]" != "u" && "$test[dir]" != "d"} {
+                #math test[count] {$test[count] + 1};
+            };
+        };
+    };
+
+    #if {"$test[foundDown]" == "0" && $test[count] > 0} {
+        #math test[rand] {1d$test[count]};
+        #var test[current] 0;
+        #foreach $test[tmpexits] test[dir] {
+            #if {"$test[dir]" != "u" && "$test[dir]" != "d"} {
+                #math test[current] {$test[current] + 1};
+                #if {"$test[current]" == "$test[rand]"} {
+                    #if $debug[test] {#echo {NEXT DIRECTION: $test[dir] NUMBER OF EXITS: $test[count] CURRENT: $test[current] RANDOM: $test[rand]}};
+                    #NOP #var bot[walk] 1;
+                    #NOP #var bot[path] {$bot[path]$test[dir];};
+                    #NOP #list bot[steps] create {$bot[path]};
+                    #NOP .botStep;
+                };
+            };
+        };
+    } {
+        #if $debug[test] {#echo {No valid exits available!}};
+    };
+};
+
 #NOP -- forest of charms;
 #alias {charm1} {
     search trees
@@ -49,16 +212,7 @@
 
 #NOP -- clear all damage trackers;
 #alias {cleardmg} {
-    dreset;
-    #if {"$guild" == "juggernaut"} {
-        mountDmg-clear;
-        truckDmg-clear;
-        supportDmg-clear;
-    };
-    #if {"$guild" == "mage"} {
-        spellDmg-clear;
-        summonDmg-clear
-    };
+    reset_trackers
 };
 
 #NOP -- summon damage summary;
@@ -88,9 +242,9 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 7##2#1500#70#defend#summons#always;
-    ms 7##2#1500#70#assist#summons#always;
-    #delay {4} {cg}
+    ms 8##2#1500#70#defend#summons#always;
+    ms 8##2#1500#70#assist#summons#always;
+    ms golema
 };
 
 #NOP -- 4 assisting;
@@ -99,7 +253,7 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 7##4#1500#70#assist#summons#always;
+    ms 8##4#1500#70#assist#summons#always;
     ms golema
 };
 
@@ -109,7 +263,7 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 7##4#1500#70#defend#summons#always;
+    ms 8##4#1500#70#defend#summons#always;
     ms golema
 };
 
@@ -119,9 +273,19 @@
     shoo;
     shoo golem;
     mystrategy;
-    ms 7##3#1500#70#assist#summons#always;
-    ms 7##1#1500#70#defend#summons#always;
-    #delay {4} {cg}
+    ms 8##3#1500#70#assist#summons#always;
+    ms 8##1#1500#70#defend#summons#always;
+    ms golema
+};
+
+#alias {killmode5} {
+    clear_sconfig;
+    shoo;
+    shoo golem;
+    mystrategy-golem;
+    ms 8##1#1500#70#defend#summons#always;
+    ms 8##3#1500#70#assist#summons#always;
+    ms golemd
 };
 
 #NOP -- setup summon configs with custom summons;
@@ -164,7 +328,7 @@
 
 #NOP -- greater contingency;
 #alias {setup_gc} {
-    #NOP cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+    cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
     cast greater contingency as major globe#cast major globe;
     cast greater contingency as stoneskin#cast stoneskin;
@@ -259,102 +423,6 @@
     cast polymorph other on %0
 };
 
-#NOP -- offensive single target damage spell (implosion - blunt damage);
-#alias {blunt1} {
-    repeat off;
-    cast perform as cast implosion;
-    cast activate c
-};
-
-#alias {blunt2} {
-    cast deactivate;
-    repeat combat/cast implosion/0
-};
-
-#NOP -- offensive single target damage spell (sunspear - radiation damage);
-#alias {rad1} {
-    repeat off;
-    cast perform as cast sunspear;
-    cast activate c
-};
-
-#alias {rad2} {
-    cast deactivate;
-    repeat combat/cast sunspear/0
-};
-
-#NOP -- offensive single target damage spell (mind warp - mind damage);
-#alias {mind1} {
-    repeat off;
-    cast perform as cast mind warp;
-    cast activate c
-};
-
-#alias {mind2} {
-    cast deactivate;
-    repeat combat/cast mind warp/0
-};
-
-#NOP -- offensive single target damage spell (disintegrate - energy dmg);
-#alias {energy1} {
-    repeat off;
-    cast perform as cast disintegrate;
-    cast activate c
-};
-
-#alias {energy2} {
-    cast deactivate;
-    repeat combat/cast disintegrate/0
-};
-
-#NOP -- offensive single target damage spell (venomous spray - poison dmg);
-#alias {poison1} {
-    repeat off;
-    cast perform as cast venomous spray;
-    cast activate c
-};
-
-#alias {poison2} {
-    cast deactivate;
-    repeat combat/cast venomous spray
-};
-
-#NOP -- offensive single target damage spell (acid arrow - acid dmg);
-#alias {acid1} {
-    repeat off;
-    cast perform as cast acid arrow;
-    cast activate c
-};
-
-#alias {acid2} {
-    cast deactivate;
-    repeat combat/cast acid arrow/0
-};
-
-#NOP -- offensive single target damage spell (prismatic spray - multi non e/b damage);
-#alias {multi-dmg1} {
-    repeat off;
-    cast perform as cast prismatic spray;
-    cast activate c
-};
-
-#alias {multi-dmg2} {
-    cast deactivate;
-    repeat combat/cast prismatic spray/0
-};
-
-#NOP -- offensive single target damage spell (burning hands - fire damage);
-#alias {fire1} {
-    repeat off;
-    cast perform as cast burning hands;
-    cast activate c
-};
-
-#alias {fire2} {
-    cast deactivate;
-    repeat combat/cast burning hands/0
-};
-
 #NOP -- cast find familiar;
 #alias {ff} {
     cast find familiar
@@ -393,23 +461,57 @@
         reflex add sp <20% cast mystic immersion;
         reflex add gp2 >40% cast focus mind;
         reflex add gp2 >90% shoo summons;
-        reflex start
+        reflex start;
+    };
+    #if {"$guild" == "elemental"} {
+        reflex clear;
+        reflex add hp <80% evoke rebuild;
+        reflex add sp <15% evoke mental depletion;
+        reflex add sp <10% evoke natural convergence;
+        reflex add sp <5% eternal heal badger;
+        #NOP reflex add gp1 <25% evoke energy drain;
+        reflex start;
+    };
+    #if {"$guild" == "bard"} {
+        reflex clear;
+        reflex add hp <70% bandage;
+        reflex start;
     };
 };
 
 #NOP -- turn gags on;
 #alias {gagson} {
+    #if {"$guild" == "juggernaut"} {
+        gag+ hpbar;
+    };
     #if {"$guild" == "mage"} {
+        gag+ hpbar;
         #gag {  --> %*};
         #gag {%*-hp-};
+    };
+    #if {"$guild" == "elemental"} {
+        #NOP;
+    };
+    #if {"$guild" == "bard"} {
+        #NOP;
     };
 };
 
 #NOP -- turn gags off;
 #alias {gagsoff} {
+    #if {"$guild" == "juggernaut"} {
+        gag-clear;
+    };
     #if {"$guild" == "mage"} {
+        gag-clear;
         #ungag {  --> %*};
-        #ungag {%*-hp-}
+        #ungag {%*-hp-};
+    };
+    #if {"$guild" == "elemental"} {
+        gag-clear;
+    };
+    #if {"$guild" == "bard"} {
+        gag-clear;
     };
 };
 
@@ -417,20 +519,49 @@
 #alias {setup_config} {
     #if {"$guild" == "juggernaut"} {
         #unvar my[familiar];
+        #unvar my[golem][name];
         gagson;
         mystrategy-mech;
         mycorpsetrig;
+        mka-clear;
         p2;
+        chatlog emotes;
         look;
     };
     #if {"$guild" == "mage"} {
-        #var my[familiar] Lucky the beautiful swan;
+        #var my[familiar] Mushroom the beautiful swan;
+        #var my[golem][name] Beetlejuice;
         gagson;
         mystrategy;
         mycorpsetrig;
+        mka-clear;
+        mka+ cast haste;
         p2;
         ash;
-        look
+        chatlog emotes;
+        look;
+    };
+    #if {"$guild" == "elemental"} {
+        #unvar my[familiar];
+        #unvar my[golem][name];
+        gagson;
+        mystrategy;
+        mycorpsetrig;
+        mka-clear;
+        #NOP p2;
+        autodrain;
+        chatlog emotes;
+        look;
+    };
+    #if {"$guild" == "bard"} {
+        #unvar my[familiar];
+        #unvar my[golem][name];
+        gagson;
+        mystrategy;
+        mycorpsetrig;
+        mka-clear;
+        chatlog emotes;
+        look;
     };
 };
 
@@ -458,7 +589,13 @@
         rcost;
     };
     #if {"$guild" == "mage"} {
-        cast rcost
+        cast rcost;
+    };
+    #if {"$guild" == "elemental"} {
+        rcost;
+    };
+    #if {"$guild" == "bard"} {
+        rcost;
     };
 };
 
@@ -479,12 +616,18 @@
 
 #NOP -- heal stim with corpse;
 #alias {b} {
-    #if {"guild" == "juggernaut"} {
+    #if {"$guild" == "juggernaut"} {
         fdeener;
     };
     #if {"$guild" == "mage"} {
         cast spell tap on corpse;
-        cast corpse blast
+        cast corpse blast;
+    };
+    #if {"$guild" == "elemental"} {
+        evoke corpse drain;
+    };
+    #if {"$guild" == "bard"} {
+        perform dirge;
     };
 };
 
@@ -498,7 +641,8 @@
     defend %1
 };
 
-#NOP -- heal yourself using stim or set your enhance to auto heal at a certain percentage;
+#NOP -- heal yourself using stim or set your enhance to auto heal at a certain percentage (juggernaut);
+#NOP -- check elemental skills OR raise an elemental skill (elemental);
 #alias {en} {
     enhance %1
 };
@@ -529,7 +673,10 @@
         lowlight;
     };
     #if {"$guild" == "mage"} {
-        cast light
+        cast light;
+    };
+    #if {"$guild" == "elemental"} {
+        evoke self illumination as %1;
     };
 };
 
@@ -539,7 +686,13 @@
         gs4;
     };
     #if {"$guild" == "mage"} {
-        lstats
+        lstats;
+    };
+    #if {"$guild" == "elemental"} {
+        pstats;
+    };
+    #if {"$guild" == "bard"} {
+        pstats;
     };
 };
 
@@ -551,6 +704,22 @@
     #if {"$guild" == "mage"} {
         lstats reset
     };
+    #if {"$guild" == "elemental"} {
+        recover;
+    };
+    #if {"$guild" == "bard"} {
+        psclear;
+    };
+};
+
+#NOP -- another login stats check (elemental/bard);
+#alias {p3} {
+    #if {"$guild" == "elemental"} {
+        pstats2;
+    };
+    #if {"$guild" == "bard"} {
+        pstats2;
+    }; 
 };
 
 #NOP -- check costs of techs in the field;
@@ -598,8 +767,14 @@
         strategy golem_assist;
         strategy summon_mf;
         strategy spelltap;
-        #NOP strategy gstrength;
-        strategy rolm
+        strategy gstrength;
+        strategy rolm;
+    };
+    #if {"$guild" == "elemental"} {
+        strategy-clear;
+    };
+    #if {"$guild" == "bard"} {
+        strategy-clear;
     };
 };
 
@@ -639,7 +814,31 @@
         corpsetrig+ crafting;
         corpsetrig+ ted2;
         corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook
+        corpsetrig+ study spellbook;
+    };
+    #if {"$guild" == "elemental"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ mDepletion;
+        corpsetrig+ cdrain;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "bard"} {
+        corpsetrig-clear;
+        corpsetrig+ cease;
+        corpsetrig+ cease;
+        corpsetrig+ remove shield;
+        corpsetrig+ remove shield;
+        corpsetrig+ dirge;
+        corpsetrig+ perform dirge;
+        corpsetrig+ perform dirge;
+        corpsetrig+ divvy;
+        corpsetrig+ ted;
+        corpsetrig+ wear shield;
+        corpsetrig+ wear shield;
     };
 };
         
@@ -669,7 +868,19 @@
         corpsetrig+ szGreenCap;
         corpsetrig+ ted2;
         corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook
+        corpsetrig+ study spellbook;
+    };
+    #if {"$guild" == "elemental"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ mDepletion;
+        corpsetrig+ cdrain;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ szCaps;
+        corpsetrig+ szGreenCap;
+        corpsetrig+ ted;
     };
 };
 
@@ -691,7 +902,15 @@
         corpsetrig+ divvy;
         corpsetrig+ ted2;
         corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook
+        corpsetrig+ study spellbook;
+    };
+    #if {"$guild" == "elemental"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ mDepletion;
+        corpsetrig+ cdrain;
+        corpsetrig+ divvy;
+        corpsetrig+ ted;
     };
 };
 
@@ -706,7 +925,11 @@
         corpsetrig+ spelltap;
         corpsetrig+ ted2;
         corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook
+        corpsetrig+ study spellbook;
+    };
+    #if {"$guild" == "elemental"} {
+        corpsetrig-clear;
+        corpsetrig+ ted;
     };
 };
 
@@ -778,6 +1001,53 @@
     };
 };
 
+#NOP -- corpsetrig for donates;
+#alias {mycorpsetrig-donates} {
+    #if {"$guild" == "juggernaut"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ fdeener2;
+        corpsetrig+ bRemains;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ give all to mushroom;
+        corpsetrig+ give all to mushroom;
+        corpsetrig+ sackit;
+        corpsetrig+ sackit;
+        corpsetrig+ ted;
+    };
+    #if {"$guild" == "mage"} {
+        corpsetrig-clear;
+        corpsetrig+ spelltap;
+        corpsetrig+ wrap;
+        corpsetrig+ cBlast2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ pPocket;
+        corpsetrig+ sackit;
+        corpsetrig+ sackit;
+        corpsetrig+ ted2;
+        corpsetrig+ study spellbook;
+        corpsetrig+ study spellbook;
+    };
+    #if {"$guild" == "elemental"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ mDepletion;
+        corpsetrig+ cdrain;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ put all in vortex;
+        corpsetrig+ put all in vortex;
+        corpsetrig+ sackit;
+        corpsetrig+ sackit;
+        corpsetrig+ ted;
+    };
+};
+
 #alias {corpseoff} {
     corpsetrig-off
 };
@@ -825,14 +1095,82 @@
     exa
 };
 
-#NOP -- QUICK WALKS TO ROOMVNUMS;
+#NOP -- quck walk to roomvnum;
 #alias {wa} {
     #map run %1
 };
 
-#NOP -- TO AND FROM BIGPIG (DUKE NUKEM)
-#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up}
-#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s}
+#NOP -- gathers all the pedes;
+#alias pede_run {w;w;w;w;w;sw;s;n;ne;e;e;e;se;s;s;nw;nw;e;w;se;se;n;n;nw;e;e;n;n;n;n;n;ne;sw;s;s;s;sw;w;w;ne;ne;s;n;sw;sw;e;e;ne;s;s;e;e;e;e;e;w;w;w;nw;n;n;se;se;w;e;nw;nw;s;s;se;w;w;s;s;s;s;s;n;n;n;ne;e;e;sw;sw;n;s;ne;ne;w;w;sw;n;n};
+
+#NOP -- gathers all the hunting kayos mobs;
+#alias kayos_run {#4 {#7 {kill mob;e};n;#7 {kill mob;w};n}};
+
+#NOP -- quick aliases for Fallout doors;
+#alias door1 {enter a %1, b %1, c %1, d %1};
+#alias door2 {enter a %1, b %2, c %3, d %4};
+
+#NOP -- to and from bigpig;
+#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up};
+#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s};
+
+#NOP -- rolm room;
+#alias {pryout} {goldenrod;moldine;ruby;gold;azure;sapphire;glidine;red;jade;modine;shimmer;amethyst;grey;orange;minder;purple;white;aquamarine;bright;lodine;jade;misine;cinder;green;equinox;entyre;graine;citrine;crimson;facine;silver;tethine;rosith;ranet;glidine;fuschia;yves;faded;milfine;perine;white};
+
+#NOP -- barra;
+#alias {p6bar} {e;s;e;e;s;e;e;n;n;e;e;e;s;w;s;w;s;s;w;n;w;w;s;w;w;n;w;s;s;e;e;e;e;e;e;e;n;n;e;e;s;s;portal;s;e;e;e;s;w;s;w;n;w;s;s;e;s;w;portal;e;e;s;w;w;s;e;e;s;w;w;s;e};
+#alias {barhel} {w;n;e;e;n;w;w;n;e;e;n;w;w;portal;e;n;w;n;n;e;s;e;n;e;n;w;w;w;n;portal;n;n;w;w;s;s;w;w;w;w;w;w;w;n;n;e;s;e;e;n;e;e;s;e;n;n;e;n;e;n;w;w;w;s;s;w;w;n;w;w;n;w};
+
+#alias {hell_pots} {place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of fire on shelf 1;};
+#alias {sr_holes} {insert hand into left hole;insert hand into centre hole;insert hand into right hole};
+
+#NOP -- challenge all mobs in arena;
+#alias {challenge_all} {
+    challenge grundar;
+    challenge sholan;
+    challenge crae;
+    challenge beloch;
+    challenge aranow;
+    challenge heorki;
+    challenge noeque;
+    challenge yoeln;
+    challenge ghoti;
+    challenge delundar
+};
+
+#alias {arena_kill_all} {
+    kill grundar;
+    kill sholan;
+    kill crae;
+    kill aranow;
+    kill heorki;
+    kill noeque;
+    kill yoeln;
+    kill ghoti;
+    kill delundar;
+    kill beloch
+};
+
+#alias {arena_kill_all2} {
+    kill grundar;
+    kill sholan;
+    kill crae;
+    kill aranow;
+    kill heorki;
+    kill noeque;
+    kill yoeln;
+    kill ghoti;
+    kill delundar
+};
+
+#NOP -- beloch bot;
+#alias {belochboton} {
+    #var {$auto_beloch} {1};
+};
+
+#alias {belochbotoff} {
+    #var {$auto_beloch} {0};
+};
 
 #NOP -- knight tour games;
 #alias {dotr6} {
@@ -870,6 +1208,8 @@
     #switch {"%0"} {
          #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap juggernaut}};
          #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap mage}};
+         #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;get coin;.gswap elemental}};
+         #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap bard}};
          #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
          #default {reflex stop;gagsoff;gswap %0;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap %0}};
     };
@@ -917,10 +1257,11 @@
 #list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list badger3kdb add {{{name} {mycorpsetrig-mage} {type} {corpses} {desc} {Corpsetrig for partying with mages}}};
 #list badger3kdb add {{{name} {mycorpsetrig-magesz} {type} {corpses} {desc} {Corpsetrig for partying with mages & sz cap eating}}};
-#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Corpsetrig without get All}}};
+#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Corpsetrig without get all}}};
 #list badger3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
 #list badger3kdb add {{{name} {mycorpsetrig-partynotap} {type} {corpses} {desc} {Corpsetrig for partying without spelltap}}};
-#list badger3kdb add {{{name} {b} {type} {corpse} {desc} {fdeener corpse if jugger - spelltap/corpse blast if mage}}};
+#list badger3kdb add {{{name} {b} {type} {corpse} {desc} {use a corpse}}};
+#list badger3kdb add {{{name} {mycorpsetrig-donates} {type} {corpse} {desc} {corpsetrig for collecting donates}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -929,6 +1270,7 @@
 #NOP - combat;
 #list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
 #list badger3kdb add {{{name} {mystrategy-mech} {type} {combat} {desc} {Mystrategy: mech tanking}}};
+#list badger3kdb add {{{name} {mystrategy-golem} {type} {combat} {desc} {Mystrategy: golem tanking}}};
 #list badger3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
 #list badger3kdb add {{{name} {sdmg1} {type} {combat} {desc} {summon damage report}}};
 #list badger3kdb add {{{name} {sdmg2} {type} {combat} {desc} {summon damage report for vaf numbers perk}}};
@@ -949,7 +1291,23 @@
 #list badger3kdb add {{{name} {rc} {type} {misc} {desc} {Rcost}}};
 #list badger3kdb add {{{name} {gagson} {type} {misc} {desc} {turn gags on}}};
 #list badger3kdb add {{{name} {gagsoff} {type} {misc} {desc} {turn gags off}}};
-
+#list badger3kdb add {{{name} {sackit} {type} {misc} {desc} {put all into bags}}};
+#list badger3kdb add {{{name} {unsackit} {type} {misc} {desc} {get all from bags}}};
+#list badger3kdb add {{{name} {unsackflask} {type} {misc} {desc} {get all flasks from bags}}};
+#list badger3kdb add {{{name} {unsackstone} {type} {misc} {desc} {get all demon stones from bags}}};
+#list badger3kdb add {{{name} {pryout} {type} {misc} {desc} {attempt to get out of prysmia room}}};
+#list badger3kdb add {{{name} {p6bar} {type} {misc} {desc} {go to barrakeith}}};
+#list badger3kdb add {{{name} {barhel} {type} {misc} {desc} {return from barrakeith}}};
+#list badger3kdb add {{{name} {challenge_all} {type} {misc} {desc} {challenge all mobs in arena}}};
+#list badger3kdb add {{{name} {belochboton} {type} {misc} {desc} {beloch bot ON}}};
+#list badger3kdb add {{{name} {belochbotoff} {type} {misc} {desc} {beloch bot OFF}}};
+#list badger3kdb add {{{name} {arena_kill_all} {type} {misc} {desc} {kill all arena mobs}}};
+#list badger3kdb add {{{name} {arena_kill_all2} {type} {misc} {desc} {kill all arena mobs except beloch}}};
+#list badger3kdb add {{{name} {pede_run} {type} {misc} {desc} {gather all pedes}}};
+#list badger3kdb add {{{name} {kayos_run} {type} {misc} {desc} {gathers all the hunting kayos mobs}}};
+#list badger3kdb add {{{name} {door1} {type} {misc} {desc} {fallout door 1}}};
+#list badger3kdb add {{{name} {door2} {type} {misc} {desc} {fallout door 2}}};
+ 
 #NOP -- guild -- juggernaut;
 #if {"$guild" == "juggernaut"} {
     #list badger3kdb add {{{name} {air} {type} {guild} {desc} {Airdrop: heal stim, hp and sp}}};
@@ -976,10 +1334,11 @@
     #list badger3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
     #list badger3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
     #list badger3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
-    #list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (assisting & defending)}}};
-    #list badger3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting)}}};
-    #list badger3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending)}}};
-    #list badger3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend)}}};
+    #list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (2 assisting & 2 defending & golem assisting)}}};
+    #list badger3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting & golem assisting)}}};
+    #list badger3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending & golem assisting)}}};
+    #list badger3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend & golem assist)}}};
+    #list badger3kdb add {{{name} {killmode5} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend & golem defend)}}};
     #list badger3kdb add {{{name} {ff} {type} {guild} {desc} {cast find familiar}}};
 
     
@@ -996,23 +1355,23 @@
     #list badger3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
     #list badger3kdb add {{{name} {pkiller} {type} {spells} {desc} {Offensive: Toggle Phantasmal Killer on & off}}};
     #list badger3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
-    #list badger3kdb add {{{name} {mind1} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {mind2} {type} {spells} {desc} {Offensive: Mind warp (mind dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {rad1} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {rad2} {type} {spells} {desc} {Offensive: Sunspear (radiation dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {poison1} {type} {spells} {desc} {Offensive: venomous spray (poison  -- on perform)}}};
-    #list badger3kdb add {{{name} {poison2} {type} {spells} {desc} {Offensive: venomous spray (poison dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {acid1} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {acid2} {type} {spells} {desc} {Offensive: acid arrow (acid dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {multi-dmg1} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {multi-dmg2} {type} {spells} {desc} {Offensive: prismatic spray (multi non e/b dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {energy1} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {energy2} {type} {spells} {desc} {Offensive: disintegrate (energy dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {fire1} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {fire2} {type} {spells} {desc} {Offensive: burning hands (fire dmg -- on repeat)}}};
-    #list badger3kdb add {{{name} {blunt1} {type} {spells} {desc} {Offensive: implosion (blunt dmg -- on perform)}}};
-    #list badger3kdb add {{{name} {blunt2} {type} {spells} {desc} {Offensive: implosion (blunt dmg -- on repeat)}}};
 };
 
+#if {"$guild" == "elemental"} {
+    #list kim3kdb add {{{name} {buff} {type} {guild} {desc} {Solidify: withstand more damage}}};
+    #list kim3kdb add {{{name} {ed} {type} {guild} {desc} {Energy drain: drain nrg from mob to heal your own nrg}}};
+    #list kim3kdb add {{{name} {en} {type} {guild} {desc} {Enhance: check elemental skills OR raise an elemental skill}}};
+    #list kim3kdb add {{{name} {eval} {type} {guild} {desc} {Evaluate: check vital info on a mob - eval <mobname>}}};
+    #list kim3kdb add {{{name} {gv} {type} {guild} {desc} {Vortex: get all from vortex}}};
+    #list kim3kdb add {{{name} {pv} {type} {guild} {desc} {Vortex: put all in vortex}}};
+    #list kim3kdb add {{{name} {vl} {type} {guild} {desc} {Vortex: check vortex}}};
+    #list kim3kdb add {{{name} {h} {type} {guild} {desc} {Rebuild: heal hps using sp}}};
+    #list kim3kdb add {{{name} {kall} {type} {guild} {desc} {Equipollent: toggle room damage}}};
+    #list kim3kdb add {{{name} {nc} {type} {guild} {desc} {Natural Convergence: heal sps to full per mental reset}}};
+    #list kim3kdb add {{{name} {p3} {type} {guild} {desc} {Pstats2: another login stats check}}};
+    #list kim3kdb add {{{name} {soulwave} {type} {guild} {desc} {Soul wave: regen sps}}};
+    #list kim3kdb add {{{name} {si} {type} {guild} {desc} {Siphon: regen nrg}}};
+    #list kim3kdb add {{{name} {efly} {type} {guild} {desc} {Fly}}};
+};
 
 #class {player_aliases} {close}
