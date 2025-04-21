@@ -1,31 +1,14 @@
-#NOP - 3k Session;
-
-/* Set player specific variables */
+#NOP -- Set Player specific variables;
+#var user untouc;
 #var guild knight;
-#var user untouch;
-#var vaf[numbers] 1;
-#var theme[name];
-#read chars/$user/vars.tin;
+#var chars/$user/vars.tin;
+#var theme[name] bright;
 
-
-/* load common */
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
 #read common/index.tin;
-#read common/bot/bots.tin;
 
-/* load specific modules for this character */
-#read modules/professions/reforger.tin;
-#read modules/corpsemanager/corpsemanager.tin;
-#read modules/helpers/helpers.tin;
-#read modules/dmgtracker/dmgtracker_old.tin;
-
-/* load guild */
-#read common/guilds/$guild/index.tin;
-#read common/guilds/eternal/eternal.tin;
-
-/* load character-specific */
-#read chars/$user/damage.tin;
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-#read chars/$user/styles.tin;
+#NOP -- Load specific modules for this character;
+#read chars/$user/ktours.tin;
+#read charas/$user/numpad.tin;
+#read chars/$user/private.tin;
