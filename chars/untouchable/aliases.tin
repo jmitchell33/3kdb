@@ -1,12 +1,63 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- reflexes;
+#alias {setup_reflex} {
+    #if {"$guild" == "juggernaut"} {
+        reflex clear;
+        reflex add sp <50% airdrop;
+        reflex add sp <10% eternal heal badger;
+        reflex add gp1 <90% transpose max;
+        reflex add gp1 <5% drop pants;
+        reflex start;
+    };
+    #if {"$guild" == "mage"} {
+        reflex clear;
+        reflex add sp <10% eternal heal badger;
+        reflex add sp <20% cast mystic immersion;
+        reflex add gp2 >40% cast focus mind;
+        reflex add gp2 >90% shoo summons;
+        reflex start;
+    };
+    #if {"$guild" == "elemental"} {
+        reflex clear;
+        reflex add hp <80% evoke rebuild;
+        reflex add sp <15% evoke mental depletion;
+        reflex add sp <10% evoke natural convergence;
+        reflex add sp <5% eternal heal badger;
+        #NOP reflex add gp1 <25% evoke energy drain;
+        reflex start;
+    };
+    #if {"$guild" == "bard"} {
+        reflex clear;
+        reflex add hp <70% bandage;
+        reflex start;
+    };
+};
+
+#NOP -- turn gags on;
+#alias {gagson} {
+    #if {"$guild" == "juggernaut"} {
+        gag+ hpbar;
+    };
+    #if {"$guild" == "mage"} {
+        gag+ hpbar;
+        #gag {  --> %*};
+        #gag {%*-hp-};
+    };
+    #if {"$guild" == "elemental"} {
+        #NOP;
+    };
+    #if {"$guild" == "bard"} {
+        #NOP;
+    };
+};
+
+
 #NOP -- ROUND COUNTER
-#alias necrounds {#system {echo ROUND COUNT: $rounds >> chars/umage/necroundcount.log}};
-#alias linkd {
-     necrounds;
-     ld;
- };
+#alias necrounds {#system {echo ROUND COUNT: $rounds >> chars/untouchable/necroundcount.log}};
+
+#alias linkd {necrounds;ld};
 
 #NOP -- alias to fire powers at start of combat
 #alias {fire_powers} {#var Powers[startOfcombat] 0;psibleed;scythe;corrode;convoke ravens;call;rabies;con 100;#delay 1 #var Powers[startOfcombat] 1}
