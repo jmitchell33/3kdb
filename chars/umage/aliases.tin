@@ -1,6 +1,13 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- ROUND COUNTER
+#alias necrounds {#system {echo ROUND COUNT: $rounds >> chars/umage/necroundcount.log}};
+#alias linkd {
+     necrounds;
+     ld;
+ };
+
 #NOP -- Random aliases
 #alias {rcup} {eternal reload item Lord Stanley's Cup};
 #alias {dmike} {eternal duplicate creature mike bolt};
@@ -255,29 +262,31 @@
 #alias {setup_defense} {
      clear_c;
      clear_gc;
-     setup_c;
-     setup_gc;
      #delay 2 {prots_ss};
      #delay 4 {prots_MG};
      #delay 6 {prots_ms};
      #delay 8 {prots_armor};
-     #delay 10 {prots_mantle};
-     #delay 10 {prots_ps};
      #delay 14 {prots_pfe};
 };
 
-#alias {setup_c} {
+#alias {setup_cevil} {
      cast contingency as prot_evil#cast protection from evil;
 };
 
+#alias {setup_cgood} {
+     cast contingency as prot_good#cast protection from good;
+};
 
 #alias {setup_gc} {
-     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
-     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
      cast greater contingency as major globe#cast major globe;
      cast greater contingency as stoneskin#cast stoneskin;
      cast greater contingency as shield#cast magnificent shield;
      cast greater contingency as armor#cast armor;
+};
+
+#alias {setup_gc2} {
+     cast greater contingency as mantle#100#cast mantle;
+     cast greater contingency as prismatic sphere#100#cast prismatic sphere;
 };
 
 #alias {clear_c} {
@@ -304,7 +313,7 @@
      strategy slow;
      strategy golem_rotate;
      strategy super_er;
-     strategy golem_assist;
+     strategy golem_defend;
      strategy summon_mf;
      strategy super_sub;
      strategy rolm;
@@ -323,9 +332,8 @@
      shoo;
      shoo golem;
      mystrategy;
-     ms 7##2#1500#70#defend#summons#always;
-     ms 7##2#1500#70#assist#summons#always;
-     #delay {4} {cg}
+     ms 8##1#1500#70#defend#summons#always;
+     ms 8##3#1500#70#assist#summons#always;
 };
 
  #alias {hydra2} {
@@ -511,6 +519,26 @@
      };
 
      #$grasp_beads {grasp beads};
+};
+
+#VAR abnum {0};
+#VAR abmax {0};
+#VAR abdir {e};
+#var ablevel {0};
+
+#ALIAS initabs {
+     #MATH {ablevel} {${ablevel} + 1};
+     #SEND !cast fabricate as item#beacon#beacon;
+     #MATH {abmax} {%1 / 4};
+     #PATH unzip ${abmax}{${abdir}};
+     #SHOWME ABYSS RADIUS SET TO: ${abmax};
+};
+#ALIAS v {
+     #SEND !get beacon;
+     #PATH walk;
+     #SEND !drop beacon;
+     #MATH {abnum} {$abnum + 1};
+     #SHOWME LEVEL ${ablevel}: ${abnum} of ${abmax};
 };
 
 

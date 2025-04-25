@@ -8,6 +8,34 @@
 #NOP -- Conditions can be combined like so - to cast heal if you have a certain amount of spell points.
 #NOP --   #if {$my[hp][current] < 500 && $my[sp][current] > 1000} {cast heal};
 
+#var corpse_drop 1;
+
+#alias {_player_heartbeat} {
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #if {$my[gp1][current] < $karma_heal && $corpse_drop && $corpses[total] > 0} {
+            #var corpse_drop 0;
+            unwrap;
+            #delay 2 {perform dirge;perform dirge;#var corpse_drop 1};
+        };
+    };
+};
+
+#alias {_player_heartbeat} {
+    #if {!$idle_flag && $action_round < $mip[round]} {
+        #if {$my[hp][current] < 500} {
+            #if {$my[sp][current] > 1000} {
+                #NOP -- Cast heal if you have enough spell points;
+                #NOP -- This is an example of how to use this to drink a potion when your health is below 500;
+                #NOP --   #if {$my[hp][current] < 500} {drink potion};
+                #NOP -- Conditions can be combined like so - to cast heal if you have a certain amount of spell points.
+                #NOP --   #if {$my[hp][current] < 500 && $my[sp][current] > 1000} {cast heal};
+            };
+        };
+    };
+};
+
+
+
 #alias {_player_heartbeat} {
     #if !$idle_flag {
         #NOP -- Actions that timing does not matter;

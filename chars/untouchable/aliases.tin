@@ -1,6 +1,64 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
+#NOP -- reflexes;
+#alias {setup_reflex} {
+    #if {"$guild" == "juggernaut"} {
+        reflex clear;
+        reflex add sp <50% airdrop;
+        reflex add sp <10% eternal heal badger;
+        reflex add gp1 <90% transpose max;
+        reflex add gp1 <5% drop pants;
+        reflex start;
+    };
+    #if {"$guild" == "mage"} {
+        reflex clear;
+        reflex add sp <10% eternal heal badger;
+        reflex add sp <20% cast mystic immersion;
+        reflex add gp2 >40% cast focus mind;
+        reflex add gp2 >90% shoo summons;
+        reflex start;
+    };
+    #if {"$guild" == "elemental"} {
+        reflex clear;
+        reflex add hp <80% evoke rebuild;
+        reflex add sp <15% evoke mental depletion;
+        reflex add sp <10% evoke natural convergence;
+        reflex add sp <5% eternal heal badger;
+        #NOP reflex add gp1 <25% evoke energy drain;
+        reflex start;
+    };
+    #if {"$guild" == "bard"} {
+        reflex clear;
+        reflex add hp <70% bandage;
+        reflex start;
+    };
+};
+
+#NOP -- turn gags on;
+#alias {gagson} {
+    #if {"$guild" == "juggernaut"} {
+        gag+ hpbar;
+    };
+    #if {"$guild" == "mage"} {
+        gag+ hpbar;
+        #gag {  --> %*};
+        #gag {%*-hp-};
+    };
+    #if {"$guild" == "elemental"} {
+        #NOP;
+    };
+    #if {"$guild" == "bard"} {
+        #NOP;
+    };
+};
+
+
+#NOP -- ROUND COUNTER
+#alias necrounds {#system {echo ROUND COUNT: $rounds >> chars/untouchable/necroundcount.log}};
+
+#alias linkd {necrounds;ld};
+
 #NOP -- alias to fire powers at start of combat
 #alias {fire_powers} {#var Powers[startOfcombat] 0;psibleed;scythe;corrode;convoke ravens;call;rabies;con 100;#delay 1 #var Powers[startOfcombat] 1}
 
@@ -37,35 +95,16 @@
 };
 
 #NOP --KNIGHT TOUR GAMES
-#alias {knight6} {play;start;dt6}
-#alias {knight8} {play;start;dt8}
-#alias {winaxe} {play;start;#5 throw axe}
-
-#NOP -- substitute hell dirs for something more manageable ('reload' to unsub);
-#alias {helldirs} {
-	#sub {yonder} {ne};
-	#sub {overhere} {s};
-	#sub {anotherway} {sw};
-	#sub {overthere} {n};
-	#sub {thisway} {se};
-	#sub {thatway} {nw};
-
-	#alias {ne} {yonder};
-	#alias {s} {overhere};
-	#alias {sw} {anotherway};
-	#alias {n} {overthere};
-	#alias {se} {thisway};
-	#alias {nw} {thatway};
-
-	#show Hell directions substituted. Go!
-};
+#alias {knight6} {play;start;dt6};
+#alias {knight8} {play;start;dt8};
+#alias {winaxe} {play;start;#5 throw axe};
 
 #NOP --NUMPAD ON OR OFF
-#alias {numoff} {#class numpad kill}
-#alias {numon} {#read chars/brianna/numpad.tin}
+#alias {numoff} {#class numpad kill};
+#alias {numon} {#read chars/brianna/numpad.tin};
 
 #NOP -- BOT STATUS
-#alias {3kdb} {ptell 3kdb bot status}
+#alias {3kdb} {ptell 3kdb bot status};
 
 #alias sz_study {pause game;qtrance teleport/w/w/w/w/w/d/sw/sw/se/s/u/nw/nw/path/sw/sw/w;.study;qtrance e/ne/ne/path/se/se/d/n/nw/ne/ne/u/e/e/e/e/e/teleport 1;play;unpause game;};
 #alias sz_reagents {pause game;qtrance teleport/w/w/w/w/w/u/w/w/w;topup;#delay 6 {qtrance e/e/e/d/e/e/e/e/e/teleport 1;play;unpause game;};}
@@ -133,7 +172,7 @@
     #map run $go_back;
 };
 
-#alias .check_death {
+/*#alias .check_death {
     #if $darkness {light torch};
     #if $actions_stacked {
         do_action;
@@ -155,13 +194,13 @@
         };
     };
     fuse 200;
-};
+};*/
 
 #alias {_player_deadmanActions} {
     #if $bot[active] {.pause;#echo {paused from deadman}};
 };
 
-#alias {.mob_kill_action} {
+/*#alias {.mob_kill_action} {
     #if $bloodlet_area {
         bloodlet $mob[target];
         .botStep;
@@ -194,7 +233,7 @@
             };
         };
     };
-};
+};*/
 
 #NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
 #alias {strat} {strategy snare;strategy call;strategy maim;strategy scythe;strategy harvest;strategy rabies;strategy fury;strategy spirithowl;strategy corrode;strategy psibleed;strategy iprime}
@@ -274,6 +313,16 @@
 
 #alias {necro_reset} {
     #NOP;
+};
+
+/* kill the bot */
+#alias {.stop2} {
+    .backupBot;  
+    #unvar bot;
+    #unalias {..};
+    #class {bot} {kill};
+    #echo {Bot killed.};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
 };
 
 #alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
