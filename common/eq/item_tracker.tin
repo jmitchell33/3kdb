@@ -1,10 +1,10 @@
-#class item_tracker kill;
-#class item_tracker open;
+#class {item_tracker} {kill};
+#class {item_tracker} {open};
 
 #NOP -- This is a generic tracker for any item that also hooks into the item gag;
 #NOP -- Soon to be added reports, but for the moment you can inspect the variable and also gag;
 
-#NOP -- Inputs are %1 item/keyname %2 category
+#NOP -- Inputs are %1 item/keyname %2 category;
 #alias .trackItem {
     #if $gags[combat_items] {#line gag};
     #math itemTracker[%1][%2] {$itemTracker[%1][%2] + 1};
@@ -41,13 +41,14 @@
 };
 
 #NOP -- Witch hat;
-#action {A bolt of electricity streams from your hat into %*!} {
-    .trackItem witch-hat dmg;
+#action {A bolt of electricity streams from your hat into %*!$} {
+    #var cmbt[affects][witchHat] 1;
+    .trackItem {witch hat} dmg;
 } {2};
 
 #NOP -- Spirit Bracers;
 #action {The bracers flare, and the attack misses you!} {
-    .trackItem spirit-bracers block;
+    .trackItem {spirit bracers} block;
 } {2};
 
 #NOP -- CMC;
@@ -65,7 +66,7 @@
 } {2};
 
 #action {^A flash of light from the CMC-660 fills everyone in your party with invigorating warmth!$} {
-    .trackItem cmc party-heal;
+    .trackItem cmc {party heal};
 } {1};
 
 #action {The CMC-660 REFLECTS the entire attack!!} {
@@ -73,12 +74,64 @@
     #var cmbt[affects][CMC] 1;
 } {2};
 
+#NOP -- Rolm;
 #action {^The healing power of the phoenix restores your mind and body.$} {
-    .trackItem rolm phoenix-heal;
+    .trackItem rolm {phoenix heal};
 } {2};
 
 #action {^Renewed by the healing energy, your mind is calmed and body strengthened.$} {
-    .trackItem rolm phoenix-heal;
+    .trackItem rolm {phoenix heal};
 } {2};
 
-#class item_tracker close;
+#NOP -- Banu Cloak;
+#action {Your cloak causes your form to phase, reducing the impact from the attack.} {
+    .trackItem {banu cloak} DR;
+} {2};
+
+#NOP -- Vblade;
+#action {The sword flashes brightly, absorbing the force of the attack!} {
+    .trackItem vblade DR;
+} {2};
+
+#NOP -- Pet Rock;
+#action {Your pet rock takes control and jerks your arm to deflect the attack.} {
+    .trackItem {pet rock} deflect;
+} {2};
+
+#NOP -- Cocoon;
+#action {The sticky cocoon absorbs part of the attack!} {
+    .trackItem {sticky cocoon} DR;
+} {2};
+
+#NOP -- Guyahi's amulet;
+#action {The amulet's protective barrier reduces the incoming attack.} {
+    .trackItem {guyahi's amulet} DR;
+} {2};
+
+#action {The amulet's protective barrier dissipates as it reduces the incoming} {
+    .trackItem {guyahi's amulet} DR;
+} {2};
+
+#action {The amulet opens and surrounds you with rejuvenating energies.} {
+    .trackItem {guyahi's amulet} heal;
+} {2};
+
+#action {The amulet opens and shoots a magical force toward$} {
+    .trackItem {guyahi's amulet} heal;
+} {2};
+
+#action {The amulet opens and floods your mind with ancient teachings.} {
+    .trackItem {guyahi's amulet} stats;
+} {2};
+
+#NOP -- Zelligar's headband;
+#action {Zelligar's Headband warms you with a radiant glow.} {
+    .trackItem {zelligar's headband} heal;
+} {2};
+
+#NOP -- Charm bracelet;
+#action {Your charm bracelet brightens, and you evade the edged attack.} {
+    .trackItem {charm bracelet} evade;
+} {2};
+
+#class {item_tracker} {close};

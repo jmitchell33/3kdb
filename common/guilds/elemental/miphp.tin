@@ -3,29 +3,14 @@
 
 #var guild_miphp 1;
 
-/*#alias {_guild_miphp} {
-    #var gline_vars {G2N: $my[g2n]  B: $my[blasts]/$my[reset]%};
-	#list temp clear;
-
-	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NRG:$gp1/$gp1_max($my[emit][level])  C:$gp2/$gp2_max  E:$ehealth};
-	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NRG:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {$gline_vars};
-	#var hpbar[prompt] $temp;
-};*/
-
 #alias {_guild_miphp} {
-	#var hpbar_gline_1 @fMipColourConv{$mip[gline][1]};
-	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
-
-	#replace hpbar_gline_1 {    } {  };
-	#replace hpbar_gline_2 {    } {  };
-
+    #format gp2 {%p} {$gp2};
+	#format gp2_max {%p} {$gp2_max};
 	#list temp clear;
 
-	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Nrg:$gp1/$gp1_max  C:$gp2/$gp2_max  E:$ehealth};
-	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Nrg:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {$hpbar_gline_1};
-	#list temp add {$hpbar_gline_2};
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NRG:$gp1/$gp1_max C:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NRG:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {<dea>Emit<cfe>: <faa>$my[emit][level] <dea>Form<cfe>: <cad>$my[form][type] <cfe>(<dba>$my[form][size]<cfe>) <bde>Rating<cfe>: <faa>$my[rating] <dea>Blasts<cfe>/<dea>Waves<cfe>: <bfc>$my[blasts]<cfe>/<bfc>$my[waves] <cfe>($my[reset]%) <dea>G2N<cfe>: <cae>$my[g2n]<088>};
 	#var hpbar[prompt] $temp;
 };
 

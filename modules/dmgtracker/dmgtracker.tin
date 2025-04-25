@@ -244,10 +244,6 @@ dreset;
     #var cmbt[affects][shield_bash] 1;
 } {2};
 
-#action {A bolt of electricity streams from your hat into %*!$} {
-    #var cmbt[affects][witchHat] 1;
-} {2};
-
 #action {^A bolt of pure energy flies out of the sky striking %*!$} {
     #var cmbt[affects][eradication] 1;
 } {2};
@@ -660,12 +656,6 @@ dreset;
     #NOP set a maximum limit for hits per round;
     #local max_hits_per_round 5;
 
-    #NOP Validate total_rounds before processing to ensure it is not missing or invalid; 
-	#if {!$total_rounds || !$ismath($total_rounds)} {
-		#echo {Error: Invalid or missing total_rounds. Skipping processing.};
-		#return;
-	};
-
     #if {$support_new_round_identifier != $support_current_round} {
         #NOP New round detected, finalize the previous round BEFORE processing the current hit;
         #math new_best {$support_round_dmg > $support_dmg[high]};
@@ -697,7 +687,7 @@ dreset;
         #math support_dmg[avg] {$support_dmg[dmg] / $support_dmg[rnd]};
     } {
         #NOP Maximum hits for this round reached, ignoring additional hits;
-        #ECHO {DEBUG: Hit ignored as it exceeds the max hits per round.};
+        #NOP #ECHO {DEBUG: Hit ignored as it exceeds the max hits per round.};
     };
 } {2};
 
