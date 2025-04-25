@@ -1,59 +1,31 @@
 #class {bot} {kill}
 #class {bot} {open}
 
-#var area {Abyss};
+#var {area} {aby};
 
-#action {The entire area seems to shudder and rumble as if the Abyss is begining} {{killbot;tell $char Abyss broken!}};
+#var check_room 0;
 
-#action {^-M-_A small fire mite$}{{#nop}} {1};
-#alias k kill;
-#action {There is no demon here.}{..};
-#action {The creature must be present.}{..};
-#action {The blast of fire is so intense it forces you from the room!}{..}{1};
- 
-#action {^-M-_$} {
-    #var mobname demon;
-    #if {"$mobname" == ""} {
-            #var mobname mite;
-        } #else {
-            _check_mob
-        }
-} {1};
+#var bot_message_1 '---- ABYSS 1 ----';
+#var bot_message_2 '----  ALL TARGETS   ----';
 
-#action {The %1th Plane of The Abyss (%2)} {
-    #var abysslevel %1;
-    #math thirdabyss {$abysslevel/3}; 
-    #math abyssplane {$thirdabyss*2};
-    #math abysshalf {$thirdabyss/2};
-} {1};
+#showme $bot_message_1;
+#showme $bot_message_2;
+#action {There is no demon here.} {.botStep};
 
-#alias {abysspath} {
-    #path create;
-    #{$thirdabyss} #path insert w;
-    #{$thirdabyss}  #path insert n;
-    #{$abysshalf} {#$abyssplane #path insert e;#path insert s;#{$abyssplane} #path insert w;#path insert s}};
-    #path goto 1;
-    #path show;
+#alias .pre_fight_check {#nop;};
 
-#delay {2} {abysspath};
+.pre_bot_check;
+#var playercheck 1;
 
-#action {The blast of fire is so intense it forces you from the room!} { 
-    #action {Your legs run away with you %1.} {
-        #regex {%1} {east} {west;.bot};
-        #regex {%1} {west} {east;.bot};
-        #regex {%1} {north} {south;.bot};
-        #regex {%1} {south} {north;.bot};
-    }{2};
-    
-#delay 1 {#unact #action {Your legs run away with you %1.}};
-        #regex {%1} {east} {west;.bot};
-        #regex {%1} {west} {east;.bot};
-        #regex {%1} {north} {south;.bot};
-        #regex {%1} {south} {north;.bot};
-    };
-    
-#delay 1 {#unact {Your legs run away with you %1.}};
-#action {You cannot go} {#path walk};
+#var {bot[path]} {e;e;e;e;e;e;e;e;e;e;e;e;e;e;s;s;s;s;s;s;s;s;s;s;s;s;s;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;e;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;w;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;s;s;s;s;s;w;w;w;w;w;w;w;w;w;w;w;w;w;s;s;s;s;s;s;s;s;s};
+
+#list botmobs clear;
+#list botmobs add {{{long} {A small fire mite} {target} {mite}}};
+#list botmobs add {{{long} {%*} {target} {demon}}};
 
 #class {bot} {close}
-#read common/bot/generic.tin;
+#read common/bot/generic.tin
+ 
+ 
+ 
+ 

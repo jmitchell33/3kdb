@@ -1,10 +1,6 @@
 #class {player_aliases} {kill}
 #class {player_aliases} {open}
 
-#alias {_player_deadmanActions} {
-    .pause;
-};
-
 #NOP -- QUICK WALKS TO ROOMVNUMS
 #alias {wa} {#map run %1}
 
@@ -21,6 +17,16 @@
     climb bench;stagedive;
     climb down;out;
     s;s;w;unlock door;open door;n
+};
+
+#NOP -- jugger suit swapping;
+#alias {swapsuit} {
+    enhance %0;
+    cassist +clear;
+    #delay 2 {calltruck};
+    #delay 4 {tp};
+    #delay 6 {empower};
+    #delay 8 {cdefend clear};
 };
 
 #NOP -- SEARCHING & EXAMINING
@@ -64,6 +70,10 @@
 #NOP --NUMPAD ON OR OFF
 #alias {numoff} {#class numpad kill}
 #alias {numon} {#read chars/brianna/numpad.tin}
+
+#NOP -- SUIT SWAP
+#alias gnome2 {swap;calltruck;truck get all;truck pfocus;support assault fire;empower;enhance 120};
+#alias sally2 {swap;calltruck;truck get all;truck pfocus;support defend;empower;enhance 85};
 
 #NOP -- briannas 3kdb aliases;
 
