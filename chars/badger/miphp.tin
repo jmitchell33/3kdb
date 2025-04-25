@@ -1,9 +1,17 @@
 #class {miphp} {kill}
 #class {miphp} {open}
 
-#alias {_player_miphp} {
+#alias {_player_miphp} {#NOP};
 
-	#NOP;
-}
+#if {"$guild" == "bard"} {
+	#action {^Coffin:%d/%d} {
+		#if {!$idle_flag} {
+			#var corpses[coffin] %1;
+			#line gag
+		};
+	};
+};
+
+
 
 #class {miphp} {close}

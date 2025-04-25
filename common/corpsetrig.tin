@@ -1,5 +1,5 @@
-#alias common_corpse kill;
-#class common_corpse open;
+#class {common_corpse} {kill};
+#class {common_corpse} {open};
 
 #NOP This variable determines whether or not to fire corpse_trig;
 #var corpsetrigStatus 1;
@@ -348,6 +348,7 @@
 
 
 #list corpseList clear;
+#NOP -- all;
 #list corpseList add {{{name} {ted} {guild} {all} {action} {love bear} {active} {0} {description} {Love Freeway Bear (+Con)}}};
 #list corpseList add {{{name} {ted2} {guild} {all} {action} {cuddle bear} {active} {0} {description} {Cuddle freeway Bear (+Int)}}};
 #list corpseList add {{{name} {bRemains} {guild} {all} {action} {burn remains} {active} {0} {description} {burn priest remains in Necropolis}}};
@@ -365,29 +366,50 @@
 #list corpseList add {{{name} {hoarder} {guild} {all} {action} {#loop 20 1 i {put all in bag $i}}  {active} {0} {description} {Hoarder: Put all in bags (20 bags)}}};
 #list corpseList add {{{name} {spoon} {guild} {all} {action} {eat corpse}  {active} {0} {description} {Spoon: Eat Corpse}}};
 #list corpseList add {{{name} {cocoon} {guild} {all} {action} {fuse 100}  {active} {0} {description} {Cocoon: Fuse 100hps}}};
+
+#NOP -- bard;
 #list corpseList add {{{name} {dirge} {guild} {bard} {action} {perform dirge}  {active} {0} {description} {Bard: Perform Dirge}}};
+#list corpseList add {{{name} {dirge2} {guild} {bard} {action} {perform dirge;perform dirge} {active} {0} {description} {Bard: Perform Dirge x2}}};
+#list corpseList add {{{name} {songcease} {guild} {bard} {action} {cease} {active} {0} {description} {Bard: Cease songs}}};
+#list corpseList add {{{name} {disc} {guild} {bard} {action} {put all in disc} {active} {0} {description} {Bard: Put all in disc}}};
+
+#NOP -- gentech;
 #list corpseList add {{{name} {gtRepair} {guild} {gentech} {action} {gt-repair} {active} {0} {description} {Gentech: Repair/Stabilize/Tactical}}};
+
+#NOP -- juggernaut;
 #list corpseList add {{{name} {deener} {guild} {juggernaut} {action} {deener}  {active} {0} {description} {Juggernaut: Deener}}};
 #list corpseList add {{{name} {fdeener} {guild} {juggernaut} {action} {fdeener}  {active} {0} {description} {Juggernaut: Fdeener 1x}}};
 #list corpseList add {{{name} {fdeener2} {guild} {juggernaut} {action} {fdeener;fdeener}  {active} {0} {description} {Juggernaut: Fdeener 2x }}};
+
+#NOP -- elemental;
 #list corpseList add {{{name} {cdrain} {guild} {elemental} {action} {evoke corpse drain}  {active} {0} {description} {Elemental: Corpse Drain}}};
+#list corpseList add {{{name} {cdrain2} {guild} {elemental} {action} {evoke corpse drain;evoke corpse drain} {active} {0} {description} {Elemental: Corpse Drain x2}}};
 #list corpseList add {{{name} {mDepletion} {guild} {elemental} {action} {evoke mental depletion on corpse} {active} {0} {description} {Elemental: Mental Depletion}}};
+#list corpseList add {{{name} {vortex} {guild} {elemental} {action} {put all in vortex} {active} {0} {description} {Elemental: Put all in vortex}}};
+
+#NOP -- necromancer;
 #list corpseList add {{{name} {preserve} {guild} {necromancer} {action} {qtrance preserve remains/get remains/keep all preservation}  {active} {0} {description} {Necro: Preserve Remains}}};
 #list corpseList add {{{name} {absorbSp} {guild} {necromancer} {action} {absorb} {active} {0} {description} {Necro: Absorb Corpse for SP}}};
 #list corpseList add {{{name} {absorbSp2} {guild} {necromancer} {action} {qtrance absorb/absorb} {active} {0} {description} {Necro: Absorb Corpse for SP 2x}}};
 #list corpseList add {{{name} {conWorth} {guild} {necromancer} {action} {con} {active} {0} {description} {Necro: Contribute Coins for Worth}}};
 #list corpseList add {{{name} {reinforce} {guild} {necromancer} {action} {reinforce all} {active} {0} {description} {Necro: Reinforce/Repair Armour}}};
+
+#NOP -- mage;
 #list corpseList add {{{name} {cBlast} {guild} {mage} {action} {cast corpse blast}  {active} {0} {description} {Mage: Corpse Blast}}};
 #list corpseList add {{{name} {cBlast2} {guild} {mage} {action} {cast corpse blast;cast corpse blast} {active} {0} {description} {Mage: Corpse Blast 2x}}};
 #list corpseList add {{{name} {spelltap} {guild} {mage} {action} {cast spell tap on corpse}  {active} {0} {description} {Mage: Spell Tap}}};
 #list corpseList add {{{name} {anchor} {guild} {mage} {action} {#if !$incombat {cast dispel magic}}  {active} {0} {description} {Mage: Dispel Magic (remove anchor)}}};
 #list corpseList add {{{name} {spellbook} {guild} {mage} {action} {#if !$studying {study spellbook}}  {active} {0} {description} {Mage: Study Spellbook}}};
 #list corpseList add {{{name} {pPocket} {guild} {mage} {action} {put all in pocket} {active} {0} {description} {Mage: put all items in deeppocket}}};
+
+#NOP -- fremen;
 #list corpseList add {{{name} {fremcorpse} {guild} {fremen} {action} {fremCorpse} {active} {0} {description} {Fremen: fai & reclaim (Threshold is half your max gp1)}}};
 #list corpseList add {{{name} {fai} {guild} {fremen} {action} {fai} {active} {0} {description} {Fremen: Donate water from a corpse back to guild}}};
 #list corpseList add {{{name} {reclaim} {guild} {fremen} {action} {reclaim} {active} {0} {description} {Fremen: Recover water from a corpse}}};
 #list corpseList add {{{name} {hide} {guild} {fremen} {action} {hide} {active} {0} {description} {Fremen: Hide in the shadows before ambushing mob}}};
 #list corpseList add {{{name} {poison} {guild} {fremen} {action} {poison} {active} {0} {description} {Fremen: Add poison to your weapon}}};
+
+#NOP -- monk;
 #list corpseList add {{{name} {study} {guild} {monk} {action} {study corpse} {active} {0} {description} {Monk: Study Corpse}}};
 #list corpseList indexate name;
 
@@ -427,4 +449,4 @@
 };
 
 
-#class common_corpse close;
+#class {common_corpse} {close};

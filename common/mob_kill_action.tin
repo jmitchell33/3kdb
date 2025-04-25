@@ -1,5 +1,5 @@
-#alias common_mka kill;
-#class common_mka open;
+#class {common_mka} {kill};
+#class {common_mka} {open};
 
 #NOP -- By default, turn it on if this file is loaded;
 #var mob_kill_action 1;
@@ -250,48 +250,69 @@
 
 
 #list mkaList clear;
+#NOP -- all;
 #list mkaList add {{{name} {chug} {guild} {all} {action} {drink alcohol} {active} {0} {description} {Have a drink before your fight}}};
-#list mkaList add {{{name} {kill} {guild} {all} {action} {
+/*#list mkaList add {{{name} {kill} {guild} {all} {action} {
     #if {"$guild" == "bard"} {
         checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
         checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
     };
-    kill $$mkaTargetName;
-} {active} {0} {description} {Attack the mob using 'kill'}}};
-#list mkaList add {{{name} {backstab} {guild} {bard} {action} {rolm edged;cast mystic venom on rod;hide in shadows;backstab $$mkaTargetName;} {active} {0} {description} {Bard: Backstab the mob}}};
+    kill $mkaTargetName;
+} {active} {0} {description} {Attack the mob using 'kill'}}};*/
+
+#NOP -- bard;
+#list mkaList add {{{name} {backstab} {guild} {bard} {action} {rolm edged;cast mystic venom on rod;hide in shadows;backstab $mkaTargetName} {active} {0} {description} {Bard: Backstab the mob}}};
 #list mkaList add {{{name} {roomAttack} {guild} {bard} {action} {itf;} {active} {0} {description} {Bard: Attack Room w/ Into The Fire}}};
+#list mkaList add {{{name} {harmony} {guild} {bard} {action} {defensive harmony} {active} {0} {description} {Bard: Increase AC for a short duration}}};
+
+#NOP -- juggernaut;
 #list mkaList add {{{name} {suppDefend} {guild} {juggernaut} {action} {
-    eval $$mkaTargetName;
+    eval $mkaTargetName;
     #line oneshot #action {
         Primary Damage type : [%w]} {
             #format defendType {%l} {%%1};
             #delay 3 {support defend $defendType};
             #delay 5 {support assault};
         };
-    } {active} {0} {description} {Jugger: Support Defend Mob Dmg Type}}};
+    } {active} {0} {description} {Jugger: Support Defend Mob Dmg Type}};
+};
+
+#NOP -- necromancer;
 #list mkaList add {{{name} {call} {guild} {necromancer} {action} {call} {active} {0} {description} {Necromancer: Call familiar into combat}}};
-#list mkaList add {{{name} {undead} {guild} {necromancer} {action} {=kill $$mkaTargetName} {active} {0} {description} {Necromancer: Undead enter combat}}};
-#list mkaList add {{{name} {ab} {guild} {psicorps} {action} {examine $$mkaTargetName} {active} {0} {description} {Psicorps: Adapt Body}}};
+#list mkaList add {{{name} {undead} {guild} {necromancer} {action} {=kill $mkaTargetName} {active} {0} {description} {Necromancer: Undead enter combat}}};
+
+#NOP -- psicorps;
+#list mkaList add {{{name} {ab} {guild} {psicorps} {action} {examine $mkaTargetName} {active} {0} {description} {Psicorps: Adapt Body}}};
+
+#NOP -- priest;
 #list mkaList add {{{name} {curse} {guild} {priest} {action} {#delay 2 curse} {active} {0} {description} {Priest: Curse}}};
 #list mkaList add {{{name} {ffire} {guild} {priest} {action} {#delay 4 ffire} {active} {0} {description} {Priest: Faerie Fire}}};
-#list mkaList add {{{name} {summon_tank} {guild} {mage} {action} {slice $$mkaTargetName} {active} {0} {description} {Mage: Initiate Combat w/ Summon}}};
-#list mkaList add {{{name} {ambush} {guild} {fremen} {action} {ambush $$mkaTargetName} {active} {0} {description} {Fremen: Hide/Ambush}}};
-        
-#list mkaList indexate name;
 
+#NOP -- mage;
+#list mkaList add {{{name} {summon_tank} {guild} {mage} {action} {slice $mkaTargetName} {active} {0} {description} {Mage: Initiate Combat w/ Summon}}};
+#list mkaList add {{{name} {haste} {guild} {mage} {action} {cast haste} {active} {0} {description} {Mage: Cast haste on yourself}}};
+
+#NOP -- fremen;
+#list mkaList add {{{name} {ambush} {guild} {fremen} {action} {ambush $mkaTargetName} {active} {0} {description} {Fremen: Hide/Ambush}}};
+
+#list mkaList indexate name;
 
 #alias mka {
     #var mkaTarget 1;
     #if {"%0" === ""} {#var mkaTargetName $room[mobs][1][autoName]} {#var mkaTargetName %0};
-    #if $mkaStatus {
+    #if {"$mkaStatus" == "1"} {
         #if {&mkaActions[] > 0} {
             #loop 1 &mkaActions[] item {
-                $mkaActions[$item][action];
+                #line substitute variables {$mkaActions[$item][action]};
             };
         };
         kill $mkaTargetName;
+        #if {"$guild" == "bard"} {
+            checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
+            checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
+        };
     };
 };
 
 
-#class common_mka close;
+#class {common_mka} {close};

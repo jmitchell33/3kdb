@@ -2,9 +2,12 @@
 #class {player_actions} {open}
 
 #NOP -- switch mech from assault to defend;
-#action {dealt the killing blow} {
-    #if {!$idle_flag && "$guild" == "juggernaut" && $mechswitchtoggle} {
-        #send {support defend}
+#if {"$guild" == "juggernaut"} {
+    
+    #action {dealt the killing blow} {
+        #if {!$idle_flag && $mechswitchtoggle} {
+            #send {support defend};
+        };
     };
 } {1};
 
@@ -54,12 +57,17 @@
             fdeener;
         };
         #if {"$guild" == "mage"} {
-            unwrap;
+            unwrap 1;
             cast corpse blast
         };
         #if {"$guild" == "elemental"} {
             unwrap 1;
             evoke mental depletion on corpse;
+        };
+        #if {"$guild" == "bard"} {
+            cease;
+            unwrap 1;
+            perform dirge;
         };
     };
 };
