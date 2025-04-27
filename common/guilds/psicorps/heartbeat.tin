@@ -261,13 +261,13 @@
       };
       #elseif {"$current_adapt_body" != "$_adapt_body"} {
         #if {$_DEBUG_HB} {#echo {[debug_heartbeat] changing adapt body dmg type to $_adapt_body}};
-        _use_adapt_body;
+        #if {$my[implants][ab][active]} {_use_adapt_body};
       };
       #else {
         #NOP;
       };
     } {
-      #if {$my[implants][%1][active]} {
+      #if {$my[implants][ab][active]} {
         #if {$_DEBUG_HB} {#echo {[debug_heartbeat] turning on adapt body}};
 		#if {$_DEBUG_HB} {#echo {[debug_heartbeat] my powers are $my[powers]}};
         _use_adapt_body;

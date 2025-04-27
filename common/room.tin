@@ -35,6 +35,16 @@
     };
 };
 
+#action {^-X-_    There are %* exits: %*-X-_} {
+    .clearRoomData;
+    #if {"$mapping" == "on"} {
+        .getMapRoomData;
+        #if {$roomname_len == 0} {#map set roomname {$room[name]}};
+        #if {$roomarea_len == 0} {#map set roomarea {$area}};
+        #if {$roomdesc_len == 0} {#map set roomdesc {$room[long]}};
+    };
+} {2};
+
 
 #NOP -- Update if there is a player in the room not in friends list;
 #act {{^-P-_(.*)}} {
@@ -96,12 +106,6 @@
             #format checkRoomLength {%L} {$room[long]};
             apiPostAll;
             #delay 2 {#var explore[walk] 1};
-        };
-        #if {"$mapping" == "on"} {
-            .getMapRoomData;
-            #if {$roomname_len == 0} {#map set roomname {$room[name]}};
-            #if {$roomarea_len == 0} {#map set roomarea {$area}};
-            #if {$roomdesc_len == 0} {#map set roomdesc {$room[long]}};
         };
     } {1};
 } {2};
@@ -229,6 +233,10 @@
     #regex {$mob[long]} {^%w the Valithyn$} {#var mobFamiliar 1};
     #regex {$mob[long]} {^$my[familiar].$} {#var mobFamiliar 1};
     #regex {$mob[long]} {^$my[golem][name] \(%w Golem\) %*.$} {#var mobFamiliar 1};
+
+    #NOP -- Knight Familiars;
+    #regex {$mob[long]} {%*, %*'s %* Percheron} {#var mobFamiliar 1};
+    #regex {$mob[long]} {%*, %*'s %* Kiso} {#var mobFamiliar 1};
 
     #if $mobFamiliar {
         #list room[familiars] add {{{name} {$mob[long]}}};

@@ -24,6 +24,11 @@
 		#if {$action_round < $mip[round] && $mip[round] > 0} {
 			#if {$my[song][rounds] > 1} {#NOP;} {#if $actions_stacked {do_action};};
 			#if {$my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {cast harmonic regeneration} {#nop}};
+		} {
+			#NOP -- If you're not in combat, let er rip;
+			#if !$incombat {
+				#if $actions_stacked {do_action};
+			};
 		};
 	};	
 };

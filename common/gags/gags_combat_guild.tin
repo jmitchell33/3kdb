@@ -242,7 +242,7 @@
             #line gag;
             #class atrance_gag open;
             #EVENT {CATCH PROCESSED LINE} {
-                #nop;
+                #if !$debug[event] {#NOP};
             };
             #class atrance_gag close;
             #delay 1 {#class atrance_gag kill};
@@ -260,7 +260,7 @@
             #line gag;
             #class rabies_gag open;
             #EVENT {CATCH PROCESSED LINE} {
-                #nop;
+                #if !$debug[event] {#NOP};
             };
             #class rabies_gag close;
             #delay 1 {#class rabies_gag kill};

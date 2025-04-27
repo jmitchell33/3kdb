@@ -202,10 +202,13 @@
 #action {^The light fades and you materialize elsewhere....} {rating} {2};
 
 #NOP -- Flip to crown/psimace upon first wielding, check charges, and brief;
-#action {The grace of an ancient god courses through you.} {touch diamond rune;examine runes};
+#action {The grace of an ancient god courses through you.} {touch diamond rune;examine runes} {2};
 
-#action {The sun rune sparks as it flips over, its face changing to that of the moon.} {#var rolm[sun] 1};
-#action {The moon rune flashes as it flips over, its face changing to that of the sun.} {#var rolm[sun] 0};
+#action {The sun rune sparks as it flips over, its face changing to that of the moon.} {#var rolm[sun] 1} {2};
+#action {The moon rune flashes as it flips over, its face changing to that of the sun.} {#var rolm[sun] 0} {2};
+
+#action {The ashes rune flashes with life as it flips over to the phoenix rune.} {#var rolm[hp_regen] 0;#var rolm[sp_regen] 1} {2}:
+#action {The phoenix rune bursts into flames as it flips over to the ashes rune.} {#var rolm[hp_regen] 1;#var rolm[sp_regen] 0} {2};
 
 
 #NOP -- This automatically checks which runes are active or not;

@@ -37,6 +37,18 @@
     #var defense_tracker[mantle][blocks] 0;
     #var defense_tracker[armor][blocks] 0;
     #var defense_tracker[total][blocks] 0;
+
+    #var defense_tracker[blink][fail] 0;
+    #var defense_tracker[prot-evil][fail] 0;
+    #var defense_tracker[prot-good][fail] 0;
+    #var defense_tracker[major-globe][fail] 0;
+    #var defense_tracker[magnificent-shield][fail] 0;
+    #var defense_tracker[stoneskin][fail] 0;
+    #var defense_tracker[prismatic-sphere][fail] 0;
+    #var defense_tracker[prismatic-aura][fail] 0;
+    #var defense_tracker[mantle][fail] 0;
+    #var defense_tracker[armor][fail] 0;
+    #var defense_tracker[total][fail] 0;
 };
 
 clear_defense_tracker;
@@ -87,6 +99,12 @@ clear_defense_tracker;
     #math defense_tracker[total][blocks] {$defense_tracker[total][blocks] + 1};
 };
 
+#alias {defense_update_fail} {
+    #line gag;
+    #math defense_tracker[%1][fail] {$defense_tracker[%1][fail] + 1};
+    #math defense_tracker[total][fail] {$defense_tracker[total][fail] + 1};
+};
+
 #action {^You wave your hands and an invisible barrier surrounds and helps protect%*\nyou.} {
     defense_update_cast armor;
 };
@@ -107,6 +125,10 @@ clear_defense_tracker;
 
 #action {Your Major Globe absorbs} {
     defense_update_block major-globe
+};
+
+#action {The magic of your Major Globe shatters from the force of the attack!} {
+    defense_update_fail major-globe
 };
 
 #action {shimmering field of grey} {
