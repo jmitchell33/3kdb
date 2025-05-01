@@ -6,18 +6,31 @@
 #var pausedtoregen 1;
 
 #alias {_player_heartbeat} {
-    #if {!$idle_flag && "$guild" == "mage"} {
-        #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
-            cast explosive release;
+    #if {!$idle_flag} {
+        #if {"$guild" == "mage"} {
+            #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
+                cast explosive release;
+            };
+            #if {$bot[active] && $my[mental_cognition] < 85 && $pausedtoregen} {
+                .pause;
+                #var pausedtoregen 0;
+            };
+            #if {$bot[paused] && $my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
+                .unpause;
+                ..;
+                #var pausedtoregen 1;
+            };
         };
-        #if {$bot[active] && $my[mental_cognition] < 85 && $pausedtoregen} {
-            .pause;
-            #var pausedtoregen 0;
-        };
-        #if {$bot[paused] && $my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-            .unpause;
-            ..;
-            #var pausedtoregen 1;
+        #if {"$guild" == "fremen"} {
+            #if {$bot[active] && "$my[litany][focus]" == "Wracked"} {
+                .pause;
+                #var pausedtoregen 0;
+            };
+            #if {$bot[paused] && "$my[litany][focus]" == "Luminous"} {
+                .unpause;
+                ..;
+                #var pausedtoregen 1;
+            };
         };
     };
 };
