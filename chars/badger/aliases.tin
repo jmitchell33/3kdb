@@ -796,10 +796,15 @@
     rtech
 };
 
-#NOP -- toggle plasma focusing for truck;
-#alias {tp} {
-    truck pfocus
-};
+#NOP -- toggle plasma focusing for truck and fremen guild chatline;
+/*#alias {tp} {
+    #if {"$guild" == "juggernaut"} {
+        truck pfocus;
+    };
+    #if {"$guild" == "fremen"} {
+        #send {!tp %1} 
+    };
+};*/
 
 #NOP -- check level of truck;
 #alias {ts} {
@@ -1025,7 +1030,12 @@
         corpsetrig+ cocoon;
     };
     #if {"$guild" == "fremen"} {
-        corpsetrig-clear
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ reclaim2;
+        corpsetrig+ divvy;
+        corpsetrig+ ted;
+        corpsetrig+ cocoon;
     };
 };
 
@@ -1035,8 +1045,6 @@
     corpsetrig+ wrap;
     corpsetrig+ fremcorpse;
     corpsetrig+ divvy;
-    corpsetrig+ getAll;
-    corpsetrig+ crafting;
     corpsetrig+ ted;
     corpsetrig+ cocoon
 };
@@ -1410,6 +1418,8 @@
 #list badger3kdb add {{{name} {mycorpsetrig-notap} {type} {corpses} {desc} {Corpsetrig for partying without spelltap}}};
 #list badger3kdb add {{{name} {b} {type} {corpse} {desc} {use a corpse}}};
 #list badger3kdb add {{{name} {mycorpsetrig-donates} {type} {corpse} {desc} {corpsetrig for collecting donates}}};
+#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {corpsetrig without get all}}};
+#list badger3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {corpsetrig to reclaim & fai (fremen)}}};  
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
