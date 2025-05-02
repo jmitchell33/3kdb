@@ -1,10 +1,17 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
+#var waves_toggle 1;
+
 #alias {_guild_heartbeat} {
-	#if !$idle_flag {
-	    #NOP;
+	#if {$my[sp][current] < $my[sp][max] / 2 && "$waves_toggle" == "1"} {
+		checkStrategy {soulwave} {#if {$my[waves] > 0} {#var waves_toggle 0;evoke soul wave;#delay 4 {#var waves_toggle 1}}};
+		checkStrategy {earthtap} {#if {$my[waves] > 0} {#var waves_toggle 0;evoke earth tap;#delay 4 {#var waves_toggle 1}}};
+		checkStrategy {thefourwinds} {#if {$my[waves] > 0} {#var waves_toggle 0;evoke the four winds;#delay 4 {#var waves_toggle 1}}};
+		checkStrategy {tidalwave} {#if {$my[waves] > 0} {#var waves_toggle 0;evoke tidal wave;#delay 4 {#var waves_toggle 1}}};
+		checkStrategy {heatwave} {#if {$my[wave] > 0} {#var waves_toggle 0;evoke heat wave;#delay 4 {#var waves_toggle 1}}};
 	};
 };
+	    
 
 #class {guild_heartbeat} {close}
