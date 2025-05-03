@@ -68,6 +68,25 @@
     };
 };
 
+#NOP -- see guild info on others;
+#alias {gfinger} {
+    #if {"$guild" == "juggernaut"} {
+        #send {!jfinger %1};
+    };
+    #if {"$guild" == "mage"} {
+        #send {!gfinger %1};
+    };
+    #if {"$guild" == "elemental"} {
+        #send {!efinger %1};
+    };
+    #if {"$guild" == "bard"} {
+        #send {!gfinger %1};
+    };
+    #if {"$guild" == "fremen"} {
+        #send {!frecall %1};
+    };
+};
+
 #NOP -- juggernaut truck pfocus - toggle between fire and energy dmg for cargo trucks;
 #alias {tpf} {
     truck pfocus
@@ -534,13 +553,13 @@
         #gag {%*-hp-};
     };
     #if {"$guild" == "elemental"} {
-        #NOP;
+        gag+ hpbar;
     };
     #if {"$guild" == "bard"} {
         #NOP;
     };
     #if {"$guild" == "fremen"} {
-        #NOP
+        gag+ hpbar
     };
 };
 
@@ -783,7 +802,7 @@
         gs4 reset;
     };
     #if {"$guild" == "mage"} {
-        lstats reset
+        lstats reset;
     };
     #if {"$guild" == "elemental"} {
         recover;
@@ -1481,6 +1500,7 @@
 #list badger3kdb add {{{name} {door2} {type} {misc} {desc} {fallout door 2}}};
 #list badger3kdb add {{{name} {bagset} {type} {misc} {desc} {set # of bags to cycle thru}}};
 #list badger3kdb add {{{name} {info} {type} {misc} {desc} {guild info files}}};
+#list badger3kdb add {{{name} {gfinger} {type} {misc} {desc} {see guild info on other players}}};
 
 #NOP -- guild -- juggernaut;
 #if {"$guild" == "juggernaut"} {

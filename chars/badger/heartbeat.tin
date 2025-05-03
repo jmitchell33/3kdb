@@ -11,7 +11,7 @@
             #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
                 cast explosive release;
             };
-            #if {$bot[active] && $my[mental_cognition] < 85 && $pausedtoregen} {
+            #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
                 .pause;
                 #var pausedtoregen 0;
             };
@@ -25,11 +25,16 @@
             #if {$bot[active] && "$my[litany][focus]" == "Wracked"} {
                 .pause;
                 #var pausedtoregen 0;
+                #var suspend_toggle 1;
+                #if {"$mip[round]" == "0" && "$suspend_toggle" == "1"} {
+                    #send {!suspend};
+                };
             };
             #if {$bot[paused] && "$my[litany][focus]" == "Luminous"} {
                 .unpause;
                 ..;
                 #var pausedtoregen 1;
+                #var suspend_toggle 1;
             };
         };
     };
