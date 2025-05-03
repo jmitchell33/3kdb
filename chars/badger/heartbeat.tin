@@ -22,15 +22,15 @@
             };
         };
         #if {"$guild" == "fremen"} {
-            #if {$bot[active] && "$my[litany][focus]" == "Wracked"} {
+            #if {$bot[active] && "$pausedtoregen" == "1" && "$my[litany][focus]" == "Wracked"} {
                 .pause;
                 #var pausedtoregen 0;
                 #var suspend_toggle 1;
-                #if {"$mip[round]" == "0" && "$suspend_toggle" == "1"} {
-                    #send {!suspend};
-                };
             };
-            #if {$bot[paused] && "$my[litany][focus]" == "Luminous"} {
+            #if {"$mip[round]" == "0" && "$suspend_toggle" == "1" && "$pausedtoregen" == "0"} {
+                #send {!suspend};
+            };
+            #if {$bot[paused] && "$pausedtoregen" == "0" && "$my[litany][focus]" == "Luminous"} {
                 .unpause;
                 ..;
                 #var pausedtoregen 1;
