@@ -4,7 +4,18 @@
 #var guild_miphp 1;
 
 #alias {_guild_miphp} {
-	#NOP
-}
+	#var hpbar_gline_1 @fMipColourConv{$mip[gline][1]};
+	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
+
+	#list temp clear;
+
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NE:$gp1/$gp1_max  SO:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NE:$my[gp1][graph] SO:$my[gp2][graph] E:$enemy[graph]};
+	#list temp add {$hpbar_gline_1};
+	#list temp add {$hpbar_gline_2};
+	#var hpbar[prompt] $temp;
+};
+
+
 
 #class {guild_miphp} close;
