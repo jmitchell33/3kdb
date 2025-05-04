@@ -21,20 +21,24 @@
     #unvar ftouches;
     #var ftTemp %0;
     #replace ftTemp { } {;};
-    #list create ftouches $ftTemp;
+    #list ftouches create $ftTemp;
     ftouch %1;
 };
 
 #act {^You make %* light as a feather!$} {
-    #list ftouches get 5 ftouchItem;
+    #list ftouches get 1 ftouchItem;
     ftouch $ftouchItem;
-    #list ftouches delete 1;
+    #if {&ftouches[] > 0} {
+        #list ftouches delete 1;    
+    };
 };
 
 #act {%* cannot be lightened any more.$} {
     #list ftouches get 1 ftouchItem;
     ftouch $ftouchItem;
-    #list ftouches delete 1;
+        #if {&ftouches[] > 0} {
+        #list ftouches delete 1;    
+    };
 };
 
 
