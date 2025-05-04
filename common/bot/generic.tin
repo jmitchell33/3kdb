@@ -105,7 +105,7 @@
 
 /* kill the bot */
 #alias {.stop} {
-    .backupBot;  
+    .backupBot;
     #unvar bot;
     #unalias {..};
     #class {bot} {kill};
@@ -144,40 +144,42 @@
 };
 
 #alias {.determineBotAction} {
-    .botStopWalking;
-    #if {$bot[foundplayer]} {
-        #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Found player - calling .botStep<088>}};
-        #var bot[walk] 1;
-        .botStep;
-    } {
-        #if {$collector[items]} {
-            #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
-        };
-        #if {$bot[foundmob]} {
-            #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Mob in the list has been found<088>}};
-            .pre_fight_check;
-            #if {$pre_fight_actions} {
-                .pre_fight_actions;
-            };
-
-            #if {!$bot[aggro-mob]} {
-                #if {$mob_kill_action} {
-                    mka $mob[target];
-                } {
-                    kill $mob[target];
-                };
-            };
+    #if !$bot[paused] {
+        .botStopWalking;
+        #if {$bot[foundplayer]} {
+            #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Found player - calling .botStep<088>}};
+            #var bot[walk] 1;
+            .botStep;
         } {
-            #if {$bot[foundobject]} {
-                #send $object_action;
-                #var bot[foundobject] 0;
+            #if {$collector[items]} {
+                #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
+            };
+            #if {$bot[foundmob]} {
+                #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Mob in the list has been found<088>}};
+                .pre_fight_check;
+                #if {$pre_fight_actions} {
+                    .pre_fight_actions;
+                };
+
+                #if {!$bot[aggro-mob]} {
+                    #if {$mob_kill_action} {
+                        mka $mob[target];
+                    } {
+                        kill $mob[target];
+                    };
+                };
             } {
-                #if {$check_room} {
-                    .check_room;
+                #if {$bot[foundobject]} {
+                    #send $object_action;
+                    #var bot[foundobject] 0;
                 } {
-                    #if $debug[bot] {#echo {<cfa>BOT DEBUG: No mob, no item, no check room - calling .botStep<088>}};
-                    #var bot[walk] 1;
-                    .botStep;
+                    #if {$check_room} {
+                        .check_room;
+                    } {
+                        #if $debug[bot] {#echo {<cfa>BOT DEBUG: No mob, no item, no check room - calling .botStep<088>}};
+                        #var bot[walk] 1;
+                        .botStep;
+                    };
                 };
             };
         };

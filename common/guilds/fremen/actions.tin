@@ -71,5 +71,109 @@
     };
 };
 
+#action {^Literjons attached to belt:} {
+    #line oneshot #action {Max:%* Contains:%*} {
+        #format my[literjons][max] {%d} {%%1};
+        #format my[literjons][carrying] {%d} {%%2};
+    } {1};
+    #line oneshot #action {Filled:%* Drying:%*} {
+        #format my[literjons][filled] {%d} {%%1};
+        #format my[literjons][drying] {%d} {%%2};
+    } {1};
+    #line oneshot #action {Empty:%*} {
+        #format my[literjons][empty] {%d} {%%1};
+    } {1};
+} {2};
+
+
+#action {^You carefully fill a literjon.} {
+    #math my[literjons][filled] {$my[literjons][filled] + 1};
+    #math my[literjons][empty] {$my[literjons][empty] - 1};
+} {2};
+
+#action {^You sip the water carefully from a literjon.} {
+    #math my[literjons][filled] {$my[literjons][filled] - 1};
+    #math my[literjons][empty] {$my[literjons][empty] + 1};
+    #math my[literjons][drying] {$my[literjons][drying] + 1};
+} {2};
+
+#action {^You have no empty literjons.} {
+    #math my[literjons][empty] {$my[literjons][empty] + 0};
+} {2};
+
+#action {^You carefully place your literjons on the rack.} {
+    #var my[literjons][empty] $my[literjons][carrying];
+    #var my[literjons][filled] 0;
+} {2};
+
+
+
+
+#alias gxp-stats {
+    #local tmpItem {};
+    #local tmpTotal 0;
+    #echo {%-15s   %-30s  %+15s} {<dfc>-++- -++- -++- -++-<088>} {     <fbc>FREMEN GXP SUMMARY<088>} {<dfc>-++- -++- -++- -++- <088>};
+    #echo {<cfd>%-30s   %-6s    %-6s   %-6s<088>} {  Category} {Count} {% of Total} {Avg. Gxp};
+    #echo {%-15s} {    <ebc>Agony<088>};
+    #foreach *stats[agony][] tmpItem {
+        #math tmpTotal {$tmpTotal + $stats[agony][${tmpItem}][count]};
+    };
+    #foreach *stats[agony][] tmpItem {
+        #if {"$tmpItem" == ""} {#NOP} {
+            #local tmpAvg 0;
+            #local tmpPercent 0.00;
+            #math tmpAvg {$stats[agony][${tmpItem}][gxp] / $stats[agony][${tmpItem}][count]};
+            #math tmpPercent {$stats[agony][${tmpItem}][count] / $tmpTotal * 100.00};
+            #format tmpPercent {%d} {$tmpPercent};
+            #echo {%-30s   %-6s    %-10s   %-6s} {      <edd>${tmpItem}<088>} {<eee>$stats[agony][${tmpItem}][count]} {    ${tmpPercent}%} {    $tmpAvg<088>};
+        };
+    };
+    #echo {%-15s   %-30s  %+15s} {<dfc>-++- -++- -++- -++-<088>} {<fbc><088>} {<dfc>-++- -++- -++- -++- <088>};
+
+};
+
+#alias .trackPowerGxp {
+    #local tmpCategory %1;
+    #local tmpItem %2;
+    #local tmpNumber 0;
+    #if {$stats[$tmpCategory][$tmpItem][count] > 0} {
+        #math stats[$tmpCategory][$tmpItem][count] {$stats[$tmpCategory][$tmpItem][count] + 1};
+    } {
+        #var stats[$tmpCategory][$tmpItem][count] 1;
+    };
+    #math stats[$tmpCategory][$tmpItem][gxp] {$stats[$tmpCategory][$tmpItem][gxp] + $my[gxp][last_round]};
+};
+
+#NOP -- Tracker for gxp/powers;
+#action {^You are too exhausted to inflict agony.$} {
+    .trackPowerGxp agony too-exhausted;
+} {2};
+
+#action {^You probe %* mind ineffectually.$} {
+    .trackPowerGxp agony ineffectually;
+} {2};
+#action {^You inflict pain on %*.$} {
+    .trackPowerGxp agony inflict-pain;
+ } {2}
+ #action {^Though tired, you cause some pain in %* mind.$} {
+    .trackPowerGxp agony tired-some;
+ } {2};
+
+#action {^You find %* mind open to you as you cause %* some pain.$} {
+    .trackPowerGxp agony mind-open;
+} {2};
+
+#action {^You invade %* mind, causing %* pain.$} {
+    .trackPowerGxp agony invade;
+} {2};
+
+#action {^You cause %* to have a momentary seizure!$} {
+    .trackPowerGxp agony seizure-momentary;
+} {2};
+
+#action {^Your mind powers cause %* to have a seizure.$} {
+    .trackPowerGxp agony seizure;
+} {2};
+
 
 #class {guild_actions} {close}

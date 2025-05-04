@@ -17,4 +17,51 @@
     donate all
 };
 
+#NOP -- donate corpses to shimoom;
+#alias {donate_water1} {
+    #map get roomvnum donate_go_back;
+    go fremen_guild;
+    #line oneshot #action {As you stand around, gawking at the huge interior of the spacing guild} {
+        go fremen_shimoom
+    } {1};
+    #line oneshot #action {The Wisdom Board containing %*} {
+        #var tmpTotal ${corpses[total] - 1};
+        unwrap all;
+        deslab all;
+        #if {$corpses[cooler] > 0} {
+            #${corpses[cooler]} {uncooler corpse};
+        };
+        #action {eyes glow bright green upon the fallen} {
+            #math tmpTotal {$tmpTotal + 1};
+        } {1};
+        #delay 4 {#line substitute variables .calcLJDonate $tmpTotal;#unaction {eyes glow bright green upon the fallen}};
+    } {1};
+};
+
+#alias {.calcLJDonate} {
+    #local tmpWaterWorth 200;
+    #local tmpMaxLJWater 0;
+    #local tmpCorpseCycles 0;
+    #math tmpMaxLJWater {$my[gp1][current] / 25 / $my[literjons][carrying]};
+    donate all;
+    #${tmpMaxLJWater} {fill all;donate all;};
+
+    #if {"%0" == ""} {#NOP} {
+        #format tmpNumber {%d} {%0};
+        #math tmpCorpseCycles {$tmpNumber * $tmpWaterWorth / 25 / $my[literjons][carrying]};
+        #loop 1 ${tmpCorpseCycles} tmpItem {
+            #2 {reclaim;fill all;donate all;hp};
+            #if {$tmpItem == $tmpCorpseCycles} {
+                #NOP -- should be at least 1 corpse left on the ground to get water back;
+                #3 reclaim;
+                wrap all;
+                go fremen_back;
+                #line oneshot #action {A rocky plateau (w,board spacecraft)} {
+                    #map run $donate_go_back;
+                } {1};
+            };
+        };
+    };
+};
+
 #class {guild_aliases} {close}
