@@ -1,0 +1,17 @@
+#class {guild_hpbar} {kill}
+#class {guild_hpbar} {open}
+
+#action {{HP:(\d+)\/(\d+)(S?) C:(\d+)\%\s+NRG:(\d+)\/(\d+)\(\d*-?\)\s+SP:(\d+)\/(\d+)\s+(B|S|G):(\d+)\((\d+)\%\)\s+G2N:[^\s]*(?:\s+T:(.*))?}} {
+    #if $gags[hpbar] {#line gag};
+    #var my[hp][current] %2;
+    #var my[hp][max] %3;
+    #regex {%4} {S} {#var my[solidify] <dba>ON<088>} {#var my[solidify] <faa>OFF<088>};
+    #var my[gp2][current] %5;
+    #var my[gp1][current] %6;
+    #var my[gp1][max] %7;
+    #var my[sp][current] %8;
+    #var my[sp][max] %9;
+};
+
+
+#class {guild_hpbar} {close}

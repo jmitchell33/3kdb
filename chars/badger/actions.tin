@@ -2,12 +2,9 @@
 #class {player_actions} {open}
 
 #NOP -- switch mech from assault to defend;
-#if {"$guild" == "juggernaut"} {
-    
-    #action {dealt the killing blow} {
-        #if {!$idle_flag && $mechswitchtoggle} {
-            #send {support defend};
-        };
+#action {dealt the killing blow} {
+    #if {!$idle_flag && "$guild" == "juggernaut" && $mechswitchtoggle} {
+        #send {support defend}
     };
 } {1};
 
@@ -68,6 +65,10 @@
             cease;
             unwrap 1;
             perform dirge;
+        };
+        #if {"$guild" == "fremen"} {
+            unwrap 1;
+            reclaim
         };
     };
 };

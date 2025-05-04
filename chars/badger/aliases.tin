@@ -12,11 +12,84 @@
 #NOP -- debug stuff;
 #alias {.startlog} {
     #switch {"%0"} {
-        #case {"on"} {#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
-        #case {"off"} {#unvar debug[bot];#log off};
+        #case {"on"} {#event {SENT OUTPUT} {#echo {<cfa>out (%0)}};#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
+        #case {"off"} {#UNEVENT {SEND OUTPUT};#unvar debug[bot];#log off};
         #case {"del"} {#log remove botlog};
         #case {""} {#echo {<fff>No user input<088>}};
     };
+};
+
+#NOP -- study spell book and suspend;
+#alias {m} {
+    #if {"$guild" == "mage"} {
+        study spellbook;
+    };
+    #if {"$guild" == "fremen"} {
+        suspend
+    };
+};
+
+#NOP -- guild info files;
+#alias {info} {
+    #if {"$guild" == "juggernaut"} {
+        #if {"%1" == ""} {
+            #send {!info};
+        } {
+            #send {!info %1};
+        };
+    };
+    #if {"$guild" == "mage"} {
+        #if {"%1" == ""} {
+            #send {!info};
+        } {
+            #send {!info %1};
+        };
+    };
+    #if {"$guild" == "elemental"} {
+        #if {"%1" == ""} {
+            #send {!info};
+        } {
+            #send {!info %1};
+        };
+    };
+    #if {"$guild" == "bard"} {
+        #if {"%1" == ""} {
+            #send {!info};
+        } {
+            #send {!info %1};
+        };
+    };
+    #if {"$guild" == "fremen"} {
+        #if {"%1" == ""} {
+            #send {!fhelp};
+        } {
+            #send {!fhelp %1};
+        };
+    };
+};
+
+#NOP -- see guild info on others;
+#alias {gfinger} {
+    #if {"$guild" == "juggernaut"} {
+        #send {!jfinger %1};
+    };
+    #if {"$guild" == "mage"} {
+        #send {!gfinger %1};
+    };
+    #if {"$guild" == "elemental"} {
+        #send {!efinger %1};
+    };
+    #if {"$guild" == "bard"} {
+        #send {!gfinger %1};
+    };
+    #if {"$guild" == "fremen"} {
+        #send {!frecall %1};
+    };
+};
+
+#NOP -- juggernaut truck pfocus - toggle between fire and energy dmg for cargo trucks;
+#alias {tpf} {
+    truck pfocus
 };
 
 #NOP -- heartening laugh;
@@ -449,10 +522,10 @@
     };
     #if {"$guild" == "elemental"} {
         reflex clear;
-        reflex add hp <80% evoke rebuild;
+        reflex add hp <75% evoke rebuild;
         reflex add sp <20% evoke mental depletion;
         reflex add sp <10% evoke natural convergence;
-        reflex add sp <50% eternal heal badger;
+        reflex add sp <40% eternal heal badger;
         #NOP reflex add gp1 <25% evoke energy drain;
         reflex start;
     };
@@ -462,6 +535,10 @@
         reflex add hp <25% hmheal;
         reflex add hp <50% eternal heal badger;
         reflex start;
+    };
+    #if {"$guild" == "fremen"} {
+        reflex clear;
+        reflex add gp1 <25% drop pants
     };
 };
 
@@ -476,10 +553,13 @@
         #gag {%*-hp-};
     };
     #if {"$guild" == "elemental"} {
-        #NOP;
+        gag+ hpbar;
     };
     #if {"$guild" == "bard"} {
         #NOP;
+    };
+    #if {"$guild" == "fremen"} {
+        gag+ hpbar
     };
 };
 
@@ -499,6 +579,9 @@
     #if {"$guild" == "bard"} {
         gag-clear;
     };
+    #if {"$guild" == "fremen"} {
+        gag-clear
+    };
 };
 
 #NOP -- setup configs;
@@ -513,7 +596,6 @@
         mka-clear;
         #NOP p2;
         set3kreport;
-        chatlog emotes;
         look;
     };
     #if {"$guild" == "mage"} {
@@ -528,7 +610,6 @@
         #NOP p2;
         set3kreport;
         ash;
-        chatlog emotes;
         look;
     };
     #if {"$guild" == "elemental"} {
@@ -542,7 +623,6 @@
         #NOP p2;
         set3kreport;
         autodrain;
-        chatlog emotes;
         look;
     };
     #if {"$guild" == "bard"} {
@@ -557,8 +637,18 @@
         mka+ harmony;
         #NOP p2;
         set3kreport;
-        chatlog emotes;
         look;
+    };
+    #if {"$guild" == "fremen"} {
+        #unvar my[familiar];
+        #unvar my[golem][name];
+        gagson;
+        mystrategy;
+        mycorpsetrig;
+        mka-on;
+        mka-clear;
+        set3kreport;
+        look
     };
 };
 
@@ -594,6 +684,9 @@
     #if {"$guild" == "bard"} {
         rcost;
     };
+    #if {"$guild" == "fremen"} {
+        check cost
+    };
 };
 
 #NOP -- airdrop;
@@ -626,6 +719,9 @@
     #if {"$guild" == "bard"} {
         cease;
         perform dirge;
+    };
+    #if {"$guild" == "fremen"} {
+        reclaim
     };
 };
 
@@ -695,6 +791,9 @@
     #if {"$guild" == "bard"} {
         pstats;
     };
+    #if {"$guild" == "fremen"} {
+        fstat
+    };
 };
 
 #NOP -- reset login exp & gxp progress;
@@ -703,13 +802,16 @@
         gs4 reset;
     };
     #if {"$guild" == "mage"} {
-        lstats reset
+        lstats reset;
     };
     #if {"$guild" == "elemental"} {
         recover;
     };
     #if {"$guild" == "bard"} {
         psclear;
+    };
+    #if {"$guild" == "fremen"} {
+        fstat -reset
     };
 };
 
@@ -728,10 +830,15 @@
     rtech
 };
 
-#NOP -- toggle plasma focusing for truck;
-#alias {tp} {
-    truck pfocus
-};
+#NOP -- toggle plasma focusing for truck and fremen guild chatline;
+/*#alias {tp} {
+    #if {"$guild" == "juggernaut"} {
+        truck pfocus;
+    };
+    #if {"$guild" == "fremen"} {
+        #send {!tp %1} 
+    };
+};*/
 
 #NOP -- check level of truck;
 #alias {ts} {
@@ -757,7 +864,7 @@
 #alias {mystrategy} {
     #if {"$guild" == "juggernaut"} {
         strategy-clear;
-        strategy rolm;
+        #NOP strategy-rolm;
         strategy frenzy;
         strategy nukes;
     };
@@ -774,18 +881,24 @@
     #if {"$guild" == "elemental"} {
         strategy-clear;
         strategy epowers;
+        strategy blasts;
+        strategy thefourwinds;
     };
     #if {"$guild" == "bard"} {
         strategy-clear;
-        strategy rolm;
-        strategy cloud
+        #NOP strategy rolm;
+        strategy cloud;
+    };
+    #if {"$guild" == "fremen"} {
+        strategy-clear;
+        strategy suspend
     };
 };
 
 #NOP -- mech tanking;
 #alias {mystrategy-mech} {
     strategy-clear;
-    strategy rolm;
+    #NOP strategy rolm;
     strategy frenzy;
     strategy nukes;
     strategy mech_resummon
@@ -840,6 +953,16 @@
         corpsetrig+ getAll;
         corpsetrig+ crafting;
         corpsetrig+ ted;
+        corpsetrig+ cocoon;
+    };
+    #if {"$guild" == "fremen"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ reclaim2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        #NOP corpsetrig+ ted;
         corpsetrig+ cocoon;
     };
 };
@@ -898,6 +1021,9 @@
         corpsetrig+ ted;
         corpsetrig+ cocoon;
     };
+    #if {"$guild" == "fremen"} {
+        corpsetrig-clear
+    };
 };
 
 #NOP -- corpsetrig without get All;
@@ -937,6 +1063,24 @@
         corpsetrig+ ted;
         corpsetrig+ cocoon;
     };
+    #if {"$guild" == "fremen"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ reclaim2;
+        corpsetrig+ divvy;
+        corpsetrig+ ted;
+        corpsetrig+ cocoon;
+    };
+};
+
+#NOP -- fai above 50% gp1 otherwise reclaim;
+#alias {mycorpsetrig-water} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ fremcorpse;
+    corpsetrig+ divvy;
+    corpsetrig+ ted;
+    corpsetrig+ cocoon
 };
 
 #NOP -- party corpsetrig;
@@ -959,6 +1103,10 @@
     #if {"$guild" == "bard"} {
         corpsetrig-clear;
         corpsetrig+ ted;
+    };
+    #if {"$guild" == "fremen"} {
+        corpsetrig-clear;
+        corpsetrig+ ted
     };
 };
 
@@ -1087,6 +1235,18 @@
         corpsetrig+ bag1;
         corpsetrig+ bag1;
         corpsetrig+ ted;
+        corpsetrig+ cocoon;
+    };
+    #if {"$guild" == "fremen"} {
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ reclaim2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ bag1;
+        corpsetrig+ bag1;
+        #NOP corpsetrig+ ted;
         corpsetrig+ cocoon;
     };
 };
@@ -1245,10 +1405,11 @@
 #NOP -- gswap;
 #alias {gw} {
     #switch {"%0"} {
-        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap juggernaut}};
-        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap mage}};
+        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;get coin;.gswap juggernaut}};
+        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;get coin;.gswap mage}};
         #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;get coin;.gswap elemental}};
-        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;despamrod;get coin;.gswap bard}};
+        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;get coin;.gswap bard}};
+        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;get coin;.gswap fremen}};
         #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
     };
 };
@@ -1300,6 +1461,8 @@
 #list badger3kdb add {{{name} {mycorpsetrig-notap} {type} {corpses} {desc} {Corpsetrig for partying without spelltap}}};
 #list badger3kdb add {{{name} {b} {type} {corpse} {desc} {use a corpse}}};
 #list badger3kdb add {{{name} {mycorpsetrig-donates} {type} {corpse} {desc} {corpsetrig for collecting donates}}};
+#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {corpsetrig without get all}}};
+#list badger3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {corpsetrig to reclaim & fai (fremen)}}};  
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -1345,6 +1508,8 @@
 #list badger3kdb add {{{name} {door1} {type} {misc} {desc} {fallout door 1}}};
 #list badger3kdb add {{{name} {door2} {type} {misc} {desc} {fallout door 2}}};
 #list badger3kdb add {{{name} {bagset} {type} {misc} {desc} {set # of bags to cycle thru}}};
+#list badger3kdb add {{{name} {info} {type} {misc} {desc} {guild info files}}};
+#list badger3kdb add {{{name} {gfinger} {type} {misc} {desc} {see guild info on other players}}};
 
 #NOP -- guild -- juggernaut;
 #if {"$guild" == "juggernaut"} {
@@ -1359,7 +1524,7 @@
     #list badger3kdb add {{{name} {fly1} {type} {guild} {desc} {Jumpjet: toggle levitate using jumpjets}}};
     #list badger3kdb add {{{name} {kk} {type} {guild} {desc} {Retarget attacks to another mob: kk <mob>}}};
     #list badger3kdb add {{{name} {rt} {type} {guild} {desc} {Rtech: check costs of techs in the field}}};
-    #list badger3kdb add {{{name} {tp} {type} {guild} {desc} {Truck pfocus: toggle plasma focusing for truck}}};
+    #list badger3kdb add {{{name} {tpf} {type} {guild} {desc} {Truck pfocus: toggle plasma focusing for truck}}};
     #list badger3kdb add {{{name} {ts} {type} {guild} {desc} {Truck status: check level of truck}}};
     #list badger3kdb add {{{name} {xm} {type} {guild} {desc} {Examine truck}}};
     #list badger3kdb add {{{name} {swapsuit} {type} {guild} {desc} {Swapping suits: setup basic powers after swapping}}};
@@ -1377,6 +1542,7 @@
     #list badger3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend & golem assist)}}};
     #list badger3kdb add {{{name} {killmode5} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend & golem defend)}}};
     #list badger3kdb add {{{name} {ff} {type} {guild} {desc} {cast find familiar}}};
+    #list badger3kdb add {{{name} {m} {type} {guild} {desc} {study spellbook}}};
 
     
     #NOP -- spells;
@@ -1415,5 +1581,10 @@
     #list badger3kdb add {{{name} {dh} {type} {guild} {desc} {Defensive Harmony: increase resistances for yourself or others}}};
     #list badger3kdb add {{{name} {hl} {type} {guild} {desc} {Heartening Laugh: +CON}}};
 };
+
+#if {"$guild" == "fremen"} {
+    #list badger3kdb add {{{name} {m} {type} {guild} {desc} {suspend - refocus mind}}};
+};
+
 
 #class {player_aliases} {close}

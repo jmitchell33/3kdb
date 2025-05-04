@@ -126,6 +126,7 @@
 #list strategyList add {{{guild} {fremen} {name} {voicefeeble} {active} {0} {description} {Fremen: Mind AC shred}}};
 #list strategyList add {{{guild} {fremen} {name} {spicebeer} {active} {0} {description} {Fremen: Drink spice beer}}};
 #list strategyList add {{{guild} {fremen} {name} {focus} {active} {0} {description} {Fremen: Concentrate your attacks on a single mob}}};
+#list strategyList add {{{guild} {fremen} {name} {suspend} {active} {0} {description} {Fremen: Refocus your mind after every fight}}};
 #list strategyList add {{{guild} {monk} {name} {palm} {active} {0} {description} {Monk: Palm}}};
 #list strategyList add {{{guild} {monk} {name} {pressure} {active} {0} {description} {Monk: Pressure}}};
 #list strategyList add {{{guild} {priest} {name} {bark} {active} {0} {description} {Priest: Barkskin}}};
@@ -343,11 +344,9 @@
         #NOP -- Actions to perform the first rounds of combat;
         #if {$mip[round] >= 1 && $mip[round] <= 3} {
             #if {"$guild" == "necromancer"} {_strategy_necro_start};
-        };
-        #NOP -- Actions to perform only once in first round;
-        #if {$mip[round] == 1} {
             #if {"$guild" == "fremen"} {_strategy_fremen_start};
         };
+
         #NOP -- Actions to perform only in the beginning of the fight;
         #if {$mip[round] > 2 && $mip[round] < 6} {
             #if {"${eternal}" != "" && "${my[eternal]}" != ""} {
@@ -401,6 +400,7 @@
         #if {"$guild" == "fremen"} {_strategy_fremen};
         #if {"$guild" == "monk"} {_strategy_monk};
         #if {"$guild" == "priest"} {_strategy_priest};
+        #if {"$guild" == "elemental"} {_strategy_guild};
     };
 };
 

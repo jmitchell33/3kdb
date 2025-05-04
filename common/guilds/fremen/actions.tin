@@ -51,6 +51,26 @@
     };
 };
 
+#NOP -- suspsend;
+#var suspend_toggle 1;
+#action {You close your eyes and focus on your breathing. Every nerve in your body} {
+    #if {!$idle_flag} {
+        #var suspend_toggle 0;
+    };
+};
+
+#action {You shock your body out of its catalepsis and awaken to this world.} {
+    #if {!$idle_flag} {
+        #var suspend_toggle 1;
+    };
+};
+
+#action {Having regained your mental focus completely, you emerge from the Bindu} {
+    #if {!$idle_flag} {
+        #var suspend_toggle 1;
+    };
+};
+
 #action {^Literjons attached to belt:} {
     #line oneshot #action {Max:%* Contains:%*} {
         #format my[literjons][max] {%d} {%%1};
@@ -154,7 +174,6 @@
 #action {^Your mind powers cause %* to have a seizure.$} {
     .trackPowerGxp agony seizure;
 } {2};
-
 
 
 #class {guild_actions} {close}

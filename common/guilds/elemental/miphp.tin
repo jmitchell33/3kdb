@@ -4,13 +4,12 @@
 #var guild_miphp 1;
 
 #alias {_guild_miphp} {
-    #format gp2 {%p} {$gp2};
 	#format gp2_max {%p} {$gp2_max};
 	#list temp clear;
 
-	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max NRG:$gp1/$gp1_max C:$gp2/$gp2_max  E:$ehealth};
+	#list temp add {HP:$my[hp][current]/$my[hp][max] SP:$my[sp][current]/$my[sp][max] NRG:$my[gp1][current]/$my[gp1][max] C:$my[gp2][current]/$gp2_max  E:$ehealth};
 	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NRG:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {<dea>Emit<cfe>: <faa>$my[emit][level] <dea>Form<cfe>: <cad>$my[form][type] <cfe>(<dba>$my[form][size]<cfe>) <bde>Rating<cfe>: <faa>$my[rating] <dea>Blasts<cfe>/<dea>Waves<cfe>: <bfc>$my[blasts]<cfe>/<bfc>$my[waves] <cfe>($my[reset]%) <dea>G2N<cfe>: <cae>$my[g2n]<088>};
+	#list temp add {<dea>Emit<cfe>: <faa>$my[emit][level] <dea>Form<cfe>: <cad>$my[form][type] <cfe>(<dba>$my[form][size]<cfe>) <bde>Rating<cfe>: <faa>$my[rating] <dea>Blasts<cfe>/<dea>Waves<cfe>: <bfc>$my[blasts]<cfe>/<bfc>$my[waves] <cfe>($my[reset]%) <dea>Solidify<cfe>:<088> $my[solidify] <dea>G2N<cfe>: <cae>$my[g2n]<088>};
 	#var hpbar[prompt] $temp;
 };
 

@@ -1,0 +1,43 @@
+#class {guild_strategy} {kill}
+#class {guild_strategy} {open}
+
+#list strategyList add {{{guild} {elemental} {name} {soulGems} {active} {0} {description} {Elemental: Trap the Soul: attempt to create soul gems when enemy is <4% health}}};
+#list strategyList add {{{guild} {elemental} {name} {blasts} {active} {0} {description} {Elemental: Before reset - create and give blasts to your current enemy}}};
+#list strategyList add {{{guild} {elemental} {name} {briefed_blasts} {active} {0} {description} {Elemental: Before reset - create and give blasts to your current enemy (briefed)}}};
+#list strategyList add {{{guild} {elemental} {name} {soulwave} {active} {0} {description} {Elemental: Soul wave - rejuvenate SP (Spirit & Time forms)}}};
+#list strategyList add {{{guild} {elemental} {name} {earthtap} {active} {0} {description} {Elemental: Earth tap - rejuvenate SP (Earth form)}}};
+#list strategyList add {{{guild} {elemental} {name} {thefourwinds} {active} {0} {description} {Elemental: The four winds - rejuvenate SP (Air form)}}};
+#list strategyList add {{{guild} {elemental} {name} {tidalwave} {active} {0} {description} {Elemental: Tidal wave - rejuvenate SP (Water form)}}};
+#list strategyList add {{{guild} {elemental} {name} {heatwave} {active} {0} {description} {Elemental: Heat wave - rejuvenate SP (Fire form)}}};
+
+#list strategyList indexate name;
+
+#var trap_the_soul_toggle 1;
+#var blast_toggle 1;
+
+#alias {_strategy_guild} {
+    #if {$mip[round] && $enemy[hp] < 4 && "$trap_the_soul_toggle" == "1"} {
+        checkStrategy {soulGems} {
+            #var trap_the_soul_toggle 0;
+            evoke trap the soul;
+            #delay 4 {#var trap_the_soul_toggle 1};
+        };
+    };
+    #if {$bot[active] && $mip[round] >= 1 && $mip[round] <= 3} {
+        #if {$my[reset] > 50 && $my[blasts] > 0} {
+            checkStrategy {blasts} {
+                #var blast_toggle 0;
+                #$my[blasts] {evoke create blast;activate blast;give blast to $mob[target]};
+                #delay 4 {#var blast_toggle 1};
+            };
+            checkStrategy {briefed_blasts} {
+                #var blast_toggle 0;
+                #$my[blasts] {evoke create blast;despam;activate blast;give blast to $mob[target]};
+                #delay 4 {#var blast_toggle 1};
+            };
+        };
+    };
+};
+
+
+#class {guild_strategy} {close}

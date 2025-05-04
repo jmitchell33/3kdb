@@ -69,6 +69,11 @@
             #NOP -- Pull data from (cstats for how much damage was received and mob class;
             #if $eternal {_update_cstats};
             .processDeathReport;
+
+            #NOP -- since commands such as xp prevent fremen suspend from working we will put it here;
+            #if {"$guild" == "fremen"} {
+                checkStrategy {suspend} {suspend};
+            };
         };
     };
 
@@ -389,6 +394,7 @@
 
 #NOP -- necromancer;
 #list corpseList add {{{name} {preserve} {guild} {necromancer} {action} {qtrance preserve remains/get remains/keep all preservation}  {active} {0} {description} {Necro: Preserve Remains}}};
+#list corpseList add {{{name} {preserve2} {guild} {necromancer} {action} {qtrance preserve remains/preserve remains/get remains/get remains/keep all preservation} {active} {0} {Necro: Preserve Remains x2}}};
 #list corpseList add {{{name} {absorbSp} {guild} {necromancer} {action} {absorb} {active} {0} {description} {Necro: Absorb Corpse for SP}}};
 #list corpseList add {{{name} {absorbSp2} {guild} {necromancer} {action} {qtrance absorb/absorb} {active} {0} {description} {Necro: Absorb Corpse for SP 2x}}};
 #list corpseList add {{{name} {conWorth} {guild} {necromancer} {action} {con} {active} {0} {description} {Necro: Contribute Coins for Worth}}};
@@ -406,6 +412,7 @@
 #list corpseList add {{{name} {fremcorpse} {guild} {fremen} {action} {fremCorpse} {active} {0} {description} {Fremen: fai & reclaim (Threshold is half your max gp1)}}};
 #list corpseList add {{{name} {fai} {guild} {fremen} {action} {fai} {active} {0} {description} {Fremen: Donate water from a corpse back to guild}}};
 #list corpseList add {{{name} {reclaim} {guild} {fremen} {action} {reclaim} {active} {0} {description} {Fremen: Recover water from a corpse}}};
+#list corpseList add {{{name} {reclaim2} {guild} {fremen} {action} {reclaim;reclaim} {active} {0} {description} {Fremen: Recover water from a corpse x2}}};
 #list corpseList add {{{name} {hide} {guild} {fremen} {action} {hide} {active} {0} {description} {Fremen: Hide in the shadows before ambushing mob}}};
 #list corpseList add {{{name} {poison} {guild} {fremen} {action} {poison} {active} {0} {description} {Fremen: Add poison to your weapon}}};
 
