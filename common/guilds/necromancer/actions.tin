@@ -25,12 +25,14 @@
     rabies;
 } {2};
 #act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1} {2};
+
 #act {The creature has been permanently maimed!} {
     #if $gags[combat_guild] {#line gag};
     #var mob[maim] 1;
-    #math my[necromancer][maim] {$my[necromancer][maim] - 1}
+    #math my[necromancer][maim] {$my[necromancer][maim] - 1};
     #var cmbt[affects][maim] 1;
 } {2};
+
 #action {>>>The psibleed upon %*.} {
     #if $gags[combat_guild] {#line gag};
     psibleed
