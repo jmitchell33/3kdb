@@ -15,14 +15,14 @@
                 .pause;
                 #var pausedtoregen 0;
             };
-            #if {$bot[paused] && $my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-                .unpause;
-                ..;
+            #if {$my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
+                #if {$bot[paused]} {.unpause};
+                #if {$bot[active]} {..};
                 #var pausedtoregen 1;
             };
         };
         #if {"$guild" == "fremen"} {
-            #if {$bot[active] && "$pausedtoregen" == "1" && "$my[litany][focus]" == "Wracked"} {
+            #if {$bot[active] && "$pausedtoregen" == "1" && "$my[litany][focus]" == "Unhindered"} {
                 .pause;
                 #var pausedtoregen 0;
                 #var suspend_toggle 1;
@@ -30,9 +30,9 @@
             #if {"$mip[round]" == "0" && "$suspend_toggle" == "1" && "$pausedtoregen" == "0"} {
                 #send {!suspend};
             };
-            #if {$bot[paused] && "$pausedtoregen" == "0" && "$my[litany][focus]" == "Luminous"} {
-                .unpause;
-                ..;
+            #if {"$pausedtoregen" == "0" && "$my[litany][focus]" == "Luminous"} {
+                #if {$bot[paused]} {.unpause};
+                #if {$bot[active]} {..};
                 #var pausedtoregen 1;
                 #var suspend_toggle 1;
             };
