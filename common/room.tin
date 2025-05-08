@@ -211,12 +211,20 @@
                 #var toggles[fremen][hold] 1;
                 #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
             };
+            #if {"$toggles[fremen][stun]" == "0"} {
+                #var toggles[fremen][stun] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+            };
         };
         #NOP -- toggle maintenance if mob is aggro;
         #if {"$bot[aggro-mob]" == "1"} {
             #if {"$toggles[fremen][hold]" == "0"} {
                 #var toggles[fremen][hold] 1;
                 #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+            };
+            #if {"$toggles[fremen][stun]" == "0"} {
+                #var toggles[fremen][hold] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - stun toggle set to 1:<088> $toggles[fremen][stun]}};
             };
         };
     };

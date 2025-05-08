@@ -72,9 +72,16 @@
 
             #NOP -- strategy actions & toggle maintenance that need to fire after all corpsetrig actions if bot is not active;
             #if {"$guild" == "fremen"} {
-                #if {"$bot[active]" != "1" && "$toggles[fremen][hold]" == "0"} {
-                    #var toggles[fremen][hold] 1;
-                    #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off or undefined - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                #if {"$bot[active]" != "1"} {
+                    #if {"$toggles[fremen][hold]" == "0"} {
+                        #var toggles[fremen][hold] 1;
+                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                        checkStrategy {suspend} {#send {!suspend}};
+                    };
+                    #if {"$toggles[fremen][stun]" == "0"} {
+                        #var toggles[fremen][stun] 1;
+                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                    };
                     checkStrategy {suspend} {#send {!suspend}};
                 };
             };

@@ -197,8 +197,12 @@
             #if {"$toggles[fremen][hold]" == "0"} {
                 #var toggles[fremen][hold] 1;
                 #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
-                checkStrategy {suspend} {#send {!suspend}};
             };
+            #if {"$toggles[fremen][stun]" == "0"} {
+                #var toggles[fremen][stun] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+            };
+            checkStrategy {suspend} {#send {!suspend}};
         };
         
         #var bot[foundmob] 0;
