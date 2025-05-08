@@ -3,6 +3,15 @@
 
 #var eternal 1;
 
+#NOP -- Turn off eternal if either of these fail;
+#action {There is no reason to '(cstats' here.} {
+	#var eternal 0;
+} {1};
+
+#action {There is no reason to '(powers' here.} {
+	#var eternal 0;
+} {1};
+
 #alias {_update_eternal_status} {
 	#if {$my[eternal][heal]} {#format {heal_string} {<bfa>HEAL<088>}} {#format {heal_string} {<faa>HEAL<088>}};
 	#if {$my[eternal][energy well]} {#format {ewell_string} {<bfa>EWELL<088>}} {#format {ewell_string} {<faa>EWELL<088>}};
@@ -170,6 +179,8 @@
 
 
 #alias {update_eternal_power} {
+	#NOP -- In case eternal was turned off, reset it to 1 if the powers screen works;
+	#var eternal 1;
 	#var found_power 0;
 	#format temp {%p} {%1};
 	#foreach $eternalList index {

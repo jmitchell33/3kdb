@@ -161,18 +161,15 @@
         #if {$bot[delta-time] > 3600} {
             #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
             #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-            thousandsFormatNumber bot[delta-rate];
-            #var xp_rate_str $bot[delta-rate] ($bot[delta-time] Hrs);
+            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]} ($bot[delta-time] Hrs);
         } {
             #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
             #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-            thousandsFormatNumber bot[delta-rate];
-            #var xp_rate_str $bot[delta-rate] ($bot[delta-time] mins);
+            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]} ($bot[delta-time] mins);
         };
         #if {!$idle_flag && $bot[active]} {
             #var temp_xp $bot[stats][xp];
-            thousandsFormatNumber temp_xp;
-            ptell Progress: $bot_current_room/$bot_total_rooms ($bot_progress%) Mobs Killed: $bot[stats][mobs]  XP Gained: $temp_xp  XP Rate/Hr: $xp_rate_str;
+            ptell Progress: $bot_current_room/$bot_total_rooms ($bot_progress%) Mobs Killed: $bot[stats][mobs]  XP Gained: @thousandsFormatNumber{$temp_xp}  XP Rate/Hr: $xp_rate_str;
         };
     };
 } {1};
