@@ -1,30 +1,46 @@
 #class {guild_actions} {kill}
 #class {guild_actions} {open}
 
+#NOP -- action toggle maintenance;
+#NOP -- voice hold;
+#action {%* recoils from your voice and stops attacking!} {
+    #if {!$idle_flag} {
+        #var toggles[fremen][hold] 0;
+        #if {$debug[toggle]} {#echo {<ffa>debug toggles: voice hold hit - hold toggle set to 0:<088> $toggles[fremen][hold]}};
+    };
+} {2};
+
+#action {%* recovers from the Voice!} {
+    #if {!$idle_flag} {
+        #var toggles[fremen][hold] 1;
+        #if {$debug[toggle]} {#echo {<ffa>debug toggles: voice hold finished - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+    };
+} {2};
+
 #NOP -- fremen skills;
 #action {You are in the yali of the Reverend Mother Jessica} {
     #if {!$idle_flag} {
         #echo {<caf>Trainable skills: <fff>litany, pain, prescience, voice, weirding<088>};
     };
-};
+} {2};
 
 #action {This is the yali of the legendary Otheym} {
     #if {!$idle_flag} {
         #echo {<caf>Trainable skills: <fff>ambush, assault, chaumary, crysknife, desert hardening, devices, hide, projectile<088>};
     };
-};
+} {2};
 
 #action {Inside this fremen yali} {
     #if {!$idle_flag} {
         #echo {<caf>Trainable skills: <fff>bindu, fiqh, ilm, nerve, prana<088>};
     };
-};
+} {2};
 
 #action {You stand before a vast lake of water deep under the sietch.} {
     #if {!$idle_flag} {
         #echo {<caf>Trainable skills: <fff>fai, huanui, water discipline<088>};
     };
-};
+} {2};
 
 #NOP -- spice;
 #var spiceBeers 0;
@@ -32,14 +48,16 @@
     #if {!$idle_flag} {
         #math {spiceBeers} {$spiceBeers + 1};
     };
-};
+} {2};
 
 #action {^You drink the spice beer.} {
     #if {!$idle_flag} {
         #var spicebeertoggle 0;
-        #math {spiceBeers} {$spiceBeers - 1};
+        #if {"$spiceBeers" != "0"} {
+            #math {spiceBeers} {$spiceBeers - 1};
+        };
     };
-};
+} {2};
 
 #action {^The effects of the spice wear off.} {
     #if {!$idle_flag} {
@@ -49,7 +67,7 @@
             #var spicebeertoggle 0;
         };
     };
-};
+} {2};
 
 #NOP -- suspsend;
 #var suspend_toggle 1;
@@ -57,19 +75,19 @@
     #if {!$idle_flag} {
         #var suspend_toggle 0;
     };
-};
+} {2};
 
 #action {You shock your body out of its catalepsis and awaken to this world.} {
     #if {!$idle_flag} {
         #var suspend_toggle 1;
     };
-};
+} {2};
 
 #action {Having regained your mental focus completely, you emerge from the Bindu} {
     #if {!$idle_flag} {
         #var suspend_toggle 1;
     };
-};
+} {2};
 
 #action {^Literjons attached to belt:} {
     #line oneshot #action {Max:%* Contains:%*} {
@@ -87,12 +105,12 @@
 
 
 #action {^You carefully fill a literjon.} {
-    #math my[literjons][filled] {$my[literjons][filled] + 1};
+    #NOP #math my[literjons][filled] {$my[literjons][filled] + 1};
     #math my[literjons][empty] {$my[literjons][empty] - 1};
 } {2};
 
 #action {^You sip the water carefully from a literjon.} {
-    #math my[literjons][filled] {$my[literjons][filled] - 1};
+    #NOP #math my[literjons][filled] {$my[literjons][filled] - 1};
     #math my[literjons][empty] {$my[literjons][empty] + 1};
     #math my[literjons][drying] {$my[literjons][drying] + 1};
 } {2};
@@ -103,7 +121,7 @@
 
 #action {^You carefully place your literjons on the rack.} {
     #var my[literjons][empty] $my[literjons][carrying];
-    #var my[literjons][filled] 0;
+    #var my[literjons][filled] 0
 } {2};
 
 
@@ -145,34 +163,48 @@
 };
 
 #NOP -- Tracker for gxp/powers;
-#action {^You are too exhausted to inflict agony.$} {
+#action {You are too exhausted to inflict agony.} {
     .trackPowerGxp agony too-exhausted;
 } {2};
 
-#action {^You probe %* mind ineffectually.$} {
+#action {You probe %* mind ineffectually.} {
     .trackPowerGxp agony ineffectually;
 } {2};
-#action {^You inflict pain on %*.$} {
-    .trackPowerGxp agony inflict-pain;
- } {2}
- #action {^Though tired, you cause some pain in %* mind.$} {
-    .trackPowerGxp agony tired-some;
- } {2};
 
-#action {^You find %* mind open to you as you cause %* some pain.$} {
+#action {You inflict pain on %*.} {
+    .trackPowerGxp agony inflict-pain;
+} {2};
+
+#action {Though tired, you cause some pain in %* mind.} {
+    .trackPowerGxp agony tired-some;
+} {2};
+
+#action {You find %* mind open to you as you cause %* some pain.} {
     .trackPowerGxp agony mind-open;
 } {2};
 
-#action {^You invade %* mind, causing %* pain.$} {
+#action {You invade %* mind, causing %* pain.} {
     .trackPowerGxp agony invade;
 } {2};
 
-#action {^You cause %* to have a momentary seizure!$} {
+#action {You cause %* to have a momentary seizure!} {
     .trackPowerGxp agony seizure-momentary;
 } {2};
 
-#action {^Your mind powers cause %* to have a seizure.$} {
+#action {Your mind powers cause %* to have a seizure.} {
     .trackPowerGxp agony seizure;
+} {2};
+
+#action {You set off %* nerves in a dreadful seizure.} {
+    .trackPowerGxp agony seizure-dreadful;
+} {2};   
+
+#action {You project your mind into %*, causing %* agony.} {
+    .trackPowerGxp agony agony;
+} {2};
+
+#action {You crumble the barrier between your minds and overwhelm %*.} {
+    .trackPowerGxp agony overwhelm;
 } {2};
 
 

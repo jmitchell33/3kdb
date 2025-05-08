@@ -204,6 +204,23 @@
     #var botTarget 0;
     #var mobFamiliar 0;
 
+    #NOP -- strategy action toggle maintenance if cassisting;
+    #if {"$guild" == "fremen"} {
+        #if {"$cassist[status]" == "1"} {
+            #if {"$toggles[fremen][hold]" == "0"} {
+                #var toggles[fremen][hold] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+            };
+        };
+        #NOP -- toggle maintenance if mob is aggro;
+        #if {"$bot[aggro-mob]" == "1"} {
+            #if {"$toggles[fremen][hold]" == "0"} {
+                #var toggles[fremen][hold] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+            };
+        };
+    };
+
     #NOP -- Auto ask/solve/return missions;
     #regex {%1} {<?>} {mission ask};
     #regex {%1} {<!>} {mission return};

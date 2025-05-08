@@ -28,26 +28,32 @@
     #var my[pain][stored] %3;
     #var my[maula][pistol] %4;
     #var my[maula][clips] %5;
-    #var my[sandtrout][reset] %6;
+    #if {"%6" == ""} {
+        #var my[sandtrout][reset] OFF;
+    }; #elseif {"%6" == "D"} {
+        #var my[sandtrout][reset] READY!;
+    }; #else {
+        #var my[sandtrout][reset] %6;
+    };
     #var my[water][round] %7;
     #var corpses[coffin] %8;
-    #var my[belt][water] %9
+    #var my[literjons][filled] %9
 };
 
 #action {Pr: %p As: %p Lt: %p At: %p} {
     #if $gags[hpbar] {#line gag};
-    #var my[prana][mode] %1;
-    #var my[assault][mode] %2;
-    #var my[litany][mode] %3;
-    #var my[attacks][mode] %4
+    #var my[mode][prana] %1;
+    #var my[mode][assault] %2;
+    #var my[mode][litany] %3;
+    #var my[mode][attacks] %4
 };
 
 #action {Bi: %p Pn: %p Wd: %p Rf: %p} {
     #if $gags[hpbar] {#line gag};
-    #var my[bindu][mode] %1;
-    #var my[pain][mode] %2;
-    #var my[weirding][mode] %3;
-    #var my[reflexes][mode] %4
+    #var my[mode][bindu] %1;
+    #var my[mode][pain] %2;
+    #var my[mode][weirding] %3;
+    #var my[mode][reflexes] %4
 };
 
 #action {Gxp: \[%p\] G: \[%d/Rnd\]} {

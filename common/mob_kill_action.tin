@@ -264,6 +264,7 @@
 #list mkaList add {{{name} {backstab} {guild} {bard} {action} {rolm edged;cast mystic venom on rod;hide in shadows;backstab $mkaTargetName} {active} {0} {description} {Bard: Backstab the mob}}};
 #list mkaList add {{{name} {roomAttack} {guild} {bard} {action} {itf;} {active} {0} {description} {Bard: Attack Room w/ Into The Fire}}};
 #list mkaList add {{{name} {harmony} {guild} {bard} {action} {defensive harmony} {active} {0} {description} {Bard: Increase AC for a short duration}}};
+#list mkaList add {{{name} {hregen} {guild} {bard} {action} {#if !$my[defs][hr] {cast harmonic regeneration}} {active} {0} {description} {Bard: cast harmonic regeneration}}};
 
 #NOP -- juggernaut;
 #list mkaList add {{{name} {suppDefend} {guild} {juggernaut} {action} {
@@ -293,13 +294,20 @@
 #list mkaList add {{{name} {haste} {guild} {mage} {action} {cast haste} {active} {0} {description} {Mage: Cast haste on yourself}}};
 
 #NOP -- fremen;
-#list mkaList add {{{name} {ambush} {guild} {fremen} {action} {ambush $mkaTargetName} {active} {0} {description} {Fremen: Hide/Ambush}}};
+#list mkaList add {{{name} {ambush} {guild} {fremen} {action} {ambush $mkaTargetName} {active} {0} {description} {Fremen: Ambush}}};
 
 #list mkaList indexate name;
 
 #alias mka {
     #var mkaTarget 1;
     #if {"%0" === ""} {#var mkaTargetName $room[mobs][1][autoName]} {#var mkaTargetName %0};
+    #NOP -- strategy action toggle maintenance incase corpsetrig fails to fire;
+    #if {"$guild" == "fremen"} {
+        #if {"$toggles[fremen][hold]" == "0"} {
+            #var toggles[fremen][hold] 1;
+            #if {$debug[toggle]} {#echo {<ffa>debug toggles: mka fired - hold set to 1:<088> $toggles[fremen][hold]}};
+        };
+    };
     #if {"$mkaStatus" == "1"} {
         #if {&mkaActions[] > 0} {
             #loop 1 &mkaActions[] item {
@@ -307,10 +315,6 @@
             };
         };
         kill $mkaTargetName;
-        #if {"$guild" == "bard"} {
-            checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
-            checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
-        };
     };
 };
 

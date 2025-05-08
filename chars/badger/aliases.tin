@@ -9,16 +9,6 @@
     };
 };
 
-#NOP -- debug stuff;
-#alias {.startlog} {
-    #switch {"%0"} {
-        #case {"on"} {#event {SENT OUTPUT} {#echo {<cfa>out (%0)}};#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
-        #case {"off"} {#UNEVENT {SEND OUTPUT};#unvar debug[bot];#log off};
-        #case {"del"} {#log remove botlog};
-        #case {""} {#echo {<fff>No user input<088>}};
-    };
-};
-
 #NOP -- study spell book and suspend;
 #alias {m} {
     #if {"$guild" == "mage"} {
@@ -100,10 +90,6 @@
 #NOP -- defensive harmony;
 #alias {dh} {
     defensive harmony
-};
-
-#alias {writelog} {
-    #system {echo ROUND COUNT: $total_rounds >> chars/badger/badgerslog.log}
 };
 
 #NOP -- configure 3kReport;
@@ -538,6 +524,8 @@
     };
     #if {"$guild" == "fremen"} {
         reflex clear;
+        reflex add hp <40% eternal heal badger;
+        reflex add hp <40% hmheal;
         reflex add gp1 <25% drop pants
     };
 };
@@ -647,6 +635,7 @@
         mycorpsetrig;
         mka-on;
         mka-clear;
+        mka+ ambush;
         set3kreport;
         look
     };
@@ -665,7 +654,7 @@
     enhance %0;
     cassist +clear;
     #delay 2 {calltruck};
-    #delay 4 {tp};
+    #delay 4 {tpf};
     #delay 6 {empower};
     #delay 8 {cdefend clear};
 };
@@ -830,16 +819,6 @@
     rtech
 };
 
-#NOP -- toggle plasma focusing for truck and fremen guild chatline;
-/*#alias {tp} {
-    #if {"$guild" == "juggernaut"} {
-        truck pfocus;
-    };
-    #if {"$guild" == "fremen"} {
-        #send {!tp %1} 
-    };
-};*/
-
 #NOP -- check level of truck;
 #alias {ts} {
     truck status
@@ -891,7 +870,11 @@
     };
     #if {"$guild" == "fremen"} {
         strategy-clear;
-        strategy suspend
+        strategy suspend;
+        strategy stun;
+        strategy spicebeer;
+        strategy voicehold;
+        strategy voicefeeble
     };
 };
 
@@ -958,12 +941,18 @@
     #if {"$guild" == "fremen"} {
         corpsetrig-clear;
         corpsetrig+ wrap;
-        corpsetrig+ reclaim2;
+        corpsetrig+ reclaim1;
+        corpsetrig+ fbelt;
+        corpsetrig+ fai2;
         corpsetrig+ divvy;
         corpsetrig+ getAll;
         corpsetrig+ crafting;
-        #NOP corpsetrig+ ted;
+        corpsetrig+ bag1;
+        corpsetrig+ bag1;
+        corpsetrig+ ted;
         corpsetrig+ cocoon;
+        corpsetrig+ hide1;
+        corpsetrig+ poison1;
     };
 };
         
@@ -1022,7 +1011,24 @@
         corpsetrig+ cocoon;
     };
     #if {"$guild" == "fremen"} {
-        corpsetrig-clear
+        corpsetrig-clear;
+        corpsetrig+ wrap;
+        corpsetrig+ reclaim1;
+        corpsetrig+ fbelt;
+        corpsetrig+ fai2;
+        corpsetrig+ divvy;
+        corpsetrig+ getAll;
+        corpsetrig+ crafting;
+        corpsetrig+ szCaps;
+        corpsetrig+ szGreenCap;
+        corpsetrig+ keep all capsule;
+        corpsetrig+ keep all capsule;
+        corpsetrig+ bag1;
+        corpsetrig+ bag1;
+        corpsetrig+ ted;
+        corpsetrig+ cocoon;
+        corpsetrig+ hide1;
+        corpsetrig+ poison1;
     };
 };
 
@@ -1078,9 +1084,12 @@
     corpsetrig-clear;
     corpsetrig+ wrap;
     corpsetrig+ fremcorpse;
+    corpsetrig+ reclaim2;
     corpsetrig+ divvy;
-    corpsetrig+ ted;
-    corpsetrig+ cocoon
+    #NOP corpsetrig+ ted;
+    corpsetrig+ cocoon;
+    corpsetrig+ hide1;
+    corpsetrig+ poison1
 };
 
 #NOP -- party corpsetrig;
@@ -1240,14 +1249,17 @@
     #if {"$guild" == "fremen"} {
         corpsetrig-clear;
         corpsetrig+ wrap;
-        corpsetrig+ reclaim2;
+        corpsetrig+ reclaim1;
+        corpsetrig+ fbelt;
+        corpsetrig+ fai2;
         corpsetrig+ divvy;
         corpsetrig+ getAll;
-        corpsetrig+ crafting;
         corpsetrig+ bag1;
         corpsetrig+ bag1;
         #NOP corpsetrig+ ted;
         corpsetrig+ cocoon;
+        corpsetrig+ hide1;
+        corpsetrig+ poison1
     };
 };
 
@@ -1304,14 +1316,21 @@
 };
 
 #NOP -- gathers all the pedes;
-#alias pede_run {w;w;w;w;w;sw;s;n;ne;e;e;e;se;s;s;nw;nw;e;w;se;se;n;n;nw;e;e;n;n;n;n;n;ne;sw;s;s;s;sw;w;w;ne;ne;s;n;sw;sw;e;e;ne;s;s;e;e;e;e;e;w;w;w;nw;n;n;se;se;w;e;nw;nw;s;s;se;w;w;s;s;s;s;s;n;n;n;ne;e;e;sw;sw;n;s;ne;ne;w;w;sw;n;n};
+#alias {pede_run} {w;w;w;w;w;sw;s;n;ne;e;e;e;se;s;s;nw;nw;e;w;se;se;n;n;nw;e;e;n;n;n;n;n;ne;sw;s;s;s;sw;w;w;ne;ne;s;n;sw;sw;e;e;ne;s;s;e;e;e;e;e;w;w;w;nw;n;n;se;se;w;e;nw;nw;s;s;se;w;w;s;s;s;s;s;n;n;n;ne;e;e;sw;sw;n;s;ne;ne;w;w;sw;n;n};
 
 #NOP -- gathers all the hunting kayos mobs;
-#alias kayos_run {#4 {#7 {kill mob;e};n;#7 {kill mob;w};n}};
+#alias {kayos_run} {#4 {#7 {kill mob;e};n;#7 {kill mob;w};n}};
 
-#NOP -- quick aliases for Fallout doors;
-#alias door1 {enter a %1, b %1, c %1, d %1};
-#alias door2 {enter a %1, b %2, c %3, d %4};
+#NOP -- fallout doors;
+#alias {door1} {
+    #echo {<ffa>Colors: <fff>black, white, blue, red, yellow, green, cyan, brown<088>};
+    enter a %1, b %1, c %1, d %1
+};
+
+#alias {door2} {
+    #echo {<ffa>Colors: <fff>black, white, blue, red, yellow, green, cyan, brown<088>};
+    enter a %1, b %2, c %3, d %4
+};
 
 #NOP -- to and from bigpig;
 #alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up};
@@ -1402,6 +1421,20 @@
     #5 throw axe
 };
 
+#NOP -- debug stuff;
+#alias {.startlog} {
+    #switch {"%0"} {
+        #case {"on"} {#event {SENT OUTPUT} {#echo {<cfa>out (%0)}};#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
+        #case {"off"} {#UNEVENT {SEND OUTPUT};#unvar debug[bot];#log off};
+        #case {"del"} {#log remove botlog};
+        #case {""} {#echo {<fff>No user input<088>}};
+    };
+};
+
+#alias {writelog} {
+    #system {echo ROUND COUNT: $total_rounds >> chars/badger/badgerslog.log}
+};
+
 #NOP -- gswap;
 #alias {gw} {
     #switch {"%0"} {
@@ -1462,7 +1495,7 @@
 #list badger3kdb add {{{name} {b} {type} {corpse} {desc} {use a corpse}}};
 #list badger3kdb add {{{name} {mycorpsetrig-donates} {type} {corpse} {desc} {corpsetrig for collecting donates}}};
 #list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {corpsetrig without get all}}};
-#list badger3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {corpsetrig to reclaim & fai (fremen)}}};  
+#list badger3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {corpsetrig to reclaim & fai (fremen)}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
