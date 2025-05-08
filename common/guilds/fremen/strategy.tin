@@ -3,6 +3,7 @@
 
 #var toggles[fremen][hold] 1;
 #var toggles[fremen][stun] 1;
+#var toggles[fremen][enfeeblement] 1;
 
 #list strategyList add {{{guild} {fremen} {name} {agony} {active} {0} {description} {Fremen: Inflict pain (mind dmg)}}};
 #list strategyList add {{{guild} {fremen} {name} {stun} {active} {0} {description} {Fremen: Stun mobs with a poison pellet}}};
@@ -16,11 +17,13 @@
 
 #NOP -- actions to perform at any time in the fight;
 #alias {_strategy_guild} {
-    checkStrategy {agony} {#if {$my[gp1][current] > 100 && $my[sp][current] > 100} {agony}};
-    checkStrategy {stun} {#if {$my[gp1][current] > 110 && "$toggles[fremen][stun]" == "1"} {stun}};
-    checkStrategy {voicehold} {#if {$my[gp1][current] > 100 && "$toggles[fremen][hold]" == "1"} {voice}};
-    checkStrategy {voicefeeble} {#if {$my[gp1][current] > 100} {voice $enemy[target] to enfeeblement}};
-    checkStrategy {spicebeer} {#if {"$spicebeertoggle" == "1" && $spiceBeers > 0} {smuggle remove spice beer;drink spice beer}};
+    #if {$enemy[hp] > 0} {
+        checkStrategy {agony} {#if {$my[gp1][current] > 100 && $my[sp][current] > 100} {agony}};
+        checkStrategy {stun} {#if {$my[gp1][current] > 110 && "$toggles[fremen][stun]" == "1"} {stun}};
+        checkStrategy {voicehold} {#if {$my[gp1][current] > 100 && "$toggles[fremen][hold]" == "1"} {voice}};
+        checkStrategy {voicefeeble} {#if {$my[gp1][current] > 100 && "$toggles[fremen][enfeeblement]" == "1"} {voice $enemy[target] to enfeeblement}};
+        checkStrategy {spicebeer} {#if {"$spicebeertoggle" == "1" && $spiceBeers > 0} {smuggle remove spice beer;drink spice beer}};
+    };
 };
 
 #NOP -- actions to perform the first rounds of combat;

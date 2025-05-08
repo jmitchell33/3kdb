@@ -18,6 +18,14 @@
     };
 } {2};
 
+#NOP -- voice enfeeblement;
+#action {recoils from your} {
+    #if {!$idle_flag} {
+        #var toggles[fremen][enfeeblement] 0;
+        #if {$debug[toggle]} {#echo {<ffa>debug toggles: enfeeblement already used - enfeeblement toggle set to 0:<088> $toggles[fremen][enfeeblement]}};
+    };
+} {2};
+
 #NOP -- fremen skills;
 #action {You are in the yali of the Reverend Mother Jessica} {
     #if {!$idle_flag} {
@@ -206,6 +214,10 @@
 
 #action {You crumble the barrier between your minds and overwhelm %*.} {
     .trackPowerGxp agony overwhelm;
+} {2};
+
+#action {You tear into %* mind, causing intense agony!} {
+    .trackPowerGxp agony intense;
 } {2};
 
 

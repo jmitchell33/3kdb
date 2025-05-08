@@ -215,6 +215,10 @@
                 #var toggles[fremen][stun] 1;
                 #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
             };
+            #if {"$toggles[fremen][enfeeblement]" == "0"} {
+                #var toggles[fremen][enfeeblement] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+            };
         };
         #NOP -- toggle maintenance if mob is aggro;
         #if {"$bot[aggro-mob]" == "1"} {
@@ -225,6 +229,10 @@
             #if {"$toggles[fremen][stun]" == "0"} {
                 #var toggles[fremen][hold] 1;
                 #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+            };
+            #if {"$toggles[fremen][enfeeblement]" == "0"} {
+                #var toggles[fremen][enfeeblement] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
             };
         };
     };
