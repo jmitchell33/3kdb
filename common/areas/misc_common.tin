@@ -64,4 +64,18 @@
 #alias {makering-white} {bow;plant white seed;plant white seed;plant hammer;chop tree;whittle ring;get ring};
 #alias {makering-green} {bow;plant green seed;plant green seed;plant hammer;chop tree;whittle ring;get ring};
 
+#NOP -- Prysmyia Exit;
+#alias prys_exit {
+    #class exit_prys kill;
+    #class exit_prys open;
+    #action {There is no reason to 'light,%*' here.} {%%1} {1};
+    #action {Prysmyia forces you back from that path.} {look;#delay 2 $exitStr} {1};
+    #action {The colors turn to darkness and resist you.} {look;#delay 2 $exitStr} {1};
+    #action {The colors shimmer slightly.} {look;#delay 2 $exitStr} {1};
+    #action {You pass through the shimmering colors.} {#class exit_prys kill} {1};
+    light;
+    #class exit_prys close;
+}
+
+
 #class {misc_common} {close}
