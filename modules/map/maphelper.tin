@@ -262,6 +262,9 @@
 	}
 };
 
+#NOP Erratio Forest;
+#action {^You squeeze your way into the Erratio forest.$} {#map goto 34133} {2};
+
 #NOP Lost City
 #act {^With a final THUD, you fly out into a pile of metal!} {#map goto 24299}
 #act {^With a bit of difficulty you make your way back up the shaft} {#map goto 24297}
@@ -361,11 +364,10 @@
 #NOP -- function to also take a step back on the mapper if we undo a map;
 #alias mapUndo {
 	#map undo;
-	#if {$bot[active] && !$bot[paused]} {
+	#if {$bot[active]} {
 		#math bot[step] {$bot[step] - 1};
-		#if {!$incombat} {
-			#delay .5 {glance};
-		};
+		#var bot[walk] 0;
+		#line substitute variables {#if !$incombat {.bot}};
 	};
 };
 
