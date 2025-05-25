@@ -110,11 +110,13 @@
 #action {^%1 drop-kicked you.$} {mobAttackTrack melee};
 
 #NOP -- Specials;
-#action {The %* preaches at you. Blood gushes from your ears!} {mobAttackTrack special};
+#action {The %* preaches at you. Blood gushes from your ears!} {mobAttackTrack special} {2};
 #action {The %* holds up his sceptre and it begins to glow eerily.} {
     #line oneshot #action {You look faint.} {#if $gags[combat_generic] {#line gag}} {1};
     mobAttackTrack special
-};
+} {2};
+#action {^The sentry scorches you with jets of liquid flame!$} {mobAttackTrack special} {2};
+#action {^The shrapnel from one of the sentry's grenades nearly rips you apart!$} {mobAttackTrack special} {2};
 
 
 #NOP -----------------------------------------------------;
