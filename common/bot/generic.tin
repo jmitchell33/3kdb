@@ -55,19 +55,14 @@
     #var bot_xp $bot[stats][xp];
     #var bot_loop_coins $bot[stats][loop][coins];
     #var bot_coins $bot[stats][coins];
-
-    thousandsFormatNumber bot_loop_xp;
-    thousandsFormatNumber bot_xp;
-    thousandsFormatNumber bot_loop_coins;
-    thousandsFormatNumber bot_coins;
     
     #format loop1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][loop][mobs]};
-    #format loop2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_loop_xp};
-    #format loop3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_loop_coins};
+    #format loop2 {%+20s %-20s} {<BBB><aad>            XP Gained: @thousandsFormatNumber{$bot_loop_xp}};
+    #format loop3 {%+20s %-20s} {<BBB><aad>         Coins Earned: @thousandsFormatNumber{$bot_loop_coins}};
     
     #format total1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][mobs]};
-    #format total2 {%+20s %-20s} {<BBB><aad>            XP Gained: $bot_xp};
-    #format total3 {%+20s %-20s} {<BBB><aad>         Coins Earned: $bot_coins};
+    #format total2 {%+20s %-20s} {<BBB><aad>            XP Gained: @thousandsFormatNumber{$bot_xp}};
+    #format total3 {%+20s %-20s} {<BBB><aad>         Coins Earned: @thousandsFormatNumber{$bot_coins}};
     
     #echo {<BBB><aad>---------------------------------------------------<088>};
     #echo {<BBB><aad>--------------     Current Loop     ---------------<088>};
@@ -96,6 +91,7 @@
 
 #alias {.backupBot} {
     #if {"$bot[alias]" != "abyss" && "$bot[alias]" != "sewers"} {
+        #unvar lastBot;
         #map get roomvnum bot[pause_room];
         #var lastBot[file] $bot[file];
         #var lastBot[curVnum] $bot[curVnum];
@@ -197,6 +193,23 @@
         #if {"$guild" == "bard"} {perform dirge};
         .bot;
     } {
+        #NOP -- strategy actions & toggle maintenance that need to fire after all corpsetrig actions if bot active;
+        #if {"$guild" == "fremen"} {
+            #if {"$toggles[fremen][hold]" == "0"} {
+                #var toggles[fremen][hold] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+            };
+            #if {"$toggles[fremen][stun]" == "0"} {
+                #var toggles[fremen][stun] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+            };
+            #if {"$toggles[fremen][enfeeblement]" == "0"} {
+                #var toggles[fremen][enfeeblement] 1;
+                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+            };
+            checkStrategy {suspend} {#send {!suspend}};
+        };
+        
         #var bot[foundmob] 0;
         #var bot[aggro-mob] 0;
         #if !$idle_flag {
@@ -244,17 +257,14 @@
             #if {$bot[delta-time] > 3600} {
                 #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
                 #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-                thousandsFormatNumber bot[delta-rate];
-                #var xp_rate_str $bot[delta-rate]/hr ($bot[delta-time] Hrs);
+                #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] Hrs);
             } {
                 #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
                 #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-                thousandsFormatNumber bot[delta-rate];
-                #var xp_rate_str $bot[delta-rate]/hr ($bot[delta-time] mins);
+                #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
             };
             #var temp_xp $bot[stats][xp];
-            thousandsFormatNumber temp_xp;
-            ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
+            ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str);
             #echo {<dfa>Coins Earned: $bot[stats][coins]<088>};
             #if {&{botcycle[]} > 0} {
                 .stop;
@@ -277,17 +287,14 @@
                 #if {$bot[delta-time] > 3600} {
                     #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
                     #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-                    thousandsFormatNumber bot[delta-rate];
-                    #var xp_rate_str $bot[delta-rate]/hr ($bot[delta-time] Hrs);
+                    #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] Hrs);
                 } {
                     #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
                     #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-                    thousandsFormatNumber bot[delta-rate];
-                    #var xp_rate_str $bot[delta-rate]/hr ($bot[delta-time] mins);
+                    #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
                 };
                 #var temp_xp $bot[stats][xp];
-                thousandsFormatNumber temp_xp;
-                ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: $temp_xp ($xp_rate_str);
+                ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str);
                 #echo {Coins Earned: $bot[stats][coins]};
                 #if {&{botcycle[]} > 0} {
                     .stop;

@@ -59,7 +59,7 @@
             #if {$corpsetrigKB} {
                 #if {"$deathReport[mob_killer]" == "$user_cap"} {corpse_trig}
             } {
-                corpse_trig
+                corpse_trig;
             };
             update_xp;
             update_coins;
@@ -70,13 +70,28 @@
             #if $eternal {_update_cstats};
             .processDeathReport;
 
-            #NOP -- since commands such as xp prevent fremen suspend from working we will put it here;
+            #NOP -- strategy actions & toggle maintenance that need to fire after all corpsetrig actions if bot is not active;
             #if {"$guild" == "fremen"} {
-                checkStrategy {suspend} {suspend};
+                #if {"$bot[active]" != "1"} {
+                    #if {"$toggles[fremen][hold]" == "0"} {
+                        #var toggles[fremen][hold] 1;
+                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                        checkStrategy {suspend} {#send {!suspend}};
+                    };
+                    #if {"$toggles[fremen][stun]" == "0"} {
+                        #var toggles[fremen][stun] 1;
+                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                    };
+                    #if {"$toggles[fremen][enfeeblement]" == "0"} {
+                        #var toggles[fremen][enfeeblement] 1;
+                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+                    };
+                    checkStrategy {suspend} {#send {!suspend}};
+                };
             };
         };
     };
-
+            
     #if $bot[active] {
         #showme {----- BOT REGISTERED KILL -----};
         #NOP #local lastItem &deathSummary[];    ;
@@ -86,7 +101,7 @@
         #NOP     };    ;
         #NOP };    ;
     };
-} {1};
+} {2};
 
 #alias .processDeathReport {
     #var deathReport[mob_rounds_to_kill] $mip[round];
@@ -410,11 +425,13 @@
 
 #NOP -- fremen;
 #list corpseList add {{{name} {fremcorpse} {guild} {fremen} {action} {fremCorpse} {active} {0} {description} {Fremen: fai & reclaim (Threshold is half your max gp1)}}};
-#list corpseList add {{{name} {fai} {guild} {fremen} {action} {fai} {active} {0} {description} {Fremen: Donate water from a corpse back to guild}}};
-#list corpseList add {{{name} {reclaim} {guild} {fremen} {action} {reclaim} {active} {0} {description} {Fremen: Recover water from a corpse}}};
+#list corpseList add {{{name} {fai1} {guild} {fremen} {action} {fai} {active} {0} {description} {Fremen: Donate water from a corpse back to guild}}};
+#list corpseList add {{{name} {fai2} {guild} {fremen} {action} {fai;fai} {active} {0} {description} {Fremen: Donate water from a corpse back to guild x2}}};
+#list corpseList add {{{name} {reclaim1} {guild} {fremen} {action} {reclaim} {active} {0} {description} {Fremen: Recover water from a corpse}}};
 #list corpseList add {{{name} {reclaim2} {guild} {fremen} {action} {reclaim;reclaim} {active} {0} {description} {Fremen: Recover water from a corpse x2}}};
-#list corpseList add {{{name} {hide} {guild} {fremen} {action} {hide} {active} {0} {description} {Fremen: Hide in the shadows before ambushing mob}}};
-#list corpseList add {{{name} {poison} {guild} {fremen} {action} {poison} {active} {0} {description} {Fremen: Add poison to your weapon}}};
+#list corpseList add {{{name} {hide1} {guild} {fremen} {action} {hide} {active} {0} {description} {Fremen: Hide in the shadows before ambushing mob}}};
+#list corpseList add {{{name} {poison1} {guild} {fremen} {action} {poison} {active} {0} {description} {Fremen: Add poison to your weapon}}};
+#list corpseList add {{{name} {fbelt} {guild} {fremen} {action} {fill all;donate all} {active} {0} {description} {Fremen: fill and donate literjons from afar (requires belt vaf perk)}}};
 
 #NOP -- monk;
 #list corpseList add {{{name} {study} {guild} {monk} {action} {study corpse} {active} {0} {description} {Monk: Study Corpse}}};

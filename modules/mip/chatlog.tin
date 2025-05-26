@@ -269,6 +269,12 @@
             #case {"Knight Main"}   	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
             #case {"Lich"}          	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
             #case {"Loremaster"}    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+
+			#NOP Fremen;
+			#case {"Fremen Tp"}    		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Fremen Guild"}    		{#NOP -- block so guild skill training etc doesnt spam;};
+			#case {"Fremen Ntp"}    		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
+			#case {"Fremen Rtp"}    		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
 			
 			#NOP Mages;
 			#case {"Mage"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
@@ -334,11 +340,26 @@
 	#var chat[act_tell][from] %1;
 	#var mip[comm][source] %1;
 	#var mip[comm][data] %2;
-	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-	#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
 	update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
 	#delay 10 {#unvar chat[act_tell][from]}
 } {2};
+
+#NOP -- Breed projection;
+#action {^You project to %w: %*} {
+	#var mip[comm][twoway] {to};
+	#var mip[comm][data] {%2};
+	update_chat <178>To %1<088>: $mip[comm][data];
+} {2};
+
+#action {^%w projects to you: %*} {
+	#var mip[comm][twoway] {from};
+	#var chat[act_tell][from] %1;
+	#var mip[comm][source] %1;
+	#var mip[comm][data] %2;
+	update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+	#delay 10 {#unvar chat[act_tell][from]}
+} {2};
+
 
 #alias {chatlog %1} {
 	#if {"%1" == "emotes"} {

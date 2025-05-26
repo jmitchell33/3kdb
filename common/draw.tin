@@ -147,8 +147,6 @@
 
     #port {init} {port_mapFull} {0};
     #delay 1 {
-        #{port_mapFull} {#var area $area;};
-        #{port_mapFull} {#var map {${map}};};
         #{port_mapFull} {#var parentSession $info[SESSION][NAME]};
         #{port_mapFull} {#read common/draw_mapFull.tin};
         #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
@@ -265,18 +263,15 @@
         #if {$bot[delta-time] > 3600} {
             #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
             #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-            thousandsFormatNumber bot[delta-rate];
-            #var xp_rate_str $bot[delta-rate];
+            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
             #var xp_time_str $bot[delta-time] Hrs;
         } {
             #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
             #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-            thousandsFormatNumber bot[delta-rate];
-            #var xp_rate_str $bot[delta-rate];
+            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
             #var xp_time_str $bot[delta-time] mins;
         };
-        #var temp_xp $bot[stats][xp];
-        thousandsFormatNumber temp_xp;
+        #var temp_xp @thousandsFormatNumber{$bot[stats][xp]};
 
         #if $bot[paused] {
             #var bot_string {\n <088>Bot Status:<DAA><aaa> 🖐 <088>};
