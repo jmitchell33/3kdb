@@ -3,4 +3,127 @@
 
 #NOP --- GUILD SPECIFIC ACTIONS;
 
+#var meditating 0;
+#var hibernating 0;
+#var add_weapon_time 0;
+
+#action {^You can't meditate while fighting.$} {#var meditating 0};
+#action {^You begin the meditation exercises to clear your mind.$} {#var meditating 1};
+#action {^Your meditation has cleared your thoughts and strengthened} {#var meditating 0;#var my[gp1][current] 100};
+#action {^You have no need to meditate.$} {#var meditating 0};
+#action {^You stir from your meditation, the sense of calm lost.$} {#var meditating 0};
+
+#action {^You can't enter a hibernation trance while fighting.$} {#var hibernating 0};
+#action {^You enter a restorative trance.$} {#var hibernating 1};
+#action {^You enter a hibernation trance.$} {#var hibernating 1};
+#action {^You are already in a hibernation trance.$} {#var hibernating 1};
+#action {^You lack sufficient energy and come out of your trance.$} {#var hibernating 0};
+#action {^You relax from shielding your thoughts.$} {#var hibernating 0};
+
+#action {^You are fully rejuvenated and thus exit your trance.$} {#var hibernating 0;#var my[gp2][current] 0};
+#action {^You have no need to enter a hibernation trance.$} {#var hibernating 0};
+#action {^You abruptly exit your hibernation trance.$} {#var hibernating 0};
+
+#action {^There is no reason to '(cstats' here.$} {#var eternal 0};
+
+#var update_weapon_time 0;
+#var add_weapon_time 0;
+
+#action {^You wield %*.} {
+    #var wielded %1;
+    #if {$wielded == {lightstaff|lightsaber|lightdaggers}} {
+        #var my[lightweapon][type] $wielded;
+        #var update_weapon_time 1;
+        #var add_weapon_time 0;
+    };
+    hp;
+} {1};
+
+#action {^You unwield %*.} {
+    #var wielded  ;
+    #var update_weapon_time 0;
+    #var add_weapon_time 0;
+    hp;
+};
+
+#NOP -- Read the current combat age from the guild screen
+#NOP -- | Guild Age:       6 Day 13 Hr 54 Min | Combat Age:     2 Day 16 Hr 52 Min |
+
+#action {\| Combat Age:%s%d Day %d Hr %d Min \|$} {
+    
+    #if {$my[lightweapon][type] == {lightstaff|lightsaber|lightdaggers}} {
+        #math combatagehours {%2*24.00 + %3 + %4/60.00};
+        #var my[combatage] $combatagehours;
+
+        #NOP -- if i just wielded the weapon, update the time without adding the difference;
+        #if {$update_weapon_time == 1} {
+            #var my[$my[lightweapon][type]][starttime] = $combatagehours;
+            #show Weapon $my[lightweapon][type] Startime: $combatagehours;
+            #var update_weapon_time 0;
+            #var add_weapon_time 1;
+        };
+
+        #NOP -- not the first time looking at combat time with this weapon, add the time gained to the mode total;
+        #if {$add_weapon_time == 1} {
+            #var oldmodetime $my[$my[lightweapon][type]][$my[lightweapon][mode]][time];
+            #show Old $my[lightweapon][mode] time $my[$my[lightweapon][type]][$my[lightweapon][mode]][time];
+            #math deltamodetime {my[combatage] - $my[$my[lightweapon][type]][starttime]};
+            #show Delta time $deltamodetime;
+            #math newtotaltime {$oldmodetime + $newmodetime};
+            #var my[$my[lightweapon][type]][$my[lightweapon][mode]][time] {$newtotaltime};
+            #show Adding {$newtotaltime} hours;
+            #var my[$my[lightweapon][type]][starttime] $my[combatage];
+            #show New start time $my[combatage];
+        };
+    };
+};
+
+#NOP -- Read the current levels from the guild screen
+#NOP -- | Lightstaff      -     black    -   Chg:  37%  Mast: 5 [G: 4][F:na]       | 
+
+#action {^\| %w%s-%s%w%s-%sChg:%s%d\%%sMast:%s%d%s\[G:%s%w\]\[F:%s%w\]%s\|$} {
+    #format {my[lightweapon][type]} {%l} {%1};
+
+    #if {%11 > $my[$my[lightweapon][type]][mastery][level]} {
+        #var my[$my[lightweapon][type]][mastery][%11][time] my[$my[lightweapon][type]][currenttime];
+        #var my[$my[lightweapon][type]][mastery][level] %11;
+    };
+    #var my[$my[lightweapon][type]][mastery][level] %11;
+    #var my[$my[lightweapon][type]][guide][level] %14;
+    #var my[$my[lightweapon][type]][flurry][level] %16;
+};
+
+#alias {weaponstats} {#show Type: $my[lightweapon][type] Mastery: $my[$my[lightweapon][type]][mastery][level] Guide: $my[$my[lightweapon][type]][guide][level] Flurry: $my[$my[lightweapon][type]][flurry][level]};
+#alias {setweaponmodetime} {
+    #math tohours {%3*24.00 + %4 + %5/60.00};
+    #var my[%1][%2][time] $tohours;
+};
+
 #class {guild_actions} {close}
+
+
+#NOP -- Your lightstaff has run out of charge. Luckily you have a spare energy cell.;
+#NOP -- You insert the energy cell into the handle of your lightstaff.;
+
+#NOP -- Black beams of pure energy withdraw back into your lightstaff.;
+#NOP -- You fall out of your trained combat mode.;
+#NOP -- Your lightstaff has run out of charge.;
+#NOP -- Your lightstaff is deactivated.;
+
+#NOP -- Sparks fly from your lightstaff's handle as the circuitry fuses.;
+#NOP -- Black beams of pure energy withdraw back into your lightstaff.;
+
+#NOP -- Your lightstaff's casing flares nearly white hot as the battery melts;
+#NOP -- down.;
+                                            
+#NOP -- Your lightstaff's blade crackles and fades to nothing as battle damage 
+#NOP -- takes its toll.  Your lightstaff's grip is battered and torn, showing  
+#NOP -- severed wires and circuits.                                            
+#NOP -- Black beams of pure energy withdraw back into your lightstaff.         
+#NOP -- You fall out of your trained combat mode.                              
+#NOP -- You unwield lightstaff.                                                
+#NOP -- Your lightstaff shuts down, and the heat in your hand warns you of the                                                                                                              │║                                                                                      ║
+#NOP -- melted mess you'll find inside the casing when you repair it.                                                                                                                       │║                                                                                      ║
+#NOP -- Black beams of pure energy withdraw back into your lightstaff.                                                                                                                      │║                                                                                      ║
+#NOP -- You fall out of your trained combat mode.                                                                                                                                           │║                                                                                      ║
+#NOP -- You unwield lightstaff.                          

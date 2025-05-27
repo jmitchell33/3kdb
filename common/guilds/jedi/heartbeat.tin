@@ -1,10 +1,57 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
+#var bot_toggle 0;
+#var meditate_pause 75;
+#var hibernate_pause 25;
+
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
-		#NOP;
+		#if {$my[dog][hungry][current] > 50} {
+			unwrap;
+			dog feed;
+		};
+		#NOP -- Conditions to stop bot;
+		#if {$my[gp1][current] < $meditate_pause && !$bot_toggle && $bot[active] && !$meditating} {
+			ptell Pausing to meditate.;
+			#var bot_toggle 1;
+			.pause;
+			#ticker mcBotResume {
+				#NOP -- updated hpbar sometimes doesn't come through if out of combat;
+				#if {$incombat == 0} {
+					hp;
+					#if {$meditating == 0} {focus meditation};
+					#if {$my[gp1][current] > 95} {
+						#var bot_toggle 0;
+						#var meditating 0;
+						#if {!$incombat} {..} {.unpause};
+						#unticker mcBotResume;
+					};
+				};
+			} {2};
+		};
+		#if {$my[gp2][current] > $hibernate_pause && !$bot_toggle && $bot[active] && !$hibernating} {
+			ptell Pausing to hibernate.;
+			#var bot_toggle 1;
+			.pause;
+			#ticker mcBotResume {
+				#NOP -- updated hpbar sometimes doesn't come through if out of combat;
+				#if {$incombat == 0} {
+					hp;
+					#if {$hibernating == 0} {focus hibernation trance for on};
+					#if {$my[gp2][current] < 5} {
+						#var bot_toggle 0;
+						#var hibernating 0;
+						#if {!$incombat} {..} {.unpause};
+						#unticker mcBotResume;
+					};
+				};
+			} {2};
+		};
 	};
+	
+
+	
 };
 
 #class {guild_heartbeat} {close}

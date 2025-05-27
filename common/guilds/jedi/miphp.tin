@@ -6,12 +6,43 @@
 #alias {_guild_miphp} {
 	#var hpbar_gline_1 @fMipColourConv{$mip[gline][1]};
 	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
+	#var {my[diss][graph]} {@graph{$my[diss][time];100}};
+	#var {my[lightweapon][chargestring]} {};
+	#var {my[lightweapon][barcolor] 0};
+	#if {$my[darkside][current] == 0} {
+		#var {my[lightweapon][saberstring]} {(+|=|_o|\x7B\x7B\x7B\x7B(==(\x7B};
+		#if {$my[lightweapon][barcolor] == ""} {
+			#var {my[lightweapon][barcolor]} aef;
+		}
+	}
+		{#var {my[lightweapon][saberstring]} {['''|o|==|_/};#var {my[lightweapon][barcolor]} faa};
+	#math cnt 0;
+	#math {divfive} {$my[lightweapon][charge] / 5};
+	#while {$cnt <= $divfive} {#cat {my[lightweapon][chargestring]} {#};#math cnt $cnt + 1};
+	#cat {my[lightweapon][chargestring]} {<088> $my[lightweapon][charge]};
+	#cat {my[lightweapon][chargestring]} {%};
+
+	#switch {"$my[lightweapon][mode]"} {
+		#case "guide" {#var {my[lightweapon][modestring]} {<afa>Guide<088>}};
+		#case "normal" {#var {my[lightweapon][modestring]} {<fff>Normal<088>}};
+		#case "flurry" {#var {my[lightweapon][modestring]} {<faa>Flurry<088>}};
+		#case "none" {#var {my[lightweapon][modestring]} {<fff>None<088>}};
+	}; 
+
+	#var {my[dog][hp][graph]} {@graph{$my[dog][hp][current];$my[dog][hp][max]}};
+	#var {my[dog][happy][graph]} {@graph{$my[dog][happy][current];100}};
+	#var {my[dog][hungry][graph]} {@graph{$my[dog][hungry][current];100}};
+	#var {my[dog][level][graph]} {@graph{$my[dog][level][tonext];100}};
+	#if {!$my[dog][name]} {#var my[dog][name] Dog};
 
 	#list temp clear;
 
 	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Conc:$gp1/$gp1_max  Force:$gp2/$gp2_max  E:$ehealth};
 	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Conc:$my[gp1][graph] Force:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {$hpbar_gline_1};
+	#list temp add {Ascension: $my[gxp]% Mode: $my[lightweapon][modestring] Charge: $my[lightweapon][saberstring]<$my[lightweapon][barcolor]>$my[lightweapon][chargestring]};
+	#list temp add {Dissipates: $my[diss][current]/$my[diss][max] Energy: $my[diss][energy] Reset:$my[diss][graph]};
+	#list temp add {Force Masks: $my[forcemasks][current]/$my[forcemasks][max] Shadowsight: $my[shadowsight][current]/$my[shadowsight][max] Dark Side: $my[darkside][current] Ki: $my[ki][current]/$my[ki][max] GRank: $my[gilgalal]};
+	#list temp add {$my[dog][name]: HP:$my[dog][hp][graph] Happy:$my[dog][happy][graph] Hunger:$my[dog][hungry][graph] Level: $my[dog][level][current] XP:$my[dog][level][graph]};
 	#list temp add {$hpbar_gline_2};
 	#var hpbar[prompt] $temp;
 };
