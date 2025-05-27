@@ -278,7 +278,14 @@
 	#action {{^The (.*)(corpse|remains) of (.*)}} {
 		#if $cooler_update {#math corpses[cooler] {$corpses[cooler] + 1}};
 	} {6};
-	#delay 2 {#var cooler_update 0;};
+	#action {{(.*) a preserved, (.*) of (.*)}} {
+		#if $cooler_update {#math corpses[cooler] {$corpses[cooler] + 1}};
+	} {6};
+	#delay 2 {
+		#var cooler_update 0;
+		#unaction {{^The (.*)(corpse|remains) of (.*)}};
+		#unaction {{(.*) a preserved, (.*) of (.*)}};
+	};
 } {2};
 
 #NOP -- Corpse Management INVENTORY;
