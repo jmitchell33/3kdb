@@ -28,12 +28,13 @@
     #var my[pain][stored] %3;
     #var my[maula][pistol] %4;
     #var my[maula][clips] %5;
-    #if {"%6" == ""} {
+    #var my[sandtrout][reset] %6;
+    #if {"$my[sandtrout][reset]" == ""} {
         #var my[sandtrout][reset] OFF;
-    }; #elseif {"%6" == "D"} {
-        #var my[sandtrout][reset] READY!;
-    }; #else {
-        #var my[sandtrout][reset] %6;
+    } {
+        #if {"$my[sandtrout][reset]" == "D"} {
+            #var my[sandtrout][reset] READY!;
+        };
     };
     #var my[water][round] %7;
     #var corpses[coffin] %8;

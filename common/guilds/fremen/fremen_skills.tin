@@ -1,0 +1,202 @@
+#class {fremen_skills} {kill};
+#class {fremen_skills} {open};
+
+#unvar fremenskill;
+
+#NOP -- Fremen skill captures;
+#action {Skill             Rank          Cost   Difficulty} {
+    #line gag;
+    #echo {<add>Skill               Rank         Cost     Difficulty   Trainer<088>};
+} {2};
+
+#action {{Ambush\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[ambush][rank] %2;
+    #var fremenskill[ambush][cost] %3;
+    #var fremenskill[ambush][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[ambush][rank]};
+    format_fremenskills {Ambush} {$fremenskill[ambush][rank]} {$fremenskill[ambush][cost]} {$fremenskill[ambush][difficulty]} {Otheym};
+} {2}; 
+       
+#action {{Assault\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[assault][rank] %2;
+    #var fremenskill[assault][cost] %3;
+    #var fremenskill[assault][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[assault][rank]};
+    format_fremenskills {Assault} {$fremenskill[assault][rank]} {$fremenskill[assault][cost]} {$fremenskill[assault][difficulty]} {Otheym};      
+} {2};
+
+#action {{Bindu\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[bindu][rank] %2;
+    #var fremenskill[bindu][cost] %3;
+    #var fremenskill[bindu][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[bindu][rank]};
+    format_fremenskills {Bindu} {$fremenskill[bindu][rank]} {$fremenskill[bindu][cost]} {$fremenskill[bindu][difficulty]} {Akkar};
+} {2};
+
+#action {{Chaumary\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[chaumary][rank] %2;
+    #var fremenskill[chaumary][cost] %3;
+    #var fremenskill[chaumary][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[chaumary][rank]};
+    format_fremenskills {Chaumary} {$fremenskill[chaumary][rank]} {$fremenskill[chaumary][cost]} {$fremenskill[chaumary][difficulty]} {Otheym};
+} {2};
+
+#action {{Crysknife\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[crysknife][rank] %2;
+    #var fremenskill[crysknife][cost] %3;
+    #var fremenskill[crysknife][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[crysknife][rank]};
+    format_fremenskills {Crysknife} {$fremenskill[crysknife][rank]} {$fremenskill[crysknife][cost]} {$fremenskill[crysknife][difficulty]} {Otheym};
+} {2};
+
+#action {{Desert hardening\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[desert_hardening][rank] %2;
+    #var fremenskill[desert_hardening][cost] %3;
+    #var fremenskill[desert_hardening][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[desert_hardening][rank]};
+    format_fremenskills {Desert hardening} {$fremenskill[desert_hardening][rank]} {$fremenskill[desert_hardening][cost]} {$fremenskill[desert_hardening][difficulty]} {Otheym};
+} {2};
+
+#action {{Devices\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[devices][rank] %2;
+    #var fremenskill[devices][cost] %3;
+    #var fremenskill[devices][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[devices][rank]};
+    format_fremenskills {Devices} {$fremenskill[devices][rank]} {$fremenskill[devices][cost]} {$fremenskill[devices][difficulty]} {Otheym};
+} {2};
+
+#action {{Fai\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[fai][rank] %2;
+    #var fremenskill[fai][cost] %3;
+    #var fremenskill[fai][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[fai][rank]};
+    format_fremenskills {Fai} {$fremenskill[fai][rank]} {$fremenskill[fai][cost]} {$fremenskill[fai][difficulty]} {Shimoom};
+} {2};
+
+#action {{Fiqh\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[fiqh][rank] %2;
+    #var fremenskill[fiqh][cost] %3;
+    #var fremenskill[fiqh][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[fiqh][rank]};
+    format_fremenskills {Fiqh} {$fremenskill[fiqh][rank]} {$fremenskill[fiqh][cost]} {$fremenskill[fiqh][difficulty]} {Akkar};
+} {2};
+
+#action {{Hide\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[hide][rank] %2;
+    #var fremenskill[hide][cost] %3;
+    #var fremenskill[hide][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[hide][rank]};
+    format_fremenskills {Hide} {$fremenskill[hide][rank]} {$fremenskill[hide][cost]} {$fremenskill[hide][difficulty]} {Otheym};
+} {2};      
+
+#action {{Huanui\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[huanui][rank] %2;
+    #var fremenskill[huanui][cost] %3;
+    #var fremenskill[huanui][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[huanui][rank]};
+    format_fremenskills {Huanui} {$fremenskill[huanui][rank]} {$fremenskill[huanui][cost]} {$fremenskill[huanui][difficulty]} {Shimoom};
+} {2};    
+
+#action {{Ilm\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[ilm][rank] %2;
+    #var fremenskill[ilm][cost] %3;
+    #var fremenskill[ilm][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[ilm][rank]};
+    format_fremenskills {Ilm} {$fremenskill[ilm][rank]} {$fremenskill[ilm][cost]} {$fremenskill[ilm][difficulty]} {Akkar};
+} {2};           
+
+#action {{Litany\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[litany][rank] %2;
+    #var fremenskill[litany][cost] %3;
+    #var fremenskill[litany][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[litany][rank]};
+    format_fremenskills {Litany} {$fremenskill[litany][rank]} {$fremenskill[litany][cost]} {$fremenskill[litany][difficulty]} {Jessica};
+} {2};  
+
+#action {{Nerve\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[nerve][rank] %2;
+    #var fremenskill[nerve][cost] %3;
+    #var fremenskill[nerve][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[nerve][rank]};
+    format_fremenskills {Nerve} {$fremenskill[nerve][rank]} {$fremenskill[nerve][cost]} {$fremenskill[nerve][difficulty]} {Akkar};
+} {2};
+
+#action {{Pain\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[pain][rank] %2;
+    #var fremenskill[pain][cost] %3;
+    #var fremenskill[pain][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[pain][rank]};
+    format_fremenskills {Pain} {$fremenskill[pain][rank]} {$fremenskill[pain][cost]} {$fremenskill[pain][difficulty]} {Jessica};
+} {2};     
+
+#action {{Prana\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[prana][rank] %2;
+    #var fremenskill[prana][cost] %3;
+    #var fremenskill[prana][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[prana][rank]};
+    format_fremenskills {Prana} {$fremenskill[prana][rank]} {$fremenskill[prana][cost]} {$fremenskill[prana][difficulty]} {Akkar};
+} {2};   
+
+#action {{Prescience\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[prescience][rank] %2;
+    #var fremenskill[prescience][cost] %3;
+    #var fremenskill[prescience][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[prescience][rank]};
+    format_fremenskills {Prescience} {$fremenskill[prescience][rank]} {$fremenskill[prescience][cost]} {$fremenskill[prescience][difficulty]} {Jessica};
+} {2}; 
+
+#action {{Projectile\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[projectile][rank] %2;
+    #var fremenskill[projectile][cost] %3;
+    #var fremenskill[projectile][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[projectile][rank]};
+    format_fremenskills {Projectile} {$fremenskill[projectile][rank]} {$fremenskill[projectile][cost]} {$fremenskill[projectile][difficulty]} {Otheym};
+} {2};
+
+#action {{Voice\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[voice][rank] %2;
+    #var fremenskill[voice][cost] %3;
+    #var fremenskill[voice][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[voice][rank]};
+    format_fremenskills {Voice} {$fremenskill[voice][rank]} {$fremenskill[voice][cost]} {$fremenskill[voice][difficulty]} {Jessica};
+} {2};
+
+#action {{Water discipline\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[water_discipline][rank] %2;
+    #var fremenskill[water_discipline][cost] %3;
+    #var fremenskill[water_discipline][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[water_discipline][rank]};
+    format_fremenskills {Water discipline} {$fremenskill[water_discipline][rank]} {$fremenskill[water_discipline][cost]} {$fremenskill[water_discipline][difficulty]} {Shimoom};
+} {2};  
+
+#action {{Weirding\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
+    #line gag;
+    #var fremenskill[weirding][rank] %2;
+    #var fremenskill[weirding][cost] %3;
+    #var fremenskill[weirding][difficulty] %4;
+    #math {fremenskill[total][rank]} {$fremenskill[total][rank] + $fremenskill[weirding][rank]};
+    format_fremenskills {Weirding} {$fremenskill[weirding][rank]} {$fremenskill[weirding][cost]} {$fremenskill[weirding][difficulty]} {Jessica};
+} {2};
+
+
+#class {fremen_skills} {close};

@@ -1,5 +1,5 @@
-#class {guild_strategy} {kill}
-#class {guild_strategy} {open}
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
 
 #list strategyList add {{{guild} {elemental} {name} {soulGems} {active} {0} {description} {Elemental: Trap the Soul: attempt to create soul gems when enemy is <4% health}}};
 #list strategyList add {{{guild} {elemental} {name} {blasts} {active} {0} {description} {Elemental: Before reset - create and give blasts to your current enemy}}};
@@ -15,6 +15,7 @@
 #var trap_the_soul_toggle 1;
 #var blast_toggle 1;
 
+#NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
     #if {$mip[round] && $enemy[hp] < 4 && "$trap_the_soul_toggle" == "1"} {
         checkStrategy {soulGems} {
@@ -39,5 +40,9 @@
     };
 };
 
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
 
-#class {guild_strategy} {close}
+#class {guild_strategy} {close};

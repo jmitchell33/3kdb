@@ -1,0 +1,28 @@
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
+
+#list strategyList add {{{guild} {priest} {name} {bark} {active} {0} {description} {Priest: Barkskin}}};
+#list strategyList add {{{guild} {priest} {name} {haste} {active} {0} {description} {Priest: Haste}}};
+#list strategyList add {{{guild} {priest} {name} {pro} {active} {0} {description} {Priest: Protection}}};
+#list strategyList add {{{guild} {priest} {name} {vest} {active} {0} {description} {Priest: Vestment}}};
+#list strategyList add {{{guild} {priest} {name} {bene} {active} {0} {description} {Priest: Beneficence}}};
+#list strategyList add {{{guild} {priest} {name} {blade} {active} {0} {description} {Priest: Blade Barrier}}};
+#list strategyList add {{{guild} {priest} {name} {blessing} {active} {0} {description} {Priest: Bless}}};
+#list strategyList add {{{guild} {priest} {name} {poe} {active} {0} {description} {Priest: Protection of Elements}}};
+#list strategyList add {{{guild} {priest} {name} {power} {active} {0} {description} {Priest: Protection of Power}}};
+#list strategyList add {{{guild} {priest} {name} {invin} {active} {0} {description} {Priest: Invincible}}};
+#list strategyList indexate name;
+
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
+    #if {$enemy[hp] > 0} {
+        #NOP;
+    };
+};
+
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
+
+#class {guild_strategy} {close};

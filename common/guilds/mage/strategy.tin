@@ -1,30 +1,31 @@
-#class guild_strategy kill;
-#class guild_strategy open;
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
 
-#list strategyList add {{{guild} {mage} {name} {anchor}  {active} {0} {description} {Anchor Yourself During Combat}}};
-#list strategyList add {{{guild} {mage} {name} {slow}  {active} {0} {description} {Slow Mob}}};
-#list strategyList add {{{guild} {mage} {name} {atrophy}  {active} {0} {description} {Atrophy Mob (Nukes Special)}}};
-#list strategyList add {{{guild} {mage} {name} {edrain}  {active} {0} {description} {Edrain Mob (Removes 1 lvl from Mob)}}};
-#list strategyList add {{{guild} {mage} {name} {spelltap}  {active} {0} {description} {Spelltap Toggling}}};
-#list strategyList add {{{guild} {mage} {name} {feeblemind}  {active} {0} {description} {Feeblemind (-int)}}};
-#list strategyList add {{{guild} {mage} {name} {phantasmal}  {active} {0} {description} {Phantasmal Killer}}};
+#list strategyList add {{{guild} {mage} {name} {anchor} {active} {0} {description} {Anchor Yourself During Combat}}};
+#list strategyList add {{{guild} {mage} {name} {slow} {active} {0} {description} {Slow Mob}}};
+#list strategyList add {{{guild} {mage} {name} {atrophy} {active} {0} {description} {Atrophy Mob (Nukes Special)}}};
+#list strategyList add {{{guild} {mage} {name} {edrain} {active} {0} {description} {Edrain Mob (Removes 1 lvl from Mob)}}};
+#list strategyList add {{{guild} {mage} {name} {spelltap} {active} {0} {description} {Spelltap Toggling}}};
+#list strategyList add {{{guild} {mage} {name} {feeblemind} {active} {0} {description} {Feeblemind (-int)}}};
+#list strategyList add {{{guild} {mage} {name} {phantasmal} {active} {0} {description} {Phantasmal Killer}}};
 #list strategyList add {{{guild} {mage} {name} {phantasmal_mf} {active} {0} {description} {Cast Monstrous Fortitude on Phantasmal}}};
-#list strategyList add {{{guild} {mage} {name} {summon_haste}  {active} {0} {description} {Summoner: Haste Summons}}};
-#list strategyList add {{{guild} {mage} {name} {summon_mf}  {active} {0} {description} {Summoner: Monstrous Fortitude}}};
-#list strategyList add {{{guild} {mage} {name} {summon_tank}  {active} {0} {description} {Summoner: Summon Tanking}}};
-#list strategyList add {{{guild} {mage} {name} {summon_cull}  {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
-#list strategyList add {{{guild} {mage} {name} {summon_select}  {active} {0} {description} {Summoner: Shoo unwanted summons}}};
-#list strategyList add {{{guild} {mage} {name} {super_er}  {active} {0} {description} {Super: Explosive Release (-sat)}}};
-#list strategyList add {{{guild} {mage} {name} {super_sub}  {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
-#list strategyList add {{{guild} {mage} {name} {golem_defend}  {active} {0} {description} {Golem: Defend & Initiate Combat}}};
-#list strategyList add {{{guild} {mage} {name} {golem_assist}  {active} {0} {description} {Golem: Assist}}};
-#list strategyList add {{{guild} {mage} {name} {gstrength}  {active} {0} {description} {Giant Strength}}};
-#list strategyList add {{{guild} {mage} {name} {no_ash}  {active} {0} {description} {No ASH Management}}};
+#list strategyList add {{{guild} {mage} {name} {summon_haste} {active} {0} {description} {Summoner: Haste Summons}}};
+#list strategyList add {{{guild} {mage} {name} {summon_mf} {active} {0} {description} {Summoner: Monstrous Fortitude}}};
+#list strategyList add {{{guild} {mage} {name} {summon_tank} {active} {0} {description} {Summoner: Summon Tanking}}};
+#list strategyList add {{{guild} {mage} {name} {summon_cull} {active} {0} {description} {Summoner: Cull Damaged Summons During MI}}};
+#list strategyList add {{{guild} {mage} {name} {summon_select} {active} {0} {description} {Summoner: Shoo unwanted summons}}};
+#list strategyList add {{{guild} {mage} {name} {super_er} {active} {0} {description} {Super: Explosive Release (-sat)}}};
+#list strategyList add {{{guild} {mage} {name} {super_sub} {active} {0} {description} {Super: Subjugate (-conc/rnd)}}};
+#list strategyList add {{{guild} {mage} {name} {golem_defend} {active} {0} {description} {Golem: Defend & Initiate Combat}}};
+#list strategyList add {{{guild} {mage} {name} {golem_assist} {active} {0} {description} {Golem: Assist}}};
+#list strategyList add {{{guild} {mage} {name} {gstrength} {active} {0} {description} {Giant Strength}}};
+#list strategyList add {{{guild} {mage} {name} {no_ash} {active} {0} {description} {No ASH Management}}};
 
 #list strategyList indexate name;
 
 #var toggle_spelltap 1;
 
+#NOP -- Actions to perform at any time in the fight;
 #alias _strategy_guild {
     #if {!$idle_flag && $action_round < $mip[round]} {
         #if {$mob[slow] < 1 || $mip[round] < 2} {
@@ -73,11 +74,11 @@
     checkStrategy {gstrength} {#if $my[prots][GS] {#NOP} {cast giant strength on $user;cast strength on $user}};
 
     #if {$toggle_spelltap && $sp_percent > 70} {
-        checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never}
+        checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never};
     };
 
     #if {!$toggle_spelltap && $sp_percent < 30} {
-        checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always}
+        checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always};
     };
 
     checkStrategy {golem_assist} {#if {$my[golem][current] && !$my[golem][active]} {cast create golem}};
@@ -99,6 +100,9 @@
     };
 };
 
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
 
-
-#class guild_strategy close;
+#class {guild_strategy} {close};
