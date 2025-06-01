@@ -1,0 +1,60 @@
+#class guild_hpbar kill
+#class guild_hpbar open
+
+#NOP -- hpbar for copy and paste;
+#NOP focus hpconfigure /H: #hp/#mhp S: #sp/#msp C: #c F: #f Dr: #dr D: #dn/#dm E: #ng S: #es #nlDe: #df Ch: #%c M: #lm Gx: #gxp Fm: #fn/#fm Ss: #ssn/#ssm Ds: #ds Ki: #kn/#km Gr: #gr
+
+#alias {setup_3kdb_hpbar} {
+	#send {focus hpconfigure /H: #hp/#mhp S: #sp/#msp C: #c F: #f Dr: #dr D: #dn/#dm E: #ng S: #es #nlDe: #df Ch: #%c M: #lm Gx: #gxp Fm: #fn/#fm Ss: #ssn/#ssm Ds: #ds Ki: #kn/#km Gr: #gr};
+};
+
+#NOP -- hp lines:
+#NOP -- H: 1029/512 S: 119/119 C: 100.00% F:   0.00% Dr:  51% D: 2/2 E: 4725 S:
+#NOP -- De: D  Ch:  81% M: guide Gx:  85.57% Fm: 1/1 Ss: 1/1 Ds: 0 Ki: 0/0 Gr: 0
+
+#action {H: %d\/%d S: %d\/%d C:%s%d\.%d\% F:%s%d\.%d\% Dr:%s%d\% D: %d\/%d E: %d S: %p} {
+    #if $gags[hpbar] {#line gag};
+    #var my[hp][current] %1;
+    #var my[hp][max] %2;
+    #var my[sp][current] %3;
+    #var my[sp][max] %4;
+    #var my[gp1][current] %6;
+    #var my[gp2][current] %9;
+    #var my[diss][time] %12;
+    #var my[diss][current] %13;
+    #var my[diss][max] %14;
+    #var my[diss][energy] %15;
+    #var ehealth %16
+};
+
+#action {De: %w  Ch:%s%d\% M: %w Gx:%s%p\% Fm: %d\/%d Ss: %d\/%d Ds: %d Ki: %d\/%d Gr: %d} {
+    #if $gags[hpbar] {#line gag};
+    #var my[defense][symbols] %1;
+    #var my[lightweapon][charge] %3;
+    #var my[lightweapon][mode] %4;
+    #var my[gxp] %6;
+    #var my[forcemasks][current] %7;
+    #var my[forcemasks][max] %8;
+    #var my[shadowsight][current] %9;
+    #var my[shadowsight][max] %10;
+    #var my[darkside][current] %11;
+    #var my[ki][current] %12;
+    #var my[ki][max] %13;
+    #var my[gilgalal] %14
+};
+
+#NOP -- dog line:
+#NOP -- Dog :: HP: 640/640  Happy: 100%  Hungry: 14%  Level: 2/3%
+
+#action {%w :: HP:%s%d\/%d%sHappy:%s%d\%%sHungry:%s%d\%%sLevel:%s%d\/%d\%} {
+    #NOP -- #if $gags[hpbar] {#line gag};
+    #var my[dog][name] %1;
+    #var my[dog][hp][current] %3;
+    #var my[dog][hp][max] %4;
+    #var my[dog][happy][current] %7;
+    #var my[dog][hungry][current] %10;
+    #var my[dog][level][current] %13;
+    #var my[dog][level][tonext] %14;
+};
+
+#class guild_hpbar close
