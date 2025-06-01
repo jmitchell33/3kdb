@@ -1,16 +1,17 @@
-#class guild_strategy kill;
-#class guild_strategy open;
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
 
-#list strategyList add {{{guild} {bard} {name} {hammer}  {active} {0} {description} {Hammer Smashed Face}}};
-#list strategyList add {{{guild} {bard} {name} {rainbow} {active} {0} {description} {Rainbow of Death}}};
-#list strategyList add {{{guild} {bard} {name} {cloud}   {active} {0} {description} {Noxious Cloud}}};
-#list strategyList add {{{guild} {bard} {name} {vortex}  {active} {0} {description} {Lightning Vortex}}};
-#list strategyList add {{{guild} {bard} {name} {assault} {active} {0} {description} {Martial Assault}}};
-#list strategyList add {{{guild} {bard} {name} {cshot} {active} {0} {description} {Called Shot}}};
-#list strategyList add {{{guild} {bard} {name} {enrage}  {active} {0} {description} {Enrage}}};
+#list strategyList add {{{guild} {bard} {name} {hammer} {active} {0} {description} {Bard: Hammer Smashed Face}}};
+#list strategyList add {{{guild} {bard} {name} {rainbow} {active} {0} {description} {Bard: Rainbow of Death}}};
+#list strategyList add {{{guild} {bard} {name} {cloud} {active} {0} {description} {Bard: Noxious Cloud}}};
+#list strategyList add {{{guild} {bard} {name} {vortex} {active} {0} {description} {Bard: Lightning Vortex}}};
+#list strategyList add {{{guild} {bard} {name} {assault} {active} {0} {description} {Bard: Martial Assault}}};
+#list strategyList add {{{guild} {bard} {name} {cshot} {active} {0} {description} {Bard: Called Shot}}};
+#list strategyList add {{{guild} {bard} {name} {enrage} {active} {0} {description} {Bard: Enrage}}};
 #list strategyList indexate name;
 
-#alias _strategy_guild {
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
     checkStrategy {assault} {
         #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
             martial assault;
@@ -48,9 +49,9 @@
             #if {$my[gp1][current] > $karma_heal} {
                 #if {$my[song][rounds] > 1} {#NOP;} {
                     #if {!$actions_stacked} {
-                        #if $resume_song {perform rainbow of death}
+                        #if $resume_song {perform rainbow of death};
                     } {
-                        do_action
+                        do_action;
                     };
                 };
                 #if !$my[defs][fr] {cast focus the rainbow};
@@ -68,7 +69,7 @@
                         #if {$mip[round] > 10} {
                             #if {!$actions_stacked} {
                                 #if {$resume_song} {
-                                    perform hammer smashed face
+                                    perform hammer smashed face;
                                 };
                             } {
                                 do_action;
@@ -100,4 +101,9 @@
     };
 };
 
-#class guild_strategy close;
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
+
+#class {guild_strategy} {close};

@@ -6,7 +6,14 @@
 #action {%* recoils from your voice and stops attacking!} {
     #if {!$idle_flag} {
         #var toggles[fremen][hold] 0;
-        #if {$debug[toggle]} {#echo {<ffa>debug toggles: voice hold hit - hold toggle set to 0:<088> $toggles[fremen][hold]}};
+        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: voice hold hit - hold toggle set to 0:<088> $toggles[fremen][hold]}};
+    };
+} {2};
+
+#action {recovers from the Voice!$} {
+    #if {!idle_flag} {
+        #var toggles[fremen][hold] 1;
+        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: voice hold recovered - hold toggle set to 1:<088> $toggles[fremen][hold]}};
     };
 } {2};
 
@@ -14,7 +21,7 @@
 #action {cannot be stunned} {
     #if {!$idle_flag} {
         #var toggles[fremen][stun] 0;
-        #if {$debug[toggle]} {#echo {<ffa>debug toggles: stun already active - stun toggle set to 0:<088> $toggles[fremen][stun]}};
+        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: stun already active - stun toggle set to 0:<088> $toggles[fremen][stun]}};
     };
 } {2};
 
@@ -22,7 +29,14 @@
 #action {recoils from your} {
     #if {!$idle_flag} {
         #var toggles[fremen][enfeeblement] 0;
-        #if {$debug[toggle]} {#echo {<ffa>debug toggles: enfeeblement already used - enfeeblement toggle set to 0:<088> $toggles[fremen][enfeeblement]}};
+        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: enfeeblement hit - enfeeblement toggle set to 0:<088> $toggles[fremen][enfeeblement]}};
+    };
+} {2};
+
+#action {recovers from the Voice and seems mentally stronger!$} {
+    #if {!$idle_flag} {
+        #var toggles[fremen][enfeeblement] 1;
+        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: enfeeblement recovered - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
     };
 } {2};
 

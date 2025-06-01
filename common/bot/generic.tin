@@ -19,6 +19,8 @@
 #var temp_xp 0;
 #var temp_coins 0;
 
+#var bot[corpsetrigfailed] 1;
+
 #format {bot[start-time]} {%T} {};
 
 #NOP -- pre_bot check is loaded via the char/user/config.tin;
@@ -193,21 +195,31 @@
         #if {"$guild" == "bard"} {perform dirge};
         .bot;
     } {
-        #NOP -- strategy actions & toggle maintenance that need to fire after all corpsetrig actions if bot active;
+        #NOP -- toggle maintenance that need to fire after all corpsetrig actions if bot active;
+        #NOP -- fremen;
         #if {"$guild" == "fremen"} {
             #if {"$toggles[fremen][hold]" == "0"} {
                 #var toggles[fremen][hold] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
             };
             #if {"$toggles[fremen][stun]" == "0"} {
                 #var toggles[fremen][stun] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
             };
             #if {"$toggles[fremen][enfeeblement]" == "0"} {
                 #var toggles[fremen][enfeeblement] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
             };
             checkStrategy {suspend} {#send {!suspend}};
+        };
+        #NOP -- juggernaut;
+        #if {"$guild" == "juggernaut"} {
+            checkStrategy {mechwarrior} {
+                #delay .5 {
+                    #send {!support defend};
+                    #send {!hp};
+                };
+            };
         };
         
         #var bot[foundmob] 0;
@@ -235,6 +247,7 @@
             #delay {bot_kick} {
                 #if {!$bot[walk] && !$incombat} {
                     #echo {<dfa>BOT STUCK RESUMING IN 3 SECONDS<088>};
+                    #if {"$bot[corpsetrigfailed]" == "1"} {#showme {----- CORPSETRIG FAILED -----}};
                     #delay {bot_restart} {.bot} {3};
                 };
             } {3};
@@ -242,6 +255,47 @@
     };
 } {5};
 
+#NOP -- if corpsetrig failed to fire then we will call most of the killing blow logic only once when bot_ticker fires;
+#action {^----- CORPSETRIG FAILED -----$} {
+    #if {"$bot[corpsetrigfailed]" == "1"} {
+        corpse_trig;
+        update_xp;
+        update_coins;
+        #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
+        #if $dmgtracker {.dmg_round_reset;#var cmbt[affects][convoke] 0};
+
+        #NOP -- toggle maintenance that need to fire after all corpsetrig actions if bot active;
+        #NOP -- fremen;
+        #if {"$bot[active]" == "1"} {
+            #if {"$guild" == "fremen"} {
+                #if {"$toggles[fremen][hold]" == "0"} {
+                    #var toggles[fremen][hold] 1;
+                    #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                };
+                #if {"$toggles[fremen][stun]" == "0"} {
+                    #var toggles[fremen][stun] 1;
+                    #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                };
+                #if {"$toggles[fremen][enfeeblement]" == "0"} {
+                    #var toggles[fremen][enfeeblement] 1;
+                    #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+                };
+                checkStrategy {suspend} {#send {!suspend}};
+            };
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                checkStrategy {mechwarrior} {
+                    #delay .5 {
+                        #send {!support defend};
+                        #send {!hp};
+                    };
+                };
+            };
+        };
+        #var bot[corpsetrigfailed] 0;
+        #if {$debug[corpsetrig][toggle]} {#echo {<ffa>debug toggles: corpsetrig failed - bot ticker activated - corpsetrigfailed set to 0:<088> $bot[corpsetrigfailed]}};
+    };
+} {2};
 
 /* Bot end actions... */
 #alias {.botComplete} {

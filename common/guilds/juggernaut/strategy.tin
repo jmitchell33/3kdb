@@ -1,0 +1,82 @@
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
+
+#var frenzy_toggle 1;
+#var nuke_toggle 1;
+#var donate_toggle 1;
+#var mech_toggle 0;
+#var dismiss_support 1;
+
+#list strategyList add {{{guild} {juggernaut} {name} {frenzy} {active} {0} {description} {Jugger: Before Reset: Use Frenzy}}};
+#list strategyList add {{{guild} {juggernaut} {name} {donateA} {active} {0} {description} {Jugger: Before Reset: Donate Airdrops}}};
+#list strategyList add {{{guild} {juggernaut} {name} {donateF} {active} {0} {description} {Jugger: Before Reset: Donate Frenzy}}};
+#list strategyList add {{{guild} {juggernaut} {name} {nukes} {active} {0} {description} {Jugger: Before Reset: Fire Nukes}}};
+#list strategyList add {{{guild} {juggernaut} {name} {mech_resummon} {active} {0} {description} {Jugger: Mech - Dismiss & resummon back into defend mode}}};
+#list strategyList add {{{guild} {juggernaut} {name} {enhance} {active} {0} {description} {Jugger: Enhance: If at max sps/stim but below max enhance, use an enhance}}};
+#list strategyList add {{{guild} {juggernaut} {name} {mechwarrior} {active} {0} {description} {Jugger: Switch from defend to assault (best used with mech_resummon strategy)}}};
+
+#list strategyList indexate name;
+
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
+    #NOP -- resummon support mech after dismissing and back into defend mode when mech hp is below 25 percent;
+    #if {"$shp" != "" && $dismiss_support && $my[clan] && $shp < 25} {
+        checkStrategy {mech_resummon} {
+            #var dismiss_support 0;
+            #send {!dismiss};
+            #send {!support summon};
+            #send {!hp};
+            #delay 4 {
+                #var dismiss_support 1;
+                #send {!support defend};
+                #send {!hp};
+                #NOP -- if enemy is higher than 10% hp then check mechwarrior strategy and switch mech into assault mode;
+                #if {$enemy[hp] > 10} {
+                    checkStrategy {mechwarrior} {
+                        #delay 10 {
+                            #send {!support assault fire};
+                            #send {!hp};
+                        };
+                    };
+                };
+            };
+        };
+    };
+    #NOP -- Use your powers when close to reset;
+    #if {$reset >= 95} {
+        #if {$frenzy_toggle && $my[clan] > 0 && $mip[round]} {
+            checkStrategy {frenzy} {#send !frenzy;#var frenzy_toggle 0};
+        };
+        #if {$nuke_toggle && $my[nukes] > 0 && $mip[round]} {
+            checkStrategy {nukes} {fire $my[nukes];#var nuke_toggle 0};
+        };
+        #NOP -- donate airdrops to needy friends;
+        #if {$donate_toggle && $my[clan] > 1} {
+            checkStrategy {donateA} {donateSupport airdrop;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}};
+        };
+        #if {$donatep_toggle && $my[clan] > 1} {
+            checkStrategy {donateF} {donateSupport frenzy;#var donate_toggle 0;#delay 10 {#var donate_toggle 1}};
+        };
+    };
+    #if {$my[hp][percent] < $my[jugg_enhance_max]} {
+        #if {$my[gp1][percent] > .99 && $my[sp][percent] > .99} {
+            checkStrategy {enhance} {enhance};
+        };
+    };
+};
+
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    checkStrategy {mechwarrior} {
+        #if {!$mech_toggle} {
+            #var mech_toggle 1;
+            #delay 6 {
+                #send {!support assault fire};
+                #send {!hp};
+            };
+        };
+    };
+};
+
+
+#class {guild_strategy} {close};

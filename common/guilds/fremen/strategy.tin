@@ -1,5 +1,5 @@
-#class {guild_strategy} {kill}
-#class {guild_strategy} {open}
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
 
 #var toggles[fremen][hold] 1;
 #var toggles[fremen][stun] 1;
@@ -15,21 +15,20 @@
 
 #list strategyList indexate name;
 
-#NOP -- actions to perform at any time in the fight;
+#NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
-    #if {$enemy[hp] > 0} {
+    #if {$enemy[hp] > 0} {        
         checkStrategy {agony} {#if {$my[gp1][current] > 100 && $my[sp][current] > 100} {agony}};
         checkStrategy {stun} {#if {$my[gp1][current] > 110 && "$toggles[fremen][stun]" == "1"} {stun}};
         checkStrategy {voicehold} {#if {$my[gp1][current] > 100 && "$toggles[fremen][hold]" == "1"} {voice}};
-        checkStrategy {voicefeeble} {#if {$my[gp1][current] > 100 && "$toggles[fremen][enfeeblement]" == "1"} {voice $enemy[target] to enfeeblement}};
+        checkStrategy {voicefeeble} {#if {$my[gp1][current] > 100 && "$toggles[fremen][enfeeblement]" == "1"} {voice $mob[target] to enfeeblement}};
         checkStrategy {spicebeer} {#if {"$spicebeertoggle" == "1" && $spiceBeers > 0} {smuggle remove spice beer;drink spice beer}};
     };
 };
 
-#NOP -- actions to perform the first rounds of combat;
-#alias {_strategy_fremen_start} {
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
     checkStrategy {focus} {#if {$my[gp1][current] > 100} {focus}};
 };
 
-
-#class {guild_strategy} {close}
+#class {guild_strategy} {close};

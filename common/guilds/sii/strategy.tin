@@ -1,0 +1,21 @@
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
+
+#NOP -- Below is an example of how to add strategies - it can be edited if you have a strategy to add;
+#list strategyList add {{{guild} {sii} {name} {example} {active} {0} {description} {Sii: brief description of example strategy}}};
+
+#list strategyList indexate name;
+
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
+    #if {$enemy[hp] > 0} {
+        #NOP;
+    };
+};
+
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
+
+#class {guild_strategy} {close};
