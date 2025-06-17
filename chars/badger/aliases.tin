@@ -79,7 +79,7 @@
         #send {!jfinger %0};
     };
     #elseif {"$guild" == "mage"} {
-        #send {!gfinger %0};
+        #send {!mfinger %0};
     };
     #elseif {"$guild" == "elemental"} {
         #send {!efinger %0};
@@ -114,7 +114,11 @@
     3kReport+ xp_ratio;
     3kReport+ dmg_dealt;
     3kReport+ dmg_received;
-    3kReport+ corpses
+    #NOP 3kReport+ corpses;
+};
+
+#alias {3kr} {
+    3kReport
 };
 
 #NOP -- fly;
@@ -941,6 +945,14 @@
     strategy frenzy;
     strategy nukes;
     strategy mech_resummon
+};
+
+#alias {mystrategy-mw} {
+    strategy-clear;
+    strategy frenzy;
+    strategy nukes;
+    strategy mech_resummon;
+    strategy mechwarrior
 };
 
 #alias {stclear} {
