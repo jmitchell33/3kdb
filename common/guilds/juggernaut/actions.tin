@@ -25,11 +25,13 @@
 	#var ammo_buy off
 } {2};
 
-#action {%* failed to acquire a lock.} {
+#action {^%* failed to acquire a lock.$} {
+	#if $gags[combat_guild] {#line gag};
 	#math mounts[no_lock] {$mounts[no_lock] + 1};
 } {2};
 
-#action {The computer chirps 'A critical hit was scored!'} {
+#action {^The computer chirps 'A critical hit was scored!'$} {
+	#if $gags[combat_guild] {#line gag};
 	#math mounts[crit] {$mounts[crit] +1};
 } {2};
 

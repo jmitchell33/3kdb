@@ -149,7 +149,11 @@
         } {
             #if {$collector[items]} {
                 #if {"$area" == "Chaotic Sewers"} {#NOP} {get all;}
+            } {
+                #if $room_coins {get coins};
+                #if $room_tome {get tome};
             };
+            
             #if {$bot[foundmob]} {
                 #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Mob in the list has been found<088>}};
                 .pre_fight_check;

@@ -112,6 +112,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {iprime}  {active} {0} {description} {Invoke Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure1}  {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (No Unholy Ground)}}};
+#list strategyList add {{{guild} {necromancer} {name} {conjure2}  {active} {0} {description} {Conjure Undead: Conjure, Nuke, Rapture, Unholy Armour (No Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {gemino}  {active} {0} {description} {Preserve Gemino Corpses}}};
 #list strategyList add {{{guild} {necromancer} {name} {ug}  {active} {0} {description} {Unholy Ground}}};
 #list strategyList add {{{guild} {juggernaut} {name} {frenzy}  {active} {0} {description} {Before Reset: Use Frenzy}}};
@@ -281,10 +282,12 @@
                 #if {$my[gp1][current] < 50000} {
                     checkStrategy {conjure} {nukeUndeadAbs};
                     checkStrategy {conjure1} {nukeUndead_noUG_Abs};
+                    checkStrategy {conjure2} {nukeUndead_noUG_Abs;rapture undead};
                 };
                 #if {$my[gp1][current] > 50000 || $my[gp2][current] > 90} {
                     checkStrategy {conjure} {nukeUndeadPres};
                     checkStrategy {conjure1} {nukeUndead_noUG_Pres};
+                    checkStrategy {conjure2} {nukeUndead_noUG_Pres;rapture undead;unholy armour undead};
                 };
             };
         };

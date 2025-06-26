@@ -5,16 +5,43 @@
     #if $gags[combat_guild] {
         #class gags_combat_guild open;
         #NOP -- Juggernaut Gags;
-        #gag {^You kick %* for no damage%*};
+        #NOP -- we set these to 3 priority so anything read in dmg tracker will have priority;
+
+        #NOP -- Computer talk;
+        #gag {^The computer chirps 'No healing needed.'$};
+        #gag {^The computer chirps 'Pumping stimulants into blood stream.'};
+        #gag {^The computer chirps 'You can not transpose your energies so fast!'};
+        #gag {^The computer chirps 'No corpse detected. Aborting.'$};
+        #gag {^The computer chirps 'Flushing the heat from your battle suit.'$};
+
+        #NOP -- death from above, punch, kick, point defense;
         #gag {^You try to kick %*};
         #gag {^You try to punch %*};
-        #gag {^You punch %* for no damage%*};
-        #gag {^You jump attack %* for no damage%*};
         #gag {^You try to jump on %*};
         #gag {^Your flamethrower %* seems distracted by the flames.};
-        #gag {The flames distracting %* have worn off.};
-        #gag {The computer chirps 'Pumping stimulants into blood stream.'};
-        #gag {The computer chirps 'You can not transpose your energies so fast!'};
+        #gag {^The flames distracting %* have worn off.};
+        #action {^You jump attack %* for %* damage.$} {#line gag} {3};
+        #action {^You punch %* for %* damage.} {#line gag} {3};
+        #action {^You kick %* for %* damage.} {#line gag} {3};
+        #action {^Point defenses %* target.} {#line gag} {3};
+        #action {^The target is engulfed in flames from your flamethrower.  %* seems distracted by the flames.$} {#line gag} {3};
+        #action {^Point defenses did no damage.$} {#line gag} {3};
+
+        #NOP -- truck;
+        #action {^%* fires its PPC at %*} {#line gag} {3};
+        #action {^Your tank %*.$} {#line gag} {3};
+        #action {^You %* with your tank.$} {#line gag} {3};
+        #action {^%* is %* by your tank.$} {#line gag} {3};
+        #action {^%* is %* by your tank.$} {#line gag} {3};
+        #action {^%* endures a world of pain courtesy of your %*.$} {#line gag} {3};
+        #action {^Appendages go flying from the onslaught of your %*.$} {#line gag} {3};
+
+        #NOP -- mount;
+        #action {^%* is %* by your {ER PPC|Lrg pulse laser|ER Lrg laser|Mdm pulse laser|ER Mdm Laser|Sml Pulse Laser|ER Sml Laser|Lrm 20|Lrm 15|SSrm 6|Lrm 10|SSrm 4|Lrm 5|SSrm 2|Gauss Rifle|Micro Gauss Rifle|Ultra Ac 10|Ultra Ac 5|Ultra Ac 2|Machine gun}.$} {
+            #line gag
+        } {3};
+        #NOP support mech;
+        #action {^%*'s Jugger Support Mech fires at %* and %*.$} {#line gag} {3};
 
         #NOP -- Mage Gags;
         #gag {You fight to maintain concentration!};
@@ -100,6 +127,10 @@
         #gag {%* is enclosed within a blue-green energy field.$}; 
 
         #NOP -- Necromancer Gags;
+
+        #NOP -- Trances;
+        #gag {^%w blinks into a slight sleep.$};
+        #gag {^%w blinks into consciousness.$};
 
         #NOP -- Form Glamors;
         #gag {You are already in a fury.};

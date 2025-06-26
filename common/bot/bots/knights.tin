@@ -38,8 +38,9 @@
     #if {$knights_left > 0} {challenge};
 } {1};
 #action {There are no challengers remaining here.} {
+    #var bot[walk] 1;
     #var knights_left 0;
-    .botStep
+    #delay .5 {#if !$incombat {.botStep}};
 } {1};
 
 #action {%*Accepting %* defeat, your challenger} {
