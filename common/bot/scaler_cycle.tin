@@ -1,0 +1,83 @@
+#NOP ========================================
+#NOP Speedrun Bot Automation Script
+#NOP ========================================
+
+#VAR {custom_current_index} {1};
+#VAR {custom_max_runs} {6};
+
+#NOP Define the speedrun data
+#LIST {custom_speedruns} CREATE {chess;chessboard;150;android;android;115;mahjong;mahjong;95;hotel;hoteltrans;115;zelligars;zelligars;150;chess;chessboard;150};
+
+#NOP Function to get data from the list (groups of 3: speedrun, bot, scaler)
+#FUNCTION {get_custom_speedrun} {#MATH {result} {(%1 - 1) * 3 + 1}; #LIST {custom_speedruns} GET {$result}; #RETURN $custom_speedruns[$result]};
+#FUNCTION {get_custom_bot} {#MATH {result} {(%1 - 1) * 3 + 2}; #LIST {custom_speedruns} GET {$result}; #RETURN $custom_speedruns[$result]};
+#FUNCTION {get_custom_scaler} {#MATH {result} {(%1 - 1) * 3 + 3}; #LIST {custom_speedruns} GET {$result}; #RETURN $custom_speedruns[$result]};
+
+#NOP Main automation function
+#ALIAS {custom_run_cycle} {
+    #IF {$custom_current_index <= $custom_max_runs} {
+        #VAR {custom_current_speedrun} {@get_custom_speedrun{$custom_current_index}};
+        #VAR {custom_current_bot} {@get_custom_bot{$custom_current_index}};
+        #VAR {custom_current_scaler} {@get_custom_scaler{$custom_current_index}};
+        
+        #ECHO {========================================};
+        #ECHO {Starting cycle $custom_current_index of $custom_max_runs};
+        #ECHO {Speedrun: $custom_current_speedrun};
+        #ECHO {Bot: $custom_current_bot};
+        #ECHO {Scaler: $custom_current_scaler};
+        #ECHO {========================================};
+        
+        #NOP Set scaler first
+        #ECHO {Setting scaler to $custom_current_scaler...};
+        scaler $custom_current_scaler;
+        #DELAY {2} {
+            #NOP Go to the area
+            #ECHO {Going to area: $custom_current_speedrun};
+            go $custom_current_speedrun;
+            #DELAY {3} {
+                #NOP Start the bot
+                #ECHO {Starting bot: -$custom_current_bot};
+                -$custom_current_bot;
+            };
+        };
+    } {
+        #ECHO {All cycles completed!};
+        #VAR {custom_current_index} {1};
+    };
+};
+
+#NOP Trigger for when bot completes - move to next cycle
+#ACTION {^\: Bot Complete\.} {
+    #ECHO {Bot completed! Moving to next cycle...};
+    #DELAY {2} {
+        #MATH {custom_current_index} {$custom_current_index + 1};
+        custom_run_cycle;
+    };
+};
+
+#NOP Command to start the automation
+#ALIAS {custom_start_auto} {
+    #VAR {custom_current_index} {1};
+    #ECHO {Starting automated speedrun/bot cycle...};
+    custom_run_cycle;
+};
+
+#NOP Command to stop the automation
+#ALIAS {custom_stop_auto} {
+    #VAR {custom_current_index} {999};
+    #ECHO {Automation stopped.};
+};
+
+#NOP Command to show current status
+#ALIAS {custom_auto_status} {
+    #ECHO {Current cycle: $custom_current_index of $custom_max_runs};
+    #IF {$custom_current_index <= $custom_max_runs} {
+        #ECHO {Next: speedrun @get_custom_speedrun{$custom_current_index}, bot @get_custom_bot{$custom_current_index}, scaler @get_custom_scaler{$custom_current_index}};
+    };
+};
+
+#ECHO {Clean Custom Speedrun Bot Script Loaded!};
+#ECHO {Commands:};
+#ECHO {  custom_start_auto  - Start the automation cycle};
+#ECHO {  custom_stop_auto   - Stop the automation};
+#ECHO {  custom_auto_status - Show current status};
