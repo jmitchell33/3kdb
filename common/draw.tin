@@ -125,7 +125,8 @@
     #math 	split[right]	{$map[width] + 1};
 
     #NOP -- The map room details goes right inside the map area;
-    #math draw_room[top] {$map[bottom]};
+    #math draw_room[top] {$map[bottom] - 1};
+    #var  draw_room[bottom] {$map[bottom]};
     #math draw_room[left] {$map[left] + 2};
     
     
@@ -197,10 +198,16 @@
     #nop -- Clear any old drawings -- Testing if we need this;
     #NOP #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
-    #if {&caption_data[]} {
-        #list caption_data set $draw[index][caption] {$corpse_string \n $eternal_string};
+    #if $corpsetrigStatus {
+        #var ktrig_string <fff>KTRIG: <fff>ON<088>;
     } {
-        #list caption_data create {$corpse_string \n $eternal_string};
+        #var ktrig_string <ccc>KTRIG: <ccc>OFF<088>;
+    };
+
+    #if {&caption_data[]} {
+        #list caption_data set $draw[index][caption] {$corpse_string \n $ktrig_string \n $eternal_string};
+    } {
+        #list caption_data create {$corpse_string \n $eternal_string \n $ktrig_string};
     };
 
     #if {$idle_sec > $deadmanIdleTimeout} {
@@ -290,7 +297,7 @@
         #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
 
     } {
-        #var bot_string {\n <088>Bot: <fff>OFF<088>};
+        #var bot_string {\n <ccc>Bot: <fff>OFF<088>};
     };
 
     #list caption_data set $draw[index][bot] $bot_string;
@@ -343,8 +350,8 @@
 
     #if $draw[initiated] {
         #nop -- Clear any old drawings;
-        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {};
-        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[top] -2 {Room Notes: ${roomMapNoteStr}};
+        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[bottom] -2 {};
+        #draw {<dda>} {tile} $draw_room[top] $draw_room[left] $draw_room[bottom] -2 { Room : ${roomMapNameStr} \n Notes: ${roomMapNoteStr}};
     };
 };
 

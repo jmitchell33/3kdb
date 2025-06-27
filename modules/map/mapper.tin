@@ -56,32 +56,28 @@
 };
 
 #NOP Room Short with Exits;
-#act {{\-R\-_(.*) \((.*)\)\s*\-R\-_}} {
-	#var room[name] %2;
-	#var room[exits] %3;
-	#if {"$mapping" == "on"} {
-		#if {"$finding_here" == "off"} {
-			#replace room[exits] {,} {;};
-			#foreach {$room[exits]} {eachexit} {#map dig $eachexit};
-			#map get {roomexit} {rexit};
-			#foreach {$rexit} {eachexit} {
-				#map at {$eachexit} {
-					#map get {roomarea} {eacharea};
-					#if {"${eacharea}" === ""} {
-						#map set {roomcolor} {<118>};
-					};
-				};
+#alias .map_create_exits {
+	#replace room[exits] {,} {;};
+	#replace room[exits] {~} {;};
+	#foreach {$room[exits]} {eachexit} {#map dig $eachexit};
+	#map get {roomexit} {rexit};
+	#foreach {$rexit} {eachexit} {
+		#map at {$eachexit} {
+			#map get {roomarea} {eacharea};
+			#if {"${eacharea}" === ""} {
+				#map set {roomcolor} {<118>};
 			};
 		};
-		#if {$roomname_len == 0} {
-			#map set roomname {%2 (%3)};
-		};
-		#if {$roomarea_len == 0} {
-			#map set roomarea {$area};
-			#map set roomcolor;
-		};
-		#if {$roomdesc_len == 0} {#var longcap on;};
-		#delay 0 mapupdate;
+	};
+	#if {$roomname_len == 0} {
+		#map set roomname {$room[name]};
+	};
+	#if {$roomarea_len == 0} {
+		#map set roomarea {$area};
+		#map set roomcolor;
+	};
+	#if {$roomdesc_len == 0} {
+		#map set roomdesc {$room[long]};
 	};
 };
 

@@ -26,6 +26,8 @@
     #list room[players] clear;
     #list room[botmobs] clear;
     #var room[updated] 0;
+    #var room_coins 0;
+    #var room_tome 0;
 
     #if $bot[active] {
         #var bot[foundmob] 0;
@@ -107,6 +109,7 @@
             apiPostAll;
             #delay 2 {#var explore[walk] 1};
         };
+        #if {"$mapping" == "on"} {.map_create_exits};
     } {1};
 } {2};
 
@@ -131,6 +134,8 @@
 
     #regex {%2} {7B{[0-9]+}} {#var item_number &1;#replace item_long { \\x7B%*} {};};
     #regex {%2} {7B{[A-Za-z]+}} {#replace item_long { \\x7B%*} {};};
+    #regex {%2} {coins} {#var room_coins 1};
+    #regex {%2} {A Tome of %*, Volume %*} {#var room_tome 1};
 
     #list room[items] add $item_long_full;
 

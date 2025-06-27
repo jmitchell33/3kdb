@@ -51,6 +51,16 @@
     .trackItem {spirit bracers} block;
 } {2};
 
+#NOP -- Charm Bracelet;
+#action {^Your charm bracelet grants you an extra attack!$} {
+    .trackItem {charm bracelet} xtra-attack;
+} {2};
+
+#action {^Your charm bracelet brightens.$} {
+    .trackItem {charm bracelet} dodge;
+    blockSelfTrack item {charm bracelet};
+} {2};
+
 #NOP -- CMC;
 #action {A flicker in the containment field surrounding the CMC's plasma tank} {
     #line oneshot #action {results in a plasma leak within your suit, causing you great pain.} {#line gag} {1};
@@ -71,7 +81,13 @@
 
 #action {The CMC-660 REFLECTS the entire attack!!} {
     .trackItem cmc reflect;
+    blockSelfTrack item CMC;
     #var cmbt[affects][CMC] 1;
+} {2};
+
+#action {^The CMC-660 blocks the entire attack!!$} {
+    blockSelfTrack item CMC;
+    .trackItem cmc block;
 } {2};
 
 #NOP -- Rolm;
@@ -83,9 +99,20 @@
     .trackItem rolm {phoenix heal};
 } {2};
 
+#action {^The aegis rune on the PsiMace pulses for a moment.$} {
+    blockSelfTrack item rolm;
+    .trackItem rolm {aegis block};
+} {2};
+
 #NOP -- Banu Cloak;
 #action {Your cloak causes your form to phase, reducing the impact from the attack.} {
     .trackItem {banu cloak} DR;
+} {2};
+
+#NOP -- Regalia of the Faerie Queen;
+#action {^You're briefly blinded by your armor absorbing the incoming damage.$} {
+    blockSelfTrack item regalia;
+    .trackItem FaerieReg DR;
 } {2};
 
 #NOP -- Vblade;

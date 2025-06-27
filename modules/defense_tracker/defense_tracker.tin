@@ -18,6 +18,11 @@
 };
 
 
+#alias {defStats_reset} {
+    #unvar defense;
+    #echo {<bfc>Defense Stats Reset<088>};
+};
+
 #alias {defStats} {
     #format tmpMobHits {%g} {$defense[mob_attempts][total]};
     #format tmpHeader {%+12s    %+9s    %+9s    %+9s} {} {Total} {% Blocked} {% of Total};
@@ -118,6 +123,7 @@
 #action {^The sentry scorches you with jets of liquid flame!$} {mobAttackTrack special} {2};
 #action {^The shrapnel from one of the sentry's grenades nearly rips you apart!$} {mobAttackTrack special} {2};
 
+#action {^The sentry launches a grenade, choking you in poison gas!$} {mobAttackTrack special} {2};
 
 #NOP -----------------------------------------------------;
 #NOP -- Guild Dodge/Block Tracking;
@@ -131,10 +137,6 @@
 #NOP -- Eternal Powers;
 #action {^The assault glances harmlessly off your aura.$} {blockSelfTrack eternal immunity};
 #action {^Your form shimmers and becomes impenetrable.$} {blockSelfTrack eternal immunity};
-
-#NOP -- Items;
-#action {^The aegis rune on the PsiMace pulses for a moment.$} {blockSelfTrack item rolm} {2};
-#action {^The CMC-660 blocks the entire attack!!$} {blockSelfTrack item CMC} {2};
 
 #NOP -- Necromancer;
 #action {^Your veil of darkness completely negates the undead creature's attack!!$} {blockSelfTrack guild veil-block} {2};
