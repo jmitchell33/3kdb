@@ -1,0 +1,25 @@
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
+
+#list strategyList add {{{guild} {monk} {name} {palm} {active} {0} {description} {Monk: Palm}}};
+#list strategyList add {{{guild} {monk} {name} {pressure} {active} {0} {description} {Monk: Pressure}}};
+#list strategyList indexate name;
+
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
+    #if {$mip[round] == 1} {
+        #var mob[palm] 0;
+        #var mob[pressure] 0;
+    };
+    #if {$action_round < $mip[round]} {
+        checkStrategy {palm} {#if {!$mob[palm] && $my[monk][ae][current] > 0} {palm}};
+        checkStrategy {pressure} {#if {!$mob[pressure]} {pressure}};
+    };
+};
+
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
+
+#class {guild_strategy} {close};

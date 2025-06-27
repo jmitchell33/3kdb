@@ -1,5 +1,5 @@
-#class {player_aliases} {kill}
-#class {player_aliases} {open}
+#class {player_aliases} {kill};
+#class {player_aliases} {open};
 
 #NOP -- deadman;
 #alias {_player_deadmanActions} {
@@ -18,48 +18,57 @@
 #NOP -- study spell book and suspend;
 #alias {m} {
     #if {"$guild" == "mage"} {
-        study spellbook;
+        #if {"%0" == ""} {
+            study spellbook;
+        };
     };
-    #if {"$guild" == "fremen"} {
-        suspend
+    #elseif {"$guild" == "fremen"} {
+        #if {"%0" == ""} {
+            suspend;
+        };
     };
 };
 
 #NOP -- guild info files;
 #alias {info} {
     #if {"$guild" == "juggernaut"} {
-        #if {"%1" == ""} {
+        #if {"%0" == ""} {
             #send {!info};
-        } {
-            #send {!info %1};
+        };
+        #else {
+            #send {!info %0};
         };
     };
-    #if {"$guild" == "mage"} {
-        #if {"%1" == ""} {
+    #elseif {"$guild" == "mage"} {
+        #if {"%0" == ""} {
             #send {!info};
-        } {
-            #send {!info %1};
+        };
+        #else {
+            #send {!info %0};
         };
     };
-    #if {"$guild" == "elemental"} {
-        #if {"%1" == ""} {
+    #elseif {"$guild" == "elemental"} {
+        #if {"%0" == ""} {
             #send {!info};
-        } {
-            #send {!info %1};
+        };
+        #else {
+            #send {!info %0};
         };
     };
-    #if {"$guild" == "bard"} {
-        #if {"%1" == ""} {
+    #elseif {"$guild" == "bard"} {
+        #if {"%0" == ""} {
             #send {!info};
-        } {
-            #send {!info %1};
+        };
+        #else {
+            #send {!info %0};
         };
     };
-    #if {"$guild" == "fremen"} {
-        #if {"%1" == ""} {
+    #elseif {"$guild" == "fremen"} {
+        #if {"%0" == ""} {
             #send {!fhelp};
-        } {
-            #send {!fhelp %1};
+        };
+        #else {
+            #send {!fhelp %0};
         };
     };
 };
@@ -67,19 +76,19 @@
 #NOP -- see guild info on others;
 #alias {gfinger} {
     #if {"$guild" == "juggernaut"} {
-        #send {!jfinger %1};
+        #send {!jfinger %0};
     };
-    #if {"$guild" == "mage"} {
-        #send {!gfinger %1};
+    #elseif {"$guild" == "mage"} {
+        #send {!gfinger %0};
     };
-    #if {"$guild" == "elemental"} {
-        #send {!efinger %1};
+    #elseif {"$guild" == "elemental"} {
+        #send {!efinger %0};
     };
-    #if {"$guild" == "bard"} {
-        #send {!gfinger %1};
+    #elseif {"$guild" == "bard"} {
+        #send {!gfinger %0};
     };
-    #if {"$guild" == "fremen"} {
-        #send {!frecall %1};
+    #elseif {"$guild" == "fremen"} {
+        #send {!frecall %0};
     };
 };
 
@@ -153,17 +162,15 @@
     vlist
 };
 
-#NOP -- evaluate mobs to check vital imformation about their power;
+#NOP -- evaluate mobs to check vital imformation about their strengths and weakness's;
 #alias {eva} {
     #if {"$guild" == "elemental"} {
-        evoke evaluate at %1;
+        #if {"%0" != ""} {evoke evaluate at %0};
+        #else {evoke evaluate};
     };
-    #if {"$guild" == "bard"} {
-        #if {"%0" == ""} {
-            cast thought wave;
-        } {
-            cast thought wave on %1;
-        };
+    #elseif {"$guild" == "bard"} {
+        #if {"%0" != ""} {cast thought wave on %0};
+        #else {cast thought wave};
     };
 };
 
@@ -181,9 +188,9 @@
 #alias {bagset} {
     #if {"%0" != ""} {
         #var bagcount %0;
-        #echo {<ffa>BAG COUNT SET TO %0};
+        #echo {<ffa>BAG COUNT SET TO %0<088>};
     } {
-        #echo {<faa>NO USER INPUT!}
+        #echo {<faa>NO USER INPUT!<088>};
     };
 };
 
@@ -192,7 +199,7 @@
     #var bagsFull 1;
     #format tmpBagCount {%d} $bagcount;
     #loop $tmpBagCount 1 tmpBag {
-        put all in bag $tmpBag
+        put all in bag $tmpBag;
     };
     #line oneshot #action {You put %* in %*.} {#var bagsFull 0};
 };
@@ -201,47 +208,43 @@
     #format tmpBagCount {%d} $bagcount;
     drop all;
     #loop 1 $tmpBagCount tmpBag {
-        get all from bag $tmpBag;drop all
+        get all from bag $tmpBag;drop all;
     };
     #var bagsFull 0;
 };
 
 #NOP -- forest of charms;
-#alias {charm1} {
-    search trees
-};
-
-#alias {charm2} {
-    #2 search rocks
-};
-
-#alias {charm3} {
-    search tree
-};
-
-#alias {charm4} {
-    search rock
-};
-
-#alias {charm5} {
-    kill guardian
-};
-
-#alias {charm6} {
-    search trees;
-    get charm
-};
-
-#alias {charm7} {
-    kill squirrel
-};
-
-#alias {charm8} {
-    snatch moon
-};
-
-#alias {charmkey} {
-    search river
+#alias {charm} {
+    #switch {"%0"} {
+        #case {"help"} {
+            #echo {<fff>Charm Bracelet Steps<088>};
+            #echo {<fff>Arguments:<088>};
+            #echo {<ada>1 <adb>(search trees)<088>};
+            #echo {<ada>2 <adb>(2x search rocks)<088>};
+            #echo {<ada>3 <adb>(search tree)<088>};
+            #echo {<ada>4 <adb>(search rock)<088>};
+            #echo {<ada>5 <adb>(kill guardian)<088>};
+            #echo {<ada>6 <adb>(search trees and get charm)<088>};
+            #echo {<ada>7 <adb>(kill squirrel)<088>};
+            #echo {<ada>8 <adb>(snatch moon)<088>};
+            #echo {<ada>key <adb>(search river)<088>};
+        };
+        #case {"1"} {search trees};
+        #case {"2"} {#2 search rocks};
+        #case {"3"} {search tree};
+        #case {"4"} {search rock};
+        #case {"5"} {kill guardian};
+        #case {"6"} {search trees;get charm};
+        #case {"7"} {kill squirrel};
+        #case {"8"} {snatch moon};
+        #case {"key"} {search river};
+        #case {""} {
+            #echo {<faa>No Argument Provided!!<088>};
+        };
+        #default {
+            #echo {<fff>Unknown Argument '%0'. Please use 'charm help' for available options.<088>};
+        };
+    };
 };
 
 #NOP -- clear all damage trackers;
@@ -270,56 +273,70 @@
 };
 
 #NOP -- aliases for setting up summon config & strategies;
-#NOP -- 2 defending & 2 assisting;
 #alias {killmode} {
-    clear_sconfig;
-    shoo;
-    shoo golem;
-    mystrategy;
-    ms 8##2#1500#70#defend#summons#always;
-    ms 8##2#1500#70#assist#summons#always;
-    ms golema
-};
-
-#NOP -- 4 assisting;
-#alias {killmode2} {
-    clear_sconfig;
-    shoo;
-    shoo golem;
-    mystrategy;
-    ms 8##4#1500#70#assist#summons#always;
-    ms golema
-};
-
-#NOP -- 4 defending;
-#alias {killmode3} {
-    clear_sconfig;
-    shoo;
-    shoo golem;
-    mystrategy;
-    ms 8##4#1500#70#defend#summons#always;
-    ms golema
-};
-
-#NOP -- 3 assisting & 1 defending;
-#alias {killmode4} {
-    clear_sconfig;
-    shoo;
-    shoo golem;
-    mystrategy;
-    ms 8##3#1500#70#assist#summons#always;
-    ms 8##1#1500#70#defend#summons#always;
-    ms golema
-};
-
-#alias {killmode5} {
-    clear_sconfig;
-    shoo;
-    shoo golem;
-    mystrategy-golem;
-    ms 8##1#1500#70#defend#summons#always;
-    ms 8##3#1500#70#assist#summons#always;
-    ms golemd
+    #switch {"%0"} {
+        #NOP -- view available options;
+        #case {"help"} {
+            #echo {<fff>Available killmodes:<088>};
+            #echo {<eaf>No argument <bec>(2 summons defending & 2 summons assisting)<088>};
+            #echo {<eaf>2 <bec>(4 summons assisting)<088>};
+            #echo {<eaf>3 <bec>(4 summons defending)<088>};
+            #echo {<eaf>4 <bec>(3 summons assisting and 1 summon defending)<088>};
+            #echo {<eaf>5 <bec>(1 summon defending and 3 summons assisting)<088>};
+        };
+        #NOP -- 4 summons assisting;
+        #case {"2"} {
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy;
+            ms 8##4#1500#70#assist#summons#always;
+            ms golema;
+        };
+        #NOP -- 4 summons defending;
+        #case {"3"} {
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy;
+            ms 8##4#1500#70#defend#summons#always;
+            ms golema;
+        };
+        #NOP -- 3 summons assisting and 1 summon defending;
+        #case {"4"} {
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy;
+            ms 8##3#1500#70#assist#summons#always;
+            ms 8##1#1500#70#defend#summons#always;
+            ms golema;
+        };
+        #NOP -- 1 summon defending and 3 summons assisting;
+        #case {"5"} {
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy-golem;
+            ms 8##1#1500#70#defend#summons#always;
+            ms 8##3#1500#70#assist#summons#always;
+            ms golemd;
+        };
+        #NOP -- default is 2 summons defending and 2 summons assisting;
+        #case {""} {
+            #echo {<ffa>No argument provided — running default killmode<088>};
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy;
+            ms 8##2#1500#70#defend#summons#always;
+            ms 8##2#1500#70#assist#summons#always;
+            ms golema;
+        };
+        #default {
+            #echo {<fff>Unknown killmode '%0'. Use 'killmode help' to see available modes.<088>};
+        };
+    };
 };
 
 #NOP -- setup summon configs with custom summons;
@@ -350,7 +367,7 @@
         #delay 12 {prots_pfe};
         #delay 14 {prots_ps};
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         #NOP spells;
         prots_hs;
         prots_pfe;
@@ -359,9 +376,14 @@
         prots_mb;
         prots_pfc;
         prots_pfh;
+        prots_blink;
         #NOP prots_hr;
         #NOP songs;
-        prots_muse
+        prots_muse;
+        prots_grace
+    };
+    #else {
+        #NOP;
     };
 };
 
@@ -453,7 +475,7 @@
 };
 
 #NOP -- charm monster (mob peace);
-#alias {charm} {
+#alias {charm1} {
     cast charm monster
 };
 
@@ -477,23 +499,6 @@
     cast find familiar
 };
 
-#NOP -- turn on and off mech switching;
-#alias {mechon} {
-    mka+ mechswitch;
-    mka+ mechswitch;
-    #var mechswitchtoggle 1
-};
-
-#alias {mechoff} {
-    mka- mechswitch;
-    #var mechswitchtoggle 0
-};
-
-#NOP -- switch mech from defend to assault;
-#alias {mechswitch} {
-    #delay {6} {#send {support assault fire}}
-};
-
 #NOP -- reflexes;
 #alias {setup_reflex} {
     #if {"$guild" == "juggernaut"} {
@@ -502,37 +507,48 @@
         reflex add sp <10% eternal heal badger;
         reflex add gp1 <90% transpose max;
         reflex add gp1 <5% drop pants;
+        reflex combat on;
         reflex start;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         reflex clear;
         reflex add sp <10% eternal heal badger;
         reflex add sp <20% cast mystic immersion;
         reflex add gp2 >40% cast focus mind;
         reflex add gp2 >90% shoo summons;
+        reflex combat on;
         reflex start;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         reflex clear;
         reflex add hp <75% evoke rebuild;
         reflex add sp <20% evoke mental depletion;
         reflex add sp <10% evoke natural convergence;
         reflex add sp <40% eternal heal badger;
         #NOP reflex add gp1 <25% evoke energy drain;
+        reflex combat on;
         reflex start;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         reflex clear;
         reflex add hp <70% bandage;
         reflex add hp <25% hmheal;
         reflex add hp <50% eternal heal badger;
+        reflex combat on;
         reflex start;
     };
-    #if {"$guild" == "fremen"} {
+    #elseif {"$guild" == "fremen"} {
         reflex clear;
         reflex add hp <40% eternal heal badger;
         reflex add hp <40% hmheal;
-        reflex add gp1 <25% drop pants
+        #NOP reflex add hp <80% prana;
+        #NOP reflex add hp >98% bindu some;
+        reflex add gp1 <25% drop pants;
+        reflex combat on;
+        reflex start;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reflex settings in this alias!!<088>};
     };
 };
 
@@ -541,19 +557,22 @@
     #if {"$guild" == "juggernaut"} {
         gag+ hpbar;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         gag+ hpbar;
         #gag {  --> %*};
         #gag {%*-hp-};
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         gag+ hpbar;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         #NOP;
     };
-    #if {"$guild" == "fremen"} {
-        gag+ hpbar
+    #elseif {"$guild" == "fremen"} {
+        gag+ hpbar;
+    };
+    #else {
+        #NOP;
     };
 };
 
@@ -562,19 +581,22 @@
     #if {"$guild" == "juggernaut"} {
         gag-clear;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         gag-clear;
         #ungag {  --> %*};
         #ungag {%*-hp-};
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         gag-clear;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         gag-clear;
     };
-    #if {"$guild" == "fremen"} {
-        gag-clear
+    #elseif {"$guild" == "fremen"} {
+        gag-clear;
+    };
+    #else {
+        #NOP;
     };
 };
 
@@ -592,7 +614,7 @@
         set3kreport;
         look;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         #var my[familiar] Mushroom the beautiful swan;
         #var my[golem][name] Beetlejuice;
         gagson;
@@ -606,7 +628,7 @@
         ash;
         look;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         #unvar my[familiar];
         #unvar my[golem][name];
         gagson;
@@ -619,7 +641,7 @@
         autodrain;
         look;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         #unvar my[familiar];
         #unvar my[golem][name];
         gagson;
@@ -633,7 +655,7 @@
         set3kreport;
         look;
     };
-    #if {"$guild" == "fremen"} {
+    #elseif {"$guild" == "fremen"} {
         #unvar my[familiar];
         #unvar my[golem][name];
         gagson;
@@ -643,7 +665,10 @@
         mka-clear;
         mka+ ambush;
         set3kreport;
-        look
+        look;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any config settings in this alias!!<088>};
     };
 };
 
@@ -670,16 +695,16 @@
     #if {"$guild" == "juggernaut"} {
         rcost;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         cast rcost;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         rcost;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         rcost;
     };
-    #if {"$guild" == "fremen"} {
+    #elseif {"$guild" == "fremen"} {
         check cost
     };
 };
@@ -691,12 +716,12 @@
 
 #NOP -- analyze armour AC to self;
 #alias {ana} {
-    analyze %1
+    analyze %0
 };
 
 #NOP -- analyze armour AC to room;
 #alias {rana} {
-    ranalyze %1
+    ranalyze %0
 };
 
 #NOP -- heal stim with corpse;
@@ -704,19 +729,22 @@
     #if {"$guild" == "juggernaut"} {
         fdeener;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         cast spell tap on corpse;
         cast corpse blast;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         evoke corpse drain;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         cease;
         perform dirge;
     };
-    #if {"$guild" == "fremen"} {
-        reclaim
+    #elseif {"$guild" == "fremen"} {
+        reclaim;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any settings for using a corpse!!<088>};
     };
 };
 
@@ -727,13 +755,13 @@
 
 #NOP -- manually defend a player;
 #alias {def} {
-    defend %1
+    defend %0
 };
 
 #NOP -- heal yourself using stim or set your enhance to auto heal at a certain percentage (juggernaut);
 #NOP -- check elemental skills OR raise an elemental skill (elemental);
 #alias {en} {
-    enhance %1
+    enhance %0
 };
 
 #NOP -- give all items to truck;
@@ -753,7 +781,7 @@
 
 #NOP -- change attacks to another target;
 #alias {kk} {
-    retarget %1
+    retarget %0
 };
 
 #NOP -- guild light;
@@ -761,14 +789,17 @@
     #if {"$guild" == "juggernaut"} {
         lowlight;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         cast light;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         evoke self illumination as %1;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         cast light;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have a guild light command in alias!!<088>};
     };
 };
 
@@ -777,17 +808,20 @@
     #if {"$guild" == "juggernaut"} {
         gs4;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         lstats;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         pstats;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         pstats;
     };
-    #if {"$guild" == "fremen"} {
-        fstat
+    #elseif {"$guild" == "fremen"} {
+        fstat;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa> does NOT have a login exp & gxp command in alias!!<088>};
     };
 };
 
@@ -795,18 +829,26 @@
 #alias {p2} {
     #if {"$guild" == "juggernaut"} {
         gs4 reset;
+        #echo {<bea>LOGIN STATS RESET!!!<088>};
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         lstats reset;
+        #echo {<bea>LOGIN STATS RESET!!!<088>};
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         recover;
+        #echo {<bea>LOGIN STATS RESET!!!<088>};
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         psclear;
+        #echo {<bea>LOGIN STATS RESET!!!<088>};
     };
-    #if {"$guild" == "fremen"} {
-        fstat -reset
+    #elseif {"$guild" == "fremen"} {
+        fstat -reset;
+        #echo {<bea>LOGIN STATS RESET!!!<088>};
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reset login commands in alias!!<088>};
     };
 };
 
@@ -815,9 +857,12 @@
     #if {"$guild" == "elemental"} {
         pstats2;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         pstats2;
-    }; 
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa> does NOT have another login stats check command in alias!!<088>};
+    };
 };
 
 #NOP -- check costs of techs in the field;
@@ -853,7 +898,7 @@
         strategy frenzy;
         strategy nukes;
     };
-    #if {"$guild" == "mage"} {
+    #elseif {"$guild" == "mage"} {
         strategy-clear;
         strategy slow;
         strategy super_er;
@@ -863,24 +908,29 @@
         strategy gstrength;
         strategy rolm;
     };
-    #if {"$guild" == "elemental"} {
+    #elseif {"$guild" == "elemental"} {
         strategy-clear;
         strategy epowers;
         strategy blasts;
         strategy thefourwinds;
     };
-    #if {"$guild" == "bard"} {
+    #elseif {"$guild" == "bard"} {
         strategy-clear;
         #NOP strategy rolm;
         strategy cloud;
+        strategy vortex;
+        strategy enrage;
     };
-    #if {"$guild" == "fremen"} {
+    #elseif {"$guild" == "fremen"} {
         strategy-clear;
         strategy suspend;
         strategy stun;
         strategy spicebeer;
         #NOP strategy voicehold;
         strategy voicefeeble;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>};
     };
 };
 
@@ -897,185 +947,500 @@
     strategy-clear
 };
 
-#NOP -- aliases to setup corpsetrigs;
-#NOP -- default corpse trig;
+#NOP -- alias to setup corpsetrigs;
 #alias {mycorpsetrig} {
-    #if {"$guild" == "juggernaut"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ fdeener2;
-        corpsetrig+ bRemains;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "mage"} {
-        corpsetrig-clear;
-        corpsetrig+ spelltap;
-        corpsetrig+ wrap;
-        corpsetrig+ cBlast2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ ted2;
-        corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook;
-    };
-    #if {"$guild" == "elemental"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        #NOP corpsetrig+ mDepletion;
-        corpsetrig+ cdrain2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "bard"} {
-        corpsetrig-clear;
-        corpsetrig+ songcease;
-        corpsetrig+ wrap;
-        corpsetrig+ dirge2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "fremen"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ reclaim1;
-        corpsetrig+ fillbelt5;
-        corpsetrig+ fillbelt5;
-        corpsetrig+ fai2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ cocoon;
-        corpsetrig+ hide1;
-        corpsetrig+ poison1;
-    };
-};
-        
-#NOP -- default corpse trig with sz cap eating;
-#alias {mycorpsetrig-sz} {
-    #if {"$guild" == "juggernaut"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ fdeener2;
-        corpsetrig+ bRemains;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ szCaps;
-        corpsetrig+ szGreenCap;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "mage"} {
-        corpsetrig-clear;
-        corpsetrig+ spelltap;
-        corpsetrig+ wrap;
-        corpsetrig+ cBlast2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ szCaps;
-        corpsetrig+ szGreenCap;
-        corpsetrig+ ted2;
-        corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook;
-    };
-    #if {"$guild" == "elemental"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        #NOP corpsetrig+ mDepletion;
-        corpsetrig+ cdrain2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ szCaps;
-        corpsetrig+ szGreenCap;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "bard"} {
-        corpsetrig-clear;
-        corpsetrig+ songcease;
-        corpsetrig+ wrap;
-        corpsetrig+ dirge2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ szCaps;
-        corpsetrig+ szGreenCap;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "fremen"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ reclaim1;
-        corpsetrig+ fillbelt5;
-        corpsetrig+ fillbelt5;
-        corpsetrig+ fai2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ szCaps;
-        corpsetrig+ szGreenCap;
-        corpsetrig+ cocoon;
-        corpsetrig+ hide1;
-        corpsetrig+ poison1;
-    };
-};
-
-#NOP -- corpsetrig without get All;
-#alias {mycorpsetrig-noget} {
-    #if {"$guild" == "juggernaut"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ fdeener2;
-        corpsetrig+ bRemains;
-        corpsetrig+ divvy;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "mage"} {
-        corpsetrig-clear;
-        corpsetrig+ spelltap;
-        corpsetrig+ wrap;
-        corpsetrig+ cBlast2;
-        corpsetrig+ divvy;
-        corpsetrig+ ted2;
-        corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook;
-    };
-    #if {"$guild" == "elemental"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        #NOP corpsetrig+ mDepletion;
-        corpsetrig+ cdrain2;
-        corpsetrig+ divvy;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "bard"} {
-        corpsetrig-clear;
-        corpsetrig+ songcease;
-        corpsetrig+ wrap;
-        corpsetrig+ dirge2;
-        corpsetrig+ divvy;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "fremen"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ reclaim2;
-        corpsetrig+ fai2;
-        corpsetrig+ divvy;
-        corpsetrig+ cocoon;
+    #switch {"%0"} {
+        #NOP -- view available options;
+        #case {"help"} {
+            #echo {<bdb>+++++++ <fff>My corpsetrig helpfile <bdb>+++++++<088>};
+            #echo {<fff>How to use: <cfa>mycorpsetrig <argument><088>};
+            #echo {<bdb>+++++++++++++++++++++++++++++++++++++<088>};
+            #echo {<bdb>+++++++ <fff>Arguments available <bdb>+++++++<088>};
+            #echo {<eaf>No argument <bea>default corpsetrig<088>};
+            #echo {<eaf>sz <bea>corpsetrig for section z cap eating<088>};
+            #echo {<eaf>gearupsz <bea>corpsetrig for compressing capsules in sz<088>};
+            #echo {<eaf>noget <bea>corpsetrig without get all<088>};
+            #echo {<eaf>donates <bea>corpsetrig for grabbing donates<088>};
+            #echo {<eaf>party <bea>corpsetrig for partying<088>};
+        };
+        #NOP -- default corpsetrig;
+        #case {""} {
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ fdeener2;
+                corpsetrig+ bRemains;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ cocoon;
+                #NOP corpsetrig+ ted;
+                corpsetrig-on;
+            };
+            #NOP -- mage;
+            #elseif {"$guild" == "mage"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ spelltap;
+                corpsetrig+ wrap;
+                corpsetrig+ cBlast2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                #NOP corpsetrig+ ted2;
+                corpsetrig+ study spellbook;
+                corpsetrig+ study spellbook;
+                corpsetrig-on;
+            };
+            #NOP -- elemental;
+            #elseif {"$guild" == "elemental"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                #NOP corpsetrig+ mDepletion;
+                corpsetrig+ cdrain2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- bard;
+            #elseif {"$guild" == "bard"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ songcease;
+                corpsetrig+ wrap;
+                corpsetrig+ dirge2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- fremen;
+            #elseif {"$guild" == "fremen"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ reclaim1;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fai2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                #NOP corpsetrig+ cocoon;
+                corpsetrig+ hide1;
+                corpsetrig+ poison1;
+                corpsetrig-on;
+            };
+            #else {
+                #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any default corpsetrig settings in this alias!!<088>};
+            };
+        };
+        #case {"sz"} {
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ fdeener2;
+                corpsetrig+ bRemains;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ cocoon;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted;
+                corpsetrig-on;
+            };
+            #NOP -- mage;
+            #elseif {"$guild" == "mage"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ spelltap;
+                corpsetrig+ wrap;
+                corpsetrig+ cBlast2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted2;
+                corpsetrig+ study spellbook;
+                corpsetrig+ study spellbook;
+                corpsetrig-on;
+            };
+            #NOP -- elemental;
+            #elseif {"$guild" == "elemental"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                #NOP corpsetrig+ mDepletion;
+                corpsetrig+ cdrain2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- bard;
+            #elseif {"$guild" == "bard"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ songcease;
+                corpsetrig+ wrap;
+                corpsetrig+ dirge2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- fremen;
+            #elseif {"$guild" == "fremen"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ reclaim1;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fai2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ cocoon;
+                corpsetrig+ hide1;
+                corpsetrig+ poison1;
+                corpsetrig-on;
+            };
+            #else {
+                #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any sz corpsetrig settings in this alias!!<088>};
+            };
+        };
+        #case {"gearupsz"} {
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                #echo {<ffa>gearupsz argument passed - setting up gearupsz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ fdeener2;
+                corpsetrig+ bRemains;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ cocoon;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress blue;
+                corpsetrig+ compress blue;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted;
+                corpsetrig-on;
+            };
+            #NOP -- mage;
+            #elseif {"$guild" == "mage"} {
+                #echo {<ffa>gearupsz argument passed - setting up gearupsz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ spelltap;
+                corpsetrig+ wrap;
+                corpsetrig+ cBlast2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress blue;
+                corpsetrig+ compress blue;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted2;
+                corpsetrig+ study spellbook;
+                corpsetrig+ study spellbook;
+                corpsetrig-on;
+            };
+            #NOP -- elemental;
+            #elseif {"$guild" == "elemental"} {
+                #echo {<ffa>gearupsz argument passed - setting up gearupsz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                #NOP corpsetrig+ mDepletion;
+                corpsetrig+ cdrain2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress blue;
+                corpsetrig+ compress blue;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- bard;
+            #elseif {"$guild" == "bard"} {
+                #echo {<ffa>gearupsz argument passed - setting up gearupsz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ songcease;
+                corpsetrig+ wrap;
+                corpsetrig+ dirge2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress blue;
+                corpsetrig+ compress blue;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- fremen;
+            #elseif {"$guild" == "fremen"} {
+                #echo {<ffa>gearupsz argument passed - setting up gearupsz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ reclaim1;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fai2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress orange;
+                corpsetrig+ compress blue;
+                corpsetrig+ compress blue;
+                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ cocoon;
+                corpsetrig+ hide1;
+                corpsetrig+ poison1;
+                corpsetrig-on;
+            };
+            #else {
+                #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any gearupsz corpsetrig settings in this alias!!<088>};
+            };
+        };
+        #NOP -- corpsetrig with no get all;
+        #case {"noget"} {
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                #echo {<ffa>noget argument passed - setting up no get all corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ fdeener2;
+                corpsetrig+ bRemains;
+                corpsetrig+ divvy;
+                corpsetrig+ cocoon;
+                #NOP corpsetrig+ ted;
+                corpsetrig-on;
+            };
+            #NOP -- mage;
+            #elseif {"$guild" == "mage"} {
+                #echo {<ffa>noget argument passed - setting up no get all corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ spelltap;
+                corpsetrig+ wrap;
+                corpsetrig+ cBlast2;
+                corpsetrig+ divvy;
+                #NOP corpsetrig+ ted2;
+                corpsetrig+ study spellbook;
+                corpsetrig+ study spellbook;
+                corpsetrig-on;
+            };
+            #NOP -- elemental;
+            #elseif {"$guild" == "elemental"} {
+                #echo {<ffa>noget argument passed - setting up no get all corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                #NOP corpsetrig+ mDepletion;
+                corpsetrig+ cdrain2;
+                corpsetrig+ divvy;
+                corpsetrig+ cocoon;
+                #NOP corpsetrig+ ted;
+                corpsetrig-on;
+            };
+            #NOP -- bard;
+            #elseif {"$guild" == "bard"} {
+                #echo {<ffa>noget argument passed - setting up no get all corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ songcease;
+                corpsetrig+ wrap;
+                corpsetrig+ dirge2;
+                corpsetrig+ divvy;
+                corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- fremen;
+            #elseif {"$guild" == "fremen"} {
+                #echo {<ffa>noget argument passed - setting up no get all corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ reclaim2;
+                corpsetrig+ fai2;
+                corpsetrig+ divvy;
+                #NOP corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #else {
+                #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any noget corpsetrig settings in this alias!!<088>};
+            };
+        };
+        #NOP -- corpsetrig for grabbing donates;
+        #case {"donates"} {
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ fdeener2;
+                corpsetrig+ bRemains;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ cocoon;
+                corpsetrig+ give all to mushroom;
+                corpsetrig+ give all to mushroom;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
+                #NOP corpsetrig+ ted;
+                corpsetrig-on;
+            };
+            #NOP -- mage;
+            #elseif {"$guild" == "mage"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ spelltap;
+                corpsetrig+ wrap;
+                corpsetrig+ cBlast2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ pPocket;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
+                #NOP corpsetrig+ ted2;
+                corpsetrig+ study spellbook;
+                corpsetrig+ study spellbook;
+                corpsetrig-on;
+            };
+            #NOP - elemental;
+            #elseif {"$guild" == "elemental"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                #NOP corpsetrig+ mDepletion;
+                corpsetrig+ cdrain2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ vortex;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- bard;
+            #elseif {"$guild" == "bard"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ songcease;
+                corpsetrig+ wrap;
+                corpsetrig+ dirge2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ disc;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
+                #NOP corpsetrig+ ted;
+                corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- fremen;
+            #elseif {"$guild" == "fremen"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ reclaim1;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fillbelt5;
+                corpsetrig+ fai2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
+                #NOP corpsetrig+ ted;
+                #NOP corpsetrig+ cocoon;
+                corpsetrig+ hide1;
+                corpsetrig+ poison1;
+                corpsetrig-on;
+            };
+            #else {
+                #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any donates corpsetrig settings in this alias!!<088>};
+            };
+        };
+        #NOP -- corpsetrig for partying;
+        #case {"party"} {
+            #NOP -- juggernaut;
+            #if {"$guild" == "juggernaut"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                #NOP corpsetrig+ ted;
+                corpsetrig-off;
+            };
+            #NOP -- mage;
+            #elseif {"$guild" == "mage"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ spelltap;
+                #NOP corpsetrig+ ted2;
+                corpsetrig+ study spellbook;
+                corpsetrig+ study spellbook;
+                corpsetrig-on;
+            };
+            #NOP -- elemental;
+            #elseif {"$guild" == "elemental"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig-off;
+            };
+            #NOP -- bard;
+            #elseif {"$guild" == "bard"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig-off;
+            };
+            #NOP -- fremen;
+            #elseif {"$guild" == "fremen"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig-off;
+            };
+            #else {
+                #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any party corpsetrig settings in this alias!!<088>};
+            };
+        };
+        #default {
+            #echo {<fff>Mycorpsetrig '%0' Unknown. Use 'mycorpsetrig help' to see available options.<088>};
+        };
     };
 };
 
@@ -1087,36 +1452,9 @@
     corpsetrig+ reclaim2;
     corpsetrig+ divvy;
     #NOP corpsetrig+ ted;
-    corpsetrig+ cocoon;
+    #NOP corpsetrig+ cocoon;
     corpsetrig+ hide1;
     corpsetrig+ poison1
-};
-
-#NOP -- party corpsetrig;
-#alias {mycorpsetrig-party} {
-    #if {"$guild" == "juggernaut"} {
-        corpsetrig-clear;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "mage"} {
-        corpsetrig-clear;
-        corpsetrig+ spelltap;
-        corpsetrig+ ted2;
-        corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook;
-    };
-    #if {"$guild" == "elemental"} {
-        corpsetrig-clear;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "bard"} {
-        corpsetrig-clear;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "fremen"} {
-        corpsetrig-clear;
-        corpsetrig+ ted
-    };
 };
 
 #NOP -- party corpsetrig without spelltap;
@@ -1184,83 +1522,6 @@
         corpsetrig+ ted2;
         corpsetrig+ study spellbook;
         corpsetrig+ study spellbook
-    };
-};
-
-#NOP -- corpsetrig for donates;
-#alias {mycorpsetrig-donates} {
-    #if {"$guild" == "juggernaut"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ fdeener2;
-        corpsetrig+ bRemains;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ give all to mushroom;
-        corpsetrig+ give all to mushroom;
-        corpsetrig+ bag1;
-        corpsetrig+ bag1;
-        corpsetrig+ ted;
-    };
-    #if {"$guild" == "mage"} {
-        corpsetrig-clear;
-        corpsetrig+ spelltap;
-        corpsetrig+ wrap;
-        corpsetrig+ cBlast2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ pPocket;
-        corpsetrig+ bag1;
-        corpsetrig+ bag1;
-        corpsetrig+ ted2;
-        corpsetrig+ study spellbook;
-        corpsetrig+ study spellbook;
-    };
-    #if {"$guild" == "elemental"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        #NOP corpsetrig+ mDepletion;
-        corpsetrig+ cdrain2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ vortex;
-        corpsetrig+ bag1;
-        corpsetrig+ bag1;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "bard"} {
-        corpsetrig-clear;
-        corpsetrig+ songcease;
-        corpsetrig+ wrap;
-        corpsetrig+ dirge2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ crafting;
-        corpsetrig+ disc;
-        corpsetrig+ bag1;
-        corpsetrig+ bag1;
-        corpsetrig+ ted;
-        corpsetrig+ cocoon;
-    };
-    #if {"$guild" == "fremen"} {
-        corpsetrig-clear;
-        corpsetrig+ wrap;
-        corpsetrig+ reclaim1;
-        corpsetrig+ fillbelt5;
-        corpsetrig+ fillbelt5;
-        corpsetrig+ fai2;
-        corpsetrig+ divvy;
-        corpsetrig+ getAll;
-        corpsetrig+ bag1;
-        corpsetrig+ bag1;
-        #NOP corpsetrig+ ted;
-        corpsetrig+ cocoon;
-        corpsetrig+ hide1;
-        corpsetrig+ poison1
     };
 };
 
@@ -1338,7 +1599,7 @@
 #alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s};
 
 #NOP -- rolm room;
-#alias {pryout} {goldenrod;moldine;ruby;gold;azure;sapphire;glidine;red;jade;modine;shimmer;amethyst;grey;orange;minder;purple;white;aquamarine;bright;lodine;jade;misine;cinder;green;equinox;entyre;graine;citrine;crimson;facine;silver;tethine;rosith;ranet;glidine;fuschia;yves;faded;milfine;perine;white};
+#alias {pryout} {prys_exit};
 
 #alias {hell_pots} {place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of air on shelf 4;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of fire on shelf 1;place jar of water on shelf 3;place jar of air on shelf 4;place jar of earth on shelf 2;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of air on shelf 4;place jar of water on shelf 3;place jar of fire on shelf 1;place jar of earth on shelf 2;place jar of air on shelf 4;place jar of water on shelf 3;place jar of earth on shelf 2;place jar of fire on shelf 1;};
 #alias {sr_holes} {insert hand into left hole;insert hand into centre hole;insert hand into right hole};
@@ -1422,6 +1683,23 @@
     #5 throw axe
 };
 
+#NOP -- amy;
+#alias {amy1} {s;e;ne;n;n;n;u;e;n;nw;ne;n;d;d;s};
+#alias {amy2} {n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
+
+#alias {amy3} {
+    examine walls;
+    examine grate;
+    smash grate;
+    squeeze through grate;
+    examine walls;
+    examine crack;
+    pry crack;
+    crack
+};
+
+#alias {amy4} {crack;u;n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
+
 #NOP -- debug stuff;
 #alias {.startlog} {
     #switch {"%0"} {
@@ -1439,11 +1717,11 @@
 #NOP -- gswap;
 #alias {gw} {
     #switch {"%0"} {
-        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;get coin;.gswap juggernaut}};
-        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;get coin;.gswap mage}};
-        #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;get coin;.gswap elemental}};
-        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;get coin;.gswap bard}};
-        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;get coin;.gswap fremen}};
+        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;get coin;.gswap juggernaut}};
+        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;hold rock;get coin;.gswap mage}};
+        #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;hold rock;get coin;.gswap elemental}};
+        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;get coin;.gswap bard}};
+        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;get coin;.gswap fremen}};
         #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
     };
 };
@@ -1483,19 +1761,14 @@
 #list badger3kdb clear;
 
 #NOP -- corpses;
-#list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
-#list badger3kdb add {{{name} {mycorpsetrig-sz} {type} {corpses} {desc} {Default corpsetrig & sz cap eating}}};
+#list badger3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig 'mycorpsetrig help' for more info}}};
 #list badger3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list badger3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list badger3kdb add {{{name} {mycorpsetrig-mage} {type} {corpses} {desc} {Corpsetrig for partying with mages}}};
 #list badger3kdb add {{{name} {mycorpsetrig-magesz} {type} {corpses} {desc} {Corpsetrig for partying with mages & sz cap eating}}};
-#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {Corpsetrig without get all}}};
-#list badger3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
 #list badger3kdb add {{{name} {mycorpsetrig-notap} {type} {corpses} {desc} {Corpsetrig for partying without spelltap}}};
 #list badger3kdb add {{{name} {b} {type} {corpse} {desc} {use a corpse}}};
-#list badger3kdb add {{{name} {mycorpsetrig-donates} {type} {corpse} {desc} {corpsetrig for collecting donates}}};
-#list badger3kdb add {{{name} {mycorpsetrig-noget} {type} {corpses} {desc} {corpsetrig without get all}}};
 #list badger3kdb add {{{name} {mycorpsetrig-water} {type} {corpses} {desc} {corpsetrig to reclaim & fai (fremen)}}};
 
 #NOP -- boosts;
@@ -1570,11 +1843,7 @@
     #list badger3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
     #list badger3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
     #list badger3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
-    #list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies (2 assisting & 2 defending & golem assisting)}}};
-    #list badger3kdb add {{{name} {killmode2} {type} {guild} {desc} {Setup summon config & strategies (All summons assisting & golem assisting)}}};
-    #list badger3kdb add {{{name} {killmode3} {type} {guild} {desc} {Setup summon config & strategies (All summons defending & golem assisting)}}};
-    #list badger3kdb add {{{name} {killmode4} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend & golem assist)}}};
-    #list badger3kdb add {{{name} {killmode5} {type} {guild} {desc} {Setup summon config & strategies (3 assist & 1 defend & golem defend)}}};
+    #list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies}}};
     #list badger3kdb add {{{name} {ff} {type} {guild} {desc} {cast find familiar}}};
     #list badger3kdb add {{{name} {m} {type} {guild} {desc} {study spellbook}}};
 
@@ -1586,7 +1855,7 @@
     #list badger3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
     #list badger3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
     #list badger3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
-    #list badger3kdb add {{{name} {charm} {type} {spells} {desc} {Charm monster: mob peace}}};
+    #list badger3kdb add {{{name} {charm1} {type} {spells} {desc} {Charm monster: mob peace}}};
     #list badger3kdb add {{{name} {mf} {type} {spells} {desc} {Enhancing: Cast monstrous fortitude - mf <summons>}}};
     #list badger3kdb add {{{name} {caststr} {type} {spells} {desc} {Enhancing: Cast giant strength & strength (+str)}}};
     #list badger3kdb add {{{name} {sub} {type} {spells} {desc} {Enhancing: Cast subjugate on summons (lowers cnc for summons)}}};
@@ -1621,4 +1890,4 @@
 };
 
 
-#class {player_aliases} {close}
+#class {player_aliases} {close};

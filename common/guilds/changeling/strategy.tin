@@ -1,10 +1,11 @@
-#class guild_strategy kill;
-#class guild_strategy open;
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
 
 #list strategyList add {{{guild} {changeling} {name} {relinquish}  {active} {0} {description} {Relinquish at 33/66/99}}};
 #list strategyList indexate name;
 
-#alias _strategy_guild {
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
     checkStrategy {relinquish} {
         #if {!$my[relinquish][active] && $my[relinquish][current] > 0} {
             #if {$my[relinquish][reset] == 33} {#send {!relinquish}};
@@ -14,4 +15,9 @@
     };
 };
 
-#class guild_strategy close;
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
+
+#class {guild_strategy} {close};

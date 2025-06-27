@@ -1,5 +1,5 @@
-#class {guild_aliases} {kill}
-#class {guild_aliases} {open}
+#class {guild_aliases} {kill};
+#class {guild_aliases} {open};
 
 #NOP -- donate water otherwise reclaim;
 #alias {fremCorpse} {
@@ -62,4 +62,27 @@
     };
 };
 
-#class {guild_aliases} {close}
+#NOP -- show skill trainers and count total skill points to figure out how many left until next glvl;
+#alias {format_fremenskills} {
+    #format {fremenskill_name} {<cff>%-20s <bea>%-8s <deb>%-11s <bad>%-10s <ffa>%-10s<088>} {%1} {%2} {%3} {%4} {%5};
+    #echo {$fremenskill_name};
+};
+
+#unvar fremenskill;
+
+#alias {fskills} {
+    #read common/guilds/fremen/fremen_skills.tin;
+    #var fremenskill[total][rank] 0;
+    #var fremenskill[total][current] 0;
+    #send {!skills -nograph};
+    #delay .5 {
+        #var fremenskill[total][current] {$fremenskill[total][rank]};
+        #math fremenskill[glvl][current] {$fremenskill[total][current] / 6};
+        #math fremenskill[total][next_glvl] {($fremenskill[glvl][current] + 1) * 6};
+        #math fremenskill[total][remaining_til_glvl] {$fremenskill[total][next_glvl] - $fremenskill[total][current]};
+        #echo {Total Skill Points: $fremenskill[total][rank] | Current GLVL: $fremenskill[glvl][current] | Next GLVL in $fremenskill[total][remaining_til_glvl] skill points};
+        #class {fremen_skills} {kill};
+    };
+};
+
+#class {guild_aliases} {close};

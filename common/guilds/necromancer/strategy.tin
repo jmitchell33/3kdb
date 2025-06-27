@@ -1,0 +1,111 @@
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
+
+#list strategyList add {{{guild} {necromancer} {name} {snare} {active} {0} {description} {Vamp/Were: Snare}}};
+#list strategyList add {{{guild} {necromancer} {name} {call} {active} {0} {description} {Call Familiar}}};
+#list strategyList add {{{guild} {necromancer} {name} {maim} {active} {0} {description} {Were: Maim}}};
+#list strategyList add {{{guild} {necromancer} {name} {scythe} {active} {0} {description} {Reaper: Scythe}}};
+#list strategyList add {{{guild} {necromancer} {name} {harvest} {active} {0} {description} {Reaper: Grim Harvest}}};
+#list strategyList add {{{guild} {necromancer} {name} {soulbind} {active} {0} {description} {Reaper: Soulbind}}};
+#list strategyList add {{{guild} {necromancer} {name} {rabies} {active} {0} {description} {Were: Rabies}}};
+#list strategyList add {{{guild} {necromancer} {name} {fury_prime} {active} {0} {description} {Were: Fury Prime}}};
+#list strategyList add {{{guild} {necromancer} {name} {fury} {active} {0} {description} {Were: Fury}}};
+#list strategyList add {{{guild} {necromancer} {name} {spirithowl} {active} {0} {description} {Were: Spirithowl}}};
+#list strategyList add {{{guild} {necromancer} {name} {bloodarc} {active} {0} {description} {Lich: Bloodarc}}};
+#list strategyList add {{{guild} {necromancer} {name} {bloodlet} {active} {0} {description} {Vamp: Bloodlet}}};
+#list strategyList add {{{guild} {necromancer} {name} {bloodfuse} {active} {0} {description} {Vamp: Bloodfuse}}};
+#list strategyList add {{{guild} {necromancer} {name} {rage} {active} {0} {description} {Vamp: Rage}}};
+#list strategyList add {{{guild} {necromancer} {name} {rage_prime} {active} {0} {description} {Vamp: Rage Prime}}};
+#list strategyList add {{{guild} {necromancer} {name} {illume} {active} {0} {description} {Pure: Illume}}};
+#list strategyList add {{{guild} {necromancer} {name} {skullfire} {active} {0} {description} {Pure: Skullfire}}};
+#list strategyList add {{{guild} {necromancer} {name} {corrode} {active} {0} {description} {Pure: Corrode}}};
+#list strategyList add {{{guild} {necromancer} {name} {psibleed} {active} {0} {description} {Pure: Psibleed}}};
+#list strategyList add {{{guild} {necromancer} {name} {shackle} {active} {0} {description} {Pure: Shackle}}};
+#list strategyList add {{{guild} {necromancer} {name} {diurnum} {active} {0} {description} {Necro: Diurnum}}};
+#list strategyList add {{{guild} {necromancer} {name} {nocturnum} {active} {0} {description} {Necro: Nocturnum}}};
+#list strategyList add {{{guild} {necromancer} {name} {iprime} {active} {0} {description} {Invoke Prime}}};
+#list strategyList add {{{guild} {necromancer} {name} {conjure} {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (Unholy Ground)}}};
+#list strategyList add {{{guild} {necromancer} {name} {conjure1} {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (No Unholy Ground)}}};
+#list strategyList add {{{guild} {necromancer} {name} {gemino} {active} {0} {description} {Preserve Gemino Corpses}}};
+#list strategyList add {{{guild} {necromancer} {name} {ug} {active} {0} {description} {Unholy Ground}}};
+#list strategyList indexate name;
+
+#NOP -- Actions to perform at any time in the fight;
+#alias {_strategy_guild} {
+    #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
+        #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
+            checkStrategy {iprime} {#var iprime_round 0;ip1;#delay 10 {#var iprime_round 1}};
+        };
+        #if {$my[necromancer][diurnum] > 0 || $my[necromancer][nocturnum] > 0} {
+            checkStrategy {diurnum} {diurnum prime;#var my[necromancer][diurnum] 0;#var my[necromancer][nocturnum] 0};
+            checkStrategy {nocturnum} {nocturnum prime;#var my[necromancer][diurnum] 0;#var my[necromancer][nocturnum] 0};
+        };
+        #if {$my[necromancer][bloodfuse] > 0 && $my[necromancer][decanters][powered] > 0} {
+            checkStrategy {bloodfuse} {
+                corpse_select;
+                #if $mask[active] {
+                    #send {qatrance cackle;qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
+                } {
+                    #send {qtrance smuggle remove potion/drink potion/preserve remains/bloodfuse corpse};
+                };
+            };
+        };
+        #if {$my[necromancer][unholy_ground]} {
+            checkStrategy {ug} {unholy ground};
+        };
+
+        #if {$my[necromancer][soulbind] && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
+            checkStrategy {soulbind} {soulbind};
+        };
+
+        #if {$my[necromancer][bloodarc] > 0 && !$mob[bloodarc]} {
+            checkStrategy {bloodarc} {bloodarc};
+        };
+            
+        #if {$my[necromancer][harvest] > 0} {
+            checkStrategy {harvest} {harvest};
+        };
+
+        #if {$my[necromancer][skullfire] > 0 && $my[necromancer][souls] >= 7 && $my[necromancer][glamors][current] >= 1} {
+            checkStrategy {skullfire} {skullfire};
+        };
+
+        #if {$my[necromancer][conjure_undead] > 0} {
+            #if {$my[gp1][current] < 50000} {
+                checkStrategy {conjure} {nukeUndeadAbs};
+                checkStrategy {conjure1} {nukeUndead_noUG_Abs};
+            };
+            #if {$my[gp1][current] > 50000 || $my[gp2][current] > 90} {
+                checkStrategy {conjure} {nukeUndeadPres};
+                checkStrategy {conjure1} {nukeUndead_noUG_Pres};
+            };
+        };
+    };
+
+    #if {$my[necromancer][spirit-howl] > 0} {
+        checkStrategy {spirithowl} {spirithowl;#var my[necromancer][spirit-howl] 0};
+    };
+
+    #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][illuming]} {
+        checkStrategy {illume} {illume};
+    };
+};
+
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #if {$my[necromancer][maim]} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {qtrance alter hybrid/maim}};};
+    checkStrategy {snare} {snare};
+    checkStrategy {shackle} {shackle};
+    checkStrategy {rabies} {rabies};
+    checkStrategy {corrode} {corrode};
+    checkStrategy {scythe} {scythe};
+    checkStrategy {call} {call};
+    checkStrategy {psibleed} {psibleed};
+    checkStrategy {fury_prime} {#if {$my[necromancer][glamors][current]} {fury prime}};
+    checkStrategy {fury} {#if {$my[necromancer][glamors][current]} {fury}};
+    checkStrategy {rage_prime} {#if {$my[necromancer][glamors][current]} {rage prime}};
+    checkStrategy {rage} {#if {$my[necromancer][glamors][current]} {rage}};
+    checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
+};
+
+#class {guild_strategy} {close};

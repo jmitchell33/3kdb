@@ -1,5 +1,5 @@
-#class {player_heartbeat} {kill}
-#class {player_heartbeat} {open}
+#class {player_heartbeat} {kill};
+#class {player_heartbeat} {open};
 
 #var corpse_delay 1;
 #var corpse_use 200;
@@ -7,6 +7,13 @@
 
 #alias {_player_heartbeat} {
     #if {!$idle_flag} {
+        #if {"$guild" == "juggernaut"} {
+            #if {$bot[active] && $shp < 27} {
+                #if {"$enemy[name]" == "Terra, Knight of Earth"} {
+                    hmshield;
+                };
+            };
+        };
         #if {"$guild" == "mage"} {
             #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
                 cast explosive release;
@@ -40,4 +47,4 @@
     };
 };
 
-#class {player_heartbeat} {close}
+#class {player_heartbeat} {close};

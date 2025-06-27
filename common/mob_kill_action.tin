@@ -58,6 +58,23 @@
     #echo {<caa>----  <fff> Mob Kill Actions (mka) has been cleared <caa>  ----<088>};
 };
 
+#alias checkMka {
+    #if $debug[mka] {#echo {<efc>RECEIVED %0<088>}};
+    #var mka_found 0;
+    #if {&mkaActions[] > 0} {
+        #foreach $mkaActions[%*] item {
+            #if {"$item[name]" == "%1"} {
+                #var mka_found 1;
+                #if $debug[mka] {#echo {<efc>Mka: %1   <fab>ACTION: %2<088>}};
+                %2;
+            };
+        };
+    };
+    #if {!$mka_found && "%3" !== ""} {
+        #if $debug[mka] {#echo {<efc>Mka: %1   <fab>ACTION: %3<088>}};
+        %3;
+    };
+};
 
 #alias mka+ {
     #if {"%0" != ""} {
@@ -141,7 +158,6 @@
         };
     };
 };
-
 
 #alias mka-help {
     #echo { ================ <dfa>3kdb MOB KILL ACTIONS <088> ================ };
@@ -252,19 +268,12 @@
 #list mkaList clear;
 #NOP -- all;
 #list mkaList add {{{name} {chug} {guild} {all} {action} {drink alcohol} {active} {0} {description} {Have a drink before your fight}}};
-/*#list mkaList add {{{name} {kill} {guild} {all} {action} {
-    #if {"$guild" == "bard"} {
-        checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
-        checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
-    };
-    kill $mkaTargetName;
-} {active} {0} {description} {Attack the mob using 'kill'}}};*/
 
 #NOP -- bard;
 #list mkaList add {{{name} {backstab} {guild} {bard} {action} {rolm edged;cast mystic venom on rod;hide in shadows;backstab $mkaTargetName} {active} {0} {description} {Bard: Backstab the mob}}};
 #list mkaList add {{{name} {roomAttack} {guild} {bard} {action} {itf;} {active} {0} {description} {Bard: Attack Room w/ Into The Fire}}};
 #list mkaList add {{{name} {harmony} {guild} {bard} {action} {defensive harmony} {active} {0} {description} {Bard: Increase AC for a short duration}}};
-#list mkaList add {{{name} {hregen} {guild} {bard} {action} {#if !$my[defs][hr] {cast harmonic regeneration}} {active} {0} {description} {Bard: cast harmonic regeneration}}};
+#list mkaList add {{{name} {hregen} {guild} {bard} {action} {cast harmonic regeneration} {active} {0} {description} {Bard: cast harmonic regeneration}}};
 
 #NOP -- juggernaut;
 #list mkaList add {{{name} {suppDefend} {guild} {juggernaut} {action} {
@@ -296,24 +305,34 @@
 #NOP -- fremen;
 #list mkaList add {{{name} {ambush} {guild} {fremen} {action} {ambush $mkaTargetName} {active} {0} {description} {Fremen: Ambush}}};
 
+#NOP -- jedi;
+#list mkaList add {{{name} {mindblock} {guild} {jedi} {action} {focus mindblock on $mkaTargetName} {active} {0} {description} {Jedi: Mindblock}}};
+#list mkaList add {{{name} {confusion} {guild} {jedi} {action} {focus confusion on $mkaTargetName} {active} {0} {description} {Jedi: Confusion}}};
+
 #list mkaList indexate name;
 
 #alias mka {
     #var mkaTarget 1;
     #if {"%0" === ""} {#var mkaTargetName $room[mobs][1][autoName]} {#var mkaTargetName %0};
-    #NOP -- strategy action toggle maintenance incase corpsetrig fails to fire;
+    #NOP -- if corpsetrig failed to fire and bot ticker activated then we will reset corpsetrigfailed variable;
+    #if {"$bot[active]" == "1" && "$bot[corpsetrigfailed]" == "0"} {
+        #var bot[corpsetrigfailed] 1;
+        #if {$debug[corpsetrig][toggle]} {#echo {<ffa>debug toggles: corpsetrig failed - resetting corpsetrigfailed to 1:<088> $bot[corpsetrigfailed]}};
+    };
+    #NOP -- toggle maintenance incase corpsetrig fails to fire;
+    #NOP -- fremen;
     #if {"$guild" == "fremen"} {
         #if {"$toggles[fremen][hold]" == "0"} {
             #var toggles[fremen][hold] 1;
-            #if {$debug[toggle]} {#echo {<ffa>debug toggles: mka fired - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+            #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: mka fired - hold toggle set to 1:<088> $toggles[fremen][hold]}};
         };
         #if {"$toggles[fremen][stun]" == "0"} {
             #var toggles[fremen][stun] 1;
-            #if {$debug[toggle]} {#echo {<ffa>debug toggles: mka fired - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+            #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: mka fired - stun toggle set to 1:<088> $toggles[fremen][stun]}};
         };
         #if {"$toggles[fremen][enfeeblement]" == "0"} {
             #var toggles[fremen][enfeeblement] 1;
-            #if {$debug[toggle]} {#echo {<ffa>debug toggles: mka fired - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+            #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: mka fired - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
         };
     };
     #if {"$mkaStatus" == "1"} {
@@ -322,8 +341,13 @@
                 #line substitute variables {$mkaActions[$item][action]};
             };
         };
+        #NOP -- bard;
+        #if {"$guild" == "bard"} {
+            checkStrategy {rainbow} {#if !$my[defs][hr] {cast harmonic regeneration}};
+            checkStrategy {hammer} {#if !$my[defs][hr] {cast harmonic regeneration}};
+        };
         kill $mkaTargetName;
-    };
+    };  
 };
 
 

@@ -1,5 +1,5 @@
-#class common_room kill;
-#class common_room open;
+#class {common_room} {kill};
+#class {common_room} {open};
 
 
 #NOP -- Add anything to the familiar mix;
@@ -209,36 +209,45 @@
     #var botTarget 0;
     #var mobFamiliar 0;
 
-    #NOP -- strategy action toggle maintenance if cassisting;
-    #if {"$guild" == "fremen"} {
-        #if {"$cassist[status]" == "1"} {
+    #NOP -- toggle maintenance if cassisting;
+    #if {"$cassist[status]" == "1"} {
+        #NOP -- fremen;
+        #if {"$guild" == "fremen"} {
             #if {"$toggles[fremen][hold]" == "0"} {
                 #var toggles[fremen][hold] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: cassist active - hold toggle set to 1:<088> $toggles[fremen][hold]}};
             };
             #if {"$toggles[fremen][stun]" == "0"} {
                 #var toggles[fremen][stun] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: cassist active - stun toggle set to 1:<088> $toggles[fremen][stun]}};
             };
             #if {"$toggles[fremen][enfeeblement]" == "0"} {
                 #var toggles[fremen][enfeeblement] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: cassist active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: cassist active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
             };
         };
-        #NOP -- toggle maintenance if mob is aggro;
-        #if {"$bot[aggro-mob]" == "1"} {
+    };
+    #NOP -- toggle maintenance if mob is aggro;
+    #if {"$bot[aggro-mob]" == "1"} {
+        #NOP -- fremen;
+        #if {"$guild" == "fremen"} {
             #if {"$toggles[fremen][hold]" == "0"} {
                 #var toggles[fremen][hold] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - hold toggle set to 1:<088> $toggles[fremen][hold]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: aggro mob - hold toggle set to 1:<088> $toggles[fremen][hold]}};
             };
             #if {"$toggles[fremen][stun]" == "0"} {
                 #var toggles[fremen][hold] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: aggro mob - stun toggle set to 1:<088> $toggles[fremen][stun]}};
             };
             #if {"$toggles[fremen][enfeeblement]" == "0"} {
                 #var toggles[fremen][enfeeblement] 1;
-                #if {$debug[toggle]} {#echo {<ffa>debug toggles: aggro mob - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+                #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: aggro mob - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
             };
+        };
+        #NOP -- reset corpsetrigfailed variable to 1 if aggro mob;
+        #if {"$bot[corpsetrigfailed]" == "0"} {
+            #var bot[corpsetrigfailed] 1;
+            #if {$debug[corpsetrig][toggle]} {#echo {<ffa>debug toggles: corpsetrig failed - resetting corpsetrigfailed to 1:<088> $bot[corpsetrigfailed]}};
         };
     };
 
@@ -355,4 +364,4 @@
     }
 } {2};
 
-#class common_room close;
+#class {common_room} {close};

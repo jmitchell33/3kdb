@@ -70,23 +70,32 @@
             #if $eternal {_update_cstats};
             .processDeathReport;
 
-            #NOP -- strategy actions & toggle maintenance that need to fire after all corpsetrig actions if bot is not active;
-            #if {"$guild" == "fremen"} {
-                #if {"$bot[active]" != "1"} {
+            #NOP -- toggle maintenance that need to fire after all corpsetrig actions if bot is not active;
+            #if {"$bot[active]" != "1"} {
+                #NOP -- fremen;
+                #if {"$guild" == "fremen"} {
                     #if {"$toggles[fremen][hold]" == "0"} {
                         #var toggles[fremen][hold] 1;
-                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - hold toggle set to 1:<088> $toggles[fremen][hold]}};
-                        checkStrategy {suspend} {#send {!suspend}};
+                        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - hold toggle set to 1:<088> $toggles[fremen][hold]}};
                     };
                     #if {"$toggles[fremen][stun]" == "0"} {
                         #var toggles[fremen][stun] 1;
-                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - stun toggle set to 1:<088> $toggles[fremen][stun]}};
+                        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - stun toggle set to 1:<088> $toggles[fremen][stun]}};
                     };
                     #if {"$toggles[fremen][enfeeblement]" == "0"} {
                         #var toggles[fremen][enfeeblement] 1;
-                        #if {$debug[toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
+                        #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
                     };
                     checkStrategy {suspend} {#send {!suspend}};
+                };
+                #NOP -- juggernaut;
+                #if {"$guild" == "juggernaut"} {
+                    checkStrategy {mechwarrior} {
+                        #delay .5 {
+                            #send {!support defend};
+                            #send {!hp};
+                        };
+                    };
                 };
             };
         };
@@ -94,12 +103,12 @@
             
     #if $bot[active] {
         #showme {----- BOT REGISTERED KILL -----};
-        #NOP #local lastItem &deathSummary[];    ;
-        #NOP #foreach *deathSummary[$lastItem][] key {    ;
-        #NOP     #if {"$deathSummary[$lastItem][$key]" > 0} {    ;
-        #NOP         #echo {$key : $deathSummary[$lastItem][$key]}    ;
-        #NOP     };    ;
-        #NOP };    ;
+        #NOP #local lastItem &deathSummary[];
+        #NOP #foreach *deathSummary[$lastItem][] key {
+        #NOP     #if {"$deathSummary[$lastItem][$key]" > 0} {
+        #NOP         #echo {$key : $deathSummary[$lastItem][$key]};
+        #NOP     };
+        #NOP };
     };
 } {2};
 

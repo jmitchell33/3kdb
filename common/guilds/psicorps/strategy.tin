@@ -1,5 +1,5 @@
-#class guild_strategy kill;
-#class guild_strategy open;
+#class {guild_strategy} {kill};
+#class {guild_strategy} {open};
 
 #list strategyList add {{{guild} {psicorps} {name} {bfuel} {active} {0} {description} {Psicorps: Body Fuel}}};
 #list strategyList add {{{guild} {psicorps} {name} {convert} {active} {0} {description} {Psicorps: Convert}}};
@@ -17,11 +17,16 @@
 #list strategyList add {{{guild} {psicorps} {name} {burst} {active} {0} {description} {Psicorps: Burst}}};
 #list strategyList indexate name;
 
-
+#NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
     #if {!$idle_flag && $action_round < $mip[round]} {
         #NOP;
     };
 };
 
-#class guild_strategy close;
+#NOP -- Actions to perform the first rounds of combat;
+#alias {_strategy_guild_start} {
+    #NOP;
+};
+
+#class {guild_strategy} {close};
