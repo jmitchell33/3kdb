@@ -9,6 +9,25 @@
     };
 };
 
+#NOP -- augur;
+#alias {aug} {
+    remove other;
+    wear circlet;
+};
+
+#alias {aug2} {
+    remove circlet;
+    wear other 2;
+};
+
+#NOP -- stanely cup;
+#alias {dcup} {
+    kill mike;
+    dc;
+    touch dove rune;
+    kill mike 1;
+};
+
 #NOP -- fill 5 literjons;
 #alias {fillbelt5} {
     #5 fill literjon;
@@ -79,7 +98,7 @@
         #send {!jfinger %0};
     };
     #elseif {"$guild" == "mage"} {
-        #send {!gfinger %0};
+        #send {!mfinger %0};
     };
     #elseif {"$guild" == "elemental"} {
         #send {!efinger %0};
@@ -114,7 +133,11 @@
     3kReport+ xp_ratio;
     3kReport+ dmg_dealt;
     3kReport+ dmg_received;
-    3kReport+ corpses
+    #NOP 3kReport+ corpses;
+};
+
+#alias {3kr} {
+    3kReport
 };
 
 #NOP -- fly;
@@ -290,7 +313,7 @@
             shoo;
             shoo golem;
             mystrategy;
-            ms 8##4#1500#70#assist#summons#always;
+            ms 9##4#1500#70#assist#summons#always;
             ms golema;
         };
         #NOP -- 4 summons defending;
@@ -299,7 +322,7 @@
             shoo;
             shoo golem;
             mystrategy;
-            ms 8##4#1500#70#defend#summons#always;
+            ms 9##4#1500#70#defend#summons#always;
             ms golema;
         };
         #NOP -- 3 summons assisting and 1 summon defending;
@@ -308,8 +331,8 @@
             shoo;
             shoo golem;
             mystrategy;
-            ms 8##3#1500#70#assist#summons#always;
-            ms 8##1#1500#70#defend#summons#always;
+            ms 9##3#1500#70#assist#summons#always;
+            ms 9##1#1500#70#defend#summons#always;
             ms golema;
         };
         #NOP -- 1 summon defending and 3 summons assisting;
@@ -318,8 +341,8 @@
             shoo;
             shoo golem;
             mystrategy-golem;
-            ms 8##1#1500#70#defend#summons#always;
-            ms 8##3#1500#70#assist#summons#always;
+            ms 9##1#1500#70#defend#summons#always;
+            ms 9##3#1500#70#assist#summons#always;
             ms golemd;
         };
         #NOP -- default is 2 summons defending and 2 summons assisting;
@@ -329,8 +352,8 @@
             shoo;
             shoo golem;
             mystrategy;
-            ms 8##2#1500#70#defend#summons#always;
-            ms 8##2#1500#70#assist#summons#always;
+            ms 9##2#1500#70#defend#summons#always;
+            ms 9##2#1500#70#assist#summons#always;
             ms golema;
         };
         #default {
@@ -943,6 +966,14 @@
     strategy mech_resummon
 };
 
+#alias {mystrategy-mw} {
+    strategy-clear;
+    strategy frenzy;
+    strategy nukes;
+    strategy mech_resummon;
+    strategy mechwarrior
+};
+
 #alias {stclear} {
     strategy-clear
 };
@@ -1148,7 +1179,7 @@
                 corpsetrig+ compress orange;
                 corpsetrig+ compress blue;
                 corpsetrig+ compress blue;
-                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ szGreenCap;
                 #NOP corpsetrig+ ted;
                 corpsetrig-on;
             };
@@ -1166,7 +1197,7 @@
                 corpsetrig+ compress orange;
                 corpsetrig+ compress blue;
                 corpsetrig+ compress blue;
-                corpsetrig+ szGreenCap;
+                #NOP corpsetrig+ szGreenCap;
                 #NOP corpsetrig+ ted2;
                 corpsetrig+ study spellbook;
                 corpsetrig+ study spellbook;
