@@ -163,6 +163,7 @@
     draw_caption_corpses;
     draw_caption_status;
     draw_caption_strategy;
+    #NOP draw_caption_bot_cycle;
 };
 
 #alias draw_all {
@@ -198,11 +199,14 @@
     #nop -- Clear any old drawings -- Testing if we need this;
     #NOP #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
+    #NOP -- Work in progress, set this to nothing before it's finished;
     #if $corpsetrigStatus {
         #var ktrig_string <fff>KTRIG: <fff>ON<088>;
     } {
         #var ktrig_string <ccc>KTRIG: <ccc>OFF<088>;
     };
+
+    #var ktrig_string  ;
 
     #if {&caption_data[]} {
         #list caption_data set $draw[index][caption] {$corpse_string \n $ktrig_string \n $eternal_string};
@@ -302,6 +306,37 @@
 
     #list caption_data set $draw[index][bot] $bot_string;
 };
+
+#alias draw_caption_bot_cycle {
+    #if {$draw[index][cycle]} {
+        #NOP -- If the stored index is greater than those existing, reset it;
+        #if {$draw[index][cycle] > &caption_data[]} {
+            #math draw[index][cycle] {&caption_data[] + 1};
+            #list caption_data insert $draw[index][cycle] {};
+        };
+    } {
+        #math draw[index][cycle] {&caption_data[] + 1};
+        #list caption_data insert $draw[index][cycle] {};
+    };
+
+    #var bot_cycle_string {\n <bef>Bot Cycler:<088>};
+
+    #if {&{botcycle[]} > 0} {
+        #list botlist indexate alias;
+        #loop 1 &botcycle[] index {
+            #list botlist find {$botcycle[$index]} {tmpIndex};
+            #format bot_cycle_name {%n} {${botlist[$tmpIndex][desc]}};
+            #format strat_name {%n} {$index[name]};
+            #cat bot_cycle_string { -> <afa>$bot_cycle_name<088>};
+        };
+    } {
+        #var bot_cycle_string {\n <bef>Bot Cycler:<088>};
+    };
+
+    #list caption_data set $draw[index][cycle] $bot_cycle_string;
+}
+
+    
 
 #alias draw_caption_strategy {
     
