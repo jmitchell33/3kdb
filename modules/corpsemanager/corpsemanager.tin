@@ -157,6 +157,53 @@
 	};
 };
 
+#NOP -- Necro alias to use # of corpses;
+#alias {corpse_select_necro} {
+	#local tmpCorpses %1;
+	#local tmpMoreCorpses 1;
+	#local tmpAbsorb %1;
+	#local tmpNewCorpse 0;
+	#echo {received corpses $tmpCorpses tmpAbsorb $tmpAbsorb};
+	#if {$corpses[coffin] > 0} {
+		#if {$corpses[coffin] >= $tmpCorpses} {
+			qtrance unwrap>$tmpCorpses;
+			#var tmpMoreCorpses 0;
+		} {
+			#math tmpCorpses {$tmpCorpses - $corpses[coffin]};
+			qtrance unwrap>$corpses[coffin];
+		};
+	};
+
+	#if $tmpMoreCorpses {
+		#if {$corpses[freezer] > 0 && $corpses[freezer] >= $tmpCorpses} {
+			qtrance deslab>$tmpCorpses;
+			#var tmpMoreCorpses 0;
+		} {
+			#math tmpCorpses {$tmpCorpses - $corpses[freezer]};
+			qtrance deslab>$corpses[freezer];
+		};
+	};
+
+	#if $tmpMoreCorpses {
+		#if {$corpses[cooler] > 0 && $corpses[cooler] >= $tmpCorpses} {
+			qtrance uncooler corpse>$tmpCorpses;
+			#var tmpMoreCorpses 0;
+		} {
+			qtrance uncooler corpse>$corpses[cooler];
+			#math tmpCorpses {$tmpCorpses - $corpses[cooler]};
+		};
+	};
+	#action {eyes glow bright green upon the fallen} {
+		#math tmpNewCorpse {$tmpNewCorpse + 1};
+	} {1};
+	#delay 4 {
+		#math tmpAbsorb {$tmpNewCorpse + $tmpAbsorb};
+		#echo {adding $tmpNewCorpse dupes and absorbing $tmpAbsorb total};
+		qtrance absorb>$tmpAbsorb;
+		#unaction {eyes glow bright green upon the fallen};
+	};
+};
+
 #alias check_box {
 	#var box_name %1;
 	#act {^-i-A colossal box (empty).$} {
@@ -211,21 +258,14 @@
 
 
 #NOP -- Corpse Management COFFIN / FREEZER;
-#NOP -- Coffin wrapping gives the same message if you wrap 1 or 50, so we need to check inventory after wrapping for a correct count;
-#var check_coffin 1;
-#act {the coffin's protective hold!$} {
-	#if $check_coffin {
-		#var check_coffin 0;
-		#delay 0.5 {i;#var check_coffin 1;};
-	};
-} {2};
+#act {the coffin's protective hold!$} {#math corpses[coffin] {$corpses[coffin] + 1}} {2};
 #act {The coffin expels a corpse!} {#line gag;#echo {<169>Coffin: -1 corpse};#math corpses[coffin] {$corpses[coffin] - 1};} {2};
 #act {The coffin expels all its corpses!} {#var corpses[coffin] 0;} {2};
 #act {You picked up %d {corpse|corpses} into the coffin.} {#math corpses[coffin] {$corpses[coffin] + %1};} {2};
 #act {There are no corpses in the coffin!} {#var corpses[coffin] 0;} {2};
       
 
-
+#NOP -- Deaths Freezer;
 #act {frame causing it to get sucked in!$} {#line gag;#echo {<169>Freezer: +1 corpse};#math {corpses[freezer]} {$corpses[freezer] + 1};} {2};
 #act {^You shake the frame and out drops} {#line gag;#echo {<169>Freezer: -1 corpse};#math {corpses[freezer]} {$corpses[freezer] - 1};} {2};
 #act {^There are no corpses in the freezer!$} {#var corpses[freezer] 0} {2};
