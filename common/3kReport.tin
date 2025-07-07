@@ -47,7 +47,7 @@
         #if {$tempListIndex > 0} {
             #var tempList $dReportList[+$tempListIndex];
 
-            #if $tempList[key][active] {
+            #if $tempList[active] {
                 #var dReportList[+$tempListIndex][active] 0;
                 #echo {<caa>----  <fff> %0 <faa>removed <eee>from the <fff>3kReport <caa>  ----<088>};
             } {
@@ -68,7 +68,7 @@
         #if {$tempListIndex > 0} {
             #var tempList $dReportList[+$tempListIndex];
 
-            #if $tempList[key][active] {
+            #if $tempList[active] {
                 #echo {<caa>----  <fff> %0 is already in the <fff>3kReport <caa>  ----<088>};
             } {
                 #var dReportList[+$tempListIndex][active] 1;
@@ -412,8 +412,8 @@
                 #math tmpPerMobDsaves {$tmpTotalDsaves / $tmpTotalKills * 1.0};
                 #format tmpPerMobDsaves {%g} $tmpPerMobDsaves;
                 #format tmpPerMobDsaveNP {%g} $tmpPerMobDsaveNP;
-                #format tmpTotalDsaveNP {%g} $tmpTotalDsaveNP;
-                #format tmpTotalDsaveNP {G} {B};
+                #format tmpTotalDsaveNP {%M} $tmpTotalDsaveNP;
+                #replace tmpTotalDsaveNP {G} {B};
             };
             
             
