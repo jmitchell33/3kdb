@@ -127,6 +127,14 @@
     } {
         #var deathReport[songs_lost] 0;
     };
+
+    #if {"$guild" == "necromancer"} {
+        #var deathReport[dsave_count] $dsave[mob][count];
+        #var deathReport[dsave_nps] $dsave[mob][np];
+    } {
+        #var deathReport[dsave_count] 0;
+        #var deathReport[dsave_nps] 0;
+    };
     
     #NOP -- Small delay to make sure we get the variables from the updates;
     #delay 1 {
@@ -146,6 +154,11 @@
         #list deathSummary_mob_dodges add {$deathReport[mob_dodges]};
         #list deathSummary_class add {$deathReport[class]};
         #list deathSummary_xp_to_class add {$deathReport[xp_to_class]};
+
+        #if {"$guild" == "necromancer"} {
+            #list deathSummary_dsave_count add {$deathReport[dsave_count]};
+            #list deathSummary_dsave_nps add {$deathReport[dsave_nps]};
+        };
         
         #if {"$guild" == "mage"} {#list deathSummary_summons_killed add {$deathReport[summons_killed]};};
         #if {"$guild" == "bard"} {#list deathSummary_songs_lost add {$deathReport[songs_lost]};};

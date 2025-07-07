@@ -199,6 +199,7 @@
             #math dsave[mob][count] {$dsave[mob][count] + 1};
             #math dsave[mob][np] {$dsave[mob][np] + %%1};
             #math dsave[mob][avg] {$dsave[mob][np] / $dsave[mob][count]};
+            #if {"$dsave[mob][name]" == ""} {#var dsave[mob][name] $enemy[name]};
             #if {$dsave[max][np] < %%1} {#var dsave[max][np] %%1};
         } {1};
         #line oneshot #action {From afar, Death favors you.} {#if $gags[combat_guild] {#line gag}} {1};
@@ -225,6 +226,7 @@
         #var dsave[mob][count] 0;
         #var dsave[mob][np] 0;
         #var dsave[mob][avg] 0;
+        #var dsave[mob][name] {};
     };
 
     #function formatDsaveLine {
