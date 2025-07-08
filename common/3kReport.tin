@@ -15,6 +15,9 @@
 #list dReportList add {{{key} {dmg_dealt} {lookup} {tmpDmg} {header_text}   {Dmg Dlt} {totals} {tmpTotalDmg} {width} {10} {active} {0}}};
 #list dReportList add {{{key} {dmg_received} {lookup} {tmpDmgReceived} {header_text}   {Dmg Rcd} {totals} {tmpTotalDmgRec} {width} {15} {active} {0}}};
 #list dReportList add {{{key} {corpses} {lookup} {tmpCorpses} {header_text}   {Corpses} {totals} {tmpTotalCorpses} {width} {6} {active} {0}}};
+#list dReportList add {{{key} {dsave_count} {lookup} {tmpPerMobDsaves} {header_text}   {DS #} {totals} {tmpTotalDsaves} {width} {6} {active} {0}}};
+#list dReportList add {{{key} {dsave_nps} {lookup} {tmpPerMobDsaveNP} {header_text}   {DS NP} {totals} {tmpTotalDsaveNP} {width} {6} {active} {0}}};
+
 #list dReportList indexate key;
 
 #NOP -- This section manages the aliases and toggling items in 3kReport;
@@ -44,7 +47,7 @@
         #if {$tempListIndex > 0} {
             #var tempList $dReportList[+$tempListIndex];
 
-            #if $tempList[key][active] {
+            #if $tempList[active] {
                 #var dReportList[+$tempListIndex][active] 0;
                 #echo {<caa>----  <fff> %0 <faa>removed <eee>from the <fff>3kReport <caa>  ----<088>};
             } {
@@ -65,7 +68,7 @@
         #if {$tempListIndex > 0} {
             #var tempList $dReportList[+$tempListIndex];
 
-            #if $tempList[key][active] {
+            #if $tempList[active] {
                 #echo {<caa>----  <fff> %0 is already in the <fff>3kReport <caa>  ----<088>};
             } {
                 #var dReportList[+$tempListIndex][active] 1;
@@ -247,6 +250,8 @@
     #list deathSummary_mob_dodges clear;
     #list deathSummary_class clear;
     #list deathSummary_xp_to_class clear;
+    #list deathSummary_dsave_count clear;
+    #list deathSummary_dsave_nps clear;
     #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>3k KILL REPORT CLEARED          <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
 };
 
@@ -287,12 +292,16 @@
         #var tmpTotalCoins 0;
         #var tmpTotalCorpses 0;
         #var tmpTotalClass 0;
+        #var tmpTotalDsaves 0;
+        #var tmpTotalDsaveNP 0;
 
         #var tmpPerMobXp 0;
         #var tmpPerMobRnds 0;
         #var tmpPerMobDmg 0;
         #var tmpPerMobCoins 0;
         #var tmpPerMobCorpses 0;
+        #var tmpPerMobDsaves 0;
+        #var tmpPerMobDsaveNP 0;
 
         #if {$tempReportSize > 0} {
             #var reportFormat1 {%-15s};
@@ -333,6 +342,7 @@
                 #format tmpDmgReceived {%g} {$deathSummary_damage_received[$item]};
                 #format tmpRounds {%g} {$deathSummary_rounds[$item]};
                 #format tmpCorpses {%g} {$deathSummary_corpses_used[$item]};
+                
 
                 #var tmpLookup[tmpMob] $tmpMob;
                 #var tmpLookup[tmpKiller] $tmpKiller;
@@ -345,9 +355,19 @@
                 #var tmpLookup[tmpRounds] $tmpRounds;
                 #var tmpLookup[tmpCorpses] $tmpCorpses;
                 
+                
                 #if {$tmpCoins == 0} {#var tmpCoins -};
                 #if {$deathSummary_damage_dealt[$item] == 0} {#var tmpDmg -};
                 #if {$deathSummary_corpses_used[$item] == 0} {#var tmpCorpses -};
+
+                #if {"$guild" == "necromancer"} {
+                    #math tmpTotalDsaves {$deathSummary_dsave_count[$item] + $tmpTotalDsaves};
+                    #math tmpTotalDsaveNP {$deathSummary_dsave_nps[$item] + $tmpTotalDsaveNP};
+                    #format tmpDsaveCount {%g} {$deathSummary_dsave_count[$item]};
+                    #format tmpDsaveNP {%g} {$deathSummary_dsave_nps[$item]};
+                    #var tmpLookup[tmpPerMobDsaves] $tmpDsaveCount;
+                    #var tmpLookup[tmpPerMobDsaveNP] $tmpDsaveNP;
+                };
                 
                 #var reportFormat3 {\{$tmpMob\}};
                 #loop 1 &dReportList[] tmpItem {
@@ -387,6 +407,15 @@
             #replace tmpTotalDmgRec {G} {B};
 
             #var tmpTotalRatio ${tmpTotalRatio}%;
+
+            #if {"$guild" == "necromancer"} {
+                #math tmpPerMobDsaves {$tmpTotalDsaves / $tmpTotalKills * 1.0};
+                #format tmpPerMobDsaves {%g} $tmpPerMobDsaves;
+                #format tmpPerMobDsaveNP {%g} $tmpPerMobDsaveNP;
+                #format tmpTotalDsaveNP {%M} $tmpTotalDsaveNP;
+                #replace tmpTotalDsaveNP {G} {B};
+            };
+            
             
 
             _reportLine;

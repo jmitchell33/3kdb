@@ -30,22 +30,22 @@
 #var mine[chaostone] 0;
 
 
-#alias {mine %1} {
-	#regex {%1} {copper} {#var mine[copper] 1};
-	#regex {%1} {bronze} {#var mine[bronze] 1};
-	#regex {%1} {iron} {#var mine[iron] 1};
-	#regex {%1} {steel} {#var mine[steel] 1};
-	#regex {%1} {silver} {#var mine[silver] 1};
-	#regex {%1} {gold} {#var mine[gold] 1};
-	#regex {%1} {mithril} {#var mine[mithril] 1};
-	#regex {%1} {titanium} {#var mine[titanium] 1};
-	#regex {%1} {ebon} {#var mine[ebon] 1};
-	#regex {%1} {adamantium} {#var mine[adamantium] 1};
-	#regex {%1} {obsidian} {#var mine[obsidian] 1};
-	#regex {%1} {nethernium} {#var mine[nethernium] 1};
-	#regex {%1} {voidstone} {#var mine[voidstone] 1};
-	#regex {%1} {phasemetal} {#var mine[phasemetal] 1};
-	#regex {%1} {chaostone} {#var mine[chaostone] 1};
+#alias {mine %0} {
+	#regex {%0} {copper} {#var mine[copper] 1};
+	#regex {%0} {bronze} {#var mine[bronze] 1};
+	#regex {%0} {iron} {#var mine[iron] 1};
+	#regex {%0} {steel} {#var mine[steel] 1};
+	#regex {%0} {silver} {#var mine[silver] 1};
+	#regex {%0} {gold} {#var mine[gold] 1};
+	#regex {%0} {mithril} {#var mine[mithril] 1};
+	#regex {%0} {titanium} {#var mine[titanium] 1};
+	#regex {%0} {ebon} {#var mine[ebon] 1};
+	#regex {%0} {adamantium} {#var mine[adamantium] 1};
+	#regex {%0} {obsidian} {#var mine[obsidian] 1};
+	#regex {%0} {nethernium} {#var mine[nethernium] 1};
+	#regex {%0} {voidstone} {#var mine[voidstone] 1};
+	#regex {%0} {phasemetal} {#var mine[phasemetal] 1};
+	#regex {%0} {chaostone} {#var mine[chaostone] 1};
 
 	#if {$mine[copper]} {#list mine_levels add 1};
 	#if {$mine[bronze]} {#list mine_levels add 2};
@@ -58,8 +58,9 @@
 	
 	#list mine_levels size num_levels;
 	#path load ${mine$mine_levels[${curr_level}]};
-	miner;#path walk;
-	}
+	miner;
+	_step_room
+}
 
 #VARIABLE {mine1} {mines 1;se;e;n;n;e;se;nw;w;s;w;e;s;e;w;s;se;sw;s;s;n;n;e;e;w;w;ne;nw;sw;w;w;n;s;e;sw;s;s;nw;n;w;s;n;e;s;se;n;n;ne;e;ne;n;w;nw;out}
 #VARIABLE {mine2} {mines 2;se;e;n;n;e;se;nw;w;s;w;e;s;e;w;s;se;sw;s;s;n;n;e;e;w;w;ne;nw;sw;w;w;n;s;e;sw;s;s;nw;n;w;s;n;e;s;se;n;n;ne;e;ne;n;w;nw;exit}
@@ -74,50 +75,51 @@
 
 #alias {miner} {
 	#class {miner} {open};
-	#act {-D-_} {_check_mine} {5};
 	#act {{(A|You have found a deposit of) \w+ ore( deposit.|!)}} {
-		#regex {%%1} {{A \w+ ore deposit.}} {#unact {^>$}};
-		#regex {%%1} {copper} {#if {$mine[copper]} {mine} {#path walk}};
-		#regex {%%1} {bronze} {#if {$mine[bronze]} {mine} {#path walk}};
-		#regex {%%1} {iron} {#if {$mine[iron]} {mine} {#path walk}};
-		#regex {%%1} {steel} {#if {$mine[steel]} {mine} {#path walk}};
-		#regex {%%1} {silver} {#if {$mine[silver]} {mine} {#path walk}};
-		#regex {%%1} {gold} {#if {$mine[gold]} {mine} {#path walk}};
-		#regex {%%1} {mithril} {#if {$mine[mithril]} {mine} {#path walk}};
-		#regex {%%1} {titanium} {#if {$mine[titanium]} {mine} {#path walk}};
-		#regex {%%1} {ebon} {#if {$mine[ebon]} {mine} {#path walk}};
-		#regex {%%1} {adamantium} {#if {$mine[adamantium]} {mine} {#path walk}};
-		#regex {%%1} {obsidian} {#if {$mine[obsidian]} {mine} {#path walk}};
-		#regex {%%1} {nethernium} {#if {$mine[nethernium]} {mine} {#path walk}};
-		#regex {%%1} {voidstone} {#if {$mine[voidstone]} {mine} {#path walk}};
-		#regex {%%1} {phasemetal} {#if {$mine[phasemetal]} {mine} {#path walk}};
-		#regex {%%1} {chaostone} {#if {$mine[chaostone]} {mine} {#path walk}};
-	};
+		#undelay minewalk;
+		#regex {%%1} {copper} {#if {$mine[copper]} {mine} {_step_room}};
+		#regex {%%1} {bronze} {#if {$mine[bronze]} {mine} {_step_room}};
+		#regex {%%1} {iron} {#if {$mine[iron]} {mine} {_step_room}};
+		#regex {%%1} {steel} {#if {$mine[steel]} {mine} {_step_room}};
+		#regex {%%1} {silver} {#if {$mine[silver]} {mine} {_step_room}};
+		#regex {%%1} {gold} {#if {$mine[gold]} {mine} {_step_room}};
+		#regex {%%1} {mithril} {#if {$mine[mithril]} {mine} {_step_room}};
+		#regex {%%1} {titanium} {#if {$mine[titanium]} {mine} {_step_room}};
+		#regex {%%1} {ebon} {#if {$mine[ebon]} {mine} {_step_room}};
+		#regex {%%1} {adamantium} {#if {$mine[adamantium]} {mine} {_step_room}};
+		#regex {%%1} {obsidian} {#if {$mine[obsidian]} {mine} {_step_room}};
+		#regex {%%1} {nethernium} {#if {$mine[nethernium]} {mine} {_step_room}};
+		#regex {%%1} {voidstone} {#if {$mine[voidstone]} {mine} {_step_room}};
+		#regex {%%1} {phasemetal} {#if {$mine[phasemetal]} {mine} {_step_room}};
+		#regex {%%1} {chaostone} {#if {$mine[chaostone]} {mine} {_step_room}};
+	} {1};
 	
-	#act {You have exhausted the supply of } {get all;_step_room};
-	#act {It appears this part of the shaft has already been searched.} {_step_room};
-	#act {You have found nothing.} {_step_room};
-	#act {You are not skilled enough to mine this.} {_step_room};
+	#action {^You begin to mine} {#undelay minewalk} {1};
+	#action {^You have exhausted the supply of } {get all;_step_room} {1};
+	#action {^It appears this part of the shaft has already been searched.} {_step_room} {1};
+	#action {^You have found nothing.} {_step_room} {1};
+	#action {^You are not skilled enough to mine this.} {_step_room} {1};
+	#action {^You should try to mine this instead.} {mine} {1};
+	#action {^You cannot spelunk while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
+	#action {^You cannot mine while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;mine} {1};};
+	#action {^You have disturbed %*} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
 
-	#alias {_check_mine} {#act {^>$} {spelunk;#unact {^>$}}};
-	#alias {_step_room} {
-		#act {^>$} {#path walk;#unact {^>$}};
-	};
+	#alias {_check_mine} {spelunk};
+	#alias {_step_room} {#delay minewalk {#path walk;_check_mine} {1}};
 	
 	#class {miner} {close}
 }
 
-#act {dealt the killing blow} {corpse_trig;glance} {1};
 
-#act {You hop in the exit chute and fly out of the mine shaft!} {
+#action {You hop in the exit chute and fly out of the mine shaft!} {
 	#if {$curr_level < $num_levels} {
-			#math {curr_level} {$curr_level + 1};
-			#path load ${mine$mine_levels[${curr_level}]};
-			#path walk}
-		{
-		killbot;
-		}
-	}
+		#math {curr_level} {$curr_level + 1};
+		#path load ${mine$mine_levels[${curr_level}]};
+		_step_room
+	} {
+		killbot
+	};
+} {1};
 
 #alias {killbot} {#class find_chute kill;#class miner kill;#class minebot kill}
 #class {minebot} {close}
