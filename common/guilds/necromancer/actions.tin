@@ -14,6 +14,11 @@
     #delay 2 {#if $my[necromancer][altered] {maim}};
 } {2};
 
+
+#action {^  You are already altered into hybrid form master.$} {
+    #var my[necromancer][altered] 1;
+} {2};
+
 #NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
 #act {^You charge forward and close your jaws on %*} {
     #if $gags[combat_guild] {#line gag};
@@ -64,15 +69,16 @@
     #math stats[corpses][spark-corpse] {$stats[corpses][spark-corpse] + 1};
     #delay .5 {#var spark_corpse 0};
 } {2};
-#act {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1};
-#act {You are already altered into %* form %w.}{#var my[necromancer][altered] 1};
-#act {You return to your normal were form.}{#var my[necromancer][altered] 1};
-#act {You alter into the embodimental spirit of the %*!} {#var my[necromancer][altered] 1};
-#act {You alter back to your normal, human form.}{#var my[necromancer][altered] 0};
-#act {You can only alter your form into beast form %w.}{#var my[necromancer][altered] 0};
-#act {You have already skullfired this repower %w.} {#var my[necromancer][skullfire] 0};
-#act {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;}
-#act {Before the repowering, you attempt a last minute %*} {
+#action {In ecstasy, your body contorts into a sleek, beastly form.} {#var my[necromancer][altered] 1} {2};
+#action {You are already altered into %* form %w.}{#var my[necromancer][altered] 1} {2};
+#action {You return to your normal were form.}{#var my[necromancer][altered] 1} {2};
+#action {You alter into the embodimental spirit of the %*!} {#var my[necromancer][altered] 1} {2};
+#action {^You call forth the great change within your body.} {#var my[necromancer][altered] 1} {2};
+#action {You alter back to your normal, human form.}{#var my[necromancer][altered] 0} {2};
+#action {You can only alter your form into beast form %w.}{#var my[necromancer][altered] 0} {2};
+#action {You have already skullfired this repower %w.} {#var my[necromancer][skullfire] 0} {2};
+#action {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;} {2};
+#action {Before the repowering, you attempt a last minute %*} {
     #if {!$idle_flag} {
         #var my[necromancer][invoke-prime] 0;
         #var my[necromancer][spirit-howl] 0;
@@ -91,8 +97,8 @@
         #math my[necromancer][repowers] {$my[necromancer][repowers] + 1};
         #send {!repower};
     };
-};
-#act {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0};
+} {2};
+#action {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0} {2};
 
 #NOP -- Update what repower powers are available;
 #action {Your repower-restricted abilities are listed below %w...} {
