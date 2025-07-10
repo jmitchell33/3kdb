@@ -159,18 +159,29 @@
 
 #NOP -- Necro alias to use # of corpses;
 #alias {corpse_select_necro} {
-	#local tmpCorpses %1;
-	#local tmpMoreCorpses 1;
-	#local tmpAbsorb %1;
-	#local tmpNewCorpse 0;
-	#echo {received corpses $tmpCorpses tmpAbsorb $tmpAbsorb};
-	#if {$corpses[coffin] > 0} {
-		#if {$corpses[coffin] >= $tmpCorpses} {
-			qtrance unwrap>$tmpCorpses;
+	#var tmpCorpses %1;
+	#var tmpMoreCorpses 1;
+	#var tmpAbsorb %1;
+
+	#if {$corpses[inventory] > 0} {
+		#if {$corpses[inventory] >= $tmpCorpses} {
+			qtrance absorb>$tmpCorpses;
 			#var tmpMoreCorpses 0;
 		} {
-			#math tmpCorpses {$tmpCorpses - $corpses[coffin]};
-			qtrance unwrap>$corpses[coffin];
+			#math tmpCorpses {$tmpCorpses - $corpses[inventory]};
+			qtrance absorb>$corpses[inventory];
+		};
+	};
+
+	#if $tmpMoreCorpses {
+		#if {$corpses[coffin] > 0} {
+			#if {$corpses[coffin] >= $tmpCorpses} {
+				qtrance unwrap>$tmpCorpses;
+				#var tmpMoreCorpses 0;
+			} {
+				#math tmpCorpses {$tmpCorpses - $corpses[coffin]};
+				qtrance unwrap>$corpses[coffin];
+			};
 		};
 	};
 
@@ -194,14 +205,28 @@
 		};
 	};
 	#action {eyes glow bright green upon the fallen} {
-		#math tmpNewCorpse {$tmpNewCorpse + 1};
+		#math tmpAbsorb {$tmpAbsorb + 1};
+		#delay {corpseAbsorb} {
+			qtrance absorb>$tmpAbsorb;
+			#unaction {eyes glow bright green upon the fallen};
+			#unvar tmpCorpses;
+			#unvar tmpMoreCorpses;
+			#unvar tmpAbsorb;
+		} {4};
 	} {1};
-	#delay 4 {
-		#math tmpAbsorb {$tmpNewCorpse + $tmpAbsorb};
-		#echo {adding $tmpNewCorpse dupes and absorbing $tmpAbsorb total};
+
+	#delay {corpseAbsorb} {
 		qtrance absorb>$tmpAbsorb;
 		#unaction {eyes glow bright green upon the fallen};
-	};
+		#unvar tmpCorpses;
+		#unvar tmpMoreCorpses;
+		#unvar tmpAbsorb;
+	} {4};
+
+	#delay corpse_burn_toggle {
+		#var corpse_burn 1;
+		i;
+	} {10};
 };
 
 #alias check_box {

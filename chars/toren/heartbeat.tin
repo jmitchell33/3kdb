@@ -2,6 +2,7 @@
 #class {heartbeat} {open}
 
 #var make_con 1;
+#var corpse_burn 1;
 
 #alias {_player_heartbeat} {
 	#if {!$idle_flag} {
@@ -14,8 +15,18 @@
 					.pause;
 					add_action {{{name} {go-donate} {action} {go_donate2}}};
 				};
-			}
+			};
 		};
+		
+		#if {$corpses[total] > 1 && $corpse_burn} {
+			#if {$my[gp1][percent] < .3 } {
+				#var corpse_burn 0;
+				corpse_select_necro @min{15,$corpses[total]};
+			};
+		} {
+			#var corpse_empty 1;
+		};
+		
 	};
 };
 

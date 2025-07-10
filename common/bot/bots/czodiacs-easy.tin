@@ -1,0 +1,198 @@
+#class {bot} {kill};
+#class {bot} {open};
+
+#var {area} {Celestial Zodiacs};
+#var check_room 0;
+#var toggle_portal_room 1;
+
+#NOP -- mobs are good, set rolm to demon;
+touch demon rune;
+
+#var bot_message_1 '---- Celestial Zodiacs - All Targets  ----';
+#showme $bot_message_1;
+
+#var {bot[path]} {light;e;se;s;se;s;se;s;sw;w;nw;n;e;s;n;w;ne;sw;e;nw;w;n;ne;sw;e;nw;w;sw;s;se;s;e;se;s;n;w;nw;n;e;w;s;sw;s;se;e;d;ne;e;se;s;se;s;se;s;sw;w;nw;n;e;s;n;w;ne;sw;e;nw;w;n;ne;sw;e;nw;w;sw;s;se;s;e;se;s;n;w;nw;n;e;w;s;sw;s;se;e;ne;n;ne;n;ne;n;nw;n;u;n;ne;e;s;n;ne;e;s;n;ne;e;se;s;sw;w;n;e;w;sw;s;w;e;ne;e;w;sw;n;w;s;sw;w;e;n;s;se;e;ne;n;s;e;n;ne;s;n;e;se;s;sw;w;nw;d;se;s;w;sw;s;e;n;nw;w;n;ne;sw;s;sw;s;se;e;w;s;e;se;w;nw;sw;s;se;e;ne;n;ne;n;w;s;se;e;ne;n;nw;w;e;n;s;se;s;d;ne;e;w;sw;s;se;e;w;s;se;e;w;s;se;e;ne;n;ne;n;nw;sw;s;sw;ne;w;se;nw;n;nw;n;s;e;n;s;se;ne;n;nw;w;n;ne;e;se;s;n;u;e;ne;n;nw;w;s;sw;n;s;w;n;s;sw;w;nw;n;s;w;nw;n;ne;e;s;se;n;e;s;ne;e;ne;n;nw;w;sw;se;e;w;nw;s;n;w;u;ne;sw;w;nw;n;ne;e;se;w;nw;n;nw;n;ne;n;s;e;se;w;ne;sw;s;e;sw;ne;se;w;ne;sw;e;s;n;w;s;se;e;ne;n;nw;n;nw;n;nw;w;u;sw;w;nw;n;e;ne;n;w;s;se;e;ne;n;nw;n;ne;n;nw;n;s;w;sw;s;e;se;w;nw;sw;s;sw;nw;n;ne;e;se;s;w;n;s;e;sw;ne;w;se;s;se;nw;e;n;s;sw;w;nw;n;nw;n;ne;e;w;sw;s;se;s;d;s;n;nw;w;sw;w;sw;w;sw;s;se;e;n;ne;e;s;w;nw;se;sw;se;e;ne;n;nw;ne;nw;s;se;e;w;n;e;se;sw;s;ne;n;e;se;s;sw;w;nw;ne;n;nw;w;sw;s;w;sw;w;nw;n;enter;swim;u;out;ne;e;ne;e;ne;e;se;u;se;s;se;e;ne;d;e;se;s;sw;s;se;s;sw;s;sw;d;sw;s;se;e;se;e;se;d;nw;w;sw;s;sw;s;sw;nw;n;u;n;nw;n;nw;n;nw;u;w;sw;w;nw;w;nw;d;nw;w;sw;u;ne;n;ne;n;ne;n;nw;n;nw;w;sw};
+
+#list botmobs clear;
+
+#list botmobs add {{{long} {Guardian of Anubis} {target} {anubis}}};
+#list botmobs add {{{long} {Guardian of Bastet} {target} {bastet}}};
+#list botmobs add {{{long} {Guardian of Horus} {target} {horus}}};
+#list botmobs add {{{long} {Guardian of Sobek} {target} {sobek}}};
+#list botmobs add {{{long} {Guardian of Ra} {target} {ra}}};
+#list botmobs add {{{long} {Guardian of Ptah} {target} {ptah}}};
+#list botmobs add {{{long} {Guardian of Isis} {target} {isis}}};
+#list botmobs add {{{long} {Guardian of Thoth} {target} {thoth}}};
+#list botmobs add {{{long} {Guardian of Sekhmet} {target} {sekhmet}}};
+#list botmobs add {{{long} {Guardian of Osiris} {target} {osiris}}};
+#list botmobs add {{{long} {Guardian of Ma'at} {target} {guardian}}};
+#list botmobs add {{{long} {Guardian of Hathor} {target} {hathor}}};
+
+#list botmobs add {{{long} {Deva of Brahma} {target} {brahma}}};
+#list botmobs add {{{long} {Deva of Durga} {target} {durga}}};
+#list botmobs add {{{long} {Deva of Vishnu} {target} {vishnu}}};
+#list botmobs add {{{long} {Deva of Ganesha} {target} {ganesha}}};
+#list botmobs add {{{long} {Deva of Shiva} {target} {shiva}}};
+#list botmobs add {{{long} {Deva of Saraswati} {target} {saraswati}}};
+#list botmobs add {{{long} {Deva of Krishna} {target} {krishna}}};
+#list botmobs add {{{long} {Deva of Hanuman} {target} {hanuman}}};
+#list botmobs add {{{long} {Deva of Kali} {target} {kali}}};
+#list botmobs add {{{long} {Deva of Rama} {target} {rama}}};
+#list botmobs add {{{long} {Deva of Lakshmi} {target} {lakshmi}}};
+#list botmobs add {{{long} {Deva of Parvati} {target} {parvati}}};
+
+#list botmobs add {{{long} {Druid of Holly} {target} {holly}}};
+#list botmobs add {{{long} {Druid of Oak} {target} {oak}}};
+#list botmobs add {{{long} {Druid of Alder} {target} {alder}}};
+#list botmobs add {{{long} {Druid of Willow} {target} {druid}}};
+#list botmobs add {{{long} {Druid of Ivy} {target} {ivy}}};
+#list botmobs add {{{long} {Druid of Hazel} {target} {hazel}}};
+#list botmobs add {{{long} {Druid of Hawthorn} {target} {hawthorn}}};
+#list botmobs add {{{long} {Druid of Birch} {target} {birch}}};
+#list botmobs add {{{long} {Druid of Rowan} {target} {rowan}}};
+#list botmobs add {{{long} {Druid of Vine} {target} {vine}}};
+#list botmobs add {{{long} {Druid of Ash} {target} {ash}}};
+#list botmobs add {{{long} {Druid of Elder} {target} {elder}}};
+
+#list botmobs add {{{long} {Sage of Al-'Ilm} {target} {al-'ilm}}};
+#list botmobs add {{{long} {Sage of Al-Mal} {target} {al-mal}}};
+#list botmobs add {{{long} {Sage of Al-Zawaj} {target} {al-zawaj}}};
+#list botmobs add {{{long} {Sage of Al-Karir} {target} {al-karir}}};
+#list botmobs add {{{long} {Sage of Al-Sihha} {target} {al-sihha}}};
+#list botmobs add {{{long} {Sage of Al-Sa'a} {target} {sage}}};
+#list botmobs add {{{long} {Sage of Al-Samt} {target} {al-samt}}};
+#list botmobs add {{{long} {Sage of Al-Nasr} {target} {al-nasr}}};
+#list botmobs add {{{long} {Sage of Al-Sa'ada} {target} {sage}}};
+#list botmobs add {{{long} {Sage of Al-Mawt} {target} {al-mawt}}};
+#list botmobs add {{{long} {Sage of Al-Qisma} {target} {al-qisma}}};
+#list botmobs add {{{long} {Sage of Al-Rizq} {target} {al-rizq}}};
+
+#list botmobs add {{{long} {Lama of the Sheep} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Yeti} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Monkey} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Tiger} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Rabbit} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Yak} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Horse} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Garuda} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Snow Lion} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Elephant} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Dragon} {target} {lama}}};
+#list botmobs add {{{long} {Lama of the Partridge} {target} {lama}}};
+
+#list botmobs add {{{long} {Shaman of Kukulkan} {target} {kukulkan}}};
+#list botmobs add {{{long} {Shaman of Itzamna} {target} {itzamna}}};
+#list botmobs add {{{long} {Shaman of Hunahpu} {target} {hunahpu}}};
+#list botmobs add {{{long} {Shaman of Ixtab} {target} {ixtab}}};
+#list botmobs add {{{long} {Shaman of Akbal} {target} {akbal}}};
+#list botmobs add {{{long} {Shaman of Ahau Can} {target} {ahau can}}};
+#list botmobs add {{{long} {Shaman of K'inich Ahau} {target} {k'inich ahau}}};
+#list botmobs add {{{long} {Shaman of Yum Kaax} {target} {yum kaax}}};
+#list botmobs add {{{long} {Shaman of Chac} {target} {chac}}};
+#list botmobs add {{{long} {Shaman of Ixchel} {target} {ixchel}}};
+#list botmobs add {{{long} {Shaman of Ix} {target} {shaman}}};
+#list botmobs add {{{long} {Shaman of Ah Puch} {target} {ah puch}}};
+
+#list botmobs add {{{long} {Spirit Warrior of the Otter} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Falcon} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Beaver} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Woodpecker} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Bear} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Snake} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Raven} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Salmon} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Goose} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the owl} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Deer} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Wolf} {target} {warrior}}};
+
+#list botmobs add {{{long} {Warrior of the Snake} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Goat} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Dragon} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Rabbit} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Rooster} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Pig} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Monkey} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Horse} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Tiger} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Rat} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Dog} {target} {warrior}}};
+#list botmobs add {{{long} {Warrior of the Ox} {target} {warrior}}};
+
+#list botmobs add {{{long} {Knight of Libra} {target} {libra}}};
+#list botmobs add {{{long} {Knight of Gemini} {target} {gemini}}};
+#list botmobs add {{{long} {Knight of Sagittarius} {target} {sagittarius}}};
+#list botmobs add {{{long} {Knight of Leo} {target} {leo}}};
+#list botmobs add {{{long} {Knight of Taurus} {target} {taurus}}};
+#list botmobs add {{{long} {Knight of Scorpio} {target} {scorpio}}};
+#list botmobs add {{{long} {Knight of Capricorn} {target} {capricorn}}};
+#list botmobs add {{{long} {Knight of Virgo} {target} {virgo}}};
+#list botmobs add {{{long} {Knight of Pisces} {target} {pisces}}};
+#list botmobs add {{{long} {Knight of Aquarius} {target} {aquarius}}};
+#list botmobs add {{{long} {Knight of Cancer} {target} {cancer}}};
+#list botmobs add {{{long} {Knight of Aries} {target} {aries}}};
+
+#list botmobs add {{{long} {Aeonos, the Celestial Nexus} {target} {aeonos}}};
+#list botmobs add {{{long} {Warrior of the Cat} {target} {warrior}}};
+
+#action {The stars align and your celestial insight reveals} {
+    #if {"$toggle_portal_room" == "1"} { 
+        .pause;
+        #echo {<fff>PORTAL ROOM OPEN!<088>};
+        ptell portal room open!;
+        #var toggle_portal_room 0;
+        #delay 5 {
+            portal;
+            open first chest;
+            open second chest;
+            open third chest;
+            open fourth chest;
+            open fifth chest;
+            open sixth chest;
+        };
+    };
+} {1};
+
+#action {As you land the final blow upon the mimic} {
+    #delay 10 {
+        portal;
+        ..;
+    };
+} {1};
+
+#action {A COLOSSAL MONSTROSITY STOMPS INTO VIEW} {
+    .pause;
+    #delay 6 {
+        .unpause;
+    };
+} {1};
+
+#action {You are blind.} {
+    .pause;
+} {1};
+
+#action {Sight returns to your eyes, darkness becomes light again.} {
+    ..;
+} {1};
+
+
+#alias .chest_action {
+    .pause;
+    examine chest;
+    search chest;
+    #echo {chest found};
+};
+
+#action {You find some gold coins in the chest!} {get coins;exa chest} {1};
+
+#action {Your vision becomes blurry. While your surroundings are intriguing, your} {..} {1};
+
+#action {The Treasury \(w,se\)} {#unact {The Treasury \(w,se\)};.chest_action} {1};
+#action {Chamber of treasure ](s,ne])} {#unact {Chamber of treasure ](s,ne])};.chest_action} {1};
+#action {Monk's Dormitory \(w,s,nw,ne\)} {#unact {Monk's Dormitory \(w,s,nw,ne\)};.chest_action} {1};
+#action {Chamber of the chest \(e,sw\)} {#unact {Chamber of the chest \(e,sw\)};.chest_action} {1};
+#action {Explorer's Lounge \(e,sw\)} {#unact {Explorer's Lounge \(e,sw\)};.chest_action} {1};
+
+
+#class {bot} {close};
+#read common/bot/generic.tin;
