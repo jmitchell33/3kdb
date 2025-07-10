@@ -103,7 +103,7 @@ touch demon rune;
 #list botmobs add {{{long} {Spirit Warrior of the Raven} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Salmon} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Goose} {target} {warrior}}};
-#list botmobs add {{{long} {Spirit Warrior of the owl} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Owl} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Deer} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Wolf} {target} {warrior}}};
 
@@ -137,11 +137,11 @@ touch demon rune;
 #list botmobs add {{{long} {Warrior of the Cat} {target} {warrior}}};
 
 #action {The stars align and your celestial insight reveals} {
-    #if {"$toggle_portal_room" == "1"} { 
+    #if {"$toggle_portal_room" == "1"} {
+        #var toggle_portal_room 0;
         .pause;
         #echo {<fff>PORTAL ROOM OPEN!<088>};
         ptell portal room open!;
-        #var toggle_portal_room 0;
         #delay 5 {
             portal;
             open first chest;
@@ -157,10 +157,8 @@ touch demon rune;
 #action {This chest has already been opened.} {
     #if {"$toggle_portal_room_empty" == "1"} {
         #var toggle_portal_room_empty 0;
-        #delay 5 {
-            portal;
-            ..;
-        };
+        portal;
+        ..;
     };
 } {1};
 
