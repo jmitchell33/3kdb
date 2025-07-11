@@ -40,6 +40,11 @@
     #echo {<efe>   ----    TRACKING OVER $fmtTmpRounds ROUNDS   ----    <088>};
 };
 
+#NOP -- Zodiac Shield;
+#action {^The shield's etchings glow, a brief wave of exhaustion washes over you.$} {
+    .trackItem {Feline Shield} {bash};
+} {2};
+
 #NOP -- Helmet of Aeonos;
 #action {The divine power of Aeonos flows through your helmet.} {
     .trackItem {Helmet of Aeonos} heal;
@@ -48,6 +53,19 @@
 #action {The moonstones on your helmet glow softly} {
     .trackItem {Helmet of Aeonos} dodge;
 } {2};
+
+#action {^The sunstones embedded in your helmet flash with warmth, momentarily} {
+    .trackItem {Helmet of Aeonos} {shield};
+} {2};
+
+#action {^The sapphire on your helmet glows brightly, and you feel a surge of} {
+    .trackItem {Helmet of Aeonos} {dodge};
+} {2};
+
+#action {^A shimmering light from the diamonds on your helmet surrounds you} {
+    .trackItem {Helmet of Aeonos} {dodge};
+} {2};
+
 
 #NOP -- Witch hat;
 #action {A bolt of electricity streams from your hat into %*!$} {
@@ -190,5 +208,6 @@
 #action {through you, fueling your life force rather than draining!} {
     .trackItem {adamantite bracers} {hp heal};
 } {2};
+
 
 #class {item_tracker} {close};

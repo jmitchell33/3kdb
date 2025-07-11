@@ -174,10 +174,13 @@
 		#if {$corpses[inventory] >= $tmpCorpses} {
 			qtrance absorb>$tmpCorpses;
 			#var tmpMoreCorpses 0;
+			#var tmpAbsorb 0;
 			#if $debug_corpse_necro {#echo {Necro Corpse Select - Inventory: Using $tmpCorpses}};
 		} {
+			#math tmpAbsorb {$tmpAbsorb - $corpses[inventory]};
 			#math tmpCorpses {$tmpCorpses - $corpses[inventory]};
 			qtrance absorb>$corpses[inventory];
+			
 			#if $debug_corpse_necro {#echo {Necro Corpse Select - Inventory 2: Using $corpses[inventory]}};
 		};
 	};

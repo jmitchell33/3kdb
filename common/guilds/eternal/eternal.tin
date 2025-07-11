@@ -230,6 +230,10 @@
 	};
 };
 
+#alias _check_eternal_powers {
+	#delay check_eternal {(powers} 6;
+}
+
 #action {{\s*([0-9]+)\s*/\s*([0-9]+)\s*([A-Za-z0-9_ ]*?):([\r\n\t ]*?)([0-9].+?)([\r\n\t ]*?)([[A-Za-z0-9.]+)([\r\n\t ]*?)([[A-Za-z0-9.]+)}} {
 	update_eternal_power {%4} %2 %6 %8 %10
 } {2};
@@ -237,7 +241,7 @@
 
 #action {A shimmering ball of energy appears magically when you snap your fingers.} {
 	#var my[eternal][energy well] 0;
-	#delay 2 {(powers};
+	_check_eternal_powers;
 };
 
 #action {In a remarkable feat of cheating, you attack again!} {
@@ -247,17 +251,17 @@
 
 #action {^$user_cap bathes you in the healing powers of the outer planes.$} {
 	#var my[eternal][heal] 0;
-	#delay 2 {(powers};
+	_check_eternal_powers;
 } {2};
 
 #action {^You tear apart %* defenses!$} {
 	#var my[eternal][shred] 0;
-	#delay 2 {(powers};
+	_check_eternal_powers;
 } {2};
 
 #action {Energy flashes down from the sky, frying %*!} {
 	#var my[eternal][fry] 0;
-	#delay 2 {(powers};
+	_check_eternal_powers;
 	#var fry_round 1;
 } {2};
 
@@ -268,12 +272,12 @@
 
 #action {^Encircling %* in a yellowy haze of mystic adrenaline} {
 	#var my[eternal][enlarge] 0;
-	#delay 2 {(powers};
+	_check_eternal_powers;
 };
 
 #action {^With a quick clap of your hands, %* splits in two!} {
 	#var my[eternal][duplicate creature] 0;
-	#delay 2 {(powers};
+	_check_eternal_powers;
 };
 
 #class {eternal} {close}
