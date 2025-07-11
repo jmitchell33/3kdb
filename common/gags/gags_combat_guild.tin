@@ -271,38 +271,19 @@
         #gag {^  You draw %* from the well of the trance.};
         #gag {^C:>>Atrancing (1): %*};
 
-        #action {^-You activate your atrance-} {
-            #line gag;
-            #class atrance_gag open;
-            #EVENT {CATCH PROCESSED LINE} {
-                #if !$debug[event] {#NOP};
-            };
-            #class atrance_gag close;
-            #delay 1 {#class atrance_gag kill};
-        } {2};
-        #action {^-Your atrance is complete-} {
-            #line gag;
-            #class atrance_gag kill;
-        } {2};
+
+        #action {^-You activate your atrance-} {#line gag} {2};
+        #action {^-Your atrance is complete-} {#line gag} {2};
 
         #action {^  Your maximum dream factor is %* master, invoking that now.} {
             #line gag 2;
         } {2};
 
-        #action {You charge forward and close your jaws on %*} {
-            #line gag;
-            #class rabies_gag open;
-            #EVENT {CATCH PROCESSED LINE} {
-                #if !$debug[event] {#NOP};
-            };
-            #class rabies_gag close;
-            #delay 1 {#class rabies_gag kill};
-        } {2};
-
-        #action {^septic saliva to infect it with rabies!} {
-            #line gag;
-            #class rabies_gag kill;
-        } {2};
+        #NOP -- Rabies;
+        #gag {You charge forward and close your jaws on %*};
+        #gag {%* the coppery odor fill your nostrils.  You shake};
+        #gag {%* vigorously to open the wounds further and %*};
+        #gag {%*saliva to infect it with rabies!$};
 
         #NOP -- Specific Necro Familiar Gags;
         #gag {^*.,'`'SaTaN'`',.* %*!$};

@@ -80,6 +80,7 @@
 #action {^You currently have %d/%d open memory globes,} {#var powers[globes][open] %1;} {2};
 #action {Before the repowering, you attempt a last minute %*} {
     #if {!$idle_flag} {
+        #var make_con 1;
         #var my[necromancer][invoke-prime] 0;
         #var my[necromancer][spirit-howl] 0;
         #var my[necromancer][maim] 0;
@@ -273,8 +274,13 @@
 #NOP -- fury;
 #action {You reach into your animal soul and fly into a fury!} {
     #math my[necromancer][glamors][current] {$my[necromancer][glamors][current] - 1}
-};
+} {2};
 
+#NOP ---- NECRO HEALING CAPTURES;
+
+#action {^\{%w\}{Dark shadows, from your very soul, dance around your body|You howl at the sky, healing your animal body|You reach down and well energy from the earth into your body|Silvery strands of mystic darkness sooth your soul|With a roar of fury, you draw health from your own soul}.$} {
+    #if $gags[combat_guild] {#line gag};
+} {2}
 
 #NOP ---NECRO TIER MSGS
 #action {As you ponder the runes, they swim before your eyes.$} {
