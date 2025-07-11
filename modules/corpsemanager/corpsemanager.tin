@@ -22,26 +22,28 @@
 		#var corpse_check_toggle 0;
 		#delay 3 {#var corpse_check_toggle 1};
 		#class corpseCapture open;
-		#action {# Item} {
-			#line gag;
-			#event {CATCH PROCESSED LINE} {
-				#format tmpLine {%p} {%%%1};
-				#if $inventory[cooler] {
-					#regex {$tmpLine} {It looks very light.} {#class corpseCapture kill};
-					#regex {$tmpLine} {It looks light.} {#class corpseCapture kill};
-					#regex {$tmpLine} {It doesn't look too heavy.} {#class corpseCapture kill};
-					#regex {$tmpLine} {It looks heavy.} {#class corpseCapture kill};
-					#regex {$tmpLine} {It would take considerable effort to lift this.} {#class corpseCapture kill};
-					#regex {$tmpLine} {You'll most likely herniate a disc lifting this} {#class corpseCapture kill};
-				} {
-					#regex {$tmpLine} {You are lightly burdened.} {#class corpseCapture kill};
-					#regex {$tmpLine} {You are burdened.} {#class corpseCapture kill};
-					#regex {$tmpLine} {You are encumbered.} {#class corpseCapture kill};
-					#regex {$tmpLine} {You are heavily loaded.} {#class corpseCapture kill};
-					#regex {$tmpLine} {You are over taxed.} {#class corpseCapture kill};
-					#regex {$tmpLine} {You are collapsing under your load. } {#class corpseCapture kill};
+		#if $test_gag {
+			#action {# Item} {
+				#line gag;
+				#event {CATCH PROCESSED LINE} {
+					#format tmpLine {%p} {%%%1};
+					#if $inventory[cooler] {
+						#regex {$tmpLine} {It looks very light.} {#class corpseCapture kill};
+						#regex {$tmpLine} {It looks light.} {#class corpseCapture kill};
+						#regex {$tmpLine} {It doesn't look too heavy.} {#class corpseCapture kill};
+						#regex {$tmpLine} {It looks heavy.} {#class corpseCapture kill};
+						#regex {$tmpLine} {It would take considerable effort to lift this.} {#class corpseCapture kill};
+						#regex {$tmpLine} {You'll most likely herniate a disc lifting this} {#class corpseCapture kill};
+					} {
+						#regex {$tmpLine} {You are lightly burdened.} {#class corpseCapture kill};
+						#regex {$tmpLine} {You are burdened.} {#class corpseCapture kill};
+						#regex {$tmpLine} {You are encumbered.} {#class corpseCapture kill};
+						#regex {$tmpLine} {You are heavily loaded.} {#class corpseCapture kill};
+						#regex {$tmpLine} {You are over taxed.} {#class corpseCapture kill};
+						#regex {$tmpLine} {You are collapsing under your load. } {#class corpseCapture kill};
+					};
+					#if !$debug[event] {#NOP};
 				};
-				#if !$debug[event] {#NOP};
 			};
 		};
 		#if {"$guild" == "necromancer"} {
@@ -54,8 +56,10 @@
 		};
 		#if $inventory[cooler] {examine cooler};
 		#NOP -- Delete the class and unevent for secondary measure;
-		#delay 2 {#class corpseCapture kill};
-		#delay 2 {#unevent {CATCH PROCESSED LINE}};
+		#if $test_gag {
+			#delay 2 {#class corpseCapture kill};
+			#delay 2 {#unevent {CATCH PROCESSED LINE}};
+		};
 	};
 };
 
@@ -159,17 +163,22 @@
 
 #NOP -- Necro alias to use # of corpses;
 #alias {corpse_select_necro} {
-	#var tmpCorpses %1;
+	#format tmpCorpses {%d} {%1};
+	#format tmpAbsorb {%d} {%1};
 	#var tmpMoreCorpses 1;
-	#var tmpAbsorb %1;
+	
+
+	#if $debug_corpse_necro {#echo {Necro Corpse Select - Input is $tmpAbsorb}};
 
 	#if {$corpses[inventory] > 0} {
 		#if {$corpses[inventory] >= $tmpCorpses} {
 			qtrance absorb>$tmpCorpses;
 			#var tmpMoreCorpses 0;
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Inventory: Using $tmpCorpses}};
 		} {
 			#math tmpCorpses {$tmpCorpses - $corpses[inventory]};
 			qtrance absorb>$corpses[inventory];
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Inventory 2: Using $corpses[inventory]}};
 		};
 	};
 
@@ -178,9 +187,11 @@
 			#if {$corpses[coffin] >= $tmpCorpses} {
 				qtrance unwrap>$tmpCorpses;
 				#var tmpMoreCorpses 0;
+				#if $debug_corpse_necro {#echo {Necro Corpse Select - Coffin: Unwrapping $tmpCorpses}};
 			} {
 				#math tmpCorpses {$tmpCorpses - $corpses[coffin]};
 				qtrance unwrap>$corpses[coffin];
+				#if $debug_corpse_necro {#echo {Necro Corpse Select - Coffin 2: Unwrapping $corpses[coffin]}};
 			};
 		};
 	};
@@ -189,9 +200,11 @@
 		#if {$corpses[freezer] > 0 && $corpses[freezer] >= $tmpCorpses} {
 			qtrance deslab>$tmpCorpses;
 			#var tmpMoreCorpses 0;
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Freezer: Deslabbing $tmpCorpses}};
 		} {
 			#math tmpCorpses {$tmpCorpses - $corpses[freezer]};
 			qtrance deslab>$corpses[freezer];
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Freezer 2: Deslabbing $corpses[freezer]}};
 		};
 	};
 
@@ -199,23 +212,27 @@
 		#if {$corpses[cooler] > 0 && $corpses[cooler] >= $tmpCorpses} {
 			qtrance uncooler corpse>$tmpCorpses;
 			#var tmpMoreCorpses 0;
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Cooler: Dropping $tmpCorpses}};
 		} {
 			qtrance uncooler corpse>$corpses[cooler];
 			#math tmpCorpses {$tmpCorpses - $corpses[cooler]};
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Cooler 2: Dropping $corpses[cooler]}};
 		};
 	};
 	#action {eyes glow bright green upon the fallen} {
 		#math tmpAbsorb {$tmpAbsorb + 1};
 		#delay {corpseAbsorb} {
+			#if $debug_corpse_necro {#echo {Necro Corpse Select - Duped Absorbing $tmpAbsorb}};
 			qtrance absorb>$tmpAbsorb;
 			#unaction {eyes glow bright green upon the fallen};
 			#unvar tmpCorpses;
 			#unvar tmpMoreCorpses;
 			#unvar tmpAbsorb;
-		} {4};
+		} {1};
 	} {1};
 
 	#delay {corpseAbsorb} {
+		#if $debug_corpse_necro {#echo {Necro Corpse Select - No Dupe Absorbing $tmpAbsorb}};
 		qtrance absorb>$tmpAbsorb;
 		#unaction {eyes glow bright green upon the fallen};
 		#unvar tmpCorpses;
