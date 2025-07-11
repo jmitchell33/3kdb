@@ -4,6 +4,7 @@
 #var {area} {Celestial Zodiacs};
 #var check_room 0;
 #var toggle_portal_room 1;
+#var toggle_portal_room_empty 1;
 
 #NOP -- mobs are good, set rolm to demon;
 touch demon rune;
@@ -103,7 +104,7 @@ touch demon rune;
 #list botmobs add {{{long} {Spirit Warrior of the Raven} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Salmon} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Goose} {target} {warrior}}};
-#list botmobs add {{{long} {Spirit Warrior of the owl} {target} {warrior}}};
+#list botmobs add {{{long} {Spirit Warrior of the Owl} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Deer} {target} {warrior}}};
 #list botmobs add {{{long} {Spirit Warrior of the Wolf} {target} {warrior}}};
 
@@ -162,6 +163,14 @@ touch demon rune;
     };
 } {1};
 
+#action {This chest has already been opened.} {
+    #if {"$toggle_portal_room_empty" == "1"} {
+        #var toggle_portal_room_empty 0;
+        portal;
+        ..;
+    };
+} {1};
+
 #action {A COLOSSAL MONSTROSITY STOMPS INTO VIEW} {
     .pause;
     #delay 6 {
@@ -176,6 +185,23 @@ touch demon rune;
 #action {Sight returns to your eyes, darkness becomes light again.} {
     ..;
 } {1};
+
+#alias .chest_action {
+    .pause;
+    examine chest;
+    search chest;
+    #echo {chest found};
+};
+
+#action {You find some gold coins in the chest!} {get coins;exa chest} {1};
+
+#action {Your vision becomes blurry. While your surroundings are intriguing, your} {..} {1};
+
+#action {The Treasury \(w,se\)} {#unact {The Treasury \(w,se\)};.chest_action} {1};
+#action {Chamber of treasure ](s,ne])} {#unact {Chamber of treasure ](s,ne])};.chest_action} {1};
+#action {Monk's Dormitory \(w,s,nw,ne\)} {#unact {Monk's Dormitory \(w,s,nw,ne\)};.chest_action} {1};
+#action {Chamber of the chest \(e,sw\)} {#unact {Chamber of the chest \(e,sw\)};.chest_action} {1};
+#action {Explorer's Lounge \(e,sw\)} {#unact {Explorer's Lounge \(e,sw\)};.chest_action} {1};
 
 #class {bot} {close};
 #read common/bot/generic.tin;

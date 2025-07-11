@@ -306,6 +306,7 @@
             #echo {<eaf>3 <bec>(4 summons defending)<088>};
             #echo {<eaf>4 <bec>(3 summons assisting and 1 summon defending)<088>};
             #echo {<eaf>5 <bec>(1 summon defending and 3 summons assisting)<088>};
+            #echo {<eaf>golem <bec>(golem assisting)<088>};
         };
         #NOP -- 4 summons assisting;
         #case {"2"} {
@@ -345,9 +346,18 @@
             ms 9##3#1500#70#assist#summons#always;
             ms golemd;
         };
-        #NOP -- default is 2 summons defending and 2 summons assisting;
+        #NOP -- offensive mage - golem assisting;
+        #case {"golem"} {
+            #echo {<ffa>No argument provided - running default killmode<088>};
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy;
+            ms golema;
+        };
+        #NOP -- default for summoner 2 summons defending and 2 summons assisting;
         #case {""} {
-            #echo {<ffa>No argument provided — running default killmode<088>};
+            #echo {<ffa>No argument provided - running default killmode<088>};
             clear_sconfig;
             shoo;
             shoo golem;
@@ -1749,11 +1759,11 @@
 #NOP -- gswap;
 #alias {gw} {
     #switch {"%0"} {
-        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;get coin;.gswap juggernaut}};
-        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;hold rock;get coin;.gswap mage}};
-        #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;hold rock;get coin;.gswap elemental}};
-        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;get coin;.gswap bard}};
-        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;get coin;.gswap fremen}};
+        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap juggernaut}};
+        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;.gswap mage}};
+        #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;hold rock;hold tome;get coin;.gswap elemental}};
+        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap bard}};
+        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap fremen}};
         #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
     };
 };
