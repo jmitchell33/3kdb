@@ -138,6 +138,24 @@ touch demon rune;
 #list botmobs add {{{long} {Warrior of the Cat} {target} {warrior}}};
 #list botmobs add {{{long} {%*, the Colossus} {target} {colossus}}};
 
+#action {Your celestial insight reveals the creation of a portal to the unknown.} {
+        #if {"$toggle_portal_room" == "1"} { 
+        .pause;
+        #echo {<fff>PORTAL ROOM OPEN!<088>};
+        ptell portal room open!;
+        #var toggle_portal_room 0;
+        #delay 5 {
+            portal;
+            open first chest;
+            open second chest;
+            open third chest;
+            open fourth chest;
+            open fifth chest;
+            open sixth chest;
+        };
+    };
+} {1};
+
 #action {The stars align and your celestial insight reveals} {
     #if {"$toggle_portal_room" == "1"} { 
         .pause;
