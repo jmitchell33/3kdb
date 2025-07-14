@@ -322,14 +322,19 @@ dreset;
     #if {"$guild" == "necromancer" && "%2" == "Undead"} {#NOP} {
         #var vaf[numbers] 1;
         #var incombat 1;
-        #local dmgAmount {};
         #format enemy[name_numbers] {%l} {%2};
         #format dmgTimes {%d} %3;
+        #var dmgTimesText %4;
         #format dmgAmount {%d} %5;
         #format dmgDisplay {%g} {$dmgAmount};
         #line gag;
         #if $gags[combat_numbers] {#NOP} {
-            #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+            #if {"$theme[dmg_display]" == ""} {
+                #echo {You hit %2 %3 %4 for $dmgDisplay damage.};
+            } {
+                #format dmgEcho {$theme[dmg_display]} {$enemy[name_numbers]} {$dmgTimes} {$dmgTimesText} {$dmgDisplay};
+                #echo {$dmgEcho};
+            };
         };
 
         #math mob[damage_dealt] {$mob[damage_dealt] + $dmgAmount};
