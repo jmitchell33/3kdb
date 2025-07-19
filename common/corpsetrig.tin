@@ -401,6 +401,7 @@
 #list corpseList add {{{name} {delay} {guild} {all} {action} {#NOP} {active} {0} {description} {2 Second Delay}}};
 #list corpseList add {{{name} {wrap} {guild} {all} {action} {wrap remains} {active} {0} {description} {Coffin: Wrap Corpse}}};
 #list corpseList add {{{name} {slab} {guild} {all} {action} {slab remains} {active} {0} {description} {Freezer: Slab Corpse}}};
+#list corpseList add {{{name} {cooler} {guild} {all} {action} {#if {$corpses[cooler] < 50} {unwrap;get corpse;cooler corpse;wrap remains}} {active} {0} {description} {Cooler: Rotates to Cooler}}};
 #list corpseList add {{{name} {szCaps} {guild} {all} {action} {swallow blue capsule;swallow orange capsule} {active} {0} {description} {SZ: Eat Blue/Orange Capsules}}};
 #list corpseList add {{{name} {szGreenCap} {guild} {all} {action} {swallow green capsule} {active} {0} {description} {SZ: Eat Green Capsule}}};
 #list corpseList add {{{name} {crafting} {guild} {all} {action} {stash all;keep all component} {active} {0} {description} {Crafting: Stash All & Keep All Components}}};
@@ -478,6 +479,7 @@
                 } {
                     $corpseActions[$item][action];
                 };
+                _strategy_guild_kill;
             };
             #if {$pauseCorpseAction} {
                 #delay 2 {
@@ -485,6 +487,7 @@
                         $corpseActions[$item][action];
                         #var pauseCorpseAction 0;
                     };
+                    _strategy_guild_kill;
                     #if {$bot[active]} {
                         #if !$pauseCorpseActionBot {.unpause};
                         .bot

@@ -78,8 +78,8 @@ From the shell, enter:
     sudo apt-get update
     sudo apt-get install build-essential zlib1g-dev libpcre3-dev libgnutls28-dev
     sudo apt-get build-dep tintin++
-    wget https://github.com/scandum/tintin/releases/download/2.02.42/tintin-2.02.42.tar.gz
-    tar -zxvf tintin-2.02.42.tar.gz
+    wget https://github.com/scandum/tintin/releases/download/2.02.51/tintin-2.02.51.tar.gz
+    tar -zxvf tintin-2.02.51.tar.gz
     cd tt/src
     ./configure
     sudo make install
