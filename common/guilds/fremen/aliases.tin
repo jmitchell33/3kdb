@@ -10,6 +10,24 @@
     };
 };
 
+#NOP -- fremCorpse2: similar to fremCorpse except it will fill up your coffin before fai
+#NOP -- max_coffin_capacity should just be set to MUD max. if you have lower, it will recalc at runtime
+#var max_coffin_capacity 50;
+#var coffin_capacity $max_coffin_capacity;
+#action {^Your coffin flashes as its capacity expands!$} {#var coffin_capacity = $max_coffin_capacity;}
+#action {^The coffin is full!$} {#var coffin_capacity $corpses[coffin];} {2}
+#alias {fremCorpse2} {
+    #if {$my[gp1][current] > $my[gp1][max] / 2} {
+        #if {$corpses[coffin] < $coffin_capacity} {
+            wrap;
+        }; #else {
+            #send !fai;
+        }
+    }; #else {
+        #send !reclaim;
+    };
+};
+
 #NOP -- fill and donate literjons at shamoom;
 #alias {donate_water} {
     acquire all;
