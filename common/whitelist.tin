@@ -110,8 +110,10 @@
     #if {"%0" != ""} {
         #format tmpItem {%n} {%0};
         #list whitelist find {$tmpItem} {index};
-        #list whitelist delete $index;
-        #echo {==> <eab> Removed $tmpItem from VIP List <088> <==};
+        #if {$index > 0} {
+            #list whitelist delete $index;
+            #echo {==> <eab> Removed $tmpItem from VIP List <088> <==};
+        };
     };
 };
 

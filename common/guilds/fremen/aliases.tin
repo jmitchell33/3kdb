@@ -10,6 +10,21 @@
     };
 };
 
+NOP -- fremCorpse2: similar to fremCorpse except it will fill up your coffin before fai
+#alias {fremCorpse2} {
+    #if {$my[gp1][current] > $my[gp1][max] / 2} {
+        #if {$corpses[coffin] < $corpses[coffin_max]} {
+            wrap;
+        }; #else {
+            #send !fai;
+        }
+    }; #else {
+        #send !reclaim;
+    };
+};
+
+
+
 #NOP -- fill and donate literjons at shamoom;
 #alias {donate_water} {
     acquire all;

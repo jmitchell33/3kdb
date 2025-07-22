@@ -308,6 +308,12 @@
 #act {The coffin expels all its corpses!} {#var corpses[coffin] 0;} {2};
 #act {You picked up %d {corpse|corpses} into the coffin.} {#math corpses[coffin] {$corpses[coffin] + %1};} {2};
 #act {There are no corpses in the coffin!} {#var corpses[coffin] 0;} {2};
+
+#NOP -- max_coffin_capacity should just be set to MUD max. if you have lower, it will recalc at runtime;
+#var corpses[coffin_max] 50;
+#NOP -- We'll set this back to the absolute max, and when you get full message again it will reset to correct amount;
+#action {^Your coffin flashes as its capacity expands!$} {#var corpses[coffin_max] 50} {2};
+#action {^The coffin is full!$} {#var corpses[coffin_max] $corpses[coffin]} {2};
       
 
 #NOP -- Deaths Freezer;

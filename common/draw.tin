@@ -206,12 +206,19 @@
         #var ktrig_string <ccc>KTRIG: <ccc>OFF<088>;
     };
 
-    #var ktrig_string  ;
-
     #if {&caption_data[]} {
-        #list caption_data set $draw[index][caption] {$corpse_string \n $ktrig_string \n $eternal_string};
+        #if $eternal {
+            #list caption_data set $draw[index][caption] {$corpse_string \n $eternal_string};
+        } {
+            #list caption_data set $draw[index][caption] {$corpse_string};
+        };
     } {
-        #list caption_data create {$corpse_string \n $eternal_string \n $ktrig_string};
+        #if $eternal {
+            #list caption_data create {$corpse_string \n $eternal_string};
+        } {
+            #list caption_data create {$corpse_string};
+        }
+        
     };
 
     #if {$idle_sec > $deadmanIdleTimeout} {

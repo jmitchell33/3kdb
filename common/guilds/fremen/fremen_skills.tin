@@ -9,6 +9,23 @@
     #echo {<add>Skill               Rank         Cost     Difficulty   Trainer<088>};
 } {2};
 
+#NOP #action {{(\w+\s?\w+?)\s+?(Normal|Easy|Very Easy) .*? (\d+)\s+?(\d+)}} { ;
+#NOP     #echo {2 is %2};
+#NOP     #echo {3 is %3};
+#NOP     #echo {4 is %4};
+#NOP     #echo {5 is %5};
+#NOP     #echo {6 is %6};
+#NOP } {1};
+
+#alias fskill-train {
+    #list tmpFremenSkill create;
+    #foreach *fremenskill[%*] index {
+        #list tmpFremenSkill add {{{skill} {$index} {cost} {$fremenskill[$index][cost]}}};
+    };
+    #list tmpFremenSkill index cost;
+    #list tmpFremenSkill order;
+};
+
 #action {{Ambush\s+(\d+)\s+([\d,]+)\s+([A-Za-z ]+)}} {
     #line gag;
     #var fremenskill[ambush][rank] %2;
