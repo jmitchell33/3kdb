@@ -104,6 +104,10 @@
     #if $bot[active] {#var bot[paused] 0;.bot};
 };
 
+#alias dcoffin2 {
+	#NOP There are no suitable corpses here to wrap!;
+};
+
 #alias cooler_rotate {
 	trace glyph;
 	#%1 {deslab;get corpse;cooler corpse};
@@ -309,10 +313,10 @@
 #act {You picked up %d {corpse|corpses} into the coffin.} {#math corpses[coffin] {$corpses[coffin] + %1};} {2};
 #act {There are no corpses in the coffin!} {#var corpses[coffin] 0;} {2};
 
-#NOP -- max_coffin_capacity should just be set to MUD max. if you have lower, it will recalc at runtime;
-#var corpses[coffin_max] 50;
+#NOP -- coffin max assumes a large number, it'll set itself to your max;
+#var corpses[coffin_max] 99;
 #NOP -- We'll set this back to the absolute max, and when you get full message again it will reset to correct amount;
-#action {^Your coffin flashes as its capacity expands!$} {#var corpses[coffin_max] 50} {2};
+#action {^Your coffin flashes as its capacity expands!$} {#var corpses[coffin_max] 99} {2};
 #action {^The coffin is full!$} {#var corpses[coffin_max] $corpses[coffin]} {2};
       
 
