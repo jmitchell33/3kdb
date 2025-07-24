@@ -1,0 +1,33 @@
+#echo {Connect to:};
+#echo {3kingdoms};
+
+#kill all;
+
+#NOP -- Replace byron below with your character (LOWER CASE).  Extend this to player5, player6, etc. to add more characters beyond 4;
+#var player1 byron;
+#var player2 ;
+#var player3 ;
+#var player4 ;
+
+
+#NOP -- This displays the options when you open tintin;
+#echo {1: $player1};
+#echo {2: $player2};
+#echo {3: $player3};
+#echo {4: $player4};
+
+#NOP -- These are the macros to match 1/2/3/4 so you can press that number to select that character;
+#macro {1} {#read chars/$player1/$player1.tin;$player1;um};
+#macro {2} {#read chars/$player2/$player2.tin;$player2;um};
+#macro {3} {#read chars/$player3/$player3.tin;$player3;um};
+#macro {4} {#read chars/$player4/$player4.tin;$player4;um};
+
+#NOP -- When you disconnect, these options will again display to log back in;
+#event {SESSION DEACTIVATED} {
+    #echo {1: $player1};
+    #echo {2: $player2};
+    #echo {3: $player3};
+    #echo {4: $player4};
+};
+
+#alias {um} {#unmacro {%d}};
