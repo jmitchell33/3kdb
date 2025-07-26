@@ -1,0 +1,23 @@
+#class guild_miphp kill;
+#class guild_miphp open;
+
+#var guild_miphp 1;
+
+#alias {_guild_miphp} {
+	#format {attack_ionbeam}	{%p}	{$my[attacks][ionbeam]};
+	#format {attack_ddb}		{%p}	{$my[attacks][ddb]};
+	#format {attack_synthorg}	{%p}	{$my[attacks][synthorg]};
+	#format {my[g2n]} {%g} {$my[g2n]};
+
+	#list temp clear;
+	#list temp add {HP: $my[hp][graph] SP: $my[sp][graph] PU: $my[gp1][graph] SPU: $my[gp2][graph] CPC:$my[cpc][graph]  E:$enemy[graph]};
+	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max PU:$gp1/$gp1_max SPU:$gp2/$gp2_max CPC:$my[cpc][current]/$my[cpc][max]  E:$ehealth};
+	#list temp add {I-Beam .: $attack_ionbeam :. DDB .: $attack_ddb :.  Synth .: $attack_synthorg :.};
+	#list temp add {TS: $my[timeslide][personal]/$my[timeslide][emergency] ($my[timeslide][reset]%)  G2N: $my[g2n]};
+
+	#var hpbar[prompt] $temp;
+};
+
+
+
+#class guild_miphp close;
