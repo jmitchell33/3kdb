@@ -4,13 +4,10 @@
 #var eternal 1;
 
 #NOP -- Turn off eternal if either of these fail;
-#action {There is no reason to '(cstats' here.} {
-	#var eternal 0;
-} {1};
 
-#action {There is no reason to '(powers' here.} {
-	#var eternal 0;
-} {1};
+#action {^There is no reason to '(cstats' here.$} {#var eternal 0} {1};
+
+#action {There is no reason to '(powers' here.} {#var eternal 0} {1};
 
 #alias {_update_eternal_status} {
 	#if {$my[eternal][heal]} {#format {heal_string} {<bfa>HEAL<088>}} {#format {heal_string} {<faa>HEAL<088>}};
@@ -215,6 +212,9 @@
 		#case {"protection"} {
 			update_eternal_delay {$temp} %5 %2;
 		};
+		#case {"unload room"} {
+			#class tmpEternalCapture kill;
+		};
 	};
 };	
 
@@ -234,9 +234,15 @@
 	#delay check_eternal {(powers} 6;
 }
 
-#action {{\s*([0-9]+)\s*/\s*([0-9]+)\s*([A-Za-z0-9_ ]*?):([\r\n\t ]*?)([0-9].+?)([\r\n\t ]*?)([[A-Za-z0-9.]+)([\r\n\t ]*?)([[A-Za-z0-9.]+)}} {
-	update_eternal_power {%4} %2 %6 %8 %10
-} {2};
+
+#action {^ Tier  Power                : Enrg Cooldn CooldR  +Tier GLR} {
+	#class tmpEternalCapture open;
+	#action {{\s*([0-9]+)\s*/\s*([0-9]+)\s*([A-Za-z0-9_ ]*?):([\r\n\t ]*?)([0-9].+?)([\r\n\t ]*?)([[A-Za-z0-9.]+)([\r\n\t ]*?)([[A-Za-z0-9.]+)}} {
+		update_eternal_power {%%4} %%2 %%6 %%8 %%10
+	} {2};
+	#class tmpEternalCapture close;
+}
+
 
 
 #action {A shimmering ball of energy appears magically when you snap your fingers.} {

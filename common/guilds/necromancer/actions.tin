@@ -271,10 +271,19 @@
 #action {Visions of the guild appear first in your mind, then reality...} {mapgo necro_rr} {2};
 
 #NOP -- Glamor maintenance;
+#action {^  You don't have enough energy.$} {
+    #math my[necromancer][glamors][current] {0};
+} {2};
+
+#NOP -- Illume;
+#action {^You call upon the material planes of energy to power your soul!$} {
+    #math my[necromancer][glamors][current] {$my[necromancer][glamors][current] - 1}
+} {2};
 #NOP -- fury;
 #action {You reach into your animal soul and fly into a fury!} {
     #math my[necromancer][glamors][current] {$my[necromancer][glamors][current] - 1}
 } {2};
+
 
 #NOP ---- NECRO HEALING CAPTURES;
 

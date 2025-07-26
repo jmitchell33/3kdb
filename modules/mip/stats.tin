@@ -96,12 +96,16 @@
 		#VAR {enemy} {};
 		#var enemy[name] %1;
 
-		#nop -- Try to lowercase the name and replace the articles with blanks to get a "target";
-		#format enemy[target] {%l} {%1};
-		#replace enemy[target] {\ba\b} {};
-		#replace enemy[target] {\ban\b} {};
-		#replace enemy[target] {\bthe\b} {};
-		#format enemy[target] {%p} {$enemy[target]};
+		#if $vaf[numbers] {
+			#var enemy[target] {$enemy[name_numbers]};
+		} {
+			#nop -- Try to lowercase the name and replace the articles with blanks to get a "target";
+			#format enemy[target] {%l} {%1};
+			#replace enemy[target] {\ba\b} {};
+			#replace enemy[target] {\ban\b} {};
+			#replace enemy[target] {\bthe\b} {};
+			#format enemy[target] {%p} {$enemy[target]};
+		};
 	} {
 		#var {enemy[last][name]} {$enemy[name]};
 		#VAR {enemy[name]} {};
@@ -251,9 +255,9 @@
         #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
         #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
         #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
-        #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
         #format {my[gxp][str_total]} {%M} {$my[gxp][total]};
         #format {my[gxp][str_total]} {%p} {$my[gxp][str_total]};
+		#format my[gxp][str_average_per_rnd] {%g} {$my[gxp][average_per_rnd]};
         #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
         .gxp_time;
 	}; #ELSEIF {%1 == 2} {

@@ -10,6 +10,21 @@
     };
 };
 
+#NOP -- fremCorpse2: similar to fremCorpse except it will fill up your coffin before fai
+#alias {fremCorpse2} {
+    #if {$my[gp1][current] > $my[gp1][max] / 2} {
+        #if {$corpses[coffin] < $corpses[coffin_max]} {
+            wrap;
+        }; #else {
+            #send !fai;
+        }
+    }; #else {
+        #send !reclaim;
+    };
+};
+
+
+
 #NOP -- fill and donate literjons at shamoom;
 #alias {donate_water} {
     acquire all;
@@ -18,22 +33,26 @@
 };
 
 #NOP -- donate corpses to shimoom;
+#var go_donate_water 0;
 #alias {donate_water1} {
-    #map get roomvnum donate_go_back;
-    #if {"$area" == "Chaotic Sewers"} {#var sewer_winch 1} {#var sewer_winch 0};
-    go fremen_shimoom;
-    #line oneshot #action {The Wisdom Board containing %*} {
-        #math tmpTotal {$corpses[total] - 1};
-        unwrap all;
-        deslab all;
-        #if {$corpses[cooler] > 0} {
-            #${corpses[cooler]} {uncooler corpse};
-        };
-        #action {eyes glow bright green upon the fallen} {
-            #math tmpTotal {$tmpTotal + 1};
-        } {1};
-        #delay 4 {.calcLJDonate $tmpTotal;#unaction {eyes glow bright green upon the fallen}};
-    } {1};
+    #if $go_donate_water {#NOP} {
+        #map get roomvnum donate_go_back;
+            #if {"$area" == "Chaotic Sewers"} {.stop;#var sewer_winch 1} {#var sewer_winch 0};
+            go fremen_shimoom;
+            #line oneshot #action {The Wisdom Board containing %*} {
+                #math tmpTotal {$corpses[total] - 1};
+                unwrap all;
+                deslab all;
+                #if {$corpses[cooler] > 0} {
+                    #${corpses[cooler]} {uncooler corpse};
+                };
+                #action {eyes glow bright green upon the fallen} {
+                    #math tmpTotal {$tmpTotal + 1};
+                } {1};
+                #delay 4 {.calcLJDonate $tmpTotal;#unaction {eyes glow bright green upon the fallen}};
+            } {1};
+        #var go_donate_water 1;
+    };
 };
 
 #alias {.calcLJDonate} {
@@ -55,7 +74,11 @@
                 wrap all;
                 go fremen_back;
                 #line oneshot #action {A rocky plateau (w,board spacecraft)} {
-                    #if {$sewer_winch} {go bank;deposit all;touch winch rune;#delay 10 {-sewers}} {#map run $donate_go_back};
+                    #var go_donate_water 0;
+                    #if {$sewer_winch} {
+                        #line oneshot #action {Dead End (s)} {#delay 4 {-sewers}};
+                        go bank;deposit all;touch winch rune
+                    } {#map run $donate_go_back};
                 } {1};
             };
         };
