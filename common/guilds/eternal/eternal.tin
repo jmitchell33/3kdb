@@ -232,18 +232,120 @@
 
 #alias _check_eternal_powers {
 	#delay check_eternal {(powers} 6;
-}
+};
 
+#NOP eternal power captures;
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+bolster\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {bolster} %2 %4 %5 %6;
+} {2};
 
-#action {^ Tier  Power                : Enrg Cooldn CooldR  +Tier GLR} {
-	#class tmpEternalCapture open;
-	#action {{\s*([0-9]+)\s*/\s*([0-9]+)\s*([A-Za-z0-9_ ]*?):([\r\n\t ]*?)([0-9].+?)([\r\n\t ]*?)([[A-Za-z0-9.]+)([\r\n\t ]*?)([[A-Za-z0-9.]+)}} {
-		update_eternal_power {%%4} %%2 %%6 %%8 %%10
-	} {2};
-	#class tmpEternalCapture close;
-}
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+destroy\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {destroy} %2 %4 %5 %6;
+} {2};
 
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+divine insight\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {divine insight} %2 %4 %5 %6;
+} {2};
 
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+duplicate creature\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {duplicate creature} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+duplicate item\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {duplicate item} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+embiggen\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {embiggen} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+energy well\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {energy well} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+enlarge\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {enlarge} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+farsight\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {farsight} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+fry\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {fry} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+hasten\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {hasten} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+heal\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {heal} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+heightened awareness\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {heightened awareness} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+immortality\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {immortality} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+pick pocket\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {pick pocket} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+protection\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {protection} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+quicken\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {quicken} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+redact\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {redact} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+refresh area\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {refresh area} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+refresh item\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {refresh item} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+refresh room\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {refresh room} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+reload item\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {reload item} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+reset dungeon\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {reset dungeon} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+resurrect\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {resurrrect} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+shred\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {shred} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+summon\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {summon} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+teleport\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {teleport} %2 %4 %5 %6;
+} {2};
+
+#action {{^\s*(\d+)\s*/\s*(\d+)\s+unload room\s*:\s*(\d+)\s+([0-9a-zA-Z.]+)\s+(RDY|--|\S+)}} {
+	update_eternal_power {unload room} %2 %4 %5 %6;
+} {2};
 
 #action {A shimmering ball of energy appears magically when you snap your fingers.} {
 	#var my[eternal][energy well] 0;
