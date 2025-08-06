@@ -17,16 +17,20 @@
 #alias {toggle} {
     #format toggle_var {%l} {%0};
     #format toggle_var {%p} {$toggle_var};
-    #if {"$toggles[$toggle_var]" != ""} {
-        #if $toggles[$toggle_var] {
-            #var toggles[$toggle_var] 0;
-            #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
-        } {
-            #var toggles[$toggle_var] 1;
-            #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
-        };
+    #if {"$toggle_var" == ""} {
+        #echo {<ffe>   -----  No toggle provided.  Use 'toggle-list' to see available options.  -----<088>};
     } {
-        #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
+        #if {"$toggles[$toggle_var]" == ""} {
+            #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
+        } {
+            #if $toggles[$toggle_var] {
+                #var toggles[$toggle_var] 0;
+                #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
+            } {
+                #var toggles[$toggle_var] 1;
+                #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
+            };
+        };
     };
 };
 
