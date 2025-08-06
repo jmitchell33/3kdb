@@ -17,6 +17,8 @@
 #list dReportList add {{{key} {corpses} {lookup} {tmpCorpses} {header_text}   {Corpses} {totals} {tmpTotalCorpses} {width} {6} {active} {0}}};
 #list dReportList add {{{key} {dsave_count} {lookup} {tmpPerMobDsaves} {header_text}   {DS #} {totals} {tmpTotalDsaves} {width} {6} {active} {0}}};
 #list dReportList add {{{key} {dsave_nps} {lookup} {tmpPerMobDsaveNP} {header_text}   {DS NP} {totals} {tmpTotalDsaveNP} {width} {6} {active} {0}}};
+#list dReportList add {{{key} {gxp_earned} {lookup} {tmpGxp} {header_text}   {GXP Earned} {totals} {tmpTotalGxp} {width} {11} {active} {0}}};
+#list dReportList add {{{key} {gxp_per_rnd} {lookup} {tmpGxpPerRnd} {header_text}   {GXP Per Rnd} {totals} {tmpAvgGxpPerRnd} {width} {11} {active} {0}}};
 
 #list dReportList indexate key;
 
@@ -243,6 +245,7 @@
     #list deathSummary_rounds clear;
     #list deathSummary_xp_earned clear;
     #list deathSummary_gxp_earned clear;
+    #list deathSummary_gxp_earned_per_round clear;
     #list deathSummary_damage_dealt clear;
     #list deathSummary_coins_earned clear;
     #list deathSummary_corpses_used clear;
@@ -294,6 +297,9 @@
         #var tmpTotalClass 0;
         #var tmpTotalDsaves 0;
         #var tmpTotalDsaveNP 0;
+        #var tmpTotalGxp 0;
+        #var tmpAvgGxp 0;
+        #var tmpAvgGxpPerRnd 0;
 
         #var tmpPerMobXp 0;
         #var tmpPerMobRnds 0;
@@ -302,6 +308,8 @@
         #var tmpPerMobCorpses 0;
         #var tmpPerMobDsaves 0;
         #var tmpPerMobDsaveNP 0;
+        #var tmpGxp 0;
+        #var tmpGxpPerRnd 0;
 
         #if {$tempReportSize > 0} {
             #var reportFormat1 {%-15s};
@@ -325,6 +333,7 @@
                 #math tmpTotalCorpses {$deathSummary_corpses_used[$item] + $tmpTotalCorpses};
                 #math tmpTotalClass {$deathSummary_class[$item] + $tmpTotalClass};
                 #math tmpTotalDmgRec {$deathSummary_damage_received[$item] + $tmpTotalDmgRec};
+                #math tmpTotalGxp {$deathSummary_gxp_earned[$item] + $tmpTotalGxp};
                 
                 #math tmpTotalRatio {$tmpTotalXp / $tmpTotalClass * 100.00};
                 #format tmpTotalRatio {%d} $tmpTotalRatio;
@@ -342,6 +351,8 @@
                 #format tmpDmgReceived {%g} {$deathSummary_damage_received[$item]};
                 #format tmpRounds {%g} {$deathSummary_rounds[$item]};
                 #format tmpCorpses {%g} {$deathSummary_corpses_used[$item]};
+                #format tmpGxp {%g} {$deathSummary_gxp_earned[$item]};
+                #format tmpGxpPerRnd {%g} {$deathSummary_gxp_earned[$item]};
                 
 
                 #var tmpLookup[tmpMob] $tmpMob;
@@ -354,6 +365,8 @@
                 #var tmpLookup[tmpDmgReceived] $tmpDmgReceived;
                 #var tmpLookup[tmpRounds] $tmpRounds;
                 #var tmpLookup[tmpCorpses] $tmpCorpses;
+                #var tmpLookup[tmpGxp] $tmpGxp;
+                #var tmpLookup[tmpGxpPerRnd] $tmpGxpPerRnd;
                 
                 
                 #if {$tmpCoins == 0} {#var tmpCoins -};
@@ -385,6 +398,8 @@
             #math tmpPerMobRnds {$tmpTotalRnds / $tmpTotalKills * 1.0};
             #math tmpPerMobXp {$tmpTotalXp / $tmpTotalKills};
             #math tmpPerMobCorpses {$tmpTotalCorpses / $tmpTotalKills * 1.0};
+            #math tmpAvgGxp {$tmpTotalGxp / $tmpTotalKills * 1.0};
+            #math tmpAvgGxpPerRnd {$tmpTotalGxp / $tmpTotalRnds * 1.0};
 
             #format tmpPerMobXp {%M} $tmpPerMobXp;
             #replace tmpPerMobXp {G} {B};
@@ -399,6 +414,7 @@
             #format tmpTotalDmg {%M} $tmpTotalDmg;
             #replace tmpTotalDmg {G} {B};
             #format tmpTotalCoins {%g} $tmpTotalCoins;
+            #format tmpTotalGxp {%g} $tmpTotalGxp;
 
             #format tmpTotalClass {%M} $tmpTotalClass;
             #replace tmpTotalClass {G} {B};

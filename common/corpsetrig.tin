@@ -122,6 +122,7 @@
     #var deathReport[xp_earned] $fight_xp;
     #if {"$area" != ""} {#var deathReport[area] $area};
     #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
+    #if {"$gxp[last-fight-per-round]" != ""} {#var deathReport[gxp_earned_per_round] $gxp[last-fight-per-round]};
 
     #if {"$guild" == "bard"} {
         #var deathReport[songs_lost] $cmbt[songs][lost][fight];
@@ -148,6 +149,7 @@
         #list deathSummary_rounds add {$deathReport[mob_rounds_to_kill]};
         #list deathSummary_xp_earned add {$deathReport[xp_earned]};
         #list deathSummary_gxp_earned add {$deathReport[gxp_earned]};;
+        #list deathSummary_gxp_earned_per_round add {$deathReport[gxp_earned_per_round]};;
         #list deathSummary_damage_dealt add {$deathReport[damage_dealt]};
         #list deathSummary_coins_earned add {$deathReport[coins_earned]};
         #list deathSummary_corpses_used add {$deathReport[corpses_used]};
@@ -460,6 +462,10 @@
 
 #NOP -- monk;
 #list corpseList add {{{name} {study} {guild} {monk} {action} {study corpse} {active} {0} {description} {Monk: Study Corpse}}};
+#list corpseList indexate name;
+
+#NOP -- Psicorps;
+#list corpseList add {{{name} {psi_donate} {guild} {psicorps} {action} {#if {"$$inventory[encumberance]" == "100"} {psi_donate}} {active} {0} {description} {Psicorps: Fold / Donate all if full}}};
 #list corpseList indexate name;
 
 

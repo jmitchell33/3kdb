@@ -14,6 +14,7 @@
 		#map get roomvnum fold_reality_source;
 		#map goto $psi_entrance;
 		#if $psi_donate {
+			#unticker donate_check;
 			d;n;e;e;e;ne;put all in box;sw;se;put all in box;
 			#NOP -- When we get to the common storage box, we'll fold reality and resume;
 			#if {$bot[paused]} {#line oneshot #action {-i-General Storage box %*.} {#var bot[paused] 0;fold reality} {1}};

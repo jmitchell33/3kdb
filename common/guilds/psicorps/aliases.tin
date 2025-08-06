@@ -108,4 +108,20 @@
   #echo {----------------};
 };
 
+#alias {psi_donate} {
+  #var psi_donate 1;
+  #map get roomvnum donate_go_back;
+  .pause;
+  #ticker donate_check {
+    #if !$incombat {fold reality};
+  } {2};
+};
+
+#alias {refill_apump} {
+  fold reality;d;n;e;e;e;ne;e;deposit all;withdraw 50000;
+  w;sw;w;w;w;w;w;w;refill;
+  e;e;e;e;e;e;ne;e;deposit all;withdraw 25000;
+  fold reality;
+};
+
 #class {guild_aliases} {close}

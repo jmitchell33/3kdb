@@ -120,10 +120,18 @@
     #line oneshot #action {You look faint.} {#if $gags[combat_generic] {#line gag}} {1};
     mobAttackTrack special
 } {2};
+
+#NOP -- Zodiac Specials;
+#action {^The Sage's blade crackles, surging with power!$} {mobAttackTrack special} {2};
+#action {^The Sage channels the power of silence, encasing you in icy stillness!$} {mobAttackTrack special} {2};
+#action {^The Sage shoots a barrage of poisoned pellets in your direction!$} {mobAttackTrack special} {2};
+#action {^The lama slashes with his scimitar, the blade cutting through you!$} {mobAttackTrack special} {2};
+
+
+#NOP -- Aegis Specials;
+#action {^The sentry launches a grenade, choking you in poison gas!$} {mobAttackTrack special} {2};
 #action {^The sentry scorches you with jets of liquid flame!$} {mobAttackTrack special} {2};
 #action {^The shrapnel from one of the sentry's grenades nearly rips you apart!$} {mobAttackTrack special} {2};
-
-#action {^The sentry launches a grenade, choking you in poison gas!$} {mobAttackTrack special} {2};
 
 #NOP -----------------------------------------------------;
 #NOP -- Guild Dodge/Block Tracking;
@@ -133,6 +141,9 @@
 #NOP -- Generic;
 #action {^Your shield blocks %* attack!$} {blockSelfTrack general shield};
 #action {^You nimbly dodge %* attack!$} {blockSelfTrack general dodge};
+
+#NOP -- Mskills;
+#action {^The spell dissipates as it contacts your form!$} {blockSelfTrack {mskill} {magic resistance}};
 
 #NOP -- Eternal Powers;
 #action {^The assault glances harmlessly off your aura.$} {blockSelfTrack eternal immunity};
