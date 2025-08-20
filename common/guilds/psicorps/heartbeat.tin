@@ -130,8 +130,8 @@
 	_check_power {Ac3} {astral construct 3};
 	_check_power {Ac4} {astral construct 4};
 	_check_power {Ac5} {astral construct 5};
-	_check_power {bc} {biocurrent};
 	_check_power {BC} {greater biocurrent};
+	_check_power {bc} {biocurrent};
 	_check_power {Cg} {conductive grasp};
 
 	#NOP -- GP1 Healing and Decision Tree to use Convert or Body Fuel;
@@ -227,6 +227,7 @@
       #elseif {$my[powers][%1][time] < 10} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] refreshing %2<088>}};
         _use_power %2;
+		#send {hp};
       };
       #else {
         #NOP;
@@ -235,6 +236,7 @@
       #if {$my[implants][%1][active]} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] turning on %2<088>}};
         _use_power %2;
+		#send {hp};
       };
       #else {
         #NOP;

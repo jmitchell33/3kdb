@@ -13,7 +13,7 @@
     #format blockTotal {%g} {$blockTotal};
     #format pctOfTotal {%d} {$pctOfTotal};
     #format pctOfHits {%d} {$pctOfHits};
-    #format blockSummary {%+12s    %+9s    %+9s    %+9s} {$blockName} {$blockTotal} {${pctOfHits}%} {${pctOfTotal}%};
+    #format blockSummary {%+20s    %+9s    %+9s    %+9s} {$blockName} {$blockTotal} {${pctOfHits}%} {${pctOfTotal}%};
     #echo $blockSummary;
 };
 
@@ -25,8 +25,8 @@
 
 #alias {defStats} {
     #format tmpMobHits {%g} {$defense[mob_attempts][total]};
-    #format tmpHeader {%+12s    %+9s    %+9s    %+9s} {} {Total} {% Blocked} {% of Total};
-    #format tmpTitle  {%+48s} {DEFENSE REPORT ($tmpMobHits Total Mob Attacks)};
+    #format tmpHeader {%+20s    %+9s    %+9s    %+9s} {} {Total} {% Blocked} {% of Total};
+    #format tmpTitle  {%+48s} {   DEFENSE REPORT ($tmpMobHits Total Mob Attacks)};
     #echo {<faa>$tmpTitle<088>};
     #echo $tmpHeader;
 
@@ -114,13 +114,6 @@
 #action {^%1 beat you like a red-headed step child.$} {mobAttackTrack melee};
 #action {^%1 drop-kicked you.$} {mobAttackTrack melee};
 
-#NOP -- Specials;
-#action {The %* preaches at you. Blood gushes from your ears!} {mobAttackTrack special} {2};
-#action {The %* holds up his sceptre and it begins to glow eerily.} {
-    #line oneshot #action {You look faint.} {#if $gags[combat_generic] {#line gag}} {1};
-    mobAttackTrack special
-} {2};
-
 #NOP -- Zodiac Specials;
 #action {^The Sage's blade crackles, surging with power!$} {mobAttackTrack special} {2};
 #action {^The Sage channels the power of silence, encasing you in icy stillness!$} {mobAttackTrack special} {2};
@@ -132,6 +125,20 @@
 #action {^The sentry launches a grenade, choking you in poison gas!$} {mobAttackTrack special} {2};
 #action {^The sentry scorches you with jets of liquid flame!$} {mobAttackTrack special} {2};
 #action {^The shrapnel from one of the sentry's grenades nearly rips you apart!$} {mobAttackTrack special} {2};
+
+
+#NOP -- Chessboard Specials;
+#action {^The %* crushes you with a mighty swipe of %*\n%*trunk!$} {mobAttackTrack special} {2};
+#action {^%* whips out a brightly glowing book and %*\n%*blasts you with pure energy!$} {mobAttackTrack special} {2};
+#action {^The %* opens his palm and a ray of frost %*\n%*from it at you!$} {mobAttackTrack special} {2};
+#action {^The A War Correspondent nearly blinds you with a powerful %*\n%*from his camera!$} {mobAttackTrack special} {2};
+#action {^The %* rolls his chariot over you, slicing deeply!$} {mobAttackTrack special} {2};
+#action {^The %* holds up his sceptre and it begins to %*\n%*You look faint.$} {mobAttackTrack special} {2};
+#action {^The Angry Horse rears up and slashes you with his %*\n%*horseshoes!$} {mobAttackTrack special} {2};
+#action {^The %* preaches at you. Blood gushes from your ears!$} {mobAttackTrack special} {2};
+#action {^The A Refugee smacks you with a befouled rag!$} {mobAttackTrack special} {2};
+#action {^The %* throws a vial of burning acid at you!$} {mobAttackTrack special} {2};
+#action {^The %* sword bursts into flame as he %*\n%*into you!$} {mobAttackTrack special} {2};
 
 #NOP -----------------------------------------------------;
 #NOP -- Guild Dodge/Block Tracking;

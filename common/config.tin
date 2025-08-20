@@ -45,7 +45,14 @@
     init_screen;
     draw_all;
     _mob_status_clear;
-    reset_trackers
+    reset_trackers;
+    #NOP -- Gag the few things this checks if it's not there for spam;
+    #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
+    #line oneshot #gag {^You find nothing of interest.};
+    #line oneshot #gag {^Perform touch at whom?};
+    #line oneshot #gag {^There is no reason to '(powers' here.};
+    #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
+    #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
 };
 
 #alias {reset_trackers} {
@@ -58,7 +65,7 @@
     };
     #if {"$guild" == "mage"} {
         spellDmg-clear;
-        summonDmg-clear
+        summonDmg-clear;
     };
 };
 

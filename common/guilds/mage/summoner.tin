@@ -237,10 +237,10 @@
 };
 
 #action {  --> %*\n%a-hp-} {
-    #var tmpGagLines 1;
-    #var tmpHpbar %0;
-    #list tmpHpbar explode {\n};
-    #NOP #if $gags[hpbar] {#line gag &tmpHpbar[]};
+    #if $gags[hpbar] {
+		#line oneshot #gag {  --> %*};
+		#line oneshot #gag { %*-hp-};
+	};
     #list summonList clear;
     #format summon1 {%p} {%1};
     #format summon2 {%p} {%2};

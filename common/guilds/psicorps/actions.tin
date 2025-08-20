@@ -17,7 +17,10 @@
 			#unticker donate_check;
 			d;n;e;e;e;ne;put all in box;sw;se;put all in box;
 			#NOP -- When we get to the common storage box, we'll fold reality and resume;
-			#if {$bot[paused]} {#line oneshot #action {-i-General Storage box %*.} {#var bot[paused] 0;fold reality} {1}};
+			#if {$bot[paused]} {#line oneshot #action {-i-General Storage box %*.} {
+				fold reality;
+				#delay 4 {#var bot[paused] 0}
+			} {1}};
 			#var psi_donate 0;
 		};
 	};
