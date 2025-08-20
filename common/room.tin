@@ -181,7 +181,14 @@
     #var mob[autoName] {};
     #var foundTimes 1;
     #var mob[long] %0;
-    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
+
+    #regex {$mob[long]} {attacking you} {
+        #NOP -- There's a mage bug where your summon will show Attacking you but not actually be attacking you;
+        #regex {$mob[long]} {[summons]} {#NOP} {
+            #var bot[aggro-mob] 1;
+            #replace mob[long] { attacking%*} {};
+        };
+    };
     #regex {$mob[long]} {7B{[0-9]+}} {#var foundTimes &1;#replace mob[long] { \\x7B%*} {};};
     #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
     #format {mob[long]} {%p} {$mob[long]};
