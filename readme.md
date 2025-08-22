@@ -20,6 +20,7 @@ Instructions on installing Tin-Tin are at the bottom.
 * logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... you would create a folder called logs/jerry
 
 **Getting Started**
+
 Inside the chars folder, create a copy of the "template" folder, and rename the folder as your character's name and the playername.tin to your character's name.  There are a few variables inside the playername.tin that also need to be updated.
 
 Using Byron as an example, the file chars/byron/playername.tin would become chars/byron/byron.tin and I would set the "guild" and "user" variables.
