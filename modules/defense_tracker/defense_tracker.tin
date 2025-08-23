@@ -75,6 +75,17 @@
     } {
         #var defense[mob_attempts][total] 1;
     };
+
+    #if {$defense[current_mob_attempts][$mobAttackType] > 0} {
+        #math defense[current_mob_attempts][$mobAttackType] {$defense[current_mob_attempts][$mobAttackType] + 1};
+    } {
+        #var defense[current_mob_attempts][$mobAttackType] 1;
+    };
+    #if {$defense[current_mob_attempts][total] > 0} {
+        #math defense[current_mob_attempts][total] {$defense[current_mob_attempts][total] + 1};
+    } {
+        #var defense[current_mob_attempts][total] 1;
+    };
 };
 
 #NOP -----------------------------------------------------;

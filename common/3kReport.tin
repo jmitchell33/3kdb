@@ -19,6 +19,8 @@
 #list dReportList add {{{key} {dsave_nps} {lookup} {tmpPerMobDsaveNP} {header_text}   {DS NP} {totals} {tmpTotalDsaveNP} {width} {6} {active} {0}}};
 #list dReportList add {{{key} {gxp_earned} {lookup} {tmpGxp} {header_text}   {GXP Earned} {totals} {tmpTotalGxp} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {gxp_per_rnd} {lookup} {tmpGxpPerRnd} {header_text}   {GXP Per Rnd} {totals} {tmpAvgGxpPerRnd} {width} {11} {active} {0}}};
+#list dReportList add {{{key} {mob_attacks_melee} {lookup} {tmpMobAttacksMelee} {header_text}   {Melee} {totals} {tmpTotalMobAttacksMelee} {width} {11} {active} {0}}};
+#list dReportList add {{{key} {mob_attacks_special} {lookup} {tmpMobAttacksSpecial} {header_text}   {Specials} {totals} {tmpTotalMobAttacksSpecial} {width} {11} {active} {0}}};
 
 #list dReportList indexate key;
 
@@ -255,6 +257,8 @@
     #list deathSummary_xp_to_class clear;
     #list deathSummary_dsave_count clear;
     #list deathSummary_dsave_nps clear;
+    #list deathSummary_mob_attacks_melee clear;
+    #list deathSummary_mob_attacks_specials clear;
     #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>3k KILL REPORT CLEARED          <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
 };
 
@@ -311,6 +315,11 @@
         #var tmpGxp 0;
         #var tmpGxpPerRnd 0;
 
+        #var tmpMobAttacksMelee 0;
+        #var tmpMobAttacksSpecial 0;
+        #var tmpTotalMobAttacksMelee 0;
+        #var tmpTotalMobAttacksSpecial 0;
+
         #if {$tempReportSize > 0} {
             #var reportFormat1 {%-15s};
             #var reportFormat2 {\{Mob\}};
@@ -334,6 +343,9 @@
                 #math tmpTotalClass {$deathSummary_class[$item] + $tmpTotalClass};
                 #math tmpTotalDmgRec {$deathSummary_damage_received[$item] + $tmpTotalDmgRec};
                 #math tmpTotalGxp {$deathSummary_gxp_earned[$item] + $tmpTotalGxp};
+                #math tmpTotalMobAttacksMelee {$deathSummary_mob_attacks_melee[$item] + $tmpTotalMobAttacksMelee};
+                #math tmpTotalMobAttacksSpecial {$deathSummary_mob_attacks_specials[$item] + $tmpTotalMobAttacksSpecial};
+                #math tmpTotalMobAttacksTotal {$deathSummary_mob_attacks_total[$item] + $tmpTotalMobAttacksTotal};
                 
                 #math tmpTotalRatio {$tmpTotalXp / $tmpTotalClass * 100.00};
                 #format tmpTotalRatio {%d} $tmpTotalRatio;
@@ -353,6 +365,9 @@
                 #format tmpCorpses {%g} {$deathSummary_corpses_used[$item]};
                 #format tmpGxp {%g} {$deathSummary_gxp_earned[$item]};
                 #format tmpGxpPerRnd {%g} {$deathSummary_gxp_earned[$item]};
+                #format tmpMobAttacksMelee {%g} {$deathSummary_mob_attacks_melee[$item]};
+                #format tmpMobAttacksSpecial {%g} {$deathSummary_mob_attacks_specials[$item]};
+                #format tmpMobAttacksTotal {%g} {$deathSummary_mob_attacks_total[$item]};
                 
 
                 #var tmpLookup[tmpMob] $tmpMob;
@@ -367,7 +382,8 @@
                 #var tmpLookup[tmpCorpses] $tmpCorpses;
                 #var tmpLookup[tmpGxp] $tmpGxp;
                 #var tmpLookup[tmpGxpPerRnd] $tmpGxpPerRnd;
-                
+                #var tmpLookup[tmpMobAttacksMelee] $tmpMobAttacksMelee;
+                #var tmpLookup[tmpMobAttacksSpecial] $tmpMobAttacksSpecial;
                 
                 #if {$tmpCoins == 0} {#var tmpCoins -};
                 #if {$deathSummary_damage_dealt[$item] == 0} {#var tmpDmg -};
@@ -400,6 +416,8 @@
             #math tmpPerMobCorpses {$tmpTotalCorpses / $tmpTotalKills * 1.0};
             #math tmpAvgGxp {$tmpTotalGxp / $tmpTotalKills * 1.0};
             #math tmpAvgGxpPerRnd {$tmpTotalGxp / $tmpTotalRnds * 1.0};
+            #math tmpPerMobAttacksMelee {$tmpTotalMobAttacksMelee / $tmpTotalKills};
+            #math tmpPerMobAttacksSpecial {$tmpTotalMobAttacksSpecial / $tmpTotalKills};
 
             #format tmpPerMobXp {%M} $tmpPerMobXp;
             #replace tmpPerMobXp {G} {B};

@@ -120,6 +120,9 @@
     #var deathReport[damage_dealt] $mob[damage_dealt];
     #var deathReport[mob_dodges] $mob[mob_dodges];
     #var deathReport[xp_earned] $fight_xp;
+    #var deathReport[mob_attacks_melee] $defense[current_mob_attempts][melee];
+    #var deathReport[mob_attacks_special] $defense[current_mob_attempts][special];
+    #var deathReport[mob_attacks_total] $defense[current_mob_attempts][total];
     #if {"$area" != ""} {#var deathReport[area] $area};
     #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
     #if {"$gxp[last-fight-per-round]" != ""} {#var deathReport[gxp_earned_per_round] $gxp[last-fight-per-round]};
@@ -157,6 +160,10 @@
         #list deathSummary_mob_dodges add {$deathReport[mob_dodges]};
         #list deathSummary_class add {$deathReport[class]};
         #list deathSummary_xp_to_class add {$deathReport[xp_to_class]};
+        #list deathSummary_mob_attacks_melee add {$deathReport[mob_attacks_melee]};
+        #list deathSummary_mob_attacks_specials add {$deathReport[mob_attacks_special]};
+        #list deathSummary_mob_attacks_total add {$deathReport[mob_attacks_total]};
+        
 
         #if {"$guild" == "necromancer"} {
             #list deathSummary_dsave_count add {$deathReport[dsave_count]};

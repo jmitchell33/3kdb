@@ -36,7 +36,19 @@
 };
 
 #alias {toggle-list} {
-    #echo { WIP - this will show a list of available toggles};
+    #echo {<cfb>   ---++---  3kdb Current Toggle Status ---++---<088>};
+    #format tmpLine {       %+15s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
+    #echo {$tmpLine};
+    #foreach *toggles[] item {
+        #if {$toggles[$item]} {
+            #format tmpLine {       %+15s          %+8s} {$item} {on};
+            #echo {<dfc>$tmpLine<088>};
+        } {
+            #format tmpLine {       %+15s          %+8s} {$item} {off};
+            #echo {<fbb>$tmpLine<088>};
+        };
+    };
+    #echo {<cfb>   ---++---                             ---++---<088>};
 };
 
 #NOP -- calculator;
