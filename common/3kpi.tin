@@ -346,10 +346,17 @@
         #if {!$ignoreLine} {
             #NOP -- These are used to signify the end of the item description capture;
             #regex {$tmpLine} {You sense this item is not original but rather a clever duplicate.} {#var itemDescCap 0};
-            #regex {$tmpLine} {The %w is in flawless condition.} {.toggleItemDescCap &1};
-            #regex {$tmpLine} {The %w is in perfect condition.} {.toggleItemDescCap &1};
-            #regex {$tmpLine} {This %w is in excellent condition.} {.toggleItemDescCap &1};
-            #regex {$tmpLine} {The %w are in battered condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in heightened condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in flawless condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in perfect condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in pristine condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {This %* in excellent condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in untarnished condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in sturdy condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in well-kept condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in rugged condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* in battered condition.} {.toggleItemDescCap &1};
+            
 
             #regex {$tmpLine} {This item is bound to you.} {#var apiItem[bind_on_equip] 1;#var itemDescCap 0;};
             
