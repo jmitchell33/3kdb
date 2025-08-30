@@ -65,6 +65,7 @@
 #alias mobAttackTrack {
     #if $gags[combat_generic] {#line gag};
     #local mobAttackType %1;
+    #local mobAttackDmgType %2;
     #if {$defense[mob_attempts][$mobAttackType] > 0} {
         #math defense[mob_attempts][$mobAttackType] {$defense[mob_attempts][$mobAttackType] + 1};
     } {
@@ -85,6 +86,19 @@
         #math defense[current_mob_attempts][total] {$defense[current_mob_attempts][total] + 1};
     } {
         #var defense[current_mob_attempts][total] 1;
+    };
+
+    #if {"${mobAttackDmgType}" != ""} {
+        #if {$defense[mob_attempts][$mobAttackDmgType] > 0} {
+            #math defense[mob_attempts][$mobAttackDmgType] {$defense[mob_attempts][$mobAttackDmgType] + 1};
+        } {
+            #var defense[mob_attempts][$mobAttackDmgType] 1;
+        };
+        #if {$defense[current_mob_attempts][$mobAttackDmgType] > 0} {
+            #math defense[current_mob_attempts][$mobAttackDmgType] {$defense[current_mob_attempts][$mobAttackDmgType] + 1};
+        } {
+            #var defense[current_mob_attempts][$mobAttackDmgType] 1;
+        };
     };
 };
 
@@ -126,22 +140,36 @@
 #action {^%1 drop-kicked you.$} {mobAttackTrack melee};
 
 #NOP -- Zodiac Specials;
-#action {^The Sage's blade crackles, surging with power!$} {mobAttackTrack special} {2};
-#action {^The Sage channels the power of silence, encasing you in icy stillness!$} {mobAttackTrack special} {2};
-#action {^The Sage shoots a barrage of poisoned pellets in your direction!$} {mobAttackTrack special} {2};
+#action {^The Sage's blade crackles, surging with power!$} {mobAttackTrack special energy} {2};
+#action {^The Sage channels the power of silence, encasing you in icy stillness!$} {mobAttackTrack special ice} {2};
+#action {^The Sage shoots a barrage of poisoned pellets in your direction!$} {mobAttackTrack special poison} {2};
 #action {^The lama slashes with his scimitar, the blade cutting through you!$} {mobAttackTrack special} {2};
 
+#NOP -- Stonemaze Pass;
+#action {^The Guardian swings its sword and you're struck with an otherwordly force.$} {mobAttackTrack special edged} {2};
+#action {^The Guardian's armor gleams with a spectral light as it strikes.$} {mobAttackTrack special energy} {2};
+#action {^The Enchantress sings an ancient incantation, unleashing an %*\n%*pulse.} {mobAttackTrack special blunt} {2};
+#action {^Rocks and stones respond to her command, animated by her stone puppetry.} {mobAttackTrack special blunt} {2};
+#action {^The ground trembles with the force of her magical onslaught.} {mobAttackTrack special energy} {2};
+#action {^The Shardling spits molten projectiles at you.$} {mobAttackTrack special fire} {2};
+#action {^The Shardling hisses and crackles, launching molten projectiles.$} {mobAttackTrack special fire} {2};
+#action {^The Shardling releases a burst of fiery embers at you.$} {mobAttackTrack special fire} {2};
+
+#action {^The Serpent hisses menacingly as it coils around you, scales digging in.$} {mobAttackTrack special edged} {2};
+#action {^The Serpent coils around you, squeezing with powerful force.$} {mobAttackTrack special blunt} {2};
+#action {^It spews molten lava in a fiery display, burning you.$} {mobAttackTrack special fire} {2};
 
 #NOP -- Aegis Specials;
-#action {^The sentry launches a grenade, choking you in poison gas!$} {mobAttackTrack special} {2};
-#action {^The sentry scorches you with jets of liquid flame!$} {mobAttackTrack special} {2};
+#action {^The sentry launches a grenade, choking you in poison gas!$} {mobAttackTrack special poison} {2};
+#action {^The sentry scorches you with jets of liquid flame!$} {mobAttackTrack special fire} {2};
 #action {^The shrapnel from one of the sentry's grenades nearly rips you apart!$} {mobAttackTrack special} {2};
 
 #NOP -- Banshee Specials;
 #action {^You are thrown across the room by the ghost's invisible force.$} {mobAttackTrack special} {2};
-#action {^The ghost spews a green slime on you, causing your skin to burn %*\n%from the toxin.$} {mobAttackTrack special} {2};
-#action {^The ghost stares intently into your eyes, causing severe pain %*\n%through your brain.$} {mobAttackTrack special} {2};
-#action {^The skeleton slashes you with a sharp finger nail, allowing its%*\n%toxin to penetrate your skin.$} {mobAttackTrack special} {2};
+#action {^The ghost spews a green slime on you, causing your skin to %*\n%*from the toxin.$} {mobAttackTrack special poison} {2};
+#action {^The ghost stares intently into your eyes, causing severe %*\n%*through your brain.$} {mobAttackTrack special mind} {2};
+#action {^The skeleton slashes you with a sharp finger nail, allowing %*\n%*toxin to penetrate your skin.$} {mobAttackTrack special edged} {2};
+#action {^You are momentarily blinded as the skeleton lands a %*\n%*between your eyes.$} {mobAttackTrack special blunt} {2};
 
 
 #NOP -- Chessboard Specials;
@@ -154,8 +182,8 @@
 #action {^The Angry Horse rears up and slashes you with his %*\n%ahorseshoes!$} {mobAttackTrack special} {2};
 #action {^The %* preaches at you. Blood gushes from your ears!$} {mobAttackTrack special} {2};
 #action {^The A Refugee smacks you with a befouled rag!$} {mobAttackTrack special} {2};
-#action {^The %* throws a vial of burning acid at you!$} {mobAttackTrack special} {2};
-#action {^The %* sword bursts into flame as he %*\n%ainto you!$} {#echo {tracked};mobAttackTrack special;} {2};
+#action {^The %* throws a vial of burning acid at you!$} {mobAttackTrack special acid} {2};
+#action {^The %* sword bursts into flame as he %*\n%ainto you!$} {#echo {tracked};mobAttackTrack special fire;} {2};
 
 #NOP -----------------------------------------------------;
 #NOP -- Guild Dodge/Block Tracking;
