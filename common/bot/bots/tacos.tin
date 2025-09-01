@@ -10,4 +10,45 @@
 #act {You try to grab a scoop of the guacamole, but it quivers away from you.} {w;repeat nocombat/grab sauce};
 #act {You try to grab a packet of hot sauce, but it crinkles away from you.} {#nop;#class bot kill;};
 
+
+#action {^You plummet, and SLAM into the ground!$} {
+    #map get roomvnum temp_go_back;
+    #class taco_ports open;
+    #line oneshot #action {>x< DEATH TACO FLOOR >x< (e,w)} {#map goto 6519} {1};
+    #line oneshot #action {>x< DEATH TACO FLOOR >x< (w)} {#map goto 6518} {1};
+    #class taco_ports close;
+};
+
+
+/*
+Veggie Taco:A Cervesa = first time use, +con, overmax sp after
+A side of rice. = overmax hp/sp
+A Veggie Taco = first time use, +wis, overmax after
+A gigantic pop
+
+Cheesy Taco
+Foil wrapper = radiation and mental ac
+nacho cheese = cold and acid ac
+meat paste = edged and energy ac
+sour cream = flame and electricity ac
+refried beans = crushing and poison ac
+
+Meat Taco
+cup of salsa
+wet wipe - stops combat
+Sliced jalapenos - +hp regen
+Cinnamon twists - throw for damage
+
+Works Taco
+Lettuce leaf
+hot sauce
+Cup of salsa - +dex, +int, +wis, +cha, regen
+
+Death Taco
+spork tier3+
+codpiece
+Guacamole skin treatment
+Shot of tequila - damage to mobs
+*/
+
 #class {bot} {close}
