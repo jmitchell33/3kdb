@@ -69,20 +69,21 @@
 
 #NOP -- These are the color patterns to know which Rejected Game map you're in;
 #NOP -- magenta;
-#action {~\e[0m\e[31m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta"} {#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
-#action {~\e[0m\e[35m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta"} {#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
+#var swap_color 1;
+#action {~\e[0m\e[31m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta" && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
+#action {~\e[0m\e[35m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta" && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
 
 #NOP -- green;
-#action {~\e[0m\e[32m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"} {#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
-#action {~\e[0m\e[30;1m%1\e[32m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"} {#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
+#action {~\e[0m\e[32m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
+#action {~\e[0m\e[30;1m%1\e[32m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
 
 #NOP -- blue;
-#action {~\e[0m\e[35m%1\e[34m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"} {#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
-#action {~\e[0m\e[34m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"} {#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
+#action {~\e[0m\e[35m%1\e[34m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
+#action {~\e[0m\e[34m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
 
 #NOP -- red;
-#action {~\e[0m\e[31m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"} {#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
-#action {~\e[0m\e[30;1m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"} {#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
+#action {~\e[0m\e[31m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
+#action {~\e[0m\e[30;1m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
 
 
 #NOP Vnums are 27662-28934 30131-30174;
