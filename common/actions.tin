@@ -3,7 +3,16 @@
 
 #var my[hm][heal] 1;
 #var my[hm][heal_other] 1;
+#var inventory[encumberance] 0;
 
+#NOP -- Inventory;
+#action {^%*: Too heavy.$} {
+    #var inventory[encumberance] 100
+} {2};
+
+#action {^%*: Ok.$} {
+    #var inventory[encumberance] 0
+} {4};
 
 #NOP -- Hockey corpse defaults;
 #alias .hockeyCorpse {
@@ -17,6 +26,8 @@
             perform dirge
         };
     };
+    #if {"$guild" == "cyborg"} {decompose};
+    #if {"$guild" == "fremen"} {reclaim};
     #if {"$guild" == "gentech"} {recharge;reclaim};
     #if {"$guild" == "juggernaut"} {deener;truck deener;fdeener};
     #if {"$guild" == "mage"} {cast corpse blast};
@@ -30,11 +41,9 @@
         };
     };
     #if {"$guild" == "priest"} {offer corpse};
-    #if {"$guild" == "fremen"} {reclaim};
 };
 
 #action {^Out of nowhere a crazed hockey fan leaps towards the Cup.} {.hockeyCorpse} {1};
-
 #action {^A hockey fan sprints out and dies.$} {.hockeyCorpse} {1};
 
 #NOP -- Dead/Alive variable;

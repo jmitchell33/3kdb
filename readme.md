@@ -19,11 +19,13 @@ Instructions on installing Tin-Tin are at the bottom.
 * modules: Individual script packages that do specific things, that specific characters can choose to utilize.
 * logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... you would create a folder called logs/jerry
 
-**How does this all work?**
-The name.tin file (byron.tin for example) is where you set the player name, guild, and some other addons like discord webhooks (pushing your tells/chats to a private discord).
-Using Byron as an example:
+**Getting Started**
 
-    *#var guild bard;
+Inside the chars folder, create a copy of the "template" folder, and rename the folder as your character's name and the playername.tin to your character's name.  There are a few variables inside the playername.tin that also need to be updated.
+
+Using Byron as an example, the file chars/byron/playername.tin would become chars/byron/byron.tin and I would set the "guild" and "user" variables.
+
+    #var guild bard;
     #var user byron;
     #read chars/$user/vars.tin;
 
@@ -33,7 +35,6 @@ Using Byron as an example:
     #NOP -- Load Common files;
     #NOP -- _load_3kdb_common is located in common/config.tin;
     #read common/index.tin;
-
 
 # Assumed Guild Defaults
 A few notes on mudside defaults are assumed for each guild.
@@ -73,6 +74,7 @@ Then you can sync and edit the mud tintin scripts from your local VSCode, and it
 
 # The following is for Ubuntu, but may work for your flavor of Linux:
 From the shell, enter:
+
     mkdir tintin
     cd tintin
     sudo apt-get update

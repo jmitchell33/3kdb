@@ -345,15 +345,31 @@
 
         #if {!$ignoreLine} {
             #NOP -- These are used to signify the end of the item description capture;
+            #NOP -- Need to update is to is/are multi capture;
             #regex {$tmpLine} {You sense this item is not original but rather a clever duplicate.} {#var itemDescCap 0};
-            #regex {$tmpLine} {The %w is in flawless condition.} {.toggleItemDescCap &1};
-            #regex {$tmpLine} {The %w is in perfect condition.} {.toggleItemDescCap &1};
-            #regex {$tmpLine} {This %w is in excellent condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in heightened condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in flawless condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in perfect condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in pristine condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {This %* is in excellent condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in untarnished condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in sturdy condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in well-kept condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in worn condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in rugged condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in weathered condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in battered condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in cracked condition.} {.toggleItemDescCap &1};
+            #regex {$tmpLine} {The %* is in fractured condition.} {.toggleItemDescCap &1};
+            
+            
+
             #regex {$tmpLine} {This item is bound to you.} {#var apiItem[bind_on_equip] 1;#var itemDescCap 0;};
             
             #regex {$tmpLine} {This item is legendary and you cannot possess more than one.} {
                 #var apiItem[legendary] 1;
                 #var apiItem[classification] Legendary;
+                .toggleItemDescCap &1
             };
             #regex {$tmpLine} {This appears to be an artifact for the %* guild.} {#var apiItem[classification] Guild Artifact};
             #regex {$tmpLine} {It looks unbreakable.} {#var apiItem[unbreakable] 1};

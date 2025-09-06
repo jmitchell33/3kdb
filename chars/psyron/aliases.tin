@@ -9,34 +9,27 @@
     .pause;
 };
 
-#alias k {
-    kill %1;
-}
-
-#alias {.mob_kill_action} {
-    kill $mob[target];
-};
-
-#alias {psi_donate} {
-  #var psi_donate 1;
-  #map get roomvnum donate_go_back;
-  fold reality;
-};
-
-#alias {refill_apump} {
-  fold reality;d;n;e;e;e;ne;e;deposit all;withdraw 50000;
-  w;sw;w;w;w;w;w;w;refill;
-  e;e;e;e;e;e;ne;e;deposit all;withdraw 25000;
-  fold reality;
-};
-
 #NOP --- Botting configurations;
 
 #alias {.pre_fight_check} {
   #var _bb 0;
 };
 
+#NOP -- Psicorps Heal Settings;
 
+#alias psi_heal {
+    #send {reflex clear};
+    #send {reflex add hp <50% [gba};
+    #send {reflex add gp1 <50% [body fuel 500};
+    #send {panic [gba/90/1};
+    #send {triage at 50% do [chain [gba,[gba};
+};
+
+#alias psi_heal_clear {
+    #send {reflex clear};
+    #send {panic off};
+    #send {triage off};
+};
 
 #NOP --- Psicorps power configurations;
 

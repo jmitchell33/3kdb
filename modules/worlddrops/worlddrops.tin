@@ -1,10 +1,34 @@
 #class {worlddrops} {kill};
 #class {worlddrops} {open};
 
-#act {^-!!!-{a red robe made of a fine fabric|Iridescent Incense|PICNP Device|Amulet of Tanooki|Amulet of Voraxis|Amulet of Waves|An exploding kitten|Buckler of Eternia|Frosted armour of Aylin|Frosted boots of Aylin|Frosted breastplate of Aylin|Frosted gauntlets of Aylin|Frosted helmet of Aylin|Frosted shield of Aylin|Golden Robes of Intellect|Molok's Titanium Breastplate|QT Amulet|Redoubt Cloak|Robe of Therlasia|Shieldbreaker|Shimmering cloak of Aylin|Skull of the Dracolich, Yaxtan|Staff of Elemental Fury|Thundering|TimeRender|Frosted shield of Aylin}} {
-	#echo {===========> WORLD DROP %1 <============};
-	#if {$bot[active] == 1} {.pause;#delay {1} {.pause}};
-} {1};
+#NOP -- To be added if below pattern works;
+#NOP Amulet of Voraxis|Amulet of Waves|An exploding kitten|Buckler of Eternia|Frosted armour of Aylin|Frosted boots of Aylin|Frosted breastplate of Aylin|Frosted gauntlets of Aylin|Frosted helmet of Aylin|Frosted shield of Aylin|Golden Robes of Intellect|Molok's Titanium Breastplate|QT Amulet|Redoubt Cloak|Robe of Therlasia|Shieldbreaker|Shimmering cloak of Aylin|Skull of the Dracolich, Yaxtan|Staff of Elemental Fury|Thundering|TimeRender|Frosted shield of Aylin;
 
+
+#alias .notifyWorldDrop {
+	#echo {<cfb>===========> <ccd>WORLD DROP %0 <088>};
+	#format tmpName {%p} {%0};
+	#var tmpName @ansiStrip{$tmpName};
+	#if $toggles[worlddrops] {
+		#if {$bot[active] == 1} {
+			#echo {<cfb>===========> <ccd>BOT PAUSED <088>};
+			#echo {<cfb>===========> <ccd> 'toggle worlddrops' to <fbb>off <ccd>to not stop in the future <088>};
+			.pause;#delay {1} {.pause}
+		};
+	};
+};
+
+#NOP -- Need to test this section when I find  aworld drop again;
+#action {~\e[0m\e[35;1mThe Soul Drinker Blade (enchanted)} {.notifyWorldDrop The Soul Drinker Blade (enchanted)} {1};
+#action {~\e[0m\e[35;1m%* flask} {.notifyWorldDrop LEGENDARY XP POTION} {1};
+#action {~\e[0m\e[35;1ma red robe made of a fine fabric} {.notifyWorldDrop a red robe made of a fine fabric} {1};
+#action {~\e[0m\e[35;1mIridescent Incense} {.notifyWorldDrop Iridescent Incense} {1};
+#action {~\e[0m\e[35;1mPICNP Device} {.notifyWorldDrop PICNP Device} {1};
+#action {~\e[0m\e[35;1mAmulet of Tanooki} {.notifyWorldDrop Amulet of Tanooki} {1};
+
+
+#action {~\e[0;33m\e[35;1m%1.} {
+	.notifyWorldDrop {%1};
+} {1};
 
 #class {worlddrops} {close};

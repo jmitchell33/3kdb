@@ -11,6 +11,47 @@
 #alias {cwho1} {#send {!cwho -O}};
 #alias {los} {#send {lineofsight}};
 
+#NOP -- Generic toggle switch;
+#if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
+#if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 0};
+#if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
+
+#alias {toggle} {
+    #format toggle_var {%l} {%0};
+    #format toggle_var {%p} {$toggle_var};
+    #if {"$toggle_var" == ""} {
+        #echo {<ffe>   -----  No toggle provided.  Use 'toggle-list' to see available options.  -----<088>};
+    } {
+        #if {"$toggles[$toggle_var]" == ""} {
+            #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
+        } {
+            #if $toggles[$toggle_var] {
+                #var toggles[$toggle_var] 0;
+                #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
+            } {
+                #var toggles[$toggle_var] 1;
+                #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
+            };
+        };
+    };
+};
+
+#alias {toggle-list} {
+    #echo {<cfb>   ---++---  3kdb Current Toggle Status ---++---<088>};
+    #format tmpLine {       %-15s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
+    #echo {$tmpLine};
+    #foreach *toggles[] item {
+        #if {$toggles[$item]} {
+            #format tmpLine {        %-15s         %+8s} {$item} {on};
+            #echo {<dfc>$tmpLine<088>};
+        } {
+            #format tmpLine {        %-15s         %+9s} {$item} { off};
+            #echo {<fbb>$tmpLine<088>};
+        };
+    };
+    #echo {<cfb>   ---++---                             ---++---<088>};
+};
+
 #NOP -- calculator;
 #alias {calc} {
 	#math {math} {%0};
@@ -51,6 +92,11 @@
         #send {i unkept};
     } {
         #if {"$guild" == "necromancer"} {
+            #NOP -- Gag these if you don't yet have chest;
+            #line oneshot #gag {^There is no reason to 'retrieve' here.};
+            #line oneshot #gag {^That is not here or it is uninteresting. (chest?)};
+            #line oneshot #gag {^There is no reason to 'deliver' here.};
+
             #NOP -- Track decanters for bloodfuse;
             #var my[necromancer][decanters][empty] 0;
             #var my[necromancer][decanters][full] 0;

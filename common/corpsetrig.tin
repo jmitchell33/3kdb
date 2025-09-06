@@ -67,7 +67,7 @@
             #if $dmgtracker {.dmg_round_reset;#var cmbt[affects][convoke] 0};
 
             #NOP -- Pull data from (cstats for how much damage was received and mob class;
-            #if $eternal {_update_cstats};
+            #if $toggles[3kreport] {#if $eternal {_update_cstats}};
             .processDeathReport;
 
             #NOP -- toggle maintenance that need to fire after all corpsetrig actions if bot is not active;
@@ -120,8 +120,12 @@
     #var deathReport[damage_dealt] $mob[damage_dealt];
     #var deathReport[mob_dodges] $mob[mob_dodges];
     #var deathReport[xp_earned] $fight_xp;
+    #var deathReport[mob_attacks_melee] $defense[current_mob_attempts][melee];
+    #var deathReport[mob_attacks_special] $defense[current_mob_attempts][special];
+    #var deathReport[mob_attacks_total] $defense[current_mob_attempts][total];
     #if {"$area" != ""} {#var deathReport[area] $area};
     #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
+    #if {"$gxp[last-fight-per-round]" != ""} {#var deathReport[gxp_earned_per_round] $gxp[last-fight-per-round]};
 
     #if {"$guild" == "bard"} {
         #var deathReport[songs_lost] $cmbt[songs][lost][fight];
@@ -148,6 +152,7 @@
         #list deathSummary_rounds add {$deathReport[mob_rounds_to_kill]};
         #list deathSummary_xp_earned add {$deathReport[xp_earned]};
         #list deathSummary_gxp_earned add {$deathReport[gxp_earned]};;
+        #list deathSummary_gxp_earned_per_round add {$deathReport[gxp_earned_per_round]};;
         #list deathSummary_damage_dealt add {$deathReport[damage_dealt]};
         #list deathSummary_coins_earned add {$deathReport[coins_earned]};
         #list deathSummary_corpses_used add {$deathReport[corpses_used]};
@@ -155,6 +160,10 @@
         #list deathSummary_mob_dodges add {$deathReport[mob_dodges]};
         #list deathSummary_class add {$deathReport[class]};
         #list deathSummary_xp_to_class add {$deathReport[xp_to_class]};
+        #list deathSummary_mob_attacks_melee add {$deathReport[mob_attacks_melee]};
+        #list deathSummary_mob_attacks_specials add {$deathReport[mob_attacks_special]};
+        #list deathSummary_mob_attacks_total add {$deathReport[mob_attacks_total]};
+        
 
         #if {"$guild" == "necromancer"} {
             #list deathSummary_dsave_count add {$deathReport[dsave_count]};
@@ -399,6 +408,8 @@
 #list corpseList add {{{name} {divvy} {guild} {all} {action} {divvy gold} {active} {0} {description} {Gold: Divvy gold}}};
 #list corpseList add {{{name} {coins} {guild} {all} {action} {get coins from corpse;get coins} {active} {0} {description} {Gold: Get coins from corpse}}};
 #list corpseList add {{{name} {delay} {guild} {all} {action} {#NOP} {active} {0} {description} {2 Second Delay}}};
+#list corpseList add {{{name} {delay5} {guild} {all} {action} {#NOP} {active} {0} {description} {5 Second Delay - (offline)}}};
+#list corpseList add {{{name} {delay10} {guild} {all} {action} {#NOP} {active} {0} {description} {10 Second Delay (offline)}}};
 #list corpseList add {{{name} {wrap} {guild} {all} {action} {wrap remains} {active} {0} {description} {Coffin: Wrap Corpse}}};
 #list corpseList add {{{name} {slab} {guild} {all} {action} {slab remains} {active} {0} {description} {Freezer: Slab Corpse}}};
 #list corpseList add {{{name} {cooler} {guild} {all} {action} {#if {$$corpses[cooler] < 50} {unwrap;get corpse;cooler corpse;wrap remains}} {active} {0} {description} {Cooler: Rotates to Cooler}}};
@@ -460,6 +471,10 @@
 
 #NOP -- monk;
 #list corpseList add {{{name} {study} {guild} {monk} {action} {study corpse} {active} {0} {description} {Monk: Study Corpse}}};
+#list corpseList indexate name;
+
+#NOP -- Psicorps;
+#list corpseList add {{{name} {psi_donate} {guild} {psicorps} {action} {#if {"$${inventory[encumberance]}" == "100"} {psi_donate}} {active} {0} {description} {Psicorps: Fold / Donate all if full}}};
 #list corpseList indexate name;
 
 

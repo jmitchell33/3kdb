@@ -181,7 +181,14 @@
     #var mob[autoName] {};
     #var foundTimes 1;
     #var mob[long] %0;
-    #regex {$mob[long]} {attacking you} {#var bot[aggro-mob] 1;#replace mob[long] { attacking%*} {}};
+
+    #regex {$mob[long]} {attacking you} {
+        #NOP -- There's a mage bug where your summon will show Attacking you but not actually be attacking you;
+        #regex {$mob[long]} {[summons]} {#NOP} {
+            #var bot[aggro-mob] 1;
+            #replace mob[long] { attacking%*} {};
+        };
+    };
     #regex {$mob[long]} {7B{[0-9]+}} {#var foundTimes &1;#replace mob[long] { \\x7B%*} {};};
     #regex {$mob[long]} {7B{[A-Za-z]+}} {#replace mob[long] { \\x7B%*} {};};
     #format {mob[long]} {%p} {$mob[long]};
@@ -258,7 +265,7 @@
     };
 
     #NOP -- Auto ask/solve/return missions;
-    #regex {%1} {<?>} {mission ask};
+    #regex {%1} {<?>} {#if $toggles[mission] {mission ask}};
     #regex {%1} {<!>} {mission return};
     #regex {%1} {<!.>} {mission return;mission ask};
     
@@ -284,8 +291,9 @@
     #regex {$mob[long]} {^%w the Mohrg$} {#var mobFamiliar 1};
     #regex {$mob[long]} {^%w the Grimare$} {#var mobFamiliar 1};
     #regex {$mob[long]} {^%w the Valithyn$} {#var mobFamiliar 1};
-    #regex {$mob[long]} {^$my[familiar].$} {#var mobFamiliar 1};
-    #regex {$mob[long]} {^$my[golem][name] \(%w Golem\) %*.$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^$my[familiar]$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {^$my[golem][name] \(%w Golem\) %*$} {#var mobFamiliar 1};
+    #regex {$mob[long]} {A shadowbound follower of %*} {#var mobFamiliar 1};
 
     #NOP -- Knight Familiars;
     #regex {$mob[long]} {%*, %*'s %* Percheron} {#var mobFamiliar 1};
@@ -336,7 +344,7 @@
             #if $bot[active] {
                 #foreach $bot[mobs][%*] botmob {
                     #if !$bot[foundmob] {
-                        #regexp {$mob[long]} {$botmob[long]} {
+                        #regexp {$mob[long]} {%i$botmob[long]} {
                             #if $debug[bot] {#echo {<cfa>DEBUG BOT: MOB FOUND $mob[long] MATCHED $botmob[long]}};
                             #if $debug[bot] {#echo {<cfa>DEBUG BOT: SETTING TARGET TO $botmob[target]}};
                             #var bot[foundmob] 1;
