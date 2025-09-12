@@ -9,6 +9,13 @@
     };
 };
 
+#NOP -- turn toggles on or off;
+#alias {togg} {
+    toggle 3kreport;
+    toggle mission;
+};
+
+#NOP -- for mapping;
 #alias {rmfix} {
     look;
     #delay 5 {
@@ -29,14 +36,6 @@
 #alias {aug2} {
     remove circlet;
     wear other 2;
-};
-
-#NOP -- stanely cup;
-#alias {dcup} {
-    kill mike;
-    dc;
-    touch dove rune;
-    kill mike 1;
 };
 
 #NOP -- fill 5 literjons;
@@ -140,11 +139,14 @@
 #NOP -- configure 3kReport;
 #alias {set3kreport} {
     3kReport-clear;
+    3kReport+ killer;
+    3kReport+ rounds;
+    3kReport+ class;
     3kReport+ xp;
     3kReport+ xp_ratio;
+    3kReport+ coins;
     3kReport+ dmg_dealt;
     3kReport+ dmg_received;
-    #NOP 3kReport+ corpses;
 };
 
 #alias {3kr} {
@@ -316,8 +318,8 @@
             #echo {<eaf>2 <bec>(4 summons assisting)<088>};
             #echo {<eaf>3 <bec>(4 summons defending)<088>};
             #echo {<eaf>4 <bec>(3 summons assisting and 1 summon defending)<088>};
-            #echo {<eaf>5 <bec>(1 summon defending and 3 summons assisting)<088>};
-            #echo {<eaf>golem <bec>(golem assisting)<088>};
+            #echo {<eaf>5 <bec>(1 summon defending and 3 summons assisting and golem defending)<088>};
+            #echo {<eaf>golem <bec>(golem assisting - self tanking)<088>};
         };
         #NOP -- 4 summons assisting;
         #case {"2"} {
@@ -347,14 +349,14 @@
             ms 10##1#1500#70#defend#summons#always;
             ms golema;
         };
-        #NOP -- 1 summon defending and 3 summons assisting;
+        #NOP -- 1 summon defending and 3 summons assisting and golem defending;
         #case {"5"} {
             clear_sconfig;
             shoo;
             shoo golem;
             mystrategy-golem;
-            ms 9##1#1500#70#defend#summons#always;
-            ms 9##3#1500#70#assist#summons#always;
+            ms 10##1#1500#70#defend#summons#always;
+            ms 10##3#1500#70#assist#summons#always;
             ms golemd;
         };
         #NOP -- offensive mage - golem assisting;
@@ -1839,6 +1841,7 @@
 #list badger3kdb add {{{name} {cleardmg} {type} {combat} {desc} {clear all damage trackers}}};
 
 #NOP -- misc;
+#list badger3kdb add {{{name} {togg} {type} {misc} {desc} {Turn toggles on or off}}};
 #list badger3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
 #list badger3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
 #list badger3kdb add {{{name} {winaxe} {type} {misc} {desc} {Knight tour game - Throwing axes}}};
