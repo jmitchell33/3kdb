@@ -1,20 +1,26 @@
-#class area_misc open;
+#class {area_misc} {kill};
+#class {area_misc} {open};
 
-#NOP -- SECTIONZ WHITE CAPSULE
-#action {a bright white capsule: Ok.} {#if {!$idle_flag} {ptell found white capsule}}
+#NOP -- SECTIONZ WHITE CAPSULE;
+#action {a bright white capsule: Ok.} {#if {!$idle_flag} {keep white capsule;ptell found white capsule!}} {2};
+#action {a dimly glowing white capsule: Ok.} {#if {!$idle_flag} {keep white capsule;ptell found white capsule!}} {2};
+#action {white capsule: Taken.} {#if {!$idle_flag} {keep white capsule;ptell found white capsule!}} {2};
 
-#NOP -- SECTIONZ CAPSULE EATING FOR TIMED LIMITED MSKILL/REGEN/STAT BOOSTS
+#NOP -- SECTIONZ CAPSULE EATING FOR TIMED LIMITED MSKILL/REGEN/STAT BOOSTS;
 #alias {eat-caps3} {swallow blue capsule;swallow orange capsule;swallow green capsule};
 #alias {eat-caps2} {swallow blue capsule;swallow orange capsule};
 #alias {eat-caps1} {swallow blue capsule};
 
-#NOP -- SECTIONZ CONTINUE CODES FOR LVL 20 & 40
+#NOP -- SECTIONZ CONTINUE CODES FOR LVL 20 & 40;
 #alias {continue40} {enter $s40};
 #alias {continue20} {enter $s20};
 #action {Just a reminder, your continue code for Section 40 is %w} {#var s40 %1} {2};
 #action {Just a reminder, your continue code for Section 20 is %w} {#var s20 %1} {2};
 
-#NOP -- ALIAS'S TO SAVE YOU TO SECTIONZ
+#NOP -- Pissed off the developer tag;
+#action {^Developer unlocks and opens the large steel door.$} {say hostage} {2};
+
+#NOP -- ALIAS'S TO SAVE YOU TO SECTIONZ;
 #alias {set40} {
     press start;
     #delay {1} {pause game};
@@ -22,7 +28,7 @@
     #delay {3} {continue40};
     #delay {4} {pause game};
     #delay {5} {play};
-    #delay {6} {unpause}
+    #delay {6} {unpause};
 };
 
 #alias {set20} {
@@ -32,10 +38,10 @@
     #delay {3} {continue20};
     #delay {4} {pause game};
     #delay {5} {play};
-    #delay {6} {unpause}
+    #delay {6} {unpause};
 };
 
-#NOP -- MAKE BALANGOOL GEAR FROM SECTIONZ
+#NOP -- MAKE BALANGOOL GEAR FROM SECTIONZ;
 #alias {gool} {
 	#switch {"%0"} {
 		#case {"green-armour"} {open figurine;insert green capsule near chest;close figurine;insert green capsule;keep armour};
@@ -54,4 +60,4 @@
 	};
 };
 
-#class area_misc close;
+#class {area_misc} {close};
