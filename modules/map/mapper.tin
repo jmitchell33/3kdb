@@ -69,9 +69,15 @@
 			};
 		};
 	};
-	#if {$roomname_len == 0} {
-		#map set roomname {$room[name]};
-	};
+	#NOP -- This comes from MIP, so set a check that the MIP room name has updated;
+	#ticker update_room_name {
+		#if $mip_room_name {
+			#if {$roomname_len == 0} {
+				#map set roomname {$room[name]};
+				#var mip_room_name 0;
+			};
+		};
+	} {.5};
 	#if {$roomarea_len == 0} {
 		#map set roomarea {$area};
 		#map set roomcolor;
@@ -96,6 +102,7 @@
 	#var room %1;
 	#if {"$mapping" == "on"} {
 		#if {$roomname_len == 0} {
+			#echo {calling lower priority room name};
 			#map set roomname {%1};
 		};
 		#if {$roomarea_len == 0} {

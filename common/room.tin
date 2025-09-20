@@ -25,6 +25,7 @@
     #list room[items] clear;
     #list room[players] clear;
     #list room[botmobs] clear;
+    #unvar room[name];
     #var room[updated] 0;
     #var room_coins 0;
     #var room_tome 0;
@@ -37,15 +38,6 @@
     };
 };
 
-#action {^-X-_    There are %* exits: %*-X-_} {
-    .clearRoomData;
-    #if {"$mapping" == "on"} {
-        .getMapRoomData;
-        #if {$roomname_len == 0} {#map set roomname {$room[name]}};
-        #if {$roomarea_len == 0} {#map set roomarea {$area}};
-        #if {$roomdesc_len == 0} {#map set roomdesc {$room[long]}};
-    };
-} {2};
 
 #NOP -- Get the current scaler of the dungeon;
 #action {^Current scaled level of the dungeon you're in: %d} {
