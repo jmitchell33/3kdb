@@ -12,9 +12,14 @@
 #alias {los} {#send {lineofsight}};
 
 #NOP -- Generic toggle switch;
-#if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
-#if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 0};
-#if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
+#delay 6 {
+    #if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
+    #if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 0};
+    #if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
+    #if {"${toggles[cult]}" == ""} {#var toggles[cult] 0};
+    #if {"${toggles[corpse_echo]}" == ""} {#var toggles[corpse_echo] 0};
+    
+};
 
 #alias {toggle} {
     #format toggle_var {%l} {%0};

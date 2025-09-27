@@ -15,12 +15,17 @@
 #list dReportList add {{{key} {dmg_dealt} {lookup} {tmpDmg} {header_text}   {Dmg Dlt} {totals} {tmpTotalDmg} {width} {10} {active} {0}}};
 #list dReportList add {{{key} {dmg_received} {lookup} {tmpDmgReceived} {header_text}   {Dmg Rcd} {totals} {tmpTotalDmgRec} {width} {15} {active} {0}}};
 #list dReportList add {{{key} {corpses} {lookup} {tmpCorpses} {header_text}   {Corpses} {totals} {tmpTotalCorpses} {width} {6} {active} {0}}};
-#list dReportList add {{{key} {dsave_count} {lookup} {tmpPerMobDsaves} {header_text}   {DS #} {totals} {tmpTotalDsaves} {width} {6} {active} {0}}};
-#list dReportList add {{{key} {dsave_nps} {lookup} {tmpPerMobDsaveNP} {header_text}   {DS NP} {totals} {tmpTotalDsaveNP} {width} {6} {active} {0}}};
 #list dReportList add {{{key} {gxp_earned} {lookup} {tmpGxp} {header_text}   {GXP Earned} {totals} {tmpTotalGxp} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {gxp_per_rnd} {lookup} {tmpGxpPerRnd} {header_text}   {GXP Per Rnd} {totals} {tmpAvgGxpPerRnd} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {mob_attacks_melee} {lookup} {tmpMobAttacksMelee} {header_text}   {Melee} {totals} {tmpTotalMobAttacksMelee} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {mob_attacks_special} {lookup} {tmpMobAttacksSpecial} {header_text}   {Specials} {totals} {tmpTotalMobAttacksSpecial} {width} {11} {active} {0}}};
+
+#NOP -- Necromancer Specific;
+#if {"$guild" == "necromancer"} {
+    #list dReportList add {{{key} {dsave_count} {lookup} {tmpPerMobDsaves} {header_text}   {DS #} {totals} {tmpTotalDsaves} {width} {6} {active} {0}}};
+    #list dReportList add {{{key} {dsave_nps} {lookup} {tmpPerMobDsaveNP} {header_text}   {DS NP} {totals} {tmpTotalDsaveNP} {width} {6} {active} {0}}};
+};
+
 
 #list dReportList indexate key;
 

@@ -1,0 +1,104 @@
+#class dmgtracker_psicorps kill;
+#class dmgtracker_psicorps open;
+
+#unvar psi_dmg;
+
+
+#alias psiDmgTrack {
+    #format newBest {%u} {NEW BEST %1 ROUND: };
+    #var psi_dmg[category][%1][name] %1;
+    #var psi_dmg[category][%1][curr] %2;
+    #math psi_dmg[category][%1][dmg] {$psi_dmg[category][%1][dmg] + %2};
+    #math psi_dmg[category][%1][rnd] {$psi_dmg[category][%1][rnd] + 1};
+    #math psi_dmg[category][%1][avg] {$psi_dmg[category][%1][dmg] / $psi_dmg[category][%1][rnd]};
+    
+
+    #if {$psi_dmg[category][%1][freq][%3][count] > 0} {
+        #math psi_dmg[category][%1][freq][%3][count] {$psi_dmg[category][%1][freq][%3][count] + 1};
+        #math psi_dmg[category][%1][freq][%3][dmg] {$psi_dmg[category][%1][freq][%3][dmg] + %2};
+        #math psi_dmg[category][%1][freq][%3][avg] {$psi_dmg[category][%1][freq][%3][dmg] / $psi_dmg[category][%1][freq][%3][count]};
+    } {
+        #var psi_dmg[category][%1][freq][%3][name] %1;
+        #var psi_dmg[category][%1][freq][%3][count] 1;
+        #var psi_dmg[category][%1][freq][%3][dmg] %2;
+        #var psi_dmg[category][%1][freq][%3][avg] %2;
+    };
+
+    #if {$psi_dmg[category][%1][dmg] < 1000} {
+        #math psi_dmg[histogram][999] {$psi_dmg[histogram][999] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 999 && $psi_dmg[category][%1][dmg] <= 2000} {
+        #math psi_dmg[histogram][2000] {$psi_dmg[histogram][2000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 1999 && $psi_dmg[category][%1][dmg] <= 3000} {
+        #math psi_dmg[histogram][3000] {$psi_dmg[histogram][3000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 2999 && $psi_dmg[category][%1][dmg] <= 4000} {
+        #math psi_dmg[histogram][4000] {$psi_dmg[histogram][4000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 3999 && $psi_dmg[category][%1][dmg] <= 5000} {
+        #math psi_dmg[histogram][5000] {$psi_dmg[histogram][5000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 4999 && $psi_dmg[category][%1][dmg] <= 6000} {
+        #math psi_dmg[histogram][6000] {$psi_dmg[histogram][6000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 5999 && $psi_dmg[category][%1][dmg] <= 7000} {
+        #math psi_dmg[histogram][7000] {$psi_dmg[histogram][7000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 6999 && $psi_dmg[category][%1][dmg] <= 8000} {
+        #math psi_dmg[histogram][8000] {$psi_dmg[histogram][8000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 7999 && $psi_dmg[category][%1][dmg] <= 9000} {
+        #math psi_dmg[histogram][9000] {$psi_dmg[histogram][9000] + 1};
+    };
+
+    #if {$psi_dmg[category][%1][dmg] > 8999 && $psi_dmg[category][%1][dmg] <= 10000} {
+        #math psi_dmg[histogram][10000] {$psi_dmg[histogram][10000] + 1};
+    };
+    
+    #if {"${psi_dmg[category][%1][high]}" === ""} {#var psi_dmg[category][%1][high] 0};
+    #if {$psi_dmg[category][%1][curr] > $psi_dmg[category][%1][high]} {
+        #var psi_dmg[category][%1][high] $psi_dmg[category][%1][curr];
+        #if $gags[combat_numbers] {#NOP} {
+            #echo {$newBest $dmgDisplay};
+        };
+    };
+};
+
+
+#action {^Your Astral Construct %*\n%*\(%*\)!} {
+    #format tmpDmg {%d} {%3};
+    #if {$tmpDmg == 0} {
+        psiDmgTrack AC 0 0;
+    } {
+        psiDmgTrack AC $tmpDmg 1;
+    };
+} {2};
+
+#action {^Your shoulder-mounted bolt gun fires a round into %*\n%*\(%*\)!} {
+    #format tmpDmg {%d} {%3};
+    #if {$tmpDmg == 0} {
+        psiDmgTrack bolt 0 0;
+    } {
+        psiDmgTrack bolt $tmpDmg 1;
+    };
+} {2};
+
+#action {Your biocurrent frys %*\(%*\).$} {
+    #format tmpDmg {%d} {%2};
+    #if {$tmpDmg == 0} {
+        psiDmgTrack biocurrent 0 0;
+    } {
+        psiDmgTrack biocurrent $tmpDmg 1;
+    };
+} {2};
+
+#class dmgtracker_psicorps close;

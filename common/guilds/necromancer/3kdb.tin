@@ -13,4 +13,94 @@
     };
 } {1};
 
+#NOP ----- Necromancer Deathsave Calculation/Summary Line ------;
+#var dsave[total][count] 0;
+#var dsave[total][np] 0;
+#var dsave[total][avg] 0;
+#var dsave[max][np] 0;
+#var dsave[round][count] 0;
+#var dsave[round][np] 0;
+#var dsave[round][avg] 0;
+#var dsave[mob][count] 0;
+#var dsave[mob][np] 0;
+#var dsave[mob][avg] 0;
+#var dsave[log] {};
+#var dsave_round 1;
+
+#action {^Death tells you:} {
+    #if $gags[combat_guild] {#line gag};
+    #line oneshot #action {My favor will cost you %d points of necromancy...} {
+        #if $gags[combat_guild] {#line gag};
+        #math dsave[total][count] {$dsave[total][count] + 1};
+        #math dsave[total][np] {$dsave[total][np] + %%1};
+        #math dsave[total][avg] {$dsave[total][np] / $dsave[total][count]};
+        #math dsave[round][count] {$dsave[round][count] + 1};
+        #math dsave[round][np] {$dsave[round][np] + %%1};
+        #math dsave[round][avg] {$dsave[round][np] / $dsave[round][count]};
+
+        #math dsave[mob][count] {$dsave[mob][count] + 1};
+        #math dsave[mob][np] {$dsave[mob][np] + %%1};
+        #math dsave[mob][avg] {$dsave[mob][np] / $dsave[mob][count]};
+        #if {"$dsave[mob][name]" == ""} {#var dsave[mob][name] $enemy[name]};
+        #if {$dsave[max][np] < %%1} {#var dsave[max][np] %%1};
+    } {1};
+    #line oneshot #action {From afar, Death favors you.} {#if $gags[combat_guild] {#line gag}} {1};
+    #if $dsave_round {
+        #var dsave_round 0;
+        #delay 1 {
+            #format dsave[round][avg] {%g} {$dsave[round][avg]};
+            #format dsave[round][count] {%g} {$dsave[round][count]};
+            #format dsave[round][np] {%g} {$dsave[round][np]};
+            #format dsave[round][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {RND: ${dsave[round][count]}x} {(NP: $dsave[round][np] Avg: $dsave[round][avg])} {<cab>💀<088>};
+            #format dsave[total][string] {%+2s %-8s %-22s %-2s} {<cab>💀<088>} {TOT: @formatThousands{${dsave[total][count]}}x} {(NP: @formatThousands{$dsave[total][np]} Avg: @formatThousands{$dsave[total][avg]})} {<cab>💀<088>};
+            #if !$gags[combat_guild] {#echo $dsave[round][string]};
+            #if !$gags[combat_guild] {#echo $dsave[total][string]};
+            #var dsave[round][avg] 0;
+            #var dsave[round][count] 0;
+            #var dsave[round][np] 0;
+            #var dsave_round 1;
+        };
+    };
+} {1};
+
+#alias .dsaveMobSave {
+    #list dsave[log] add {{{mob} {$enemy[name]} {count} {$dsave[mob][count]} {np} {$dsave[mob][np]} {avg} {$dsave[mob][avg]}}};
+    #var dsave[mob][count] 0;
+    #var dsave[mob][np] 0;
+    #var dsave[mob][avg] 0;
+    #var dsave[mob][name] {};
+};
+
+#function formatDsaveLine {
+    #format tmpString {%.30s} {%1};
+    #format result {%+30s %+10s %+10s %+10s} {$tmpString} {%2} {%3} {%4};
+    #echo {$result};
+    #return #NOP;
+};
+
+#alias dsave_report {
+    #format dsaveReportMax {%g} $dsave[max][np];
+    #echo {<eab>------------------         DSAVE REPORT       ------------------<088>};
+    #echo {             <eab>Largest single death save cost $dsaveReportMax NPs<088>};
+    #var dsaveReportMob Total;
+    #format dsaveReportNP {%g} $dsave[total][np];
+    #format dsaveReportCount {%g} $dsave[total][count];
+    #format dsaveReportAvg {%g} $dsave[total][avg];
+    @formatDsaveLine{<eab>$dsaveReportMob<088>;<eab>$dsaveReportNP<088>;<eab>$dsaveReportCount<088>;<eab>$dsaveReportAvg<088>};
+
+    #echo {};
+    #var dsaveReportMob <bfa>MOB NAME<088>;
+    #var dsaveReportNP <bfa>Total NP<088>;
+    #var dsaveReportCount <bfa># Dsaves<088>;
+    #var dsaveReportAvg <bfa>Avg. NP<088>;
+    @formatDsaveLine{$dsaveReportMob;$dsaveReportNP;$dsaveReportCount;$dsaveReportAvg};
+    #foreach $dsave[log][%*] item {
+        #var dsaveReportMob $item[mob];
+        #format dsaveReportNP {%g} $item[np];
+        #format dsaveReportCount {%g} $item[count];
+        #format dsaveReportAvg {%g} $item[avg];
+        @formatDsaveLine{$dsaveReportMob;$dsaveReportNP;$dsaveReportCount;$dsaveReportAvg};
+    };
+};
+
 #class 3kdb_helpers close;
