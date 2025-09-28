@@ -5,7 +5,10 @@
 #alias deadman {
     #math deadmanIdleTimeout {60 * %1};
     #show \nDeadman enabled for %1 minutes.;
-    #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+    #delay {deadmanSwitch} {
+        #if !$idle_flag {deadmanActions};
+    } {$deadmanIdleTimeout};
+    #delay 1 {#var idle_flag 1};
 }
 
 #alias deadmanoff {
@@ -14,9 +17,10 @@
 }
 
 #alias deadmanActions {
+    #if $bot[active] {.pause};
+    _player_deadmanActions;
     #var idle_flag 1;
     #show \nDEADMAN TIMEOUT.\n;
-    _player_deadmanActions;
 }
 
 #var chat_delay 1

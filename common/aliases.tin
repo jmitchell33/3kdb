@@ -91,6 +91,26 @@
     #var bagsFull 0;
 };
 
+#NOP -- Use hmheal if possible, eternal heal otherwise;
+#NOP -- If you're a mage, check if immersion is running;
+#alias {useHeal} {
+     #if {!$my[eternal][heal] && $my[hm][heal]} {
+         #if {"$guild" == "mage"} {
+            #if {!$my[immersion][active]} {hmheal};
+         } {
+            hmheal
+         };
+          
+     };
+     #if {$my[eternal][heal]} {
+        #if {"$guild" == "mage"} {
+            #if {!$my[immersion][active]} {(heal $user;};
+         } {
+            (heal $user;
+         };
+     };
+};
+
 
 #NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
 #alias {i} {
