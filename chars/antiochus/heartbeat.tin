@@ -1,6 +1,9 @@
 #class {player_heartbeat} {kill}
 #class {player_heartbeat} {open}
 
+#var corpse_delay 0;
+#var gp1_corpse 2000;
+
 #alias {_player_heartbeat} {
     #if !$idle_flag {
         #if {$my[perceptions][current] > 0} {
@@ -11,6 +14,15 @@
         #if {$my[roots][current] > 0 && $my[brood] > 0} {
             #if !$my[roots][active] {root broodlings};
             #if {"${my[roots][active]}" === ""} {root broodlings};
+        };
+
+        #if {$my[gp1][current] < $gp1_corpse} {
+            #if !$corpse_delay {
+                #var corpse_delay 1;
+                corpse_select;
+                #delay {4} {collect dna from corpse;collect dna from corpse};
+                #delay {4} {#var corpse_delay 0};
+            };
         };
     };
 };

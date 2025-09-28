@@ -28,6 +28,8 @@
 	#replace prots_string  { } {};
 	#replace prots_string  {*} { };
 
+	#NOP -- If ash is undefined and not idle, turn it on, should only ever happen upon new connection;
+	#if {!$idle_flag && "${ash}" == ""} {ash on};
 	#if {$ash == 0} {#var ash_string <FAA><bbb>OFF<088>};
 	#if {$ash == 1} {#var ash_string <ACA><fff>PLYRS<088>};
 	#if {$ash == 2} {#var ash_string <ACA><fff>ALL<088>};
