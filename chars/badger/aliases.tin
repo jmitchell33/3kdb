@@ -9,6 +9,38 @@
     };
 };
 
+#NOP -- smuggle stuff before fighting durantalist;
+#alias {smug1} {
+    unkeep all materials;
+    unkeep all torch;
+    #2 unlight torch;
+    unkeep all key;
+    unkeep cup;
+    #2 smuggle materials;
+    #2 smuggle torch;
+    #4 smuggle key;
+    smuggle cup;
+    unkeep all bag;
+    drop all;
+    drop 50000 coins;
+};
+
+#alias {smug2} {
+    #2 smuggle remove materials;
+    #2 smuggle remove torch;
+    #4 smuggle remove key;
+    smuggle remove cup;
+    keep all materials;
+    keep all torch;
+    keep all key;
+    light torch;
+    light torch 2;
+    keep cup;
+    get all;
+    keep all bag;
+};
+
+
 #NOP -- turn toggles on or off;
 #alias {togg} {
     toggle 3kreport;
@@ -319,7 +351,8 @@
             #echo {<eaf>3 <bec>(4 summons defending)<088>};
             #echo {<eaf>4 <bec>(3 summons assisting and 1 summon defending)<088>};
             #echo {<eaf>5 <bec>(1 summon defending and 3 summons assisting and golem defending)<088>};
-            #echo {<eaf>golem <bec>(golem assisting - self tanking)<088>};
+            #echo {<eaf>golem <bec>(golem assisting with no summons - self tanking)<088>};
+            #echo {<eaf>selftank <bec>(golem assisting with 4 assisting summons - self tanking)};
         };
         #NOP -- 4 summons assisting;
         #case {"2"} {
@@ -365,6 +398,15 @@
             shoo;
             shoo golem;
             mystrategy;
+            ms golema;
+        };
+        #NOP -- offensive mage with summons;
+        #case {"selftank"} {
+            clear_sconfig;
+            shoo;
+            shoo golem;
+            mystrategy;
+            ms 10##4#1500#70#assist#summons#always;
             ms golema;
         };
         #NOP -- default for summoner 2 summons defending and 2 summons assisting;
@@ -536,7 +578,10 @@
 
 #NOP -- polymorph other (turn mobs against each other);
 #alias {pmo} {
-    cast polymorph other on %0
+    #if {"%0" == ""} {
+        cast polymorph other on $mkaTargetName;
+    }; 
+    #else {cast polymorph other on %0};
 };
 
 #NOP -- cast find familiar;
@@ -548,7 +593,7 @@
 #alias {setup_reflex} {
     #if {"$guild" == "juggernaut"} {
         reflex clear;
-        reflex add sp <50% airdrop;
+        #NOP reflex add sp <50% airdrop;
         reflex add sp <10% eternal heal badger;
         reflex add gp1 <90% transpose max;
         reflex add gp1 <5% drop pants;
@@ -827,7 +872,12 @@
 
 #NOP -- change attacks to another target;
 #alias {kk} {
-    retarget %0
+    #if {"$guild" == "juggernaut"} {
+        retarget %0;
+    };
+    #if {"$guild" == "mage"} {
+        mka;
+    };
 };
 
 #NOP -- guild light;
