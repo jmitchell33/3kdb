@@ -106,18 +106,24 @@
 
 #action {^%w taps you on the shoulder.$} { 
     #if !$idle_flag {
-        #format followtarget {%l} {%1}; 
-        follow $followtarget;
-        cassist $followtarget;
+        #if $toggles[emote_follow] {
+            #format followtarget {%l} {%1}; 
+            follow $followtarget;
+            cassist $followtarget;
+        };
     };
 } {2};
 
 #action {^From afar, %w stares at you in %w Jesus Christ pose.$} {
     #if !$idle_flag {
-        #format healtarget {%l} {%1}; 
-        hmheal $healtarget;
-        #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
-        #delay 2 {#unaction {^You need rest to use that power again.$}};
+        #format healtarget {%l} {%1};
+        #if $toggles[emote_heal] {
+            hmheal $healtarget;
+            #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
+            #delay 2 {#unaction {^You need rest to use that power again.$}};
+        } {
+            #delay tmpResponse {tell $healtarget No, die.  Hmheal is not currently being offered.};
+        };
     };
 } {2};
 
@@ -150,7 +156,11 @@
 
 #action {^%w says, 'Greetings, Comrade!' to you.$} { 
     #if !$idle_flag {
-        #10 corpse_select
+        #if $toggles[emote_corpse] {
+            #10 corpse_select
+        } {
+            #delay tmpResponse {say Sorry, corpse sharing is not currently enabled.} 3;
+        };
     };
 } {2};
 

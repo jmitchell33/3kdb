@@ -5,8 +5,14 @@
 
 #NOP -- rally other players when they use the soul 'toke' on you;
 #action {^%w offers you a toke.$} {
-    #format tmp {%l} {%1};
-    rally $tmp
+    #if !$idle_flag {
+        #format tmp {%l} {%1};
+        #if {$toggles[emote_rally]} {
+            rally $tmp
+        } {
+            #delay tmpResponse {say Sorry, auto-rally is not currently enabled.} 3;
+        };
+    };
 };
 
 #action {^You are already assisting %w.$} {
