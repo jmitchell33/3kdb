@@ -122,7 +122,7 @@
             #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
             #delay 2 {#unaction {^You need rest to use that power again.$}};
         } {
-            #delay tmpResponse {tell $healtarget No, die.  Hmheal is not currently being offered.};
+            #delay tmpResponse {tell $healtarget No, die.  Hmheal is not currently being offered.} {3};
         };
     };
 } {2};
@@ -130,27 +130,39 @@
 #action {^%w stares at you in %w Jesus Christ pose.$} { 
     #if !$idle_flag {
         #format healtarget {%l} {%1}; 
-        hmheal $healtarget;
-        #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
-        #delay 2 {#unaction {^You need rest to use that power again.$}};
+        #if $toggles[emote_heal] {
+            hmheal $healtarget;
+            #action {^You need rest to use that power again.$} {tell $healtarget No, die.  Hmheal is on cooldown.} {2};
+            #delay 2 {#unaction {^You need rest to use that power again.$}};
+        } {
+            #delay tmpResponse {tell $healtarget No, die.  Hmheal is not currently being offered.} {3};
+        };
     };
 } {2};
 
 #action {^%w stares at you in %w best Anti-Christ pose.} {
     #if !$idle_flag {
-        #format healtarget {%l} {%1}; 
-        (heal $healtarget;
-        #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
-        #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+        #format healtarget {%l} {%1};
+        #if $toggles[emote_eheal] {
+            (heal $healtarget;
+            #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
+            #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+        } {
+            #delay tmpResponse {tell $healtarget No, die.  Eternal heal is not currently being offered.} {3};
+        };
     };
 } {2};
 
 #action {^From afar, %w stares at you in %w best Anti-Christ pose.} {
     #if !$idle_flag {
-        #format healtarget {%l} {%1}; 
-        (heal $healtarget;
-        #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
-        #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+        #format healtarget {%l} {%1};
+        #if $toggles[emote_eheal] {
+            (heal $healtarget;
+            #action {^You must wait %* to use that ability.$} {tell $healtarget No, die.  (heal is on cooldown for another %%1.} {1};
+            #delay 2 {#unaction {^You must wait %* to use that ability.$}};
+        } {
+            #delay tmpResponse {tell $healtarget No, die.  Eternal heal is not currently being offered.} {3};
+        };
     };
 } {2};
 
@@ -159,7 +171,7 @@
         #if $toggles[emote_corpse] {
             #10 corpse_select
         } {
-            #delay tmpResponse {say Sorry, corpse sharing is not currently enabled.} 3;
+            #delay tmpResponse {say Sorry, corpse sharing is not currently enabled.} {3};
         };
     };
 } {2};
