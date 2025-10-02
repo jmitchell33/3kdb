@@ -204,11 +204,11 @@
 
 #alias corpsetrig+ {
     #if {"%0" != ""} {
-        #list corpseList {find} {%0} {tempListIndex};
+        #list corpseList {find} {%i%0} {tempListIndex};
         #var tempList $corpseList[+$tempListIndex];
         #if {&tempList[] == 0} {
             #list corpseActions indexate name;
-            #list corpseActions {find} {%0} {tempListIndex};
+            #list corpseActions {find} {%i%0} {tempListIndex};
             #var tempList $corpseList[+$tempListIndex];
         };
         #if {&tempList[] > 0} {
@@ -216,7 +216,7 @@
             #NOP -- Otherwise, if there is no corpseActions list, we add it;
             #if {&corpseActions[] > 0} {
                 #list corpseActions indexate name;
-                #list corpseActions {find} {%0} {itemExists};
+                #list corpseActions {find} {%i%0} {itemExists};
                 #if {$itemExists} {
                     #echo {<caa>----  <fff> %0 is already in the <fff>corpse_trig <caa>  ----<088>};
                 } {
@@ -261,15 +261,15 @@
             #list corpseActions indexate name;
         } {
             #list corpseActions indexate name;
-            #list corpseList {find} {%0} {tempListIndex};
+            #list corpseList {find} {%i%0} {tempListIndex};
             #var tempList $corpseList[+$tempListIndex];
             #if {&tempList[] == 0} {
-                #list corpseActions {find} {%0} {tempListIndex};
+                #list corpseActions {find} {%i%0} {tempListIndex};
                 #var tempList $corpseList[+$tempListIndex];
             };
             #if {&tempList[] > 0} {
                 #if {&corpseActions[] > 0} {
-                    #list corpseActions {find} {%0} {itemExists};
+                    #list corpseActions {find} {%i%0} {itemExists};
                     #if {$itemExists} {
                         #echo {<caa>----  <fff> %0 has been <baa>removed<088> from <fff>corpse_trig <caa>  ----<088>};
                         #list corpseActions filter {} {%0};
@@ -307,7 +307,7 @@
     #if {"%0" != ""} {
         #var foundItem 0;
         #list corpseActions indexate name;
-        #list corpseActions find {%0} {foundItem};
+        #list corpseActions {find} {%i%0} {foundItem};
         #if {$foundItem == 0} {
             #echo { <bba>$foundItem[name] was not found in the corpsetrig actions<088>};
         };
@@ -328,7 +328,7 @@
     #if {"%0" != ""} {
         #var foundItem 0;
         #list corpseActions indexate name;
-        #list corpseActions find {%0} {foundItem};
+        #list corpseActions {find} {%i%0} {foundItem};
         #if {$foundItem == 0} {
             #echo { <bba>$foundItem[name] was not found in the corpsetrig actions<088>};
         };
@@ -421,12 +421,18 @@
 #list corpseList add {{{name} {hoarder} {guild} {all} {action} {#loop 20 1 i {put all in bag $i}} {active} {0} {description} {Hoarder: Put all in bags (20 bags)}}};
 #list corpseList add {{{name} {spoon} {guild} {all} {action} {eat corpse} {active} {0} {description} {Spoon: Eat Corpse}}};
 #list corpseList add {{{name} {cocoon} {guild} {all} {action} {fuse 100} {active} {0} {description} {Cocoon: Fuse 100hps}}};
+#list corpseList add {{{name} {cocoon500} {guild} {all} {action} {fuse 500} {active} {0} {description} {Cocoon: Fuse 500hps}}};
 
 #NOP -- bard;
 #list corpseList add {{{name} {dirge} {guild} {bard} {action} {perform dirge}  {active} {0} {description} {Bard: Perform Dirge}}};
 #list corpseList add {{{name} {dirge2} {guild} {bard} {action} {perform dirge;perform dirge} {active} {0} {description} {Bard: Perform Dirge x2}}};
 #list corpseList add {{{name} {songcease} {guild} {bard} {action} {cease} {active} {0} {description} {Bard: Cease songs}}};
 #list corpseList add {{{name} {disc} {guild} {bard} {action} {put all in disc} {active} {0} {description} {Bard: Put all in disc}}};
+
+#NOP -- Cyborg;
+#list corpseList add {{{name} {decompose} {guild} {cyborg} {action} {decompose}  {active} {0} {description} {Cyborg: Decompose}}};
+#list corpseList add {{{name} {decompose2} {guild} {cyborg} {action} {decompose} {active} {0} {description} {Cyborg: Decompose x2}}};
+
 
 #NOP -- gentech;
 #list corpseList add {{{name} {gtRepair} {guild} {gentech} {action} {gt-repair} {active} {0} {description} {Gentech: Repair/Stabilize/Tactical}}};
