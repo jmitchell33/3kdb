@@ -94,7 +94,7 @@
     #math tmpPercent {1.00 * $cmbt[category][%1][rnd] / $cmbt[category][total][rnd] * 100};
     #format dmgName {%n} {%1};
     #format dmgActive {%d} {$tmpPercent};
-    #echo {<efb>$dmgName - $dmgActive of Rounds<088>};
+    #echo {<efb>$dmgName - ${dmgActive}% of Rounds<088>};
     #loop 1 &cmbt[category][%1][freq][] freq {
         #format dmgAvg {%g} {$cmbt[category][%1][freq][$freq][avg]};
         #format dmgRounds {%g} {$cmbt[category][%1][freq][$freq][count]};
@@ -118,7 +118,9 @@
     #var cmbt[affects][magician] 0;
     #var cmbt[affects][DM] 0;
     #var cmbt[affects][bloodfuse] 0;
+    #var cmbt[affects][chill] 0;
     #var cmbt[affects][clutch] 0;
+    #var cmbt[affects][grasp] 0;
     #var cmbt[affects][jump] 0;
     #var cmbt[affects][punch] 0;
     #var cmbt[affects][kick] 0;
@@ -155,6 +157,7 @@ dreset;
 
 
 #NOP -- Toggles for necro powers;
+#action {^B:You grasp hold of your enemy with the chill touch of death!$} {#var cmbt[affects][chill] 1} {2};
 #action {^B:You grab your enemy with your talons in a clutch of death!$} {#var cmbt[affects][clutch] 1} {2};
 #action {^B:You grasp hold of your enemy with the dark touch of death.$} {#var cmbt[affects][grasp] 1} {2};
 #action {^You grab hold of %w with your left talon} {#var cmbt[affects][bloodarc] 1} {2};
@@ -293,6 +296,7 @@ dreset;
         #var cmbt[affects][witchHat] 0;
         #var cmbt[affects][iprime] 0;
         #var cmbt[affects][eradication] 0;
+        #var cmbt[affects][chill] 0;
         #var cmbt[affects][clutch] 0;
         #var cmbt[affects][grasp] 0;
         #var cmbt[affects][bloodarc] 0;
@@ -415,6 +419,9 @@ dreset;
                     };
                     #if {$cmbt[affects][grasp]} {
                         dmgTrack grasp $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][chill]} {
+                        dmgTrack chill $dmgAmount $dmgTimes;
                     };
                     #if {$cmbt[affects][skullfire]} {
                         dmgTrack skullfire $dmgAmount $dmgTimes;
