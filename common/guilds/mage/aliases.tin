@@ -181,5 +181,40 @@
     };
 };
 
+#NOP -- quick fix for mage summon tanking if room damage causes you to attack them such as boulders from zodiac;
+#var summon_shoo_toggle 0;
+
+#alias {.checksummons} {
+    #if {"$summon_shoo_toggle" == "1"} {#return};
+    #if {"$enemy[name]" == ""} {#return};
+
+    #var temp_enemy_name $enemy[name];
+    #replace temp_enemy_name { \[%*\]%*} {};
+    #replace temp_enemy_name { \(%*\)%*} {};
+    #replace temp_enemy_name { \\x7B%*\\x7D%*} {};
+    #replace temp_enemy_name {An } {};
+    #replace temp_enemy_name {A } {};
+    #replace temp_enemy_name {The } {};
+    #format {temp_enemy_name} {%p} {$temp_enemy_name};
+    #format {temp_enemy_name} {%l} {$temp_enemy_name};
+
+    #var temp_summon_names {$summonList};
+    #list temp_summon_names simplify;
+    #replace temp_summon_names {;} {};
+    #replace temp_summon_names {:%*%} {;};
+    #format {temp_summon_names} {%l} {$temp_summon_names};
+
+    #foreach {$temp_summon_names} {tempsummonname} {
+        #format {tempsummonname} {%l} {$tempsummonname};
+        #if {"$temp_enemy_name" == "$tempsummonname"} {
+            ptell Attacking your summons, shooing them away!;
+            shoo;
+            #var enemy[name] 0;
+            #var summon_shoo_toggle 1;
+            #delay {summon_shoo_reset} {#var summon_shoo_toggle 0;} {5};
+            #break;
+        };
+    };
+};
 
 #class {guild_aliases} {close}
