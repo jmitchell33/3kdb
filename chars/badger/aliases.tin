@@ -346,11 +346,11 @@
         #NOP -- view available options;
         #case {"help"} {
             #echo {<fff>Available killmodes:<088>};
-            #echo {<eaf>No argument <bec>(2 summons defending & 2 summons assisting)<088>};
-            #echo {<eaf>2 <bec>(4 summons assisting)<088>};
-            #echo {<eaf>3 <bec>(4 summons defending)<088>};
-            #echo {<eaf>4 <bec>(3 summons assisting and 1 summon defending)<088>};
-            #echo {<eaf>5 <bec>(1 summon defending and 3 summons assisting and golem defending)<088>};
+            #echo {<eaf>No argument <bec>(2 summons defending & 2 summons assisting & golem assisting)<088>};
+            #echo {<eaf>2 <bec>(4 summons assisting & golem assisting)<088>};
+            #echo {<eaf>3 <bec>(4 summons defending & golem assisting)<088>};
+            #echo {<eaf>4 <bec>(3 summons assisting & 1 summon defending & golem assisting)<088>};
+            #echo {<eaf>5 <bec>(1 summon defending & 3 summons assisting & golem defending)<088>};
             #echo {<eaf>golem <bec>(golem assisting with no summons - self tanking)<088>};
             #echo {<eaf>selftank <bec>(golem assisting with 4 assisting summons - self tanking)};
         };
@@ -369,6 +369,7 @@
             shoo;
             shoo golem;
             mystrategy;
+            strategy shoosummons;
             ms 10##4#1500#70#defend#summons#always;
             ms golema;
         };
@@ -378,6 +379,7 @@
             shoo;
             shoo golem;
             mystrategy;
+            strategy shoosummons;
             ms 10##3#1500#70#assist#summons#always;
             ms 10##1#1500#70#defend#summons#always;
             ms golema;
@@ -388,6 +390,7 @@
             shoo;
             shoo golem;
             mystrategy-golem;
+            strategy shoosummons;
             ms 10##1#1500#70#defend#summons#always;
             ms 10##3#1500#70#assist#summons#always;
             ms golemd;
@@ -416,6 +419,7 @@
             shoo;
             shoo golem;
             mystrategy;
+            strategy shoosummons;
             ms 10##2#1500#70#defend#summons#always;
             ms 10##2#1500#70#assist#summons#always;
             ms golema;
@@ -1002,6 +1006,7 @@
         strategy summon_mf;
         strategy spelltap;
         strategy gstrength;
+        strategy shoosummons;
         strategy rolm;
     };
     #elseif {"$guild" == "elemental"} {

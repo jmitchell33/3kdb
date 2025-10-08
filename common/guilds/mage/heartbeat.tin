@@ -43,6 +43,12 @@
 		study spellbook;
 	};
 
+    #if {!$idle_flag} {
+        checkStrategy {shoosummons} {
+            .checksummons;
+        };
+    };
+
     #if !$idle_flag {
         #if {$my[coins] > 2100} {#var ffetch_coins 1} {#var ffetch_coins 0};
         #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {
