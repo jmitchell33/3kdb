@@ -261,7 +261,26 @@ dreset;
 } {2};
 
 #NOP -- Convoke we'll track each round to see how the damage increases each round;
-#action {^B:Your vampiric essence calls out to the children of the night.} {#var cmbt[affects][convoke] 1;} {2};
+#NOP -- This message comes delayed, so we need to add 1 to the first round;
+#action {^B:Your vampiric essence calls out to the children of the night.} {
+    #math convoke[first_round] {$mip[round] + 1};
+    #math convoke[second_round] {$mip[round] + 2};
+    #math convoke[third_round] {$mip[round] + 3};
+    #var cmbt[affects][convoke] 1;
+} {2};
+
+#alias .dmg_round_convoke {
+    #if {$mip[round] == $convoke[first_round]} {
+        dmgTrack convoke_1 $dmgAmount $dmgTimes;
+    };
+    #if {$mip[round] == $convoke[second_round]} {
+        dmgTrack convoke_2 $dmgAmount $dmgTimes;
+    };
+    #if {$mip[round] == $convoke[third_round]} {
+        dmgTrack convoke_3 $dmgAmount $dmgTimes;
+        #var cmbt[affects][convoke] 0;
+    };
+};
 
  
 #action {^The brilliant sphere of energy explodes!} {
@@ -285,7 +304,6 @@ dreset;
         #var cmbt[crit][round] 0;
         #var ewell_round 0;
         #var fry_round 0;
-        #if {$cmbt[affects][convoke] == 4} {#var cmbt[affects][convoke] 0;};
         #if {"$guild" == "mage"} {
             #foreach *summon_dmg[vaf][%*] tmpSummonItem {
                 #var summon_dmg[vaf][$tmpSummonItem][round][damage] 0;
@@ -405,8 +423,7 @@ dreset;
                         dmgTrack witchHat $dmgAmount $dmgTimes;
                     };
                     #if {$cmbt[affects][convoke]} {
-                        dmgTrack convoke_${cmbt[affects][convoke]} $dmgAmount $dmgTimes;
-                        #math cmbt[affects][convoke] {$cmbt[affects][convoke] + 1};
+                        .dmg_round_convoke;
                     };
                     #if {$cmbt[affects][jump]} {
                         dmgTrack jump $dmgAmount $dmgTimes;
