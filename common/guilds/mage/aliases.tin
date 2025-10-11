@@ -5,6 +5,16 @@
 #var mage[contingencies][mantle] 200;
 #var mage[contingencies][sphere] 799;
 
+#NOP -- GC Tracking;
+#ACTION {^You have greater contingencies set up on you as follows:} {
+     #var gcList {};
+} {2}
+
+#ACTION {^%d:You will cast %* should your} {
+     #list gcList add {%2};
+} {2};
+
+
 #NOP --- Mage Summon Aliases;
 #var mscMinSps 1500;
 #var mscMinConc 50;

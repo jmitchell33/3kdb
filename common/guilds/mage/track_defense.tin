@@ -66,21 +66,32 @@ clear_defense_tracker;
     #format $cast_percent {%f} {$cast_percent};
     #format $block_per_cast {%f} {$block_per_cast};
 
+    #list spell_costs indexate name;
+    #list spell_costs find {%i$defense_name} tmpIndex;
+    #math tmpSpCost {$cast_count * $spell_costs[$tmpIndex][cost]};
+    #math totalSpCost {$totalSpCost + $tmpSpCost};
+    #format tmpSpCost {%g} {$tmpSpCost};
+
+    #format block_count {%g} {$block_count};
+
     #if {"$defense_name" == "Total"} {
-        #format result {<acf>-----<faa> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast};
+        #format totalSpCost {%g} {$totalSpCost};
+        #format result {<acf>-----<faa> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast} {$totalSpCost};
     } {
-        #format result {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast};
+        #format result {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast} {$tmpSpCost};
     };
     #showme $result;
 };
 
 #alias {defense_summary} {
-    #format header1 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {Defense Type} {# of} {% of} {# of} {% of} {Blocks/};
-    #format header2 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {} {Casts} {Casts} {Blocks} {Blocks} {Cast};
-    #format header3 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s   <acf>-----} {} {} {} {} {} {};
+    #format header1 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+7s   <acf>-----} {Defense Type} {# of} {% of} {# of} {% of} {Blocks/} {SP};
+    #format header2 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {} {Casts} {Casts} {Blocks} {Blocks} {Cast} {Spent};
+    #format header3 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {} {} {} {} {} {} {};
     #showme $header1;
     #showme $header2;
     #showme $header3;
+
+    #var totalSpCost 0;
 
     #foreach $defense_tracker[%*] index {
         formatDefense {$index[name]} {$index[casts]} {$index[blocks]}
