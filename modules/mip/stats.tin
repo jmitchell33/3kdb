@@ -126,6 +126,7 @@
 			#CASE {"bard"}			{.mipProcessGlineBard {%1}};
 			#CASE {"breed"}			{#if $processBreedGline {.mipProcessGlineBreed {%1}}};
 			#CASE {"changeling"}	{.mipProcessGlineChangeling {%1}};
+			#CASE {"cyborg"}		{.mipProcessGlineCyborg {%1}};
 			#CASE {"elemental"}		{.mipProcessGlineElemental {%1}};
 			#CASE {"fremen"}        {.mipProcessGlineFremen {%1}};
 			#CASE {"gentech"}		{.mipProcessGlineGentech {%1}};
@@ -164,6 +165,26 @@
 		#ECHO {<171> Invalid Gline Number <088>}
 	}
 };
+
+#ALIAS {.mipProcessGlineCyborg} {
+    #IF {%1 == 1} {
+        #regex {$mip[gline][1]} {ND:> <yYes%%} {
+            #var my[nanos][available] Yes;
+            #var tmpReg &1;
+            #regex $tmpReg {><g[><y%d} {#var my[nanos][reset] &&1};
+        };
+        #regex {$mip[gline][1]} {ND:> <yNo%%} {
+            #var my[nanos][available] No;
+            #var tmpReg &1;
+            #regex $tmpReg {><g[><y%d} {#var my[nanos][reset] &&1};
+        };
+    }; #ELSEIF {%1 == 2} {
+        #NOP;
+    }; #ELSE {
+        #ECHO {<171> Invalid Gline Number <088>};
+    }
+};
+
 
 #ALIAS {.mipProcessGlineMage} {
 	#NOP -- DISABLED PARTIALLY BUT LEAVE THE CODE IN CASE ITS FIXED;

@@ -95,8 +95,12 @@
     reach for jar;
     #if {"$guild" == "mage"} {deplete levitate};
     #if {"$guild" == "necromancer"} {shapeshift};
-    get jar;
-    read runes;
+    #if {"$guild" == "mage"} {
+        #line oneshot #action {You float gently to the ground.} {get jar;read runes};
+    } {
+        get jar;
+        read runes;
+    };
 };
 
 
