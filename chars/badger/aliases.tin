@@ -9,6 +9,13 @@
     };
 };
 
+#NOP -- view all 3kdb reports/trackers;
+#alias {ds} {
+    3kReport;
+    istats;
+    dstats
+};
+
 #NOP -- smuggle stuff before fighting durantalist;
 #alias {smug1} {
     unkeep all materials;
@@ -360,6 +367,7 @@
             shoo;
             shoo golem;
             mystrategy;
+            strategy shoosummons;
             ms 10##4#1500#70#assist#summons#always;
             ms golema;
         };
@@ -369,7 +377,6 @@
             shoo;
             shoo golem;
             mystrategy;
-            strategy shoosummons;
             ms 10##4#1500#70#defend#summons#always;
             ms golema;
         };
@@ -379,7 +386,6 @@
             shoo;
             shoo golem;
             mystrategy;
-            strategy shoosummons;
             ms 10##3#1500#70#assist#summons#always;
             ms 10##1#1500#70#defend#summons#always;
             ms golema;
@@ -401,6 +407,7 @@
             shoo;
             shoo golem;
             mystrategy;
+            strategy shoosummons;
             ms golema;
         };
         #NOP -- offensive mage with summons;
@@ -409,6 +416,7 @@
             shoo;
             shoo golem;
             mystrategy;
+            strategy shooshummons;
             ms 10##4#1500#70#assist#summons#always;
             ms golema;
         };
@@ -419,7 +427,6 @@
             shoo;
             shoo golem;
             mystrategy;
-            strategy shoosummons;
             ms 10##2#1500#70#defend#summons#always;
             ms 10##2#1500#70#assist#summons#always;
             ms golema;
@@ -443,19 +450,37 @@
     cast summon config activate
 };
 
+#NOP -- clear defense;
+#alias {clear_defense} {
+    clear_def;
+    deplete prismatic aura;
+    deplete prismatic sphere;
+    deplete major globe;
+    deplete minor globe;
+    deplete magnificent shield;
+    deplete shield;
+    deplete armor;
+    deplete protection from evil;
+    deplete protection from good;
+    deplete rhino skin;
+    deplete stoneskin;
+    deplete blink;
+    deplete mantle;
+};
+
 #NOP -- setup defense;
 #alias {setup_defense} {
     #if {"$guild" == "mage"} {
         clear_gc;
         clear_c;
         setup_gc;
-        setup_c;
+        #NOP setup_c;
         #delay 2 {prots_armor};
         #delay 4 {prots_ms};
         #delay 6 {prots_MG};
         #delay 8 {prots_ss};
         #delay 10 {prots_mb};
-        #delay 12 {prots_pfe};
+        #delay 12 {prots_pfg};
         #delay 14 {prots_ps};
     };
     #elseif {"$guild" == "bard"} {
@@ -495,7 +520,8 @@
     cast greater contingency as major globe#cast major globe;
     cast greater contingency as stoneskin#cast stoneskin;
     cast greater contingency as shield#cast magnificent shield;
-    cast greater contingency as armor#cast armor
+    cast greater contingency as armor#cast armor;
+    cast greater contingency as protection from good#cast protection from good;
 };
 
 #NOP -- clear greater contingency;
@@ -1886,6 +1912,7 @@
 #list badger3kdb add {{{name} {vigiboost-wis} {type} {boosts} {desc} {Vigilant flask boost: +15 wis}}};
 
 #NOP - combat;
+#list badger3kdb add {{{name} {clear_defense} {type} {combat} {desc} {Clear defenses}}};
 #list badger3kdb add {{{name} {setup_defense} {type} {combat} {desc} {Setup defenses}}};
 #list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
 #list badger3kdb add {{{name} {mystrategy-mech} {type} {combat} {desc} {Mystrategy: mech tanking}}};
@@ -1894,6 +1921,7 @@
 #list badger3kdb add {{{name} {sdmg1} {type} {combat} {desc} {summon damage report}}};
 #list badger3kdb add {{{name} {sdmg2} {type} {combat} {desc} {summon damage report for vaf numbers perk}}};
 #list badger3kdb add {{{name} {cleardmg} {type} {combat} {desc} {clear all damage trackers}}};
+#list badger3kdb add {{{name} {ds} {type} {combat} {desc} {view all 3kdb trackers}}};
 
 #NOP -- misc;
 #list badger3kdb add {{{name} {togg} {type} {misc} {desc} {Turn toggles on or off}}};
