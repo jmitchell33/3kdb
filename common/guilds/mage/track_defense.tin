@@ -70,8 +70,8 @@ clear_defense_tracker;
     #list spell_costs find {%i$defense_name} tmpIndex;
     #math tmpSpCost {$cast_count * $spell_costs[$tmpIndex][cost]};
     #math totalSpCost {$totalSpCost + $tmpSpCost};
+    
     #format tmpSpCost {%g} {$tmpSpCost};
-
     #format block_count {%g} {$block_count};
 
     #if {"$defense_name" == "Total"} {
@@ -96,6 +96,18 @@ clear_defense_tracker;
     #foreach $defense_tracker[%*] index {
         formatDefense {$index[name]} {$index[casts]} {$index[blocks]}
     };
+};
+
+#alias {.calc_defense_summary} {
+    #var cast_count 0;
+    #var totalSpCost 0;
+    #list spell_costs indexate name;
+    #foreach $defense_tracker[%*] index {
+        #list spell_costs find {%i$index[name]} tmpIndex;
+        #math tmpSpCost {$index[casts] * $spell_costs[$tmpIndex][cost]};
+        #math totalSpCost {$totalSpCost + $tmpSpCost};
+    };
+    #format totalSpCost {%g} {$totalSpCost};
 };
 
 #alias {defense_update_cast} {
