@@ -20,12 +20,17 @@
 #list dReportList add {{{key} {mob_attacks_melee} {lookup} {tmpMobAttacksMelee} {header_text}   {Melee} {totals} {tmpTotalMobAttacksMelee} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {mob_attacks_special} {lookup} {tmpMobAttacksSpecial} {header_text}   {Specials} {totals} {tmpTotalMobAttacksSpecial} {width} {11} {active} {0}}};
 
+
 #NOP -- Necromancer Specific;
 #if {"$guild" == "necromancer"} {
     #list dReportList add {{{key} {dsave_count} {lookup} {tmpPerMobDsaves} {header_text}   {DS #} {totals} {tmpTotalDsaves} {width} {6} {active} {0}}};
     #list dReportList add {{{key} {dsave_nps} {lookup} {tmpPerMobDsaveNP} {header_text}   {DS NP} {totals} {tmpTotalDsaveNP} {width} {6} {active} {0}}};
 };
 
+#NOP -- Mage Specific;
+#if {"$guild" == "mage"} {
+    #list dReportList add {{{key} {sp_spent} {lookup} {tmpMobSpSpent} {header_text}   {SP Spent} {totals} {tmpTotalSpSpent} {width} {8} {active} {0}}};
+};
 
 #list dReportList indexate key;
 
@@ -129,6 +134,7 @@
                 #var mob[class] $tmpLastKill[class];
                 #var deathReport[class] $tmpLastKill[class];
                 #var deathReport[damage_received] $tmpLastKill[damage_received];
+                
             };
             #if $captureKills {
                 #regex {$tmpLine} {%* : %*} {
@@ -264,6 +270,7 @@
     #list deathSummary_dsave_nps clear;
     #list deathSummary_mob_attacks_melee clear;
     #list deathSummary_mob_attacks_specials clear;
+    #list deathSummary_sp_spent clear;
     #echo {<eef>   -=+=-  -=+=-  -=+=-  -=+=-<088>      <eaa>3k KILL REPORT CLEARED          <eef>-=+=-  -=+=-  -=+=-  -=+=-<088>};
 };
 
@@ -309,6 +316,7 @@
         #var tmpTotalGxp 0;
         #var tmpAvgGxp 0;
         #var tmpAvgGxpPerRnd 0;
+        #var tmpSpSpent 0;
 
         #var tmpPerMobXp 0;
         #var tmpPerMobRnds 0;
@@ -319,6 +327,7 @@
         #var tmpPerMobDsaveNP 0;
         #var tmpGxp 0;
         #var tmpGxpPerRnd 0;
+        #var tmpTotalSpSpent 0;
 
         #var tmpMobAttacksMelee 0;
         #var tmpMobAttacksSpecial 0;
@@ -351,6 +360,7 @@
                 #math tmpTotalMobAttacksMelee {$deathSummary_mob_attacks_melee[$item] + $tmpTotalMobAttacksMelee};
                 #math tmpTotalMobAttacksSpecial {$deathSummary_mob_attacks_specials[$item] + $tmpTotalMobAttacksSpecial};
                 #math tmpTotalMobAttacksTotal {$deathSummary_mob_attacks_total[$item] + $tmpTotalMobAttacksTotal};
+                #math tmpTotalSpSpent {$deathSummary_sp_spent[$item] + $tmpTotalSpSpent};
                 
                 #math tmpTotalRatio {$tmpTotalXp / $tmpTotalClass * 100.00};
                 #format tmpTotalRatio {%d} $tmpTotalRatio;
@@ -373,6 +383,7 @@
                 #format tmpMobAttacksMelee {%g} {$deathSummary_mob_attacks_melee[$item]};
                 #format tmpMobAttacksSpecial {%g} {$deathSummary_mob_attacks_specials[$item]};
                 #format tmpMobAttacksTotal {%g} {$deathSummary_mob_attacks_total[$item]};
+                #format tmpMobSpSpent {%g} {$deathSummary_sp_spent[$item]};
                 
 
                 #var tmpLookup[tmpMob] $tmpMob;
@@ -389,6 +400,8 @@
                 #var tmpLookup[tmpGxpPerRnd] $tmpGxpPerRnd;
                 #var tmpLookup[tmpMobAttacksMelee] $tmpMobAttacksMelee;
                 #var tmpLookup[tmpMobAttacksSpecial] $tmpMobAttacksSpecial;
+                #var tmpLookup[tmpMobSpSpent] $tmpMobSpSpent;
+                
                 
                 #if {$tmpCoins == 0} {#var tmpCoins -};
                 #if {$deathSummary_damage_dealt[$item] == 0} {#var tmpDmg -};
@@ -446,6 +459,8 @@
             #replace tmpTotalDmgRec {G} {B};
 
             #var tmpTotalRatio ${tmpTotalRatio}%;
+
+            #format tmpTotalSpSpent {%g} $tmpTotalSpSpent;
 
             #if {"$guild" == "necromancer"} {
                 #math tmpPerMobDsaves {$tmpTotalDsaves / $tmpTotalKills * 1.0};

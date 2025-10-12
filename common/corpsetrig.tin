@@ -170,7 +170,15 @@
             #list deathSummary_dsave_nps add {$deathReport[dsave_nps]};
         };
         
-        #if {"$guild" == "mage"} {#list deathSummary_summons_killed add {$deathReport[summons_killed]};};
+        #NOP -- Determine how much sp was spent on this fight on defensive spells;
+        #NOP -- Determine how many summons it took to tank it;
+        #if {"$guild" == "mage"} {
+            #list deathSummary_summons_killed add {$deathReport[summons_killed]};
+            .calc_defense_summary;
+            #math deathReport[sp_spent] {$totalSpCost - $deathReport[sp_spent_t1]};
+            #var deathReport[sp_spent_t1] $totalSpCost;
+            #list deathSummary_sp_spent add {$deathReport[sp_spent]};
+        };
         #if {"$guild" == "bard"} {#list deathSummary_songs_lost add {$deathReport[songs_lost]};};
         _mob_status_clear;
     };
