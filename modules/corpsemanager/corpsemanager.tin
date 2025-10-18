@@ -65,13 +65,13 @@
 
 #NOP -- Inventory tracking is often inconsistent since you can use them from there.  If there are corpses in inventory,;
 #NOP -- Verify every so often that they're still there;
-#ticker corpses_inventory {
-	#if !$idle_flag {
-		#if {$corpses[inventory] > 0} {
-			check_corpses;
-		};
-	};
-} {120};
+#NOP #ticker corpses_inventory {     ;
+#NOP 	#if !$idle_flag {     ;
+#NOP 		#if {$corpses[inventory] > 0} {     ;
+#NOP 			check_corpses;     ;
+#NOP 		};     ;
+#NOP 	};     ;
+#NOP } {120};     ;
 
 
 #action {You have no {corpse|remains}.} {check_corpses;} {1};
