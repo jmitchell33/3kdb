@@ -22,6 +22,51 @@
 #act {^You grab the power cell from the locker.$} {#math kayos[cell] {$kayos[cell] + 1};#math kayos[current_bunker] {$kayos[current_bunker] + 1}} {1};
 #act {^There's no longer a power cell here.  Someone must have already grabbed it.$} {#math kayos[current_bunker] {$kayos[current_bunker] + 1}} {1};
 
+#NOP -- This is the alias to do bunker actions;
+#alias .bunkerActions {
+    #if {$kayos[current_bunker] == 1} {
+        #map run $kayos[bunker][1];
+        #delay 3 {
+            #list bot[steps] create {$bunker_path};
+            unlock bunker;
+            #map goto 22675;
+            ..;
+        };
+    };
+    #if {$kayos[current_bunker] == 2} {
+        #map goto ${kayos[bunker][1]};
+        #delay 1 {#map run $kayos[bunker][2]};
+        #delay 3 {
+            #list bot[steps] create {$bunker_path};
+            unlock bunker;
+            #map goto 22675;
+            ..;
+        }
+    };
+    #if {$kayos[current_bunker] == 3} {
+        #map goto ${kayos[bunker][2]};
+        #delay 1 {#map run $kayos[bunker][3]};
+        #delay 3 {
+            #list bot[steps] create {$bunker_path};
+            unlock bunker;
+            #map goto 22675;
+            ..;
+        };
+    };
+    #if {$kayos[current_bunker] == 4} {
+        #map goto ${kayos[bunker][3]};
+        #delay 1 {#map run $kayos[ship]};
+        #delay 3 {
+            #3 insert cell;
+            #list bot[steps] create {$spaceship_path};
+
+            teleport;
+            #map goto 10382;
+            ..;
+        }
+    };
+};
+
 #NOP -- When the bot completes the main field, loop the 3 bunkers and then the spaceship;
 #act {^------- BOT COMPLETE -----} {
     #var checkBunker 0;
@@ -29,48 +74,7 @@
     .pause;
     #if {$kayos[current_bunker] == 1} {
         #echo {MAIN FIELD CLEAR -- ENTERING BUNKERS};
-    };
-    #delay 2 {
-        #if {$kayos[current_bunker] == 1} {
-            #map run $kayos[bunker][1];
-            #delay 3 {
-                #list bot[steps] create {$bunker_path};
-                unlock bunker;
-                #map goto 22675;
-                ..;
-            };
-        };
-        #if {$kayos[current_bunker] == 2} {
-            #map goto ${kayos[bunker][1]};
-            #delay 1 {#map run $kayos[bunker][2]};
-            #delay 3 {
-                #list bot[steps] create {$bunker_path};
-                unlock bunker;
-                #map goto 22675;
-                ..;
-            }
-        };
-        #if {$kayos[current_bunker] == 3} {
-            #map goto ${kayos[bunker][2]};
-            #delay 1 {#map run $kayos[bunker][3]};
-            #delay 3 {
-                #list bot[steps] create {$bunker_path};
-                unlock bunker;
-                #map goto 22675;
-                ..;
-            };
-        };
-        #if {$kayos[current_bunker] == 4} {
-            #map goto ${kayos[bunker][3]};
-            #delay 1 {#map run $kayos[ship]};
-            #delay 3 {
-                #3 insert cell;
-                #list bot[steps] create {$spaceship_path};
-                teleport;
-                #map goto 10382;
-                ..;
-            }
-        };
+        .bunkerActions;
     };
 } {1};
 
@@ -155,14 +159,17 @@
         #map get roomvnum bunkerVnum;
         #if {&kayos[bunker][] == 0} {
             #var kayos[bunker][1] $bunkerVnum;
+            #echo {KAYOSBUNKER SET 1 $bunkerVnum};
         } {
             #if {$kayos[bunker][1] == $bunkerVnum} {#NOP} {
                 #if {&kayos[bunker][] == 1} {
                     #var kayos[bunker][2] $bunkerVnum;
+                    #echo {KAYOSBUNKER SET 2 $bunkerVnum};
                 } {
                     #if {{$kayos[bunker][1] == $bunkerVnum} || {$kayos[bunker][2] == $bunkerVnum}} {#NOP} {
                         #if {&kayos[bunker][] == 2} {
                             #var kayos[bunker][3] $bunkerVnum;
+                            #echo {KAYOSBUNKER SET 3 $bunkerVnum};
                         };
                     };
                 };

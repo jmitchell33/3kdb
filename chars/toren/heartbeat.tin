@@ -1,8 +1,13 @@
 #class {heartbeat} {kill}
 #class {heartbeat} {open}
 
+
+#NOP -- Percent to use corpses;
+#var corpse_burn_np .3;
+
 #var make_con 1;
 #var corpse_burn 1;
+
 
 #alias {_player_heartbeat} {
 	#if {!$idle_flag} {
@@ -17,11 +22,11 @@
 				};
 			};
 		};
-		
+
 		#if {$corpses[total] > 1 && $corpse_burn} {
-			#if {$my[gp1][percent] < .3 } {
+			#if {$my[gp1][percent] < $corpse_burn_np} {
 				#var corpse_burn 0;
-				corpse_select_necro @min{15;$corpses[total]};
+				#delay 6 {#if {$my[gp1][percent] < $corpse_burn_np} {corpse_select_necro @min{15;$corpses[total]};#var corpse_burn 1}};
 			};
 		} {
 			#var corpse_empty 1;
