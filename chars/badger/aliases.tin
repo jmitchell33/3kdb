@@ -897,7 +897,15 @@
 
 #NOP -- toggle levitate using jumpjets;
 #alias {fly1} {
-    jumpjet
+    #if {"$guild" == "juggernaut"} {
+        jumpjet;
+    };
+    #elseif {"$guild" == "mage"} {
+        cast levitate;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have a guild flying command in alias!!<088>};
+    };
 };
 
 #NOP -- change attacks to another target;

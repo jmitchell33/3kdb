@@ -1,16 +1,71 @@
-#class {crafting} {kill}
-#class {crafting} {open}
+#class {crafting} {kill};
+#class {crafting} {open};
 
 #read modules/crafting/data.tin;
 
-#NOP -- auto assemble your crafting satchel On & Off;
-#alias {autostash-on} {
-    #read modules/crafting/assemble.tin;
-    #send !stashlist
+#NOP -- Common Crafting Stuff;
+
+#NOP -- lookup jewels;
+#alias jewel-lookup {
+    #var foundJewel 0;
+    #format tempjewel {%l} {%0};
+
+    #if {"$tempjewel" === "help"} {
+        #echo {<fba>-----  <efa>How to Use:  <fba>-----<088>};
+        #echo {<fff>Use <dce>jewel-lookup <fff>followed by a keyword or level number.<088>};
+        #echo {};
+        #echo {<efa>Examples:<088>};
+        #echo {<dea>  jewel-lookup heart <fff>- shows all jewels with 'heart'.<088>};
+        #echo {<dea>  jewel-lookup copper shards <fff>- shows all entries related to 'copper shards'.<088>};
+        #echo {<dea>  jewel-lookup 48 <fff>- lists jewels with level 48 (minimum or trivial).<088>};
+        #echo {};
+        #echo {<fff>You can search by <dce>jewel name<fff>, or <dce>numeric level<fff>.<088>};
+        #echo {<fba>-----------------------------------------<088>};
+        #return;
+    };
+
+    #foreach $crafting_jewels[data][jewels] jewel {
+        #format jewelName {%l} {$jewel[jewel]};
+        #format transmutableJewels {%l} {$jewel[transmutes]};
+        #format jewelMin {%l} {$jewel[min]};
+        #format jewelTrivial {%l} {$jewel[trivial]};
+        #var matchFound 0;
+
+        #if {"$jewelName" != ""} {
+            #regex {$jewelName} {%*${tempjewel}%*} {#var matchFound 1;};
+        };
+        #if {"$transmutableJewels" != ""} {
+            #regex {$transmutableJewels} {%*${tempjewel}%*} {#var matchFound 1;};
+        };
+        #if {"$jewelMin" != ""} {
+            #regex {$jewelMin} {%*${tempjewel}%*} {#var matchFound 1;};
+        };
+        #if {"$jewelTrivial" != ""} {
+            #regex {$jewelTrivial} {%*${tempjewel}%*} {#var matchFound 1;};
+        };
+
+        #if {$matchFound} {
+            #var foundJewel 1;
+            #format jewel[jewel] {%n} {$jewel[jewel]};
+            #echo {<fba>-----  <efa>$jewel[jewel] <fff>Information  <fba>-----<088>};
+            #echo {<fff>  Minimum Level: <dce>$jewel[min]<088>};
+            #echo {<fff>  Maximum Level: <dce>$jewel[trivial]<088>};
+            #echo {};
+            #echo {<fff>  Transmute <ead>$jewel[jewel] <fff>into:<088>};
+            #foreach $jewel[transmutes] tmpjewel {
+                #if {"$tmpjewel" != ""} {#echo {<dea>    $tmpjewel<088>};};
+            };
+            #echo {<fba>-----------------------------------------<088>};
+        };
+    };
+
+    #if !$foundJewel {
+        #echo {<fba>-----   <ffa>UNABLE TO FIND JEWEL!! <fff> %0  <fba>   -----<088>};
+        #echo {<fff>Try <dea>jewel-lookup heart<fff>, <dea>jewel-lookup copper shards<fff>, or <dea>jewel-lookup 48<fff>.<088>};
+        #echo {<fff>Fore more help, check out <ead>jewel-lookup help<088>};
+        #echo {<fba>-----------------------------------------<088>};
+    };
 };
 
-#alias {autostash-off} {
-    #class autoassemble kill
-};
 
-#class {crafting} {close}
+#class {crafting} {close};

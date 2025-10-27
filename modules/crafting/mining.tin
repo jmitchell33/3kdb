@@ -1,0 +1,80 @@
+#class {mining} {kill}
+#class {mining} {open}
+
+#NOP -- turn miner on and off;
+#alias {miner-on} {#read modules/crafting/miner.tin};
+#alias {miner-off} {killbot};
+
+#NOP -- lookup mining deposits;
+#alias deposit-lookup {
+    #var foundDeposit 0;
+    #var exactLevelFound 0;
+    #format tempName {%l} {%0};
+
+    #if {"$tempName" === "help"} {
+        #echo {<fba>-----  <efa>How to Use:  <fba>-----<088>};
+        #echo {<fff>Use <dce>deposit-lookup <fff>followed by a keyword or level number to find matching deposits and jewels.<088>};
+        #echo {};
+        #echo {<efa>Examples:<088>};
+        #echo {<dea>  deposit-lookup chaostone <fff>- searches for chaostone deposit.<088>};
+        #echo {<dea>  deposit-lookup sapphire <fff>- shows all entries related to 'sapphire'.<088>};
+        #echo {<dea>  deposit-lookup 90 <fff>- lists deposits with min or max level 90.<088>};
+        #echo {};
+        #echo {<fff>You can search by <dce>deposit<fff>, <dce>jewel<fff>, or <dce>numeric level<fff>.<088>};
+        #echo {<fba>-----------------------------------------<088>};
+        #return;
+    };
+
+    #format tmpNumber {%d} {$tempName};
+
+    #foreach $crafting_deposits[data][deposits] deposit {
+        #format depositName {%l} {$deposit[deposit]};
+        #format jewelName {%l} {$deposit[jewels-yielded]};
+        #format minLvl {%l} {$deposit[min-level]};
+        #format maxLvl {%l} {$deposit[max-level]};
+        #var matchFound 0;
+
+        #if {"$tempName" == ""} {
+            #var matchFound 1;
+        } {
+            #regex {$depositName} {%*${tempName}%*} {#var matchFound 1;};
+            #regex {$jewelName} {%*${tempName}%*} {#var matchFound 1;};
+            #if {"$tmpNumber" != "0"} {
+                #if {"$minLvl" == "$tempName" || "$maxLvl" == "$tempName"} {#var matchFound 1;#var exactLevelFound 1;};
+            };
+        };
+
+        #if {$matchFound} {
+            #var foundDeposit 1;
+            #if {"$deposit[deposit]" != "" || "$deposit[min-level]" != "" || "$deposit[max-level]" != ""} {
+                #echo {<fba>-----  <ffa>$deposit[deposit] <fff>Information  <fba>-----<088>};
+                #echo {<fff>  Minimum Level: <dce>$deposit[min-level]<088>};
+                #echo {<fff>  Maximum Level: <dce>$deposit[max-level]<088>};
+                #echo {};
+                #if {"$deposit[jewels-yielded]" != ""} {
+                    #echo {<ccd>  Jewels Yielded by deposit:<088>};
+                    #foreach $deposit[jewels-yielded] tmpjewels {
+                        #if {"$tmpjewels" != ""} {#echo {<bea>           $tmpjewels<088>};};
+                    };
+                };
+                #echo {};
+                #if {"$deposit[smelt-ratio]" != ""} {
+                    #echo {<bdc>    Smelt Ratio: <088>};
+                    #foreach $deposit[smelt-ratio] tmpsmelt {
+                        #if {"$tmpsmelt" != ""} {#echo {<adb>           $tmpsmelt<088>};};
+                    };
+                };
+                #echo {<fba>-----------------------------------------<088>};
+            };
+        };
+    };
+
+    #if !$foundDeposit {
+        #echo {<fba>-----   <ffa>UNABLE TO FIND A DEPOSIT OR JEWEL MATCHING <fff> %0  <fba>   -----<088>};
+        #echo {<fff>Try <dea>deposit-lookup iron<fff>, <dea>deposit-lookup emerald dust<fff>, or <dea>deposit-lookup 90<fff>.<088>};
+        #echo {<fba>------------------------------------------------------------------<088>};
+    };
+};
+
+
+#class {mining} {close}

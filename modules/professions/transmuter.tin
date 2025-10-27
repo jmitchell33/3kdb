@@ -1,5 +1,17 @@
-#class {transmuter} {kill}
-#class {transmuter} {open}
+#class {transmuter} {kill};
+#class {transmuter} {open};
+
+#NOP -- read professions data;
+#read modules/professions/data.tin;
+
+#NOP -- shorter alias to use transmute_burn upgrade-leg;
+#alias {tburn} {
+    #format tmpburn {%l} {%0};
+    #if {"$tmpburn" != ""} {
+        transmute_burn upgrade-leg {$tmpburn};
+    };
+    #echo {<fff>Usage: tburn <jewel name> <088>};
+};
 
 #NOP -----------------------------------------------------------;
 #NOP -----------------------------------------------------------;
@@ -16,7 +28,7 @@
 #NOP        train                 -Consolidate components until Superior (that provide pxp);
 #NOP        train-leg             -Consolidate components until Legendary (that provide pxp);
 
-#action {Profession #1 : Transmuter%s\(Level %d\)%s\[%*\]} {#var transmuter[level] %2} {2};
+#action {Profession #1 : Transmuter%s\(Level %d\)%*} {#var transmuter[level] %2} {2};
 
 #alias satchel_retrieve_xmute {
     #var items_required %1;
@@ -78,15 +90,17 @@
     #action {Pfffzzzt!  You transmute:} {#math transmute_count {$transmute_count + 1};};
     #delay .5 {
         #if {"%1" == ""} {
-            #echo {<ddd>    No parameters were provided, please provide a valid parameter such as:  <088>};
-            #echo {<ddd>     transmute_burn consolidate  <088>};
-            #echo {                                                                                         };
-            #echo {<ddd>     Valid parameters include:                                                  <088>  };
-            #echo {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp)          <088>  };
-            #echo {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp)          <088>  };
-
-            #echo {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp)     <088>  };
-            #echo {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp)     <088>  };
+            #echo {<fff>    No parameters were provided, please provide a valid parameter. <088>};
+            #echo {<faa>------------------------------------------------------------------ <088>};
+            #echo {<fff>     Valid parameters include: <088>};
+            #echo {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp) <088>};
+            #echo {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp) <088>};
+            #echo {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp) <088>};
+            #echo {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp) <088>};
+            #echo {<ccf>       upgrade-leg      <ddd>-Upgrade a specific component until Legendary (not guaranteed pxp) <088>};
+            #echo {<ffa>         Examples:    <ccd>transmute_burn upgrade-leg <sapphire dust> <088>};
+            #echo {<ccd>                           transmute_burn <consolidate> <088>};
+            #echo {<faa>------------------------------------------------------------------ <088>};
         } {
             #send profs;
             #echo {<ccf>  -------------------------------------------    <088>  };
@@ -181,6 +195,34 @@
                             #unaction {Pfffzzzt!  You transmute:};
                         };
                     };
+                    #case {"upgrade-leg"} {
+                        #if {"%2" == ""} {
+                            #echo {<faa>------------------------------------------------------------------ <088>};
+                            #echo {<fff>You must provide a component name, example: <ccd>transmute_burn upgrade-leg <sapphire dust> <088>};
+                            #echo {<faa>------------------------------------------------------------------ <088>};
+                        } {
+                            #var target_component {%2 %3};
+                            #foreach $satchel[data][%*] index {
+                                #if {$transmuter[level] >= $index[min-level] && "$index[component]" == "$target_component"} {
+                                    #foreach $craft[satchel][%*] satchel_item {
+                                        #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
+                                            #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                            #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                            #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                            #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                            #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                            #if {$satchel_item[superior] >= 4} {satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];};
+                                        };
+                                    };
+                                };
+                            };
+                            #delay 4 {
+                                #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS (UPGRADE-LEG)    <ccf>-------    <088>  };
+                                #unaction {Pfffzzzt!  You transmute:};
+                            };
+                        };
+                    };
+
                     #default {
                         #echo {<ccf>  -------    <faa>No match found, did you mispell %1?         <ccf>  -------    <088>  };
                     };
@@ -232,5 +274,29 @@
     };
 };
 
+#NOP -- transmuting ratios;
+#alias {transmute_ratios} {
+    #if {$transmuter[level] >= 50} {
+        #echo {<bea>Transmuting Ratios plvl 50+<088>};
+        #echo {<caf>--------------------------<088>};
+        #echo {<fff>4 Crude    = 3 Poor<088>};
+        #echo {<fff>3 Poor     = 2 Average<088>};
+        #echo {<fff>2 Average  = 1 Good<088>};
+        #echo {<fff>3 Good     = 1 Superior<088>};
+        #echo {<fff>4 Superior = 1 Legendary<088>};
+        #echo {<caf>--------------------------<088>};
+    } {
+        #echo {<bea>Transmuting Ratios plvls 0-49<088>};
+        #echo {<caf>--------------------------<088>};
+        #echo {<fff>4 Crude    = 3 Poor<088>};
+        #echo {<fff>3 Poor     = 2 Average<088>};
+        #echo {<fff>3 Average  = 1 Good<088>};
+        #echo {<fff>4 Good     = 1 Superior<088>};
+        #echo {<fff>5 Superior = 1 Legendary<088>};
+        #echo {<caf>--------------------------<088>};
+        
+    };
+};
 
-#class transmuter {close}
+
+#class {transmuter} {close};
