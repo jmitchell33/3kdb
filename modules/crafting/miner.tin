@@ -102,13 +102,19 @@
 	#action {^You should try to mine this instead.} {mine} {1};
 	#action {^You cannot spelunk while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
 	#action {^You cannot mine while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;mine} {1};};
-	#action {^You have disturbed %*} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
+	#action {^You have disturbed %*} {
+		#undelay minewalk;
+		#line oneshot #action {dealt the killing blow} {
+			corpse_trig;
+			spelunk;
+		} {1};
+	} {1};
 
 	#alias {_check_mine} {spelunk};
 	#alias {_step_room} {#delay minewalk {#path walk;_check_mine} {1}};
 	
 	#class {miner} {close}
-}
+};
 
 
 #action {You hop in the exit chute and fly out of the mine shaft!} {
@@ -121,7 +127,7 @@
 	};
 } {1};
 
-#alias {killbot} {#class find_chute kill;#class miner kill;#class minebot kill}
+#alias {killbot} {#class find_chute kill;#class miner kill;#class minebot kill};
 #class {minebot} {close}
 
 /*

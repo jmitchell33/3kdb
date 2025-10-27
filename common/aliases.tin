@@ -185,7 +185,7 @@
     #class player_tickers kill;
 };
 
-#alias reload {
+#alias .reload {
     .kill_guild_classes;
     .kill_player_classes;
     #read chars/$user/vars.tin;
@@ -364,11 +364,15 @@
 #alias {stashlist} {
     #if {"%1" == ""} {
         #send stashlist;
-    };
-    #if {"%1" == "assemble"} {
-        #read modules/crafting/assemble.tin;
-        #send stashlist;
-        #delay 2 {#class {autoassemble} {kill}};
+    } {
+        #if {"%1" == "assemble"} {
+            #echo {<fba>Loading assemble module...<088>};
+            #read modules/crafting/assemble.tin;
+            #send stashlist;
+            #delay 2 {#class {autoassemble} {kill}};
+        } {
+            #send {stashlist %0};
+        };
     };
 };
 

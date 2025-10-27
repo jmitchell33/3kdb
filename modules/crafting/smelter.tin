@@ -3,22 +3,24 @@
 #class {smelter} {open}
 
 #alias {autosmelt %1} {
-	#var {ore_type} {%1};
-	unstash2 all worst $ore_type ore;
-	#class {smelter_bot} {open};
-	#act {{You found: \[[0-9]+\] \[[A-z]+\] <[A-z ]+ ore>}} {
-		#regex {%%0} {{\d+}} {#var num_ore &1};
-		#regex {%%0} {{legendary|superior|good|average|poor|crude|worthless}} {#var qual_ore &1};
-			#if {$num_ore > 10} {
-				#$num_ore insert $qual_ore $ore_type ore;
-				#send {smelt};
-				get all;
-				stash all
-				}
-			{autosmelt $ore_type}
-		};
-	#act {You stuff %%1 components into your crafting satchel.} {autosmelt $ore_type};
-	#act {No objects found.} {#class {smelter_bot} {kill}};
-	#class {smelter_bot} {close}
-	}
+    #var {ore_type} {%1};
+    unstash2 all worst $ore_type ore;
+    #class {smelter_bot} {open};
+    #act {You found: \[[0-9]+\] \[[A-z]+\] <[A-z ]+ ore>} {
+        #regex {%%0} {\d+} {#var num_ore &1};
+        #regex {%%0} {legendary|superior|good|average|poor|crude|worthless} {#var qual_ore &1};
+        #if {$num_ore > 10} {
+            #send {$num_ore insert $qual_ore $ore_type ore};
+            #send {smelt};
+            get all;
+            stash all;
+            autosmelt $ore_type;
+        };
+    };
+    #act {You stuff %%1 components into your crafting satchel.} {autosmelt $ore_type};
+    #act {No objects found.} {#class {smelter_bot} {kill}};
+    #class {smelter_bot} {close};
+};
+
+
 #class {smelter} {close}

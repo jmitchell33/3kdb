@@ -1,0 +1,224 @@
+#class {enchanter} {kill};
+#class {enchanter} {open};
+
+#NOP -- Heart types that are not used in any +stat recipes;
+#NOP -- damnation, rage, rejuvenation, water;
+
+#NOP -- enchanting - list nontrivial recipe mouldings (recipes that provide cxp);
+#alias {ln} {list nontrivial};
+
+#NOP -- turn autosmelting on;
+#alias {smelter-on} {#read modules/crafting/smelter.tin};
+
+#NOP -- lookup gem recipes;
+#alias gem-lookup {
+    #var foundGem 0;
+    #var exactLevelFound 0;
+    #format tempName {%l} {%0};
+
+    #if {"$tempName" === "help"} {
+        #echo {<fba>-----  <efa>How to Use:  <fba>-----<088>};
+        #echo {<fff>Use <dce>gem-lookup <fff>followed by a keyword or level number to find matching gems.<088>};
+        #echo {};
+        #echo {<efa>Examples:<088>};
+        #echo {<dea>  gem-lookup wis <fff>- shows all gems with 'wis' or 'wisdom' in name or effect.<088>};
+        #echo {<dea>  gem-lookup fire <fff>- shows all entries related to 'fire' effects.<088>};
+        #echo {<dea>  gem-lookup 48 <fff>- lists gems with min or max level 48.<088>};
+        #echo {};
+        #echo {<fff>You can search by <dce>name<fff>, <dce>effect<fff>, or <dce>numeric level<fff>.<088>};
+        #echo {<fba>-----------------------------------------<088>};
+        #return;
+    };
+
+    #format tmpNumber {%d} {$tempName};
+
+    #foreach $crafting_gem[data][gems] gem {
+        #format listName {%l} {$gem[gem]};
+        #format effectName {%l} {$gem[effect]};
+        #format minLvl {%l} {$gem[min-level]};
+        #format maxLvl {%l} {$gem[max-level]};
+        #var matchFound 0;
+
+        #if {"$tempName" == ""} {
+            #var matchFound 1;
+        } {
+            #regex {$listName} {%*${tempName}%*} {#var matchFound 1;};
+            #regex {$effectName} {%*${tempName}%*} {#var matchFound 1;};
+            #if {"$tmpNumber" != "0"} {
+                #if {"$minLvl" == "$tempName" || "$maxLvl" == "$tempName"} {#var matchFound 1;#var exactLevelFound 1;};
+            };
+        };
+
+        #if {$matchFound} {
+            #var foundGem 1;
+            #if {"$gem[min-level]" != "" || "$gem[max-level]" != "" || "$gem[effect]" != "" || "$gem[jewels]" != "" || "$gem[fragment]" != ""} {
+                #echo {<fba>-----  <efa>$gem[gem] <fff>Information  <fba>-----<088>};
+                #echo {<fff>  Minimum Level: <dce>$gem[min-level]<088>};
+                #echo {<fff>  Maximum Level: <dce>$gem[max-level]<088>};
+                #echo {<fff>  Gem Effects: $gem[effect]<088>};
+                #echo {};
+                #if {"$gem[jewels]" != ""} {
+                    #echo {<caf>  Jewels Required:<088>};
+                    #foreach $gem[jewels] jewel {
+                        #echo {<fff>           $jewel<088>};
+                    };
+                };
+                #echo {<caf>  Fragment Required: <fff>$gem[fragment]<088>};
+                #echo {<fba>-----------------------------------------<088>};
+            };
+        };
+    };
+
+    #if !$foundGem {
+        #echo {<fba>-----   <ffa>UNABLE TO FIND A GEM OR EFFECT MATCHING <fff> %0  <fba>   -----<088>};
+        #echo {<fff>Try <dea>gem-lookup wis<fff>, <dea>gem-lookup fire<fff>, or <dea>gem-lookup 48<fff>.<088>};
+    };
+};
+
+#NOP -- Badger's Gem Maker v6.9;
+#alias {make-gem} {
+    #format tempGem {%l} {%0};
+    #var foundGem 0;
+
+    #NOP Help section;
+    #if {"$tempGem" === "help"} {
+        #echo {🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡};
+        #echo {<fba>-----------------------------------------<088>};
+        #echo {<fba>++++  <efa>Badger's Gem Maker v6.9  <fba>++++<088>};
+        #echo {<fba>-----------------------------------------<088>};
+        #echo {<fba>-----  <efa>How to Use:  <fba>-----<088>};
+        #echo {};
+        #echo {<fff>Use <dce>make-gem <fff>followed by the exact gem name to automatically craft it.<088>};
+        #echo {};
+        #echo {<efa>Examples:<088>};
+        #echo {<dea>  make-gem minor might<fff>  — crafts the Gem of Minor Might.<088>};
+        #echo {<dea>  make-gem major despot<fff> — crafts the Gem of Major Despot.<088>};
+        #echo {};
+        #echo {<bec>You must have the legendary materials required to make the gem\n you want, and in your satchel for this to work.<088>};
+        #echo {<cdd>If you do not have the required materials, check out\n <dce>gem-lookup help<fff>, <dce>jewel-lookup help<fff>, <dce>deposit-lookup help<088>};
+        #echo {<fff>If you are a transmuter, check out\n <dce>transmute_burn<fff>, <dce>transmute_ratios<fff>, <dce>transmute_ug<088>};
+        #echo {<dda>The script unstashes materials, buys moulding\n inserts parts, and fires the kiln.<088>};
+        #echo {<ffa>Note: <fff>Gem names are <dce>case-insensitive<fff>, you can type\n uppercase, lowercase, or mixed and it will work.<088>};
+        #echo {<fba>-----------------------------------------<088>};
+        #echo {🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡🦡};
+        #return;
+    };
+
+    #NOP Search for the gem to craft;
+    #if {"$tempGem" != ""} {
+        #foreach $crafting_gem[data][gems] gem {
+            #format listName {%l} {$gem[gem]};
+            #if {"$listName" != ""} {
+                #regex {$listName} {^${tempGem}$} {
+                    #var foundGem 1;
+                    #echo {<fba>-----  <efa>Preparing to craft <dce>$gem[gem] <fba>-----<088>};
+                    #echo {};
+
+                    #var missingMaterial 0;
+                    #list jewel_materials clear;
+                    #list missing_jewels clear;
+                    #unvar last_unstash;
+                    #unvar fragment_to_insert;
+
+                    #echo {<fff>Required Jewels:<088>};
+
+                    #NOP oneshot handler to capture missing unstash attempts;
+                    #line oneshot #action {No objects found.} {
+                        #var missingMaterial 1;
+                        #list missing_jewels add $last_unstash;
+                    };
+
+                    #NOP Unstash each required jewel and track exact name;
+                    #foreach $gem[jewels] jewel {
+                        #if {"$jewel" != ""} {
+                            #format unstashName {%l} {$jewel};
+                            #var last_unstash $unstashName;
+                            unstash2 legendary $unstashName;
+                            #list jewel_materials add $unstashName;
+                            #echo {<fff>Attempting to unstash: <dea>$unstashName<088>};
+                        };
+                    };
+
+                    #NOP Unstash optional fragment/essence/heart if defined;
+                    #if {"$gem[fragment]" != ""} {
+                        #format fragName {%l} {$gem[fragment]};
+                        #var last_unstash $fragName;
+                        unstash2 legendary $fragName;
+                        #var fragment_to_insert $fragName;
+                        #echo {<fff>Required Fragment/Essence/Heart: <dea>$fragName<088>};
+                    };
+
+                    #NOP If any materials missing, warn and abort;
+                    #if {$missingMaterial} {
+                        #echo {};
+                        #echo {<faa>Warning: Missing materials detected:<088>};
+                        #foreach $missing_jewels[%*] tmpmissing {
+                            #echo {<ffa>    Missing Materials:<088>};
+                            #echo {<fff>     $tmpmissing<088>};
+                        };
+                        #return;
+                    };
+
+                    #NOP Prepare moulding;
+                    #var tmpMoulding $gem[gem];
+                    #format tmpMoulding {%l} {$tmpMoulding};
+
+                    go enchanter_shop;
+
+                    #NOP Buy moulding and move to kiln;
+                    #delay {buy_moulding} {
+                        buy gem of $tmpMoulding;
+                        #echo {<fff>Gem of <ccd>$tmpMoulding <fff>Moulding bought — heading to kiln room.<088>};
+                        go enchanter_kiln;
+
+                        #NOP Insert materials in order they were unstashed, then fragment, then moulding;
+                        #delay {insert_materials} {
+                            #echo {<fba>-----  <efa>Inserting Components for <dce>$tmpMoulding <fba>-----<088>};
+
+                            #NOP Insert only unstashed jewels;
+                            #foreach $jewel_materials[%*] tmpmat {
+                                #if {"$tmpmat" != ""} {
+                                    insert $tmpmat;
+                                    #echo {<fff>Inserting <ffa>$tmpmat <fff>into kiln.<088>};
+                                };
+                            };
+
+                            #NOP Insert fragment/essence/heart;
+                            #if {"$fragment_to_insert" != ""} {
+                                insert $fragment_to_insert;
+                                #echo {<fff>Inserting <ffa>$fragment_to_insert <fff>into kiln.<088>};
+                            };
+
+                            insert moulding;
+                            #echo {<fff>Inserting Moulding for a gem of <ffa>$tmpMoulding <fff>into kiln.<088>};
+                            fire;
+
+                            #line oneshot #action {You have created something new!} {
+                                retrieve gem;
+                                keep gem;
+                                #echo {<fba>+++++++++++++++++++++++++++++++++++++++++<088>};
+                                #echo {<caf>   ★  <dce>Gem Created Successfully! <caf>★   <088>};
+                                #echo {<fff>Enjoy your new Legendary Gem of <dea>$tmpMoulding<fff>!<088>};
+                                #echo {<fba>+++++++++++++++++++++++++++++++++++++++++<088>};
+                                #unvar tmpMoulding;
+                            };
+                        } {5};
+                    } {5};
+                };
+            };
+        };
+    };
+
+    #NOP If gem not found in recipe list;
+    #if !$foundGem {
+        #echo {<fba>-----   <ffa>UNABLE TO FIND GEM MATCHING <fff>%0 <fba>   -----<088>};
+        #echo {<bec>You must have the legendary materials required to make the gem\n you want, and in your satchel for this to work.<088>};
+        #echo {<fff>Try <dea>make-gem minor might<fff> or <dea>make-gem major despot<fff>.\n<fff>or <dea>make-gem major excessive health and spirit<fff>.<088>};
+        #echo {<fff>Note: Gem names are <dce>case-insensitive<fff>, you can type uppercase,\n lowercase, or mixed and it will work.<088>};
+        #echo {<fff>For more information: <ccd>make-gem help<088>};
+        #echo {<fba>-----------------------------------------<088>};
+    };
+};
+
+
+#class {enchanter} {close};

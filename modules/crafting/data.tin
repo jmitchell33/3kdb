@@ -1,237 +1,201 @@
-#class crafting_data kill;
-#class crafting_data open;
+#class {crafting_data} {kill};
+#class {crafting_data} {open};
 
-#NOP -- Heart types that are not used in any +stat recipes;
-#NOP -- damnation, rage, rejuvenation, water;
+#NOP -- Crafting Data;
+
+#NOP -- gem data;
+#list crafting_gem[data][gems] clear;
+#list crafting_gem[data][gems] add {{{gem} {Minor Might} {min-level} {1} {max-level} {5} {jewels} {{Aquamarine} {Aquamarine Dust}} {fragment} {Fragment of Light} {effect} {Str} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Blades Aggression} {min-level} {1} {max-level} {5} {jewels} {{Copper Shards} {Tiger's Eye}} {fragment} {Fragment of Light} {effect} {Edged WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Blades Protection} {min-level} {2} {max-level} {6} {jewels} {{Copper Shards} {Morganite}} {fragment} {Fragment of Light} {effect} {Edged AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Crushing Protection} {min-level} {3} {max-level} {7} {jewels} {{Aquamarine} {Tiger's Eye Dust}} {fragment} {Fragment of Water} {effect} {Blunt AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Agility} {min-level} {3} {max-level} {7} {jewels} {{Copper Shards} {Tiger's Eye}} {fragment} {Fragment of Light} {effect} {Dex} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Crushing Aggression} {min-level} {4} {max-level} {8} {jewels} {{Aquamarine} {Tiger's Eye Dust}} {fragment} {Fragment of Water} {effect} {Blunt WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Flame Protection} {min-level} {5} {max-level} {9} {jewels} {{Eye of Flame} {Morganite Dust}} {fragment} {Fragment of Light} {effect} {Fire AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Flame Aggression} {min-level} {6} {max-level} {10} {jewels} {{Eye of Flame} {Morganite Dust}} {fragment} {Fragment of Light} {effect} {Fire WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Endurance} {min-level} {7} {max-level} {11} {jewels} {{Morganite} {Tiger's Eye Dust}} {fragment} {Fragment of Shadow} {effect} {Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Frost Protection} {min-level} {8} {max-level} {12} {jewels} {{Eye of Frost} {Morganite Dust}} {fragment} {Fragment of Water} {effect} {Ice AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Frost Aggression} {min-level} {9} {max-level} {13} {jewels} {{Eye of Frost} {Morganite Dust}} {fragment} {Fragment of Water} {effect} {Ice WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Acid Protection} {min-level} {10} {max-level} {14} {jewels} {{Bronze Shards} {Morganite}} {fragment} {Fragment of Might} {effect} {Acid AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Lion} {min-level} {10} {max-level} {14} {jewels} {{Cat's Eye} {Iron Shards}} {fragment} {Fragment of Might} {effect} {Str/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Acid Aggression} {min-level} {11} {max-level} {15} {jewels} {{Bronze Shards} {Morganite}} {fragment} {Fragment of Might} {effect} {Acid WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Terminator} {min-level} {11} {max-level} {15} {jewels} {{Cat's Eye Dust} {Eye of Flame}} {fragment} {Fragment of Might} {effect} {Str/Dex} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Electric Protection} {min-level} {12} {max-level} {16} {jewels} {{Bronze Shards} {Cat's Eye}} {fragment} {Fragment of Rage} {effect} {Electric AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Smarts} {min-level} {12} {max-level} {16} {jewels} {{Cat's Eye} {Iron Shards}} {fragment} {Fragment of Shadow} {effect} {Int} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Clever Thief} {min-level} {13} {max-level} {17} {jewels} {{Eye of Flame} {Iron Shards}} {fragment} {Fragment of Shadow} {effect} {Dex/Int} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Electric Aggression} {min-level} {13} {max-level} {17} {jewels} {{Bronze Shards} {Cat's Eye}} {fragment} {Fragment of Rage} {effect} {Electric WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Wolf} {min-level} {15} {max-level} {19} {jewels} {{Eye of Flame} {Garnet Dust}} {fragment} {Fragment of Soul} {effect} {Dex/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Mental Protection} {min-level} {15} {max-level} {19} {jewels} {{Alexandrite} {Steel Shards}} {fragment} {Fragment of Rage} {effect} {Mind AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Scholar} {min-level} {15} {max-level} {19} {jewels} {{Cat's Eye Dust} {Garnet}} {fragment} {Fragment of Soul} {effect} {Int/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Suave Thief} {min-level} {16} {max-level} {20} {jewels} {{Eye of Frost} {Garnet Dust}} {fragment} {Fragment of Soul} {effect} {Dex/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Insight} {min-level} {16} {max-level} {20} {jewels} {{Garnet} {Garnet Dust}} {fragment} {Fragment of Soul} {effect} {Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Mental Aggression} {min-level} {16} {max-level} {20} {jewels} {{Alexandrite} {Steel Shards}} {fragment} {Fragment of Rage} {effect} {Mind WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Energy Protection} {min-level} {17} {max-level} {21} {jewels} {{Garnet} {Steel Shards}} {fragment} {Fragment of Soul} {effect} {Energy AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Energy Aggression} {min-level} {18} {max-level} {22} {jewels} {{Garnet} {Steel Shards}} {fragment} {Fragment of Soul} {effect} {Energy WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Assault Protection} {min-level} {18} {max-level} {22} {jewels} {{Alexandrite} {Silver Shards}} {fragment} {Fragment of The Unseen} {effect} {Edged and Blunt AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Persuasiveness} {min-level} {18} {max-level} {22} {jewels} {{Alexandrite Dust} {Garnet}} {fragment} {Fragment of The Unseen} {effect} {Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Barbarian} {min-level} {19} {max-level} {23} {jewels} {{Alexandrite} {Alexandrite Dust}} {fragment} {Fragment of The Unseen} {effect} {Int/Str} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Assault Aggression} {min-level} {19} {max-level} {23} {jewels} {{Eye of Earth} {Silver Shards}} {fragment} {Fragment of The Unseen} {effect} {Edged and Blunt WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Elements Protection} {min-level} {20} {max-level} {24} {jewels} {{Eye of Flame} {Eye of Frost}} {fragment} {Fragment of The Unseen} {effect} {Fire and Ice AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Jackal} {min-level} {20} {max-level} {24} {jewels} {{Alexandrite} {Alexandrite Dust}} {fragment} {Fragment of Ascension} {effect} {Int/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Elements Aggression} {min-level} {21} {max-level} {25} {jewels} {{Eye of Flame} {Eye of Frost}} {fragment} {Fragment of The Unseen} {effect} {Fire and Ice WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Poison Protection} {min-level} {21} {max-level} {25} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Ascension} {effect} {Poison AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Thespian} {min-level} {21} {max-level} {25} {jewels} {{Beryl} {Garnet Dust}} {fragment} {Fragment of Ascension} {effect} {Int/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Poison Aggression} {min-level} {22} {max-level} {26} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Ascension} {effect} {Poison WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Detective} {min-level} {22} {max-level} {26} {jewels} {{Eye of Earth} {Pyrite Dust}} {fragment} {Fragment of Blasting} {effect} {Str/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Thief At Large} {min-level} {23} {max-level} {27} {jewels} {{Pyrite} {Pyrite Dust}} {fragment} {Fragment of Blasting} {effect} {Dex/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Radiation Protection} {min-level} {23} {max-level} {27} {jewels} {{Pyrite} {Silver Shards}} {fragment} {Fragment of Damnation} {effect} {Radiation AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Devouring Protection} {min-level} {24} {max-level} {28} {jewels} {{Eye of Earth} {Silver Shards}} {fragment} {Fragment of Willy} {effect} {Poison and Acid AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Radiation Aggression} {min-level} {24} {max-level} {28} {jewels} {{Pyrite} {Silver Shards}} {fragment} {Fragment of Damnation} {effect} {Radiation WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Elephant} {min-level} {25} {max-level} {29} {jewels} {{Pyrite Dust} {Roan's Tears}} {fragment} {Fragment of Willy} {effect} {Con/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Devouring Aggression} {min-level} {26} {max-level} {30} {jewels} {{Beryl} {Silver Shards}} {fragment} {Fragment of Willy} {effect} {Poison and Acid WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Abbot} {min-level} {27} {max-level} {31} {jewels} {{Pyrite} {Tourmaline Dust}} {fragment} {Fragment of Destruction} {effect} {Wis/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Domination Protection} {min-level} {27} {max-level} {31} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Destruction} {effect} {Mind and Energy AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Agent} {min-level} {28} {max-level} {32} {jewels} {{Beryl Dust} {Tourmaline}} {fragment} {Fragment of Compassion} {effect} {Str/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Athlete} {min-level} {28} {max-level} {32} {jewels} {{Beryl} {Tourmaline Dust}} {fragment} {Fragment of Knowledge} {effect} {Str/Dex/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Irradiation Aggression} {min-level} {29} {max-level} {33} {jewels} {{Gold Shards} {Tourmaline}} {fragment} {Fragment of Compassion} {effect} {Electric and Radiation WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Domination Aggression} {min-level} {29} {max-level} {33} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Destruction} {effect} {Mind and Energy WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Irradiation Protection} {min-level} {30} {max-level} {34} {jewels} {{Gold Shards} {Tourmaline}} {fragment} {Fragment of Compassion} {effect} {Electric and Radiation AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Koala} {min-level} {30} {max-level} {34} {jewels} {{Eye of Air} {Tourmaline Dust}} {fragment} {Fragment of Knowledge} {effect} {Con/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Minor Despot} {min-level} {31} {max-level} {35} {jewels} {{Amethyst Dust} {Tourmaline}} {fragment} {Fragment of Knowledge} {effect} {Int/Wis/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Might} {min-level} {33} {max-level} {37} {jewels} {{Topaz} {Topaz Dust}} {fragment} {Essence of Light} {effect} {Strength} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Blades Aggression} {min-level} {33} {max-level} {37} {jewels} {{Amethyst} {Gold Shards}} {fragment} {Essence of Light} {effect} {Edged WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Blades Protection} {min-level} {34} {max-level} {38} {jewels} {{Gold Shards} {Topaz}} {fragment} {Essence of Light} {effect} {Edged AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Crushing Protection} {min-level} {35} {max-level} {39} {jewels} {{Mithril Shards} {Topaz}} {fragment} {Essence of Water} {effect} {Blunt AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Agility} {min-level} {35} {max-level} {39} {jewels} {{Eye of Air} {Topaz Dust}} {fragment} {Essence of Light} {effect} {Dexterity} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Crushing Aggression} {min-level} {36} {max-level} {40} {jewels} {{Amethyst} {Mithril Shards}} {fragment} {Essence of Water} {effect} {Blunt WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Health} {min-level} {37} {max-level} {41} {jewels} {{Happy Ed's Tears} {Hematite Dust}} {fragment} {Essence of Shadow} {effect} {HP Regeneration} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Flame Protection} {min-level} {37} {max-level} {41} {jewels} {{Core of Flame} {Mithril Shards}} {fragment} {Essence of Light} {effect} {Fire AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Flame Aggression} {min-level} {38} {max-level} {42} {jewels} {{Core of Flame} {Mithril Shards}} {fragment} {Essence of Light} {effect} {Fire WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Endurance} {min-level} {39} {max-level} {43} {jewels} {{Happy Ed's Tears} {Hematite Dust}} {fragment} {Essence of Shadow} {effect} {Constitution} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Acid Protection} {min-level} {40} {max-level} {44} {jewels} {{Amethyst} {Mithril Shards}} {fragment} {Essence of Might} {effect} {Acid AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Acid Aggression} {min-level} {41} {max-level} {45} {jewels} {{Amethyst} {Mithril Shards}} {fragment} {Essence of Might} {effect} {Acid WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Frost Protection} {min-level} {42} {max-level} {46} {jewels} {{Core of Frost} {Mithril Shards}} {fragment} {Essence of Water} {effect} {Ice/Cold AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Lion} {min-level} {42} {max-level} {46} {jewels} {{Heliodor Dust} {Topaz}} {fragment} {Essence of Might} {effect} {Str/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Spirit} {min-level} {43} {max-level} {47} {jewels} {{Topaz} {Hematite Dust}} {fragment} {Essence of Rejuvenation} {effect} {SP Regeneration} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Terminator} {min-level} {43} {max-level} {47} {jewels} {{Heliodor} {Heliodor Dust}} {fragment} {Essence of Might} {effect} {Str/Dex} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Frost Aggression} {min-level} {43} {max-level} {47} {jewels} {{Core of Frost} {Mithril Shards}} {fragment} {Essence of Water} {effect} {Ice/Cold WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Electric Protection} {min-level} {44} {max-level} {48} {jewels} {{Core of Flame} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Electric AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Smarts} {min-level} {44} {max-level} {48} {jewels} {{Core of Frost} {Hematite Dust}} {fragment} {Essence of Shadow} {effect} {Intelligence} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Clever Thief} {min-level} {45} {max-level} {49} {jewels} {{Happy Ed's Tears} {Heliodor Dust}} {fragment} {Essence of Shadow} {effect} {Dex/Int} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Electric Aggression} {min-level} {45} {max-level} {49} {jewels} {{Core of Flame} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Electric WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Excessive Health} {min-level} {46} {max-level} {50} {jewels} {{Heliodor} {Hematite Dust}} {fragment} {Essence of Rejuvenation} {effect} {Overmax HP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Wolf} {min-level} {47} {max-level} {51} {jewels} {{Heliodor} {Heliodor Dust}} {fragment} {Essence of Soul} {effect} {Dex/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Mental Protection} {min-level} {47} {max-level} {51} {jewels} {{Core of Frost} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Mental AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Scholar} {min-level} {47} {max-level} {51} {jewels} {{Hematite} {Hematite Dust}} {fragment} {Essence of Soul} {effect} {Int/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Mental Aggression} {min-level} {48} {max-level} {52} {jewels} {{Core of Frost} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Mental WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Insight} {min-level} {48} {max-level} {52} {jewels} {{Hematite} {Peridot Dust}} {fragment} {Essence of Soul} {effect} {Wisdom} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Suave Thief} {min-level} {48} {max-level} {52} {jewels} {{Heliodor Dust} {Hematite}} {fragment} {Essence of Soul} {effect} {Dex/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Energy Protection} {min-level} {49} {max-level} {53} {jewels} {{Peridot} {Titanium Shards}} {fragment} {Essence of Soul} {effect} {Energy AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Energy Aggression} {min-level} {50} {max-level} {54} {jewels} {{Peridot} {Titanium Shards}} {fragment} {Essence of Soul} {effect} {Energy WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Excessive Spirit} {min-level} {50} {max-level} {54} {jewels} {{Peridot} {Peridot Dust}} {fragment} {Essence of Soul} {effect} {Overmax SP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Assault Protection} {min-level} {50} {max-level} {54} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of The Unseen} {effect} {Edged and Blunt AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Persuasiveness} {min-level} {50} {max-level} {54} {jewels} {{Hematite} {Peridot Dust}} {fragment} {Essence of The Unseen} {effect} {Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Barbarian} {min-level} {51} {max-level} {55} {jewels} {{Heliodor} {Peridot Dust}} {fragment} {Essence of The Unseen} {effect} {Int/Str} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Assault Aggression} {min-level} {51} {max-level} {55} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of The Unseen} {effect} {Edged and Blunt WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Elements Protection} {min-level} {52} {max-level} {56} {jewels} {{Core of Flame} {Core of Frost}} {fragment} {Essence of The Unseen} {effect} {Fire and Ice AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Jackal} {min-level} {52} {max-level} {56} {jewels} {{Heliodor Dust} {Peridot}} {fragment} {Essence of Ascension} {effect} {Int/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard health and spirit} {min-level} {52} {max-level} {56} {jewels} {{Heliodor} {Peridot Dust}} {fragment} {Essence of The Unseen} {effect} {HP/SP regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Poison Protection} {min-level} {53} {max-level} {57} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of Ascension} {effect} {Poison AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Elements Aggression} {min-level} {53} {max-level} {57} {jewels} {{Core of Flame} {Core of Frost}} {fragment} {Essence of The Unseen} {effect} {Fire and Ice WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Thespian} {min-level} {53} {max-level} {57} {jewels} {{Peridot} {Peridot Dust}} {fragment} {Essence of Ascension} {effect} {Int/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Detective} {min-level} {54} {max-level} {58} {jewels} {{Heliodor Dust} {Peridot}} {fragment} {Essence of Blasting} {effect} {Str/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Poison Aggression} {min-level} {54} {max-level} {58} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of Ascension} {effect} {Poison WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Radiation Protection} {min-level} {55} {max-level} {59} {jewels} {{Adamantium Shards} {Pearl}} {fragment} {Essence of Damnation} {effect} {Radiation AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Thief At Large} {min-level} {55} {max-level} {59} {jewels} {{Pearl} {Peridot Dust}} {fragment} {Essence of Blasting} {effect} {Dex/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Devouring Protection} {min-level} {56} {max-level} {60} {jewels} {{Adamantium Shards} {Core of Earth}} {fragment} {Essence of Willy} {effect} {Poison and Acid AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Radiation Aggression} {min-level} {56} {max-level} {60} {jewels} {{Adamantium Shards} {Pearl}} {fragment} {Essence of Damnation} {effect} {Radiation WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Elephant} {min-level} {57} {max-level} {61} {jewels} {{Pearl} {Pearl Dust}} {fragment} {Essence of Willy} {effect} {Con/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Spirit And Excessive Health} {min-level} {57} {max-level} {61} {jewels} {{Peridot} {Pearl Dust}} {fragment} {Essence of Damnation} {effect} {Overmax HP Regen & SP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Devouring Aggression} {min-level} {58} {max-level} {62} {jewels} {{Adamantium Shards} {Core of Earth}} {fragment} {Essence of Willy} {effect} {Poison and Acid AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Domination Protection} {min-level} {59} {max-level} {63} {jewels} {{Core of Air} {Obsidian Shards}} {fragment} {Essence of Destruction} {effect} {Mental AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Abbot} {min-level} {59} {max-level} {63} {jewels} {{Core of Air} {Peridot Dust}} {fragment} {Essence of Destruction} {effect} {Wis/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Agent} {min-level} {60} {max-level} {64} {jewels} {{Opal} {Opal Dust}} {fragment} {Essence of Compassion} {effect} {Str/Wis} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Athlete} {min-level} {60} {max-level} {64} {jewels} {{Opal} {Pearl Dust}} {fragment} {Essence of Knowledge} {effect} {Str/Dex/Con} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Health And Excessive Spirit} {min-level} {60} {max-level} {64} {jewels} {{Opal} {Pearl Dust}} {fragment} {Essence of Destruction} {effect} {HP Regen & Overmax SP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Irradiation Aggression} {min-level} {61} {max-level} {65} {jewels} {{Core of Air} {Obsidian Shards}} {fragment} {Essence of Compassion} {effect} {Electric and Radiation WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Domination Aggression} {min-level} {61} {max-level} {65} {jewels} {{Core of Air} {Adamantium Shards}} {fragment} {Essence of Destruction} {effect} {Mental and Energy WC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Irradiation Protection} {min-level} {62} {max-level} {66} {jewels} {{Core of Air} {Obsidian Shards}} {fragment} {Essence of Compassion} {effect} {Electric and Radiation AC} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Koala} {min-level} {63} {max-level} {67} {jewels} {{Opal} {Opal Dust}} {fragment} {Essence of Knowledge} {effect} {Con/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Despot} {min-level} {64} {max-level} {68} {jewels} {{Ghoti's Tears} {Pearl Dust}} {fragment} {Essence of Knowledge} {effect} {Int/Wis/Cha} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Standard Excessive Health And Spirit} {min-level} {65} {max-level} {69} {jewels} {{Pearl} {Opal Dust}} {fragment} {Essence of Knowledge} {effect} {Overmax HP/SP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Blades Aggression} {min-level} {66} {max-level} {70} {jewels} {{Ghoti's Tears} {Obsidian Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Might} {min-level} {66} {max-level} {70} {jewels} {{Opal} {Opal Dust}} {fragment} {Heart of Light} {effect} {Strength} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Blades Protection} {min-level} {67} {max-level} {71} {jewels} {{Ghoti's Tears} {Obsidian Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Crushing Protection} {min-level} {68} {max-level} {72} {jewels} {{Ghoti's Tears} {Nethernium Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Agility} {min-level} {68} {max-level} {72} {jewels} {{Star of Flame} {Opal Dust}} {fragment} {Heart of Light} {effect} {Dexterity} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Crushing Aggression} {min-level} {69} {max-level} {73} {jewels} {{Ghoti's Tears} {Nethernium Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Health} {min-level} {70} {max-level} {74} {jewels} {{Star of Flame} {Opal Dust}} {fragment} {Heart of Shadow} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Flame Protection} {min-level} {70} {max-level} {74} {jewels} {{Star of Flame} {Nethernium Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Flame Aggression} {min-level} {71} {max-level} {75} {jewels} {{Star of Flame} {Nethernium Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Endurance} {min-level} {72} {max-level} {76} {jewels} {{Star of Flame} {Opal Dust}} {fragment} {Heart of Shadow} {effect} {Constitution} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Frost Protection} {min-level} {73} {max-level} {77} {jewels} {{Star of Frost} {Voidstone Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Frost Aggression} {min-level} {74} {max-level} {78} {jewels} {{Star of Frost} {Voidstone Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Acid Protection} {min-level} {75} {max-level} {79} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Might} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Lion} {min-level} {75} {max-level} {79} {jewels} {{Diamond Dust} {Diamond}} {fragment} {Heart of Might} {effect} {Constitution/Strength} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Acid Aggression} {min-level} {76} {max-level} {80} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Might} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Spirit} {min-level} {76} {max-level} {80} {jewels} {{Diamond} {Opal Dust}} {fragment} {Heart of Rejuvenation} {effect} {SP Regeneration} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Terminator} {min-level} {76} {max-level} {80} {jewels} {{Diamond Dust} {Star of Frost}} {fragment} {Heart of Might} {effect} {Strength/Dexterity} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Smarts} {min-level} {77} {max-level} {81} {jewels} {{Diamond Dust} {Diamond}} {fragment} {Heart of Shadow} {effect} {Intelligence} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Electric Protection} {min-level} {77} {max-level} {81} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Clever Thief} {min-level} {78} {max-level} {82} {jewels} {{Diamond Dust} {Star of Flame}} {fragment} {Heart of Shadow} {effect} {Dexterity/Intelligence} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Electric Aggression} {min-level} {78} {max-level} {82} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Excessive Health} {min-level} {79} {max-level} {83} {jewels} {{Diamond} {Opal Dust}} {fragment} {Heart of Rejuvenation} {effect} {Overmax HP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Mental Protection} {min-level} {80} {max-level} {84} {jewels} {{Phasemetal Shards} {Emerald}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Scholar} {min-level} {80} {max-level} {84} {jewels} {{Diamond} {Diamond Dust}} {fragment} {Heart of Soul} {effect} {Intelligence/Wisdom} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Wolf} {min-level} {80} {max-level} {84} {jewels} {{Emerald} {Emerald Dust}} {fragment} {Heart of Soul} {effect} {Dexterity/Constitution} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Mental Aggression} {min-level} {81} {max-level} {85} {jewels} {{Phasemetal Shards} {Emerald}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Suave Thief} {min-level} {81} {max-level} {85} {jewels} {{Diamond Dust} {Star of Frost}} {fragment} {Heart of Soul} {effect} {Dexterity/Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Insight} {min-level} {81} {max-level} {85} {jewels} {{Emerald} {Emerald Dust}} {fragment} {Heart of Soul} {effect} {Wisdom} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Energy Protection} {min-level} {82} {max-level} {86} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Soul} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Excessive Spirit} {min-level} {83} {max-level} {87} {jewels} {{Emerald Dust} {Shansabyk's Tears}} {fragment} {Heart of Soul} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Persuasiveness} {min-level} {83} {max-level} {87} {jewels} {{Emerald Dust} {Star of Frost}} {fragment} {Heart of The Unseen} {effect} {Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Energy Aggression} {min-level} {83} {max-level} {87} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Soul} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Assault Protection} {min-level} {83} {max-level} {87} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}}
+#list crafting_gem[data][gems] add {{{gem} {Major Barbarian} {min-level} {84} {max-level} {88} {jewels} {{Emerald} {Emerald Dust}} {fragment} {Heart of The Unseen} {effect} {Intelligence/Strength} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Assault Aggression} {min-level} {84} {max-level} {88} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Jackal} {min-level} {85} {max-level} {89} {jewels} {{Sapphire} {Sapphire Dust}} {fragment} {Heart of Ascension} {effect} {Intelligence/Constitution} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Elements Protection} {min-level} {85} {max-level} {89} {jewels} {{Star of Flame} {Star of Frost}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Thespian} {min-level} {86} {max-level} {90} {jewels} {{Emerald Dust} {Sapphire}} {fragment} {Heart of Ascension} {effect} {Intelligence/Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Elements Aggression} {min-level} {86} {max-level} {90} {jewels} {{Star of Flame} {Star of Frost}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Poison Protection} {min-level} {86} {max-level} {90} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Ascension} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Poison Aggression} {min-level} {87} {max-level} {91} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Ascension} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Detective} {min-level} {87} {max-level} {91} {jewels} {{Sapphire} {Sapphire Dust}} {fragment} {Heart of Blasting} {effect} {Strength/Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Radiation Protection} {min-level} {88} {max-level} {92} {jewels} {{Phasemetal Shards} {Sapphire}} {fragment} {Heart of Damnation} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Thief At Large} {min-level} {88} {max-level} {92} {jewels} {{Emerald} {Sapphire Dust}} {fragment} {Heart of Blasting} {effect} {Dexterity/Wisdom} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Radiation Aggression} {min-level} {89} {max-level} {93} {jewels} {{Phasemetal Shards} {Sapphire}} {fragment} {Heart of Damnation} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Devouring Protection} {min-level} {89} {max-level} {93} {jewels} {{Phasemetal Shards} {Star of Earth}} {fragment} {Heart of Willy} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Elephant} {min-level} {90} {max-level} {94} {jewels} {{Ruby Dust} {Star of Earth}} {fragment} {Heart of Willy} {effect} {Constitution/Wisdom} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major spirit and excessive health} {min-level} {90} {max-level} {94} {jewels} {{Star of Earth} {Sapphire Dust}} {fragment} {Heart of Damnation} {effect} {SP Regen and Overmax HP Regen} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Devouring Aggression} {min-level} {91} {max-level} {95} {jewels} {{Phasemetal Shards} {Star of Earth}} {fragment} {Heart of Willy} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Domination Protection} {min-level} {92} {max-level} {96} {jewels} {{Cancer's Tears} {Chaostone Shards}} {fragment} {Heart of Destruction} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Abbot} {min-level} {92} {max-level} {96} {jewels} {{Ruby} {Ruby Dust}} {fragment} {Heart of Destruction} {effect} {Wisdom/Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Athlete} {min-level} {93} {max-level} {97} {jewels} {{Ruby} {Ruby Dust}} {fragment} {Heart of Knowledge} {effect} {Strength/Dexterity/Constitution} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Agent} {min-level} {93} {max-level} {97} {jewels} {{Sapphire} {Sapphire Dust}} {fragment} {Heart of Compassion} {effect} {Strength/Wisdom} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Domination Aggression} {min-level} {94} {max-level} {98} {jewels} {{Cancer's Tears} {Chaostone Shards}} {fragment} {Heart of Destruction} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Irradiation Aggression} {min-level} {94} {max-level} {98} {jewels} {{Chaostone Shards} {Ruby}} {fragment} {Heart of Compassion} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Irradiation Protection} {min-level} {95} {max-level} {99} {jewels} {{Chaostone Shards} {Ruby}} {fragment} {Heart of Compassion} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Koala} {min-level} {96} {max-level} {100} {jewels} {{Cancer's Tears} {Sapphire Dust}} {fragment} {Heart of Knowledge} {effect} {Constitution/Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Despot} {min-level} {97} {max-level} {101} {jewels} {{Ruby} {Ruby Dust}} {fragment} {Heart of Knowledge} {effect} {Intelligence/Wisdom/Charisma} {one-shot} {} {xp-to-fill} {}}};
+#list crafting_gem[data][gems] add {{{gem} {Major Excessive Health and Spirit} {min-level} {98} {max-level} {101} {jewels} {{Cancer's Tears} {Ruby Dust}} {fragment} {Heart of Knowledge} {effect} {} {one-shot} {} {xp-to-fill} {}}};
+
+#NOP -- minining deposit data;
+#list crafting_deposits[data][deposits] clear;
+#list crafting_deposits[data][deposits] add {{{deposit} {Copper} {jewels-yielded} {{Copper Shards} {Aquamarine} {Aquamarine Dust} {Morganite} {Morganite Dust} {Tiger's Eye} {Tiger's Eye Dust}} {min-level} {1} {max-level} {10} {mine-level} {1} {smelt-ratio} {1 - 1 bar from 1 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Bronze} {jewels-yielded} {{Bronze Shards} {Cat's Eye} {Cat's Eye Dust} {Eye of Flame} {Garnet} {Garnet Dust}} {min-level} {7} {max-level} {15} {mine-level} {2} {smelt-ratio} {34 ore to 33 bars with miner skill 1/5}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Iron} {jewels-yielded} {{Iron Shards} {Garnet} {Garnet Dust} {Alexandrite} {Alexandrite Dust} {Eye of Frost}} {min-level} {10} {max-level}	{20} {mine-level} {3} {smelt-ratio} {? x-1 bar from x ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Steel} {jewels-yielded} {{Steel Shards} {Eye of Frost} {Eye of Flame} {Cat's Eye} {Cat's Eye Dust}} {min-level} {15} {max-level} {25} {mine-level} {3} {smelt-ratio} {0.666 - 4 bar from 6 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Silver} {jewels-yielded} {{Silver Shards} {Pyrite} {Pyrite Dust} {Tourmaline} {Tourmaline Dust} {Beryl} {Beryl Dust} {Eye of Earth} {Roan's Tears}} {min-level} {20} {max-level} {30} {mine-level}	{4} {smelt-ratio} {0.769 - 10 bar from 13 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Gold} {jewels-yielded} {{Gold Shards} {Eye of Air} {Topaz} {Topaz Dust} {Amethyst} {Amethyst Dust} {Happy Ed's Tears}} {min-level} {25} {max-level} {35} {mine-level} {4} {smelt-ratio} {0.777 - 14 bar from 18 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Mithril} {jewels-yielded} {{Mithril Shards} {Heliodor} {Heliodor Dust} {Hematite} {Hematite Dust} {Core of Flame}} {min-level}	{33} {max-level} {43} {mine-level} {4} {smelt-ratio} {.77 - 77 from 99 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Titanium} {jewels-yielded} {{Titanium Shards} {Peridot} {Peridot Dust} {Core of Frost}} {min-level} {42} {max-level} {52} {mine-level} {5} {smelt-ratio} {0.598 - 58 bar from 97 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Ebon} {jewels-yielded} {{Ebon Shards} {Core of Earth} {Heliodor} {Heliodor Dust} {Peridot} {Peridot Dust}} {min-level} {50} {max-level} {60} {mine-level} {5} {smelt-ratio} {0.598 - 58 bar from 97 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Adamantium} {jewels-yielded} {{Adamantium Shards} {Core of Air} {Pearl} {Pearl Dust}} {min-level} {55} {max-level} {65} {mine-level} {6} {smelt-ratio}	{.5265 - 9 bars from 16 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Obsidian} {jewels-yielded} {{Obsidian Shards} {Ghoti's Tears} {Opal} {Opal Dust} {Pearl} {Pearl Dust}} {min-level} {60} {max level} {70} {mine-level} {6} {smelt-ratio} {.5625 - 9 bars from 16 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Nethernium} {jewels-yielded} {{Nethernium Shards} {Ghoti's Tears} {Opal} {Opal Dust} {Star of Flame}} {min-level} {65} {max-level}	{75} {mine-level} {7} {.2857 - 2 bars from 7 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Voidstone} {jewels-yielded} {{Voidstone Shards} {Shansabyk's Tears} {Diamond} {Diamond Dust} {Star of Frost}} {min-level} {73} {max-level} {83} {mine-level} {7} {smelt-ratio} {.2857 - 2 bars from 7 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Phasemetal} {jewels-yielded} {{Phasemetal Shards} {Emerald} {Emerald Dust} {Sapphire} {Sapphire Dust} {Star of Earth} {Star of Air}} {min-level} {80} {max-level} {90} {mine-level} {7} {smelt-ratio} {.2857 - 2 bars from 7 ore}}};
+#list crafting_deposits[data][deposits] add {{{deposit} {Chaostone} {jewels-yielded} {{Chaostone Shards} {Cancer's Tears} {Emerald} {Emerald Dust} {Ruby} {Ruby Dust} {Sapphire} {Sapphire Dust}} {min-level} {90} {max-level} {100} {mine-level} {8} {smelt-ratio}	{.1 - 1 bar from 10 ore}}};
 
 
-#alias gem-stat-lookup {
-    #var foundGem 0;
-    #format tempName {%l} {%0};
-
-    #foreach $crafting[data][gems] gem {
-        #format listName {%l} $gem[effect];
-        #regex {$listName} {%*${tempName}%*} {
-            #var foundGem 1;
-            #echo {<ece>-----  $gem[gem] Information  -----};
-            #echo {<fff>  Minimum Level: $gem[min-level]};
-            #echo {<fff>  Maximum Level: $gem[min-level]};
-            #echo {<fff>  Gem Effects: $gem[effect]};
-            #echo {<fff>  Jewels Required:};
-            #foreach $gem[jewels] jewel {
-                #echo {<fff>           $jewel};
-            };
-            #echo {<fff>  Fragments Required: $gem[fragment]};
-            #echo {<ece>-----------------------------------};
-        };
-    };
-    #if !$foundGem {
-        #echo {<edd>-----   UNABLE TO FIND A GEM MATCHING <fff> %0  <edd>   -----};
-    };
-};
-
-
-
-#alias gem-lookup {
-    #var foundGem 0;
-    #format tempName {%l} {%0};
-
-    #foreach $crafting[data][gems] gem {
-        #format listName {%l} $gem[gem];
-        #regex {$listName} {%*${tempName}%*} {
-            #var foundGem 1;
-            #echo {<ece>-----  $gem[gem] Information  -----};
-            #echo {<fff>  Minimum Level: $gem[min-level]};
-            #echo {<fff>  Maximum Level: $gem[min-level]};
-            #echo {<fff>  Gem Effects: $gem[effect]};
-            #echo {<fff>  Jewels Required:};
-            #foreach $gem[jewels] jewel {
-                #echo {<fff>           $jewel};
-            };
-            #echo {<fff>  Fragments Required: $gem[fragment]};
-            #echo {<ece>-----------------------------------};
-        };
-    };
-    #if !$foundGem {
-        #echo {<edd>-----   UNABLE TO FIND A GEM MATCHING <fff> %0  <edd>   -----};
-    };
-};
-
-
-
-#list crafting[data][gems] clear;
-#list crafting[data][gems] add {{{gem} {Minor Might} {min-level} {1} {max-level} {5} {jewels} {{Aquamarine} {Aquamarine Dust}} {fragment} {Fragment of Light} {effect} {Str} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Blades Aggression} {min-level} {1} {max-level} {5} {jewels} {{Copper Shards} {Tiger's Eye}} {fragment} {Fragment of Light} {effect} {Edged WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Blades Protection} {min-level} {2} {max-level} {6} {jewels} {{Copper Shards} {Morganite}} {fragment} {Fragment of Light} {effect} {Edged AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Crushing Protection} {min-level} {3} {max-level} {7} {jewels} {{Aquamarine} {Tiger's Eye Dust}} {fragment} {Fragment of Water} {effect} {Blunt AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Agility} {min-level} {3} {max-level} {7} {jewels} {{Copper Shards} {Tiger's Eye}} {fragment} {Fragment of Light} {effect} {Dex} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Crushing Aggression} {min-level} {4} {max-level} {8} {jewels} {{Aquamarine} {Tiger's Eye Dust}} {fragment} {Fragment of Water} {effect} {Blunt WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Flame Protection} {min-level} {5} {max-level} {9} {jewels} {{Eye of Flame} {Morganite Dust}} {fragment} {Fragment of Light} {effect} {Fire AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Flame Aggression} {min-level} {6} {max-level} {10} {jewels} {{Eye of Flame} {Morganite Dust}} {fragment} {Fragment of Light} {effect} {Fire WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Endurance} {min-level} {7} {max-level} {11} {jewels} {{Morganite} {Tiger's Eye Dust}} {fragment} {Fragment of Shadow} {effect} {Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Frost Protection} {min-level} {8} {max-level} {12} {jewels} {{Eye of Frost} {Morganite Dust}} {fragment} {Fragment of Water} {effect} {Ice AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Frost Aggression} {min-level} {9} {max-level} {13} {jewels} {{Eye of Frost} {Morganite Dust}} {fragment} {Fragment of Water} {effect} {Ice WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Acid Protection} {min-level} {10} {max-level} {14} {jewels} {{Bronze Shards} {Morganite}} {fragment} {Fragment of Might} {effect} {Acid AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Lion} {min-level} {10} {max-level} {14} {jewels} {{Cat's Eye} {Iron Shards}} {fragment} {Fragment of Might} {effect} {Str/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Acid Aggression} {min-level} {11} {max-level} {15} {jewels} {{Bronze Shards} {Morganite}} {fragment} {Fragment of Might} {effect} {Acid WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Terminator} {min-level} {11} {max-level} {15} {jewels} {{Cat's Eye Dust} {Eye of Flame}} {fragment} {Fragment of Might} {effect} {Str/Dex} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Electric Protection} {min-level} {12} {max-level} {16} {jewels} {{Bronze Shards} {Cat's Eye}} {fragment} {Fragment of Rage} {effect} {Electric AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Smarts} {min-level} {12} {max-level} {16} {jewels} {{Cat's Eye} {Iron Shards}} {fragment} {Fragment of Shadow} {effect} {Int} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Clever Thief} {min-level} {13} {max-level} {17} {jewels} {{Eye of Flame} {Iron Shards}} {fragment} {Fragment of Shadow} {effect} {Dex/Int} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Electric Aggression} {min-level} {13} {max-level} {17} {jewels} {{Bronze Shards} {Cat's Eye}} {fragment} {Fragment of Rage} {effect} {Electric WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Wolf} {min-level} {15} {max-level} {19} {jewels} {{Eye of Flame} {Garnet Dust}} {fragment} {Fragment of Soul} {effect} {Dex/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Mental Protection} {min-level} {15} {max-level} {19} {jewels} {{Alexandrite} {Steel Shards}} {fragment} {Fragment of Rage} {effect} {Mind AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Scholar} {min-level} {15} {max-level} {19} {jewels} {{Cat's Eye Dust} {Garnet}} {fragment} {Fragment of Soul} {effect} {Int/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Suave Thief} {min-level} {16} {max-level} {20} {jewels} {{Eye of Frost} {Garnet Dust}} {fragment} {Fragment of Soul} {effect} {Dex/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Insight} {min-level} {16} {max-level} {20} {jewels} {{Garnet} {Garnet Dust}} {fragment} {Fragment of Soul} {effect} {Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Mental Aggression} {min-level} {16} {max-level} {20} {jewels} {{Alexandrite} {Steel Shards}} {fragment} {Fragment of Rage} {effect} {Mind WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Energy Protection} {min-level} {17} {max-level} {21} {jewels} {{Garnet} {Steel Shards}} {fragment} {Fragment of Soul} {effect} {Energy AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Energy Aggression} {min-level} {18} {max-level} {22} {jewels} {{Garnet} {Steel Shards}} {fragment} {Fragment of Soul} {effect} {Energy WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Assault Protection} {min-level} {18} {max-level} {22} {jewels} {{Alexandrite} {Silver Shards}} {fragment} {Fragment of The Unseen} {effect} {Edged and Blunt AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Persuasiveness} {min-level} {18} {max-level} {22} {jewels} {{Alexandrite Dust} {Garnet}} {fragment} {Fragment of The Unseen} {effect} {Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Barbarian} {min-level} {19} {max-level} {23} {jewels} {{Alexandrite} {Alexandrite Dust}} {fragment} {Fragment of The Unseen} {effect} {Int/Str} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Assault Aggression} {min-level} {19} {max-level} {23} {jewels} {{Eye of Earth} {Silver Shards}} {fragment} {Fragment of The Unseen} {effect} {Edged and Blunt WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Elements Protection} {min-level} {20} {max-level} {24} {jewels} {{Eye of Flame} {Eye of Frost}} {fragment} {Fragment of The Unseen} {effect} {Fire and Ice AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Jackal} {min-level} {20} {max-level} {24} {jewels} {{Alexandrite} {Alexandrite Dust}} {fragment} {Fragment of Ascension} {effect} {Int/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Elements Aggression} {min-level} {21} {max-level} {25} {jewels} {{Eye of Flame} {Eye of Frost}} {fragment} {Fragment of The Unseen} {effect} {Fire and Ice WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Poison Protection} {min-level} {21} {max-level} {25} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Ascension} {effect} {Poison AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Thespian} {min-level} {21} {max-level} {25} {jewels} {{Beryl} {Garnet Dust}} {fragment} {Fragment of Ascension} {effect} {Int/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Poison Aggression} {min-level} {22} {max-level} {26} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Ascension} {effect} {Poison WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Detective} {min-level} {22} {max-level} {26} {jewels} {{Eye of Earth} {Pyrite Dust}} {fragment} {Fragment of Blasting} {effect} {Str/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Thief At Large} {min-level} {23} {max-level} {27} {jewels} {{Pyrite} {Pyrite Dust}} {fragment} {Fragment of Blasting} {effect} {Dex/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Radiation Protection} {min-level} {23} {max-level} {27} {jewels} {{Pyrite} {Silver Shards}} {fragment} {Fragment of Damnation} {effect} {Radiation AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Devouring Protection} {min-level} {24} {max-level} {28} {jewels} {{Eye of Earth} {Silver Shards}} {fragment} {Fragment of Willy} {effect} {Poison and Acid AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Radiation Aggression} {min-level} {24} {max-level} {28} {jewels} {{Pyrite} {Silver Shards}} {fragment} {Fragment of Damnation} {effect} {Radiation WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Elephant} {min-level} {25} {max-level} {29} {jewels} {{Pyrite Dust} {Roan's Tears}} {fragment} {Fragment of Willy} {effect} {Con/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Devouring Aggression} {min-level} {26} {max-level} {30} {jewels} {{Beryl} {Silver Shards}} {fragment} {Fragment of Willy} {effect} {Poison and Acid WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Abbot} {min-level} {27} {max-level} {31} {jewels} {{Pyrite} {Tourmaline Dust}} {fragment} {Fragment of Destruction} {effect} {Wis/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Domination Protection} {min-level} {27} {max-level} {31} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Destruction} {effect} {Mind and Energy AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Agent} {min-level} {28} {max-level} {32} {jewels} {{Beryl Dust} {Tourmaline}} {fragment} {Fragment of Compassion} {effect} {Str/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Athlete} {min-level} {28} {max-level} {32} {jewels} {{Beryl} {Tourmaline Dust}} {fragment} {Fragment of Knowledge} {effect} {Str/Dex/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Irradiation Aggression} {min-level} {29} {max-level} {33} {jewels} {{Gold Shards} {Tourmaline}} {fragment} {Fragment of Compassion} {effect} {Electric and Radiation WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Domination Aggression} {min-level} {29} {max-level} {33} {jewels} {{Roan's Tears} {Silver Shards}} {fragment} {Fragment of Destruction} {effect} {Mind and Energy WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Irradiation Protection} {min-level} {30} {max-level} {34} {jewels} {{Gold Shards} {Tourmaline}} {fragment} {Fragment of Compassion} {effect} {Electric and Radiation AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Koala} {min-level} {30} {max-level} {34} {jewels} {{Eye of Air} {Tourmaline Dust}} {fragment} {Fragment of Knowledge} {effect} {Con/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Minor Despot} {min-level} {31} {max-level} {35} {jewels} {{Amethyst Dust} {Tourmaline}} {fragment} {Fragment of Knowledge} {effect} {Int/Wis/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Might} {min-level} {33} {max-level} {37} {jewels} {{Topaz} {Topaz Dust}} {fragment} {Essence of Light} {effect} {Strength} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Blades Aggression} {min-level} {33} {max-level} {37} {jewels} {{Amethyst} {Gold Shards}} {fragment} {Essence of Light} {effect} {Edged WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Blades Protection} {min-level} {34} {max-level} {38} {jewels} {{Gold Shards} {Topaz}} {fragment} {Essence of Light} {effect} {Edged AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Crushing Protection} {min-level} {35} {max-level} {39} {jewels} {{Mithril Shards} {Topaz}} {fragment} {Essence of Water} {effect} {Blunt AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Agility} {min-level} {35} {max-level} {39} {jewels} {{Eye of Air} {Topaz Dust}} {fragment} {Essence of Light} {effect} {Dexterity} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Crushing Aggression} {min-level} {36} {max-level} {40} {jewels} {{Amethyst} {Mithril Shards}} {fragment} {Essence of Water} {effect} {Blunt WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Health} {min-level} {37} {max-level} {41} {jewels} {{Happy Ed's Tears} {Hematite Dust}} {fragment} {Essence of Shadow} {effect} {HP Regeneration} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Flame Protection} {min-level} {37} {max-level} {41} {jewels} {{Core of Flame} {Mithril Shards}} {fragment} {Essence of Light} {effect} {Fire AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Flame Aggression} {min-level} {38} {max-level} {42} {jewels} {{Core of Flame} {Mithril Shards}} {fragment} {Essence of Light} {effect} {Fire WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Endurance} {min-level} {39} {max-level} {43} {jewels} {{Happy Ed's Tears} {Hematite Dust}} {fragment} {Essence of Shadow} {effect} {Constitution} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Acid Protection} {min-level} {40} {max-level} {44} {jewels} {{Amethyst} {Mithril Shards}} {fragment} {Essence of Might} {effect} {Acid AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Acid Aggression} {min-level} {41} {max-level} {45} {jewels} {{Amethyst} {Mithril Shards}} {fragment} {Essence of Might} {effect} {Acid WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Frost Protection} {min-level} {42} {max-level} {46} {jewels} {{Core of Frost} {Mithril Shards}} {fragment} {Essence of Water} {effect} {Ice/Cold AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Lion} {min-level} {42} {max-level} {46} {jewels} {{Heliodor Dust} {Topaz}} {fragment} {Essence of Might} {effect} {Str/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Spirit} {min-level} {43} {max-level} {47} {jewels} {{Topaz} {Hematite Dust}} {fragment} {Essence of Rejuvenation} {effect} {SP Regeneration} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Terminator} {min-level} {43} {max-level} {47} {jewels} {{Heliodor} {Heliodor Dust}} {fragment} {Essence of Might} {effect} {Str/Dex} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Frost Aggression} {min-level} {43} {max-level} {47} {jewels} {{Core of Frost} {Mithril Shards}} {fragment} {Essence of Water} {effect} {Ice/Cold WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Electric Protection} {min-level} {44} {max-level} {48} {jewels} {{Core of Flame} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Electric AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Smarts} {min-level} {44} {max-level} {48} {jewels} {{Core of Frost} {Hematite Dust}} {fragment} {Essence of Shadow} {effect} {Intelligence} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Clever Thief} {min-level} {45} {max-level} {49} {jewels} {{Happy Ed's Tears} {Heliodor Dust}} {fragment} {Essence of Shadow} {effect} {Dex/Int} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Electric Aggression} {min-level} {45} {max-level} {49} {jewels} {{Core of Flame} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Electric WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Excessive Health} {min-level} {46} {max-level} {50} {jewels} {{Heliodor} {Hematite Dust}} {fragment} {Essence of Rejuvenation} {effect} {Overmax HP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Wolf} {min-level} {47} {max-level} {51} {jewels} {{Heliodor} {Heliodor Dust}} {fragment} {Essence of Soul} {effect} {Dex/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Mental Protection} {min-level} {47} {max-level} {51} {jewels} {{Core of Frost} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Mental AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Scholar} {min-level} {47} {max-level} {51} {jewels} {{Hematite} {Hematite Dust}} {fragment} {Essence of Soul} {effect} {Int/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Mental Aggression} {min-level} {48} {max-level} {52} {jewels} {{Core of Frost} {Titanium Shards}} {fragment} {Essence of Rage} {effect} {Mental WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Insight} {min-level} {48} {max-level} {52} {jewels} {{Hematite} {Peridot Dust}} {fragment} {Essence of Soul} {effect} {Wisdom} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Suave Thief} {min-level} {48} {max-level} {52} {jewels} {{Heliodor Dust} {Hematite}} {fragment} {Essence of Soul} {effect} {Dex/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Energy Protection} {min-level} {49} {max-level} {53} {jewels} {{Peridot} {Titanium Shards}} {fragment} {Essence of Soul} {effect} {Energy AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Energy Aggression} {min-level} {50} {max-level} {54} {jewels} {{Peridot} {Titanium Shards}} {fragment} {Essence of Soul} {effect} {Energy WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Excessive Spirit} {min-level} {50} {max-level} {54} {jewels} {{Peridot} {Peridot Dust}} {fragment} {Essence of Soul} {effect} {Overmax SP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Assault Protection} {min-level} {50} {max-level} {54} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of The Unseen} {effect} {Edged and Blunt AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Persuasiveness} {min-level} {50} {max-level} {54} {jewels} {{Hematite} {Peridot Dust}} {fragment} {Essence of The Unseen} {effect} {Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Barbarian} {min-level} {51} {max-level} {55} {jewels} {{Heliodor} {Peridot Dust}} {fragment} {Essence of The Unseen} {effect} {Int/Str} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Assault Aggression} {min-level} {51} {max-level} {55} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of The Unseen} {effect} {Edged and Blunt WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Elements Protection} {min-level} {52} {max-level} {56} {jewels} {{Core of Flame} {Core of Frost}} {fragment} {Essence of The Unseen} {effect} {Fire and Ice AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Jackal} {min-level} {52} {max-level} {56} {jewels} {{Heliodor Dust} {Peridot}} {fragment} {Essence of Ascension} {effect} {Int/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard health and spirit} {min-level} {52} {max-level} {56} {jewels} {{Heliodor} {Peridot Dust}} {fragment} {Essence of The Unseen} {effect} {HP/SP regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Poison Protection} {min-level} {53} {max-level} {57} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of Ascension} {effect} {Poison AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Elements Aggression} {min-level} {53} {max-level} {57} {jewels} {{Core of Flame} {Core of Frost}} {fragment} {Essence of The Unseen} {effect} {Fire and Ice WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Thespian} {min-level} {53} {max-level} {57} {jewels} {{Peridot} {Peridot Dust}} {fragment} {Essence of Ascension} {effect} {Int/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Detective} {min-level} {54} {max-level} {58} {jewels} {{Heliodor Dust} {Peridot}} {fragment} {Essence of Blasting} {effect} {Str/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Poison Aggression} {min-level} {54} {max-level} {58} {jewels} {{Core of Earth} {Ebon Shards}} {fragment} {Essence of Ascension} {effect} {Poison WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Radiation Protection} {min-level} {55} {max-level} {59} {jewels} {{Adamantium Shards} {Pearl}} {fragment} {Essence of Damnation} {effect} {Radiation AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Thief At Large} {min-level} {55} {max-level} {59} {jewels} {{Pearl} {Peridot Dust}} {fragment} {Essence of Blasting} {effect} {Dex/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Devouring Protection} {min-level} {56} {max-level} {60} {jewels} {{Adamantium Shards} {Core of Earth}} {fragment} {Essence of Willy} {effect} {Poison and Acid AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Radiation Aggression} {min-level} {56} {max-level} {60} {jewels} {{Adamantium Shards} {Pearl}} {fragment} {Essence of Damnation} {effect} {Radiation WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Elephant} {min-level} {57} {max-level} {61} {jewels} {{Pearl} {Pearl Dust}} {fragment} {Essence of Willy} {effect} {Con/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Spirit And Excessive Health} {min-level} {57} {max-level} {61} {jewels} {{Peridot} {Pearl Dust}} {fragment} {Essence of Damnation} {effect} {Overmax HP Regen & SP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Devouring Aggression} {min-level} {58} {max-level} {62} {jewels} {{Adamantium Shards} {Core of Earth}} {fragment} {Essence of Willy} {effect} {Poison and Acid AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Domination Protection} {min-level} {59} {max-level} {63} {jewels} {{Core of Air} {Obsidian Shards}} {fragment} {Essence of Destruction} {effect} {Mental AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Abbot} {min-level} {59} {max-level} {63} {jewels} {{Core of Air} {Peridot Dust}} {fragment} {Essence of Destruction} {effect} {Wis/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Agent} {min-level} {60} {max-level} {64} {jewels} {{Opal} {Opal Dust}} {fragment} {Essence of Compassion} {effect} {Str/Wis} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Athlete} {min-level} {60} {max-level} {64} {jewels} {{Opal} {Pearl Dust}} {fragment} {Essence of Knowledge} {effect} {Str/Dex/Con} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Health And Excessive Spirit} {min-level} {60} {max-level} {64} {jewels} {{Opal} {Pearl Dust}} {fragment} {Essence of Destruction} {effect} {HP Regen & Overmax SP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Irradiation Aggression} {min-level} {61} {max-level} {65} {jewels} {{Core of Air} {Obsidian Shards}} {fragment} {Essence of Compassion} {effect} {Electric and Radiation WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Domination Aggression} {min-level} {61} {max-level} {65} {jewels} {{Core of Air} {Adamantium Shards}} {fragment} {Essence of Destruction} {effect} {Mental and Energy WC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Irradiation Protection} {min-level} {62} {max-level} {66} {jewels} {{Core of Air} {Obsidian Shards}} {fragment} {Essence of Compassion} {effect} {Electric and Radiation AC} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Koala} {min-level} {63} {max-level} {67} {jewels} {{Opal} {Opal Dust}} {fragment} {Essence of Knowledge} {effect} {Con/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Despot} {min-level} {64} {max-level} {68} {jewels} {{Ghoti's Tears} {Pearl Dust}} {fragment} {Essence of Knowledge} {effect} {Int/Wis/Cha} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Standard Excessive Health And Spirit} {min-level} {65} {max-level} {69} {jewels} {{Pearl} {Opal Dust}} {fragment} {Essence of Knowledge} {effect} {Overmax HP/SP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Blades Aggression} {min-level} {66} {max-level} {70} {jewels} {{Ghoti's Tears} {Obsidian Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Might} {min-level} {66} {max-level} {70} {jewels} {{Opal} {Opal Dust}} {fragment} {Heart of Light} {effect} {Strength} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Blades Protection} {min-level} {67} {max-level} {71} {jewels} {{Ghoti's Tears} {Obsidian Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Crushing Protection} {min-level} {68} {max-level} {72} {jewels} {{Ghoti's Tears} {Nethernium Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Agility} {min-level} {68} {max-level} {72} {jewels} {{Star of Flame} {Opal Dust}} {fragment} {Heart of Light} {effect} {Dexterity} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Crushing Aggression} {min-level} {69} {max-level} {73} {jewels} {{Ghoti's Tears} {Nethernium Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Health} {min-level} {70} {max-level} {74} {jewels} {{Star of Flame} {Opal Dust}} {fragment} {Heart of Shadow} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Flame Protection} {min-level} {70} {max-level} {74} {jewels} {{Star of Flame} {Nethernium Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Flame Aggression} {min-level} {71} {max-level} {75} {jewels} {{Star of Flame} {Nethernium Shards}} {fragment} {Heart of Light} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Endurance} {min-level} {72} {max-level} {76} {jewels} {{Star of Flame} {Opal Dust}} {fragment} {Heart of Shadow} {effect} {Constitution} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Frost Protection} {min-level} {73} {max-level} {77} {jewels} {{Star of Frost} {Voidstone Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Frost Aggression} {min-level} {74} {max-level} {78} {jewels} {{Star of Frost} {Voidstone Shards}} {fragment} {Heart of Water} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Acid Protection} {min-level} {75} {max-level} {79} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Might} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Lion} {min-level} {75} {max-level} {79} {jewels} {{Diamond Dust} {Diamond}} {fragment} {Heart of Might} {effect} {Constitution/Strength} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Acid Aggression} {min-level} {76} {max-level} {80} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Might} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Spirit} {min-level} {76} {max-level} {80} {jewels} {{Diamond} {Opal Dust}} {fragment} {Heart of Rejuvenation} {effect} {SP Regeneration} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Terminator} {min-level} {76} {max-level} {80} {jewels} {{Diamond Dust} {Star of Frost}} {fragment} {Heart of Might} {effect} {Strength/Dexterity} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Smarts} {min-level} {77} {max-level} {81} {jewels} {{Diamond Dust} {Diamond}} {fragment} {Heart of Shadow} {effect} {Intelligence} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Electric Protection} {min-level} {77} {max-level} {81} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Clever Thief} {min-level} {78} {max-level} {82} {jewels} {{Diamond Dust} {Star of Flame}} {fragment} {Heart of Shadow} {effect} {Dexterity/Intelligence} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Electric Aggression} {min-level} {78} {max-level} {82} {jewels} {{Shansabyk's Tears} {Voidstone Shards}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Excessive Health} {min-level} {79} {max-level} {83} {jewels} {{Diamond} {Opal Dust}} {fragment} {Heart of Rejuvenation} {effect} {Overmax HP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Mental Protection} {min-level} {80} {max-level} {84} {jewels} {{Phasemetal Shards} {Emerald}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Scholar} {min-level} {80} {max-level} {84} {jewels} {{Diamond} {Diamond Dust}} {fragment} {Heart of Soul} {effect} {Intelligence/Wisdom} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Wolf} {min-level} {80} {max-level} {84} {jewels} {{Emerald} {Emerald Dust}} {fragment} {Heart of Soul} {effect} {Dexterity/Constitution} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Mental Aggression} {min-level} {81} {max-level} {85} {jewels} {{Phasemetal Shards} {Emerald}} {fragment} {Heart of Rage} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Suave Thief} {min-level} {81} {max-level} {85} {jewels} {{Diamond Dust} {Star of Frost}} {fragment} {Heart of Soul} {effect} {Dexterity/Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Insight} {min-level} {81} {max-level} {85} {jewels} {{Emerald} {Emerald Dust}} {fragment} {Heart of Soul} {effect} {Wisdom} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Energy Protection} {min-level} {82} {max-level} {86} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Soul} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Excessive Spirit} {min-level} {83} {max-level} {87} {jewels} {{Emerald Dust} {Shansabyk's Tears}} {fragment} {Heart of Soul} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Persuasiveness} {min-level} {83} {max-level} {87} {jewels} {{Emerald Dust} {Star of Frost}} {fragment} {Heart of The Unseen} {effect} {Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Energy Aggression} {min-level} {83} {max-level} {87} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Soul} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Assault Protection} {min-level} {83} {max-level} {87} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Barbarian} {min-level} {84} {max-level} {88} {jewels} {{Emerald} {Emerald Dust}} {fragment} {Heart of The Unseen} {effect} {Intelligence/Strength} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Assault Aggression} {min-level} {84} {max-level} {88} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Jackal} {min-level} {85} {max-level} {89} {jewels} {{Sapphire} {Sapphire Dust}} {fragment} {Heart of Ascension} {effect} {Intelligence/Constitution} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Elements Protection} {min-level} {85} {max-level} {89} {jewels} {{Star of Flame} {Star of Frost}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Thespian} {min-level} {86} {max-level} {90} {jewels} {{Emerald Dust} {Sapphire}} {fragment} {Heart of Ascension} {effect} {Intelligence/Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Elements Aggression} {min-level} {86} {max-level} {90} {jewels} {{Star of Flame} {Star of Frost}} {fragment} {Heart of The Unseen} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Poison Protection} {min-level} {86} {max-level} {90} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Ascension} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Poison Aggression} {min-level} {87} {max-level} {91} {jewels} {{Phasemetal Shards} {Star of Air}} {fragment} {Heart of Ascension} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Detective} {min-level} {87} {max-level} {91} {jewels} {{Sapphire} {Sapphire Dust}} {fragment} {Heart of Blasting} {effect} {Strength/Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Radiation Protection} {min-level} {88} {max-level} {92} {jewels} {{Phasemetal Shards} {Sapphire}} {fragment} {Heart of Damnation} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Thief At Large} {min-level} {88} {max-level} {92} {jewels} {{Emerald} {Sapphire Dust}} {fragment} {Heart of Blasting} {effect} {Dexterity/Wisdom} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Radiation Aggression} {min-level} {89} {max-level} {93} {jewels} {{Phasemetal Shards} {Sapphire}} {fragment} {Heart of Damnation} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Devouring Protection} {min-level} {89} {max-level} {93} {jewels} {{Phasemetal Shards} {Star of Earth}} {fragment} {Heart of Willy} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Elephant} {min-level} {90} {max-level} {94} {jewels} {{Ruby Dust} {Star of Earth}} {fragment} {Heart of Willy} {effect} {Constitution/Wisdom} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major spirit and excessive health} {min-level} {90} {max-level} {94} {jewels} {{Star of Earth} {Sapphire Dust}} {fragment} {Heart of Damnation} {effect} {SP Regen and Overmax HP Regen} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Devouring Aggression} {min-level} {91} {max-level} {95} {jewels} {{Phasemetal Shards} {Star of Earth}} {fragment} {Heart of Willy} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Domination Protection} {min-level} {92} {max-level} {96} {jewels} {{Cancer's Tears} {Chaostone Shards}} {fragment} {Heart of Destruction} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Abbot} {min-level} {92} {max-level} {96} {jewels} {{Ruby} {Ruby Dust}} {fragment} {Heart of Destruction} {effect} {Wisdom/Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Athlete} {min-level} {93} {max-level} {97} {jewels} {{Ruby} {Ruby Dust}} {fragment} {Heart of Knowledge} {effect} {Strength/Dexterity/Constitution} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Agent} {min-level} {93} {max-level} {97} {jewels} {{Sapphire} {Sapphire Dust}} {fragment} {Heart of Compassion} {effect} {Strength/Wisdom} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Domination Aggression} {min-level} {94} {max-level} {98} {jewels} {{Cancer's Tears} {Chaostone Shards}} {fragment} {Heart of Destruction} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Irradiation Aggression} {min-level} {94} {max-level} {98} {jewels} {{Chaostone Shards} {Ruby}} {fragment} {Heart of Compassion} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Irradiation Protection} {min-level} {95} {max-level} {99} {jewels} {{Chaostone Shards} {Ruby}} {fragment} {Heart of Compassion} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Koala} {min-level} {96} {max-level} {100} {jewels} {{Cancer's Tears} {Sapphire Dust}} {fragment} {Heart of Knowledge} {effect} {Constitution/Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Despot} {min-level} {97} {max-level} {101} {jewels} {{Ruby} {Ruby Dust}} {fragment} {Heart of Knowledge} {effect} {Intelligence/Wisdom/Charisma} {one-shot} {} {xp-to-fill} {}}}
-#list crafting[data][gems] add {{{gem} {Major Excessive Health and Spirit} {min-level} {98} {max-level} {101} {jewels} {{Cancer's Tears} {Ruby Dust}} {fragment} {Heart of Knowledge} {effect} {} {one-shot} {} {xp-to-fill} {}}}
-
-#class crafting_data close;
+#class {crafting_data} {close};
