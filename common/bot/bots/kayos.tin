@@ -11,7 +11,7 @@
 #var kayos[bunker] {};
 #var kayos[current_bunker] 1;
 #var kayos[ship] 0;
-#delay 1 {#send {i}};
+#delay 2 #send {i};
 
 #var {bot[path]} {e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;s;s;s;s;s;s;s};
 #var {bunker_path} {enter bunker;n;w;e;e;n;{grab cell};s;w;s;out};
@@ -94,7 +94,6 @@
         };
         #if {"$kayos[current_bunker]" == "2"} {
             #echo {HEADING TO BUNKER 2};
-
             .bunkerActions;
         };
         #if {"$kayos[current_bunker]" == "3"} {
@@ -182,27 +181,29 @@
 #list botmobs add {{{long} {Thorion the Hammer} {target} {mob}}};
 #list botmobs add {{{long} {Yttra the Great Worm} {target} {mob}}};
 
-
-
 #var checkBunker 1;
 #act {^-i-A squat bunker.$} {
     #if {"$checkBunker" == "1"} {
         #map get roomvnum bunkerVnum;
-        #if {"&kayos[bunker][]" == "0"} {
-            #var kayos[bunker][1] $bunkerVnum;
-            #echo {KAYOSBUNKER SET 1 $bunkerVnum};
+
+        #if {$kayos[bunker][1] == $bunkerVnum || $kayos[bunker][2] == $bunkerVnum || $kayos[bunker][3] == $bunkerVnum} {
+            #echo {Bunker already recorded: $bunkerVnum};
         } {
-            #if {"$kayos[bunker][1]" == "$bunkerVnum"} {#NOP} {
-                #if {"&kayos[bunker][]" == "1"} {
+            #switch &kayos[bunker][] {
+                #case 0 {
+                    #var kayos[bunker][1] $bunkerVnum;
+                    #echo {KAYOSBUNKER SET 1 $bunkerVnum};
+                };
+                #case 1 {
                     #var kayos[bunker][2] $bunkerVnum;
                     #echo {KAYOSBUNKER SET 2 $bunkerVnum};
-                } {
-                    #if {{"$kayos[bunker][1]" == "$bunkerVnum"} || {"$kayos[bunker][2]" == "$bunkerVnum"}} {#NOP} {
-                        #if {"&kayos[bunker][]" == "2"} {
-                            #var kayos[bunker][3] $bunkerVnum;
-                            #echo {KAYOSBUNKER SET 3 $bunkerVnum};
-                        };
-                    };
+                };
+                #case 2 {
+                    #var kayos[bunker][3] $bunkerVnum;
+                    #echo {KAYOSBUNKER SET 3 $bunkerVnum};
+                };
+                #default {
+                    #echo {Already have 3 bunkers recorded.};
                 };
             };
         };
