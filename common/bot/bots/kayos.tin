@@ -11,59 +11,74 @@
 #var kayos[bunker] {};
 #var kayos[current_bunker] 1;
 #var kayos[ship] 0;
-#send {i};
+#delay 2 #send {i};
 
 #var {bot[path]} {e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;n;e;e;e;e;e;e;e;n;w;w;w;w;w;w;w;s;s;s;s;s;s;s};
-#var {bunker_path} {enter bunker;n;w;e;e;n;{grab cell;keep cell;s;w;s;out}};
+#var {bunker_path} {enter bunker;n;w;e;e;n;{grab cell};s;w;s;out};
 #var {spaceship_path} {e;e;e;e;{open briefcase;touch beacon;.stop}};
 
-#act {^An intricate digital key: Ok.$} {#math kayos[key] {$kayos[key]+1}} {1};
-#act {^key: Taken.$} {#math kayos[key] {$kayos[key]+1}} {1};
-#act {^You grab the power cell from the locker.$} {#math kayos[cell] {$kayos[cell] + 1};#math kayos[current_bunker] {$kayos[current_bunker] + 1}} {1};
-#act {^There's no longer a power cell here.  Someone must have already grabbed it.$} {#math kayos[current_bunker] {$kayos[current_bunker] + 1}} {1};
+#act {^An intricate digital key: Ok.$} {#math kayos[key] {$kayos[key] + 1}} {1};
+#act {^key: Taken.$} {#math kayos[key] {$kayos[key] + 1}} {1};
+#act {^You grab the power cell from the locker.$} {
+    #math kayos[cell] {$kayos[cell] + 1};
+    #math kayos[current_bunker] {$kayos[current_bunker] + 1};
+    #echo {POWER CELL FOUND};
+    ..
+} {1};
+
+#act {^There's no longer a power cell here.  Someone must have already grabbed it.$} {
+    #math kayos[current_bunker] {$kayos[current_bunker] + 1};
+    #echo {POWER CELL ALREADY GONE};
+    ..
+} {1};
 
 #NOP -- This is the alias to do bunker actions;
 #alias .bunkerActions {
-    #if {$kayos[current_bunker] == 1} {
+    #if {"$kayos[current_bunker]" == "1"} {
         #map run $kayos[bunker][1];
         #delay 3 {
             #list bot[steps] create {$bunker_path};
             unlock bunker;
             #map goto 22675;
-            ..;
+            #delay 2 {..};
         };
     };
-    #if {$kayos[current_bunker] == 2} {
+    #if {"$kayos[current_bunker]" == "2"} {
         #map goto ${kayos[bunker][1]};
-        #delay 1 {#map run $kayos[bunker][2]};
         #delay 3 {
+            #map run $kayos[bunker][2];
+        };
+        #delay 5 {
             #list bot[steps] create {$bunker_path};
             unlock bunker;
             #map goto 22675;
-            ..;
-        }
-    };
-    #if {$kayos[current_bunker] == 3} {
-        #map goto ${kayos[bunker][2]};
-        #delay 1 {#map run $kayos[bunker][3]};
-        #delay 3 {
-            #list bot[steps] create {$bunker_path};
-            unlock bunker;
-            #map goto 22675;
-            ..;
+            #delay 2 {..};
         };
     };
-    #if {$kayos[current_bunker] == 4} {
-        #map goto ${kayos[bunker][3]};
-        #delay 1 {#map run $kayos[ship]};
+    #if {"$kayos[current_bunker]" == "3"} {
+        #map goto ${kayos[bunker][2]};
         #delay 3 {
+            #map run $kayos[bunker][3];
+        };
+        #delay 5 {
+            #list bot[steps] create {$bunker_path};
+            unlock bunker;
+            #map goto 22675;
+            #delay 2 {..};
+        };
+    };
+    #if {"$kayos[current_bunker]" == "4"} {
+        #map goto ${kayos[bunker][3]};
+        #delay 3 {
+            #map run $kayos[ship];
+        };
+        #delay 5 {
             #3 insert cell;
             #list bot[steps] create {$spaceship_path};
-
             teleport;
             #map goto 10382;
-            ..;
-        }
+            #delay 2 {..};
+        };
     };
 };
 
@@ -72,16 +87,30 @@
     #var checkBunker 0;
     #var bot[step] 1;
     .pause;
-    #if {$kayos[current_bunker] == 1} {
-        #echo {MAIN FIELD CLEAR -- ENTERING BUNKERS};
-        .bunkerActions;
-    };
+    #delay {bunker_run} {
+        #if {"$kayos[current_bunker]" == "1"} {
+            #echo {MAIN FIELD CLEAR -- HEADING TO BUNKER 1};
+            .bunkerActions;
+        };
+        #if {"$kayos[current_bunker]" == "2"} {
+            #echo {HEADING TO BUNKER 2};
+            .bunkerActions;
+        };
+        #if {"$kayos[current_bunker]" == "3"} {
+            #echo {HEADING TO BUNKER 3};
+            .bunkerActions;
+        };
+        #if {"$kayos[current_bunker]" == "4"} {
+            #echo {HEADING TO SHIP};
+            .bunkerActions;
+        };
+    } {5};
 } {1};
 
 #NOP -- These two are for necromancer inventory, which is of course different than standard;
 #var checkKey 1;
 #act {%+2sAn intricate digital key} {
-    #if {$checkKey && $inventory_check} {
+    #if {"$checkKey" == "1" && "$inventory_check" == "1"} {
         #var checkKey 0;
         #var kayos[key] 1;
         #delay 1 {#var checkKey 1};
@@ -92,7 +121,7 @@
 
 #var checkCell 1;
 #act {%+2sA dark mass of energy} {
-    #if {$checkCell && $inventory_check} {
+    #if {"$checkCell" == "1" && "$inventory_check" == "1"} {
         #var checkCell 0;
         #var kayos[cell] 1;
         #delay 1 {#var checkCell 1};
@@ -102,7 +131,7 @@
 } {5};
 
 #act {%d%*An intricate digital key.$} {
-    #if $inventory_check {
+    #if {"$inventory_check" == "1"} {
         #var tempVar %2;
         #replace tempVar { } {};
         #replace tempVar {*} {};
@@ -111,13 +140,14 @@
 } {6};
 
 #act {%d%*A dark mass of energy.$} {
-    #if $inventory_check {
+    #if {"$inventory_check" == "1"} {
         #var tempVar %2;
         #replace tempVar { } {};
         #replace tempVar {*} {};
         #var kayos[cell] $tempVar;
     };
 } {6};
+
 
 #list botmobs clear;
 #list botmobs add {{{long} {A demon soldier} {target} {mob}}};
@@ -151,27 +181,29 @@
 #list botmobs add {{{long} {Thorion the Hammer} {target} {mob}}};
 #list botmobs add {{{long} {Yttra the Great Worm} {target} {mob}}};
 
-
-
 #var checkBunker 1;
 #act {^-i-A squat bunker.$} {
-    #if $checkBunker {
+    #if {"$checkBunker" == "1"} {
         #map get roomvnum bunkerVnum;
-        #if {&kayos[bunker][] == 0} {
-            #var kayos[bunker][1] $bunkerVnum;
-            #echo {KAYOSBUNKER SET 1 $bunkerVnum};
+
+        #if {$kayos[bunker][1] == $bunkerVnum || $kayos[bunker][2] == $bunkerVnum || $kayos[bunker][3] == $bunkerVnum} {
+            #echo {Bunker already recorded: $bunkerVnum};
         } {
-            #if {$kayos[bunker][1] == $bunkerVnum} {#NOP} {
-                #if {&kayos[bunker][] == 1} {
+            #switch &kayos[bunker][] {
+                #case 0 {
+                    #var kayos[bunker][1] $bunkerVnum;
+                    #echo {KAYOSBUNKER SET 1 $bunkerVnum};
+                };
+                #case 1 {
                     #var kayos[bunker][2] $bunkerVnum;
                     #echo {KAYOSBUNKER SET 2 $bunkerVnum};
-                } {
-                    #if {{$kayos[bunker][1] == $bunkerVnum} || {$kayos[bunker][2] == $bunkerVnum}} {#NOP} {
-                        #if {&kayos[bunker][] == 2} {
-                            #var kayos[bunker][3] $bunkerVnum;
-                            #echo {KAYOSBUNKER SET 3 $bunkerVnum};
-                        };
-                    };
+                };
+                #case 2 {
+                    #var kayos[bunker][3] $bunkerVnum;
+                    #echo {KAYOSBUNKER SET 3 $bunkerVnum};
+                };
+                #default {
+                    #echo {Already have 3 bunkers recorded.};
                 };
             };
         };

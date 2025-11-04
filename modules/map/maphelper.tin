@@ -242,8 +242,8 @@
 		#map goto 10278
 	}
 };
-#action {^You are unable to penetrate the wall that %* has %*} {mapUndo} {2};
-#action {^The giant wall collapses, unblocking the escape routes.$} {#if $bot[active] {.bot}} {2};
+#action {^You are unable to penetrate the wall that %* has %*} {#if $bot[active] {.pause;mapUndo}} {2};
+#action {^The giant wall collapses, unblocking the escape routes.$} {#if $bot[active] {..}} {2};
 #action {^You can't go forward while enemies are present.$} {mapUndo} {2};
 #action {^You touch the beacon, and a friendly ship belonging to The Vigilant swings by.} {#map goto 10278} {2};
 
