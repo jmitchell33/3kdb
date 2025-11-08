@@ -52,12 +52,6 @@
 	draw_caption_bot_cycle;
 };
 
-#alias {thisarea} {
-	#list {botcycle} {get} {$cycle} {currentarea};
-	go $currentarea;
-	#delay {3} {-$currentarea}
-};
-
 
 #alias {nextarea} {
 	#if {$cycle < &{botcycle[]}} {
@@ -65,9 +59,16 @@
 	} {
 		#var cycle 1;
 	};
+	#var tmpIndex 0;
 	#list {botcycle} {get} {$cycle} {currentarea};
-	#delay {3} {-$currentarea};
-	#delay {5} {br $cycle}
+	#list {botlist} {get} {$currentarea} {tmpIndex};
+	
+	#delay {3} {+$currentarea};
+
+	#NOP -- If the area is not 'looped' then remove it from the botlist;
+	#if $botlist[$tmpIndex][loop] {#NOP} {
+		#list botcycle {delete} {$cycle};
+	};
 };
 
 #alias {botclear} {
