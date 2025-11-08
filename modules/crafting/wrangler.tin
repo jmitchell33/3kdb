@@ -1,0 +1,67 @@
+#class {wrangler} {kill}
+#class {wrangler} {open}
+
+
+#var gem_fillup[mob_class] 0;
+#var gem_fillup[class_needed_for_100] 0;
+#var gem_fillup[class_to_fill] 0;
+#var gem_fillup[current_gem_percent] 0;
+#var gem_fillup[mob_class_total] 0;
+#var gem_fillup[mob_class_total_metric] 0;
+
+#action {The gem is now %d.%d\% full.} {
+    #if {"$eternal" === "1"} {
+
+        #var gem_fillup[current_gem_percent] %1.%2;
+        #var gem_fillup[mob_class] $tmpLastKill[class];
+        #math {gem_fillup[class_needed_for_100]} {100 - $gem_fillup[current_gem_percent]};
+        #math {gem_fillup[class_to_fill]} {$gem_fillup[mob_class] * $gem_fillup[class_needed_for_100]};
+        #math {gem_fillup[class_to_fill]} {$gem_fillup[class_to_fill] / $gem_fillup[current_gem_percent]};
+        #math {gem_fillup[mob_class_total]} {$gem_fillup[mob_class_total] + $gem_fillup[mob_class]};
+
+        #format {gem_fillup[mob_class_metric]} {%M} {$gem_fillup[mob_class]};
+        #format {gem_fillup[class_to_fill_metric]} {%M} {$gem_fillup[class_to_fill]};
+        #format {gem_fillup[mob_class_total_metric]} {%M} {$gem_fillup[mob_class_total]};
+
+        #replace {gem_fillup[mob_class_metric]} {.0K} {K};
+        #replace {gem_fillup[mob_class_metric]} {.0M} {M};
+        #replace {gem_fillup[mob_class_metric]} {.0B} {B};
+        #replace {gem_fillup[mob_class_metric]} {.0k} {k};
+        #replace {gem_fillup[mob_class_metric]} {.0m} {m};
+        #replace {gem_fillup[mob_class_metric]} {.0b} {b};
+
+        #replace {gem_fillup[class_to_fill_metric]} {.0K} {K};
+        #replace {gem_fillup[class_to_fill_metric]} {.0M} {M};
+        #replace {gem_fillup[class_to_fill_metric]} {.0B} {B};
+        #replace {gem_fillup[class_to_fill_metric]} {.0k} {k};
+        #replace {gem_fillup[class_to_fill_metric]} {.0m} {m};
+        #replace {gem_fillup[class_to_fill_metric]} {.0b} {b};
+
+        #replace {gem_fillup[mob_class_total_metric]} {.0K} {K};
+        #replace {gem_fillup[mob_class_total_metric]} {.0M} {M};
+        #replace {gem_fillup[mob_class_total_metric]} {.0B} {B};
+        #replace {gem_fillup[mob_class_total_metric]} {.0k} {k};
+        #replace {gem_fillup[mob_class_total_metric]} {.0m} {m};
+        #replace {gem_fillup[mob_class_total_metric]} {.0b} {b};
+
+        #echo {<fca>--------------------------------------------<088>};
+        #echo {<ccd>Last mob class: <bea> $gem_fillup[mob_class_metric]<088>};
+        #echo {<ccd>Total mob class: <bbe> $gem_fillup[mob_class_total_metric]<088>};
+        #echo {<ccd>Class to fill: <fff> $gem_fillup[class_to_fill_metric]<088>};
+        #echo {<fca>--------------------------------------------<088>};
+
+        #if {$gem_fillup[current_gem_percent] >= 100} {
+            #var gem_fillup[mob_class] 0;
+            #var gem_fillup[class_needed_for_100] 0;
+            #var gem_fillup[class_to_fill] 0;
+            #var gem_fillup[current_gem_percent] 0;
+            #var gem_fillup[mob_class_metric] 0;
+            #var gem_fillup[class_to_fill_metric] 0;
+            #var gem_fillup[mob_class_total] 0;
+            #var gem_fillup[mob_class_total_metric] 0;
+        };
+    };
+} {2};
+
+
+#class {wrangler} {open}

@@ -95,20 +95,28 @@
 	} {1};
 	
 	#action {^You begin to mine} {#undelay minewalk} {1};
-	#action {^You have exhausted the supply of } {get all;_step_room} {1};
+	#NOP #action {^You have exhausted the supply of } {get all;_step_room} {1};
+	#NOP the action capture below is much more reliable;
+	#action {^You have exhausted} {get all;_step_room} {1};
 	#action {^It appears this part of the shaft has already been searched.} {_step_room} {1};
 	#action {^You have found nothing.} {_step_room} {1};
 	#action {^You are not skilled enough to mine this.} {_step_room} {1};
 	#action {^You should try to mine this instead.} {mine} {1};
 	#action {^You cannot spelunk while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
 	#action {^You cannot mine while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;mine} {1};};
-	#action {^You have disturbed %*} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
+	#action {^You have disturbed %*} {
+		#undelay minewalk;
+		#line oneshot #action {dealt the killing blow} {
+			corpse_trig;
+			spelunk;
+		} {1};
+	} {1};
 
 	#alias {_check_mine} {spelunk};
 	#alias {_step_room} {#delay minewalk {#path walk;_check_mine} {1}};
 	
 	#class {miner} {close}
-}
+};
 
 
 #action {You hop in the exit chute and fly out of the mine shaft!} {
@@ -121,7 +129,7 @@
 	};
 } {1};
 
-#alias {killbot} {#class find_chute kill;#class miner kill;#class minebot kill}
+#alias {killbot} {#class find_chute kill;#class miner kill;#class minebot kill};
 #class {minebot} {close}
 
 /*
@@ -132,4 +140,8 @@ v 2.019.2 -- tweak selectivity for ores, completely revamp for new mines
 
 KNOWN ISSUES:  DOES NOT END PROPERLY, USE KILLBOT
 
+last updated by badger 2025/10/28
+miner ends properly
+miner will now stop when you disturb a mob and continue once dead
+using a more reliable capture for when you exhaust a deposit
 */

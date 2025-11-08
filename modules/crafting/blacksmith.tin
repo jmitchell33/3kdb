@@ -1,18 +1,9 @@
-#class {forge} {kill}
-#class {forge} {open}
-#var quality worst;
+#class {blacksmith} {kill};
+#class {blacksmith} {open};
 
-#act {-INGREDIENTS-} {insert moulding;#delay 2 fire}
-#act {{^[0-9]+ [A-z' ]+$}} {
-        #regex {%0} {{[0-9]}} {#var item_quan &1};
-        #regex {%0} {{[A-z ']+} } {#var item_name &1};
-        #$item_quan unstash2 $quality $item_name; 
-	#$item_quan insert $item_name;
-        }
-	
-#act {You have created something new!} {retrieve all;exa moulding}
+#NOP -- turn blacksmith forge on and off;
+#alias {forge-on} {#read modules/crafting/blacksmith_forge.tin};
+#alias {forge-off} {killforge};
 
-#alias {killforge} {#class {forge} {kill}}
-#alias {out} {killforge;out}
 
-#class {forge} {close}
+#class {blacksmith} {close};
