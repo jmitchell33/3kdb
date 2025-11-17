@@ -23,10 +23,11 @@
 			};
 		};
 
-		#if {$corpses[total] > 1 && $corpse_burn} {
-			#if {$my[gp1][percent] < $corpse_burn_np} {
+		#if {$corpses[total] > 1} {
+			#if {$my[gp1][percent] < $corpse_burn_np && $corpse_burn} {
 				#var corpse_burn 0;
-				#delay 6 {#if {$my[gp1][percent] < $corpse_burn_np} {corpse_select_necro @min{15;$corpses[total]};#var corpse_burn 1}};
+				#delay 6 {#if {$my[gp1][percent] < $corpse_burn_np} {corpse_select_necro @min{15;$corpses[total]}}};
+				#delay 7 {#var corpse_burn 1};
 			};
 		} {
 			#var corpse_empty 1;

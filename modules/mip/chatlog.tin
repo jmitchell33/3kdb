@@ -99,6 +99,173 @@
 	#IF {$mipgag == 0} {.mipProcessCAA %0}
 };
 
+#alias {.handleCommLine} {
+	#var tmpCommLine %0;
+	#var tmpCommGuild 0;
+	#switch {"$tmpCommLine"} {
+		#NOP -- Some of these might be guild lines, if they are update to the guild below;
+		#case {"Auction"}      	  	{#var {commcol} {${theme[chatcolor][auction]}}};
+		#case {"Announce"}  	  	{#var {commcol} {<168>}};
+		#case {"BS Announce"}  	  	{#var {commcol} {<168>}};
+		#case {"BS Tell"}      	  	{#var {commcol} {<128>}};
+		#case {"C-Trade"}	   	  	{#var {commcol} {<178>}};
+		#case {"Clan %*"}      	  	{#var {commcol} {<158>}};
+		#case {"Com"}          	  	{#var {commcol} {<128>}};
+		#case {"Council"}      	  	{#var {commcol} {<108>}};
+		#case {"Craft"}	   	  		{#var {commcol} {<178>}};
+		#case {"Cult Game"}	   	  	{#var {commcol} {<ace>}};
+		#case {"Events"}       	  	{#var {commcol} {<168>}};
+		#case {"Explorer"}     	  	{#var {commcol} {<178>}};
+		#case {"Fcom"}         	  	{#var {commcol} {<268>}};
+		#case {"Gamers"}       	  	{#var {commcol} {<268>}};
+		#case {"High Mortal"}  	  	{#var {commcol} {${theme[chatcolor][hm]}}};
+		#case {"House Chat"}		{#var {commcol} {<268>}};
+		#case {"Lottery"}         	{#var {commcol} {<178>}};
+		#case {"Main"}              {#var {commcol} {<118>}};
+		#case {"Ncom"}              {#var {commcol} {<268>}};
+		#case {"Newbie"}            {#var {commcol} {<138>}};
+		#case {"Notify"}            {#var {commcol} {<168>}};
+		#case {"Party"}             {#var {commcol} {${theme[chatcolor][party]}}};
+		#case {"Poll"}              {#var {commcol} {<178>}};
+		#case {"Professions"}       {#var {commcol} {<178>}};
+		#case {"Shout"}             {#var {commcol} {<178>}};
+		#case {"Sports Football"}   {#var {commcol} {<178>}};
+		#case {"Slime Chat"}        {#var {commcol} {<128>}};
+		#case {"Zilch_shout"}       {#var {commcol} {<168>}};
+
+		#NOP -- Guild Lines;
+
+		#NOP -- Multiple guilds use these flags or have access to these lines;
+		#case {"RG Admin"}        {#var {commcol} {<168>};#var tmpCommGuild 1};
+		
+
+		#NOP -- Angel;
+		#case {"Angel"}            	{#var {commcol} {<168>};#var tmpCommGuild 1};
+
+		#NOP -- Bard;
+		#case {"ADMIN"}            	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Bard 30"}			{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard 50"}			{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard 70"}			{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard Admin"}		{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard Elder"}		{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard Gallant"}		{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard Leader"}		{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard Main"}			{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+		#case {"Bard Mystic"}		{#var {commcol} {<ddd>};#var tmpCommGuild 1};
+
+		#NOP -- Breed;
+		#case {"Breed"}             {#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"BreedOOC"}          {#var {commcol} {<258>};#var tmpCommGuild 1};
+		
+		#NOP -- Cyborg;
+		#case {"Cyborg Com"}        {#var {commcol} {<138>};#var tmpCommGuild 1};
+		#case {"Cyborg Death"}      {#var {commcol} {<218>};#var tmpCommGuild 1};
+		#case {"Cyborg Guild"}      {#var {commcol} {<228>};#var tmpCommGuild 1};
+		#case {"Cyborg Notify"}     {#var {commcol} {<268>};#var tmpCommGuild 1};
+		#case {"Cyborg Syndicate"}  {#var {commcol} {<128>};#var tmpCommGuild 1};
+
+		#NOP -- Elemental;
+		#case {"EL-75"} 			{#var {commcol} {<178>};#var tmpCommGuild 1};
+		#case {"Main"} 				{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Megamental"} 		{#var {commcol} {<178>};#var tmpCommGuild 1};
+		#case {"Mental Adept"}		{#var {commcol} {<178>};#var tmpCommGuild 1};
+		#case {"Mental Master"} 	{#var {commcol} {<178>};#var tmpCommGuild 1};
+		#case {"S100"} 				{#var {commcol} {<178>};#var tmpCommGuild 1};
+		#case {"Spirit"} 			{#var {commcol} {<178>};#var tmpCommGuild 1};
+		#case {"Time"}            	{#var {commcol} {<168>};#var tmpCommGuild 1};
+
+		#NOP -- Eternal;
+		#case {"Eternal Main"}      {#var {commcol} {<168>};#var tmpCommGuild 1};
+
+		#NOP Fremen;
+		#case {"Fremen Tp"}    		{#var {commcol} {<128>};#var tmpCommGuild 1};
+		#case {"Fremen Guild"}    	{#NOP -- block so guild skill training etc doesnt spam;};
+		#case {"Fremen Ntp"}    	{#var {commcol} {<128>};#var tmpCommGuild 1};
+		#case {"Fremen Rtp"}    	{#var {commcol} {<128>};#var tmpCommGuild 1};
+
+		#NOP Gentech;
+		#case {"Alpha"}            	{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Beta"}            	{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Defense"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Ggent"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Gamma"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Offense"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Notify"}          	{#NOP -- block so echelon etc doesnt spam;};
+		#case {"Sci"}          		{#var {commcol} {<168>};#var tmpCommGuild 1};
+
+
+		#NOP -- Jedi;
+		#case {"Jedi"}              {#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"JEDI"}              {#var {commcol} {<128>};#var tmpCommGuild 1};
+		
+		#NOP -- Juggernaut;
+		#case {"Bear"}              {#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Bloodname"}         {#var {commcol} {<218>};#var tmpCommGuild 1};
+		#case {"Falcon"}            {#var {commcol} {<128>};#var tmpCommGuild 1};
+		#case {"Gjugg"}             {#var {commcol} {${theme[chatcolor][gjugg]}};#var tmpCommGuild 1};
+		#case {"JuggAnnounce"}      {#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"JuggMissiles"}      {#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"JuggNewbie"}        {#var {commcol} {<258>};#var tmpCommGuild 1};
+		#case {"Loremaster"}        {#var {commcol} {<274>};#var tmpCommGuild 1};
+		#case {"Whine"}             {#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Wolf"}            	{#var {commcol} {<228>};#var tmpCommGuild 1};
+
+		#NOP -- Knights;
+		#case {"Knight Announce"}   {#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Knight Main"}       {#var {commcol} {<168>};#var tmpCommGuild 1};
+		
+		#NOP Mages;
+		#case {"Mage"}		    	{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Arch Mage"}		    {#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Black Pearl"}		{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Crimson Rose"}		{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Flaming Palm"}		{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Gmage"}		    	{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"High Mage"}		    {#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Platinum Star"}		{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Sorcerer"}		    {#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Tyrian Vines"}		{#var {commcol} {<118>};#var tmpCommGuild 1};
+		#case {"Visionary"}		    {#var {commcol} {<118>};#var tmpCommGuild 1};
+
+
+		#NOP -- Monk;
+		#case {"Monk"}            	{#var {commcol} {<238>};#var tmpCommGuild 1};
+
+		#NOP -- Necromancer;
+		#case {"Lich"}            	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Gnecr"}            	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Necro"}            	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Sphere-%*"}      	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Were"}            	{#var {commcol} {<158>};#var tmpCommGuild 1};
+
+		#NOP -- Priest;
+		#case {"Bitch"}        		{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Embodiment"}      	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Gprie"}      	    {#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Light Path"}      	{#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Priest"}      	    {#var {commcol} {<158>};#var tmpCommGuild 1};
+		#case {"Priest Announce"}   {#NOP -- block this line from logging;};
+		#case {"Priest Broadcast"}  {#NOP -- block this line from logging;};
+		
+		#NOP -- Psicorps;
+		#case {"Psi Main"}        	{#var {commcol} {<168>};#var tmpCommGuild 1};
+
+		#NOP -- Sii;
+		#case {"Gsii"}        		{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"HiPsi"}        		{#var {commcol} {<168>};#var tmpCommGuild 1};
+		#case {"Psi"}        		{#var {commcol} {<168>};#var tmpCommGuild 1};
+
+
+
+		#default		        	{#var {commcol} {<178>}};
+	};
+
+	#if {$tmpCommGuild} {
+		#var discordChannel $webhook[url][guild];#var chatCategory guild;
+	};
+};
+
 #ALIAS {.mipProcessCAA} {
 	#REGEX {%1} {{(.*)\~(.*)\~(.*)\~(.*)}} {
 		#var lastData $mip[comm][cdata];
@@ -112,196 +279,12 @@
 
 		#NOP Ansify lines;
 		#var {commcol} {<178>};
-		#switch {"$mip[comm][line]"} {
-			#case {"ADMIN"}            	{#var {commcol} {<158>}};
-            #case {"Alpha"}            	{#var {commcol} {<168>}};
-            #case {"Angel"}            	{#var {commcol} {<168>}};
-			#case {"Bard 30"}			{#var {commcol} {<ddd>}};
-			#case {"Bard 50"}			{#var {commcol} {<ddd>}};
-			#case {"Bard 70"}			{#var {commcol} {<ddd>}};
-			#case {"Bard Admin"}		{#var {commcol} {<ddd>}};
-			#case {"Bard Elder"}		{#var {commcol} {<ddd>}};
-			#case {"Bard Gallant"}		{#var {commcol} {<ddd>}};
-			#case {"Bard Leader"}		{#var {commcol} {<ddd>}};
-			#case {"Bard Main"}			{#var {commcol} {<ddd>}};
-			#case {"Bard Mystic"}		{#var {commcol} {<ddd>}};
-            #case {"Announce"}        {#var {commcol} {<168>}};
-            #case {"Auction"}        {#var {commcol} {${theme[chatcolor][auction]}}};
-            #case {"Bear"}            {#var {commcol} {<168>}};
-            #case {"Bloodname"}        {#var {commcol} {<218>}};
-            #case {"Breed"}            {#var {commcol} {<158>}};
-            #case {"BreedOOC"}        {#var {commcol} {<258>}};
-            #case {"BS Announce"}        {#var {commcol} {<168>}};
-            #case {"BS Tell"}        {#var {commcol} {<128>}};
-			#case {"Clan %*"}        {#var {commcol} {<158>}};
-            #case {"Com"}            {#var {commcol} {<128>}};
-            #case {"Council"}        {#var {commcol} {<108>}};
-            #case {"Cult Game"}	    {#var {commcol} {<ace>}};
-            #case {"Cyborg Com"}        {#var {commcol} {<138>}};
-            #case {"Cyborg Death"}        {#var {commcol} {<218>}};
-            #case {"Cyborg Guild"}        {#var {commcol} {<228>}};
-            #case {"Cyborg Notify"}        {#var {commcol} {<268>}};
-            #case {"Cyborg Syndicate"}    {#var {commcol} {<128>}};
-            #case {"Eternal Main"}        {#var {commcol} {<168>}};
-            #case {"Events"}        {#var {commcol} {<168>}};
-            #case {"Explorer"}        {#var {commcol} {<178>}};
-            #case {"Falcon"}        {#var {commcol} {<128>}};
-            #case {"Fcom"}            {#var {commcol} {<268>}};
-            #case {"Gamers"}        {#var {commcol} {<268>}};
-		    #case {"Gjugg"}            {#var {commcol} {${theme[chatcolor][gjugg]}}};
-            #case {"High Mortal"}        {#var {commcol} {${theme[chatcolor][hm]}}};
-            #case {"Jedi"}            {#var {commcol} {<158>}};
-            #case {"JEDI"}            {#var {commcol} {<128>}};
-            #case {"JuggAnnounce"}        {#var {commcol} {<118>}};
-            #case {"JuggMissiles"}        {#var {commcol} {<118>}};
-            #case {"Announce"}        	{#var {commcol} {<168>}};
-            #case {"Auction"}        	{#var {commcol} {$theme[chatcolor][auction]}};
-            #case {"Bear"}            	{#var {commcol} {<168>}};
-            #case {"Bloodname"}        	{#var {commcol} {<218>}};
-            #case {"Breed"}            	{#var {commcol} {<158>}};
-            #case {"BreedOOC"}        	{#var {commcol} {<258>}};
-            #case {"BS Announce"}       {#var {commcol} {<168>}};
-            #case {"BS Tell"}        	{#var {commcol} {<128>}};
-            #case {"Clan %*"}        	{#var {commcol} {<158>}};
-            #case {"Com"}            	{#var {commcol} {<128>}};
-            #case {"Council"}       	{#var {commcol} {<108>}};
-            #case {"Cult Game"}	    	{#var {commcol} {<ace>}};
-            #case {"Cyborg Com"}        {#var {commcol} {<138>}};
-            #case {"Cyborg Death"}      {#var {commcol} {<218>}};
-            #case {"Cyborg Guild"}      {#var {commcol} {<228>}};
-            #case {"Cyborg Notify"}     {#var {commcol} {<268>}};
-            #case {"Cyborg Syndicate"}  {#var {commcol} {<128>}};
-            #case {"Eternal Main"}      {#var {commcol} {<168>}};
-            #case {"Events"}        	{#var {commcol} {<168>}};
-            #case {"Explorer"}        	{#var {commcol} {<178>}};
-            #case {"Falcon"}        	{#var {commcol} {<128>}};
-            #case {"Fcom"}            	{#var {commcol} {<268>}};
-            #case {"Gamers"}        	{#var {commcol} {<268>}};
-		    #case {"Gjugg"}            	{#var {commcol} {$theme[chatcolor][gjugg]}};
-            #case {"High Mortal"}       {#var {commcol} {$theme[chatcolor][hm]}};
-            #case {"Jedi"}            	{#var {commcol} {<158>}};
-            #case {"JEDI"}            	{#var {commcol} {<128>}};
-            #case {"JuggAnnounce"}      {#var {commcol} {<118>}};
-            #case {"JuggMissiles"}      {#var {commcol} {<118>}};
-            #case {"JuggNewbie"}        {#var {commcol} {<258>}};
-            #case {"Knight Announce"}   {#var {commcol} {<168>}};
-            #case {"Knight Main"}       {#var {commcol} {<168>}};
-            #case {"Lich"}            	{#var {commcol} {<158>}};
-            #case {"Loremaster"}        {#var {commcol} {<274>}};
-            #case {"Lottery"}        	{#var {commcol} {<178>}};
-			
-			#NOP Mages;
-			#case {"Mage"}            	{#var {commcol} {<118>}};
-			#case {"Mage"}		    	{#var {commcol} {<118>}};
-			#case {"Arch Mage"}		    {#var {commcol} {<118>}};
-			#case {"High Mage"}		    {#var {commcol} {<118>}};
-			#case {"Sorcerer"}		    {#var {commcol} {<118>}};
-			#case {"Tyrian Vines"}		{#var {commcol} {<118>}};
-			#case {"Black Pearl"}		{#var {commcol} {<118>}};
-			#case {"Crimson Rose"}		{#var {commcol} {<118>}};
-			#case {"Platinum Star"}		{#var {commcol} {<118>}};
-			#case {"Flaming Palm"}		{#var {commcol} {<118>}};
-			#case {"Visionary"}		    {#var {commcol} {<118>}};
-			#case {"Gmage"}		    	{#var {commcol} {<118>}};
 
-            #case {"Main"}            {#var {commcol} {<118>}};
-            #case {"Monk"}            {#var {commcol} {<238>}};
-            #case {"Ncom"}            {#var {commcol} {<268>}};
-            #case {"Newbie"}        {#var {commcol} {<138>}};
-            #case {"Notify"}        {#var {commcol} {<168>}};
-            #case {"Party"}            {#var {commcol} {${theme[chatcolor][party]}}};
-            #case {"Poll"}            {#var {commcol} {<178>}};
-            #case {"Professions"}        {#var {commcol} {<178>}};
-            #case {"Psi Main"}        {#var {commcol} {<168>}};
-			#case {"RG Admin"}        {#var {commcol} {<168>}};
-            #case {"Shout"}            {#var {commcol} {<178>}};
-            #case {"Main"}            	{#var {commcol} {<118>}};
-            #case {"Monk"}            	{#var {commcol} {<238>}};
-            #case {"Ncom"}            	{#var {commcol} {<268>}};
-            #case {"Newbie"}        	{#var {commcol} {<138>}};
-            #case {"Notify"}        	{#var {commcol} {<168>}};
-            #case {"Party"}            	{#var {commcol} {$theme[chatcolor][party]}};
-            #case {"Poll"}           	{#var {commcol} {<178>}};
-            #case {"Professions"}       {#var {commcol} {<178>}};
-            #case {"Psi Main"}        	{#var {commcol} {<168>}};
-			#case {"RG Admin"}       	{#var {commcol} {<168>}};
-            #case {"Shout"}            	{#var {commcol} {<178>}};
-            #case {"Slime Chat"}        {#var {commcol} {<128>}};
-            #case {"Time"}            	{#var {commcol} {<168>}};
-            #case {"Whine"}             {#var {commcol} {<118>}};
-            #case {"Wolf"}            	{#var {commcol} {<228>}};
-            #case {"Zilch_shout"}       {#var {commcol} {<168>}};
-			#default		        	{#var {commcol} {<178>}};
-		};
+		#NOP -- Default discord channel is general.  Ansi and discord channel it is directed to;
+		#NOP -- are managed via the .handleCommLine alias;
 
-			
-
-		#NOP Direct to the webhook channel we want;
 		#var discordChannel $webhook[url][general];
-		#switch {"$mip[comm][line]"} {
-			#case {"ADMIN"}         	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"Alpha"}         	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"Angel"}         	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard 30"}			{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard 50"}			{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard 70"}			{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard Admin"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard Elder"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard Gallant"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard Leader"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard Main"}			{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bard Mystic"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bear"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Bloodname"}	    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Breed"}         	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"BreedOOC"}      	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Com"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Council"}	    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Eternal Main"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Falcon"}	    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Gjugg"}         	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Jedi"}          	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"JEDI"}          	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"JuggNewbie"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Knight Announce"} 	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"Knight Main"}   	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"Lich"}          	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-            #case {"Loremaster"}    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-
-			#NOP Fremen;
-			#case {"Fremen Tp"}    		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Fremen Guild"}    		{#NOP -- block so guild skill training etc doesnt spam;};
-			#case {"Fremen Ntp"}    		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Fremen Rtp"}    		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			
-			#NOP Mages;
-			#case {"Mage"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Arch Mage"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"High Mage"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Sorcerer"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Tyrian Vines"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Black Pearl"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Crimson Rose"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Platinum Star"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Flaming Palm"}		{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Visionary"}		    {#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Gmage"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-
-			#case {"Main"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Monk"}          	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Psi Main"}      	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"RG Admin"}      	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Time"}          	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Whine"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-			#case {"Wolf"}		    	{#var discordChannel $webhook[url][guild];#var chatCategory guild};
-
-			#case {"Clan %*"}      	{#var discordChannel $webhook[url][clan];#var chatCategory clan};
-
-			#case {"High Mortal"}		{#var discordChannel $webhook[url][high_mortal];#var chatCategory high_mortal};
-			
-			#case {"Party"}         	{#var discordChannel $webhook[url][party];#var chatCategory party};
-			#default		        	{#var discordChannel $webhook[url][general];#var chatCategory general};
-		};
+		.handleCommLine {$mip[comm][line]};
 		
 		#var {mip[comm][cdata]} {$mip[comm][data]};
 		#replace {mip[comm][cdata]} {:} {:<099>};

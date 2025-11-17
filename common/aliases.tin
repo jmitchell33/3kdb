@@ -24,6 +24,7 @@
     #if {"${toggles[emote_eheal]}" == ""} {#var toggles[emote_eheal] 1};
     #if {"${toggles[emote_rally]}" == ""} {#var toggles[emote_rally] 1};
     #if {"${toggles[emote_corpse]}" == ""} {#var toggles[emote_corpse] 1};  
+    #if {"${toggles[emote_dungeon_clear]}" == ""} {#var toggles[emote_dungeon_clear] 1};  
 };
 
 #alias {toggle} {
@@ -47,20 +48,20 @@
 };
 
 #alias {toggle-list} {
-    #echo {<cfb>   ---++---  3kdb Current Toggle Status ---++---<088>};
+    #echo {<cfb>   ---++---       3kdb Current Toggle Status      ---++---<088>};
     #echo {<fff>       Usage: toggle <toggle alias> <088>};
-    #format tmpLine {       %-15s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
+    #format tmpLine {       %-25s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
     #echo {$tmpLine};
     #foreach *toggles[] item {
         #if {$toggles[$item]} {
-            #format tmpLine {        %-15s         %+8s} {$item} {on};
+            #format tmpLine {        %-25s         %+8s} {$item} {on};
             #echo {<dfc>$tmpLine<088>};
         } {
-            #format tmpLine {        %-15s         %+9s} {$item} { off};
+            #format tmpLine {        %-25s         %+9s} {$item} { off};
             #echo {<fbb>$tmpLine<088>};
         };
     };
-    #echo {<cfb>   ---++---                             ---++---<088>};
+    #echo {<cfb>   ---++---        ---++---        ---++---       ---++---<088>};
 };
 
 #NOP -- calculator;

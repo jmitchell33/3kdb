@@ -70,23 +70,27 @@ clear_defense_tracker;
     #list spell_costs find {%i$defense_name} tmpIndex;
     #math tmpSpCost {$cast_count * $spell_costs[$tmpIndex][cost]};
     #math totalSpCost {$totalSpCost + $tmpSpCost};
+
+    #math {sp_per_block} {$tmpSpCost / $block_count};
     
     #format tmpSpCost {%g} {$tmpSpCost};
     #format block_count {%g} {$block_count};
+    #format cast_count {%g} {$cast_count};
 
     #if {"$defense_name" == "Total"} {
         #format totalSpCost {%g} {$totalSpCost};
-        #format result {<acf>-----<faa> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast} {$totalSpCost};
+        #math {total_sp_per_block} {$totalSpCost / $block_count};
+        #format result {<acf>-----<faa> %+30s %+6s %+6s %+6s %+6s %+6s %+8s %+6s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast} {$totalSpCost} {$total_sp_per_block};
     } {
-        #format result {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast} {$tmpSpCost};
+        #format result {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s %+6s   <acf>-----} {$defense_name} {$cast_count} {$cast_percent} {$block_count} {$block_percent} {$block_per_cast} {$tmpSpCost}  {$sp_per_block};
     };
     #showme $result;
 };
 
 #alias {defense_summary} {
-    #format header1 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+7s   <acf>-----} {Defense Type} {# of} {% of} {# of} {% of} {Blocks/} {SP};
-    #format header2 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {} {Casts} {Casts} {Blocks} {Blocks} {Cast} {Spent};
-    #format header3 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s   <acf>-----} {} {} {} {} {} {} {};
+    #format header1 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+7s %+6s   <acf>-----} {Defense Type} {# of} {% of} {# of} {% of} {Blocks/} {SP} {SP/};
+    #format header2 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s %+6s   <acf>-----} {} {Casts} {Casts} {Blocks} {Blocks} {Cast} {Spent} {Block};
+    #format header3 {<acf>-----<fff> %+30s %+6s %+6s %+6s %+6s %+6s %+8s %+6s   <acf>-----} {} {} {} {} {} {} {} {};
     #showme $header1;
     #showme $header2;
     #showme $header3;

@@ -8,12 +8,23 @@
     #if !$idle_flag {
         #format tmp {%l} {%1};
         #if {$toggles[emote_rally]} {
-            rally $tmp
+            rally $tmp;
         } {
-            #delay tmpResponse {say Sorry, auto-rally is not currently enabled.} 3;
+            #delay tmpResponse {say Sorry, auto-rally is not currently enabled.} {3};
         };
     };
-};
+} {2};
+
+#NOP -- Clear your dungeons if they use the soul 'alien' on you;
+#action {^%w takes your alien.  You never get over it.  Ever.$} {
+    #if !$idle_flag {
+        #if {$toggles[emote_dungeon_clear]} {
+            dungeons clear all;
+        } {
+            #delay tmpResponse {say Sorry, dungeon clear is not currently enabled.} {3};
+        };
+    };
+} {2};
 
 #action {^You are already assisting %w.$} {
     #var addItem 1;
