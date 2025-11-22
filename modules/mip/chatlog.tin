@@ -102,6 +102,9 @@
 #alias {.handleCommLine} {
 	#var tmpCommLine %0;
 	#var tmpCommGuild 0;
+	#var tmpCommClan 0;
+	#var tmpCommParty 0;
+	#var tmpCommHM 0;
 	#switch {"$tmpCommLine"} {
 		#NOP -- Some of these might be guild lines, if they are update to the guild below;
 		#case {"Auction"}      	  	{#var {commcol} {${theme[chatcolor][auction]}}};
@@ -109,7 +112,7 @@
 		#case {"BS Announce"}  	  	{#var {commcol} {<168>}};
 		#case {"BS Tell"}      	  	{#var {commcol} {<128>}};
 		#case {"C-Trade"}	   	  	{#var {commcol} {<178>}};
-		#case {"Clan %*"}      	  	{#var {commcol} {<158>}};
+		#case {"Clan %*"}      	  	{#var {commcol} {<158>};#var tmpCommClan 1;};
 		#case {"Com"}          	  	{#var {commcol} {<128>}};
 		#case {"Council"}      	  	{#var {commcol} {<108>}};
 		#case {"Craft"}	   	  		{#var {commcol} {<178>}};
@@ -118,14 +121,14 @@
 		#case {"Explorer"}     	  	{#var {commcol} {<178>}};
 		#case {"Fcom"}         	  	{#var {commcol} {<268>}};
 		#case {"Gamers"}       	  	{#var {commcol} {<268>}};
-		#case {"High Mortal"}  	  	{#var {commcol} {${theme[chatcolor][hm]}}};
+		#case {"High Mortal"}  	  	{#var {commcol} {${theme[chatcolor][hm]}};#var tmpCommHM 1;};
 		#case {"House Chat"}		{#var {commcol} {<268>}};
 		#case {"Lottery"}         	{#var {commcol} {<178>}};
 		#case {"Main"}              {#var {commcol} {<118>}};
 		#case {"Ncom"}              {#var {commcol} {<268>}};
 		#case {"Newbie"}            {#var {commcol} {<138>}};
 		#case {"Notify"}            {#var {commcol} {<168>}};
-		#case {"Party"}             {#var {commcol} {${theme[chatcolor][party]}}};
+		#case {"Party"}             {#var {commcol} {${theme[chatcolor][party]}};#var tmpCommParty 1};
 		#case {"Poll"}              {#var {commcol} {<178>}};
 		#case {"Professions"}       {#var {commcol} {<178>}};
 		#case {"Shout"}             {#var {commcol} {<178>}};
@@ -259,6 +262,18 @@
 
 
 		#default		        	{#var {commcol} {<178>}};
+	};
+
+	#if {$tmpCommHM} {
+		#var discordChannel $webhook[url][high_mortal];#var chatCategory high_mortal;
+	};
+
+	#if {$tmpCommParty} {
+		#var discordChannel $webhook[url][party];#var chatCategory party;
+	};
+
+	#if {$tmpCommClan} {
+		#var discordChannel $webhook[url][clan];#var chatCategory clan;
 	};
 
 	#if {$tmpCommGuild} {
