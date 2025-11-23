@@ -85,7 +85,7 @@
 	#foreach $ignoreEmotes {item} {#list chat[general] filter {} {%*${item}%*};#list chat[tell] filter {} {%*${item}%*};};
 };
 
-#NOP ***** Broadcast Communication (Chat/Shout) *****
+#NOP ***** Broadcast Communication (Chat/Shout) *****;
 #ALIAS {.mipProcessCAAgag} {
 	#var mipgag 0;
 
@@ -304,15 +304,15 @@
 		#var {mip[comm][cdata]} {$mip[comm][data]};
 		#replace {mip[comm][cdata]} {:} {:<099>};
 		#replace {mip[comm][cdata]} {]} {]<099>};
-		#NOP -- try #sub here;
-		#var {mip[comm][cdata]} {$commcol$mip[comm][cdata]<099>};
+		
+		#var {mip[comm][cdata]} {${commcol}${mip[comm][cdata]}<099>};
 
-		#NOP if it's the same as the last line, do nothing/prevent spam;
+		#NOP if it's the same as the last line, do nothing to prevent spam;
 		#if {"$mip[comm][cdata]" != "$lastData"} {
 			#line log {logs/$sysUser/$datestamp} {$timestamp\};
 			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
 			
-			update_chat $mip[comm][cdata];
+			update_chat {$mip[comm][cdata]};
 		};
 	}
 };
@@ -651,7 +651,7 @@
 	#replace {chat[text]} {\\x7B} {\uFF5B};
 	#replace {chat[text]} {\\x7D} {\uFF5D};
 	
-	#list chat[general] ins -1 {${timestamp}$chat[text]};
+	#list chat[general] ins -1 {${timestamp}${chat[text]}};
 	#var discordText ${mip[comm][source]}: ${mip[comm][data]};
 	#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
 	#if {"$chatCategory" != "general"} {postChatCategory};

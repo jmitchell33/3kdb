@@ -110,7 +110,16 @@
 
 #alias cooler_rotate {
 	trace glyph;
-	#%1 {deslab;get corpse;cooler corpse};
+	#var numberOfRounds 1;
+	#if {"$guild" == "necromancer"} {
+		#math numberOfRounds {%1 / 3 / 16};
+		#math numberOfRounds {$numberOfRounds + 1};
+		#format numberOfRounds {%d} {$numberOfRounds};
+		#echo {number of rounds is $numberOfRounds};
+		#${numberOfRounds} {qtrance deslab/get corpse/cooler corpse>16};
+	 } {
+		#%1 {deslab;get corpse;cooler corpse};
+	};
 	trace glyph;
 };
 
