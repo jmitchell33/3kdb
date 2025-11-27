@@ -85,7 +85,7 @@
 	#foreach $ignoreEmotes {item} {#list chat[general] filter {} {%*${item}%*};#list chat[tell] filter {} {%*${item}%*};};
 };
 
-#NOP ***** Broadcast Communication (Chat/Shout) *****
+#NOP ***** Broadcast Communication (Chat/Shout) *****;
 #ALIAS {.mipProcessCAAgag} {
 	#var mipgag 0;
 
@@ -102,6 +102,9 @@
 #alias {.handleCommLine} {
 	#var tmpCommLine %0;
 	#var tmpCommGuild 0;
+	#var tmpCommClan 0;
+	#var tmpCommParty 0;
+	#var tmpCommHM 0;
 	#switch {"$tmpCommLine"} {
 		#NOP -- Some of these might be guild lines, if they are update to the guild below;
 		#case {"Auction"}      	  	{#var {commcol} {${theme[chatcolor][auction]}}};
@@ -109,7 +112,7 @@
 		#case {"BS Announce"}  	  	{#var {commcol} {<168>}};
 		#case {"BS Tell"}      	  	{#var {commcol} {<128>}};
 		#case {"C-Trade"}	   	  	{#var {commcol} {<178>}};
-		#case {"Clan %*"}      	  	{#var {commcol} {<158>}};
+		#case {"Clan %*"}      	  	{#var {commcol} {<158>};#var tmpCommClan 1;};
 		#case {"Com"}          	  	{#var {commcol} {<128>}};
 		#case {"Council"}      	  	{#var {commcol} {<108>}};
 		#case {"Craft"}	   	  		{#var {commcol} {<178>}};
@@ -118,14 +121,14 @@
 		#case {"Explorer"}     	  	{#var {commcol} {<178>}};
 		#case {"Fcom"}         	  	{#var {commcol} {<268>}};
 		#case {"Gamers"}       	  	{#var {commcol} {<268>}};
-		#case {"High Mortal"}  	  	{#var {commcol} {${theme[chatcolor][hm]}}};
+		#case {"High Mortal"}  	  	{#var {commcol} {${theme[chatcolor][hm]}};#var tmpCommHM 1;};
 		#case {"House Chat"}		{#var {commcol} {<268>}};
 		#case {"Lottery"}         	{#var {commcol} {<178>}};
 		#case {"Main"}              {#var {commcol} {<118>}};
 		#case {"Ncom"}              {#var {commcol} {<268>}};
 		#case {"Newbie"}            {#var {commcol} {<138>}};
 		#case {"Notify"}            {#var {commcol} {<168>}};
-		#case {"Party"}             {#var {commcol} {${theme[chatcolor][party]}}};
+		#case {"Party"}             {#var {commcol} {${theme[chatcolor][party]}};#var tmpCommParty 1};
 		#case {"Poll"}              {#var {commcol} {<178>}};
 		#case {"Professions"}       {#var {commcol} {<178>}};
 		#case {"Shout"}             {#var {commcol} {<178>}};
@@ -261,6 +264,18 @@
 		#default		        	{#var {commcol} {<178>}};
 	};
 
+	#if {$tmpCommHM} {
+		#var discordChannel $webhook[url][high_mortal];#var chatCategory high_mortal;
+	};
+
+	#if {$tmpCommParty} {
+		#var discordChannel $webhook[url][party];#var chatCategory party;
+	};
+
+	#if {$tmpCommClan} {
+		#var discordChannel $webhook[url][clan];#var chatCategory clan;
+	};
+
 	#if {$tmpCommGuild} {
 		#var discordChannel $webhook[url][guild];#var chatCategory guild;
 	};
@@ -289,15 +304,15 @@
 		#var {mip[comm][cdata]} {$mip[comm][data]};
 		#replace {mip[comm][cdata]} {:} {:<099>};
 		#replace {mip[comm][cdata]} {]} {]<099>};
-		#NOP -- try #sub here;
-		#var {mip[comm][cdata]} {$commcol$mip[comm][cdata]<099>};
+		
+		#var {mip[comm][cdata]} {${commcol}${mip[comm][cdata]}<099>};
 
-		#NOP if it's the same as the last line, do nothing/prevent spam;
+		#NOP if it's the same as the last line, do nothing to prevent spam;
 		#if {"$mip[comm][cdata]" != "$lastData"} {
 			#line log {logs/$sysUser/$datestamp} {$timestamp\};
 			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
 			
-			update_chat $mip[comm][cdata];
+			update_chat {$mip[comm][cdata]};
 		};
 	}
 };
@@ -636,7 +651,7 @@
 	#replace {chat[text]} {\\x7B} {\uFF5B};
 	#replace {chat[text]} {\\x7D} {\uFF5D};
 	
-	#list chat[general] ins -1 {${timestamp}$chat[text]};
+	#list chat[general] ins -1 {${timestamp}${chat[text]}};
 	#var discordText ${mip[comm][source]}: ${mip[comm][data]};
 	#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
 	#if {"$chatCategory" != "general"} {postChatCategory};
