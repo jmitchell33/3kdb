@@ -412,7 +412,7 @@
     #NOP -- load guild;
     #read common/guilds/$guild/index.tin;
     #NOP -- load character;
-    #read chars/$user/vars.tin;
+    #nop #read chars/$user/vars.tin;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
     #read chars/$user/config.tin;
@@ -429,10 +429,17 @@
     touch diamond rune;
     #send {(powers};
     .update_gags;
-    #delay 10 {
-        init_screen;
-        #map goto 65
-    }
+    #nop draw_all;
+    _mob_status_clear;
+    reset_trackers;
+    #NOP -- Gag the few things this checks if it's not there for spam;
+    #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
+    #line oneshot #gag {^You find nothing of interest.};
+    #line oneshot #gag {^Perform touch at whom?};
+    #line oneshot #gag {^There is no reason to '(powers' here.};
+    #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
+    #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
+    #delay 6 {init_screen}
 };
 
 
