@@ -9,6 +9,264 @@
     };
 };
 
+#NOP tacos;
+#alias starttacos {
+    #echo {Starting Taco Run!};
+    #if {"$guild" == "mage"} {cast levitate};
+    #if {"$guild" == "juggernaut"} {jumpjet};
+    scaler 91;
+    e;
+    repeat nocombat/grab shell/0;
+    scaler 150;
+
+    #line oneshot #action {You try to grab a taco shell, but they all wriggle away from your grasp!} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            e;
+            repeat nocombat/grab lettuce/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            e;
+            repeat nocombat/grab lettuce/0
+        }
+    };
+    #line oneshot #action {You try to grab some lettuce, but it shrinks away from your hand!} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            e;
+            repeat nocombat/grab tomatoes/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            e;
+            repeat nocombat/grab tomatoes/0
+        }
+    };
+    #line oneshot #action {^You try to grab some tomatoes but they quiver like jello and slime away\nfrom you!$} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            e;
+            repeat nocombat/grab cheese/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            e;
+            repeat nocombat/grab cheese/0
+        }
+    };
+    #line oneshot #action {You try to grab a handful of cheese, but it slips away from you.} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            s;
+            repeat nocombat/grab meat/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            s;
+            repeat nocombat/grab meat/0
+        }
+    };
+    #line oneshot #action {You try to grab some meat, but it creeps away from your grasp!} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            w;
+            repeat nocombat/grab sour cream/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            w;
+            repeat nocombat/grab sour cream/0
+        }
+    };
+    #line oneshot #action {You try to grab a scoop of the sour cream, but it quivers away from you.} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            w;
+            repeat nocombat/grab guacamole/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            w;
+            repeat nocombat/grab guacamole/0
+        }
+    };
+    #line oneshot #action {You try to grab a scoop of the guacamole, but it quivers away from you.} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            jumpjet;
+            w;
+            repeat nocombat/grab hot sauce/0
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            cast levitate;
+            w;
+            repeat nocombat/grab hot sauce/0
+        }
+    };
+    #line oneshot #action {You try to grab a packet of hot sauce, but it crinkles away from you.} {
+        repeat off;
+        #if {"$guild" == "mage"} {deplete levitate};
+        #if {"$guild" == "juggernaut"} {jumpjet};
+        
+        #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+            get all;
+            w;
+            #delay 2 {
+                #echo {Taco Run Complete!}
+            }
+        };
+
+        #line oneshot #action {You float gently to the ground.} {
+            get all;
+            w;
+            #delay 2 {
+                #echo {Taco Run Complete!}
+            }
+        }
+    }
+};
+
+#NOP announce where event is on hm line;
+#var go_event_back 0;
+#alias {eventlocation} {
+    #if {$go_event_back} {
+        #echo {<faa>Event location already captured. Use 'announce_event' to share.<088>}
+    };
+    #else {
+        #map get roomvnum go_back;
+        #var go_event_back 1;
+        go magic;
+        #delay 6 {
+            go_back;
+            #delay 6 {
+                #path save forward event_location;
+                #echo {<ffa>Event location captured!<088>};
+                #delay {1} {announce_event}
+            }
+        }
+    }
+};
+
+#alias {announce_event} {
+    #if {!&event_location} {
+        #echo {<faa>Error: No event location saved yet. Run 'eventlocation' first.<088>};
+        #return
+    };
+    
+    #local event_tmp_current_dir {};
+    #local event_tmp_count 0;
+    #local event_tmp_output_parts {};
+    #list event_tmp_output_parts create {};
+    
+    #nop Parse through each direction in event_location;
+    #foreach {$event_location} {event_tmp_dir} {
+        #nop Skip portal since it's always there;
+        #if {"$event_tmp_dir" == "portal"} {
+            #continue
+        };
+        
+        #nop Check if this direction is the same as the previous one;
+        #if {"$event_tmp_dir" == "$event_tmp_current_dir"} {
+            #math event_tmp_count {$event_tmp_count + 1}
+        };
+        #else {
+            #nop Save the previous direction group if it exists;
+            #if {$event_tmp_count > 0} {
+                #if {$event_tmp_count == 1} {
+                    #list event_tmp_output_parts add {$event_tmp_current_dir}
+                };
+                #else {
+                    #local event_tmp_formatted {};
+                    #format event_tmp_formatted {%d%s} {$event_tmp_count} {$event_tmp_current_dir};
+                    #list event_tmp_output_parts add {$event_tmp_formatted}
+                }
+            };
+            
+            #nop Start new direction;
+            #var event_tmp_current_dir {$event_tmp_dir};
+            #var event_tmp_count 1
+        }
+    };
+    
+    #nop Don't forget to add the last direction group;
+    #if {$event_tmp_count > 0} {
+        #if {$event_tmp_count == 1} {
+            #list event_tmp_output_parts add {$event_tmp_current_dir}
+        };
+        #else {
+            #local event_tmp_formatted {};
+            #format event_tmp_formatted {%d%s} {$event_tmp_count} {$event_tmp_current_dir};
+            #list event_tmp_output_parts add {$event_tmp_formatted}
+        }
+    };
+    
+    #nop Join all parts with / separator;
+    #local event_tmp_final_output {};
+    #local event_tmp_first 1;
+    #foreach {*event_tmp_output_parts[%*]} {event_tmp_idx} {
+        #if {$event_tmp_first == 1} {
+            #var event_tmp_final_output {$event_tmp_output_parts[$event_tmp_idx]};
+            #var event_tmp_first 0
+        };
+        #else {
+            #var event_tmp_final_output {$event_tmp_final_output/$event_tmp_output_parts[$event_tmp_idx]}
+        }
+    };
+    
+    #nop Send to hmline;
+    #var go_event_back 0;
+    hm event, $event_tmp_final_output
+};
+
 #NOP -- minining;
 #alias {mine1} {
     mine voidstone phasemetal chaostone
@@ -1138,6 +1396,8 @@
         strategy cloud;
         strategy vortex;
         strategy enrage;
+        strategy cshot;
+        strategy rolm;
     };
     #elseif {"$guild" == "fremen"} {
         strategy-clear;
@@ -1785,7 +2045,9 @@
 
 #NOP -- vigilant boosts;
 #alias {vigiboost-wis} {
-    buy 1;buy 2;buy 3;buy 4;buy 5;
+    buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
     imprint wisdom;quaff flask;
     imprint wisdom;quaff flask;
     imprint wisdom;quaff flask;
@@ -2053,6 +2315,7 @@
 #list badger3kdb add {{{name} {ustash1} {type} {misc} {desc} {unstash all the jewels i collect/use}}};
 #list badger3kdb add {{{name} {ustash2} {type} {misc} {desc} {unstash all frags/essence/hearts}}};
 #list badger3kdb add {{{name} {ore1} {type} {misc} {desc} {unstash ore and prospect ore}}};
+#list badger3kdb add {{{name} {starttacos} {type} {misc} {desc} {start taco bot}}};
 
 #NOP -- guild -- juggernaut;
 #if {"$guild" == "juggernaut"} {
