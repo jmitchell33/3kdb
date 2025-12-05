@@ -412,7 +412,6 @@
     #NOP -- load guild;
     #read common/guilds/$guild/index.tin;
     #NOP -- load character;
-    #nop #read chars/$user/vars.tin;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
     #read chars/$user/config.tin;
@@ -421,15 +420,14 @@
     #read chars/$user/private.tin;
     #read chars/$user/tickers.tin;
     #NOP -- load defaults;
-	mipon;
-	loadmap;
+    mipon;
+    loadmap;
     postload;
-	i;
+    i;
     examine cooler;
     touch diamond rune;
     #send {(powers};
     .update_gags;
-    #nop draw_all;
     _mob_status_clear;
     reset_trackers;
     #NOP -- Gag the few things this checks if it's not there for spam;
@@ -439,10 +437,13 @@
     #line oneshot #gag {^There is no reason to '(powers' here.};
     #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
     #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
-    #delay 6 {init_screen}
+    #NOP -- Wait for variables to initialize, then redraw screen;
+    #delay 6 {init_screen};
+    #delay 7 {
+        draw_all;
+        clearChatHeader;
+        draw_chat;
+    }
 };
-
-
-
 
 #class {default_aliases} {close}
