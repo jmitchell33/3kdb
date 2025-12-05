@@ -6,7 +6,14 @@
     #if {!$idle_flag} {
         wield rod;
         wield shard
-    };
+    }
+} {1};
+
+#nop slippery that none of your armor seems to want to stay on!;
+#action {The guacamole coating Badger finally oozes off.} {
+    #if {!$idle_flag} {
+        wear all
+    }
 } {1};
 
 #NOP -- if i accidently pick up corpses durning a stepper;
@@ -14,7 +21,7 @@
     #if {!$idle_flag && $bot[active] && "$guild" == "fremen"} {
         drop corpse;
         fai
-    };
+    }
 };
 
 #NOP -- if not wielding a weapon as fremen;
@@ -23,14 +30,14 @@
         draw crysknife;
         wield crysknife;
         keep crysknife
-    };
+    }
 };
 
 #action {^You already have your crysknife drawn.} {
     #if {!$idle_flag} {
         wield crysknife;
         keep crysknife
-    };
+    }
 };
 
 #NOP -- automagically toggle truck pfocus;
@@ -45,26 +52,26 @@
 #action {[%w enters the game]} {
     #if {!$idle_flag} {
         mywhosync
-    };
+    }
 } {1};
 
 #action {[%w reconnects]} {
     #if {!$idle_flag} {
         mywhosync
-    };
+    }
 } {1};
 
 #action {[%w disconnects]} {
     #if {!$idle_flag} {
         mywhosync
-    };
+    }
 } {1};
 
 #NOP -- hurinteons tome;
 #action {Hurinteon's tome vibrates and flashes brightly for a moment.} {
     #if {!$idle_flag} {
         ptell Hurinteon's tome has reset
-    };
+    }
 };
 
 #NOP -- QUICK FIX FOR BANSHEES STEPPER;
@@ -94,8 +101,8 @@
         #if {"$guild" == "fremen"} {
             unwrap 1;
             reclaim
-        };
-    };
+        }
+    }
 };
 
 #NOP -- emergency airdrop;
@@ -109,13 +116,13 @@
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {
     #if {!$idle_flag} {
         truck ammo vbuy missile 6 1 40000
-    };
+    }
 };
 
 #action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {
     #if {!$idle_flag} {
         truck ammo vbuy missile 6 1 40000
-    };
+    }
 };
 
 #NOP -- jugger cdefend for party;
@@ -127,7 +134,7 @@
 #action {Gargoyle <cgame>: The remaining roles were:} {
     #if {$cultjoin && !$idle_flag} {
         #delay 6 {cult join}
-    };
+    }
 };
 
 #NOP - beloch bot;
@@ -136,7 +143,7 @@
 		challenge_all;
         kill beloch;
         arena_kill_all
-	};
+	}
 };
 
 #NOP -- hobbit pipe;
@@ -151,14 +158,14 @@
 
 #action {A voice whispers in your mind.  You may proceed.} {
     #if {!$idle_flag && "$tao_toggle" == "1" && "$area" == "Tao Te Cheng"} {
-        #send {!continue};
-    };
+        #send {!continue}
+    }
 } {1};
 
 #action {You bow deeply in respect to the ancients.} {
     #if {!$idle_flag && "$tao_toggle" == "1" && "$area" == "Tao Te Cheng"} {
-        #send {!flipbird all};
-    };
+        #send {!flipbird all}
+    }
 } {1};
 
 #class {player_actions} {close};

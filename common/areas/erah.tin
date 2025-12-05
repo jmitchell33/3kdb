@@ -1,5 +1,5 @@
-#class {area_erah} {kill};
-#class {area_erah} {open};
+#class {area_erah} {kill}
+#class {area_erah} {open}
 
 
 #NOP -- ERAH GRAND MASTER;
@@ -22,7 +22,7 @@
 
 #alias {banu2} {examine trees;search trees};
 
-#alias {banu3} {examine pillar;search pillar;grab orb;look at orb;#echo {you have to fly dumbass}};
+#alias {banu3} {examine pillar;search pillar;grab orb;look at orb;#echo {<ffa>You have to fly<088>}};
 #action {This orb exudes an aura of magical energy that almost seems to guide} {ptell found first orb};
 
 #alias {banu4} {examine fountain;search fountain;get journal;examine journal};
@@ -50,58 +50,74 @@
 
 #alias {banu10} {enter};
 
-#alias {banu11} {examine statues;search statues;pry orb;get orb;grab orb;look at orb;#echo {you have to fly dumbass}};
+#alias {banu11} {examine statues;search statues;pry orb;get orb;grab orb;look at orb;#echo {<ffa>You have to fly!<088>}};
 #action {You grab the dull orb before it closes back up.} {ptell found second orb};
 
 #alias {banu12} {examine sigil;search sigil;north};
 
-#NOP -- BANSHEE GUYAHI;
-#alias {queen1} {
-    examine shelves;
-    search shelves;
-    #if {"$guild" == "necromancer"} {shapeshift raven};
-    #if {"$guild" == "bard"} {cast wings of the phoenix};
-    #if {"$guild" == "juggernaut"} {jumpjet};
-    reach for jar;
-    #delay {5} {
-        #if {"$guild" == "necromancer"} {shapeshift};
-        #if {"$guild" == "bard"} {land};
-        #if {"$guild" == "juggernaut"} {jumpjet};
-        get phylactery;
-        examine phylactery;
-        read runes;
-        #echo {you have to fly dumbass};
-    };
-};
+#nop banshee;
 #alias {guy1} {$guyahicode};
 #action {Your mind is filled with the word '%w'.} {#var guyahicode %1} {2};
 
 #alias {banshee_fear} {
     #if {"$guild" == "psicorps"} {[suggestion guardian};
-    #if {"$guild" == "necromancer"} {#5 turn undead};
+    #if {"$guild" == "necromancer"} {#5 turn undead}
 };
 
 #alias {banshee_dispel} {
     #if {"$guild" == "psicorps"} {[psychic disjunction barrier};
-    #if {"$guild" == "mage"} {cast dispel magic here};
+    #if {"$guild" == "mage"} {cast dispel magic here}
 };
 
 #alias {banshee_jar} {
     exa shelves;
     search shelves;
-    #if {"$guild" == "mage"} {cast levitate};
-    #if {"$guild" == "bard"} {cast wings of the phoenix;land};
-    #if {"$guild" == "necromancer"} {shapeshift raven};
-    reach for jar;
-    #if {"$guild" == "mage"} {deplete levitate};
-    #if {"$guild" == "necromancer"} {shapeshift};
-    #if {"$guild" == "mage"} {
-        #line oneshot #action {You float gently to the ground.} {get jar;read runes};
-    } {
-        get jar;
-        read runes;
+    #if {"$guild" == "mage"} {cast levitate;reach for jar};
+    #elseif {"$guild" == "bard"} {cast wings of the phoenix;reach for jar};
+    #elseif {"$guild" == "necromancer"} {shapeshift raven;reach for jar};
+    #elseif {"$guild" == "juggernaut"} {jumpjet;reach for jar};
+    #else {
+        #echo {<ffa>Current guild needs to be added to the alias: <fff>$guild <ffa>- You need to fly<088>};
+        reach for jar
     };
+    #nop some guilds/items need a short delay before using again;
+    #delay 5 {
+        #if {"$guild" == "bard"} {
+            land;
+            #nop get phylactery;
+            get jar;
+            read runes
+        };
+        #elseif {"$guild" == "necromancer"} {
+            shapeshift;
+            #nop get phylactery;
+            get jar;
+            read runes
+        };
+        #elseif {"$guild" == "mage"} {
+            deplete levitate;
+            #line oneshot #action {You float gently to the ground.} {
+                #nop get phylactery;
+                get jar;
+                read runes
+            }
+        };
+        #elseif {"$guild" == "juggernaut"} {
+            jumpjet;
+            #line oneshot #action {Your jumpjets shut down and you land on the ground.} {
+                #nop get phylactery;
+                get jar;
+                read runes
+            }
+        };
+        #else {
+            #echo {<ffa>Current guild needs to be added to the alias: <fff>$guild <ffa>- You need to land<088>};
+            #nop get phylactery;
+            get jar;
+            read runes
+        }
+    }
 };
 
 
-#class {area_erah} {close};
+#class {area_erah} {close}
