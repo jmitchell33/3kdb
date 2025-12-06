@@ -1021,7 +1021,7 @@
 
 #action {The %* goblin touches%*} {
     #if {"$craft_farming[data][tool_type]" == "Simple"} {
-        setgoblinvalue {%1} {M/A}
+        setgoblinvalue {%1} {0}
     };
     #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
         setgoblinvalue {%1} {2}
@@ -1553,607 +1553,831 @@
     }
 };
 
-#nop the plant recipes from this point need to be rewritten;
-#alias FARML4snappea {
+#alias farml4snappea {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;30};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;35};
-        fertilize {Smurfy fertilizer;35};
-        aerate {Serinth air;50};
-        spray {Hunch pesticide;10};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        fertilize some happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        spray little hunch pesticide;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        water {R'lyehwater ;30};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;35};
-        fertilize {Smurfy fertilizer;35};
-        aerate {Serinth air;50};
-        spray {Hunch pesticide;10}
+        water lots r'lyeh water;
+        fertilize some happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        spray little hunch pesticide
     }
 };
 
-#alias FARML5blackberry {
+#alias farml5blackberry {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;30};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;35};
-        fertilize {Smurfy fertilizer;35};
-        aerate {Serinth air;10};
-        spray {Hunch pesticide;30};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        fertilize some happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little serinth air;
+        water lots r'lyeh water;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] % 2 == 0} {
-        water {R'lyehwater ;30};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;35};
-        fertilize {Smurfy fertilizer;35};
-        aerate {Serinth air;10};
-        spray {Hunch pesticide;30}
+        water lots r'lyeh water;
+        fertilize some happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little serinth air;
+        spray lots hunch pesticide
     }
 };
 
-#alias FARML5navelorange {
-  #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        aerate {Serinth air;35};
-        fertilize {Alphabet fertilizer;35};
-        sne {grow plant}
+#alias farml5navelorange {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim;
+        aerate lots serinth air;
+        fertilize lots alphabet fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        aerate {Serinth air;20};
-        fertilize {Alphabet fertilizer;20}
+        aerate some serinth air;
+        fertilize some alphabet fertilizer
     }
 };
 
-#alias FARML5newpotato {
+#alias farml5newpotato {
     #if {$craft_farming[data][plantround] == 0} {
-	    sne {stake claim}
+        sne stake claim
     };
     cleanplot_amish;
-    spread {Burns brand neutralizer;127};
-    spray {Murus Faralain pesticide;3};
-    water {Gulf of Mexicowater ;60};
-	spread {Garou neutralizer;133};
-	spray {Hunch pesticide;40};
-	fertilize {Smurfy fertilizer;31};
-	water {Atlantiswater ;32};
-	water {Wayhavenwater ;13};
-	spread {Cowville neutralizer;103};
-	aerate {Serinth air;22};
-	fertilize {Hippie fertilizer;102};
-	spread {Der'thalas neutralizer;105};
-	spray {Mount Perplexus pesticide;2};
-	water {R'lyehwater ;25};
-	fertilize {Happy Ed's fertilizer;78};
-	aerate {Genlab air;35};
-	aerate {Ryogi-Pei air;57};
-	spray {Ant Cave pesticide;7};
-	aerate {Detroit air;2};
-	fertilize {Alphabet fertilizer;42};
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread some burns brand neutralizer;
+    spray little murus faralain pesticide;
+    water lots gulf of mexico water;
+    water lots gulf of mexico water;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    spread little garou neutralizer;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    fertilize lots smurfy fertilizer;
+    water lots atlantis water;
+    water little wayhaven water;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    aerate some serinth air;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    spray little mount perplexus pesticide;
+    water some r'lyeh water;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    aerate lots genlab air;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    spray little ant cave pesticide;
+    aerate little detroit air;
+    fertilize lots alphabet fertilizer;
+    fertilize some alphabet fertilizer;
     #if {$craft_farming[data][plantround] == 0} {
-	    sne {grow plant}
+        sne grow plant
     }
 };
 
-#alias FARML5canteloupe {
+#alias farml5canteloupe {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;70};
-        fertilize {Happy Ed's fertilizer;70};
-        fertilize {Hippie fertilizer;70};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] == 1} {
-        water {wayhavenwater ;35};
-        fertilize {Happy Ed's fertilizer;35};
-        fertilize {Hippie fertilizer;20}
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize some hippie fertilizer
     };
     #elseif {$craft_farming[data][plantround] > 1} {
-        water {wayhavenwater ;20};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;20}
+        water some wayhaven water;
+        fertilize some happy ed's fertilizer;
+        fertilize some hippie fertilizer
     }
-};  
+};
 
-#alias FARML6avocado {
+#alias farml6avocado {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;70};
-        fertilize {Happy Ed's fertilizer;70};
-        fertilize {Hippie fertilizer;45};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize some hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] == 3 || $craft_farming[data][plantround] == 5} {
-        water {wayhavenwater ;20};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;20}
+        water some wayhaven water;
+        fertilize some happy ed's fertilizer;
+        fertilize some hippie fertilizer
     }
 };
 
-#alias FARML6boscpear {
+#alias farml6boscpear {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;70};
-        aerate {Genlab air;105};
-        fertilize {Hippie fertilizer;70};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        aerate {Genlab air;20};
-        fertilize {Smurfy fertilizer;20};
-        water {R'lyehwater ;20}
+        aerate some genlab air;
+        fertilize some smurfy fertilizer;
+        water some r'lyeh water
     }
 };
 
-#alias FARML6eggplant {
+#alias farml6eggplant {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;70};
-        fertilize {Happy Ed's fertilizer;70};
-        fertilize {Hippie fertilizer;70};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] == 3} {
-        water {wayhavenwater ;20};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;20}
+        water some wayhaven water;
+        fertilize some happy ed's fertilizer;
+        fertilize some hippie fertilizer
     }
 };
 
-#alias FARML6bluepotato {
+#alias farml6bluepotato {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;140};
-        fertilize {Happy Ed's fertilizer;60};
-        fertilize {Hippie fertilizer;60};
-        fertilize {Smurfy fertilizer;60};
-        aerate {Serinth air;10};
-        spray {Hunch pesticide;10};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little serinth air;
+        spray little hunch pesticide;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        water {R'lyehwater ;140};
-        fertilize {Happy Ed's fertilizer;60};
-        fertilize {Hippie fertilizer;60};
-        fertilize {Smurfy fertilizer;60};
-        aerate {Serinth air;10};
-        spray {Hunch pesticide;10}
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little serinth air;
+        spray little hunch pesticide
     }
 };
 
-#alias FARML6jalapeno {
+#alias farml6jalapeno {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;35};
-        fertilize {Happy Ed's fertilizer;35};
-        fertilize {Hippie fertilizer;35};
-        aerate {Detroit air;35};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        aerate lots detroit air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        water {wayhavenwater ;20};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;20};
-        aerate {Detroit air;20}
+        water some wayhaven water;
+        fertilize some happy ed's fertilizer;
+        fertilize some hippie fertilizer;
+        aerate some detroit air
     }
 };
 
-#alias FARML7yellowpepper {
+#alias farml7yellowpepper {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;80};
-        aerate {Ryogi-Pei air;140};
-        fertilize {Hippie fertilizer;80};)
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots ryogi-pei air;
+        aerate lots ryogi-pei air;
+        aerate lots ryogi-pei air;
+        aerate lots ryogi-pei air;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] % 2 == 0} {
-        water {wayhavenwater ;20};
-        aerate {Ryogi-Pei air;35};
-        fertilize {Hippie fertilizer;20}
+        water some wayhaven water;
+        aerate lots ryogi-pei air;
+        fertilize some hippie fertilizer
     }
 };
 
-#alias FARML8alfalfasprout {
+#alias farml8alfalfasprout {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;105};
-        fertilize {Hippie fertilizer;105};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] == 3 || $craft_farming[data][plantround] == 5} {
-        water {wayhavenwater ;35};
-        fertilize {Hippie fertilizer;5}
+        water lots wayhaven water;
+        fertilize little hippie fertilizer
     }
 };
 
-#alias FARML8redplum {
+#alias farml8redplum {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;105};
-        fertilize {Happy Ed's fertilizer;35};
-        fertilize {Hippie fertilizer;35};
-        fertilize {Smurfy fertilizer;35};
-        aerate {Serinth air;10};
-        spray {Hunch pesticide;10};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little serinth air;
+        spray little hunch pesticide;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        water {R'lyehwater ;105};
-        spray {Hunch pesticide;10};
-        fertilize {Hippie fertilizer;20};
-        spray {Mount Perplexus pesticide;10};
-        aerate {Ryogi-Pei air;20}
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        spray little hunch pesticide;
+        fertilize some hippie fertilizer;
+        spray little mount perplexus pesticide;
+        aerate some ryogi-pei air
     }
 };
 
-#alias FARML8mandarin {
+#alias farml8mandarin {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        aerate {Detroit air;175};
-        water {mexicowater ;175};
-        fertilize {Smurfy fertilizer;350};
-        sne {grow plant}
+        sne stake claim;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        water lots mexico water;
+        water lots mexico water;
+        water lots mexico water;
+        water lots mexico water;
+        water lots mexico water;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 1} {
-        aerate {Detroit air;30};
-        water {mexicowater ;30};
-        fertilize {Smurfy fertilizer;60}
+        aerate lots detroit air;
+        water lots mexico water;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
     }
 };
 
-#alias FARML8whiteplum {
+#alias farml8whiteplum {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;105};
-        fertilize {Happy Ed's fertilizer;35};
-        fertilize {Hippie fertilizer;35};
-        fertilize {Smurfy fertilizer;35};
-        aerate {Serinth air;10};
-        spray {Hunch pesticide;10};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little serinth air;
+        spray little hunch pesticide;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        water {R'lyehwater ;105};
-        spray {Hunch pesticide;10};
-        fertilize {Hippie fertilizer;20};
-        spray {Mount Perplexus pesticide;10};
-        aerate {Ryogi-Pei air;20}
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        spray little hunch pesticide;
+        fertilize some hippie fertilizer;
+        spray little mount perplexus pesticide;
+        aerate some ryogi-pei air
     }
 };
 
-#alias FARML9boysenberry {
+#alias farml9boysenberry {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Alphabet fertilizer;35};
-        water {wayhavenwater ;70};
-        fertilize {Smurfy fertilizer;40};
-        fertilize {Hippie fertilizer;40};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots alphabet fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots smurfy fertilizer;
+        fertilize some smurfy fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize some hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;20};
-        fertilize {Smurfy fertilizer;20};
-        water {wayhavenwater ;10};
-        fertilize {Happy Ed's fertilizer;10}
+        fertilize some hippie fertilizer;
+        fertilize some smurfy fertilizer;
+        water little wayhaven water;
+        fertilize little happy ed's fertilizer
     }
 };
 
-#alias FARML10babyeggplant {
+#alias farml10babyeggplant {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Smurfy fertilizer;20};
-        fertilize {Hippie fertilizer;20};
-        sne {grow plant}
+        sne stake claim;
+        fertilize some smurfy fertilizer;
+        fertilize some hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;20};
-        fertilize {Smurfy fertilizer;20}
+        fertilize some hippie fertilizer;
+        fertilize some smurfy fertilizer
     }
 };
 
-#alias FARML11banana {
+#alias farml11banana {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Smurfy fertilizer;105};
-        fertilize {Happy Ed's fertilizer;105};
-        water {wayhavenwater ;105};
-        aerate {Serinth air;105};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        sne {twiddle};
-        fertilize {Smurfy fertilizer;25};
-        water {wayhavenwater ;20}
+        sne twiddle;
+        fertilize some smurfy fertilizer;
+        water some wayhaven water
     };
     #else {
-        fertilize {Happy Ed's fertilizer;35};
-        aerate {Serinth air;35}
+        fertilize lots happy ed's fertilizer;
+        aerate lots serinth air
     }
 };
 
-#alias FARML11englishcucmber {
+#alias farml11englishcucmber {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Hippie fertilizer;140};
-        fertilize {Happy Ed's fertilizer;140};
-        water {wayhavenwater ;140};
-        aerate {Genlab air;140};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;35};
-        fertilize {Happy Ed's fertilizer;35};
-        fertilize {Alphabet fertilizer;10};
-        water {wayhavenwater ;35};
-        aerate {Genlab air;35}
+        fertilize lots hippie fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize little alphabet fertilizer;
+        water lots wayhaven water;
+        aerate lots genlab air
     }
 };
 
-#alias FARML11yukongold {
+#alias farml11yukongold {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;70};
-        aerate {Genlab air;105};
-        fertilize {Hippie fertilizer;70};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;70};
-        water {wayhavenwater ;10};
-        aerate {Genlab air;70}
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        water little wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air
     };
     #elseif {$craft_farming[data][plantround] % 2 == 0} {
-        spread {Burns brand neutralizer;150};
-        aerate {Genlab air;45}
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        aerate lots genlab air;
+        aerate some genlab air
     }
 };
 
-#alias FARML12mottledpepper {
+#alias farml12mottledpepper {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Hippie fertilizer;35};
-        water {wayhavenwater ;175};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots hippie fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;35};
-        fertilize {Happy Ed's fertilizer;45};
-        water {wayhavenwater ;35}
+        fertilize lots hippie fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize some happy ed's fertilizer;
+        water lots wayhaven water
     }
 };
 
-#alias FARML14bartletpear {
+#alias farml14bartletpear {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Happy Ed's fertilizer;210};
-        water {wayhavenwater ;70};
-        aerate {Genlab air;70};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;105};
-        water {wayhavenwater ;45};
-        aerate {Genlab air;70}
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        water lots happy ed's fertilizer;
+        water some happy ed's fertilizer;
+        aerate lots genlab air;
+        aerate lots genlab air
     }
 };
 
-#alias FARML14brusselsprout {
+#alias farml14brusselsprout {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Hippie fertilizer;35};
-        water {wayhavenwater ;70};
-        aerate {Genlab air;70};
-        aerate {Serinth air;10};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots hippie fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate little serinth air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;30};
-        aerate {Genlab air;35}
+        fertilize lots hippie fertilizer;
+        aerate lots genlab air
     };
     #elseif {$craft_farming[data][plantround] % 2 == 0} {
-        water {wayhavenwater ;10}
+        water little wayhaven water
     };
     #else {
-        water {wayhavenwater ;20}
+        water some wayhaven water
     }
 };
 
-#alias FARML15mango {
+#alias farml15mango {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Happy Ed's fertilizer;30};
-        water {R'lyehwater ;70};
-        fertilize {Smurfy fertilizer;70};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots happy ed's fertilizer;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Smurfy fertilizer;35};
-        water {R'lyehwater ;20}
+        fertilize lots smurfy fertilizer;
+        water some r'lyeh water
     }
 };
 
-#alias FARML16russetpotato {
+#alias farml16russetpotato {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {wayhavenwater ;70};
-        aerate {Genlab air;105};
-        fertilize {Hippie fertilizer;70};
-        sne {grow plant}
+        sne stake claim;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer;70};
-        water {wayhavenwater ;10};
-        aerate {Genlab air;70}
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        water little wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air
     };
     #elseif {$craft_farming[data][plantround] % 2 == 0} {
-        spread {Burns brand neutralizer;150};
-     	aerate {Genlab air;45}
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        aerate lots genlab air;
+        aerate some genlab air
     }
 };
 
-#alias FARML17gooseberry {
+#alias farml17gooseberry {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Hippie fertilizer;70};
-        spray {Mount Perplexus pesticide;35};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        spray lots mount perplexus pesticide;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;40};
-        spray {Mount Perplexus pesticide;40}
+        fertilize lots happy ed's fertilizer;
+        fertilize some happy ed's fertilizer;
+        spray lots mount perplexus pesticide;
+        spray some mount perplexus pesticide
     }
 };
 
-#alias FARML18spaghetti {
+#alias farml18spaghetti {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        water {R'lyehwater ;140};
-        fertilize {Happy Ed's fertilizer;60};
-        fertilize {Hippie fertilizer;60};
-        fertilize {Smurfy fertilizer;60};
-        sne {grow plant}
+        sne stake claim;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] == 2 || $craft_farming[data][plantround] == 4} {
-        water {R'lyehwater ;70};
-        fertilize {Happy Ed's fertilizer;30};
-        fertilize {Hippie fertilizer;30};
-        fertilize {Smurfy fertilizer;30}
+        water lots r'lyeh water;
+        water lots r'lyeh water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer
     };
     #elseif {$craft_farming[data][plantround] == 3 || $craft_farming[data][plantround] == 5} {
-        water {R'lyehwater ;50};
-        fertilize {Happy Ed's fertilizer;20};
-        fertilize {Hippie fertilizer;20};
-        fertilize {Smurfy fertilizer;20}
+        water lots r'lyeh water;
+        water some r'lyeh water;
+        fertilize some happy ed's fertilizer;
+        fertilize some hippie fertilizer;
+        fertilize some smurfy fertilizer
     }
 };
 
-#alias FARML19asparagus {
+#alias farml19asparagus {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Happy Ed's fertilizer;105};
-        fertilize {Smurfy fertilizer;20};
-        aerate {Genlab air;10};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize some smurfy fertilizer;
+        aerate little genlab air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;55};
-        aerate {Genlab air;10};
-        fertilize {Smurfy fertilizer;20}
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        aerate little genlab air;
+        fertilize some smurfy fertilizer
     }
 };
 
-#alias FARML20lychee {
+#alias farml20lychee {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Happy Ed's fertilizer;70};
-        fertilize {Smurfy fertilizer;70};
-        aerate {Genlab air;30};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate lots genlab air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;55};
-        fertilize {Smurfy fertilizer;30};
-        aerate {Genlab air;10};
-        aerate {Ryogi-Pei air;30}
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate little genlab air;
+        aerate lots ryogi-pei air
     }
 };
 
-#alias FARML22habanero {
+#alias farml22habanero {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Happy Ed's fertilizer;30};
-        fertilize {Hippie fertilizer;80};
-        water {wayhavenwater ;40};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        water lots wayhaven water;
+        fertilize some wayhaven water;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;40};
-        water {wayhavenwater ;30};
-        aerate {Ryogi-Pei air;20};
-        fertilize {Hippie fertilizer;10}
+        fertilize lots happy ed's fertilizer;
+        fertilize some happy ed's fertilizer;
+        water lots wayhaven water;
+        aerate some ryogi-pei air;
+        fertilize little hippie fertilizer
     }
 };
 
-#alias FARML22lentil {
+#alias farml22lentil {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Smurfy fertilizer;70};
-        aerate {Genlab air;70};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;35};
-        fertilize {Smurfy fertilizer;20};
-        fertilize {Hippie fertilizer;20}
+        fertilize lots happy ed's fertilizer;
+        fertilize some smurfy fertilizer;
+        fertilize some hippie fertilizer
     }
 };
 
-#alias FARML25pomegranate {
+#alias farml25pomegranate {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Happy Ed's fertilizer;175};
-	    fertilize {Smurfy;70};
-        aerate {Serinth air;385};
-        water {atlantiswater ;125};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        water lots atlantis water;
+        water lots atlantis water;
+        water lots atlantis water;
+        water lots atlantis water;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;40};
-        aerate {Serinth air;125};
-        spread {Burns brand neutralizer;90};
-        water {atlantiswater ;10}
+        fertilize lots happy ed's fertilizer;
+        fertilize some happy ed's fertilizer;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        water little atlantis water
     }
 };
 
-#alias FARML25kiwi {
+#alias farml25kiwi {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Smurfy fertilizer;185};
-        fertilize {Happy Ed's fertilizer;105};
-        aerate {Serinth air;80};
-        water {atlantiswater ;115};
-        spray {Mount Perplexus pesticide;230};
-        spray {Ant Cave pesticide;125};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        water lots atlantis water;
+        water lots atlantis water;
+        water lots atlantis water;
+        water some atlantis water;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Smurfy fertilizer;20};
-        fertilize {Happy Ed's fertilizer;35};
-        aerate {Serinth air;10};
-        water {atlantiswater ;70};
-        spray {Mount Perplexus pesticide;20};
-        spray {Ant Cave pesticide;80}
+        fertilize some smurfy fertilizer;
+        fertilize lots happy ed's fertilizer;
+        aerate little serinth air;
+        water lots atlantis water;
+        water lots atlantis water;
+        spray some mount perplexus pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide
     }
 };
 
-#alias FARML28salmonberry {
+#alias farml28salmonberry {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        aerate {Serinth air;70};
-        aerate {Genlab air;105};
-        water {wayhavenwater ;90};
-        fertilize {Happy Ed's fertilizer;105};
-        fertilize {Hippie fertilizer;80};
-        fertilize {Smurfy fertilizer;55};
-        spray {Ant Cave pesticide;35};
-        spread {Garou neutralizer;70};
-        sne {grow plant}
+        sne stake claim;
+        aerate lots serinth air;
+        aerate lots serinth air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        spray lots ant cave pesticide;
+        spread lots garou neutralizer;
+        spread lots garou neutralizer;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Happy Ed's fertilizer;10};
-        spread {Garou neutralizer;20};
-        fertilize {Hippie fertilizer;35};
-        water {wayhavenwater ;45};
-        aerate {Genlab air;20};
-        aerate {Serinth air;20}
+        fertilize little happy ed's fertilizer;
+        spread some garou neutralizer;
+        fertilize lots hippie fertilizer;
+        water lots wayhaven water;
+        water some wayhaven water;
+        aerate some genlab air;
+        aerate some serinth air
     }
 };
 
-#alias FARML28persimmon {
+#alias farml28persimmon {
     #if {$craft_farming[data][plantround] == 0} {
         sne stake claim;
         water lots atlantis water;
@@ -2170,654 +2394,891 @@
     }
 };
 
-#alias FARML30ginger {
+#alias farml30ginger {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Alphabet fertilizer;90};
-        water {wayhavenwater ;105};
-        aerate {Genlab air;70};
-        spray {Ant Cave pesticide;35};
-        sne {grow plant};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {feed green};
-        sne {feed green};
-        sne {feed green};
-        sne {feed green};
-        sne {feed green}
+        sne stake claim;
+        fertilize lots alphabet fertilizer;
+        fertilize lots alphabet fertilizer;
+        fertilize lots alphabet fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        spray lots ant cave pesticide;
+        sne grow plant;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne feed green;
+        sne feed green;
+        sne feed green;
+        sne feed green;
+        sne feed green
     };
     #elseif {$craft_farming[data][plantround] > 0 && $craft_farming[data][plantround] < 3} {
-        water {wayhavenwater ;35};
-        aerate {Genlab air;20};     
-        fertilize {Happy Ed's fertilizer;35}; 
-        fertilize {Alphabet fertilizer;20}
+        water lots wayhaven water;
+        aerate some genlab air;
+        fertilize lots happy ed's fertilizer;
+        fertilize some alphabet fertilizer
     };
     #elseif {$craft_farming[data][plantround] == 3 || $craft_farming[data][plantround] == 4} {
-        aerate {Genlab air;20};
-        aerate {Genlab air;20};
-        water {wayhavenwater ;20};
-		water {atlantiswater ;10};
-        fertilize {Alphabet fertilizer;35};
-        fertilize {Alphabet fertilizer;10};
-        fertilize {Happy Ed's fertilizer;35}; 
-		sne {feed green};
-        sne {feed green}
+        aerate some genlab air;
+        aerate some genlab air;
+        water some wayhaven water;
+        water little atlantis water;
+        fertilize lots alphabet fertilizer;
+        fertilize little alphabet fertilizer;
+        fertilize lots happy ed's fertilizer;
+        sne feed green;
+        sne feed green
     };
     #else {
-        aerate {Genlab air;20};
-        aerate {Genlab air;20};
-        water {wayhavenwater ;20};
-		water {atlantiswater ;10};
-        fertilize {Alphabet fertilizer;20};
-        fertilize {Happy Ed's fertilizer;35}; 
-		sne {feed green};
-        sne {feed green}
+        aerate some genlab air;
+        aerate some genlab air;
+        water some wayhaven water;
+        water little atlantis water;
+        fertilize some alphabet fertilizer;
+        fertilize lots happy ed's fertilizer;
+        sne feed green;
+        sne feed green
     };
-    sne {depress oximeter button};
-    sne {push hygrometer button};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green}
+    sne depress oximeter button;
+    sne push hygrometer button;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green
 };
 
-#alias FARML30soybean {
+#alias farml30soybean {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-	    fertilize {Smurfy fertilizer;70}; 
-	    fertilize {Hippie fertilizer;70};
-        water {wayhavenwater ;105};
-	    fertilize {Happy Ed's fertilizer;175};
-    	aerate {Genlab air;105};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots smurfy fertilizer;
+        fertilize lots smurfy fertilizer;
+        fertilize lots hippie fertilizer;
+        fertilize lots hippie fertilizer;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        water lots wayhaven water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        water {wayhavenwater ;70};
-    	aerate {Genlab air;10};
-        sne {depress oximeter button}; 
-        sne {push hygrometer button}
+        water lots wayhaven water;
+        water lots wayhaven water;
+        aerate little genlab air;
+        sne depress oximeter button;
+        sne push hygrometer button
     }
 };
 
-#alias FARML32honeysugarapple {
+#alias farml32honeysugarapple {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
     };
-	@cleanplot3{};
-	@feedsome{};
-	spread {burns brand neutralizer;105};
-	spread {cowville neutralizer;105};
-	@addlittle2{};
-	@addlittle2{};
+    cleanplot3;
+    feedsome;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    addlittle2;
+    addlittle2;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-}; 
-
-#alias FARM34tomatillo {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        fertilize {Smurfy fertilizer;35};
-	    fertilize {Hippie fertilizer;35};
-        water {atlantiswater ;35};
-	    spread {burns brand neutralizer;35};
-        spray {Mount Perplexus pesticide;20};
-        water {mexicowater ;105};
-	    fertilize {Happy Ed's fertilizer;175};
-        spray {Ant Cave pesticide;125};
-	    aerate {Detroit air;125};
-	    aerate {Genlab air;140};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {feed green};
-        sne {grow plant}
-    };
-    #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Alphabet fertilizer;20};
-        fertilize {Alphabet fertilizer;10};
-        fertilize {Hippie fertilizer;10};
-        aerate {Ryogi-Pei air;10};
-        water {atlantiswater ;35};
-        water {wayhavenwater ;10};
-        spread {burns brand neutralizer;20};
-        sne {depress oximeter button};
-        sne {depress oximeter button};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {feed green}
+        sne grow plant
     }
 };
 
-#alias FARML35bambooshoot {
+#alias farm34tomatillo {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-	    fertilize {Smurfy fertilizer;35}; 
-        water {mexicowater ;70};
-	    fertilize {Happy Ed's fertilizer;105};
-	    aerate {Genlab air;70};
-        sne {feed green};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {grow plant}
+        sne stake claim;
+        fertilize lots smurfy fertilizer;
+        fertilize lots hippie fertilizer;
+        water lots atlantis water;
+        spread lots burns brand neutralizer;
+        spray some mount perplexus pesticide;
+        water lots mexico water;
+        water lots mexico water;
+        water lots mexico water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        aerate lots detroit air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne feed green;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-        fertilize {Hippie fertilizer:20};
-        fertilize {Smurfy fertilizer;10};
-        water {atlantiswater ;10};
-        water {atlantiswater ;10};
-        fertilize {Happy Ed's fertilizer;10};
-	    aerate {Genlab air;20}
+        fertilize some alphabet fertilizer;
+        fertilize little alphabet fertilizer;
+        fertilize little hippie fertilizer;
+        aerate little ryogi-pei air;
+        water lots atlantis water;
+        water little wayhaven water;
+        spread some burns brand neutralizer;
+        sne depress oximeter button;
+        sne depress oximeter button;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne feed green
+    }
+};
+
+#alias farml35bambooshoot {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim;
+        fertilize lots smurfy fertilizer;
+        water lots mexico water;
+        water lots mexico water;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        fertilize lots happy ed's fertilizer;
+        aerate lots genlab air;
+        aerate lots genlab air;
+        sne feed green;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne grow plant
+    };
+    #elseif {$craft_farming[data][plantround] > 0} {
+        fertilize some hippie fertilizer;
+        fertilize little smurfy fertilizer;
+        water little atlantis water;
+        water little atlantis water;
+        fertilize little happy ed's fertilizer;
+        aerate some genlab air
     };
     #elseif {$craft_farming[data][plantround] == 3} {
-	    sne {feed green};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        water {gulf of mexicowater ;10}
+        sne feed green;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        water little gulf of mexico water
     }
 };
 
-#alias FARML35pinkgrape {
+#alias farml35pinkgrape {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        spray {Hunch pesticide;70};
-        spray {Murus Faralain pesticide;70};
-        spray {Mount Perplexus pesticide;70};
-        spray {ant cave pesticide;140};
-        sne {feed blue};
-        sne {feed blue};
-        sne {feed blue};
-        sne {feed blue};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {grow plant}
+        sne stake claim;
+        spray lots hunch pesticide;
+        spray lots hunch pesticide;
+        spray lots murus faralain pesticide;
+        spray lots murus faralain pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots mount perplexus pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        spray lots ant cave pesticide;
+        sne feed blue;
+        sne feed blue;
+        sne feed blue;
+        sne feed blue;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-	    fertilize {Smurfy fertilizer;35};
-	    fertilize {Happy Ed's fertilizer;35};
-	    aerate {Genlab air;35};
-        water {mexicowater ;35};
-        sne {feed blue};
-        sne {feed blue};
-        sne {feed blue};
-        sne {feed blue};
-        sne {depress oximeter button};
-        sne {push hygrometer button}
+        fertilize lots smurfy fertilizer;
+        fertilize lots happy ed's fertilizer;
+        aerate lots genlab air;
+        water lots mexico water;
+        sne feed blue;
+        sne feed blue;
+        sne feed blue;
+        sne feed blue;
+        sne depress oximeter button;
+        sne push hygrometer button
     }
 };
 
-#alias FARML37pawpaw {
+#alias farml37pawpaw {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
     };
-	@cleanplot3{};
-    spray {Mount Perplexus pesticide;100};
-    aerate {Genlab air;73};
-    spray {Murus Faralain pesticide;3};
-    spray {Hunch pesticide;90};
-    water {Wayhavenwater ;20};
-    water {R'lyehwater ;45};
-    spread {Burns brand neutralizer;17};
-    water {Atlantiswater ;24};
-    spread {Der'thalas neutralizer;62};
-    spray {Ant Cave pesticide;58};
-    aerate {Ryogi-Pei air;26};
-    aerate {Serinth air;31};
-    fertilize {Happy Ed's fertilizer;57};
-    spread {Garou neutralizer;26};
-    fertilize {Hippie fertilizer;22};
-    fertilize {Alphabet fertilizer;59};
-    spread {Cowville neutralizer;6};
-    water {Gulf of Mexicowater ;87};
-    aerate {Detroit air;88};
-    fertilize {Smurfy fertilizer;28};
+    cleanplot3;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    aerate some genlab air;
+    spray little murus faralain pesticide;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    water some wayhaven water;
+    water lots r'lyeh water;
+    water some r'lyeh water;
+    spread little burns brand neutralizer;
+    water some atlantis water;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    aerate some ryogi-pei air;
+    aerate lots serinth air;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    spread some garou neutralizer;
+    fertilize some hippie fertilizer;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    spread little cowville neutralizer;
+    water lots gulf of mexico water;
+    water lots gulf of mexico water;
+    water some gulf of mexico water;
+    aerate lots detroit air;
+    aerate lots detroit air;
+    aerate lots detroit air;
+    fertilize lots smurfy fertilizer;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+        sne grow plant
     }
-}; 
+};
 
-#alias FARML37date {
+#alias farml37date {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
     };
-	@cleanplot3{};
-	aerate {ryogi-pei air;70};
-	spray {mount perplexus pesticide;105};
-	spread {garou neutralizer;70};
-	@feedsome{};
-	water {wayhavenwater ;35};
-	fertilize {happy ed's fertilizer;20};
-	fertilize {alphabet fertilizer;20};
-	fertilize {smurfy fertilizer;20};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange}
-    sne {depress oximeter button};
-    sne {push hygrometer button};
+    cleanplot3;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    feedsome;
+    water lots wayhaven water;
+    fertilize some happy ed's fertilizer;
+    fertilize some alphabet fertilizer;
+    fertilize some smurfy fertilizer;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    sne depress oximeter button;
+    sne push hygrometer button;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+        sne grow plant
     }
 };
 
-#alias FARML38yellowcarrot {
+#alias farml38yellowcarrot {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
     };
-	@cleanplot3{};
-	fertilize {Hippie fertilizer;56};
-	fertilize {Happy Ed's fertilizer;38};
-	aerate {Genlab air;97};
-	spray {Ant Cave pesticide;50};
-	aerate {Serinth air;86};
-	spread {Garou neutralizer;94};
-	fertilize {Alphabet fertilizer;50};
-	water {Atlantiswater ;59};
-	water {Gulf of Mexicowater ;61};
-	spread {Cowville neutralizer;31};
-	spray {Hunch pesticide;31};
-	fertilize {Smurfy fertilizer;4};
-	water {R'lyehwater ;41};
-	spread {Der'thalas neutralizer;79};
-	spray {Mount Perplexus pesticide;88};
-	spread {Burns brand neutralizer;59};
-	spray {Murus Faralain pesticide;9};
-	water {Wayhavenwater ;8};
-	aerate {Ryogi-Pei air;94};
-	aerate {Detroit air;24};
+    cleanplot3;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots happy ed's fertilizer;
+    fertilize some happy ed's fertilizer;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    aerate lots serinth air;
+    aerate lots serinth air;
+    aerate lots serinth air;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    water lots atlantis water;
+    water lots atlantis water;
+    water lots gulf of mexico water;
+    water lots gulf of mexico water;
+    spread lots cowville neutralizer;
+    spray lots hunch pesticide;
+    fertilize little smurfy fertilizer;
+    water lots r'lyeh water;
+    water some r'lyeh water;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spray little murus faralain pesticide;
+    water little wayhaven water;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    aerate some detroit air;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+        sne grow plant
     }
 };
 
-#alias FARML39guava {
+#alias farml39guava {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-	    @cleanplot{};
-	    @feedsome{};
-	    @feedsome{};
-	    spray {ant cave pesticide;35};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-        sne {grow plant}
-    };
-    #elseif {$craft_farming[data][plantround] > 0} {
-	    @cleanplot{};
-	    @feedsome2{};
-	    @feedlittle{};
-        sne {depress oximeter button};
-        sne {push hygrometer button};
-	    spray {ant cave pesticide;35}
-    }
-};
-
-#alias FARML40quince {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-	    @cleanplot{};
-	    @feedlots{};
-        sne {grow plant}
-    };
-    #elseif {$craft_farming[data][plantround] > 0} {
-	    @cleanplot{};
-	    @feedlots{};
-    }
-};
-
-#alias FARML41thimbleberry {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    };
-    @cleanplot{};
-	@feedsome{};
-	spread {burns brand neutralizer;105};
-	spread {cowville neutralizer;105};
-	@addlittle1{};
-	@addlittle1{};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML43chokecherry {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    };
-	@cleanplot3{};
-	spread {Garou neutralizer;61};
-	spray {Mount Perplexus pesticide;88};
-	aerate {Detroit air;38};
-	fertilize {Hippie fertilizer;15};
-	fertilize {Alphabet fertilizer;15};
-	water {R'lyehwater ;27};
-	spread {Der'thalas neutralizer;85};
-	water {Atlantiswater ;90};
-	spray {Murus Faralain pesticide;85};
-	spray {Hunch pesticide;21};
-	aerate {Ryogi-Pei air;82};
-	water {Wayhavenwater ;26};
-	spread {Cowville neutralizer;89};
-	water {Gulf of Mexicowater ;24};
-	spray {Ant Cave pesticide;23};
-	fertilize {Smurfy fertilizer;92};
-	aerate {Genlab air;82};
-	aerate {Serinth air;5};
-	spread {Burns brand neutralizer;5};
-    fertilize {Happy Ed's fertilizer;31};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML43coconut {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    };
-	@cleanplot3{};
-	aerate {Ryogi-Pei air;20};
-	water {Gulf of Mexicowater ;66};
-	aerate {Genlab air;63};
-	fertilize {Happy Ed's fertilizer;6};
-	spread {Der'thalas neutralizer;34};
-	aerate {Serinth air;85};
-	spread {Burns brand neutralizer;74};
-	spray {Mount Perplexus pesticide;95};
-	fertilize {Hippie fertilizer;100};
-	spray {Murus Faralain pesticide;32};
-	water {R'lyehwater ;13};
-	water {Atlantiswater ;20};
-	spread {Garou neutralizer;15};
-	fertilize {Alphabet fertilizer;3};
-	fertilize {Smurfy fertilizer;58};
-	aerate {Detroit air;54};
-	spray {Hunch pesticide;11};
-	water {Wayhavenwater ;85};
-	spray {Ant Cave pesticide;75};
-	spread {Cowville neutralizer;29};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML45wasabi {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    }; 
-	@cleanplot{};
-	@feedlittle{};
-	@feedlittle{};
-	spread {burns brand neutralizer;105};
-	spread {cowville neutralizer;105};
-    sne {depress oximeter button};
-    sne {push hygrometer button};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML47luffa {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    };
-	@cleanplot3{};
-	water {Wayhavenwater ;63};
-	aerate {Genlab air;22};
-	water {Atlantiswater ;17};
-	spray {Ant Cave pesticide;37};
-	water {Gulf of Mexicowater ;7};
-	spray {Hunch pesticide;32};
-	spray {Murus Faralain pesticide;67};
-	fertilize {Hippie fertilizer;73};
-	spray {Mount Perplexus pesticide;81};
-	fertilize {Happy Ed's fertilizer;2};
-	spread {Cowville neutralizer;81};
-	aerate {Ryogi-Pei air;71};
-	fertilize {Alphabet fertilizer;60};
-	spread {Der'thalas neutralizer;53};
-	spread {Burns brand neutralizer;80};
-    aerate {Detroit air;13};
-	aerate {Serinth air;62};
-	water {R'lyehwater ;35};
-	fertilize {Smurfy fertilizer;86};
-	spread {Garou neutralizer;62};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML48radicchio {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    };
-	@cleanplot3{};
-    spray {Murus Faralain pesticide;100};
-    fertilize {Smurfy fertilizer;73};
-    aerate {Detroit air;93};
-    water {Gulf of Mexicowater ;24};
-    water {Atlantiswater ;87};
-    spread {Der'thalas neutralizer;27};
-    spread {Cowville neutralizer;40};
-    aerate {Ryogi-Pei air;54};
-    spread {Garou neutralizer;30};
-    water {Wayhavenwater ;21};
-    aerate {Serinth air;15};
-    spray {Ant Cave pesticide;100};
-    fertilize {Happy Ed's fertilizer;96};
-    spray {Hunch pesticide;85};
-    spray {Mount Perplexus pesticide;62};
-    spread {Burns brand neutralizer;85};
-    water {R'lyehwater ;78};
-    fertilize {Hippie fertilizer;88};
-    aerate {Genlab air;47};
-    fertilize {Alphabet fertilizer;31};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed orange};
-    sne {feed orange};
-    sne {feed orange};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML49whitecelery {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
-    };
-	@cleanplot3{};
-	spread {Garou neutralizer;90};
-	fertilize {Happy Ed's fertilizer;62};
-	spray {Murus Faralain pesticide;53};
-	aerate {Serinth air;23};
-	spread {Der'thalas neutralizer;26};
-	water {Gulf of Mexicowater ;23};
-	aerate {Ryogi-Pei air;86};
-	water {Wayhavenwater ;55};
-	aerate {Genlab air;87};
-	water {Atlantiswater ;25};	
-	spray {Hunch pesticide;6};
-	spray {Ant Cave pesticide;9};)
-	water {R'lyehwater ;99};
-	aerate {Detroit air;37};
-	spray {Mount Perplexus pesticide;43};
-	fertilize {Alphabet fertilizer;90};
-	fertilize {Hippie fertilizer;79};
-	spread {Cowville neutralizer;10};
-	spread {Burns brand neutralizer;24};
-	fertilize {Smurfy fertilizer;75};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
-    }
-};
-
-#alias FARML49dragonfruit {
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim};
-        @cleanplot{};
-	    @feedsome{};
-	    spread {burns brand neutralizer;105};
-	    spread {cowville neutralizer;105};
-	    @addlittle2{};
-	    sne {grow plant}
+        sne stake claim;
+        cleanplot;
+        feedsome;
+        feedsome;
+        spray lots ant cave pesticide;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        sne grow plant
     };
     #elseif {$craft_farming[data][plantround] > 0} {
-	    @cleanplot3_tuon{};
-	    @feedsome{};
-	    @feedsome{};
-	    spread {burns brand neutralizer;105};
-	    spread {cowville neutralizer;105};
-	    @addlittle2{}
+        cleanplot;
+        feedsome2;
+        feedlittle;
+        sne depress oximeter button;
+        sne push hygrometer button;
+        spray lots ant cave pesticide
     }
 };
 
-#alias FARML50kaffirlime {
+#alias farml40quince {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim;
+        cleanplot;
+        feedlots;
+        sne grow plant
     };
-    @cleanplot3{};
-	spray {Hunch pesticide;43};
-    spray {Ant Cave pesticide;95}; 
-	water {Wayhavenwater ;64};
-	spread {Garou neutralizer;40};
-	water {R'lyehwater ;57};
-	water {Atlantiswater ;16};
-	spread {Der'thalas neutralizer;26};
-	spray {Murus Faralain pesticide;55};
-	aerate {Ryogi-Pei air:91};
-	aerate {Detroit air;66};
-	aerate {Genlab air;93};
-	spread {Cowville neutralizer;54};
-	fertilize {Smurfy fertilizer;78};
-	spread {Burns brand neutralizer;36};
-	water {Gulf of Mexicowater ;67};
-	aerate {Serinth air;46};
-	fertilize {Hippie fertilizer;20};
-	fertilize {Happy Ed's fertilizer;65};
-	spray {Mount Perplexus pesticide;58};
-	fertilize {Alphabet fertilizer;94};
-    #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+    #elseif {$craft_farming[data][plantround] > 0} {
+        cleanplot;
+        feedlots
     }
 };
 
-#alias FARML52ceylonspinach {
+#alias farml41thimbleberry {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
+    };
+    cleanplot;
+    feedsome;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    addlittle1;
+    addlittle1;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml43chokecherry {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot3;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    aerate lots detroit air;
+    fertilize little hippie fertilizer;
+    fertilize little alphabet fertilizer;
+    water some r'lyeh water;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    water lots atlantis water;
+    water lots atlantis water;
+    water lots atlantis water;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    spray some hunch pesticide;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    water some wayhaven water;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    water some gulf of mexico water;
+    spray some ant cave pesticide;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    aerate little serinth air;
+    spread little burns brand neutralizer;
+    fertilize lots happy ed's fertilizer;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml43coconut {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot3;
+    aerate some ryogi-pei air;
+    water lots gulf of mexico water;
+    water lots gulf of mexico water;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    fertilize little happy ed's fertilizer;
+    spread lots der'thalas neutralizer;
+    aerate lots serinth air;
+    aerate lots serinth air;
+    aerate lots serinth air;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    spray lots murus faralain pesticide;
+    water little r'lyeh water;
+    water some atlantis water;
+    spread little garou neutralizer;
+    fertilize little alphabet fertilizer;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    aerate lots detroit air;
+    aerate lots detroit air;
+    spray little hunch pesticide;
+    water lots wayhaven water;
+    water lots wayhaven water;
+    water lots wayhaven water;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spread lots cowville neutralizer;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml45wasabi {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot;
+    feedlittle;
+    feedlittle;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    sne depress oximeter button;
+    sne push hygrometer button;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml47luffa {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot3;
+    water lots wayhaven water;
+    water lots wayhaven water;
+    aerate some genlab air;
+    water little atlantis water;
+    spray lots ant cave pesticide;
+    water little gulf of mexico water;
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    fertilize little happy ed's fertilizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    spread lots der'thalas neutralizer;
+    spread lots der'thalas neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    aerate little detroit air;
+    aerate lots serinth air;
+    aerate lots serinth air;
+    water lots r'lyeh water;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml48radicchio {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot3;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    aerate lots detroit air;
+    aerate lots detroit air;
+    aerate lots detroit air;
+    water some gulf of mexico water;
+    water lots atlantis water;
+    water lots atlantis water;
+    water lots atlantis water;
+    spread lots der'thalas neutralizer;
+    spread lots cowville neutralizer;
+    spread some cowville neutralizer;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    spread lots garou neutralizer;
+    water some wayhaven water;
+    aerate little serinth air;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    water lots r'lyeh water;
+    water lots r'lyeh water;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    aerate lots genlab air;
+    aerate some genlab air;
+    fertilize lots alphabet fertilizer;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed orange;
+    sne feed orange;
+    sne feed orange;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml49whitecelery {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot3;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    aerate some serinth air;
+    spread some der'thalas neutralizer;
+    water some gulf of mexico water;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    water lots wayhaven water;
+    water lots wayhaven water;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    water some atlantis water;
+    spray little hunch pesticide;
+    spray little ant cave pesticide;
+    water lots r'lyeh water;
+    water lots r'lyeh water;
+    water lots r'lyeh water;
+    aerate lots detroit air;
+    spray lots mount perplexus pesticide;
+    spray some mount perplexus pesticide;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    spread little cowville neutralizer;
+    spread some burns brand neutralizer;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml49dragonfruit {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim;
+        cleanplot;
+        feedsome;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots cowville neutralizer;
+        spread lots cowville neutralizer;
+        spread lots cowville neutralizer;
+        addlittle2;
+        sne grow plant
+    };
+    #elseif {$craft_farming[data][plantround] > 0} {
+        cleanplot3_tuon;
+        feedsome;
+        feedsome;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots burns brand neutralizer;
+        spread lots cowville neutralizer;
+        spread lots cowville neutralizer;
+        spread lots cowville neutralizer;
+        addlittle2
+    }
+};
+
+#alias farml50kaffirlime {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
+    };
+    cleanplot3;
+    spray lots hunch pesticide;
+    spray some hunch pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    water lots wayhaven water;
+    water lots wayhaven water;
+    spread lots garou neutralizer;
+    spread some garou neutralizer;
+    water lots r'lyeh water;
+    water lots r'lyeh water;
+    water little atlantis water;
+    spread some der'thalas neutralizer;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    aerate lots ryogi-pei air;
+    aerate lots detroit air;
+    aerate lots detroit air;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    aerate lots genlab air;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    fertilize lots smurfy fertilizer;
+    fertilize lots smurfy fertilizer;
+    spread lots burns brand neutralizer;
+    water lots gulf of mexico water;
+    water lots gulf of mexico water;
+    aerate lots serinth air;
+    aerate some serinth air;
+    fertilize some hippie fertilizer;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    #if {$craft_farming[data][plantround] == 0} {
+        sne grow plant
+    }
+};
+
+#alias farml52ceylonspinach {
+    #if {$craft_farming[data][plantround] == 0} {
+        sne stake claim
     };
     cleanplot_amish;
-    aerate {Genlab air;14};
-    water {Atlantiswater ;50};
-    spread {Burns brand neutralizer;23};
-    spray {Murus Faralain pesticide;13};
-    spread {Garou neutralizer;55};
-    fertilize {Alphabet fertilizer;57};
-    spray {Mount Perplexus pesticide;60};
-    spread {Der'thalas neutralizer;4};
-    fertilize {Hippie fertilizer;18};
-    water {Gulf of Mexicowater ;17};
-    aerate {Serinth air;29};
-    spray {Hunch pesticide;18};
-    fertilize {Smurfy fertilizer;47};
-    aerate {Ryogi-Pei air;23};
-    aerate {Detroit air;23};
-    fertilize {Happy Ed's fertilizer;49};
-    water {R'lyehwater ;17};
-    water {Wayhavenwater ;6};
-    spread {Cowville neutralizer;36};
-    spray {Ant Cave pesticide;5};
-    fertilize {Smurfy fertilizer;45};
+    aerate little genlab air;
+    water lots atlantis water;
+    water lots atlantis water;
+    spread some burns brand neutralizer;
+    spray little murus faralain pesticide;
+    spread lots garou neutralizer;
+    spread lots garou neutralizer;
+    fertilize lots alphabet fertilizer;
+    fertilize lots alphabet fertilizer;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spread little der'thalas neutralizer;
+    fertilize little hippie fertilizer;
+    water little gulf of mexico water;
+    aerate lots serinth air;
+    spray little hunch pesticide;
+    fertilize lots smurfy fertilizer;
+    fertilize some smurfy fertilizer;
+    aerate some ryogi-pei air;
+    aerate some detroit air;
+    fertilize lots happy ed's fertilizer;
+    fertilize some happy ed's fertilizer;
+    water little r'lyeh water;
+    water little wayhaven water;
+    spread lots cowville neutralizer;
+    spray little ant cave pesticide;
+    fertilize lots smurfy fertilizer;
+    fertilize some smurfy fertilizer;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+        sne grow plant
     }
 };
 
-#alias FARML52artichoke {
+#alias farml52artichoke {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
     };
-    spray {Hunch pesticide;140};
-    spray {murus faralain pesticide;70};
-    spray {mount perplexus pesticide;105};
-    spray {ant cave pesticide;140};
-	@feedsome{};
-	@feedsome{};
-	spread {burns brand neutralizer;105};
-	spread {cowville neutralizer;105};
-    fertilize {alphabet fertilizer;20};
-	sne {push hygrometer button};
-	sne {depress oximeter button};
-    sne {feed red};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed blue};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed green};
-    sne {feed orange};
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots murus faralain pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    feedsome;
+    feedsome;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots burns brand neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    spread lots cowville neutralizer;
+    fertilize some alphabet fertilizer;
+    sne push hygrometer button;
+    sne depress oximeter button;
+    sne feed red;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed blue;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed green;
+    sne feed orange;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+        sne grow plant
     }
 };
 
-#alias FARML53taro {
+#alias farml53taro {
     #if {$craft_farming[data][plantround] == 0} {
-        sne {stake claim}
+        sne stake claim
     };
-	cleanplot_amish;
-    spray {Murus Faralain pesticide;13};
-    water {Wayhavenwater ;15};
-    spread {Der'thalas neutralizer;21};
-    fertilize {Hippie fertilizer;99};
-    fertilize {Smurfy fertilizer;48};
-    spray {Ant Cave pesticide;59};
-    spray {Hunch pesticide;49};
-    spread {Burns brand neutralizer;26};
-    aerate {Ryogi-Pei air;45};
-    water {Gulf of Mexicowater ;37};
-    aerate {Serinth air;17};
-    spread {Garou neutralizer;26};
-    fertilize {Alphabet fertilizer;3};
-    aerate {Detroit air;29};
-    aerate {Genlab air;26};
-    spread {Cowville neutralizer;27};
-    water {R'lyehwater ;26};
-    spray {Mount Perplexus pesticide;66};
-    water {Atlantiswater ;64};
-    fertilize {Happy Ed's fertilizer;99};
+    cleanplot_amish;
+    spray little murus faralain pesticide;
+    water little wayhaven water;
+    spread some der'thalas neutralizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots hippie fertilizer;
+    fertilize lots smurfy fertilizer;
+    fertilize some smurfy fertilizer;
+    spray lots ant cave pesticide;
+    spray lots ant cave pesticide;
+    spray lots hunch pesticide;
+    spray lots hunch pesticide;
+    spread some burns brand neutralizer;
+    aerate lots ryogi-pei air;
+    aerate some ryogi-pei air;
+    water lots gulf of mexico water;
+    aerate little serinth air;
+    spread some garou neutralizer;
+    fertilize little alphabet fertilizer;
+    aerate lots detroit air;
+    aerate some genlab air;
+    spread some cowville neutralizer;
+    water some r'lyeh water;
+    spray lots mount perplexus pesticide;
+    spray lots mount perplexus pesticide;
+    water lots atlantis water;
+    water lots atlantis water;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots happy ed's fertilizer;
     #if {$craft_farming[data][plantround] == 0} {
-        sne {grow plant}
+        sne grow plant
     }
 };
 
+#nop the plant recipes from this point need to be rewritten
 #alias FARML54loganberry {
     #if {$craft_farming[data][plantround] == 0} {
         sne {stake claim}
@@ -5636,10 +6097,10 @@
     #echo {};
     #echo {<ffa>Basic Feeding:<088>};
     #echo {<ccd>  goblins<feb>         - Feed all gremlins once<088>};
-    #echo {<ccd>  feed red gremlin<feb>    - Feed red gremlin<088>};
-    #echo {<ccd>  feed blue gremlin<feb>   - Feed blue gremlin<088>};
-    #echo {<ccd>  feed green gremlin<feb>  - Feed green gremlin<088>};
-    #echo {<ccd>  feed orange gremlin<feb> - Feed orange gremlin<088>};
+    #echo {<ccd>  feed red<feb>    - Feed red gremlin<088>};
+    #echo {<ccd>  feed blue<feb>   - Feed blue gremlin<088>};
+    #echo {<ccd>  feed green<feb>  - Feed green gremlin<088>};
+    #echo {<ccd>  feed orange<feb> - Feed orange gremlin<088>};
     #echo {};
     #echo {<fff>Note:<feb> Gremlin reactions tell you about<088>};
     #echo {<feb>      nutrient levels in the soil<088>};
