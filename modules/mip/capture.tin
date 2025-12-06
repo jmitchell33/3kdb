@@ -5,24 +5,24 @@ associated aliases related to each mip message, which are generally handles in t
 Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 */
 
-#NOP ***** Set MIP ID Code **********
-#VAR {mip} {}
-#VAR {mip[Version]} {2.01.1}
-#VAR {mip[id]} {}
+#NOP ***** Set MIP ID Code **********;
+#VAR {mip} {};
+#VAR {mip[Version]} {2.01.1};
+#VAR {mip[id]} {};
 #LOOP {1} {5} {i} {
-	#MATH {temp[digit]} {1d10 - 1};
-	#VAR {mip[id]} {$mip[id]$temp[digit]}
-}
-#UNVAR {temp[digit]}
+	#MATH {temp[digit]} {1d10 - 1};;
+	#VAR {mip[id]} {$mip[id]$temp[digit]};
+};
+#UNVAR {temp[digit]};
 
-#NOP ***** Tell MUD to send MIP *************
+#NOP ***** Tell MUD to send MIP *************;
 #DELAY {2} {
-	#SEND 3klient $mip[id]~~Tin$mip[Version];
+	#SEND 3klient $mip[id]~~Po3kdb$mip[Version];
 	#SEND 3klient LINEFEED on;
 	#SEND 3klient HAA off;
-}
+};
 
-#NOP ***** Extract Raw Data *********
+#NOP ***** Extract Raw Data *********;
 #ACTION {~{\#K\%$mip[id](.{3})(.{3})(.*)}} {
     #if {$mipdebug} {
         #show MIP: %3: %4;
