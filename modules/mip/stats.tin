@@ -363,6 +363,10 @@
 			#VAR {my[necromancer][glamors][current]}	{&1};
 			#VAR {my[necromancer][glamors][max]}		{&2};
 		};
+		#REGEX {$mip[gline][1]} {Blaz:%d/%d}    {
+            #VAR {my[necromancer][glamors][current]}    {&1};
+            #VAR {my[necromancer][glamors][max]}        {&2};
+        };
 		#REGEX {$mip[gline][1]} {furious}	{
 			#VAR {my[necromancer][glamors][furious]} 1;
 		} {
@@ -378,7 +382,11 @@
 		} {
 			#VAR {my[necromancer][glamors][illuming]} 0;
 		};
-
+		#REGEX {$mip[gline][1]} {blazing}    {
+            #VAR {my[necromancer][glamors][blazing]} 1;
+        } {
+            #VAR {my[necromancer][glamors][blazing]} 0;
+        };
 
 		#REGEX {$mip[gline][1]} {Prot:%wX}	{#VAR {my[prot]}		{&1}};
 		#REGEX {$mip[gline][1]} {Prot:%w>}	{#VAR {my[prot]}		{&1}};
