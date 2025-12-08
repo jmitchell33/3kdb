@@ -5726,13 +5726,13 @@
             }
         };
         #elseif {"$craft_farming[data][auto_mode]" == "cxp"} {
-            #if {$craft_farming[data][farming_level] >= $min_lvl && &craft_farming[farmland][cxp][$tmpfarm]} {
+            #if {$craft_farming[data][farming_level] >= $min_lvl  && $craft_farming[data][farming_level] <= $max_lvl} {
                 #list craft_farming[farm_list] add {$tmpfarm};
                 #if {$craft_farming[data][echo] == 1} {
                     #echo {<caf>Valid CXP farm: farm_land$tmpfarm ($min_lvl-$max_lvl)<088>}
-                }
-            }
-        }
+                };
+            };
+        };
     };
     
     #list craft_farming[farm_list] size craft_farming[data][max_farms];
