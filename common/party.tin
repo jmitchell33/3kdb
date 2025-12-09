@@ -94,7 +94,7 @@
 };
 
 #NOP -- 3kdb reporting stuff;
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w corpses} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb %w corpses} {
     #var partyReportString $corpse_string;
     #replace partyReportString {<088>} {};
     #replace partyReportString {<ceb>} {};
@@ -109,7 +109,7 @@
 } {2};
 
 #NOP -- ROOM VNUM REPORTING;
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w vnum} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb %w vnum} {
     #if {"%2" == "$user" && !$idle_flag} {
         #map get roomvnum temp_vnum;
         ptell My current vnum is $temp_vnum;
@@ -118,7 +118,7 @@
 
 #NOP -- CORPSE SHARING AND REPORTING;
 #var gimme_corpses 1;
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb %w corpses {[-a-zA-Z]*}} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb %w corpses {[-a-zA-Z]*}} {
     #if {"%2" == "$user"} {
         #if {!$idle_flag && $gimme_corpses} { 
             #if {"%3" == "gimme-coffin"} {
@@ -171,7 +171,7 @@
     };
 } {1};
 
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot status} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb bot status} {
     #if {$bot[active] && !$idle_flag} {
         #format {bot[report-time]} {%T} {};
         #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
@@ -193,7 +193,7 @@
 
 
 #NOP -- Need to rewrite this to work with 3kReport;
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot standings} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb bot standings} {
     #if {$bot[active] && !$idle_flag} {
         #var total_kills 0;
         #var other_kills 0;
@@ -246,7 +246,7 @@
 
 
 
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot path-find} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb bot path-find} {
     #if {!$idle_flag && $bot[active]} {
         #var partyReportPath {Path to find me is: $bot[steps][1]};
         #loop 2 $bot[step] step {
@@ -256,7 +256,7 @@
     };
 } {1};
 
-#act {~\e[33;1m[PARTY]\e[0m %w: 3kdb bot help} {
+#act {~\e[%*;%+m[PARTY]%* %w: 3kdb bot help} {
     #if {!$idle_flag && $bot[active]} {
         #delay .2 {
             ptell ---------------------------------------------------;
