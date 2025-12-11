@@ -393,25 +393,62 @@
     };
 };
 
-#NOP -- gswap;
+#NOP -- gswap - guild swap;
 #alias {.gswap} {
-    #NOP -- kill guild classes;
+    #NOP -- Validate guild argument;
+    #if {"%0" == ""} {
+        #echo {<eaa>Usage: .gswap <guild><088>};
+        #echo {<eaa>Example: .gswap mage<088>};
+        #return
+    };
+    
+    #NOP -- Check if guild file exists;
+    #format guild_file {common/guilds/%s/index.tin} {%0};
+    #script {file_check} {test -f $guild_file && echo "exists" || echo "missing"};
+    
+    #if {"$file_check[1]" == "missing"} {
+        #echo {<eaa>----------------------------------------------------<088>};
+        #echo {<eaa>Guild not found: %0<088>};
+        #echo {<eaa>File missing: $guild_file<088>};
+        #echo {<eaa>----------------------------------------------------<088>};
+        #return
+    };
+    
+    #echo {<dfa>----------------------------------------------------<088>};
+    #echo {<dfa>Swapping to guild: %0<088>};
+    #echo {<dfa>Please wait...<088>};
+    #echo {<dfa>----------------------------------------------------<088>};
+    
+    #NOP -- Clear the screen and kill all drawing classes;
+    #screen clear all;
+    #map flag vtmap off;
+    #unsplit;
+    
+    #NOP -- Kill all guild and player classes;
     .kill_guild_classes;
-    #NOP -- kill player classes;
     .kill_player_classes;
-    #NOP -- kill dmgtrackers;
     .kill_dmg_trackers;
-    #NOP -- kill botcycle;
     #class botcycle kill;
-    #NOP -- kill mka actions;
     #class common_mka kill;
-    #NOP -- load new guild variable;
+    #class draw kill;
+    
+    #NOP -- Unset draw variables to prevent errors;
+    #unvar draw;
+    #unvar draw_room;
+    #unvar map;
+    #unvar chat;
+    #unvar hpbar;
+    #unvar ticker;
+    #unvar caption;
+    #unvar split;
+    #unvar screen;
+    
+    #NOP -- Set the new guild;
     #var guild %0;
-    #NOP -- load common;
+    
+    #NOP -- Reload everything in proper order;
     #read common/index.tin;
-    #NOP -- load guild;
     #read common/guilds/$guild/index.tin;
-    #NOP -- load character;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
     #read chars/$user/config.tin;
@@ -419,30 +456,51 @@
     #read chars/$user/miphp.tin;
     #read chars/$user/private.tin;
     #read chars/$user/tickers.tin;
-    #NOP -- load defaults;
+    
+    #NOP -- Initialize everything except postload;
     mipon;
     loadmap;
-    postload;
-    i;
-    examine cooler;
-    touch diamond rune;
-    #send {(powers};
-    .update_gags;
-    _mob_status_clear;
-    reset_trackers;
-    #NOP -- Gag the few things this checks if it's not there for spam;
-    #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
-    #line oneshot #gag {^You find nothing of interest.};
-    #line oneshot #gag {^Perform touch at whom?};
-    #line oneshot #gag {^There is no reason to '(powers' here.};
-    #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
-    #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
-    #NOP -- Wait for variables to initialize, then redraw screen;
-    #delay 6 {init_screen};
-    #delay 7 {
-        draw_all;
+    
+    #NOP -- Wait for MIP to initialize before drawing;
+    #delay 3 {
+        i;
+        examine cooler;
+        touch diamond rune;
+        #send {(powers};
+        .update_gags;
+        _mob_status_clear;
+        reset_trackers;
+        
+        #NOP -- Gag spam;
+        #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
+        #line oneshot #gag {^You find nothing of interest.};
+        #line oneshot #gag {^Perform touch at whom?};
+        #line oneshot #gag {^There is no reason to '(powers' here.};
+        #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
+        #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
+    };
+    
+    #NOP -- Initialize screen after everything is loaded;
+    #delay 6 {
+        #NOP -- Read draw.tin to ensure all draw functions exist;
+        #read common/draw.tin;
+        init_screen;
+        #NOP -- Now that screen is initialized, we can safely run postload;
+        #delay 1 {postload};
+    };
+    
+    #NOP -- Final draw and save after init_screen completes;
+    #delay 8 {
         clearChatHeader;
         draw_chat;
+        draw_all;
+        
+        #NOP -- Now save the state after everything is loaded;
+        _variable_export;
+        
+        #echo {<dfa>----------------------------------------------------<088>};
+        #echo {<dfa>Guild swap complete: $guild<088>};
+        #echo {<dfa>----------------------------------------------------<088>}
     }
 };
 

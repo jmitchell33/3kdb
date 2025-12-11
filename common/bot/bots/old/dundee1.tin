@@ -1,0 +1,49 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Dundee Swamp};
+
+#var check_room 0;
+
+#var bot_message_1 '---- DUNDEE STEPPER SWAMP 1 ----';
+#var bot_message_2 '----  ALL TARGETS   ----';
+
+#showme $bot_message_1;
+#showme $bot_message_2;
+
+#alias .pre_fight_check {#nop;};
+
+.pre_bot_check;
+
+#var {bot[path]} {e;n;n;s;s;s;s;s;s;s;e;n;n;n;n;n;n;n;e;s;s;s;s;s;s;s;e;n;n;n;n;n;n;n;e;s;s;s;s;s;s;s;e;n;n;n;n;n;n;n;e;s;s;s;s;s;s;s;e;n;n;n;n;n;n;n;e;s;s;s;s;s;s;s;e;n;n;n;n;n;n;n;e;s;s;s;s;s;s;s;w;w;w;w;w;w;w;w;w;w;n;n;n;n;n;w}
+
+#act {^-M-_{Mature Swamp Crocodile|Great Egret|Salamander|Crane|Anaconda|Swamp Crocodile|Red-bellied Watersnake|Drop bear|Cane Toad|Marbled Reed Frog|Swamp Sparrow|Tricolored Heron|Caecilian|Marsh Rat|Anhinga|Short-tailed Shrew|Marsh Snake|Marsh Frog|Armadillo|Platypus|Black-bellied Snake|Osprey}} {
+	#if {"%1" == "Red-bellied Watersnake"} {@botSetMobActions{snake};};
+	#if {"%1" == "Drop Bear"} {@botSetMobActions{bear};};
+	#if {"%1" == "Cane Toad"} {@botSetMobActions{toad};};
+	#if {"%1" == "Marbled Reed Frog"} {@botSetMobActions{frog};};
+	#if {"%1" == "Swamp Sparrow"} {@botSetMobActions{sparrow};};
+	#if {"%1" == "Tricolored Heron"} {@botSetMobActions{heron};};
+	#if {"%1" == "Swamp Crocodile"} {@botSetMobActions{crocodile};};
+	#if {"%1" == "Marsh Rat"} {@botSetMobActions{rat};};
+	#if {"%1" == "Caecilian"} {@botSetMobActions{caecilian};};
+	#if {"%1" == "Anhinga"} {@botSetMobActions{anhinga};};
+	#if {"%1" == "Short-tailed Shrew"} {@botSetMobActions{shrew};};
+	#if {"%1" == "Marsh Snake"} {@botSetMobActions{snake};};
+	#if {"%1" == "Marsh Frog"} {@botSetMobActions{frog};};
+	#if {"%1" == "Armadillo"} {@botSetMobActions{armadillo};};
+	#if {"%1" == "Platypus"} {@botSetMobActions{platypus};};
+	#if {"%1" == "Black-bellied Snake"} {@botSetMobActions{snake};};
+	#if {"%1" == "Osprey"} {@botSetMobActions{osprey};};
+	#if {"%1" == "Mature Swamp Crocodile"} {@botSetMobActions{crocodile};};
+	#if {"%1" == "Great Egret"} {@botSetMobActions{egret};};
+	#if {"%1" == "Salamander"} {@botSetMobActions{salamander};};
+	#if {"%1" == "Crane"} {@botSetMobActions{crane};};
+	#if {"%1" == "Crikey"} {@botSetMobActions{crikey};};
+	#if {"%1" == "Anaconda"} {@botSetMobActions{snake};};
+	.check_monster;
+} {2};
+
+#class {bot} {close}
+
+#read common/bot/generic.tin
