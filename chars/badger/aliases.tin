@@ -823,6 +823,7 @@
         #delay 10 {prots_mb};
         #delay 12 {prots_pfg};
         #delay 14 {prots_ps};
+        #delay 16 {cast mantle}
     };
     #elseif {"$guild" == "bard"} {
         #NOP spells;
@@ -840,7 +841,7 @@
         prots_grace
     };
     #else {
-        #NOP;
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any protection commands/spells in alias!!<088>};
     };
 };
 
@@ -950,9 +951,9 @@
 #NOP -- polymorph other (turn mobs against each other);
 #alias {pmo} {
     #if {"%0" == ""} {
-        cast polymorph other on $mkaTargetName;
+        cast polymorph other on $mob[target]
     }; 
-    #else {cast polymorph other on %0};
+    #else {cast polymorph other on %0}
 };
 
 #NOP -- cast find familiar;
@@ -969,17 +970,18 @@
         reflex add gp1 <90% transpose max;
         reflex add gp1 <5% drop pants;
         reflex combat on;
-        reflex start;
+        reflex start
     };
     #elseif {"$guild" == "mage"} {
         reflex clear;
         reflex add sp <10% eternal heal badger;
         reflex add sp <20% cast mystic immersion;
+        reflex add gp1 >84% drop pants;
         reflex add gp2 >40% cast focus mind;
         reflex add gp2 >90% shoo summons;
         reflex combat on;
         reflex combat;
-        reflex start;
+        reflex start
     };
     #elseif {"$guild" == "elemental"} {
         reflex clear;
@@ -989,7 +991,7 @@
         reflex add sp <40% eternal heal badger;
         #NOP reflex add gp1 <25% evoke energy drain;
         reflex combat on;
-        reflex start;
+        reflex start
     };
     #elseif {"$guild" == "bard"} {
         reflex clear;
@@ -997,7 +999,7 @@
         reflex add hp <25% hmheal;
         reflex add hp <50% eternal heal badger;
         reflex combat on;
-        reflex start;
+        reflex start
     };
     #elseif {"$guild" == "fremen"} {
         reflex clear;
@@ -1007,59 +1009,59 @@
         #NOP reflex add hp >98% bindu some;
         reflex add gp1 <25% drop pants;
         reflex combat on;
-        reflex start;
+        reflex start
     };
     #else {
-        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reflex settings in this alias!!<088>};
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reflex settings in this alias!!<088>}
     };
 };
 
 #NOP -- turn gags on;
 #alias {gagson} {
     #if {"$guild" == "juggernaut"} {
-        gag+ hpbar;
+        gag+ hpbar
     };
     #elseif {"$guild" == "mage"} {
         gag+ hpbar;
         #gag {  --> %*};
-        #gag {%*-hp-};
+        #gag {%*-hp-}
     };
     #elseif {"$guild" == "elemental"} {
-        gag+ hpbar;
+        gag+ hpbar
     };
     #elseif {"$guild" == "bard"} {
-        #NOP;
+        gag+ hpbar
     };
     #elseif {"$guild" == "fremen"} {
-        gag+ hpbar;
+        gag+ hpbar
     };
     #else {
         #NOP;
-    };
+    }
 };
 
 #NOP -- turn gags off;
 #alias {gagsoff} {
     #if {"$guild" == "juggernaut"} {
-        gag-clear;
+        gag-clear
     };
     #elseif {"$guild" == "mage"} {
         gag-clear;
         #ungag {  --> %*};
-        #ungag {%*-hp-};
+        #ungag {%*-hp-}
     };
     #elseif {"$guild" == "elemental"} {
-        gag-clear;
+        gag-clear
     };
     #elseif {"$guild" == "bard"} {
-        gag-clear;
+        gag-clear
     };
     #elseif {"$guild" == "fremen"} {
-        gag-clear;
+        gag-clear
     };
     #else {
         #NOP;
-    };
+    }
 };
 
 #NOP -- setup configs;
@@ -1371,24 +1373,24 @@
         strategy-clear;
         #NOP strategy-rolm;
         strategy frenzy;
-        strategy nukes;
+        strategy nukes
     };
     #elseif {"$guild" == "mage"} {
         strategy-clear;
         strategy slow;
-        strategy super_er;
+        #nop strategy super_er;
         strategy golem_assist;
         strategy summon_mf;
         strategy spelltap;
         strategy gstrength;
         strategy shoosummons;
-        strategy rolm;
+        strategy rolm
     };
     #elseif {"$guild" == "elemental"} {
         strategy-clear;
         strategy epowers;
         strategy blasts;
-        strategy thefourwinds;
+        strategy thefourwinds
     };
     #elseif {"$guild" == "bard"} {
         strategy-clear;
@@ -1397,7 +1399,7 @@
         strategy vortex;
         strategy enrage;
         strategy cshot;
-        strategy rolm;
+        strategy rolm
     };
     #elseif {"$guild" == "fremen"} {
         strategy-clear;
@@ -1405,10 +1407,10 @@
         strategy stun;
         strategy spicebeer;
         #NOP strategy voicehold;
-        strategy voicefeeble;
+        strategy voicefeeble
     };
     #else {
-        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>};
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>}
     };
 };
 
@@ -2057,7 +2059,7 @@
 
 #NOP -- examining & searching;
 #alias {x} {
-    exa
+    exa %0
 };
 
 #NOP -- quck walk to roomvnum;

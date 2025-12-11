@@ -79,27 +79,55 @@
 #action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down};
 
 #NOP -- reflexes;
+#variable {tmp_explosive_release} {0};
+#variable {tmp_unwrap} {0};
+
 #action {You have no pants.} {
     #if {!$idle_flag} {
         #if {"$guild" == "juggernaut"} {
             stimheal1;
-            fdeener;
+            fdeener
         };
         #if {"$guild" == "mage"} {
-            unwrap 1;
-            cast corpse blast
+            #if {$my[super][current] == 0} {
+                #if {$tmp_unwrap == 0} {
+                    #var tmp_unwrap 1;
+                    unwrap 1;
+                    #delay {2} {#var tmp_unwrap 0}
+                };
+                cast corpse blast
+            };
+            #else {
+                #if {$tmp_explosive_release == 0} {
+                    #var tmp_explosive_release 1;
+                    cast explosive release;
+                    #delay {5} {#var tmp_explosive_release 0}
+                }
+            }
         };
         #if {"$guild" == "elemental"} {
-            unwrap 1;
-            evoke mental depletion on corpse;
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                unwrap 1;
+                #delay {2} {#var tmp_unwrap 0}
+            };
+            evoke mental depletion on corpse
         };
         #if {"$guild" == "bard"} {
             cease;
-            unwrap 1;
-            perform dirge;
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                unwrap 1;
+                #delay {2} {#var tmp_unwrap 0}
+            };
+            perform dirge
         };
         #if {"$guild" == "fremen"} {
-            unwrap 1;
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                unwrap 1;
+                #delay {2} {#var tmp_unwrap 0}
+            };
             reclaim
         }
     }
