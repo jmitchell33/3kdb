@@ -170,7 +170,7 @@
 
 #alias update_xp {
     #if {"%1" == "start"} {
-        #action {^You have %* total xp.$} {
+        #line oneshot #action {^You have %* total xp.$} {
             #if {$bot[active]} {
                 #math bot[stats][xp] 0;
                 #math bot[stats][loop][xp] 0;
@@ -186,7 +186,7 @@
             #math bot[stats][mobs] {$bot[stats][mobs] + 1};
         };
         
-        #action {^You have %* total xp.$} {
+        #line oneshot #action {^You have %* total xp.$} {
             #format temp_xp {%d} {%%1};
             #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
                 #if {$temp_xp > $my[xp]} {
@@ -209,8 +209,7 @@
         #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
     };
 
-    #action {^At this rate you will level in %*} {
-        #class tmpCapture kill;
+    #line oneshot action {^At this rate you will level in %*} {
         #line gag;
     } {2};
 };
