@@ -349,6 +349,9 @@ dreset;
         #var vaf[numbers] 1;
         #var incombat 1;
         #format enemy[name_numbers] {%l} {%2};
+        #if $vaf[numbers] {
+            #var enemy[target] {${enemy[name_numbers]}};
+        };
         #format dmgTimes {%d} %3;
         #var dmgTimesText %4;
         #format dmgAmount {%d} %5;
@@ -461,7 +464,6 @@ dreset;
     }
 } {2};
     
-
 #act {%1 hits you for %2 damage!} {
     #var incombat 1;
     #var dmgt[curr] %2;
