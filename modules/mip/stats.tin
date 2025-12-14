@@ -92,27 +92,25 @@
 
 #NOP ***** Combat Mob Name *****;
 #ALIAS {.mipProcessFFFK} {
-	#IF {"%1" != ""} {
-		#VAR {enemy} {};
-		#var enemy[name] %1;
-
-		#if $vaf[numbers] {
-			#var enemy[target] {$enemy[name_numbers]};
-		} {
-			#nop -- Try to lowercase the name and replace the articles with blanks to get a "target";
-			#format enemy[target] {%l} {%1};
-			#replace enemy[target] {\ba\b} {};
-			#replace enemy[target] {\ban\b} {};
-			#replace enemy[target] {\bthe\b} {};
-			#format enemy[target] {%p} {$enemy[target]};
-		};
-	} {
-		#var {enemy[last][name]} {$enemy[name]};
-		#VAR {enemy[name]} {};
-		#VAR {enemy[target]} {};
-		#VAR {enemy[graph]} {};
-		#VAR {enemy[hp]} {}
-	};
+    #IF {"%1" != ""} {
+        #var enemy[name] %1;
+        #if $vaf[numbers] {
+            #var enemy[target] {${enemy[name_numbers]}}
+        } {
+            #nop -- Try to lowercase the name and replace the articles with blanks to get a "target";
+            #format enemy[target] {%l} {%1};
+            #replace enemy[target] {\ba\b} {};
+            #replace enemy[target] {\ban\b} {};
+            #replace enemy[target] {\bthe\b} {};
+            #format enemy[target] {%p} {$enemy[target]}
+        }
+    } {
+        #var {enemy[last][name]} {$enemy[name]};
+        #VAR {enemy[name]} {};
+        #VAR {enemy[target]} {};
+        #VAR {enemy[graph]} {};
+        #VAR {enemy[hp]} {}
+    }
 };
 
 #NOP ***** Guild Stats Line 1/2 *****
