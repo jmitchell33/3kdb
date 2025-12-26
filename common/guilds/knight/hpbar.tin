@@ -6,7 +6,7 @@
 
 
 #act {{HP:(\d+)/(\d+) SP:(\d+)/(\d+) STM:(\d+)/(\d+) STN:(\d+)\% SW:([\d\.]+)\% \| (\w+) (\w+)}} {
-	#line gag;
+	#if $gags[hpbar] {#line gag};
 	#var {my[hp][current]}	{%2};
 	#var {my[hp][max]}	{%3};
 	#var {my[sp][current]}	{%4};
@@ -21,7 +21,7 @@
 };
 
 #act {PPD(%w) End(%w) Cry(%p) Dfl(%w) Study(%w) Dodge(%w) Brawl(%w) Shield(%w) Parry(%w)} {
-	#line gag;
+	#if $gags[hpbar] {#line gag};
 	#var {kskills[prepare]}		{%1};
     #if {"$kskills[prepare]" == "Y"} {#var kskills[prepare] <ffa>ON<088>};
     #if {"$kskills[prepare]" == "n"} {#var kskills[prepare] <faa>OFF<088>;#send !prepare on};
@@ -52,7 +52,7 @@
 };
 
 #act {GXP: %d(%p) Joust:%p E:%p} {
-	#line gag;
+	#if $gags[hpbar] {#line gag};
     #if {!$g2n_last_round} {#var g2n_last_round %1};
 	#var {gxp_to_nxt_glvl}	{%2};
 	#var {joust}	{%3};
