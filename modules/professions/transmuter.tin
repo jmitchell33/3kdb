@@ -1,22 +1,13 @@
-#class {transmuter} {kill};
-#class {transmuter} {open};
+#class {transmuter} {kill}
+#class {transmuter} {open}
 
 #NOP -- read professions data;
 #read modules/professions/data.tin;
 
-#NOP -- shorter alias to use transmute_burn upgrade-leg;
-#alias {tburn} {
-    #if {"%1" != ""} {
-        transmute_burn upgrade-leg %1 %2 %3;
-    } {
-        #echo {<fff>Usage: tburn <component name> <088>};
-    };
-};
-
 #NOP -----------------------------------------------------------;
 #NOP -----------------------------------------------------------;
 #NOP -----           Oscar's Deluxe Transmuter            ------;
-#NOP ---------       Heavily Modified by Badger        ---------;
+#NOP -----------------------------------------------------------;
 #NOP -----------------------------------------------------------;
 
 #NOP        syntax example: transmute_burn consolidate;
@@ -28,148 +19,78 @@
 #NOP        train                 -Consolidate components until Superior (that provide pxp);
 #NOP        train-leg             -Consolidate components until Legendary (that provide pxp);
 
+
+#nop #action {Profession #1 : Transmuter%s\(Level %d\)%s\[%*\]} {#var transmuter[level] %2};
 #action {Profession #1 : Transmuter%s\(Level %d\)%*} {#var transmuter[level] %2} {2};
 
 #alias satchel_retrieve_xmute {
     #var items_required %1;
     #var item_quality %2;
-    #var satchel_tmpItem %3;
+    #var item %3;
     #var items_available %4;
     
     #math items_required {$items_required * 1};
     #math sets_available {$items_available / $items_required};
-    #var items_used 0;
 
     #if {$sets_available >= 1} {
         #loop 1 $sets_available index {
-            #delay {$index * 2} {
-                #math remaining_items {$items_available - $items_used};
-                #if {$remaining_items >= $items_required} {
-                    #math items_used {$items_used + $items_required};
-                    #math transmute_stats[items_by_quality][$item_quality] {$transmute_stats[items_by_quality][$item_quality] + $items_required};
-                    #NOP -- Above Level 50 the transmute ratio drops by 1 for average and above;
-                    #if {$transmuter[level] >= 50} {
-                        #if {"$item_quality" == "worthless"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to average;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "crude"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to average;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "poor"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to average;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "average"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to good;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "good"} {
-                            #3 {unstash $item_quality $satchel_tmpItem};
-                            transmute 3 $satchel_tmpItem quality to superior;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "superior"} {
-                            #4 {unstash $item_quality $satchel_tmpItem};
-                            transmute 4 $satchel_tmpItem quality to legendary;
-                            stash all;
-                        };
-                    } {
-                        #NOP Transmuter ratios for lvls 0-49;
-                        #if {"$item_quality" == "worthless"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to average;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "crude"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to average;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "poor"} {
-                            #2 {unstash $item_quality $satchel_tmpItem};
-                            transmute 2 $satchel_tmpItem quality to average;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "average"} {
-                            #3 {unstash $item_quality $satchel_tmpItem};
-                            transmute 3 $satchel_tmpItem quality to good;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "good"} {
-                            #4 {unstash $item_quality $satchel_tmpItem};
-                            transmute 4 $satchel_tmpItem quality to superior;
-                            stash all;
-                        };
-                        #if {"$item_quality" == "superior"} {
-                            #5 {unstash $item_quality $satchel_tmpItem};
-                            transmute 5 $satchel_tmpItem quality to legendary;
-                            stash all;
-                        };
-                    };
-                };
+            #if {"$item_quality" == "worthless"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to average;
             };
-        };
-    } {
-        #if {$items_available > 0 && $items_available < $items_required} {
-            #echo {<faa>WARNING: Not enough $item_quality $satchel_tmpItem (need $items_required, have $items_available) <088>};
+            #if {"$item_quality" == "crude"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to average;
+            };
+            #if {"$item_quality" == "poor"} {
+                #2 {unstash $item_quality $item};
+                transmute 2 $item quality to average;
+            };
+
+            #if {"$item_quality" == "average"} {
+                #3 {unstash $item_quality $item};
+                transmute 3 $item quality to good;
+            };
+            #if {"$item_quality" == "good"} {
+                #4 {unstash $item_quality $item};
+                transmute 4 $item quality to superior;
+            };
+            #if {"$item_quality" == "superior"} {
+                #5 {unstash $item_quality $item};
+                transmute 5 $item quality to legendary;
+            };
+
+            #NOP -- Above Level 50 the transmute ratio drops by 1 for average and above;
+         #NOP   #if {"$item_quality" == "average"} {
+         #NOP       #2 {unstash $item_quality $item};
+         #NOP       transmute 2 $item quality to good;
+         #NOP   };
+         #NOP   #if {"$item_quality" == "good"} {
+         #NOP       #3 {unstash $item_quality $item};
+         #NOP       transmute 3 $item quality to superior;
+         #NOP   };
+         #NOP   #if {"$item_quality" == "superior"} {
+         #NOP       #4 {unstash $item_quality $item};
+         #NOP       transmute 4 $item quality to legendary;
+         #NOP   };
         };
     };
 };
 
 #alias transmute_burn {
     #var transmute_count 0;
-    #var transmute_stats[colors_used] 0;
-    #var transmute_stats[colors_remaining] 0;
-    #var transmute_stats[items_by_quality][worthless] 0;
-    #var transmute_stats[items_by_quality][crude] 0;
-    #var transmute_stats[items_by_quality][poor] 0;
-    #var transmute_stats[items_by_quality][average] 0;
-    #var transmute_stats[items_by_quality][good] 0;
-    #var transmute_stats[items_by_quality][superior] 0;
-    #var transmute_stats[max_delay] 0;
-    
     #action {Pfffzzzt!  You transmute:} {#math transmute_count {$transmute_count + 1};};
-    #action {You hear a small magical zot from your stone as %d colours are consumed.} {
-        #math transmute_stats[colors_used] {$transmute_stats[colors_used] + %%1};
-    };
-    #action {You have %d colours remaining, swirling happily.} {
-        #var transmute_stats[colors_remaining] {%%1};
-    };
-    #action {That would require the magick from %d colours, and you have only %d.} {
-        #echo {<faa>═══════════════════════════════════════════════════════════<088>};
-        #echo {<faa>║  ERROR: INSUFFICIENT COLORS - ABORTING TRANSMUTES!        ║<088>};
-        #echo {<faa>║  Required: %%1 | Available: %%2                           ║<088>};
-        #echo {<faa>═══════════════════════════════════════════════════════════<088>};
-    };
-    
     #delay .5 {
         #if {"%1" == ""} {
-            #echo {<faa> ----------------------------------------------------------------- <088>};
-            #echo {<faa> ----------------------------------------------------------------- <088>};
-            #echo {<faa> -----           <fff>Oscar's Deluxe Transmuter            <faa> ------ <088>};
-            #echo {<faa> ---------       <fff>Heavily Modified by Badger        <faa> --------- <088>};
-            #echo {<faa> ----------------------------------------------------------------- <088>};
-            #echo {<fff>    No parameters were provided, please provide a valid parameter. <088>};
-            #echo {<faa> ----------------------------------------------------------------- <088>};
-            #echo {<fff>     Valid parameters include: <088>};
-            #echo {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp) <088>};
-            #echo {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp) <088>};
-            #echo {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp) <088>};
-            #echo {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp) <088>};
-            #echo {<ccf>       upgrade-leg      <ddd>-Upgrade a specific component until Legendary (not guaranteed pxp) <088>};
-            #echo {<ffa>         Examples:    <ccd>transmute_burn upgrade-leg <sapphire dust> <088>};
-            #echo {<ccd>                           transmute_burn <consolidate> <088>};
-            #echo {<faa> ----------------------------------------------------------------- <088>};
-            #unaction {Pfffzzzt!  You transmute:};
-            #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-            #unaction {You have %d colours remaining, swirling happily.};
-            #unaction {That would require the magick from %d colours, and you have only %d.};
+            #echo {<ddd>    No parameters were provided, please provide a valid parameter such as:  <088>};
+            #echo {<ddd>     transmute_burn consolidate  <088>};
+            #echo {                                                                                         };
+            #echo {<ddd>     Valid parameters include:                                                  <088>  };
+            #echo {<ccf>       consolidate      <ddd>-Consolidate satchel until Superior (not guaranteed pxp)          <088>  };
+            #echo {<ccf>       consolidate-leg  <ddd>-Consolidate satchel until Legendary (not guaranteed pxp)          <088>  };
+
+            #echo {<ccf>       train            <ddd>-Consolidate components until Superior (that provide pxp)     <088>  };
+            #echo {<ccf>       train-leg        <ddd>-Consolidate components until Legendary (that provide pxp)     <088>  };
         } {
             #send profs;
             #echo {<ccf>  -------------------------------------------    <088>  };
@@ -183,54 +104,18 @@
                             #if {$transmuter[level] >= $index[min-level]} {
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {
-                                            satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];
-                                            #math tmp_delay {($satchel_item[worthless] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[crude] >= 2} {
-                                            satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];
-                                            #math tmp_delay {($satchel_item[crude] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[poor] >= 2} {
-                                            satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];
-                                            #math tmp_delay {($satchel_item[poor] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[average] >= 2} {
-                                            satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];
-                                            #math tmp_delay {($satchel_item[average] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[good] >= 3} {
-                                            satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];
-                                            #math tmp_delay {($satchel_item[good] / 3) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
                                     };
                                 };
                             };
                         };
-                        #math final_delay {$transmute_stats[max_delay] + 6};
-                        #delay $final_delay {
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<ccf>  ║              <ffa>TRANSMUTE SESSION COMPLETE<ccf>                 ║  <088>};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<fff>    Total Transmutes: <ffa>$transmute_count <088>};
-                            #echo {<fff>    Colors Used: <faa>$transmute_stats[colors_used] <088>};
-                            #echo {<fff>    Colors Remaining: <afa>$transmute_stats[colors_remaining] <088>};
-                            #if {$transmute_stats[items_by_quality][worthless] > 0} {#echo {<ddd>    Worthless items transmuted: <fff>$transmute_stats[items_by_quality][worthless] <088>};};
-                            #if {$transmute_stats[items_by_quality][crude] > 0} {#echo {<ddd>    Crude items transmuted: <fff>$transmute_stats[items_by_quality][crude] <088>};};
-                            #if {$transmute_stats[items_by_quality][poor] > 0} {#echo {<ddd>    Poor items transmuted: <fff>$transmute_stats[items_by_quality][poor] <088>};};
-                            #if {$transmute_stats[items_by_quality][average] > 0} {#echo {<ddd>    Average items transmuted: <fff>$transmute_stats[items_by_quality][average] <088>};};
-                            #if {$transmute_stats[items_by_quality][good] > 0} {#echo {<ddd>    Good items transmuted: <fff>$transmute_stats[items_by_quality][good] <088>};};
-                            #if {$transmute_stats[items_by_quality][superior] > 0} {#echo {<ddd>    Superior items transmuted: <fff>$transmute_stats[items_by_quality][superior] <088>};};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
+                        #delay 4 {
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
-                            #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-                            #unaction {You have %d colours remaining, swirling happily.};
-                            #unaction {That would require the magick from %d colours, and you have only %d.};
                         };
                     };
                     #case {"consolidate-leg"} {
@@ -238,59 +123,19 @@
                             #if {$transmuter[level] >= $index[min-level]} {                                
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {
-                                            satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];
-                                            #math tmp_delay {($satchel_item[worthless] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[crude] >= 2} {
-                                            satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];
-                                            #math tmp_delay {($satchel_item[crude] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[poor] >= 2} {
-                                            satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];
-                                            #math tmp_delay {($satchel_item[poor] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[average] >= 2} {
-                                            satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];
-                                            #math tmp_delay {($satchel_item[average] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[good] >= 3} {
-                                            satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];
-                                            #math tmp_delay {($satchel_item[good] / 3) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[superior] >= 4} {
-                                            satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];
-                                            #math tmp_delay {($satchel_item[superior] / 4) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                        #if {$satchel_item[superior] >= 4} {satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];};
                                     };
                                 };
                             };
                         };
-                        #math final_delay {$transmute_stats[max_delay] + 6};
-                        #delay $final_delay {
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<ccf>  ║              <ffa>TRANSMUTE SESSION COMPLETE<ccf>                 ║  <088>};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<fff>    Total Transmutes: <ffa>$transmute_count <088>};
-                            #echo {<fff>    Colors Used: <faa>$transmute_stats[colors_used] <088>};
-                            #echo {<fff>    Colors Remaining: <afa>$transmute_stats[colors_remaining] <088>};
-                            #if {$transmute_stats[items_by_quality][worthless] > 0} {#echo {<ddd>    Worthless items transmuted: <fff>$transmute_stats[items_by_quality][worthless] <088>};};
-                            #if {$transmute_stats[items_by_quality][crude] > 0} {#echo {<ddd>    Crude items transmuted: <fff>$transmute_stats[items_by_quality][crude] <088>};};
-                            #if {$transmute_stats[items_by_quality][poor] > 0} {#echo {<ddd>    Poor items transmuted: <fff>$transmute_stats[items_by_quality][poor] <088>};};
-                            #if {$transmute_stats[items_by_quality][average] > 0} {#echo {<ddd>    Average items transmuted: <fff>$transmute_stats[items_by_quality][average] <088>};};
-                            #if {$transmute_stats[items_by_quality][good] > 0} {#echo {<ddd>    Good items transmuted: <fff>$transmute_stats[items_by_quality][good] <088>};};
-                            #if {$transmute_stats[items_by_quality][superior] > 0} {#echo {<ddd>    Superior items transmuted: <fff>$transmute_stats[items_by_quality][superior] <088>};};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
+                        #delay 4 {
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS    <ccf>-------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
-                            #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-                            #unaction {You have %d colours remaining, swirling happily.};
-                            #unaction {That would require the magick from %d colours, and you have only %d.};
                         };
                     };
                     #case {"train"} {
@@ -298,31 +143,11 @@
                             #if {$transmuter[level] >= $index[min-level] && $transmuter[level] < $index[max-level]} {
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {
-                                            satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];
-                                            #math tmp_delay {($satchel_item[worthless] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[crude] >= 2} {
-                                            satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];
-                                            #math tmp_delay {($satchel_item[crude] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[poor] >= 2} {
-                                            satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];
-                                            #math tmp_delay {($satchel_item[poor] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[average] >= 3} {
-                                            satchel_retrieve_xmute 3 average {$satchel_item[name]} $satchel_item[average];
-                                            #math tmp_delay {($satchel_item[average] / 3) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[good] >= 4} {
-                                            satchel_retrieve_xmute 4 good {$satchel_item[name]} $satchel_item[good];
-                                            #math tmp_delay {($satchel_item[good] / 4) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 3} {satchel_retrieve_xmute 3 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 4} {satchel_retrieve_xmute 4 good {$satchel_item[name]} $satchel_item[good];};
 
                                         #NOP -- Above Level 50 the transmute ratio drops by 1 for average and above;
                                         #NOP -- This appears to only apply to components below a certain level - maybe it's relative to your level?;
@@ -335,25 +160,9 @@
                                 };
                             };
                         };
-                        #math final_delay {$transmute_stats[max_delay] + 6};
-                        #delay $final_delay {
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<ccf>  ║              <ffa>TRANSMUTE SESSION COMPLETE<ccf>                 ║  <088>};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<fff>    Total Transmutes: <ffa>$transmute_count <088>};
-                            #echo {<fff>    Colors Used: <faa>$transmute_stats[colors_used] <088>};
-                            #echo {<fff>    Colors Remaining: <afa>$transmute_stats[colors_remaining] <088>};
-                            #if {$transmute_stats[items_by_quality][worthless] > 0} {#echo {<ddd>    Worthless items transmuted: <fff>$transmute_stats[items_by_quality][worthless] <088>};};
-                            #if {$transmute_stats[items_by_quality][crude] > 0} {#echo {<ddd>    Crude items transmuted: <fff>$transmute_stats[items_by_quality][crude] <088>};};
-                            #if {$transmute_stats[items_by_quality][poor] > 0} {#echo {<ddd>    Poor items transmuted: <fff>$transmute_stats[items_by_quality][poor] <088>};};
-                            #if {$transmute_stats[items_by_quality][average] > 0} {#echo {<ddd>    Average items transmuted: <fff>$transmute_stats[items_by_quality][average] <088>};};
-                            #if {$transmute_stats[items_by_quality][good] > 0} {#echo {<ddd>    Good items transmuted: <fff>$transmute_stats[items_by_quality][good] <088>};};
-                            #if {$transmute_stats[items_by_quality][superior] > 0} {#echo {<ddd>    Superior items transmuted: <fff>$transmute_stats[items_by_quality][superior] <088>};};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
+                        #delay 4 {
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS  <ccf>  -------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
-                            #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-                            #unaction {You have %d colours remaining, swirling happily.};
-                            #unaction {That would require the magick from %d colours, and you have only %d.};
                         };
                     };
                     #case {"train-leg"} {
@@ -361,364 +170,25 @@
                             #if {$transmuter[level] >= $index[min-level] && $transmuter[level] <= $index[max-level]} {                                
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {
-                                            satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];
-                                            #math tmp_delay {($satchel_item[worthless] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[crude] >= 2} {
-                                            satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];
-                                            #math tmp_delay {($satchel_item[crude] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[poor] >= 2} {
-                                            satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];
-                                            #math tmp_delay {($satchel_item[poor] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[average] >= 2} {
-                                            satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];
-                                            #math tmp_delay {($satchel_item[average] / 2) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[good] >= 3} {
-                                            satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];
-                                            #math tmp_delay {($satchel_item[good] / 3) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
-                                        #if {$satchel_item[superior] >= 4} {
-                                            satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];
-                                            #math tmp_delay {($satchel_item[superior] / 4) * 2};
-                                            #if {$tmp_delay > $transmute_stats[max_delay]} {#var transmute_stats[max_delay] $tmp_delay;};
-                                        };
+                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
+                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
+                                        #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
+                                        #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
+                                        #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
+                                        #if {$satchel_item[superior] >= 4} {satchel_retrieve_xmute 4 superior {$satchel_item[name]} $satchel_item[superior];};
                                     };
                                 };
                             };
                         };
-                        #math final_delay {$transmute_stats[max_delay] + 6};
-                        #delay $final_delay {
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<ccf>  ║              <ffa>TRANSMUTE SESSION COMPLETE<ccf>                 ║  <088>};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                            #echo {<fff>    Total Transmutes: <ffa>$transmute_count <088>};
-                            #echo {<fff>    Colors Used: <faa>$transmute_stats[colors_used] <088>};
-                            #echo {<fff>    Colors Remaining: <afa>$transmute_stats[colors_remaining] <088>};
-                            #if {$transmute_stats[items_by_quality][worthless] > 0} {#echo {<ddd>    Worthless items transmuted: <fff>$transmute_stats[items_by_quality][worthless] <088>};};
-                            #if {$transmute_stats[items_by_quality][crude] > 0} {#echo {<ddd>    Crude items transmuted: <fff>$transmute_stats[items_by_quality][crude] <088>};};
-                            #if {$transmute_stats[items_by_quality][poor] > 0} {#echo {<ddd>    Poor items transmuted: <fff>$transmute_stats[items_by_quality][poor] <088>};};
-                            #if {$transmute_stats[items_by_quality][average] > 0} {#echo {<ddd>    Average items transmuted: <fff>$transmute_stats[items_by_quality][average] <088>};};
-                            #if {$transmute_stats[items_by_quality][good] > 0} {#echo {<ddd>    Good items transmuted: <fff>$transmute_stats[items_by_quality][good] <088>};};
-                            #if {$transmute_stats[items_by_quality][superior] > 0} {#echo {<ddd>    Superior items transmuted: <fff>$transmute_stats[items_by_quality][superior] <088>};};
-                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
+                        #delay 4 {
+                            #echo {<ccf>  -------    YOU TRANSMUTED <faa>$transmute_count MATERIALS <ccf>   -------    <088>  };
                             #unaction {Pfffzzzt!  You transmute:};
-                            #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-                            #unaction {You have %d colours remaining, swirling happily.};
-                            #unaction {That would require the magick from %d colours, and you have only %d.};
                         };
                     };
-                    #case {"upgrade-leg"} {
-                        #if {"%2" == ""} {
-                            #echo {<faa>------------------------------------------------------------------ <088>};
-                            #echo {<fff>You must provide a component name, example: <ccd>transmute_burn upgrade-leg <sapphire dust> <088>};
-                            #echo {<faa>------------------------------------------------------------------ <088>};
-                        } {
-                            #var target_component {%2};
-                            #if {"%3" != ""} {
-                                #var target_component {%2 %3};
-                            };
-                            #if {"%4" != ""} {
-                                #var target_component {%2 %3 %4};
-                            };
-                            #format {target_component_lower} {%l} {$target_component};
-                            #echo {<cfc>Searching for component: '$target_component' (lowercase: '$target_component_lower') <088>};
-                            #var found_item 0;
-                            #var upgrade_delay 0;
-                            
-                            #foreach $craft[satchel][%*] satchel_item {
-                                #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[total] > 0} {
-                                    #var found_item 1;
-                                    #echo {<cfc>Found in craft satchel: $satchel_item[name] (total: $satchel_item[total]) <088>};
-                                };
-                            };
-                            
-                            #if {$found_item == 0} {
-                                #echo {<faa>ERROR: Component '$target_component' not found in your satchel! <088>};
-                            } {
-                                #NOP Process worthless quality;
-                                #foreach $craft[satchel][%*] satchel_item {
-                                    #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                    #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[worthless] >= 2} {
-                                        #var items_required 2;
-                                        #math sets_available {$satchel_item[worthless] / $items_required};
-                                        #if {$sets_available >= 1} {
-                                            #echo {<cfc>Processing $satchel_item[worthless] worthless $satchel_item[name] <088>};
-                                            #loop 1 $sets_available cnt {
-                                                #math current_delay {$upgrade_delay + ($cnt * 2)};
-                                                #delay {$current_delay} {
-                                                    #math transmute_stats[items_by_quality][worthless] {$transmute_stats[items_by_quality][worthless] + 2};
-                                                    #if {$transmuter[level] >= 50} {
-                                                        #2 {unstash worthless $target_component};
-                                                        transmute 2 $target_component quality to average;
-                                                        stash all;
-                                                    } {
-                                                        #2 {unstash worthless $target_component};
-                                                        transmute 2 $target_component quality to average;
-                                                        stash all;
-                                                    };
-                                                };
-                                            };
-                                            #math upgrade_delay {$upgrade_delay + ($sets_available * 2)};
-                                        };
-                                    };
-                                };
-                                
-                                #NOP Update satchel and process crude;
-                                #math update_delay {$upgrade_delay + 2};
-                                #delay {$update_delay} {
-                                    update_satchel;
-                                    #delay 2 {
-                                        #foreach $craft[satchel][%*] satchel_item {
-                                            #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                            #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[crude] >= 2} {
-                                                #var items_required 2;
-                                                #math sets_available {$satchel_item[crude] / $items_required};
-                                                #if {$sets_available >= 1} {
-                                                    #echo {<cfc>Processing $satchel_item[crude] crude $satchel_item[name] <088>};
-                                                    #loop 1 $sets_available cnt {
-                                                        #math current_delay {($cnt * 2)};
-                                                        #delay {$current_delay} {
-                                                            #math transmute_stats[items_by_quality][crude] {$transmute_stats[items_by_quality][crude] + 2};
-                                                            #if {$transmuter[level] >= 50} {
-                                                                #2 {unstash crude $target_component};
-                                                                transmute 2 $target_component quality to average;
-                                                                stash all;
-                                                            } {
-                                                                #2 {unstash crude $target_component};
-                                                                transmute 2 $target_component quality to average;
-                                                                stash all;
-                                                            };
-                                                        };
-                                                    };
-                                                    #var upgrade_delay {$sets_available * 2};
-                                                };
-                                            };
-                                        };
-                                        
-                                        #NOP Update satchel and process poor;
-                                        #math update_delay {$upgrade_delay + 2};
-                                        #delay {$update_delay} {
-                                            update_satchel;
-                                            #delay 2 {
-                                                #foreach $craft[satchel][%*] satchel_item {
-                                                    #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                                    #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[poor] >= 2} {
-                                                        #var items_required 2;
-                                                        #math sets_available {$satchel_item[poor] / $items_required};
-                                                        #if {$sets_available >= 1} {
-                                                            #echo {<cfc>Processing $satchel_item[poor] poor $satchel_item[name] <088>};
-                                                            #loop 1 $sets_available cnt {
-                                                                #math current_delay {($cnt * 2)};
-                                                                #delay {$current_delay} {
-                                                                    #math transmute_stats[items_by_quality][poor] {$transmute_stats[items_by_quality][poor] + 2};
-                                                                    #if {$transmuter[level] >= 50} {
-                                                                        #2 {unstash poor $target_component};
-                                                                        transmute 2 $target_component quality to average;
-                                                                        stash all;
-                                                                    } {
-                                                                        #2 {unstash poor $target_component};
-                                                                        transmute 2 $target_component quality to average;
-                                                                        stash all;
-                                                                    };
-                                                                };
-                                                            };
-                                                            #var upgrade_delay {$sets_available * 2};
-                                                        };
-                                                    };
-                                                };
-                                                
-                                                #NOP Update satchel and process average;
-                                                #math update_delay {$upgrade_delay + 2};
-                                                #delay {$update_delay} {
-                                                    update_satchel;
-                                                    #delay 2 {
-                                                        #foreach $craft[satchel][%*] satchel_item {
-                                                            #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                                            #if {$transmuter[level] >= 50} {
-                                                                #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[average] >= 2} {
-                                                                    #var items_required 2;
-                                                                    #math sets_available {$satchel_item[average] / $items_required};
-                                                                    #if {$sets_available >= 1} {
-                                                                        #echo {<cfc>Processing $satchel_item[average] average $satchel_item[name] <088>};
-                                                                        #loop 1 $sets_available cnt {
-                                                                            #math current_delay {($cnt * 2)};
-                                                                            #delay {$current_delay} {
-                                                                                #math transmute_stats[items_by_quality][average] {$transmute_stats[items_by_quality][average] + 2};
-                                                                                #2 {unstash average $target_component};
-                                                                                transmute 2 $target_component quality to good;
-                                                                                stash all;
-                                                                            };
-                                                                        };
-                                                                        #var upgrade_delay {$sets_available * 2};
-                                                                    };
-                                                                };
-                                                            } {
-                                                                #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[average] >= 3} {
-                                                                    #var items_required 3;
-                                                                    #math sets_available {$satchel_item[average] / $items_required};
-                                                                    #if {$sets_available >= 1} {
-                                                                        #echo {<cfc>Processing $satchel_item[average] average $satchel_item[name] <088>};
-                                                                        #loop 1 $sets_available cnt {
-                                                                            #math current_delay {($cnt * 2)};
-                                                                            #delay {$current_delay} {
-                                                                                #math transmute_stats[items_by_quality][average] {$transmute_stats[items_by_quality][average] + 3};
-                                                                                #3 {unstash average $target_component};
-                                                                                transmute 3 $target_component quality to good;
-                                                                                stash all;
-                                                                            };
-                                                                        };
-                                                                        #var upgrade_delay {$sets_available * 2};
-                                                                    };
-                                                                };
-                                                            };
-                                                        };
-                                                        
-                                                        #NOP Update satchel and process good;
-                                                        #math update_delay {$upgrade_delay + 2};
-                                                        #delay {$update_delay} {
-                                                            update_satchel;
-                                                            #delay 2 {
-                                                                #foreach $craft[satchel][%*] satchel_item {
-                                                                    #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                                                    #if {$transmuter[level] >= 50} {
-                                                                        #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[good] >= 3} {
-                                                                            #var items_required 3;
-                                                                            #math sets_available {$satchel_item[good] / $items_required};
-                                                                            #if {$sets_available >= 1} {
-                                                                                #echo {<cfc>Processing $satchel_item[good] good $satchel_item[name] <088>};
-                                                                                #loop 1 $sets_available cnt {
-                                                                                    #math current_delay {($cnt * 2)};
-                                                                                    #delay {$current_delay} {
-                                                                                        #math transmute_stats[items_by_quality][good] {$transmute_stats[items_by_quality][good] + 3};
-                                                                                        #3 {unstash good $target_component};
-                                                                                        transmute 3 $target_component quality to superior;
-                                                                                        stash all;
-                                                                                    };
-                                                                                };
-                                                                                #var upgrade_delay {$sets_available * 2};
-                                                                            };
-                                                                        };
-                                                                    } {
-                                                                        #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[good] >= 4} {
-                                                                            #var items_required 4;
-                                                                            #math sets_available {$satchel_item[good] / $items_required};
-                                                                            #if {$sets_available >= 1} {
-                                                                                #echo {<cfc>Processing $satchel_item[good] good $satchel_item[name] <088>};
-                                                                                #loop 1 $sets_available cnt {
-                                                                                    #math current_delay {($cnt * 2)};
-                                                                                    #delay {$current_delay} {
-                                                                                        #math transmute_stats[items_by_quality][good] {$transmute_stats[items_by_quality][good] + 4};
-                                                                                        #4 {unstash good $target_component};
-                                                                                        transmute 4 $target_component quality to superior;
-                                                                                        stash all;
-                                                                                    };
-                                                                                };
-                                                                                #var upgrade_delay {$sets_available * 2};
-                                                                            };
-                                                                        };
-                                                                    };
-                                                                };
-                                                                
-                                                                #NOP Update satchel and process superior;
-                                                                #math update_delay {$upgrade_delay + 2};
-                                                                #delay {$update_delay} {
-                                                                    update_satchel;
-                                                                    #delay 2 {
-                                                                        #foreach $craft[satchel][%*] satchel_item {
-                                                                            #format {satchel_item_name_lower} {%l} {$satchel_item[name]};
-                                                                            #if {$transmuter[level] >= 50} {
-                                                                                #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[superior] >= 4} {
-                                                                                    #var items_required 4;
-                                                                                    #math sets_available {$satchel_item[superior] / $items_required};
-                                                                                    #if {$sets_available >= 1} {
-                                                                                        #echo {<cfc>Processing $satchel_item[superior] superior $satchel_item[name] <088>};
-                                                                                        #loop 1 $sets_available cnt {
-                                                                                            #math current_delay {($cnt * 2)};
-                                                                                            #delay {$current_delay} {
-                                                                                                #math transmute_stats[items_by_quality][superior] {$transmute_stats[items_by_quality][superior] + 4};
-                                                                                                #4 {unstash superior $target_component};
-                                                                                                transmute 4 $target_component quality to legendary;
-                                                                                                stash all;
-                                                                                            };
-                                                                                        };
-                                                                                        #var upgrade_delay {$sets_available * 2};
-                                                                                    };
-                                                                                };
-                                                                            } {
-                                                                                #if {"$satchel_item_name_lower" == "$target_component_lower" && $satchel_item[superior] >= 5} {
-                                                                                    #var items_required 5;
-                                                                                    #math sets_available {$satchel_item[superior] / $items_required};
-                                                                                    #if {$sets_available >= 1} {
-                                                                                        #echo {<cfc>Processing $satchel_item[superior] superior $satchel_item[name] <088>};
-                                                                                        #loop 1 $sets_available cnt {
-                                                                                            #math current_delay {($cnt * 2)};
-                                                                                            #delay {$current_delay} {
-                                                                                                #math transmute_stats[items_by_quality][superior] {$transmute_stats[items_by_quality][superior] + 5};
-                                                                                                #5 {unstash superior $target_component};
-                                                                                                transmute 5 $target_component quality to legendary;
-                                                                                                stash all;
-                                                                                            };
-                                                                                        };
-                                                                                        #var upgrade_delay {$sets_available * 2};
-                                                                                    };
-                                                                                };
-                                                                            };
-                                                                        };
-                                                                        
-                                                                        #NOP Final completion message;
-                                                                        #math final_delay {$upgrade_delay + 6};
-                                                                        #delay {$final_delay} {
-                                                                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                                                                            #echo {<ccf>  ║              <ffa>TRANSMUTE SESSION COMPLETE<ccf>                 ║  <088>};
-                                                                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                                                                            #echo {<fff>    Component: <ffc>$target_component <088>};
-                                                                            #echo {<fff>    Total Transmutes: <ffa>$transmute_count <088>};
-                                                                            #echo {<fff>    Colors Used: <faa>$transmute_stats[colors_used] <088>};
-                                                                            #echo {<fff>    Colors Remaining: <afa>$transmute_stats[colors_remaining] <088>};
-                                                                            #if {$transmute_stats[items_by_quality][worthless] > 0} {#echo {<ddd>    Worthless items transmuted: <fff>$transmute_stats[items_by_quality][worthless] <088>};};
-                                                                            #if {$transmute_stats[items_by_quality][crude] > 0} {#echo {<ddd>    Crude items transmuted: <fff>$transmute_stats[items_by_quality][crude] <088>};};
-                                                                            #if {$transmute_stats[items_by_quality][poor] > 0} {#echo {<ddd>    Poor items transmuted: <fff>$transmute_stats[items_by_quality][poor] <088>};};
-                                                                            #if {$transmute_stats[items_by_quality][average] > 0} {#echo {<ddd>    Average items transmuted: <fff>$transmute_stats[items_by_quality][average] <088>};};
-                                                                            #if {$transmute_stats[items_by_quality][good] > 0} {#echo {<ddd>    Good items transmuted: <fff>$transmute_stats[items_by_quality][good] <088>};};
-                                                                            #if {$transmute_stats[items_by_quality][superior] > 0} {#echo {<ddd>    Superior items transmuted: <fff>$transmute_stats[items_by_quality][superior] <088>};};
-                                                                            #echo {<ccf>  ═══════════════════════════════════════════════════════════  <088>};
-                                                                            #unaction {Pfffzzzt!  You transmute:};
-                                                                            #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-                                                                            #unaction {You have %d colours remaining, swirling happily.};
-                                                                            #unaction {That would require the magick from %d colours, and you have only %d.};
-                                                                        };
-                                                                    };
-                                                                };
-                                                            };
-                                                        };
-                                                    };
-                                                };
-                                            };
-                                        };
-                                    };
-                                };
-                            };
-                        };
-                    };
-
                     #default {
-                        #echo {<ccf>  -------    <faa>No match found, did you mispell %1?         <ccf>  -------    <088>};
-                        #unaction {Pfffzzzt!  You transmute:};
-                        #unaction {You hear a small magical zot from your stone as %d colours are consumed.};
-                        #unaction {You have %d colours remaining, swirling happily.};
-                        #unaction {That would require the magick from %d colours, and you have only %d.};
+                        #echo {<ccf>  -------    <faa>No match found, did you mispell %1?         <ccf>  -------    <088>  };
                     };
-                };
+                }
                 stash all;
             };
         };
@@ -726,69 +196,100 @@
 };
 
 #alias transmute_ug {
-    #if {"%1" == "poor"} {
-        #2 unstash poor %2;
-        transmute 2 %2 quality to average;
-        stash all;
-    };
-    #if {$transmuter[level] >= 50} {
-        #if {"%1" == "average"} {
-            #2 unstash average %2;
-            transmute 2 %2 quality to good;
-            stash all;
-        };
-        #if {"%1" == "good"} {
-            #3 unstash good %2;
-            transmute 3 %2 quality to superior;
-            stash all;
-        };
-        #if {"%1" == "superior"} {
-            #4 unstash superior %2;
-            transmute 4 %2 quality to legendary;
-            stash all;
-        };
+    #if {"%0" == ""} {
+        #echo {<afa>╔══════════════════════════════════════════════════════════╗<088>};
+        #echo {<afa>║           <fff>Transmute Upgrade Helper<afa>                       ║<088>};
+        #echo {<afa>╚══════════════════════════════════════════════════════════╝<088>};
+        #echo {};
+        #echo {<fff>Description:<088>};
+        #echo {  Automatically upgrades items to the next quality tier.};
+        #echo {  Unstashes items, transmutes them, then restashes.};
+        #echo {};
+        #echo {<fff>Quality Tiers:<088>};
+        #echo {  poor → average → good → superior → legendary};
+        #echo {};
+        #echo {<fff>Usage:<088> transmute_ug <item name> <quality>};
+        #echo {};
+        #echo {<fff>Examples:<088>};
+        #echo {  transmute_ug heart of soul average  <afa>(upgrades to good)<088>};
+        #echo {  transmute_ug green apple good       <afa>(upgrades to superior)<088>};
+        #echo {  transmute_ug gooseberry poor        <afa>(upgrades to average)<088>};
+        #echo {};
+        #echo {<fff>Valid qualities:<088> poor, average, good, superior};
+        #echo {};
+        #echo {<afa>Note: Level 50+ transmuters use fewer items per upgrade.<088>};
     } {
-        #if {"%1" == "average"} {
-            #2 unstash average %2;
-            transmute 2 %2 quality to good;
-            stash all;
-        };
-        #if {"%1" == "good"} {
-            #4 unstash good %2;
-            transmute 4 %2 quality to superior;
-            stash all;
-        };
-        #if {"%1" == "superior"} {
-            #5 unstash superior %2;
-            transmute 5 %2 quality to legendary;
-            stash all;
+        #regex {%0} {^{.+} {[^ ]+}$} {
+            #local item_name {&1};
+            #format item_name {%l} {&1};
+            #local quality {};
+            #format quality {%l} {&2};
+            
+            #if {"$quality" == "poor"} {
+                #2 unstash poor $item_name;
+                transmute 2 $item_name quality to average;
+                stash all;
+            } {
+                #if {$transmuter[level] >= 50} {
+                    #if {"$quality" == "average"} {
+                        #2 unstash average $item_name;
+                        transmute 2 $item_name quality to good;
+                        stash all;
+                    };
+                    #if {"$quality" == "good"} {
+                        #3 unstash good $item_name;
+                        transmute 3 $item_name quality to superior;
+                        stash all;
+                    };
+                    #if {"$quality" == "superior"} {
+                        #4 unstash superior $item_name;
+                        transmute 4 $item_name quality to legendary;
+                        stash all;
+                    };
+                } {
+                    #if {"$quality" == "average"} {
+                        #2 unstash average $item_name;
+                        transmute 2 $item_name quality to good;
+                        stash all;
+                    };
+                    #if {"$quality" == "good"} {
+                        #4 unstash good $item_name;
+                        transmute 4 $item_name quality to superior;
+                        stash all;
+                    };
+                    #if {"$quality" == "superior"} {
+                        #5 unstash superior $item_name;
+                        transmute 5 $item_name quality to legendary;
+                        stash all;
+                    };
+                };
+            };
+        } {
+            #echo {<faa>Error: Invalid format. Please provide item name and quality.<088>};
+            #echo {Type 'transmute_ug' with no arguments for help.};
         };
     };
 };
 
 #NOP -- transmuting ratios;
-#alias {transmute_ratios} {
-    #if {$transmuter[level] >= 50} {
-        #echo {<bea>Transmuting Ratios plvl 50+<088>};
-        #echo {<caf>--------------------------<088>};
-        #echo {<fff>4 Crude    = 3 Poor<088>};
-        #echo {<fff>3 Poor     = 2 Average<088>};
-        #echo {<fff>2 Average  = 1 Good<088>};
-        #echo {<fff>3 Good     = 1 Superior<088>};
-        #echo {<fff>4 Superior = 1 Legendary<088>};
-        #echo {<caf>--------------------------<088>};
-    } {
-        #echo {<bea>Transmuting Ratios plvls 0-49<088>};
-        #echo {<caf>--------------------------<088>};
-        #echo {<fff>4 Crude    = 3 Poor<088>};
-        #echo {<fff>3 Poor     = 2 Average<088>};
-        #echo {<fff>3 Average  = 1 Good<088>};
-        #echo {<fff>4 Good     = 1 Superior<088>};
-        #echo {<fff>5 Superior = 1 Legendary<088>};
-        #echo {<caf>--------------------------<088>};
-        
-    };
+#alias transmute_ratios {
+    #echo {<bea>Transmuting Ratios plvl 50+<088>};
+    #echo {<caf>--------------------------<088>};
+    #echo {<fff>4 Crude    = 3 Poor<088>};
+    #echo {<fff>3 Poor     = 2 Average<088>};
+    #echo {<fff>2 Average  = 1 Good<088>};
+    #echo {<fff>3 Good     = 1 Superior<088>};
+    #echo {<fff>4 Superior = 1 Legendary<088>};
+    #echo {<caf>--------------------------<088>};
+    #echo {};
+    #echo {<bea>Transmuting Ratios plvls 0-49<088>};
+    #echo {<caf>--------------------------<088>};
+    #echo {<fff>4 Crude    = 3 Poor<088>};
+    #echo {<fff>3 Poor     = 2 Average<088>};
+    #echo {<fff>3 Average  = 1 Good<088>};
+    #echo {<fff>4 Good     = 1 Superior<088>};
+    #echo {<fff>5 Superior = 1 Legendary<088>};
+    #echo {<caf>--------------------------<088>};
 };
 
-
-#class {transmuter} {close};
+#class transmuter {close}
