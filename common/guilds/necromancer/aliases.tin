@@ -8,6 +8,27 @@
   #MATH {result} {%1};
 };
 
+#NOP ----- Teleport Helper;
+#var tmpPortsets 1;
+#alias {teleport set} {
+    #map get roomvnum tmpVnum;
+    #format tmpPort {%d} {%1};
+    #format tmpNote {%p} {%2};
+    #var my[necromancer][portsets][$tmpPort][vnum] $tmpVnum;
+    #var my[necromancer][portsets][$tmpPort][short] $room[name];
+    #var my[necromancer][portsets][$tmpPort][note] $tmpNote;
+    #echo {<efe>  -------- <efc>Port $tmpPort now set to vnum $tmpVnum   <efe>--------<088>};
+    #send {teleport set %0};
+};
+
+#alias {teleport%+1s%+1d} {
+    #format tmpPort {%d} {%2};
+    #if {"$my[necromancer][portsets][$tmpPort][vnum]" != ""} {
+        #line oneshot #action {The illusions clear from your mind and you find yourself there.} {#map goto $my[necromancer][portsets][$tmpPort][vnum]};
+    };
+    #send {teleport %2};
+};
+
 #alias check_chest {
     #action {-i-A small, blood-filled crystal decanter%*} {
         #regex {%%1} {7B{[0-9]+}} {#var foundtimes &1};
