@@ -395,18 +395,6 @@
     toggle mission;
 };
 
-#NOP -- for mapping;
-#alias {rmfix} {
-    look;
-    #delay 5 {
-        mapWriteRoom;
-        #delay 5 {
-            look;
-            #echo {<ffa>ROOMNAME: $roomname<088>};
-        };
-    };
-};
-
 #NOP -- augur;
 #alias {aug} {
     remove other;
@@ -793,20 +781,25 @@
 
 #NOP -- clear defense;
 #alias {clear_defense} {
-    clear_def;
-    deplete prismatic aura;
-    deplete prismatic sphere;
-    deplete major globe;
-    deplete minor globe;
-    deplete magnificent shield;
-    deplete shield;
-    deplete armor;
-    deplete protection from evil;
-    deplete protection from good;
-    deplete rhino skin;
-    deplete stoneskin;
-    deplete blink;
-    deplete mantle;
+    #if {"$guild" == "mage"} {
+        clear_def;
+        deplete prismatic aura;
+        deplete prismatic sphere;
+        deplete major globe;
+        deplete minor globe;
+        deplete magnificent shield;
+        deplete shield;
+        deplete armor;
+        deplete protection from evil;
+        deplete protection from good;
+        deplete rhino skin;
+        deplete stoneskin;
+        deplete blink;
+        deplete mantle
+    };
+    #elseif {"$guild" == "bard"} {
+        clear_prots
+    }
 };
 
 #NOP -- setup defense;
