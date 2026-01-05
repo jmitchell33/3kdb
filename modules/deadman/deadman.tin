@@ -40,4 +40,12 @@
     };
 } {0};
 
+#NOP -- Initialize deadman timer on file load;
+#delay 1 {
+    #var idle_flag 0;
+    #var idle 0;
+    #var deadManTimeLeft $deadmanIdleTimeout;
+    #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+};
+
 #class {deadman} {close}
