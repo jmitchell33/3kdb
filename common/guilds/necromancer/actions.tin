@@ -266,6 +266,25 @@
     checkStrategy {bloodlet} {bloodlet $enemy[target]};
 } {2};
 
+#NOP ----- Teleport Helper;
+#var tmpPortsets 1;
+#alias {teleport set} {
+    #map get roomvnum tmpVnum;
+    #format tmpPort {%d} {%1};
+    #format tmpNote {%p} {%2};
+    #var my[necromancer][portsets][$tmpPort][vnum] $tmpVnum;
+    #var my[necromancer][portsets][$tmpPort][short] $room[name];
+    #var my[necromancer][portsets][$tmpPort][note] $tmpNote;
+    #echo {<efe>  -------- <efc>Port $tmpPort now set to vnum $tmpVnum   <efe>--------<088>};
+};
+
+#action {^Visions of the guild appear first in your mind, then reality...$} {
+    #map get roomvnum tmpVnum;
+    #var my[necromancer][portsets][1][vnum] $tmpVnum;
+    #var my[necromancer][portsets][1][short] $room[name];
+    #delay .5 {mapgo necro_rr};
+} {2};
+
 
 #NOP ----- The moon has x stages;
 #NOP A new moon hangs in the dark sky.;
@@ -292,6 +311,26 @@
     };
 } {6};
 
+#NOP -- Aid a person;
+#action {^%w clubs you like a baby seal!$} {
+    #if !$idle_flag {
+        #if $toggles[emote_aid] {
+            #format {lower} {%l} {%1};
+            #if {$my[gp1][percent] > .51} {
+                #math tmpNumber {.5 * $my[gp1][current]};
+                #if {$tmpNumber < 50000} {
+                    #var npToAid $tmpNumber;
+                } {
+                    #var npToAid 50000;
+                };
+                aid $lower $npToAid;
+            };
+        } {
+            #send {!say I do not have aid toggled at the moment.  At this time, fear the reaper.};
+        };
+    };
+} {2};
+
 #ACTION {^%w goes 'Breakin the law! Breakin the law!' at you.} {
     #if !$idle_flag {
         qtrance preserve remains>50;
@@ -314,9 +353,6 @@
     #echo {RAPTURE LEFT %1};
 } {2};
 
-
-#NOP -- Teleport helpers;
-#action {Visions of the guild appear first in your mind, then reality...} {mapgo necro_rr} {2};
 
 #NOP -- Glamor maintenance;
 #action {^  You don't have enough energy.$} {

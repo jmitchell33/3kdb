@@ -67,59 +67,10 @@
     #map run $go_back;
 };
 
-#alias .check_death {
-    #if $darkness {light torch};
-    #if $actions_stacked {
-        do_action;
-    } {
-        #if {$inventory[freezer] && $corpses[freezer] < 50} {
-            slab remains;
-            slab remains;
-        };
-        #if {$inventory[coffin] && $corpses[coffin] < 28} {
-            get remains;
-            wrap remains;
-            get remains;
-            wrap remains;
-        };
-        #if {$inventory[encumberance] > 95} {
-            #delay 1 {absorb;absorb;get all;.bot};
-        } {
-            #delay 1 {preserve_remains;preserve_remains;get all;put all in buckler;.bot};
-        };
-    };
-    fuse 200;
-};
-
 #alias {_player_deadmanActions} {
     #NOP;
 };
 
-#alias {.mob_kill_action} {
-    #var stats[starting-gp] $my[gp1][current];
-    kill $mob[target];
-    checkStrategy {snare} {snare $mob[target]};
-    checkStrategy {rabies} {rabies};
-    checkStrategy {corrode} {corrode};
-    checkStrategy {scythe} {scythe};
-    #if {$my[necromancer][maim] > 0} {checkStrategy {maim} {#if {$my[necromancer][altered]} {maim} {alter hybrid;maim}}};
-    checkStrategy {call} {call};
-    checkStrategy {undead} {=kill $mob[target]};
-    #if {"$area" == "Banshee's Lair"} {
-        #delay 3 {
-            kill undead 2;
-            snare undead 2;
-            rabies undead 2;
-            corrode undead 2;
-        };
-        #delay 6 {
-            kill undead 3;
-            snare undead 3;
-            rabies undead 3;
-            corrode undead 3;
-        };
-    };
-};
 
 #NOP ---THIS SECTION IS FOR NECRO SPECIFIC ALIASES
 
@@ -211,11 +162,6 @@
     };
 };
 
-#alias {necro_reset} {
-    #NOP;
-};
-
-#alias {gxp_tracker} {#act { |  Next Circle:[%*]%*]}  {#line log comms.txt %1}};
 
 
 #class {player_aliases} {close}
