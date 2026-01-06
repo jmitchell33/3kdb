@@ -266,18 +266,6 @@
     checkStrategy {bloodlet} {bloodlet $enemy[target]};
 } {2};
 
-#NOP ----- Teleport Helper;
-#var tmpPortsets 1;
-#alias {teleport set} {
-    #map get roomvnum tmpVnum;
-    #format tmpPort {%d} {%1};
-    #format tmpNote {%p} {%2};
-    #var my[necromancer][portsets][$tmpPort][vnum] $tmpVnum;
-    #var my[necromancer][portsets][$tmpPort][short] $room[name];
-    #var my[necromancer][portsets][$tmpPort][note] $tmpNote;
-    #echo {<efe>  -------- <efc>Port $tmpPort now set to vnum $tmpVnum   <efe>--------<088>};
-};
-
 #action {^Visions of the guild appear first in your mind, then reality...$} {
     #map get roomvnum tmpVnum;
     #var my[necromancer][portsets][1][vnum] $tmpVnum;
