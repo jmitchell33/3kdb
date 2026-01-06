@@ -112,11 +112,16 @@
 	trace glyph;
 	#var numberOfRounds 1;
 	#if {"$guild" == "necromancer"} {
-		#math numberOfRounds {%1 / 16};
-		#format numberOfRounds {%d} {$numberOfRounds};
-		#${numberOfRounds} {qtrance deslab/get corpse/cooler corpse>16};
-		#math tmpRemainder {%1 -($numberOfRounds * 16)};
-		#send {qtrance deslab/get corpse/cooler coprse>${tmpRemainder}};
+		#format tmpNumber {%d} {%1};
+		#if {$tmpNumber <= 16} {
+			#send {qtrance deslab/get corpse/cooler corpse>${tmpNumber}};
+		} {
+			#math numberOfRounds {$tmpNumber / 16};
+			#format numberOfRounds {%d} {$numberOfRounds};
+			#${numberOfRounds} {qtrance deslab/get corpse/cooler corpse>16};
+			#math tmpRemainder {$tmpNumber - ($numberOfRounds * 16)};
+			#send {qtrance deslab/get corpse/cooler corpse>${tmpRemainder}};
+		};
 	 } {
 		#%1 {deslab;get corpse;cooler corpse};
 	};
