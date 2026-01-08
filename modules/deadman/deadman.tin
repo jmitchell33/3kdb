@@ -1,51 +1,54 @@
 #class {deadman} {open}
 
-#var deadmanIdleTimeout 900;
+#format deadmanIdleTimeout {%d} {$deadmanIdleTimeout}; 
+#if {"$deadmanIdleTimeout" == ""} {#var deadmanIdleTimeout 900};
 
 #alias deadman {
-    #math deadmanIdleTimeout {60 * %1};
-    #show \nDeadman enabled for %1 minutes.;
-    #delay {deadmanSwitch} {
-        #if !$idle_flag {deadmanActions};
-    } {$deadmanIdleTimeout};
-    #delay 1 {#var idle_flag 1};
-}
-
-#alias deadmanoff {
-    #undelay {deadmanSwitch};
-    #show Deadman off.;
-}
+    #if {"%1" == "off"} {
+        #undelay {deadmanSwitch};
+        #echo {\n<efd>   ===============  <fac>DEADMAN OFF <efd>=============== \n};
+    } {
+        #math deadmanIdleTimeout {60 * %1};
+        #echo {\n<efd>   ===============  <fac>DEADMAN ENABLED FOR %1 MINUTES <efd>=============== \n};
+        #delay {deadmanSwitch} {
+            #if !$idle_flag {deadmanActions};
+        } {$deadmanIdleTimeout};
+        #delay 1 {#var idle_flag 1};
+    };
+};
 
 #alias deadmanActions {
     #if $bot[active] {.pause};
     _player_deadmanActions;
     #var idle_flag 1;
-    #show \nDEADMAN TIMEOUT.\n;
+    #echo {\n<efd>   ===============  <fac>DEADMAN TIMEOUT <efd>=============== \n};
 }
 
 #var chat_delay 1
 
-#event {RECEIVED INPUT} {
-    #var idle_flag 0;
-    #var idle 0;
-    #var deadManTimeLeft $deadmanIdleTimeout;
-    #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
-    #if $sessionActive {
-        #if $chat_delay {
-            #var chat_delay 0;
-            #delay {reDraw} {clearChatHeader;draw_chat;#var chat_delay 1} {5};
-        } {
-            #var chat_delay 1;
-        };
-    };
-} {0};
-
 #NOP -- Initialize deadman timer on file load;
-#delay 1 {
-    #var idle_flag 0;
-    #var idle 0;
-    #var deadManTimeLeft $deadmanIdleTimeout;
-    #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+#alias _init_deadman {
+    #delay 1 {
+        #var idle_flag 0;
+        #var idle 0;
+        #var deadManTimeLeft $deadmanIdleTimeout;
+        #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+
+        #event {RECEIVED INPUT} {
+            #var idle_flag 0;
+            #var idle 0;
+            #var deadManTimeLeft $deadmanIdleTimeout;
+            #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+            #if $sessionActive {
+                #if $chat_delay {
+                    #var chat_delay 0;
+                    #delay {reDraw} {clearChatHeader;draw_chat;#var chat_delay 1} {5};
+                } {
+                    #var chat_delay 1;
+                };
+            };
+        } {0};
+    };
 };
 
 #class {deadman} {close}
