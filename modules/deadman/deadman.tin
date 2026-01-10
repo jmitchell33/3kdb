@@ -1,7 +1,7 @@
 #class {deadman} {open}
 
 #format deadmanIdleTimeout {%d} {$deadmanIdleTimeout}; 
-#if {"$deadmanIdleTimeout" == ""} {#var deadmanIdleTimeout 900};
+#if {"$deadmanIdleTimeout" == "0"} {#var deadmanIdleTimeout 900};
 
 #alias deadman {
     #if {"%1" == "off"} {
@@ -32,7 +32,7 @@
         #var idle_flag 0;
         #var idle 0;
         #format xdeadmanIdleTimeout {%d} {$xdeadmanIdleTimeout}; 
-        #if {"$xdeadmanIdleTimeout" == ""} {#var deadmanIdleTimeout 900};
+        #if {"$xdeadmanIdleTimeout" == "0"} {#var deadmanIdleTimeout 900};
         #var deadManTimeLeft $deadmanIdleTimeout;
         #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
 
