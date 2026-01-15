@@ -17,7 +17,7 @@
     #send {set bspam 0};
 };
 
-#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%d Prots: %* MI: %d ST: %* Cof: %*} {
+#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%* Prots: %* MI: %d ST: %* Cof: %*} {
     #if $gags[hpbar] {#line gag};
     #var hpbar_mc %5;
     #var hpbar_gem %6;
@@ -25,7 +25,9 @@
     #var hpbar_prots { %14 };
     #regex {%17} {None} {#var corpses[coffin] 0};
     #regex {%17} {%d/%d} {#var corpses[coffin] &1};
-    #if {!$g2n_last_round} {#var g2n_last_round %13};
+    #if {!$my[gxp][g2n][last_round]} {#format my[gxp][g2n][last_round] {%d} {%13}};
+
+    #format my[gxp][g2n][current] {%d} {%13};
 
     #REGEX {$hpbar_prots}	{ SS }		{#VAR {my[prots][SS]} {1}}	{#VAR {my[prots][SS]} {0}};
     #REGEX {$hpbar_prots}	{ PA }		{#VAR {my[prots][PA]} {1}}	{#VAR {my[prots][PA]} {0}};
@@ -45,7 +47,7 @@
     #REGEX {$hpbar_prots}	{ SB }		{#VAR {my[prots][SB]} {1}}	{#VAR {my[prots][SB]} {0}};
     
     #if {$incombat} {
-        #math {my[gxp][last_round]} {$g2n_last_round - %13};
+        #math {my[gxp][last_round]} {$my[gxp][g2n][last_round] - $my[gxp][g2n][current]};
         #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
         #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
         #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
@@ -59,7 +61,7 @@
         .gxp_time;
     };
 
-    #var g2n_last_round %13;
+    #format my[gxp][g2n][last_round] {%d} {%13};
 } {2};
 
 
