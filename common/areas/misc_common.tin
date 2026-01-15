@@ -1,6 +1,27 @@
 #class {misc_common} {kill};
 #class {misc_common} {open};
 
+#NOP -- westersea fishing;
+#NOP -- start fishing bot;
+#alias {startfishing} {
+    #read common/areas/wsea_fishing.tin;
+    #delay 3 {
+	    thread rod;
+	    bait rod;
+	    fish;
+	    #var fish[caught] 0;
+	    #draw Yellow scroll line 1 1 1 30;
+	    #echo {<ccf>LETS CATCH US A FISH!<088>};
+	    #draw Yellow scroll line 1 1 1 30
+    }
+};
+
+#NOP -- stop fishing bot;
+#alias {stopfishing} {
+	return;
+	#class wsea_fishing kill
+};
+
 #NOP -- Gather cow herds (from sw corner);
 #alias cow_run {#6 e;#6 n;w;#6 s;w;n;n;n;nw;ne;n;#3 w;s;e;e;#4 s;w;w;n;ne;n;n;w;w;s;e;s;w;s;e;s;w;s};
 
