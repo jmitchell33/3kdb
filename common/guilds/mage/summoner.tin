@@ -179,13 +179,15 @@
 			#var summon_haste 0;
 			checkStrategy {summon_haste} {
 				#NOP -- We can't haste phantasmal killer or other illusions;
-				#if {"$key" == "Something"} {#NOP} {#var summon_renew_haste 1}};
+				#if {"$key" == "Something"} {#NOP} {#var summon_renew_haste 1};
+			};
 		};
 		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
 			#var summon_mf 0;
 			checkStrategy {summon_mf} {#var summon_renew_mf 1};
 			#if {"$key" == "Something"} {
-				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something}};
+				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
+			};
 		};
 
 		#var found_summon 0;
