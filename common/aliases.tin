@@ -465,6 +465,9 @@
     #NOP -- Initialize everything except postload;
     mipon;
     loadmap;
+
+    #NOP -- Initialize deadman;
+    _init_deadman;
     
     #NOP -- Wait for MIP to initialize before drawing;
     #delay 3 {
@@ -499,7 +502,7 @@
         clearChatHeader;
         draw_chat;
         draw_all;
-        #delay 2 {init_screen};
+        #delay 6 {init_screen};
         
         #NOP -- Now save the state after everything is loaded;
         _variable_export;

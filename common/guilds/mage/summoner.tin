@@ -179,13 +179,15 @@
 			#var summon_haste 0;
 			checkStrategy {summon_haste} {
 				#NOP -- We can't haste phantasmal killer or other illusions;
-				#if {"$key" == "Something"} {#NOP} {#var summon_renew_haste 1}};
+				#if {"$key" == "Something"} {#NOP} {#var summon_renew_haste 1};
+			};
 		};
 		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
 			#var summon_mf 0;
 			checkStrategy {summon_mf} {#var summon_renew_mf 1};
 			#if {"$key" == "Something"} {
-				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something}};
+				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
+			};
 		};
 
 		#var found_summon 0;
@@ -296,37 +298,114 @@
 #alias .summonLookupName {
 	#var tmpName %0;
 	#switch {"$tmpName"} {
-		#case {"A Celestial Lion"} {#var summonTmpName lion;};
-		#case {"An Undead Wraith"} {#var summonTmpName wraith;};
-		#case {"A Shadow Panther"} {#var summonTmpName panther;};
-		#case {"10-headed Hydra"} {#var summonTmpName hydra;};
-		#case {"Night Hag"} {#var summonTmpName hag;};
-		#case {"Neo-otyugh"} {#var summonTmpName neo-otyugh;};
-		#case {"Roper"} {#var summonTmpName roper;};
-		#case {"Mind Flayer"} {#var summonTmpName mind flayer;};
-		#case {"Fire Lizard"} {#var summonTmpName fire lizard;};
-		#case {"8-headed Pyro-hydra"} {#var summonTmpName hydra;};
-		#case {"Spectre"} {#var summonTmpName spectre;};
-		#case {"Mummy"} {#var summonTmpName mummy;};
-		#case {"Frost Giant"} {#var summonTmpName giant;};
-		#case {"Fire Giant"} {#var summonTmpName giant;};
-		#case {"Stone Giant"} {#var summonTmpName giant;};
-		#case {"Hill Giant"} {#var summonTmpName giant;};
-		#case {"Ettin"} {#var summonTmpName ettin;};
-		#case {"Umber Hulk"} {#var summonTmpName hulk;};
-		#case {"Phoenix"} {#var summonTmpName phoenix;};
-		#case {"Gorgon"} {#var summonTmpName gorgon;};
-		#case {"Xorn"} {#var summonTmpName xorn;};
-		#case {"Chimera"} {#var summonTmpName chimera;};
-		#case {"Giant Slug"} {#var summonTmpName slug;};
-		#case {"A Disfigured Wereboar"} {#var summonTmpName wereboar;};
-		#case {"A Giant Spider"} {#var summonTmpName spider;};
-		#case {"A Nasty Cockatrice"} {#var summonTmpName cockatrice;};
-		#case {"An Enormous Minotaur"} {#var summonTmpName minotaur;};
-		#case {"A Swift Leucrotta"} {#var summonTmpName leucrotta;};
-		#case {"A Shimmering Black Displacer Beast"} {#var summonTmpName beast;};
-		#case {"A Gnarly 7-headed Hydra"} {#var summonTmpName hydra;};
-		#case {"A Giant Poisonous Snake"} {#var summonTmpName snake;};
+		#nop ms1;
+		#case {"A Manes (demon)"} {#var summonTmpName manes};
+		#case {"A Giant Rat"} {#var summonTmpName rat};
+		#case {"A Small Kobold"} {#var summonTmpName kobold};
+		#case {"A Mean Hobgoblin"} {#var summonTmpName hobgoblin};
+		#case {"A Goblin"} {#var summonTmpName goblin};
+		#case {"An Orc"} {#var summonTmpName orc};
+
+		#nop ms2;
+		#case {"A Lemure"} {#var summonTmpName lemure};
+		#case {"A Giant Toad"} {#var summonTmpName toad};
+		#case {"A Stirge"} {#var summonTmpName stirge};
+		#case {"A Gnoll"} {#var summonTmpName gnoll};
+		#case {"A Giant Centipede"} {#var summonTmpName centipede};
+		#case {"An Ugly Troglodyte"} {#var summonTmpName troglodyte};
+
+		#nop ms3;
+		#case {"A Huge Spider"} {#var summonTmpName spider};
+		#case {"A Giant Boring Beetle"} {#var summonTmpName beetle};
+		#case {"A Smelly Bugbear"} {#var summonTmpName bugbear};
+		#case {"A Disfigured Wererat"} {#var summonTmpName wererat};
+		#case {"A Large Spider"} {#var summonTmpName spider};
+		#case {"A Giant Weasel"} {#var summonTmpName weasel};
+		#case {"A Rotting Ghoul"} {#var summonTmpName ghoul};
+		#case {"A Giant Tick"} {#var summonTmpName tick};
+		#case {"A Large Ogre"} {#var summonTmpName ogre};
+		#case {"A Giant Lizard"} {#var summonTmpName lizard};
+
+		#nop ms4;
+		#case {"A Dark Shadow"} {#var summonTmpName shadow};
+		#case {"A Huge Owlbear"} {#var summonTmpName owlbear};
+		#case {"A Giant Constrictive Snake"} {#var summonTmpName snake};
+		#case {"A Carnivorous Ape"} {#var summonTmpName ape};
+		#case {"A Rotting Ghast"} {#var summonTmpName ghast};
+		#case {"A Disfigured Werewolf"} {#var summonTmpName werewolf};
+		#case {"A 5-headed Hydra"} {#var summonTmpName hydra};
+		#case {"A Froth-mouthed Hell Hound"} {#var summonTmpName hound};
+		#case {"A Large Ice Toad"} {#var summonTmpName ice toad};
+		#case {"A Stony Gargoyle"} {#var summonTmpName gargoyle};
+		#case {"An Enormous Poisonous Toad"} {#var summonTmpName poisonous toad};
+
+		#nop ms5;
+		#case {"A Shimmering Black Displacer Beast"} {#var summonTmpName beast};
+		#case {"A Gnarly 7-headed Hydra"} {#var summonTmpName hydra};
+		#case {"A Giant Poisonous Snake"} {#var summonTmpName poisonous snake};
+		#case {"A Disfigured Wereboar"} {#var summonTmpName wereboar};
+		#case {"A Nasty Cockatrice"} {#var summonTmpName cockatrice};
+		#case {"A Giant Spider"} {#var summonTmpName spider};
+		#case {"A Swift Leucrotta"} {#var summonTmpName leucrotta};
+		#case {"An Enormous Minotaur"} {#var summonTmpName minotaur};
+
+		#nop ms6;
+		#case {"A Disfigured Jackalwere"} {#var summonTmpName jackalwere};
+		#case {"A Shimmering Phase Spider"} {#var summonTmpName spider};
+		#case {"A Stinky-assed Otyugh"} {#var summonTmpName otyugh};
+		#case {"A Disfigured Weretiger"} {#var summonTmpName weretiger};
+		#case {"A Firey Salamander"} {#var summonTmpName salamander};
+		#case {"A Dangerous Rakshasa"} {#var summonTmpName rakshasa};
+		#case {"A Near-invisible Wraith"} {#var summonTmpName wraith};
+		#case {"A Terrifying Manticore"} {#var summonTmpName manticore};
+		#case {"A Terrible Wyvern"} {#var summonTmpName wyvern};
+		#case {"A Power Ogre Magi"} {#var summonTmpName ogre magi};
+		#case {"A Disgusting Carrion Crawler"} {#var summonTmpName crawler};
+		#case {"A Rotting Wight"} {#var summonTmpName wight};
+		#case {"An Enormous Troll"} {#var summonTmpName troll};
+		#case {"An Enormous 8-headed Hydra"} {#var summonTmpName hydra};
+
+		#nop ms7;
+		#case {"A Hu-goddamn-mongous 10-headed Hydra"} {#var summonTmpName hydra};
+		#case {"A huge Flaming Phoenix"} {#var summonTmpName phoenix};
+		#case {"A Damn Ugly Mind-flayer"} {#var summonTmpName mind-flayer};
+		#case {"A Crimson-red Fire Lizard"} {#var summonTmpName lizard};
+		#case {"A Obsidian-black Gorgon"} {#var summonTmpName gorgon};
+		#case {"A Shimmering Spectre"} {#var summonTmpName spectre};
+		#case {"A Gargantuan Roper"} {#var summonTmpName roper};
+		#case {"A 2-headed Ettin"} {#var summonTmpName ettin};
+		#case {"A Rock-encrusted Xorn"} {#var summonTmpName xorn};
+		#case {"A Fugly Night Hag"} {#var summonTmpName hag};
+		#case {"A Giant Umber Hulk"} {#var summonTmpName hulk};
+		#case {"A 3-headed Chimera"} {#var summonTmpName chimera};
+		#case {"A Giant Slug"} {#var summonTmpName slug};
+		#case {"A Rotting Mummy"} {#var summonTmpName mummy};
+		#case {"An Enormous, 8-headed Pyro-hydra"} {#var summonTmpName pyro-hydra};
+		#case {"An Enormous Fire Giant"} {#var summonTmpName fire giant};
+		#case {"An Enormous Frost Giant"} {#var summonTmpName frost giant};
+		#case {"An Enormous Stone Giant"} {#var summonTmpName stone giant};
+		#case {"An Enormous Hill Giant"} {#var summonTmpName hill giant};
+		#case {"An Enormous Neo-otyugh"} {#var summonTmpName neo-otyugh};
+
+		#nop ms8;
+		#case {"An Enormous Storm Giant"} {#var summonTmpName storm giant};
+		#case {"An Enormous Cloud Giant"} {#var summonTmpName cloud giant};
+
+		#nop ms9;
+		#case {"A Beast Owlbear"} {#var summonTmpName owlbear};
+		#case {"A Demon Hellhound"} {#var summonTmpName hellhound};
+		#case {"A Fey Dryad"} {#var summonTmpName dryad};
+
+		#nop ms10;
+		#case {"A Celestial Lion"} {#var summonTmpName lion};
+		#case {"A Shadow Panther"} {#var summonTmpName panther};
+		#case {"An Undead Wraith"} {#var summonTmpName wraith};
+
+		#nop ms11;
+		#case {"A Fey Sprite"} {#var summonTmpName sprite};
+		#case {"A Chain Devil"} {#var summonTmpName devil};
+		#case {"A celestial Hawk"} {#var summonTmpName hawk};
+		#case {"A Snarling, Blood-soaked Chupacabra"} {#var summonTmpName chupacabre};
 	};
 };
 

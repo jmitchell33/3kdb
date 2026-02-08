@@ -51,14 +51,25 @@
     }
 };
 
-#alias gc_ss {cast greater contingency as stoneskin#cast stoneskin;};
-#alias gc_mg {cast greater contingency as major globe#cast major globe;};
-#alias gc_shield {cast greater contingency as shield#cast magnificent shield;};
-#alias gc_armor {cast greater contingency as armor#cast armor;};
+#alias gc_ss {cast greater contingency as stoneskin#cast stoneskin};
+#alias gc_mg {cast greater contingency as major globe#cast major globe};
+#alias gc_shield {cast greater contingency as shield#cast magnificent shield};
+#alias gc_armor {cast greater contingency as armor#cast armor};
 #alias gc_pfg {deplete protection from evil;cast greater contingency as prot_good#cast protection from good;cast protection from good};
 #alias gc_pfe {deplete protection from good;cast greater contingency as prot_evil#cast protection from evil;cast protection from evil};
-#alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;};
-#alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;};
+#alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle};
+#alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere};
+
+#alias c_rs {cast contingency as stoneskin#cast rhino skin};
+#alias c_mg {cast contingency as minor globe#cast minor globe};
+#alias c_shield {cast contingency as shield#cast shield};
+#alias c_mshield {cast contingency as shield#cast magnificent shield}
+#alias c_armor {cast contingency as armor#cast armor};
+#alias c_pfg {deplete protection from evil;cast contingency as prot_good#cast protection from good;cast protection from good};
+#alias c_pfe {deplete protection from good;cast contingency as prot_evil#cast protection from evil;cast protection from evil};
+#alias c_blur {cast contingency as blinking#cast blur};
+#alias c_blink {cast contingency as blinking#cast blink}; 
+#alias c_invis {cast contingency as invisibility#cast invisibility};
 
 #NOP -- clear defenses;
 #alias {clear_def} {
@@ -74,8 +85,8 @@
 #alias {prots_MG} {check_extension;cast major globe;#var defs[MG] 1;echo_prots_MG};
 #alias {prots_mg} {check_extension;cast minor globe;#var defs[mg] 1;echo_prots_mg};
 #alias {prots_ms} {check_extension;cast magnificent shield;#var defs[ms] 1;echo_prots_ms};
-#alias {prots_pfe} {check_extension;cast protection from evil;clear_align;#var defs[pe] 1;echo_prots_pfe};
-#alias {prots_pfg} {check_extension;cast protection from good;clear_align;#var defs[pg] 1;echo_prots_pfg};
+#alias {prots_pfe} {deplete protection from good;check_extension;cast protection from evil;clear_align;#var defs[pe] 1;echo_prots_pfe};
+#alias {prots_pfg} {deplete protection from evil;check_extension;cast protection from good;clear_align;#var defs[pg] 1;echo_prots_pfg};
 #alias {prots_rs} {check_extension;cast rhino skin;clear_align;#var defs[rs] 1;echo_prots_rs};
 #alias {prots_ss} {check_extension;cast stoneskin;#var defs[SS] 1;echo_prots_ss};
 #alias {prots_shield} {check_extension;cast shield;#var defs[shield] 1;echo_prots_shield};
