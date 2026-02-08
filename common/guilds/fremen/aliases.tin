@@ -56,9 +56,9 @@
 };
 
 #alias {.calcLJDonate} {
-    #local tmpWaterWorth 200;
-    #local tmpMaxLJWater 0;
-    #local tmpCorpseCycles 0;
+    #var tmpWaterWorth 200;
+    #var tmpMaxLJWater 0;
+    #var tmpCorpseCycles 0;
     #math tmpMaxLJWater {$my[gp1][current] / 25 / $my[literjons][carrying]};
     donate all;
     #${tmpMaxLJWater} {fill all;donate all;};
@@ -98,14 +98,29 @@
     #var fremenskill[total][rank] 0;
     #var fremenskill[total][current] 0;
     #send {!skills -nograph};
-    #delay .5 {
+    #line oneshot #action {^Available gxp to spend:  %*       Total gxp spent:  %*} {
+        #var tmpList $fremenskill;
+        #var cheapestSkill_cost 100000000;
+        #foreach *tmpList[] key {
+            #if {$tmpList[$key][cost] < $cheapestSkill_cost} {
+                #var cheapestSkill_cost $tmpList[$key][cost];
+                #var cheapestSkill_name $key;
+            };
+        };
         #var fremenskill[total][current] {$fremenskill[total][rank]};
         #math fremenskill[glvl][current] {$fremenskill[total][current] / 6};
         #math fremenskill[total][next_glvl] {($fremenskill[glvl][current] + 1) * 6};
         #math fremenskill[total][remaining_til_glvl] {$fremenskill[total][next_glvl] - $fremenskill[total][current]};
-        #echo {Total Skill Points: $fremenskill[total][rank] | Current GLVL: $fremenskill[glvl][current] | Next GLVL in $fremenskill[total][remaining_til_glvl] skill points};
+        #delay .1 {
+            #echo {<bfe>Total Skill Points: $fremenskill[total][rank] | Current GLVL: $fremenskill[glvl][current] | Next GLVL in $fremenskill[total][remaining_til_glvl] skill points<088>};
+            #echo {<bfe>Cheapest to train: $cheapestSkill_name<088>};
+        };
         #class {fremen_skills} {kill};
     };
+};
+
+#alias {fskills-cheap} {
+    #foreach *fremenskill[] key {#echo $key};
 };
 
 #class {guild_aliases} {close};

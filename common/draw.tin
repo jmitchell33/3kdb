@@ -21,6 +21,50 @@
 #list caption_data clear;
 #list strategy_data clear;
 
+#if {"${caption[tab]}" === ""} {#var caption[tab] general};
+
+#var caption_toggle[corpses][active] 1;
+#var caption_toggle[eternal][active] 1;
+#var caption_toggle[strategy][active] 1;
+#var caption_toggle[bot][active] 1;
+#var caption_toggle[bot_cycle][active] 1;
+
+#var caption_toggle[corpses][order] 1;
+#var caption_toggle[eternal][order] 2;
+#var caption_toggle[bot][order] 3;
+#var caption_toggle[strategy][order] 4;
+#var caption_toggle[bot_cycle][order] 5;
+#format caption_title_string {%+9sGeneral    Bot%-9s};;
+
+#NOP -- Mouse press events;
+#EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
+    #line strip {#var {tmpClickItem} {%4}};
+    #format tmpClickItem {%p} {$tmpClickItem};
+    #if {"$tmpClickItem" == "General"} {
+       caption_view general; 
+    };
+    #if {"$tmpClickItem" == "Bot"} {
+       caption_view bot; 
+    };
+};
+
+
+#alias caption_view {
+    #format {tmpItem} {%p} {%0};
+    #if {"$tmpItem" == ""} {#NOP} {
+        #if {"$tmpItem" == "general"} {
+            #format caption_title_string {%+9s<cfc>General<088>    <cde>Bot<088>%-9s};
+            #var caption[tab] general;
+            _update_caption_data;
+        };
+        #if {"$tmpItem" == "bot"} {
+            #format caption_title_string {%+9s<cde>General<088>    <cfc>Bot<088>%-9s};
+            #var caption[tab] bot;
+            _update_caption_data;
+        };
+    };
+};
+
 #NOP /* Pass 0-100 percentage number to split the current screen at. */
 #alias {setsplit} {
     #math _perc {%1 * .01}; 
@@ -138,6 +182,116 @@
     draw_all;
 };
 
+#alias caption-help {
+    #echo {    <cde>=============================================<088>};
+    #echo {             <ced>${userCap}'s 3kDB Data Panel<088>};
+    #echo {    <cde>=============================================<088>};
+    #echo {\n <dee>The data panel is the information listed on the right side<088>};
+    #echo { <dee>of the screen (typically).  These currently include the<088>};
+    #echo { <dee><cfd>General<dee> and <cfd>Bot<dee> tabs.<088>};
+     
+    #echo {\n <dee>To navigate between tabs, you can either: <088>};
+    #echo {   <ddd>(1) Press 'qq' to enable the mouse and click an option, or<088>};
+    #echo {   <ddd>(2) Type <dfc>caption_view general <ddd>or <dfc>caption_view bot <ddd><088>};
+    #echo {\n <dee>To update the data displayed, you can:};
+    #format tmpItem {%-15s %-50s} {    <bfc>caption+} {<ddd>Add an item<088>};
+    #echo {$tmpItem};
+    #format tmpItem {%-15s %-50s} {    <bfc>caption++} {<ddd>Move an item up on the display. (soon-TH)<088>};
+    #echo {$tmpItem};
+    #format tmpItem {%-15s %-50s} {    <fbc>caption-} {<ddd>Remove an item<088>};
+    #echo {$tmpItem};
+    #format tmpItem {%-15s %-50s} {    <fbc>caption--} {<ddd>Lower an item item up on the display. (soon-TH)<088>};
+    #echo {$tmpItem};
+
+    #echo {    <cde>=============================================<088>};
+};
+
+#alias caption {
+    #var tmpList {};
+
+    #echo {    <ced>=======================================<088>};
+    #echo {    <ced>======= <cac>CAPTION DATA POR FLAVOR<ced> =======<088>};
+    #echo {    <ced>=======================================<088>};
+    #echo {\n<ddd>Current caption data includes:<088>};
+    #foreach *caption_toggle[] key {
+        #if $caption_toggle[$key][active] {
+            #var tmpList[${caption_toggle[$key][order]}] $key;
+        };
+    };
+    #foreach *tmpList[] item {
+        #echo {  <efc>[$item]<088> : <bfb>$tmpList[$item]<088>};
+    };
+
+    #echo {\n<ddd>Available caption data to add with <afc>caption+<088>};
+    #var tmpList {};
+    #var tmpCount 0;
+    #foreach *caption_toggle[] key {
+        #if !$caption_toggle[$key][active] {
+            #var tmpList[${caption_toggle[$key][order]}] $key;
+            #math tmpCount {$tmpCount + 1};
+        };
+    };
+    #if {"$tmpCount" == "0"} {
+        #echo {\n<fbb>You have added all available captions. Remove them with <afc>caption-<088>};
+    } {
+        #foreach *tmpList[] item {
+            #echo {  <efc>[$item]<088> : <bfb>$tmpList[$item]<088>};
+        };
+    };
+
+    #echo {\n<ddd>Type <cfd>caption-help <ddd>to see all available commands.<088>};
+    #echo {    <ced>=======================================<088>};
+};
+
+#alias caption+ {
+    #format tmpLookup {%p} {%0};
+    #if {"$caption_toggle[$tmpLookup]" == ""} {
+        #echo {   <ffc>  $tmpLookup <eab> was not found in the caption data. Check spelling and try again.<088>};
+    } {
+        #if {$caption_toggle[$tmpLookup][active]} {
+            #echo {   <ffc>  $tmpLookup <ded> is already active in the caption data.<088>};
+        } {
+            #var caption_toggle[$tmpLookup][active] 1;
+            #echo {   <ffc>  $tmpLookup <bfc> has been added to the caption data.<088>};
+        };
+    };
+} {3};
+
+#alias caption- {
+    #format tmpLookup {%p} {%0};
+    #if {"$caption_toggle[$tmpLookup]" == ""} {
+        #echo {   <ffc>  $tmpLookup <eab> was not found in the caption data. Check spelling and try again.<088>};
+    } {
+        #if {$caption_toggle[$tmpLookup][active]} {
+            #var caption_toggle[$tmpLookup][active] 0;
+            #echo {   <ffc>  $tmpLookup <dbb> has been removed from the caption data.<088>};
+        } {
+            #echo {   <ffc>  $tmpLookup <ded> has already been removed from the caption data.<088>};
+        };
+    };
+} {3};
+
+
+#NOP -- Placeholder for the caption ++ and and -- when I have a moment;
+#NOP    #alias caption++ {        ;
+#NOP        #format tmpLookup {%p} {%0};        ;
+#NOP        #if {"$caption_toggle[$tmpLookup]" == ""} {        ;
+#NOP            #echo {   <ffc>  $tmpLookup <eab> was not found in the caption data. Check spelling and try again.<088>};        ;
+#NOP        } {        ;
+#NOP            #if {$caption_toggle[$tmpLookup][order] > 1} {        ;
+#NOP                #var oldIndexA $caption_toggle[$tmpLookup][order];        ;
+#NOP                #math newIndexA {$oldIndexA - 1};        ;
+#NOP                #var oldIndexB_key $caption_order[$newIndexA];        ;
+#NOP                        ;
+#NOP                #math newIndexA {$oldIndexA - 1};        ;
+#NOP                #var caption_toggle[$tmpLookup][active] 0;        ;
+#NOP                #echo {   <ffc>  $tmpLookup <dbb> has been removed from the caption data.<088>};        ;
+#NOP            } {        ;
+#NOP                #echo {   <ffc>  $tmpLookup <ded> is already at the top of the order.<088>};        ;
+#NOP            };        ;
+#NOP        };        ;
+#NOP    } {2};        ;
+
 
 #alias {mapFull} {
     #NOP -- We will start a dummy server port with the map layout and send commands for seed data;
@@ -156,20 +310,19 @@
     };
 };
 
+#alias _update_caption_data {
+    _caption_data_bot;
+    _caption_data_bot_cycle;
+    _caption_data_corpses;
+    _caption_data_eternal;
+    _caption_data_strategy
 
-
-
-#alias {draw_caption_all} {
-    draw_caption_corpses;
-    draw_caption_status;
-    draw_caption_strategy;
-    #NOP draw_caption_bot_cycle;
 };
 
 #alias draw_all {
     #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
     #if {"$draw[chat][active]" == "on"} { draw_chat };
-    #if {"$draw[caption][active]" == "on"} { draw_caption_all };
+    #if {"$draw[caption][active]" == "on"} { _update_caption_data;draw_caption};
     #if {"$draw[room][active]" == "on"} { draw_room };
 };
 
@@ -194,37 +347,111 @@
     };
 };
 
-#NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
-#alias draw_caption_corpses {
-    #nop -- Clear any old drawings -- Testing if we need this;
-    #NOP #draw {<dda>} {tile} $caption[top] $caption[left]+1 $caption[bottom] -1 {};
 
-    #NOP -- Work in progress, set this to nothing before it's finished;
-    #if $corpsetrigStatus {
-        #var ktrig_string <fff>KTRIG: <fff>ON<088>;
-    } {
-        #var ktrig_string <ccc>KTRIG: <ccc>OFF<088>;
+#alias _caption_data_corpses {
+    #var caption_toggle[corpses][string] $corpse_string;
+    draw_caption;
+};
+
+#alias _caption_data_eternal {
+    #var caption_toggle[eternal][string] $eternal_string;
+    draw_caption;
+};
+
+#alias _caption_data_strategy {
+    #var strategy_string {<bef>Strategy:<088>};
+
+    #foreach $strategyActive[%*] index {
+        #format strat_name {%n} {$index[name]};
+        #cat strategy_string { <afa>$strat_name<088>};
     };
 
-    #if {&caption_data[]} {
-        #if $eternal {
-            #list caption_data set $draw[index][caption] {$corpse_string \n $eternal_string};
+    #var caption_toggle[strategy][string] $strategy_string;
+    draw_caption;
+};
+
+#var theme[caption] <cde>;
+
+#alias .bot_xp_string {
+    #format {bot[report-time]} {%T} {};
+    #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
+    #if {$bot[delta-time] > 3600} {
+        #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
+        #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
+        #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
+        #var xp_time_str $bot[delta-time] Hrs;
+    } {
+        #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
+        #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
+        #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
+        #var xp_time_str $bot[delta-time] mins;
+    };
+    #var bot[stats][xp_rate_str] $xp_rate_str;
+    #var bot[stats][xp_time_str] $xp_time_str;
+};
+
+#NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
+#alias draw_caption {
+    #list caption_data clear;
+    #unvar caption_order;
+
+    #foreach *caption_toggle[] key {
+        #var caption_order[$caption_toggle[$key][order]] $key;
+    };
+
+    #if {"$caption[tab]" == "bot"} {
+        #list botlist indexate alias;
+        #list botlist find {$bot[alias]} tmpIndex;
+        #var tmpName $botlist[$tmpIndex][desc];
+        #if {"${tmpName}" == ""} {
+            #list caption_data add {<cde>Current Bot: <fbc>N/A<088>};
         } {
-            #list caption_data set $draw[index][caption] {$corpse_string};
+            #list caption_data add {<cde>Current Bot: <fbc>$tmpName<088>};
+            #list caption_data add {<dee>Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+            .bot_xp_string;
+            #list caption_data add {<dee>Kills: $bot[stats][mobs] XP: @thousandsFormatNumber{$bot[stats][xp]} ($bot[stats][xp_rate_str]/hr)};
+            #list caption_data add {\n $caption_toggle[bot][string]<088>};
+
+            #variable bot_loop_xp $bot[stats][loop][xp];
+            #variable bot_xp $bot[stats][xp];
+            #variable bot_loop_coins $bot[stats][loop][coins];
+            #variable bot_coins $bot[stats][coins];
+            #var tmpLoopKills <dee>Mobs Killed: $bot[stats][loop][mobs];
+            #var tmpLoopXp <dee>XP Gained: @thousandsFormatNumber{$bot_loop_xp};
+            #var tmpLoopCoins <dee>Coins Earned: @thousandsFormatNumber{$bot_loop_coins};
+            #var tmpTotalKills <dee>Mobs Killed: $bot[stats][mobs];
+            #var tmpTotalXp <dee>XP Gained: @thousandsFormatNumber{$bot_xp};
+            #var tmpTotalCoins <dee>Coins Earned: @thousandsFormatNumber{$bot_coins};
+            #var currentLoop {
+                \n<cde>Current Loop<088>
+                \n$tmpLoopKills
+                \n$tmpLoopXp
+                \n$tmpLoopCoins
+            };
+            #var totalLoop {
+                \n<cde>Bot Total<088>
+                \n$tmpTotalKills
+                \n$tmpTotalXp
+                \n$tmpTotalCoins
+            };
+
+            #list caption_data add {$currentLoop};
+            #list caption_data add {$totalLoop};
+            #list caption_data add {$caption_toggle[bot_cycle][string]};
         };
     } {
-        #if $eternal {
-            #list caption_data create {$corpse_string \n $eternal_string};
-        } {
-            #list caption_data create {$corpse_string};
-        }
-        
+        #foreach $caption_order[] key {
+            #if $caption_toggle[$key][active] {
+                #list caption_data add {\n $caption_toggle[$key][string]};
+            };
+        };
     };
 
     #if {$idle_sec > $deadmanIdleTimeout} {
         #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
     } {
-        #draw calign grid <ccc> tubed box $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
+		#draw $theme[caption] calign jeweled filled line $caption[top]+1 $caption[left]+1 $caption[top]+1 -1 {$caption_title_string};
+        #draw calign blanked box $caption[top]+2 $caption[left]+1 $caption[bottom] -1 $caption_data[];
     };
 };
 
@@ -257,18 +484,7 @@
 
 
 #NOP /* -- Bot status -- */
-#alias draw_caption_status {
-    #if {$draw[index][bot]} {
-        #NOP -- If the stored index is greater than those existing, reset it;
-        #if {$draw[index][bot] > &caption_data[]} {
-            #math draw[index][bot] {&caption_data[] + 1};
-            #list caption_data insert $draw[index][bot] {};
-        };
-    } {
-        #math draw[index][bot] {&caption_data[] + 1};
-        #list caption_data insert $draw[index][bot] {};
-    };
-
+#alias _caption_data_bot {
     #if $bot[active] {
         #var bot_total_rooms &bot[steps][];
         #var bot_current_room $bot[step];
@@ -291,42 +507,46 @@
         };
         #var temp_xp @thousandsFormatNumber{$bot[stats][xp]};
 
-        #if $bot[paused] {
-            #var bot_string {\n <088>Bot Status:<DAA><aaa> 🖐 <088>};
+        #if {"$caption[tab]" == "bot"} {
+            #if $bot[paused] {
+                #var bot_string {<088>Bot Status:<DAA><aaa> 🖐 PAUSED 🖐 <088>};
+            } {
+                #var bot_string {<cde>Bot Status: <dfc> ✔ ACTIVE <088>};
+            };
+
+            #if $bot[playercheck] {
+                #cat bot_string {\n<cde>Playercheck:<dfc> ✔ ACTIVE <088>};
+            } {
+                #cat bot_string {\n<cde>Playercheck:<eab> ✔ OFF   <088>};
+            };
+
         } {
-            #var bot_string {\n Bot Status:<ACA><fff> ▶ <088>};
+            #if $bot[paused] {
+                #var bot_string {<088>Bot Status:<DAA><aaa> 🖐 <088>};
+            } {
+                #var bot_string {Bot Status:<ACA><fff> ▶ <088>};
+            };
+
+            #if $bot[playercheck] {
+                #cat bot_string {<ACA><fff> ✔ <088>};
+            } {
+                #cat bot_string {<DAA><aaa> ✔ <088>};
+            };
+
+            #cat bot_string {\n Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+            #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
         };
-
-        #if $bot[playercheck] {
-            #cat bot_string {<ACA><fff> ✔ <088>};
-        } {
-            #cat bot_string {<DAA><aaa> ✔ <088>};
-        };
-
-        #cat bot_string {\n Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
-
-        #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
 
     } {
         #var bot_string {\n <ccc>Bot: <fff>OFF<088>};
     };
 
-    #list caption_data set $draw[index][bot] $bot_string;
+    #var caption_toggle[bot][string] $bot_string;
+    draw_caption;
 };
 
-#alias draw_caption_bot_cycle {
-    #if {$draw[index][cycle]} {
-        #NOP -- If the stored index is greater than those existing, reset it;
-        #if {$draw[index][cycle] > &caption_data[]} {
-            #math draw[index][cycle] {&caption_data[] + 1};
-            #list caption_data insert $draw[index][cycle] {};
-        };
-    } {
-        #math draw[index][cycle] {&caption_data[] + 1};
-        #list caption_data insert $draw[index][cycle] {};
-    };
-
-    #var bot_cycle_string {\n <bef>Bot Cycler:<088>};
+#alias _caption_data_bot_cycle {
+    #var bot_cycle_string {\n <cde>Bot Cycler:<088>};
 
     #if {&{botcycle[]} > 0} {
         #list botlist indexate alias;
@@ -337,36 +557,15 @@
             #cat bot_cycle_string { -> <afa>$bot_cycle_name<088>};
         };
     } {
-        #var bot_cycle_string {\n <bef>Bot Cycler:<088>};
+        #var bot_cycle_string {\n <cde>Bot Cycler: <fac>N/A<088>};
     };
 
-    #list caption_data set $draw[index][cycle] $bot_cycle_string;
-}
-
-    
-
-#alias draw_caption_strategy {
-    
-    #if {$draw[index][strategy]} {
-        #NOP -- If the stored index is greater than those existing, reset it;
-        #if {$draw[index][strategy] > &caption_data[]} {
-            #math draw[index][strategy] {&caption_data[] + 1};
-            #list caption_data insert $draw[index][strategy] {};
-        };
-    } {
-        #math draw[index][strategy] {&caption_data[] + 1};
-        #list caption_data insert $draw[index][strategy] {};
-    };
-
-    #var strategy_string {\n <bef>Strategy:<088>};
-
-    #foreach $strategyActive[%*] index {
-        #format strat_name {%n} {$index[name]};
-        #cat strategy_string { <afa>$strat_name<088>};
-    };
-
-    #list caption_data set $draw[index][strategy] $strategy_string;
+    #var caption_toggle[bot_cycle][string] $bot_cycle_string;
+    draw_caption;
 };
+
+    
+
 
 #NOP /* -- MAP -- */
 #alias init_map {

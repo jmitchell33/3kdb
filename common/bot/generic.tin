@@ -88,6 +88,7 @@
         #var bot[playercheck] 1;
         #delay .2 {#echo {<BAF><ffe>------ PLAYERCHECK IS NOW ON --------<088>}};
     };
+    _update_caption_data;
 };
 
 
@@ -108,19 +109,19 @@
     #unalias {..};
     #class {bot} {kill};
     #echo {Bot killed.};
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
 };
 
 #alias .pause {
     .backupBot;
     #undelay bot_kick;
     #var bot[paused] 1;
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
 };
 
 #alias .unpause {
     #var bot[paused] 0;
-    #if {"$draw[status][active]" == "on"} {#delay 2 {draw_caption_status}};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
 };
 
 #alias .botStep {
@@ -139,7 +140,7 @@
 #alias {.botStopWalking} {
     #map get roomvnum bot[curVnum];
     #var bot[walk] 0;
-    #if {"$draw[status][active]" == "on"} {draw_caption_status};
+    #if {"$draw[status][active]" == "on"} {_caption_data_bot};
 };
 
 #alias {.determineBotAction} {

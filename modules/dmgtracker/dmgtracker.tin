@@ -119,6 +119,7 @@
     #var cmbt[affects][tactician] 0;
     #var cmbt[affects][magician] 0;
     #var cmbt[affects][DM] 0;
+    #var cmbt[affects][double_invoke] 0;
     #var cmbt[affects][bloodfuse] 0;
     #var cmbt[affects][chill] 0;
     #var cmbt[affects][clutch] 0;
@@ -169,6 +170,10 @@ dreset;
 #action {^A violet scream erupts from your lips as you strikes forth with a} {#var cmbt[affects][bloodarc] 1} {2};
 #action {^You raise your palm forward and a %* skull of %*} {#var cmbt[affects][skullfire] 1} {2};
 
+#NOP -- Necro double invoke;
+#action {^>>%* howls in extreme pain from the titanic blast of energy!!$} {#var cmbt[affects][double_invoke] 1} {2};
+
+
 #NOP -- Toggles for profession boosts;
 #action {^Your crazed ambition overflows!$} {
     #if $gags[combat_generic] {#line gag};
@@ -201,6 +206,12 @@ dreset;
 #action {^Your tactical advantage ends.$} {
     #if $gags[combat_generic] {#line gag};
     #var cmbt[affects][tactician] 0;
+} {2};
+#action {^The rallying cry inspires you!  You leap to the attack!$} {
+    #var cmbt[affects][marshal] 1;
+} {2};
+#action {^The effects of the offensive rallying cry wear off.$} {
+    #var cmbt[affects][marshal] 0;
 } {2};
 
 
@@ -300,6 +311,7 @@ dreset;
         #var cmbt[affects][rune_sword_blue_rune] 0;
         #var cmbt[affects][iprime] 0;
         #var cmbt[affects][eradication] 0;
+        #var cmbt[affects][double_invoke] 0;
         #var cmbt[affects][chill] 0;
         #var cmbt[affects][clutch] 0;
         #var cmbt[affects][grasp] 0;
@@ -430,6 +442,9 @@ dreset;
                     #if {$cmbt[affects][chill]} {
                         dmgTrack chill $dmgAmount $dmgTimes;
                     };
+                    #if {$cmbt[affects][double_invoke]} {
+                        dmgTrack dbl_invoke $dmgAmount $dmgTimes;
+                    };
                     #if {$cmbt[affects][skullfire]} {
                         dmgTrack skullfire $dmgAmount $dmgTimes;
                     };
@@ -456,6 +471,9 @@ dreset;
                     };
                     #if {$mob[gremlin]} {
                         dmgTrack gremlin $dmgAmount $dmgTimes;
+                    };
+                    #if {$cmbt[affects][marshal]} {
+                        dmgTrack marshal $dmgAmount $dmgTimes;
                     };
                 };
             };

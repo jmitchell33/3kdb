@@ -189,8 +189,12 @@
 } {2};
 
 #NOP -- AUTO PULLING ROPE TO AND FROM PLAYER;
-#action {^Pull the rope, and you will be teleported to %*.$} {#if {!$idle_flag} {pull rope}};
-#action {^Pulling the rope, will allow %* passage.$} {#if {!$idle_flag} {pull rope}};
+#action {^Pull the rope, and you will be teleported to %*.$} {
+    #if {$toggles[teleport] && !$idle_flag} {pull rope};
+};
+#action {^Pulling the rope, will allow %* passage.$} {
+    #if {$toggles[teleport] && !$idle_flag} {pull rope};
+};
 
 #NOP -- Message for Pride of the Kwik-e Mart Wearing Off;
 #action {^The last of the oil leaks from your body.$} {eat pride} {2};

@@ -6,4 +6,24 @@
 };
 
 
+#alias {donate_water2} {
+    #map get roomvnum donate_go_back;
+    #if {"$area" == "Chaotic Sewers"} {.stop;#var sewer_winch 1} {#var sewer_winch 0};
+    #if {"$area" == "Section Z"} {pause game;#var section_z 1} {#var section_z 0};
+    go fremen_shimoom;
+    #line oneshot #action {The Wisdom Board containing %*} {
+        unwrap all;
+        deslab all;
+        #if {$corpses[cooler] > 0} {
+            #${corpses[cooler]} {uncooler corpse};
+        };
+        #delay 4 {
+            #100 {#5 {fill all;donate all};reclaim};
+            #if $section_z {go sz;unpause game};
+        };
+    } {1};
+};
+
+
+
 #class {player_aliases} {close}
