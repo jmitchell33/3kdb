@@ -100,17 +100,17 @@
     #replace partyReportString {<ceb>} {};
     #replace partyReportString {\\n} {:};
     #replace partyReportString {  } {};
-    #if {"%2" == "bot"} {
+    #if {"%5" == "bot"} {
         #if {!$idle_flag && $bot[active]} {#delay .2 {ptell $partyReportString};};
     };
-    #if {"%2" == "$user"} {
+    #if {"%5" == "$user"} {
         #if {!$idle_flag} {#delay .2 {ptell $partyReportString};};
     };
 } {2};
 
 #NOP -- ROOM VNUM REPORTING;
 #act {~\e[%*;%+m[PARTY]%* %w: 3kdb %w vnum} {
-    #if {"%2" == "$user" && !$idle_flag} {
+    #if {"%5" == "$user" && !$idle_flag} {
         #map get roomvnum temp_vnum;
         ptell My current vnum is $temp_vnum;
     };
@@ -119,23 +119,23 @@
 #NOP -- CORPSE SHARING AND REPORTING;
 #var gimme_corpses 1;
 #act {~\e[%*;%+m[PARTY]%* %w: 3kdb %w corpses {[-a-zA-Z]*}} {
-    #if {"%2" == "$user"} {
+    #if {"%5" == "$user"} {
         #if {!$idle_flag && $gimme_corpses} { 
-            #if {"%3" == "gimme-coffin"} {
+            #if {"%6" == "gimme-coffin"} {
                 #var gimme_corpses 0;
                 ptell Attempting to unwrap 10 corpses;
                 #10 unwrap;
                 #delay .1 {i};
                 #delay 4 {#var gimme_corpses 1};
             };
-            #if {"%3" == "gimme-freezer"} {
+            #if {"%6" == "gimme-freezer"} {
                 #var gimme_corpses 0;
                 ptell Attempting to deslab 10 corpses;
                 #10 deslab;
                 #delay .1 {i};
                 #delay 4 {#var gimme_corpses 1};
             };
-            #if {"%3" == "gimme-cooler"} {
+            #if {"%6" == "gimme-cooler"} {
                 #var gimme_corpses 0;
                 ptell Attempting to uncooler 10 corpses;
                 #10 uncooler corpse;
@@ -144,23 +144,23 @@
             };
         };
     };
-    #if {"%2" == "bot"} {
+    #if {"%5" == "bot"} {
         #if {!$idle_flag && $bot[active] && $gimme_corpses} {
-            #if {"%3" == "gimme-coffin"} {
+            #if {"%6" == "gimme-coffin"} {
                 #var gimme_corpses 0;
                 ptell Attempting to unwrap 10 corpses;
                 #10 unwrap;
                 #delay .1 {i};
                 #delay 4 {#var gimme_corpses 1};
             };
-            #if {"%3" == "gimme-freezer"} {
+            #if {"%6" == "gimme-freezer"} {
                 #var gimme_corpses 0;
                 ptell Attempting to deslab 10 corpses;
                 #10 deslab;
                 #delay .1 {i};
                 #delay 4 {#var gimme_corpses 1};
             };
-            #if {"%3" == "gimme-cooler"} {
+            #if {"%6" == "gimme-cooler"} {
                 #var gimme_corpses 0;
                 ptell Attempting to uncooler 10 corpses;
                 #10 uncooler corpse;

@@ -13,7 +13,7 @@
 	#list {botlist} find {$tmpName} {tmpIndex};
 	#if {$tmpIndex > 0} {
 		#list {botcycle} {add} {$tmpName};
-		draw_caption_bot_cycle;
+		_caption_data_bot_cycle;
 		#var tmpName $botlist[$tmpIndex][alias];
 		#echo {<bfa> +++ +++ <088> <efe>$tmpName added to bot cycle <bfa> +++ +++ <088>};
 	} {
@@ -49,7 +49,7 @@
 		#echo {<fbb> -+- <088> <fdc>There are no areas in the cycles to remove. <fbb> -+- <088>};
 	};
 
-	draw_caption_bot_cycle;
+	_caption_data_bot_cycle;
 };
 
 
@@ -119,14 +119,14 @@
 
 #event {VARIABLE UPDATE cycle} {
 	#if {&{botcycle[]} > 0} {
-		draw_caption_bot_cycle;
+		_caption_data_bot_cycle;
 	};
 };
 
 
 #event {VARIABLE UPDATE botcycle} {
 	#if {&{botcycle[]} > 0} {
-		draw_caption_bot_cycle;
+		_caption_data_bot_cycle;
 	};
 };
 

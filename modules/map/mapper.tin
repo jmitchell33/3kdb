@@ -161,12 +161,12 @@
 		#var findexits $room[exits];
 		#replace findexits {,} {;};
 		#replace findexits {~} {;};
-		#map list {roomarea} {$area} {roomname} {$room[name]%*} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
+		#map list {roomarea} {$area} {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
 		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$room[name]%*} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
+			#map list {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
 		};
 		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$room[name]%*} {roomexits} {$findexits} {variable} {findroom[$find_count]};
+			#map list {roomname} {$room[name]} {roomexits} {$findexits} {variable} {findroom[$find_count]};
 		};
 		#if {&findroom[$find_count][] == 1} {
 			#map goto *findroom[$find_count][1..1];

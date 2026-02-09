@@ -4,7 +4,53 @@
 #NOP -- For right now this just burns heal
 #action {^A surge of leadership rushes through your veins,} {
     #if !$idle_flag {
-        #4 rallycry offensive $enemy[name_numbers];
+        #if {$my[marshal][charges] > 8} {
+            #var my[marshal][charges] 12;
+        } {
+            #math my[marshal][charges] {$my[marshal][charges] + 4};
+        };
+    };
+} {2};
+
+#action {A Marshal's Standard (%d glowing of 12 total gems)} {
+    #if $inventory_check {
+        #var my[marshal][charges] %1;
+    };
+} {2};
+
+#action {^You have already exhausted the magic of the marshal's standard!$} {
+    #var my[marshal][charges] 0;
+} {2};
+
+#list strategyList add {{{guild} {all} {name} {rallycry-o} {active} {0} {description} {Marshal: RallyCry Offensive}}};
+#list strategyList add {{{guild} {all} {name} {rallycry-d} {active} {0} {description} {Marshal: RallyCry Defensive}}};
+#list strategyList add {{{guild} {all} {name} {rallycry-h} {active} {0} {description} {Marshal: RallyCry Healing}}};
+#list strategyList add {{{guild} {all} {name} {rallycry-s} {active} {0} {description} {Marshal: RallyCry Spirit}}};
+#list strategyList indexate name;
+
+#NOP -- We'll use marshal on longer fights, but fire in the beginning;
+#ticker strategy_marshal {
+    #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
+        #if {$incombat && $my[marshal][charges] > 0 && $bot[active]} {
+            #if {"$cmbt[affects][marshal]" == "0"} {
+                checkStrategy {rallycry-o} {
+                    #if $vaf[numbers] {
+                        rallycry offensive $enemy[name_numbers];
+                    } {
+                        rallycry offensive $enemy[target];
+                    };
+                };
+            };
+            checkStrategy {rallycry-h} {
+                rallycry heal;
+            };
+            checkStrategy {rallycry-d} {
+                rallycry defensive;
+            };
+            checkStrategy {rallycry-s} {
+                rallycry spirit;
+            };
+        };
     };
 } {2};
 
