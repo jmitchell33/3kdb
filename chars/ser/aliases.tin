@@ -1,0 +1,162 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#var pickle_farming 0;
+#var aoe_immo 0;
+
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#alias k {
+    kill %1;
+}
+
+#alias {.mob_kill_action} {
+    examine $mob[target];
+    kill $mob[target];
+}
+
+#NOP ---MISC;
+#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box;golem give all to byron;put all in box};
+#alias {bag_all %1} {get all from disc;#loop 1 %1 i {put all in bag $i}};
+
+
+#alias corpse_trig {
+    get coins from corpse;wrap corpse;
+    #if {$darkness} {remove ring of darkness};
+    #if {$combat[pf]} {actuate psychofeedback int for con};
+
+    #if {"$area" == "Section Z"} {
+        get all from corpse;
+        eat green;eat blue;eat orange;
+    };
+    #if {"$area" == "Westersea Thugs" || "$area" == "Westersea Sewer"} {
+      get lockbox from corpse;
+      sm lockbox;
+    };
+    #if {$pickle_farming} {
+      smr jug;drink jug;sm jug;
+      #if {"$area" == "sewer" || "$area" == "icyblue"} {
+        get ring from corpse;
+        get bag from corpse;
+      };
+    };
+    #if {$aoe_immo} {
+      immolate all;
+    };
+};
+
+#alias {refill_apump} {
+  fold reality;d;n;e;e;e;ne;e;deposit all;withdraw 50000;
+  w;sw;w;w;w;w;w;w;refill;
+  e;e;e;e;e;e;ne;e;deposit all;withdraw 25000;
+  fold reality;
+};
+
+#NOP --- Botting configurations;
+
+#alias {.pre_fight_check} {
+  #var _bb 0;
+  #var _dm 0;
+};
+
+
+
+#NOP --- Psicorps power configurations;
+
+#alias {defense} {
+  #var psiwield 1;
+  #var psiwield_1 shard;
+  #var psiwield_2 shard 2;
+  #var use_expertise 0;
+  #var combat {};
+
+  #nop -- Defense buffs;
+
+  #var combat[ab] 1;
+  #var combat[Cp] 1;
+  #var combat[Eb] 1;
+  #var combat[IB] 1;
+  #var combat[IV] 1;
+  #var combat[Ib] 1;
+  #var combat[Iv] 0;
+  #var combat[Vg] 1;
+  #var combat[Vr] 0;
+  #var combat[Vv] 0;
+
+  #nop -- Combat buffs;
+
+  #var combat[AA] 1;
+  #var combat[Bo] 1;
+  #var combat[CP] 1;
+  #var combat[pf] 0;
+  #var combat[Sj] 0;
+
+  #nop -- Combat powers;
+
+  #var combat[bb] 0;
+  #var combat[bc] 0;
+  #var combat[BC] 1;
+  #var combat[dm] 1;
+  #var combat[ragony] 0;
+  #var combat[rpain] 0;
+};
+
+#alias {attack} {
+  #var psiwield 1;
+  #var psiwield_1 shard;
+  #var psiwield_2 shard 2;
+  #var use_expertise 0;
+  #var combat {};
+
+  #nop -- Defense buffs;
+
+  #var combat[Vr] 0;
+  #var combat[Eb] 0;
+  #var combat[Cp] 0;
+  #var combat[Iv] 0;
+  #var combat[IV] 0;
+  #var combat[Ib] 0;
+  #var combat[IB] 0;
+  #var combat[Vg] 1;
+  #var combat[Vv] 0;
+  #var combat[ab] 0;
+
+  #nop -- Combat buffs;
+
+  #var combat[AA] 1;
+  #var combat[Ac4] 0;
+  #var combat[Bo] 1;
+  #var combat[Cg] 0;
+  #var combat[CP] 1;
+  #var combat[Sj] 1;
+  #var combat[pf] 1;
+
+  #nop -- Combat powers;
+
+  #var combat[bc] 0;
+  #var combat[BC] 1;
+  #var combat[E] 1;
+  #var combat[ragony] 1;
+  #var combat[rpain] 0;
+};
+
+#alias {solo} {
+addp GV;
+addp IB;
+addp PR;
+addp Di;
+addp Ib;
+addp Eb;
+addp Ab;
+addp SP;
+addp Vg;
+addp Gv;
+addp CP;
+addp Bo;
+addp Ac6;
+addp BC;
+addp PC;
+}
