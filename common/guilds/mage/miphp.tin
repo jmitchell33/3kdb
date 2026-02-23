@@ -2,6 +2,9 @@
 #class guild_miphp open;
 
 #var guild_miphp 1;
+#NOP -- Initialize so prompt never shows literal $prots_show / $prots_string_display before first _guild_miphp run;
+#var prots_string_display {};
+#var prots_show {};
 
 #alias {_guild_miphp} {
     #if {&my[summons][] > 0} {#var summoner 1};
@@ -28,6 +31,10 @@
 	#var prots_string {$ps_string $m_string $mb_string $pa_string $MG_string $ss_string $armor_string $mag_string $rs_string $mg_string $pg_string $pe_string $blink_string $shield_string $gs_string $sb_string};
 	#replace prots_string  { } {};
 	#replace prots_string  {*} { };
+	#NOP -- Display: current prots_string. Backup prots_string_display when non-empty so Prots line persists if hpbar line empty/partial. When prots_string empty, clear backup so we show nothing;
+	#if {"$prots_string" != ""} {#var prots_string_display $prots_string} {#var prots_string_display {}};
+	#var prots_show $prots_string;
+	#if {"$prots_show" == ""} {#var prots_show $prots_string_display};
 
 	#NOP -- If ash is undefined and not idle, turn it on, should only ever happen upon new connection;
 	#if {!$idle_flag && "${ash}" == ""} {ash on};
@@ -38,7 +45,7 @@
 	#list temp clear;
 	#list temp add {<eeb>HP:<ffe>$hp/$hp_max <eeb>SP:<ffe>$sp/$sp_max <eeb>Sat:<ffe>$gp1/$gp1_max  <eeb>C:<ffe>$gp2/$gp2_max  <eeb>E:<ffe>$ehealth<088>};
 	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Sat:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]<088>};
-	#list temp add {<eeb>Prots: <ffe>$prots_string <eeb>Gem: <ffe>$my[gem]%  <eeb>MC: <ffe>$my[mental_cognition]% ASH: $ash_string<088>};
+	#list temp add {<eeb>Prots: <ffe>$prots_show <eeb>Gem: <ffe>$my[gem]%  <eeb>MC: <ffe>$my[mental_cognition]% ASH: $ash_string<088>};
 	#list temp add {<eeb>Golem: $my[golem][current]/$my[golem][reset]%  <eeb>Super: <ffe>$my[super][current]/$my[super][reset]%  <eeb>I: <ffe>$immersion_string <eeb>ST: <ffe>$my[spelltap][bonus]/$my[spelltap][corpses] <eeb>G2N: <ffe>@thousandsFormatNumber{$my[g2n]}<088>};
 	#list temp add {<eeb>Gxp $my[gxp][str_time]: <dea>$my[gxp][str_t30_per_hr] T-30 <dfe>|<dea> $my[gxp][str_average_per_hr]/Hr <dfe>|<dea> $my[gxp][str_total] Total<088>};
     #if $summoner {#list temp add {$summon_string}};

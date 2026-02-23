@@ -1,6 +1,6 @@
 #class {mipstats} {open};
 
-#NOP ***** Combined Stats Data *****
+#NOP ***** Combined Stats Data *****;
 #ALIAS {.mipProcessFFF} {
 	#VAR {mip[FFF][flag]} {0};
 	#VAR {mip[FFF][toggle]} {0};
@@ -17,61 +17,87 @@
 					.mipProcessFFFSub {$mip[FFF][flag]} {$mip[FFF][${mip[FFF][flag]}][data]};
 					#VAR {mip[FFF][flag]} {0};
 					#VAR {mip[FFF][toggle]} {0};
-				}
+				};
 			} {
-				#VAR {mip[FFF][${mip[FFF][flag]}][data]} {${mip[FFF][${mip[FFF][flag]}][data]}${i}}
-			}
-		}
+				#VAR {mip[FFF][${mip[FFF][flag]}][data]} {${mip[FFF][${mip[FFF][flag]}][data]}${i}};
+			};
+		};
 	};
 	#IF {"$mip[FFF][$mip[FFF][flag]][data]" != ""} {
-		.mipProcessFFFSub {$mip[FFF][flag]} {$mip[FFF][${mip[FFF][flag]}][data]}
-	}
-
+		.mipProcessFFFSub {$mip[FFF][flag]} {$mip[FFF][${mip[FFF][flag]}][data]};
+	};
     _update_status;
-}
+};
 
-#NOP ***** Separated Stats Data *****
+#NOP ***** Separated Stats Data *****;
+#NOP Current/max for hp,sp,gp1,gp2 set here from MIP FFF (A/B=hp C/D=sp E/F=gp1 G/H=gp2). Only update when %2 non-empty to avoid clearing display;
+#NOP All numeric FFF values are sanitized with #format {%d} so ANSI/color codes in the stream never get stored (fixes hpbar/graph corruption);
 #ALIAS {.mipProcessFFFSub} {
 	#SWITCH {"%1"} {
+		#NOP A = Hit Points current;
 		#CASE {"A"} {
-			#NOP Hit Points;
-			#math my[hp][change] {%2 - $my[hp][current]};
-			#VAR {my[hp][current]} {%2};
-			#math my[hp][percent] {1.00 * $my[hp][current] / $my[hp][max]};
+			#if {"%2" != ""} {
+				#format _mip_num {%d} {%2};
+				#math my[hp][change] {$_mip_num - $my[hp][current]};
+				#VAR {my[hp][current]} {$_mip_num};
+				#math my[hp][percent] {1.00 * $my[hp][current] / $my[hp][max]};
+			};
 		};
-		#CASE {"B"} {#NOP Hit Points Maximum;#VAR {my[hp][max]} {%2};};
+		#NOP B = Hit Points maximum;
+		#CASE {"B"} {#if {"%2" != ""} {#format _mip_num {%d} {%2}; #VAR {my[hp][max]} {$_mip_num};};};
+		#NOP C = Spell Points current;
 		#CASE {"C"} {
-			#NOP Spell Points;
-			#math my[sp][change] {%2 - $my[sp][current]};
-			#VAR {my[sp][current]} {%2};
-			#math my[sp][percent] {1.00 * $my[sp][current] / $my[sp][max]};
+			#if {"%2" != ""} {
+				#format _mip_num {%d} {%2};
+				#math my[sp][change] {$_mip_num - $my[sp][current]};
+				#VAR {my[sp][current]} {$_mip_num};
+				#math my[sp][percent] {1.00 * $my[sp][current] / $my[sp][max]};
+			};
 		};
-		#CASE {"D"} {#NOP Spell Points Maximum;#VAR {my[sp][max]} {%2};};
+		#NOP D = Spell Points maximum;
+		#CASE {"D"} {#if {"%2" != ""} {#format _mip_num {%d} {%2}; #VAR {my[sp][max]} {$_mip_num};};};
+		#NOP E = Guild Points1 current;
 		#CASE {"E"} {
-			#NOP Guild Points1;
-			#math my[gp1][change] {%2 - $my[gp1][current]};
-			#VAR {my[gp1][current]} {%2};
-			#math my[gp1][percent] {1.00 * $my[gp1][current] / $my[gp1][max]};
+			#if {"%2" != ""} {
+				#format _mip_num {%d} {%2};
+				#math my[gp1][change] {$_mip_num - $my[gp1][current]};
+				#VAR {my[gp1][current]} {$_mip_num};
+				#math my[gp1][percent] {1.00 * $my[gp1][current] / $my[gp1][max]};
+			};
 		};
-		#CASE {"F"} {#NOP Guild Points1 Maximum;#VAR {my[gp1][max]} {%2};};
+		#NOP F = Guild Points1 maximum;
+		#CASE {"F"} {#if {"%2" != ""} {#format _mip_num {%d} {%2}; #VAR {my[gp1][max]} {$_mip_num};};};
+		#NOP G = Guild Points2 current;
 		#CASE {"G"} {
-			#NOP Guild Points2;
-			#math my[gp2][change] {%2 - $my[gp2][current]};
-			#VAR {my[gp2][current]} {%2};
-			#math my[gp2][percent] {1.00 * $my[gp2][current] / $my[gp2][max]};
+			#if {"%2" != ""} {
+				#format _mip_num {%d} {%2};
+				#math my[gp2][change] {$_mip_num - $my[gp2][current]};
+				#VAR {my[gp2][current]} {$_mip_num};
+				#math my[gp2][percent] {1.00 * $my[gp2][current] / $my[gp2][max]};
+			};
 		};
-		#CASE {"H"} {#NOP Guild Points2 Maximum;#VAR {my[gp2][max]} {%2};};
-		#CASE {"I"} {#NOP Primary Guild Line;.mipProcessGline {1} {%2}};
-		#CASE {"J"} {#NOP Secondary Guild Line;.mipProcessGline {2} {%2}};
-		#CASE {"K"} {#NOP Mob Fighting;.mipProcessFFFK {%2}};
-		#CASE {"L"} {#NOP Mob Health;#math enemy[hp_change] {$enemy[hp] - %2};#format {enemy[hp]} {%d} {%2};};
-		#CASE {"M"} {#NOP Mob Image File};
+		#NOP H = Guild Points2 maximum;
+		#CASE {"H"} {#if {"%2" != ""} {#format _mip_num {%d} {%2}; #VAR {my[gp2][max]} {$_mip_num};};};
+		#NOP I = Primary guild line (gline 1);
+		#CASE {"I"} {.mipProcessGline {1} {%2};};
+		#NOP J = Secondary guild line (gline 2);
+		#CASE {"J"} {.mipProcessGline {2} {%2};};
+		#NOP K = Mob fighting (enemy name/target);
+		#CASE {"K"} {.mipProcessFFFK {%2};};
+		#NOP L = Mob health - only update when non-empty so display keeps last good value;
+		#CASE {"L"} {
+			#if {"%2" != ""} {
+				#math enemy[hp_change] {$enemy[hp] - %2};
+				#format {enemy[hp]} {%d} {%2};
+			};
+		};
+		#NOP M = Mob image file;
+		#CASE {"M"} {};
+		#NOP N = Combat round and round-based state;
 		#CASE {"N"} {
 			#var {mip[last_round]} {$mip[round]};
 			#VAR {mip[round]} {%2};
-			#NOP -- If round is the same or 0, you're no longer in combat;
-			#NOP -- There's also a ticker to check this since this doesn't always fire at the end of a fight if no;
-			#NOP -- new MIP line is received;
+			#NOP If round same or 0 you are no longer in combat. Ticker also checks since this does not always fire at fight end;
 			#if {$mip[round] == $mip[last_round] || $mip[round] == 0} {
 				#var incombat 0;
 				#var dmgTrackerNewRound 0;
@@ -83,14 +109,12 @@
 				#var my[dead] 0;
 			};
 			#if {$mip[round] < $mip[last_round]} {#var last_fight_rounds $mip[last_round]};
-			
-			#NOP Combat Round Counter;
+
+			#NOP Combat round counter;
 			#if !$total_rounds {#var total_rounds 1} {#math total_rounds {$total_rounds + 1};};
 			#format total_rounds_string {%g} {$total_rounds};
 
-			#NOP -- Average the first 10 rounds of combat to see if it'll be a fast or longer fight;
-			#NOP -- This is useful for some powers to save if it's a very fast fight;
-			#NOP -- If it's a long fight (>100 rounds) it will default to 100;
+			#NOP Average first 10 rounds to detect fast vs long fight for some powers;
 			#if {$mip[round] <= 10 && $mip[round] > 1 && $mip[round] > $mip[last_round]} {
 				#var enemy[hp_change] @max{$enemy[hp_change];1};
 				#math enemy[kill_rate][${enemy[kill_rate_avg_count]}] {100 / $enemy[hp_change]};
@@ -103,42 +127,47 @@
 				#math enemy[kill_rate_avg_count] {$enemy[kill_rate_avg_count] + 1};
 			};
 
-			#NOP -- Redunandant "round reset" for the damage tracker in case the You hit x for y string is botched;
+			#NOP Redundant round reset for damage tracker if "You hit x for y" string is botched;
 			#if $dmgtracker {.dmg_round_reset};
 		};
-		#DEFAULT {#NOP Every other non-handled flag};
-	}
-}
+		#NOP Unhandled FFF sub-flag;
+		#DEFAULT {};
+	};
+};
 
 #NOP ***** Combat Mob Name *****;
 #ALIAS {.mipProcessFFFK} {
     #IF {"%1" != ""} {
         #var enemy[name] %1;
         #if $vaf[numbers] {
-            #var enemy[target] {${enemy[name_numbers]}}
+            #var enemy[target] {${enemy[name_numbers]}};
         } {
-            #nop -- Try to lowercase the name and replace the articles with blanks to get a "target";
+            #NOP Lowercase name and strip articles (a, an, the) to get target;
             #format enemy[target] {%l} {%1};
             #replace enemy[target] {\ba\b} {};
             #replace enemy[target] {\ban\b} {};
             #replace enemy[target] {\bthe\b} {};
-            #format enemy[target] {%p} {$enemy[target]}
-        }
+            #format enemy[target] {%p} {$enemy[target]};
+        };
     } {
+        #NOP Empty mob name: store last name then clear enemy state;
         #var {enemy[last][name]} {$enemy[name]};
         #VAR {enemy[name]} {};
         #VAR {enemy[target]} {};
         #VAR {enemy[graph]} {};
-        #VAR {enemy[hp]} {}
-    }
+        #VAR {enemy[hp]} {};
+    };
 };
 
-#NOP ***** Guild Stats Line 1/2 *****
+#NOP ***** Guild Stats Line 1/2 *****;
 #ALIAS {.mipProcessGline} {
-	#VAR {mip[gline][%1]} {%2};
+	#NOP Only update gline when non-empty so display keeps last good value;
+	#if {"%2" != ""} {
+		#VAR {mip[gline][%1]} {%2};
+	};
 	#VAR {temp} {};
 
-	#NOP GUILD SPECIFIC GLINE PROCESSING;
+	#NOP Guild-specific gline processing when gline data is non-empty;
 	#IF {"%2" != ""} {
 		#SWITCH {"$guild"} {
 			#CASE {"bard"}			{.mipProcessGlineBard {%1}};
@@ -154,7 +183,7 @@
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
 			#CASE {"priest"}        {.mipProcessGlinePriest {%1}};
 			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
-		}
+		};
 	};
 };
 
@@ -162,15 +191,15 @@
 	#IF {%1 == 1} {
 		#REGEX {$mip[gline][1]} {Chaos Flux: %d/%d} {
 			#VAR {my[relinquish][current]}	{&1};
-			#VAR {my[relinquish][reset]}	{&2}
+			#VAR {my[relinquish][reset]}	{&2};
 		};
 		#REGEX {$mip[gline][1]} {{Density|Homeostasis|Mitosis|Morphogenesis|Resilience}: %d.%d\%} {
 			#VAR {my[skill][name]}		{&1};
-			#VAR {my[skill][current]}	{&2.&3}
+			#VAR {my[skill][current]}	{&2.&3};
 		};
 		#REGEX {$mip[gline][1]}	{\[{FF|IL}\(%d\): %d.%d\%\]>  \[%D\]} {
 			#VAR {my[ff][current]}		{&3.&4};
-			#VAR {my[form]}			{&5}
+			#VAR {my[form]}			{&5};
 		};
 	}; #ELSEIF {%1 == 2} {
 		#REGEX {$mip[gline][2]}	{\[Bioplasts: %d\]} {#VAR {my[bioplasts]}	{&1}};
@@ -180,8 +209,8 @@
 			#VAR {my[relinquish][active]}	{0};
 		};
 	}; #ELSE {
-		#ECHO {<171> Invalid Gline Number <088>}
-	}
+		#ECHO {<171> Invalid Gline Number <088>};
+	};
 };
 
 #ALIAS {.mipProcessGlineCyborg} {
@@ -197,17 +226,16 @@
             #regex $tmpReg {><g[><y%d} {#var my[nanos][reset] &&1};
         };
     }; #ELSEIF {%1 == 2} {
-        #NOP;
+		#NOP No gline 2 processing for cyborg;
     }; #ELSE {
         #ECHO {<171> Invalid Gline Number <088>};
-    }
+    };
 };
 
 
 #ALIAS {.mipProcessGlineMage} {
-	#NOP -- DISABLED PARTIALLY BUT LEAVE THE CODE IN CASE ITS FIXED;
-	#NOP -- MIP DATA IN MAGES IS EXTREMELY UNRELIABLE AND WILL NOT POST FOR 1-3ish ROUNDS AT A TIME;
-	#NOP -- PROTECTION MAINTENANCE IS MANAGED VIA HPBAR;
+	#NOP DISABLED PARTIALLY - MIP data in mages is unreliable and may not post for 1-3 rounds. Protection maintenance is managed via hpbar;
+	#NOP Active: Gem, MC, immersion, spelltap. Prots from gline were disabled, mage hpbar parses prots from hpbar line instead;
 
 	#IF {%1 == 1} {
 		#REGEX {$mip[gline][1]}	{Gem:%d\%}  		{#VAR {my[gem]}				   {&1}	}	{#VAR {my[gem]}					{0}	};
@@ -217,22 +245,23 @@
                                                      #VAR {my[spelltap][corpses]}  {&2}};
 
 		#format hpbar_prots_active {%L} {${hpbar_prots}};
-		#NOP #if {$hpbar_prots_active > 0} {#NOP} {	;
-		#NOP	#REGEX {$mip[gline][1]}	{SS>}				{#VAR {my[prots][SS]}		   {1}	}	{#VAR {my[prots][SS]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{PA}				{#VAR {my[prots][PA]}		   {1}	}	{#VAR {my[prots][PA]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{{PS|PS!}}			{#VAR {my[prots][PS]}		   {1}	}	{#VAR {my[prots][PS]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{{<gA|<yA}}			{#VAR {my[prots][A]}		   {1}	}	{#VAR {my[prots][A]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{{<gB|<yB}}			{#VAR {my[prots][B]}		   {1}	}	{#VAR {my[prots][B]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{MB}				{#VAR {my[prots][MB]}		   {1}	}	{#VAR {my[prots][MB]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{<yS>}  			{#VAR {my[prots][S]}		   {1}	}	{#VAR {my[prots][S]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{MS}				{#VAR {my[prots][MS]}		   {1}	}	{#VAR {my[prots][MS]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{{M>|M!>}}			{#VAR {my[prots][M]}		   {1}	}	{#VAR {my[prots][M]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{RS}				{#VAR {my[prots][RS]}		   {1}	}	{#VAR {my[prots][RS]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{MG>}				{#VAR {my[prots][MG]}		   {1}	}	{#VAR {my[prots][MG]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{mg}				{#VAR {my[prots][mg]}		   {1}	}	{#VAR {my[prots][mg]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{PG}				{#VAR {my[prots][PG]}		   {1}	}	{#VAR {my[prots][PG]}			{0}	};      ;
-		#NOP	#REGEX {$mip[gline][1]}	{PE}				{#VAR {my[prots][PE]}		   {1}	}	{#VAR {my[prots][PE]}			{0}	};      ;
-		#NOP };	;
+		#NOP Prots from gline disabled below - mage hpbar parses prots from hpbar line instead. Left in case MIP becomes reliable;
+		#NOP #if {$hpbar_prots_active > 0} {#NOP} {;
+		#NOP	#REGEX {$mip[gline][1]}	{SS>}				{#VAR {my[prots][SS]}		   {1}	}	{#VAR {my[prots][SS]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{PA}				{#VAR {my[prots][PA]}		   {1}	}	{#VAR {my[prots][PA]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{{PS|PS!}}			{#VAR {my[prots][PS]}		   {1}	}	{#VAR {my[prots][PS]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{{<gA|<yA}}			{#VAR {my[prots][A]}		   {1}	}	{#VAR {my[prots][A]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{{<gB|<yB}}			{#VAR {my[prots][B]}		   {1}	}	{#VAR {my[prots][B]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{MB}				{#VAR {my[prots][MB]}		   {1}	}	{#VAR {my[prots][MB]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{<yS>}  			{#VAR {my[prots][S]}		   {1}	}	{#VAR {my[prots][S]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{MS}				{#VAR {my[prots][MS]}		   {1}	}	{#VAR {my[prots][MS]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{{M>|M!>}}			{#VAR {my[prots][M]}		   {1}	}	{#VAR {my[prots][M]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{RS}				{#VAR {my[prots][RS]}		   {1}	}	{#VAR {my[prots][RS]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{MG>}				{#VAR {my[prots][MG]}		   {1}	}	{#VAR {my[prots][MG]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{mg}				{#VAR {my[prots][mg]}		   {1}	}	{#VAR {my[prots][mg]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{PG}				{#VAR {my[prots][PG]}		   {1}	}	{#VAR {my[prots][PG]}			{0}	};
+		#NOP	#REGEX {$mip[gline][1]}	{PE}				{#VAR {my[prots][PE]}		   {1}	}	{#VAR {my[prots][PE]}			{0}	};
+		#NOP };
 	}; #ELSEIF {%1 == 2} {
 		#REGEX {$mip[gline][2]}	{G: %d\/%d\%}		{#VAR {my[golem][current]}		{&1};
 													 #VAR {my[golem][reset]}		{&2}};
@@ -243,8 +272,8 @@
 		#REGEX {$mip[gline][2]}	{I: %d}				{#VAR {my[immersion][count]}	{&1}};
 
 	}; #ELSE {
-		#ECHO {<171> Invalid Gline Number <088>}
-	}
+		#ECHO {<171> Invalid Gline Number <088>};
+	};
 };
 
 #ALIAS {.mipProcessGlineElemental} {
@@ -260,13 +289,14 @@
 			#VAR {my[shrouds]}		{&7};
 			#VAR {my[reset]}		{&8};
 		};
-		#REGEX {$mip[gline][2]} {G2N: <%w%d>}			{#VAR {my[g2n]}			{&2}}
+		#REGEX {$mip[gline][2]} {G2N: <%w%d>}			{#VAR {my[g2n]}			{&2}};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
-	}
+	};
 };
 
 #ALIAS {.mipProcessGlineGentech} {
+	#NOP Default CPC max for percentage display;
 	#var my[cpc][max] 10000;
 	#IF {%1 == 1} {
 		#REGEX {$mip[gline][1]}	{CPC:\<%?%d\>} {#VAR {my[cpc][current]} {&2}};
@@ -283,7 +313,7 @@
 		#REGEX {$mip[gline][2]}	{Illum\(\<%?%w\>\)} {#VAR {my[illum]} {&2}};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
-	}
+	};
 };
 
 #ALIAS {.mipProcessGlineFremen} {
@@ -309,7 +339,7 @@
 			#VAR {my[limberness]} {&1};
 		}; #ELSE {
 			#ECHO {<171> Invalid Gline Number <088>};
-		}
+		};
 	};
 };
 
@@ -335,7 +365,7 @@
 			#if $my[gxp][total_gained] {#math my[gxp][total_gained] {$my[gxp][total_gained] + $my[gxp][change]}} {#var my[gxp][total_gained] $my[gxp][change]};
 			#math my[gxp][average] {$my[gxp][total_gained] / $total_rounds};
 			#if {$my[gxp][change] > $my[gxp][best]} {#var my[gxp][best] $my[gxp][change]};
-		}
+		};
 	}; #ELSEIF {%1 == 2} {
 		#REGEX {$mip[gline][2]} {Nukes: \[%d/%d\]>} {
 			#format {my[nukes]} {%d}	 {&1};
@@ -359,8 +389,8 @@
 		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
-	}
-}
+	};
+};
 
 #ALIAS {.mipProcessGlineNecromancer} {
 	#IF {%1 == 1} {
@@ -423,14 +453,15 @@
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};
-}
+};
 
 #ALIAS {.mipProcessGlineMonk} {
-	#IF {%1 == 1} {
-		#NOP;
-	}; #ELSEIF {%1 == 2} {
-		#NOP;
-	}; #ELSE {
+	#NOP No monk-specific gline 1 processing;
+	#IF {%1 == 1} {};
+	#ELSEIF {%1 == 2} {
+		#NOP No monk-specific gline 2 processing;
+	};
+	#ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};
 };
@@ -440,10 +471,10 @@
 		#REGEX {$mip[gline][1]} {PROT: <rOFF>}	{#VAR {my[effects][protection]} OFF};
 		#REGEX {$mip[gline][1]} {PROT: <sON>}	{#VAR {my[effects][protection]} ON};
 		#REGEX {$mip[gline][1]} {CL: [<c%d\%>]}	{
-			#VAR {my[priest][beseech]} 0
+			#VAR {my[priest][beseech]} 0;
 		};
 		#REGEX {$mip[gline][1]} {CL: [<g*><c%d\%>]}	{
-			#VAR {my[priest][beseech]} 1
+			#VAR {my[priest][beseech]} 1;
 		};
 		#REGEX {$mip[gline][2]} {STO: <c%d>/<b%d>} {
 			#var my[acolyte][mana_stored] &1;
@@ -455,7 +486,7 @@
 
 #ALIAS {.mipProcessGlineBard} {
 	#IF {%1 == 1} {
-		#nop Protection Info;
+		#NOP Protection info from gline 1 (FR PE PN PG PF PH HS O V R AG ES B HR MB ab AB RF CS M). Set to 0 on non-match so heartbeat auto-cast works;
 		#REGEX {$mip[gline][1]} { FR:%d}	{#VAR {my[defs][fr]}		{&1}}   {#var {my[defs][fr]}    {0}};
 		#REGEX {$mip[gline][1]} { PE:%d}	{#VAR {my[defs][pe]}		{&1}}   {#var {my[defs][pe]}    {0}};
 		#REGEX {$mip[gline][1]} { PN:%d}	{#VAR {my[defs][pn]}		{&1}}   {#var {my[defs][pn]}    {0}};
@@ -478,7 +509,7 @@
 		#REGEX {$mip[gline][1]} { *M*}		{#VAR {my[defs][m]}		     {1}}	{#var {my[defs][m]}    {0}};
 
 	}; #ELSEIF {%1 == 2} {
-		#nop Smile, GXP, Song Performing, Rounds left;
+		#NOP Smile, GXP, song performing, rounds left;
 		#REGEX {$mip[gline][2]} { S:%d}		{#VAR {my[smile]}		{&1}};
 		#REGEX {$mip[gline][2]} { NGL: %d%}	{#VAR {my[g2nl]}		{&1}};
 		#REGEX {$mip[gline][2]} { %*: %d} {
@@ -513,9 +544,9 @@
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};
-}
+};
 
-#NOP ***** Guild Stats Line Colour Handling *****
+#NOP ***** Guild Stats Line Colour Handling *****;
 #FUNCTION {fMipColourConv} {
 	#VAR {result} {%1};
 	#REPLACE {result} {>} {<099>};
@@ -527,6 +558,6 @@
 	#REPLACE {result} {<v} {<859>};
 	#REPLACE {result} {<s} {<279>};
 	#REPLACE {result} {<w} {};
-}
+};
 
 #class {mipstats} {close};

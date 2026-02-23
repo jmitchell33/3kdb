@@ -2,6 +2,9 @@
 #class guild_miphp open;
 
 #var guild_miphp 1;
+#NOP -- Initialize so prompt never shows literal $prot_show / $prot_string_display before first _guild_miphp run;
+#var prot_string_display {};
+#var prot_show {};
 
 #alias {_guild_miphp} {
 	#if {$my[defs][ab] == 1}						{#var ab_string <ACA><fff>ab*<088>} 				{#var ab_string {}};
@@ -30,15 +33,19 @@
 	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $ab1_string $hr_string $fr_string $r_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
 	#replace prot_string  { } {};
 	#replace prot_string  {*} { };
+	#NOP -- Display: current prot_string. Backup prot_string_display when non-empty so Prots line persists if gline empty/partial. When prot_string empty, clear backup so we show nothing;
+	#if {"$prot_string" != ""} {#var prot_string_display $prot_string} {#var prot_string_display {}};
+	#var prot_show $prot_string;
+	#if {"$prot_show" == ""} {#var prot_show $prot_string_display};
 
 	#if {$my[song][rounds] > 0} {#var song_string ${theme[bard_song]}<dae>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
 	
 	#list temp clear;
 	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Karma:$gp1/$gp1_max  Voice:$gp2/$gp2_max  E:$ehealth};
 	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Karma:$my[gp1][graph] Voice:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {<fff>Prots: $prot_string};
+	#list temp add {<fff>Prots: $prot_show};
 	#list temp add {$song_string};
 	#var hpbar[prompt] $temp;
-}
+};
 
 #class guild_miphp close;
