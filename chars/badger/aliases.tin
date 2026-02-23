@@ -801,9 +801,9 @@
     };
     #elseif {"$guild" == "bard"} {
         reflex clear;
-        reflex add hp <70% bandage;
-        reflex add hp <25% hmheal;
-        reflex add hp <50% eternal heal badger;
+        reflex add hp <10% hmheal;
+        reflex add hp <20% eternal heal badger;
+        reflex add sp >200 cast blade dance;
         reflex combat on;
         reflex start
     };
@@ -2009,16 +2009,80 @@
     #system {echo ROUND COUNT: $total_rounds >> chars/badger/badgerslog.log}
 };
 
-#NOP -- gswap;
+#nop -- gswap;
 #alias {gw} {
-    #switch {"%0"} {
-        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap juggernaut}};
-        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;.gswap mage}};
-        #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;hold rock;hold tome;get coin;.gswap elemental}};
-        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap bard}};
-        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap fremen}};
-        #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
+    #if {"%0" == ""} {
+        #echo {<efb>==========<088> <faa>NO GUILD PROVIDED<088> <efb>==========<088>};
+        #echo {<ceb>Use <ffd>gw-help<ceb> for usage and guild actions<088>};
+        #return
     };
+    _variable_export;
+    #switch {"%0"} {
+        #case {"juggernaut"} {
+            reflex stop;gagsoff;gswap juggernaut;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
+                #delay {4} {#end};
+            };
+        };
+        #case {"mage"} {
+            reflex stop;gagsoff;gswap mage;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
+                #delay {4} {#end};
+            };
+        };
+        #case {"elemental"} {
+            reflex stop;gagsoff;gswap elemental;
+            #delay {6} {
+                get all;keep all;wear all;hold rock;hold tome;get coin;
+                #delay {4} {#end};
+            };
+        };
+        #case {"bard"} {
+            reflex stop;gagsoff;gswap bard;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
+                #delay {4} {#end};
+            };
+        };
+        #case {"fremen"} {
+            reflex stop;gagsoff;gswap fremen;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
+                #delay {4} {#end};
+            };
+        };
+        #default {
+            #echo {<eaa>Unknown guild: %0<088>};
+            #echo {<ceb>Use <ffd>gw-help<ceb> for valid guilds<088>};
+        };
+    };
+};
+
+#nop -- gw-help;
+#alias {gw-help} {
+    #echo {};
+    #echo {<dfc>  ====================  <ffa>Badger's Guild Swap  <dfc>====================<088>};
+    #echo {};
+    #echo {<ceb>  Usage       <fff>gw <guild><088>};
+    #echo {<ceb>  Example     <fff>gw bard<088>};
+    #echo {};
+    #echo {<bea>  Flow        <dae>_variable_export then in-game reflex stop / gagsoff / gswap <guild><088>};
+    #echo {<bea>              <dae>then after 6s get/keep/wear/wield/hold, then 4s later #end. You then manually log<088>};
+    #echo {<bea>              <dae>into the correct profile.<088>};
+    #echo {};
+    #echo {<dfc>  ----------------  <ffa>GUILD  <dfc>----------------  ACTIONS (after 6s delay)<088>};
+    #echo {};
+    #echo {<cff>  juggernaut  <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  mage        <deb>get all / keep all / wear all / wield rod / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  elemental   <deb>get all / keep all / wear all / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  bard        <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  fremen      <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
+    #echo {};
+    #echo {<bea>  Before actions  <dae>reflex stop / gagsoff / gswap <guild><088>};
+    #echo {};
+    #echo {<dfc>  ================================================================<088>}
 };
 
 #NOP -- badgers 3kdb aliases;

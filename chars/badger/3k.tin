@@ -1,0 +1,36 @@
+#echo {Connect to:};
+#echo {3kingdoms};
+
+#kill all;
+
+#NOP -- All guilds in same folder (chars/badger/). Char files: badgerbard.tin, badgerjugg.tin, etc. MUD login name is same for all.;
+#var player1 badgerbard;
+#var player2 badgerjugg;
+#var player3 badgermage;
+#var player4 badgerfremen;
+#var player5 badgermental;
+
+#NOP -- Menu: press 1-5 to load that char file;
+#echo {1: $player1};
+#echo {2: $player2};
+#echo {3: $player3};
+#echo {4: $player4};
+#echo {5: $player5};
+
+#NOP -- Macro: read chars/badger/<name>.tin then unmacro;
+#macro {1} {#read chars/badger/$player1.tin;unmacro};
+#macro {2} {#read chars/badger/$player2.tin;unmacro};
+#macro {3} {#read chars/badger/$player3.tin;unmacro};
+#macro {4} {#read chars/badger/$player4.tin;unmacro};
+#macro {5} {#read chars/badger/$player5.tin;unmacro};
+
+#NOP -- When you disconnect, menu shows again;
+#event {SESSION DEACTIVATED} {
+    #echo {1: $player1};
+    #echo {2: $player2};
+    #echo {3: $player3};
+    #echo {4: $player4};
+    #echo {5: $player5};
+};
+
+#alias {unmacro} {#unmacro {%d}};

@@ -311,8 +311,15 @@
 		#if {"$mip[comm][cdata]" != "$lastData"} {
 			#line log {logs/$sysUser/$datestamp} {$timestamp\};
 			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
-			
-			update_chat {$mip[comm][cdata]};
+			_mip_chat_sender_blacklisted;
+			#if {$_mip_blacklist_hit == 1} {
+				#NOP Blacklisted: still log and Discord, only skip chat window;
+				#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+				#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+				#if {"$chatCategory" != "general"} {postChatCategory};
+			} {
+				update_chat {$mip[comm][cdata]};
+			};
 		};
 	}
 };
@@ -335,7 +342,12 @@
 	#var chat[act_tell][from] %1;
 	#var mip[comm][source] %1;
 	#var mip[comm][data] %2;
-	update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+	_mip_chat_sender_blacklisted;
+	#if {$_mip_blacklist_hit == 1} {
+		#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+		#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+		#if {"$chatCategory" != "general"} {postChatCategory};
+	} {update_chat <178>$mip[comm][source]<088>: $mip[comm][data]};
 	#delay 10 {#unvar chat[act_tell][from]}
 } {2};
 
@@ -343,7 +355,12 @@
 #action {^You project to %w: %*} {
 	#var mip[comm][twoway] {to};
 	#var mip[comm][data] {%2};
-	update_chat <178>To %1<088>: $mip[comm][data];
+	_mip_chat_sender_blacklisted;
+	#if {$_mip_blacklist_hit == 1} {
+		#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+		#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+		#if {"$chatCategory" != "general"} {postChatCategory};
+	} {update_chat <178>To %1<088>: $mip[comm][data]};
 } {2};
 
 #action {^%w projects to you: %*} {
@@ -351,7 +368,12 @@
 	#var chat[act_tell][from] %1;
 	#var mip[comm][source] %1;
 	#var mip[comm][data] %2;
-	update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+	_mip_chat_sender_blacklisted;
+	#if {$_mip_blacklist_hit == 1} {
+		#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+		#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+		#if {"$chatCategory" != "general"} {postChatCategory};
+	} {update_chat <178>$mip[comm][source]<088>: $mip[comm][data]};
 	#delay 10 {#unvar chat[act_tell][from]}
 } {2};
 
@@ -540,17 +562,12 @@
 							#var mip[comm][twoway] {from};
 							#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
 							#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
-							#if {"$chat[group]" === ""} {
-								update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+							_mip_chat_sender_blacklisted;
+							#if {$_mip_blacklist_hit == 1} {
+								#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+								#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+								#if {"$chatCategory" != "general"} {postChatCategory};
 							} {
-								update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
-							};
-							#bell;
-						} {
-							#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
-								#var mip[comm][twoway] {from};
-								#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-								#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
 								#if {"$chat[group]" === ""} {
 									update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
 								} {
@@ -558,8 +575,26 @@
 								};
 								#bell;
 							};
-						}
-						
+						} {
+							#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
+								#var mip[comm][twoway] {from};
+								#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+								#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+								_mip_chat_sender_blacklisted;
+								#if {$_mip_blacklist_hit == 1} {
+									#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+									#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+									#if {"$chatCategory" != "general"} {postChatCategory};
+								} {
+									#if {"$chat[group]" === ""} {
+										update_chat <178>$mip[comm][source]<088>: $mip[comm][data];
+									} {
+										update_chat <178>$mip[comm][source] + $chat[group]<088>: $mip[comm][data];
+									};
+									#bell;
+								};
+							};
+						};
 					};
 				};
 			};

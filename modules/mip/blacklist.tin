@@ -1,0 +1,64 @@
+#class {mipblacklist} {kill};
+#class {mipblacklist} {open};
+
+#NOP -- Chat blacklist: names here are blocked from the chat window (any chatline). List lives in global for export/import via status.tin.;
+#NOP -- Only restore from xblacklist when we have saved data, never clear first or we wipe list restored by _variable_import.;
+#class global open;
+#if {&xblacklist[] > 0} {#list blacklist clear;#loop 1 &xblacklist[] _blidx {#list blacklist add {$xblacklist[$_blidx]}}};
+#class global close;
+
+#alias blacklist {
+    #if {&blacklist[] > 0} {
+        #echo {<caa>----     <fff> CHAT BLACKLIST (blocked from chat window) <caa>     ----<088>};
+        #loop 1 &blacklist[] item {
+            #echo {   <eab>$item   <fbc>$blacklist[$item]<088>};
+        };
+    } {
+        #echo {<caa>----              <fff> CHAT BLACKLIST IS EMPTY <caa>              ----<088>};
+    };
+    #echo {};
+    #echo {<caa>----    <ced> blacklist+ name <dac>to block that person's chat <caa>       ----<088>};
+    #echo {<caa>----    <ced> blacklist- name <dac>to unblock and show their chat again <caa> ----<088>};
+    #echo {<caa>----    <ced> blacklist-clear <dac>to clear the blacklist <caa>            ----<088>};
+};
+
+#alias blacklist-clear {
+    #list blacklist clear;
+    #echo {<caa>----  <fff> Chat blacklist has been cleared <caa>  ----<088>};
+};
+
+#alias blacklist+ {
+    #if {"%0" != ""} {
+        #format tmpItem {%n} {%0};
+        #var tmpItemExists 0;
+        #list blacklist find {$tmpItem} tmpItemExists;
+        #if !$tmpItemExists {
+            #list blacklist add {$tmpItem};
+            #echo {==> <eab> Blocking chat from $tmpItem <088> <==};
+        };
+    };
+};
+
+#alias blacklist- {
+    #if {"%0" != ""} {
+        #format tmpItem {%n} {%0};
+        #list blacklist find {$tmpItem} {index};
+        #if {$index > 0} {
+            #list blacklist delete $index;
+            #echo {==> <cfb> Unblocked $tmpItem (chat will show again) <088> <==};
+        };
+    };
+};
+
+#NOP -- Set _mip_blacklist_hit 1 if current sender (mip[comm][source]) is blacklisted, else 0.;
+#alias _mip_chat_sender_blacklisted {
+    #var _mip_blacklist_hit 0;
+    #if {"$mip[comm][source]" == ""} {#return};
+    #if {&blacklist[] <= 0} {#return};
+    #format _mip_blacklist_check {%n} {$mip[comm][source]};
+    #loop 1 &blacklist[] _bl_i {
+        #if {"$_mip_blacklist_check" == "$blacklist[$_bl_i]"} {#var _mip_blacklist_hit 1};
+    };
+};
+
+#class {mipblacklist} {close};
