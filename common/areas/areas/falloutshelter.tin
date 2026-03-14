@@ -30,7 +30,7 @@
 #nop Aliases;
 
 #alias {dsolve} {
-	#map {get} {ROOMVNUM} {doornum};
+	#var doornum %1;
 	#echo {Starting solver for room $doornum...};
 	#echo {Once complete, fdkey can unlock this door without rerunning the solver, if the code hasn’t changed.};
 	#var dsolve_cancel 0;
@@ -151,10 +151,7 @@
                 #list {phase2List} {delete} {$idx};
                 #var slotD $phase2List[1];
                 #var phase2Complete 1;
-		#if {$doornum == 3050} {
-	  		#list {doorcombos} {set} {1} {a $slotA, b $slotB, c $slotC, d $slotD};
-		}; #elseif {$doornum == 3092} {
-  			#list {doorcombos} {set} {2} {a $slotA, b $slotB, c $slotC, d $slotD};
+		#list {doorcombos} {set} {$doornum} {a $slotA, b $slotB, c $slotC, d $slotD};
 		};
 		#echo {Door code: $slotA, $slotB, $slotC, $slot};
 		#echo {Door combo for room $doornum saved. Use "fdkey" to unlock door in future visits.};
@@ -169,17 +166,16 @@
 #nop Alias for unlocking door when your code is valid
 
 #alias {fdkey} {
+    #var doornum %1
     #echo {Reminder: door codes rotate every few hours. If this doesn’t work, run dsolve again.};
-    #map {get} {ROOMVNUM} {doornum};
-    #if {$doornum == 3050 && "$doorcombos[1]" != {}} {
-        #echo {Sending saved combo for room $doornum...};
-        enter $doorcombos[1];
-	 }; #elseif {$doornum == 3092 && "$doorcombos[2]" != {}} {
-		#echo {Sending saved combo for room $doornum...};
-		enter $doorcombos[2];
-	}; #else {
-		#echo {No saved combo found for this room. Run dsolve first.};
-    };
+    #if {$doornum == {} {#echo {Please supply the door number.}
+    	;#elseif {$doorcombos[$doornum] == {}} {
+		echo {There is not a code for that door, please run dsolve.}
+		; #else{
+			echo {Sending saved combo for room $doornum...};
+		        enter $doorcombos[$doornum];
+			};
+	   };
 
 };
 
