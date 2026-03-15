@@ -15,12 +15,17 @@
 #list strategyList add {{{guild} {psicorps} {name} {ragony} {active} {0} {description} {Psicorps: Recall Agony}}};
 #list strategyList add {{{guild} {psicorps} {name} {demoralize} {active} {0} {description} {Psicorps: Demoralize}}};
 #list strategyList add {{{guild} {psicorps} {name} {burst} {active} {0} {description} {Psicorps: Burst}}};
+#list strategyList add {{{guild} {psicorps} {name} {sever} {active} {0} {description} {Psicorps: Sever the Tie}}};
 #list strategyList indexate name;
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
     #if {!$idle_flag && $action_round < $mip[round]} {
-        #NOP;
+        checkStrategy {sever} {
+            #if {$my[implants][sever][active] && !$hbp && $my[gp1][percent] > .25} {
+                #send {[sever the tie};
+            };
+        };
     };
 };
 

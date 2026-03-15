@@ -653,7 +653,9 @@
 	
 	#list chat[general] ins -1 {${timestamp}${chat[text]}};
 	#var discordText ${mip[comm][source]}: ${mip[comm][data]};
-	#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+	#if {$discordPost && !$mipgag} {
+		#delay postDiscord {postDiscord ${discordText}} 20;
+	};
 	#if {"$chatCategory" != "general"} {postChatCategory};
 	draw_chat;
 };
