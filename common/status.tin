@@ -116,6 +116,8 @@
     #var xgags $gags;
     #var xmy $my;
     #var xwhitelist $whitelist;
+    #NOP -- Chat blacklist (list) for MIP chat window;
+    #list xblacklist copy blacklist;
     #var xchat[log][emotes] $chat[log][emotes];
     #var xdReportList $dReportList;
     #var xtoggles $toggles;
@@ -152,7 +154,11 @@
     #var dReportList $xdReportList;
     #var toggles $xtoggles;
     #var deadmanIdleTimeout $xdeadmanIdleTimeout;
-    
+
+    #NOP -- Restore chat blacklist from saved xblacklist so it persists across ld;
+    #list blacklist clear;
+    #if {&xblacklist[] > 0} {#loop 1 &xblacklist[] _blidx {#list blacklist add {$xblacklist[$_blidx]}}};
+
     #var split $split;
     #var hpbar $xhpbar;
     #var caption $xcaption;

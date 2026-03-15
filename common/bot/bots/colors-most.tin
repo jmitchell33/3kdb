@@ -1,0 +1,113 @@
+#class {bot} {open}
+
+#var {area} {Night of Colour};
+#var check_room 1;
+
+#var bot_message_1 '---- NIGHT OF COLORS STEPPER     ----';
+#var bot_message_2 '--- All Mobs except Impediment ----';
+
+#var {bot[path]} {n;n;w;n;n;n;s;s;s;s;s;s;sw;s;n;n;n;n;n;n;n;n;n;n;ne;climb;u;u;d;d;d;sw;s;s;s;s;s;w;n;s;s;s;s;s;sw;s;s;n;n;n;n;n;n;n;n;n;nw;s;s
+;s;s;s;s;s;s;s;n;nw;n;n;n;n;n;n;sw;s;s;s;s;nw;n;n;sw;e;e;e;e;e;e;e;e;e;s;n;n;e;s;s;s;se;n;n;n;n;n;w;n;e;n;ne;s;s;s;s;s;s;s;s;s;se;n;n;n;n;n;n;n;n;n;n;n;s;e;n;n;s;s;s;s;s;s;s;s;s;s;s;ne;n;n;n;n;n;
+n;n;n;n;se;s;s;s;s;s;s;s;ne;n;n;n;n;n;se;s;n;se;s;s;s;s;s;se;sw;ne;nw;ne;n;n;n;se;sw;s;w;n;w;w;w;w;w;w;w;w;w;n;w;s}
+
+#list botmobs clear;
+#list botmobs add {{{long} {Furtive} {target} {furtive}}};
+#list botmobs add {{{long} {Bulwark} {target} {bulwark}}};
+#list botmobs add {{{long} {Rapid} {target} {rapid}}};
+#list botmobs add {{{long} {Gloom} {target} {gloom}}};
+#list botmobs add {{{long} {Hostile} {target} {hostile}}};
+#list botmobs add {{{long} {Dismal} {target} {dismal}}};
+#list botmobs add {{{long} {Swoop} {target} {swoop}}};
+#list botmobs add {{{long} {Paragon} {target} {paragon}}};
+#nop #list botmobs add {{{long} {Impediment} {target} {impediment}}};
+#list botmobs add {{{long} {Timorous} {target} {timorous}}};
+#list botmobs add {{{long} {Radiance} {target} {radiance}}};
+#list botmobs add {{{long} {Dusky Glimmer} {target} {glimmer}}};
+#list botmobs add {{{long} {Darting Glimmer} {target} {glimmer}}};
+#list botmobs add {{{long} {Russet Glimmer} {target} {glimmer}}};
+#list botmobs add {{{long} {Yellowish Glimmer} {target} {glimmer}}};
+#list botmobs add {{{long} {Dancing Glimmer} {target} {glimmer}}};
+#list botmobs add {{{long} {Smoking Glimmer} {target} {glimmer}}};
+#list botmobs add {{{long} {Peace} {target} {peace}}};
+#list botmobs add {{{long} {Resilient} {target} {resilient}}};
+#list botmobs add {{{long} {Snare} {target} {snare}}};
+#list botmobs add {{{long} {Mud} {target} {mud}}};
+
+    
+#alias {.check_room} {
+    consider shadow;
+	#var foundshadow 0;
+    #act {^Monster class: Really Big (18).$} {
+        #undelay bot_kick;
+        #var bot[walk] 0;
+        #var bot[foundmob] 1;
+        #var mob[target] shadow;
+        #var mob[foundtimes] 1;
+        kill $mob[target];
+        #unaction {^Monster class: Really Big (18).$}
+    };
+	#delay {.4} {#if {!$foundshadow && !$bot[foundmob]} {#var bot[walk] 1;.botStep;};}
+}
+
+#act {^-i-{White web}} {
+	#if {"%1" == "White web" && $corpses[total] > 10} {
+        #var bot[foundobject] 1;#var object_action {shake web}
+    } {
+        .botStep
+    };
+} {1};
+
+#act {^Vibrations shake the web, and fade to stillness.} {
+    #if {$bot[foundmob]} {
+        #nop
+    } {
+        .botStep
+    }
+} {1};
+
+#act {^Vibrations shake the web, the owner pounces!} {
+    #undelay bot_kick;
+    #var bot[walk] 0;
+    #var bot[foundmob] 1;
+    #var mob[target] furtive;
+    #var mob[foundtimes] 1;
+	#var mob[long] Furtive;
+	kill furtive;
+	ewell;
+} {1};
+
+#if {"$guild" == "bard"} {
+    #ticker checkMob {
+        #switch {"$enemy[name]"} {
+            #case {"Impediment"} {
+                #if {"$rolm[type]" != "Sword/Fire"} {#if $rolm[sun] {touch moon rune;rolm fire}};
+            };
+            #default {
+                #if {"$wielded" == "The Rod of Lordly Might"} {#if !$rolm[sun] {touch sun rune}};
+            };
+        };
+    } {2};
+};
+
+#if {"$guild" == "mage"} {
+    #ticker checkCasting {
+        #switch {"$enemy[name]"} {
+            #case {"Impediment"} {
+                #if {"$my[casting]" != "incinerate"} {cast perform as cast incinerate};
+            };
+            #case {"Mud"} {
+                #if {"$my[casting]" == "mind warp"} {cast perform as cast sunspear};
+            };
+            #case {"Snare"} {
+                #if {"$my[casting]" == "mind warp"} {cast perform as cast sunspear};
+            };
+            #default {
+                #if {"$my[casting]" != "mind warp"} {cast perform as cast mind warp};
+            };
+        };
+    } {2};
+};
+
+#class {bot} {close}
+
+#read common/bot/generic.tin

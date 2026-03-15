@@ -237,6 +237,9 @@
             suspend;
         };
     };
+    #elseif {"$guild" == "monk"} {
+        meditate;
+    };
 };
 
 #NOP -- guild info files;
@@ -281,6 +284,14 @@
             #send {!fhelp %0};
         };
     };
+    #elseif {"$guild" == "monk"} {
+        #if {"%0" == ""} {
+            #send {!info};
+        };
+        #else {
+            #send {!info %0};
+        };
+    };
 };
 
 #NOP -- see guild info on others;
@@ -299,6 +310,9 @@
     };
     #elseif {"$guild" == "fremen"} {
         #send {!frecall %0};
+    };
+    #elseif {"$guild" == "monk"} {
+        #send {!gfinger %0};
     };
 };
 
@@ -801,9 +815,9 @@
     };
     #elseif {"$guild" == "bard"} {
         reflex clear;
-        reflex add hp <70% bandage;
-        reflex add hp <25% hmheal;
-        reflex add hp <50% eternal heal badger;
+        reflex add hp <10% hmheal;
+        reflex add hp <20% eternal heal badger;
+        reflex add sp >200 cast blade dance;
         reflex combat on;
         reflex start
     };
@@ -814,6 +828,14 @@
         #NOP reflex add hp <80% prana;
         #NOP reflex add hp >98% bindu some;
         reflex add gp1 <25% drop pants;
+        reflex combat on;
+        reflex start
+    };
+    #elseif {"$guild" == "monk"} {
+        reflex clear;
+        reflex add hp <70% hands;
+        reflex add gp1 <25% enervate 300;
+        reflex add gp2 <25% focus 30;
         reflex combat on;
         reflex start
     };
@@ -836,10 +858,13 @@
         gag+ hpbar
     };
     #elseif {"$guild" == "bard"} {
-        #nop gag+ hpbar
+        #nop;
     };
     #elseif {"$guild" == "fremen"} {
         gag+ hpbar
+    };
+    #elseif {"$guild" == "monk"} {
+        #nop;
     };
     #else {
         #NOP;
@@ -865,6 +890,9 @@
     #elseif {"$guild" == "fremen"} {
         gag-clear
     };
+    #elseif {"$guild" == "monk"} {
+        gag-clear
+    };
     #else {
         #NOP;
     }
@@ -882,7 +910,7 @@
         mka-clear;
         #NOP p2;
         set3kreport;
-        look;
+        look
     };
     #elseif {"$guild" == "mage"} {
         #var my[familiar] Mushroom the beautiful swan;
@@ -896,7 +924,7 @@
         #NOP p2;
         set3kreport;
         ash;
-        look;
+        look
     };
     #elseif {"$guild" == "elemental"} {
         #unvar my[familiar];
@@ -909,7 +937,7 @@
         #NOP p2;
         set3kreport;
         autodrain;
-        look;
+        look
     };
     #elseif {"$guild" == "bard"} {
         #unvar my[familiar];
@@ -923,7 +951,7 @@
         mka+ harmony;
         #NOP p2;
         set3kreport;
-        look;
+        look
     };
     #elseif {"$guild" == "fremen"} {
         #unvar my[familiar];
@@ -935,7 +963,18 @@
         mka-clear;
         mka+ ambush;
         set3kreport;
-        look;
+        look
+    };
+    #elseif {"$guild" == "monk"} {
+        #unvar my[familiar];
+        #unvar my[golem][name];
+        #nop gagson;
+        mystrategy;
+        mycorpsetrig;
+        mka-on;
+        mka-clear;
+        set3kreport;
+        look
     };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any config settings in this alias!!<088>};
@@ -963,20 +1002,23 @@
 #NOP -- rcost;
 #alias {rc} {
     #if {"$guild" == "juggernaut"} {
-        rcost;
+        rcost
     };
     #elseif {"$guild" == "mage"} {
-        cast rcost;
+        cast rcost
     };
     #elseif {"$guild" == "elemental"} {
-        rcost;
+        rcost
     };
     #elseif {"$guild" == "bard"} {
-        rcost;
+        rcost
     };
     #elseif {"$guild" == "fremen"} {
         check cost
     };
+    #elseif {"$guild" == "monk"} {
+        rcost
+    }
 };
 
 #NOP -- airdrop;
@@ -1013,6 +1055,10 @@
     #elseif {"$guild" == "fremen"} {
         reclaim;
     };
+    #elseif {"$guild" == "monk"} {
+        study corpse;
+        eat corpse;
+    };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any settings for using a corpse!!<088>};
     };
@@ -1031,7 +1077,12 @@
 #NOP -- heal yourself using stim or set your enhance to auto heal at a certain percentage (juggernaut);
 #NOP -- check elemental skills OR raise an elemental skill (elemental);
 #alias {en} {
-    enhance %0
+    #if {"$guild" == "elemental"} {
+        enhance %0;
+    };
+    #elseif {"$guild" == "monk"} {
+        enervate %0;
+    };
 };
 
 #NOP -- give all items to truck;
@@ -1203,6 +1254,7 @@
         strategy vortex;
         strategy enrage;
         strategy cshot;
+        strategy assault;
         strategy rolm
     };
     #elseif {"$guild" == "fremen"} {
@@ -1212,6 +1264,9 @@
         strategy spicebeer;
         #NOP strategy voicehold;
         strategy voicefeeble
+    };
+    #elseif {"$guild" == "monk"} {
+        strategy-clear
     };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>}
@@ -1331,6 +1386,21 @@
                 corpsetrig+ poison1;
                 corpsetrig-on;
             };
+            #NOP -- monk;
+            #elseif {"$guild" == "monk"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ study;
+                corpsetrig+ wrap;
+                corpsetrig+ spoon;
+                corpsetrig+ eat corpse;
+                corpsetrig+ eat corpse;
+                corpsetrig+ divvy;
+                corpsetrig+ coins;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig-on;
+            };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any default corpsetrig settings in this alias!!<088>};
             };
@@ -1418,6 +1488,23 @@
                 #NOP corpsetrig+ cocoon;
                 corpsetrig+ hide1;
                 corpsetrig+ poison1;
+                corpsetrig-on;
+            };
+            #NOP -- monk;
+            #elseif {"$guild" == "monk"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ study;
+                corpsetrig+ wrap;
+                corpsetrig+ spoon;
+                corpsetrig+ eat corpse;
+                corpsetrig+ eat corpse;
+                corpsetrig+ divvy;
+                corpsetrig+ coins;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
                 corpsetrig-on;
             };
             #else {
@@ -1524,6 +1611,21 @@
                 corpsetrig+ poison1;
                 corpsetrig-on;
             };
+            #NOP -- monk;
+            #elseif {"$guild" == "monk"} {
+                #echo {<ffa>gearupsz argument passed - setting up gearupsz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ study;
+                corpsetrig+ wrap;
+                corpsetrig+ spoon;
+                corpsetrig+ eat corpse;
+                corpsetrig+ eat corpse;
+                corpsetrig+ divvy;
+                corpsetrig+ coins;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig-on;
+            };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any gearupsz corpsetrig settings in this alias!!<088>};
             };
@@ -1588,6 +1690,19 @@
                 corpsetrig+ fai2;
                 corpsetrig+ divvy;
                 #NOP corpsetrig+ cocoon;
+                corpsetrig-on;
+            };
+            #NOP -- monk;
+            #elseif {"$guild" == "monk"} {
+                #echo {<ffa>noget argument passed - setting up no get all corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ study;
+                corpsetrig+ wrap;
+                corpsetrig+ spoon;
+                corpsetrig+ eat corpse;
+                corpsetrig+ eat corpse;
+                corpsetrig+ divvy;
+                corpsetrig+ coins;
                 corpsetrig-on;
             };
             #else {
@@ -1685,6 +1800,23 @@
                 corpsetrig+ poison1;
                 corpsetrig-on;
             };
+            #NOP -- monk;
+            #elseif {"$guild" == "monk"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ study;
+                corpsetrig+ wrap;
+                corpsetrig+ spoon;
+                corpsetrig+ eat corpse;
+                corpsetrig+ eat corpse;
+                corpsetrig+ divvy;
+                corpsetrig+ coins;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
+                corpsetrig-on;
+            };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any donates corpsetrig settings in this alias!!<088>};
             };
@@ -1725,6 +1857,12 @@
                 #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
                 corpsetrig-clear;
                 corpsetrig-off;
+            };
+            #NOP -- monk;
+            #elseif {"$guild" == "monk"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig-off
             };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any party corpsetrig settings in this alias!!<088>};
@@ -2009,16 +2147,88 @@
     #system {echo ROUND COUNT: $total_rounds >> chars/badger/badgerslog.log}
 };
 
-#NOP -- gswap;
+#nop -- gswap;
 #alias {gw} {
-    #switch {"%0"} {
-        #case {"juggernaut"} {reflex stop;gagsoff;gswap juggernaut;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap juggernaut}};
-        #case {"mage"} {reflex stop;gagsoff;gswap mage;#delay {6} {get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;.gswap mage}};
-        #case {"elemental"} {reflex stop;gagsoff;gswap elemental;#delay {6} {get all;keep all;wear all;hold rock;hold tome;get coin;.gswap elemental}};
-        #case {"bard"} {reflex stop;gagsoff;gswap bard;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap bard}};
-        #case {"fremen"} {reflex stop;gagsoff;gswap fremen;#delay {6} {get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;.gswap fremen}};
-        #case {""} {#echo {<efb>==========<088> <faa>NO GUILD PROVIDED!!!<088> <efb>==========<088>}};
+    #if {"%0" == ""} {
+        #echo {<efb>==========<088> <faa>NO GUILD PROVIDED<088> <efb>==========<088>};
+        #echo {<ceb>Use <ffd>gw-help<ceb> for usage and guild actions<088>};
+        #return
     };
+    _variable_export;
+    #switch {"%0"} {
+        #case {"juggernaut"} {
+            reflex stop;gagsoff;gswap juggernaut;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
+                #delay {6} {#end};
+            };
+        };
+        #case {"mage"} {
+            reflex stop;gagsoff;gswap mage;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
+                #delay {6} {#end};
+            };
+        };
+        #case {"elemental"} {
+            reflex stop;gagsoff;gswap elemental;
+            #delay {6} {
+                get all;keep all;wear all;hold rock;hold tome;get coin;
+                #delay {6} {#end};
+            };
+        };
+        #case {"bard"} {
+            reflex stop;gagsoff;gswap bard;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
+                #delay {6} {#end};
+            };
+        };
+        #case {"fremen"} {
+            reflex stop;gagsoff;gswap fremen;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
+                #delay {6} {#end};
+            };
+        };
+        #case {"monk"} {
+            reflex stop;gagsoff;gswap monk;
+            #delay {6} {
+                get all;keep all;wear all;hold rock;hold tome;get coin;
+                #delay {6} {#end};
+            };
+        };
+        #default {
+            #echo {<eaa>Unknown guild: %0<088>};
+            #echo {<ceb>Use <ffd>gw-help<ceb> for valid guilds<088>};
+        };
+    };
+};
+
+#nop -- gw-help;
+#alias {gw-help} {
+    #echo {};
+    #echo {<dfc>  ====================  <ffa>Badger's Guild Swap  <dfc>====================<088>};
+    #echo {};
+    #echo {<ceb>  Usage       <fff>gw <guild><088>};
+    #echo {<ceb>  Example     <fff>gw bard<088>};
+    #echo {};
+    #echo {<bea>  Flow        <dae>_variable_export then in-game reflex stop / gagsoff / gswap <guild><088>};
+    #echo {<bea>              <dae>then after 6s get/keep/wear/wield/hold, then 4s later #end. You then manually log<088>};
+    #echo {<bea>              <dae>into the correct profile.<088>};
+    #echo {};
+    #echo {<dfc>  ----------------  <ffa>GUILD  <dfc>----------------  ACTIONS (after 6s delay)<088>};
+    #echo {};
+    #echo {<cff>  juggernaut  <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  mage        <deb>get all / keep all / wear all / wield rod / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  elemental   <deb>get all / keep all / wear all / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  bard        <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  fremen      <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  monk        <deb>get all / keep all / wear all / hold rock / hold tome / get coin<088>};
+    #echo {};
+    #echo {<bea>  Before actions  <dae>reflex stop / gagsoff / gswap <guild><088>};
+    #echo {};
+    #echo {<dfc>  ================================================================<088>}
 };
 
 #NOP -- badgers 3kdb aliases;
