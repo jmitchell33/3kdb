@@ -238,6 +238,21 @@
 };
 
 #if {"$guild" == "knight" || "$guild" == "fremen"} {
+    #alias .gxp_t30_add {
+        #if {&my[gxp][t30][] > 30} {
+            #math my[gxp][t30_total] {$my[gxp][t30_total] - $my[gxp][t30][1]};
+            #list my[gxp][t30] delete 1;
+            #list my[gxp][t30] add $my[gxp][last_round];
+            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
+        } {
+            #list my[gxp][t30] add $my[gxp][last_round];
+            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
+        };
+        #math my[gxp][t30_average] {$my[gxp][t30_total] / &my[gxp][t30][]};
+        #math my[gxp][t30_per_hr] {$my[gxp][t30_average] * 30 * 60};
+        #format my[gxp][str_t30_per_hr] {%M} {$my[gxp][t30_per_hr]};
+    };
+
     #alias .gxp_time {
         #format {my[gxp][report-time]} {%T} {};
         #math my[gxp][delta-time] {$my[gxp][report-time] - $my[gxp][start-time]};
