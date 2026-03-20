@@ -172,15 +172,15 @@
     #var doornum %1;
     #echo {Reminder: door codes rotate every few hours. If this doesn’t work, run dsolve again.};
     #if {$doornum == {}} {
-	#echo {Please supply the door number.};
-	}; #elseif {$doorcombos[$doornum] == {}} {
+		#echo {Please supply the door number.};
+	};
+	#elseif {$doorcombos[$doornum] == {}} {
 		#echo {There is not a code for that door, please run dsolve.};
-		}; #else {
-			#echo {Sending saved combo for room $doornum...};
-		        enter $doorcombos[$doornum];
-			};
-	   };
-
+	};
+	#else {
+		#echo {Sending saved combo for room $doornum...};
+		enter $doorcombos[$doornum];
+	};
 };
 
 #class {area_fallout_shelter} {close};
