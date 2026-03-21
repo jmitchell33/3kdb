@@ -14,11 +14,10 @@
 	#if {$tmpIndex > 0} {
 		#list {botcycle} {add} {$tmpName};
 		_caption_data_bot_cycle;
-		#var tmpName $botlist[$tmpIndex][alias];
-		#echo {<bfa> +++ +++ <088> <efe>$tmpName added to bot cycle <bfa> +++ +++ <088>};
+		#echo {<bfa> +++ +++ <088> <efe>$botcycle[&botcycle[]] added to bot cycle <bfa> +++ +++ <088>};
 	} {
 		#echo {<fbb> -+- <088> <fdc>This was not found in the botlist.  Verify the alias <ded>$tmpName<088><fdc> and try again. <fbb> -+- <088>};
-	};	
+	};
 };
 
 #alias {bcy-} {
@@ -81,7 +80,7 @@
 	#echo {<228> |<fab>             No areas loaded             <228>|<088>};
 	#echo {<228> |<178>  bcy+ bot_alias<dfe>   to add an area.       <228>|<088>};
 	#echo {<228> |<178>  bcy- bot_alias<dfe>   remove an area.       <228>|<088>};
-	#echo {<228> |<178>  botlist <dfe>       to see available bots.<228>|<088>};
+	#echo {<228> |<178>  botlist <dfe>       to see available bots.  <228>|<088>};
 	#echo {<228> +-----------------------------------------+}<088>;
 };
 
@@ -103,7 +102,7 @@
 
 #alias {bcy} {
 	#echo {<228> +-----------------------------------------+}<088>;
-	#echo {<228> |<138>            Area Cycler                <228>|<088>};
+	#echo {<228> |<138>              Area Cycler                <228>|<088>};
 	#echo {<228> +-----------------------------------------+}<088>;
 	#if {&{botcycle[]} == 0} {
 		.cycler_help_file

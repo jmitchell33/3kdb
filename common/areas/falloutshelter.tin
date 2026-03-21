@@ -1,0 +1,187 @@
+#class {area_fallout_shelter} {kill};
+#class {area_fallout_shelter} {open};
+
+#nop Variables;
+#var colorlist {{1}{black}{2}{white}{3}{blue}{4}{red}{5}{green}{6}{yellow}{7}{cyan}{8}{brown}};
+#var line11 {};
+#var line12 {};
+#var line21 {};
+#var line22 {};
+#var slotA {};
+#var slotB {};
+#var slotC {};
+#var slotD {};
+#var currentcolor {};
+#kill var doorcombos;
+#list doorcombos {create};
+#list doorcombos {add} {blah1};
+#list doorcombos {add} {blah2};
+
+#nop Actions;
+
+#action {{\s\[(.)\]\s\[(.)\]\n\s\[(.)\]\s\[(.)\]}} {
+    #var line11 %2;
+    #var line12 %3;
+    #var line21 %4;
+    #var line22 %5;
+    #nop    #delay {0.01} {#echo {PANEL: $line11 $line12 $line21 $line22}};
+};
+
+#nop Aliases;
+
+#alias {dsolve} {
+	#var doornum %1;
+	#if {$doornum == {}} {#echo {Please supply a door number.}
+	}; #else {
+	#echo {Starting solver for room $doornum...};
+	#echo {Once complete, fdkey can unlock this door without rerunning the solver, if the code hasn’t changed.};
+	#var dsolve_cancel 0;
+	#var icolor 1;
+	#var totalX 0;
+	#var phase1Complete 0;
+	#kill var phase1Result;
+	#list phase1Result {create};
+	phase1Step;
+    };
+};
+#alias {stopdsolve} {
+	#var dsolve_cancel 1;
+	#echo {Door solver stopping after current iteration};
+};
+
+#alias {phase1Step} {
+	#if {$dsolve_cancel == 0} {
+        	#var xcount 0;
+	        #var currentcolor $colorlist[$icolor];
+		#math icolor {$icolor + 1};
+	        enter a $currentcolor, b $currentcolor, c $currentcolor, d $currentcolor;
+	        #delay {6} {
+		        #if {"$line11" == "X"} {#math xcount {$xcount + 1}};
+			#if {"$line12" == "X"} {#math xcount {$xcount + 1}};
+			#if {"$line21" == "X"} {#math xcount {$xcount + 1}};
+			#if {"$line22" == "X"} {#math xcount {$xcount + 1}};
+			#if {$xcount > 0} {
+				#loop {1} {$xcount} {itemp} {
+					#list {phase1Result} {add} {$currentcolor};
+			                };
+				};	
+
+			#math totalX {$totalX + $xcount};
+			#if {$totalX >= 4} {#var phase1Complete 1};
+			#if {$phase1Complete == 0 && $dsolve_cancel == 0 && $icolor <= 8} {
+		                phase1Step;
+			}; #else {
+				phase2start;
+			         };
+		        };
+	    }; #else {
+       		     #echo {Phase1 halted};
+		    };
+	};
+
+#nop Phase 2 – slot-by-slot recursive solver with control color;
+
+#alias {phase2start} {
+    #var phase2Complete 0;
+    #var idx 1;
+    #var line11 {};
+    #var line12 {};
+    #var line21 {};
+    #var line22 {};
+    #var slotA {};
+    #var slotB {};
+    #var slotC {};
+    #var slotD {};
+
+
+    #nop Pick a control color from colors not in phase1Result;
+    #loop {1} {8} {ctrlidx} {
+        #list {phase1Result} {find} {$colorlist[$ctrlidx]} {p1rX};
+        #if {$p1rX == 0} {#var controlcolor $colorlist[$ctrlidx]; #break};
+    };
+
+    #nop Copy Phase 1 results into Phase 2 list;
+    #list {phase2List} {copy} {phase1Result};
+
+    #nop Start Phase 2 recursion with Slot A;
+    solveSlotA;
+};
+
+#nop Solve Slot A;
+#alias {solveSlotA} {
+		#if {$dsolve_cancel == 0 && "$slotA" == {}} {
+			enter a $phase2List[$idx], b $controlcolor, c $controlcolor, d $controlcolor;
+		        #delay {6} {
+				#if {"$line11" == "X"} {
+				#var slotA $phase2List[$idx];
+				#list {phase2List} {delete} {$idx};
+				#var idx 1;
+				solveSlotB;
+			        }; #else {
+			                #math idx {$idx + 1};
+			                solveSlotA;
+					};
+				};
+			};
+};
+
+#nop Solve Slot B;
+#alias {solveSlotB} {
+    #if {$dsolve_cancel == 0 && "$slotB" == {}} {
+        enter a $slotA, b $phase2List[$idx], c $controlcolor, d $controlcolor;
+        #delay {6} {
+            #if {"$line12" == "X"} {
+                #var slotB $phase2List[$idx];
+                #list {phase2List} {delete} {$idx};
+                #var idx 1;
+                solveSlotC;
+            }; #else {
+                #math idx {$idx + 1};
+                solveSlotB;
+            };
+        };
+    };
+};
+
+#nop Solve Slot C;
+#alias {solveSlotC} {
+    #if {$dsolve_cancel == 0 && "$slotC" == {}} {
+        enter a $slotA, b $slotB, c $phase2List[$idx], d $controlcolor;
+        #delay {6} {
+            #if {"$line21" == "X"} {
+                #var slotC $phase2List[$idx];
+                #list {phase2List} {delete} {$idx};
+                #var slotD $phase2List[1];
+                #var phase2Complete 1;
+		#list {doorcombos} {set} {$doornum} {a $slotA, b $slotB, c $slotC, d $slotD};
+		};
+		#echo {Door code: $slotA, $slotB, $slotC, $slotD};
+		#echo {Door combo for room $doornum saved. Use "fdkey" to unlock door in future visits.};
+		enter a $slotA, b $slotB, c $slotC, d $slotD;
+		}; #else {
+                #math idx {$idx + 1};
+                solveSlotC;
+            };
+        };
+   };
+
+
+#nop Alias for unlocking door when your code is valid;
+
+#alias {fdkey} {
+    #var doornum %1;
+    #echo {Reminder: door codes rotate every few hours. If this doesn’t work, run dsolve again.};
+    #if {$doornum == {}} {
+		#echo {Please supply the door number.};
+	};
+	#elseif {$doorcombos[$doornum] == {}} {
+		#echo {There is not a code for that door, please run dsolve.};
+	};
+	#else {
+		#echo {Sending saved combo for room $doornum...};
+		enter $doorcombos[$doornum];
+	};
+};
+
+#class {area_fallout_shelter} {close};
+
