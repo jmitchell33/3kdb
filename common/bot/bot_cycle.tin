@@ -53,20 +53,16 @@
 
 
 #alias {nextarea} {
-	#if {$cycle < &{botcycle[]}} {
-		#math cycle {$cycle + 1};
-	} {
-		#var cycle 1;
-	};
 	#var tmpIndex 0;
-	#list {botcycle} {get} {$cycle} {currentarea};
+	#list {botcycle} {get} {1} {currentarea};
 	#list {botlist} {get} {$currentarea} {tmpIndex};
 	
 	#delay {3} {+$currentarea};
 
 	#NOP -- If the area is not 'looped' then remove it from the botlist;
 	#if $botlist[$tmpIndex][loop] {#NOP} {
-		#list botcycle {delete} {$cycle};
+		#list botcycle {delete} {1};
+
 	};
 };
 
