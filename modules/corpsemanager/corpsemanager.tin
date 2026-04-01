@@ -322,6 +322,7 @@
 #alias {.corpses_inventory %+1D%+1..3d} {
 	#if {"%1" == "+"} {
 		#math corpses[inventory] {$corpses[inventory] + %2};
+		#delay presKeep {keep all preservation} {.2};
 	};
 	#if {"%1" == "-"} {
 		#math corpses[inventory] {$corpses[inventory] - %2};
@@ -538,6 +539,12 @@
 
 #if {"$guild" == "elemental"} {
     #action {You envelop the corpse in your elemental energies.} {
+        .corpseRecord
+    } {2};
+};
+
+#if {"$guild" == "knight"} {
+    #action {You raise a cairn of stones over the remains of your foe, as a simple} {
         .corpseRecord
     } {2};
 };
