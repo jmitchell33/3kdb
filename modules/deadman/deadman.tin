@@ -31,8 +31,7 @@
     #delay 3 {
         #var idle_flag 0;
         #var idle 0;
-        #format xdeadmanIdleTimeout {%d} {$xdeadmanIdleTimeout}; 
-        #if {"$xdeadmanIdleTimeout" == "0"} {#var deadmanIdleTimeout 900};
+        #if {"${xdeadmanIdleTimeout}" === ""} {#var deadmanIdleTimeout 900};
         #var deadManTimeLeft $deadmanIdleTimeout;
         #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
 
