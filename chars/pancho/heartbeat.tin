@@ -3,7 +3,8 @@
 
 #alias {_player_heartbeat} {
     #if {!$idle_flag && $action_round < $mip[round]} {
-        #NOP
+        #NOP -- Make sure you're never in Standard method because you don't earn gxp;
+        #if {"$method" == "Standard"} {method focus};
     };
 };
 

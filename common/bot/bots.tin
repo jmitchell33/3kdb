@@ -172,18 +172,27 @@
 #NOP -- This alias shows the available bots based on the area you're in;
 #alias .area_bots {
     #if {"$area" == ""} {#NOP} {
-        #local botlist_tmp {};
-        #local botlist_tmp $botlist;
-        #list botlist_tmp index area;
-        #list botlist_tmp sort;
-        #list botlist_tmp filter {$area};
-        #if {&botlist_tmp[] > 0} {
-            #echo {   <cfc>Bots in $area include:<088>};
-            #local tmpItem {};
-            #loop 1 &botlist_tmp[] tmpItem {
-                format_botlist {     $botlist_tmp[$tmpItem][alias]} {$botlist_tmp[$tmpItem][desc]};
+        #if {"$botlist[1][area]" == ""} {
+            #echo {Bot Areas not populated...repopulating list};
+            _area_bots
+        } {
+            #var botlist_tmp {};
+            #var botlist_tmp $botlist;
+            #if {"${botlist_tmp}" === ""} {#NOP} {
+                #list botlist_tmp index area;
+                #list botlist_tmp sort;
+                #list botlist_tmp filter {$area};
+                #if {&botlist_tmp[] > 0} {
+                    #echo {   <cfc>Bots in $area include:<088>};
+                    #var tmpItem {};
+                    #loop 1 &botlist_tmp[] tmpItem {
+                        format_botlist {     $botlist_tmp[$tmpItem][alias]} {$botlist_tmp[$tmpItem][desc]};
+                    };
+                    #echo {};
+                };
             };
-            #echo {};
+            #unvar botlist_tmp;
+            #unvar tmpItem;
         };
     };
 };
@@ -255,6 +264,9 @@
 #list botlist add {{{file} {pande2} {alias} {pande2} {desc} {Pandemonium 2} {start_vnum} {49569} {loop} {0} {playercheck} {1}}};
 #list botlist add {{{file} {anchorman} {alias} {anchorman} {desc} {Anchorman (skips Ron)} {start_vnum} {4206} {loop} {1} {playercheck} {0}}};
 #list botlist add {{{file} {observatory} {alias} {observatory} {desc} {Carina's Observatory} {start_vnum} {201} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {cowville} {alias} {cowville} {desc} {Cowville} {start_vnum} {30654} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {hyperfunk2} {alias} {hyperfunk2} {desc} {Hyperfunk 2.0} {start_vnum} {22171} {loop} {1} {playercheck} {1}}};
+#list botlist add {{{file} {mtg} {alias} {mtg} {desc} {Magic: The Gathering} {start_vnum} {23611} {loop} {1} {playercheck} {1}}};
 
 #NOP -------------------------- Fantasy Steppers ----------------------------------;
 
