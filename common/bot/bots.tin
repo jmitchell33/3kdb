@@ -4,19 +4,20 @@
 #read common/bot/bot_cycle.tin;
 
 #alias {.resume} {
-    #var bot $lastBot;
-    #var botResume 1;
     #if {"$lastBot[rating]" == "Section Z"} {
         #map run 24786;
         unpause game;
         #echo {10 seconds until $lastBot[rating] resumes...};
-        #delay 10 {..;#var botResume 0;};
+        #delay 10 {..};
     } {
-        #map run $lastBot[pause_room];
+        #if {$lastBot[pause_room]} {
+            #map run $lastBot[pause_room];
+        };
         #echo {10 seconds until $lastBot[rating] resumes...};
-        #delay 10 {..;#var botResume 0;};
+        #delay 10 {..};
     };
 };
+
 
 
 #alias {+%1} {
