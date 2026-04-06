@@ -1,0 +1,21 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var check_room 0;
+
+#echo {<afb>----            Larem Cemetery            ----<088>};
+
+#var {bot[path]} {enter mausoleum;out;s;enter mausoleum;out;e;n;e;s;enter mausoleum;out;e;n;{say shalandra;enter mausoleum;push lid;search coffin;d};n;e;s;n;n;s;w;w;w;{search roots;get key;e};n;n;w;e;e;e;w;{unlock door;open door;n};{push altar;d};u;s;w;s;s;e;s;u;out;w;w;w};
+
+#list botmobs clear;
+
+#list botmobs add {{{long} {A wandering vampire} {target} {vampire}}};
+#list botmobs add {{{long} {A vampire} {target} {vampire}}};
+#list botmobs add {{{long} {Korondir the Anti-Paladin} {target} {korondir}}};
+
+
+#action {As you turn to walk out, a vampire jumps out from inside the coffin} {#var incombat 1;mapUndo};
+#action {The vampire blocks your way!} {mapUndo} {2};
+
+#class {bot} {close}
+#read common/bot/generic.tin
