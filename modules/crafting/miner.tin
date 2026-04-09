@@ -1,17 +1,28 @@
-#class {minebot} {open}
-#echo {>====================================================================<}
-#echo {		MinerBot   v.2.01.9.a (tm) Ser}
-#echo {		Usage:	   "mine <types of ores>"}
-#echo {		Function:  MINES THE REQUESTED ORES }
-#echo {		Ex:  "mine gold obsidian adamantium"}
-#echo {}
-#echo {	   --- LIST OF ORES FOR YOUR VIEWING PLEASURE --- }
-#echo { copper, bronze, iron, steel, silver, gold, mithril, titanium, ebon,}
-#echo {  adamantium, obsidian, nethernium, voidstone, phasemetal, chaostone}
-#echo {>====================================================================<}
+#class {minebot} {kill};
+#class {minebot} {open};
+#echo {<ffa>====================================================================<088>};
+#echo {<fff>  3kdb MinerBot  quick start<088>};
+#echo {};
+#echo {<ccd>Ore<fff>  Walks mine paths and sends <dce>mine <deposit><fff> when that ore appears.<088>};
+#echo {<fff>  Example: <dce>mine gold obsidian adamantium<088>};
+#echo {<ccd>  All deposit names: <fff>mine-list<088>};
+#echo {};
+#echo {<ccd>Jewels<fff>  Sends <dce>mine for <name><fff> when that tier matches. Requires miner mskill.<088>};
+#echo {<fff>  Example one jewel: <dce>minefor aquamarine dust<088>};
+#echo {<fff>  Example rotate list: <dce>minefor emerald dust,emerald,sapphire<088>};
+#echo {<ccd>  All jewel names by ore tier: <fff>minefor-list<088>};
+#echo {};
+#echo {<ccd>Stop bots<fff>  miner-off <ccd>then <fff>miner-on<ccd> to load again.<088>};
+#echo {<ffa>====================================================================<088>};
+
+#alias {mine-list} {
+    #echo {<ccd>Deposits for <dce>mine <deposit> ...<ccd>:<088>};
+    #echo {<fff>copper bronze iron steel silver gold mithril titanium ebon<088>};
+    #echo {<fff>adamantium obsidian nethernium voidstone phasemetal chaostone<088>};
+};
 
 #var mine_levels {};
-#var num_levels {}
+#var num_levels {};
 #var curr_level 1;
 #var mine[copper] 0;
 #var mine[bronze] 0;
@@ -28,7 +39,6 @@
 #var mine[voidstone] 0;
 #var mine[phasemetal] 0;
 #var mine[chaostone] 0;
-
 
 #alias {mine %0} {
 	#regex {%0} {copper} {#var mine[copper] 1};
@@ -57,19 +67,12 @@
 	#if {$mine[chaostone]} {#list mine_levels add 8};
 	
 	#list mine_levels size num_levels;
+	#var curr_level 1;
 	#path load ${mine$mine_levels[${curr_level}]};
 	miner;
-	_step_room
+	#var {_miner_path_driver} {ore};
+	_step_room;
 }
-
-#VARIABLE {mine1} {mines 1;se;e;n;n;e;se;nw;w;s;w;e;s;e;w;s;se;sw;s;s;n;n;e;e;w;w;ne;nw;sw;w;w;n;s;e;sw;s;s;nw;n;w;s;n;e;s;se;n;n;ne;e;ne;n;w;nw;out}
-#VARIABLE {mine2} {mines 2;se;e;n;n;e;se;nw;w;s;w;e;s;e;w;s;se;sw;s;s;n;n;e;e;w;w;ne;nw;sw;w;w;n;s;e;sw;s;s;nw;n;w;s;n;e;s;se;n;n;ne;e;ne;n;w;nw;exit}
-#VARIABLE {mine3} {mines 3;n;n;w;w;se;nw;s;n;sw;ne;w;e;nw;se;ne;e;n;w;n;n;w;w;s;nw;s;s;s;s;s;w;w;n;e;s;e;n;n;n;n;n;se;e;s;s;s;e;e;s;s;exit}
-#VARIABLE {mine4} {mines 4;e;e;e;ne;ne;ne;se;se;se;n;n;n;s;s;s;sw;sw;sw;n;n;n;n;n;s;s;e;e;w;w;w;w;e;e;s;s;s;nw;nw;nw;w;w;w;exit}
-#VARIABLE {mine5} {mines 5;e;n;n;n;e;se;se;e;e;ne;e;s;s;w;s;e;e;w;w;s;nw;nw;e;w;s;s;s;s;w;n;n;n;sw;sw;w;n;n;n;w;exit}
-#VARIABLE {mine6} {mines 6;w;w;w;sw;n;s;s;s;sw;se;ne;nw;s;n;n;n;e;n;n;e;e;n;n;w;s;nw;s;w;w;w;n;s;s;e;e;e;e;se;e;exit}
-#VARIABLE {mine7} {mines 7;se;e;n;e;e;e;e;s;w;w;s;e;s;e;s;s;w;w;w;n;n;e;s;n;w;s;s;e;e;e;e;e;e;n;n;w;s;n;e;s;s;w;w;w;n;n;e;n;e;n;w;w;n;w;w;w;w;w;s;nw;exit}
-#VARIABLE {mine8} {mines 8;s;w;w;sw;se;se;n;n;s;s;ne;ne;nw;n;exit}
 
 #var deposit 0;
 
@@ -115,33 +118,574 @@
 	#alias {_check_mine} {spelunk};
 	#alias {_step_room} {#delay minewalk {#path walk;_check_mine} {1}};
 	
-	#class {miner} {close}
+	#class {miner} {close};
 };
 
+#alias {killbot} {#undelay minewalk;#class {miner} {kill}};
+#class {minebot} {close};
 
-#action {You hop in the exit chute and fly out of the mine shaft!} {
-	#if {$curr_level < $num_levels} {
-		#math {curr_level} {$curr_level + 1};
-		#path load ${mine$mine_levels[${curr_level}]};
-		_step_room
-	} {
-		killbot
-	};
-} {1};
+#VARIABLE {mine1} {mines 1;se;e;n;n;e;se;nw;w;s;w;e;s;e;w;s;se;sw;s;s;n;n;e;e;w;w;ne;nw;sw;w;w;n;s;e;sw;s;s;nw;n;w;s;n;e;s;se;n;n;ne;e;ne;n;w;nw;out};
+#VARIABLE {mine2} {mines 2;se;e;n;n;e;se;nw;w;s;w;e;s;e;w;s;se;sw;s;s;n;n;e;e;w;w;ne;nw;sw;w;w;n;s;e;sw;s;s;nw;n;w;s;n;e;s;se;n;n;ne;e;ne;n;w;nw;exit};
+#VARIABLE {mine3} {mines 3;n;e;s;e;n;n;n;n;n;se;n;e;nw;se;ne;sw;n;nw;se;n;s;ne;se;n;s;ne;sw;s;ne;sw;e;s;w;e;s;w;w;n;n;w;w;s;e;s;s;e;e;w;sw;se;nw;s;n;sw;ne;w;e;nw;se;e;e;s;s;exit};
+#VARIABLE {mine4} {mines 4;e;e;e;se;se;se;ne;ne;ne;nw;nw;nw;sw;sw;sw;e;e;e;e;e;w;w;n;n;s;s;s;s;s;nw;nw;nw;w;ne;ne;ne;ne;se;se;se;se;sw;sw;sw;sw;nw;nw;nw;nw;w;se;se;se;se;se;ne;ne;ne;ne;ne;nw;nw;nw;nw;nw;sw;sw;sw;sw;ne;ne;ne;ne;se;se;se;se;n;n;exit};
+#VARIABLE {mine5} {mines 5;e;n;n;n;e;se;se;e;e;ne;e;s;s;w;s;e;e;w;w;s;nw;nw;e;w;s;s;s;s;w;n;n;n;sw;sw;w;n;n;n;w;exit};
+#VARIABLE {mine6} {mines 6;w;w;w;sw;n;s;s;s;sw;se;ne;nw;s;n;n;n;e;n;n;e;e;n;n;w;s;nw;s;w;w;w;n;s;s;e;e;e;e;se;e;exit};
+#VARIABLE {mine7} {mines 7;se;e;n;e;e;e;e;s;w;w;s;e;s;e;s;s;w;w;w;n;n;e;s;n;w;s;s;e;e;e;e;e;e;n;n;w;s;n;e;s;s;w;w;w;n;n;e;n;e;n;w;w;n;w;w;w;w;w;s;nw;exit};
+#VARIABLE {mine8} {mines 8;s;w;w;sw;se;se;n;n;s;s;ne;ne;nw;n;exit};
 
-#alias {killbot} {#class find_chute kill;#class miner kill;#class minebot kill};
-#class {minebot} {close}
+#class {jewelminebot} {kill};
+#class {jewelminebot} {open};
 
-/*
-CHANGELOG
-v.18 -- minor path fixes, tweaks, ore selectivity.
-v.19 -- no longer bumps into walls, added killbot
-v 2.019.2 -- tweak selectivity for ores, completely revamp for new mines
+#alias {killjewelbot} {#undelay jminewalk;#class jewelminer kill};
 
-KNOWN ISSUES:  DOES NOT END PROPERLY, USE KILLBOT
+#alias {minefor-list} {
+    #echo {<ccd>Jewels for <dce>minefor<ccd> (match ore tier on deposit):<088>};
+    #echo {<ccd>copper:<fff> copper shards, aquamarine, aquamarine dust, morganite, morganite dust, tiger's eye, tiger's eye dust<088>};
+    #echo {<ccd>bronze:<fff> bronze shards, cat's eye, cat's eye dust, eye of flame, garnet, garnet dust<088>};
+    #echo {<ccd>iron:<fff> iron shards, garnet, garnet dust, alexandrite, alexandrite dust, eye of frost<088>};
+    #echo {<ccd>steel:<fff> steel shards, eye of frost, eye of flame, cat's eye, cat's eye dust<088>};
+    #echo {<ccd>silver:<fff> silver shards, pyrite, pyrite dust, tourmaline, tourmaline dust, beryl, beryl dust, eye of earth, roan's tears<088>};
+    #echo {<ccd>gold:<fff> gold shards, eye of air, topaz, topaz dust, amethyst, amethyst dust, happy ed's tears<088>};
+    #echo {<ccd>mithril:<fff> mithril shards, heliodor, heliodor dust, hematite, hematite dust, core of flame<088>};
+    #echo {<ccd>titanium:<fff> titanium shards, peridot, peridot dust, core of frost<088>};
+    #echo {<ccd>ebon:<fff> ebon shards, core of earth, heliodor, heliodor dust, peridot, peridot dust<088>};
+    #echo {<ccd>adamantium:<fff> adamantium shards, core of air, pearl, pearl dust<088>};
+    #echo {<ccd>obsidian:<fff> obsidian shards, ghoti's tears, opal, opal dust, pearl, pearl dust<088>};
+    #echo {<ccd>nethernium:<fff> nethernium shards, ghoti's tears, opal, opal dust, star of flame<088>};
+    #echo {<ccd>voidstone:<fff> voidstone shards, shansabyk's tears, diamond, diamond dust, star of frost<088>};
+    #echo {<ccd>phasemetal:<fff> phasemetal shards, emerald, emerald dust, sapphire, sapphire dust, star of earth, star of air<088>};
+    #echo {<ccd>chaostone:<fff> chaostone shards, cancer's tears, emerald, emerald dust, ruby, ruby dust, sapphire, sapphire dust<088>};
+};
 
-last updated by badger 2025/10/28
-miner ends properly
-miner will now stop when you disturb a mob and continue once dead
-using a more reliable capture for when you exhaust a deposit
-*/
+#alias {minefor_clear_jewel_flags} {
+    #var mine_jewel[copper_shards] 0;#var mine_jewel[aquamarine] 0;#var mine_jewel[aquamarine_dust] 0;#var mine_jewel[morganite] 0;#var mine_jewel[morganite_dust] 0;#var mine_jewel[tigers_eye] 0;#var mine_jewel[tigers_eye_dust] 0;
+    #var mine_jewel[bronze_shards] 0;#var mine_jewel[cats_eye] 0;#var mine_jewel[cats_eye_dust] 0;#var mine_jewel[eye_of_flame] 0;#var mine_jewel[garnet] 0;#var mine_jewel[garnet_dust] 0;
+    #var mine_jewel[iron_shards] 0;#var mine_jewel[alexandrite] 0;#var mine_jewel[alexandrite_dust] 0;#var mine_jewel[eye_of_frost] 0;
+    #var mine_jewel[steel_shards] 0;
+    #var mine_jewel[silver_shards] 0;#var mine_jewel[pyrite] 0;#var mine_jewel[pyrite_dust] 0;#var mine_jewel[tourmaline] 0;#var mine_jewel[tourmaline_dust] 0;#var mine_jewel[beryl] 0;#var mine_jewel[beryl_dust] 0;#var mine_jewel[eye_of_earth] 0;#var mine_jewel[roans_tears] 0;
+    #var mine_jewel[gold_shards] 0;#var mine_jewel[eye_of_air] 0;#var mine_jewel[topaz] 0;#var mine_jewel[topaz_dust] 0;#var mine_jewel[amethyst] 0;#var mine_jewel[amethyst_dust] 0;#var mine_jewel[happy_eds_tears] 0;
+    #var mine_jewel[mithril_shards] 0;#var mine_jewel[heliodor] 0;#var mine_jewel[heliodor_dust] 0;#var mine_jewel[hematite] 0;#var mine_jewel[hematite_dust] 0;#var mine_jewel[core_of_flame] 0;
+    #var mine_jewel[titanium_shards] 0;#var mine_jewel[peridot] 0;#var mine_jewel[peridot_dust] 0;#var mine_jewel[core_of_frost] 0;
+    #var mine_jewel[ebon_shards] 0;#var mine_jewel[core_of_earth] 0;
+    #var mine_jewel[adamantium_shards] 0;#var mine_jewel[core_of_air] 0;#var mine_jewel[pearl] 0;#var mine_jewel[pearl_dust] 0;
+    #var mine_jewel[obsidian_shards] 0;#var mine_jewel[ghotis_tears] 0;#var mine_jewel[opal] 0;#var mine_jewel[opal_dust] 0;
+    #var mine_jewel[nethernium_shards] 0;#var mine_jewel[star_of_flame] 0;
+    #var mine_jewel[voidstone_shards] 0;#var mine_jewel[shansabyks_tears] 0;#var mine_jewel[diamond] 0;#var mine_jewel[diamond_dust] 0;#var mine_jewel[star_of_frost] 0;
+    #var mine_jewel[phasemetal_shards] 0;#var mine_jewel[emerald] 0;#var mine_jewel[emerald_dust] 0;#var mine_jewel[sapphire] 0;#var mine_jewel[sapphire_dust] 0;#var mine_jewel[star_of_earth] 0;#var mine_jewel[star_of_air] 0;
+    #var mine_jewel[chaostone_shards] 0;#var mine_jewel[cancers_tears] 0;#var mine_jewel[ruby] 0;#var mine_jewel[ruby_dust] 0;
+    #list jewel_target_queue clear;
+    #var jewel_mud_phrase_last {};
+};
+
+#alias {minefor_apply_one_jewel_string} {
+    #regex {$minefor_parse_input} {^copper shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {copper_shards};#var mine_jewel[copper_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^tigers eye dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {tigers_eye_dust};#var mine_jewel[tigers_eye_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^tiger's eye dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {tigers_eye_dust};#var mine_jewel[tigers_eye_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^tigers eye$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {tigers_eye};#var mine_jewel[tigers_eye] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^tiger's eye$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {tigers_eye};#var mine_jewel[tigers_eye] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^morganite dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {morganite_dust};#var mine_jewel[morganite_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^morganite$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {morganite};#var mine_jewel[morganite] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^aquamarine dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {aquamarine_dust};#var mine_jewel[aquamarine_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^aquamarine$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {aquamarine};#var mine_jewel[aquamarine] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^bronze shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {bronze_shards};#var mine_jewel[bronze_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^cats eye dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {cats_eye_dust};#var mine_jewel[cats_eye_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^cat's eye dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {cats_eye_dust};#var mine_jewel[cats_eye_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^cats eye$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {cats_eye};#var mine_jewel[cats_eye] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^cat's eye$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {cats_eye};#var mine_jewel[cats_eye] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^eye of flame$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {eye_of_flame};#var mine_jewel[eye_of_flame] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^garnet dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {garnet_dust};#var mine_jewel[garnet_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^garnet$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {garnet};#var mine_jewel[garnet] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^iron shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {iron_shards};#var mine_jewel[iron_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^alexandrite dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {alexandrite_dust};#var mine_jewel[alexandrite_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^alexandrite$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {alexandrite};#var mine_jewel[alexandrite] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^eye of frost$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {eye_of_frost};#var mine_jewel[eye_of_frost] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^steel shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {steel_shards};#var mine_jewel[steel_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^silver shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {silver_shards};#var mine_jewel[silver_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^pyrite dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {pyrite_dust};#var mine_jewel[pyrite_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^pyrite$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {pyrite};#var mine_jewel[pyrite] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^tourmaline dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {tourmaline_dust};#var mine_jewel[tourmaline_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^tourmaline$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {tourmaline};#var mine_jewel[tourmaline] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^beryl dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {beryl_dust};#var mine_jewel[beryl_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^beryl$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {beryl};#var mine_jewel[beryl] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^eye of earth$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {eye_of_earth};#var mine_jewel[eye_of_earth] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^roans tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {roans_tears};#var mine_jewel[roans_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^roan's tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {roans_tears};#var mine_jewel[roans_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^gold shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {gold_shards};#var mine_jewel[gold_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^eye of air$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {eye_of_air};#var mine_jewel[eye_of_air] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^topaz dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {topaz_dust};#var mine_jewel[topaz_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^topaz$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {topaz};#var mine_jewel[topaz] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^amethyst dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {amethyst_dust};#var mine_jewel[amethyst_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^amethyst$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {amethyst};#var mine_jewel[amethyst] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^happy eds tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {happy_eds_tears};#var mine_jewel[happy_eds_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^happy ed's tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {happy_eds_tears};#var mine_jewel[happy_eds_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^mithril shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {mithril_shards};#var mine_jewel[mithril_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^heliodor dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {heliodor_dust};#var mine_jewel[heliodor_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^heliodor$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {heliodor};#var mine_jewel[heliodor] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^hematite dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {hematite_dust};#var mine_jewel[hematite_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^hematite$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {hematite};#var mine_jewel[hematite] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^core of flame$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {core_of_flame};#var mine_jewel[core_of_flame] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^titanium shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {titanium_shards};#var mine_jewel[titanium_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^peridot dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {peridot_dust};#var mine_jewel[peridot_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^peridot$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {peridot};#var mine_jewel[peridot] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^core of frost$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {core_of_frost};#var mine_jewel[core_of_frost] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^ebon shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {ebon_shards};#var mine_jewel[ebon_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^core of earth$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {core_of_earth};#var mine_jewel[core_of_earth] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^adamantium shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {adamantium_shards};#var mine_jewel[adamantium_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^core of air$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {core_of_air};#var mine_jewel[core_of_air] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^pearl dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {pearl_dust};#var mine_jewel[pearl_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^pearl$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {pearl};#var mine_jewel[pearl] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^obsidian shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {obsidian_shards};#var mine_jewel[obsidian_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^ghotis tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {ghotis_tears};#var mine_jewel[ghotis_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^ghoti's tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {ghotis_tears};#var mine_jewel[ghotis_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^opal dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {opal_dust};#var mine_jewel[opal_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^opal$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {opal};#var mine_jewel[opal] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^nethernium shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {nethernium_shards};#var mine_jewel[nethernium_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^star of flame$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {star_of_flame};#var mine_jewel[star_of_flame] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^voidstone shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {voidstone_shards};#var mine_jewel[voidstone_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^shansabyks tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {shansabyks_tears};#var mine_jewel[shansabyks_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^shansabyk's tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {shansabyks_tears};#var mine_jewel[shansabyks_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^diamond dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {diamond_dust};#var mine_jewel[diamond_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^diamond$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {diamond};#var mine_jewel[diamond] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^star of frost$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {star_of_frost};#var mine_jewel[star_of_frost] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^phasemetal shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {phasemetal_shards};#var mine_jewel[phasemetal_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^emerald dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {emerald_dust};#var mine_jewel[emerald_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^emerald$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {emerald};#var mine_jewel[emerald] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^sapphire dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {sapphire_dust};#var mine_jewel[sapphire_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^sapphire$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {sapphire};#var mine_jewel[sapphire] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^star of earth$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {star_of_earth};#var mine_jewel[star_of_earth] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^star of air$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {star_of_air};#var mine_jewel[star_of_air] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^chaostone shards$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {chaostone_shards};#var mine_jewel[chaostone_shards] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^cancers tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {cancers_tears};#var mine_jewel[cancers_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^cancer's tears$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {cancers_tears};#var mine_jewel[cancers_tears] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^ruby dust$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {ruby_dust};#var mine_jewel[ruby_dust] 1;#var _mf_seg_done 1}};
+    #regex {$minefor_parse_input} {^ruby$} {#if {"$_mf_seg_done" == "0"} {#list jewel_target_queue add {ruby};#var mine_jewel[ruby] 1;#var _mf_seg_done 1}};
+
+};
+
+#alias {.jewel_queue_bump} {
+    #list jewel_target_queue size _jqsz;
+    #math jewel_queue_idx {$jewel_queue_idx + 1};
+    #if {$jewel_queue_idx > $_jqsz} {#var jewel_queue_idx 1};
+};
+
+#alias {.jewel_try_queue_pick} {
+    #list jewel_target_queue size _jqsz;
+    #if {$_jqsz > 0} {
+        #list jewel_target_queue get $jewel_queue_idx _jkey;
+        #replace {_jkey} {\r} {};
+        #replace {_jkey} {\n} {};
+        #format _jkey {%p} {$_jkey};
+        #var _jewel_phrase_key $_jkey;
+        .jewel_phrase_from_key;
+        #if {"$jewel_mud_phrase" != ""} {.jewel_queue_bump};
+    };
+};
+
+#alias {.jewel_phrase_from_key} {
+    #var jewel_mud_phrase {};
+    #switch {"$_jewel_phrase_key"} {
+        #case {"copper_shards"} {#var jewel_mud_phrase {copper shards}};
+        #case {"tigers_eye_dust"} {#var jewel_mud_phrase {tiger's eye dust}};
+        #case {"tigers_eye"} {#var jewel_mud_phrase {tiger's eye}};
+        #case {"morganite_dust"} {#var jewel_mud_phrase {morganite dust}};
+        #case {"morganite"} {#var jewel_mud_phrase {morganite}};
+        #case {"aquamarine_dust"} {#var jewel_mud_phrase {aquamarine dust}};
+        #case {"aquamarine"} {#var jewel_mud_phrase {aquamarine}};
+        #case {"bronze_shards"} {#var jewel_mud_phrase {bronze shards}};
+        #case {"cats_eye_dust"} {#var jewel_mud_phrase {cat's eye dust}};
+        #case {"cats_eye"} {#var jewel_mud_phrase {cat's eye}};
+        #case {"eye_of_flame"} {#var jewel_mud_phrase {eye of flame}};
+        #case {"garnet_dust"} {#var jewel_mud_phrase {garnet dust}};
+        #case {"garnet"} {#var jewel_mud_phrase {garnet}};
+        #case {"iron_shards"} {#var jewel_mud_phrase {iron shards}};
+        #case {"alexandrite_dust"} {#var jewel_mud_phrase {alexandrite dust}};
+        #case {"alexandrite"} {#var jewel_mud_phrase {alexandrite}};
+        #case {"eye_of_frost"} {#var jewel_mud_phrase {eye of frost}};
+        #case {"steel_shards"} {#var jewel_mud_phrase {steel shards}};
+        #case {"silver_shards"} {#var jewel_mud_phrase {silver shards}};
+        #case {"pyrite_dust"} {#var jewel_mud_phrase {pyrite dust}};
+        #case {"pyrite"} {#var jewel_mud_phrase {pyrite}};
+        #case {"tourmaline_dust"} {#var jewel_mud_phrase {tourmaline dust}};
+        #case {"tourmaline"} {#var jewel_mud_phrase {tourmaline}};
+        #case {"beryl_dust"} {#var jewel_mud_phrase {beryl dust}};
+        #case {"beryl"} {#var jewel_mud_phrase {beryl}};
+        #case {"eye_of_earth"} {#var jewel_mud_phrase {eye of earth}};
+        #case {"roans_tears"} {#var jewel_mud_phrase {roan's tears}};
+        #case {"gold_shards"} {#var jewel_mud_phrase {gold shards}};
+        #case {"eye_of_air"} {#var jewel_mud_phrase {eye of air}};
+        #case {"topaz_dust"} {#var jewel_mud_phrase {topaz dust}};
+        #case {"topaz"} {#var jewel_mud_phrase {topaz}};
+        #case {"amethyst_dust"} {#var jewel_mud_phrase {amethyst dust}};
+        #case {"amethyst"} {#var jewel_mud_phrase {amethyst}};
+        #case {"happy_eds_tears"} {#var jewel_mud_phrase {happy ed's tears}};
+        #case {"mithril_shards"} {#var jewel_mud_phrase {mithril shards}};
+        #case {"heliodor_dust"} {#var jewel_mud_phrase {heliodor dust}};
+        #case {"heliodor"} {#var jewel_mud_phrase {heliodor}};
+        #case {"hematite_dust"} {#var jewel_mud_phrase {hematite dust}};
+        #case {"hematite"} {#var jewel_mud_phrase {hematite}};
+        #case {"core_of_flame"} {#var jewel_mud_phrase {core of flame}};
+        #case {"titanium_shards"} {#var jewel_mud_phrase {titanium shards}};
+        #case {"peridot_dust"} {#var jewel_mud_phrase {peridot dust}};
+        #case {"peridot"} {#var jewel_mud_phrase {peridot}};
+        #case {"core_of_frost"} {#var jewel_mud_phrase {core of frost}};
+        #case {"ebon_shards"} {#var jewel_mud_phrase {ebon shards}};
+        #case {"core_of_earth"} {#var jewel_mud_phrase {core of earth}};
+        #case {"adamantium_shards"} {#var jewel_mud_phrase {adamantium shards}};
+        #case {"core_of_air"} {#var jewel_mud_phrase {core of air}};
+        #case {"pearl_dust"} {#var jewel_mud_phrase {pearl dust}};
+        #case {"pearl"} {#var jewel_mud_phrase {pearl}};
+        #case {"obsidian_shards"} {#var jewel_mud_phrase {obsidian shards}};
+        #case {"ghotis_tears"} {#var jewel_mud_phrase {ghoti's tears}};
+        #case {"opal_dust"} {#var jewel_mud_phrase {opal dust}};
+        #case {"opal"} {#var jewel_mud_phrase {opal}};
+        #case {"nethernium_shards"} {#var jewel_mud_phrase {nethernium shards}};
+        #case {"star_of_flame"} {#var jewel_mud_phrase {star of flame}};
+        #case {"voidstone_shards"} {#var jewel_mud_phrase {voidstone shards}};
+        #case {"shansabyks_tears"} {#var jewel_mud_phrase {shansabyk's tears}};
+        #case {"diamond_dust"} {#var jewel_mud_phrase {diamond dust}};
+        #case {"diamond"} {#var jewel_mud_phrase {diamond}};
+        #case {"star_of_frost"} {#var jewel_mud_phrase {star of frost}};
+        #case {"phasemetal_shards"} {#var jewel_mud_phrase {phasemetal shards}};
+        #case {"emerald_dust"} {#var jewel_mud_phrase {emerald dust}};
+        #case {"emerald"} {#var jewel_mud_phrase {emerald}};
+        #case {"sapphire_dust"} {#var jewel_mud_phrase {sapphire dust}};
+        #case {"sapphire"} {#var jewel_mud_phrase {sapphire}};
+        #case {"star_of_earth"} {#var jewel_mud_phrase {star of earth}};
+        #case {"star_of_air"} {#var jewel_mud_phrase {star of air}};
+        #case {"chaostone_shards"} {#var jewel_mud_phrase {chaostone shards}};
+        #case {"cancers_tears"} {#var jewel_mud_phrase {cancer's tears}};
+        #case {"ruby_dust"} {#var jewel_mud_phrase {ruby dust}};
+        #case {"ruby"} {#var jewel_mud_phrase {ruby}};
+        #default {#nop};
+    };
+};
+
+#alias {.minefor_parse_comma_segments} {
+    #var _mf_scratch $_mf_spec;
+    #replace {_mf_scratch} {,} {~};
+    #list _mf_seglist clear;
+    #list _mf_seglist explode {~} {$_mf_scratch};
+    #loop 1 &_mf_seglist[] _mf_li {
+        #list _mf_seglist get $_mf_li _mf_seg;
+        #format _mf_seg {%p} {$_mf_seg};
+        #format _mf_seg {%l} {$_mf_seg};
+        #if {"$_mf_seg" != ""} {#var minefor_parse_input $_mf_seg;#var _mf_seg_done 0;minefor_apply_one_jewel_string};
+    };
+};
+
+#alias {minefor} {
+    #format _mf_arg {%l} {%0};
+    #if {"$_mf_arg" == ""} {#nop} {
+        killbot;
+        killjewelbot;
+        minefor_clear_jewel_flags;
+        #var jewel_queue_idx 1;
+        #var _mf_spec %0;
+        #format _mf_spec {%l} {$_mf_spec};
+        #replace {_mf_spec} {, } {,};
+        #replace {_mf_spec} { ,} {,};
+        #replace {_mf_spec} {，} {,};
+        .minefor_parse_comma_segments;
+        #list jewel_mine_levels clear;
+        #var jewel_curr_level 1;
+        #if {$mine_jewel[copper_shards] | $mine_jewel[aquamarine] | $mine_jewel[aquamarine_dust] | $mine_jewel[morganite] | $mine_jewel[morganite_dust] | $mine_jewel[tigers_eye] | $mine_jewel[tigers_eye_dust]} {#list jewel_mine_levels add 1};
+        #if {$mine_jewel[bronze_shards] | $mine_jewel[cats_eye] | $mine_jewel[cats_eye_dust] | $mine_jewel[eye_of_flame] | $mine_jewel[garnet] | $mine_jewel[garnet_dust]} {#list jewel_mine_levels add 2};
+        #if {$mine_jewel[iron_shards] | $mine_jewel[garnet] | $mine_jewel[garnet_dust] | $mine_jewel[alexandrite] | $mine_jewel[alexandrite_dust] | $mine_jewel[eye_of_frost] | $mine_jewel[steel_shards] | $mine_jewel[eye_of_flame] | $mine_jewel[cats_eye] | $mine_jewel[cats_eye_dust]} {#list jewel_mine_levels add 3};
+        #if {$mine_jewel[silver_shards] | $mine_jewel[pyrite] | $mine_jewel[pyrite_dust] | $mine_jewel[tourmaline] | $mine_jewel[tourmaline_dust] | $mine_jewel[beryl] | $mine_jewel[beryl_dust] | $mine_jewel[eye_of_earth] | $mine_jewel[roans_tears] | $mine_jewel[gold_shards] | $mine_jewel[eye_of_air] | $mine_jewel[topaz] | $mine_jewel[topaz_dust] | $mine_jewel[amethyst] | $mine_jewel[amethyst_dust] | $mine_jewel[happy_eds_tears] | $mine_jewel[mithril_shards] | $mine_jewel[heliodor] | $mine_jewel[heliodor_dust] | $mine_jewel[hematite] | $mine_jewel[hematite_dust] | $mine_jewel[core_of_flame]} {#list jewel_mine_levels add 4};
+        #if {$mine_jewel[titanium_shards] | $mine_jewel[peridot] | $mine_jewel[peridot_dust] | $mine_jewel[core_of_frost] | $mine_jewel[ebon_shards] | $mine_jewel[core_of_earth] | $mine_jewel[heliodor] | $mine_jewel[heliodor_dust] | $mine_jewel[peridot] | $mine_jewel[peridot_dust]} {#list jewel_mine_levels add 5};
+        #if {$mine_jewel[adamantium_shards] | $mine_jewel[core_of_air] | $mine_jewel[pearl] | $mine_jewel[pearl_dust] | $mine_jewel[obsidian_shards] | $mine_jewel[ghotis_tears] | $mine_jewel[opal] | $mine_jewel[opal_dust]} {#list jewel_mine_levels add 6};
+        #if {$mine_jewel[nethernium_shards] | $mine_jewel[ghotis_tears] | $mine_jewel[opal] | $mine_jewel[opal_dust] | $mine_jewel[star_of_flame] | $mine_jewel[voidstone_shards] | $mine_jewel[shansabyks_tears] | $mine_jewel[diamond] | $mine_jewel[diamond_dust] | $mine_jewel[star_of_frost] | $mine_jewel[phasemetal_shards] | $mine_jewel[emerald] | $mine_jewel[emerald_dust] | $mine_jewel[sapphire] | $mine_jewel[sapphire_dust] | $mine_jewel[star_of_earth] | $mine_jewel[star_of_air]} {#list jewel_mine_levels add 7};
+        #if {$mine_jewel[chaostone_shards] | $mine_jewel[cancers_tears] | $mine_jewel[emerald] | $mine_jewel[emerald_dust] | $mine_jewel[ruby] | $mine_jewel[ruby_dust] | $mine_jewel[sapphire] | $mine_jewel[sapphire_dust]} {#list jewel_mine_levels add 8};
+        #list jewel_mine_levels size jewel_num_levels;
+        #if {$jewel_num_levels < 1} {
+            #echo {<eaa>minefor: no matching jewels in <fff>%0<eaa>. Try <fff>minefor-list<eaa> after <fff>miner-on<eaa>.<088>};
+        } {
+            #path load ${mine$jewel_mine_levels[${jewel_curr_level}]};
+            jewelminer;
+            #var {_miner_path_driver} {jewel};
+            _step_jewel_room;
+        };
+    };
+};
+
+#alias {.jewel_send_mine_cmd} {
+    #if {"$jewel_mud_phrase" != ""} {
+        #var jewel_mud_phrase_last $jewel_mud_phrase;
+        #var _jewel_out {};
+        #cat {_jewel_out} {mine for };
+        #cat {_jewel_out} $jewel_mud_phrase;
+        #send $_jewel_out;
+    } {
+        _step_jewel_room;
+    };
+};
+#alias {jewelm} {
+    #if {"$jewel_mud_phrase" == ""} {#var jewel_mud_phrase $jewel_mud_phrase_last};
+    .jewel_send_mine_cmd;
+};
+#alias {.jewel_send_or_spelunk} {.jewel_send_mine_cmd};
+
+#alias {.jewel_pick_copper} {
+    #var _jewel_ore {copper};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[copper_shards]} {#var jewel_mud_phrase {copper shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[aquamarine]} {#var jewel_mud_phrase {aquamarine}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[aquamarine_dust]} {#var jewel_mud_phrase {aquamarine dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[morganite]} {#var jewel_mud_phrase {morganite}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[morganite_dust]} {#var jewel_mud_phrase {morganite dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[tigers_eye]} {#var jewel_mud_phrase {tiger's eye}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[tigers_eye_dust]} {#var jewel_mud_phrase {tiger's eye dust}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_bronze} {
+    #var _jewel_ore {bronze};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[bronze_shards]} {#var jewel_mud_phrase {bronze shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[cats_eye]} {#var jewel_mud_phrase {cat's eye}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[cats_eye_dust]} {#var jewel_mud_phrase {cat's eye dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[eye_of_flame]} {#var jewel_mud_phrase {eye of flame}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[garnet]} {#var jewel_mud_phrase {garnet}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[garnet_dust]} {#var jewel_mud_phrase {garnet dust}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_iron} {
+    #var _jewel_ore {iron};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[iron_shards]} {#var jewel_mud_phrase {iron shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[garnet]} {#var jewel_mud_phrase {garnet}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[garnet_dust]} {#var jewel_mud_phrase {garnet dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[alexandrite]} {#var jewel_mud_phrase {alexandrite}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[alexandrite_dust]} {#var jewel_mud_phrase {alexandrite dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[eye_of_frost]} {#var jewel_mud_phrase {eye of frost}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_steel} {
+    #var _jewel_ore {steel};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[steel_shards]} {#var jewel_mud_phrase {steel shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[eye_of_frost]} {#var jewel_mud_phrase {eye of frost}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[eye_of_flame]} {#var jewel_mud_phrase {eye of flame}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[cats_eye]} {#var jewel_mud_phrase {cat's eye}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[cats_eye_dust]} {#var jewel_mud_phrase {cat's eye dust}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_silver} {
+    #var _jewel_ore {silver};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[silver_shards]} {#var jewel_mud_phrase {silver shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[pyrite]} {#var jewel_mud_phrase {pyrite}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[pyrite_dust]} {#var jewel_mud_phrase {pyrite dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[tourmaline]} {#var jewel_mud_phrase {tourmaline}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[tourmaline_dust]} {#var jewel_mud_phrase {tourmaline dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[beryl]} {#var jewel_mud_phrase {beryl}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[beryl_dust]} {#var jewel_mud_phrase {beryl dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[eye_of_earth]} {#var jewel_mud_phrase {eye of earth}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[roans_tears]} {#var jewel_mud_phrase {roan's tears}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_gold} {
+    #var _jewel_ore {gold};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[gold_shards]} {#var jewel_mud_phrase {gold shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[eye_of_air]} {#var jewel_mud_phrase {eye of air}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[topaz]} {#var jewel_mud_phrase {topaz}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[topaz_dust]} {#var jewel_mud_phrase {topaz dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[amethyst]} {#var jewel_mud_phrase {amethyst}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[amethyst_dust]} {#var jewel_mud_phrase {amethyst dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[happy_eds_tears]} {#var jewel_mud_phrase {happy ed's tears}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_mithril} {
+    #var _jewel_ore {mithril};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[mithril_shards]} {#var jewel_mud_phrase {mithril shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[heliodor]} {#var jewel_mud_phrase {heliodor}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[heliodor_dust]} {#var jewel_mud_phrase {heliodor dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[hematite]} {#var jewel_mud_phrase {hematite}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[hematite_dust]} {#var jewel_mud_phrase {hematite dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[core_of_flame]} {#var jewel_mud_phrase {core of flame}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_titanium} {
+    #var _jewel_ore {titanium};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[titanium_shards]} {#var jewel_mud_phrase {titanium shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[peridot]} {#var jewel_mud_phrase {peridot}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[peridot_dust]} {#var jewel_mud_phrase {peridot dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[core_of_frost]} {#var jewel_mud_phrase {core of frost}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_ebon} {
+    #var _jewel_ore {ebon};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[ebon_shards]} {#var jewel_mud_phrase {ebon shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[core_of_earth]} {#var jewel_mud_phrase {core of earth}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[heliodor]} {#var jewel_mud_phrase {heliodor}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[heliodor_dust]} {#var jewel_mud_phrase {heliodor dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[peridot]} {#var jewel_mud_phrase {peridot}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[peridot_dust]} {#var jewel_mud_phrase {peridot dust}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_adamantium} {
+    #var _jewel_ore {adamantium};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[adamantium_shards]} {#var jewel_mud_phrase {adamantium shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[core_of_air]} {#var jewel_mud_phrase {core of air}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[pearl]} {#var jewel_mud_phrase {pearl}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[pearl_dust]} {#var jewel_mud_phrase {pearl dust}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_obsidian} {
+    #var _jewel_ore {obsidian};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[obsidian_shards]} {#var jewel_mud_phrase {obsidian shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[ghotis_tears]} {#var jewel_mud_phrase {ghoti's tears}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[opal]} {#var jewel_mud_phrase {opal}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[opal_dust]} {#var jewel_mud_phrase {opal dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[pearl]} {#var jewel_mud_phrase {pearl}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[pearl_dust]} {#var jewel_mud_phrase {pearl dust}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_nethernium} {
+    #var _jewel_ore {nethernium};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[nethernium_shards]} {#var jewel_mud_phrase {nethernium shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[ghotis_tears]} {#var jewel_mud_phrase {ghoti's tears}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[opal]} {#var jewel_mud_phrase {opal}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[opal_dust]} {#var jewel_mud_phrase {opal dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[star_of_flame]} {#var jewel_mud_phrase {star of flame}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_voidstone} {
+    #var _jewel_ore {voidstone};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[voidstone_shards]} {#var jewel_mud_phrase {voidstone shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[shansabyks_tears]} {#var jewel_mud_phrase {shansabyk's tears}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[diamond]} {#var jewel_mud_phrase {diamond}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[diamond_dust]} {#var jewel_mud_phrase {diamond dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[star_of_frost]} {#var jewel_mud_phrase {star of frost}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_phasemetal} {
+    #var _jewel_ore {phasemetal};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[phasemetal_shards]} {#var jewel_mud_phrase {phasemetal shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[emerald_dust]} {#var jewel_mud_phrase {emerald dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[emerald]} {#var jewel_mud_phrase {emerald}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[sapphire_dust]} {#var jewel_mud_phrase {sapphire dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[sapphire]} {#var jewel_mud_phrase {sapphire}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[star_of_earth]} {#var jewel_mud_phrase {star of earth}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[star_of_air]} {#var jewel_mud_phrase {star of air}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {.jewel_pick_chaostone} {
+    #var _jewel_ore {chaostone};
+    #var jewel_mud_phrase {};
+    .jewel_try_queue_pick;
+    #if {"$jewel_mud_phrase" == ""} {
+        #if {$mine_jewel[chaostone_shards]} {#var jewel_mud_phrase {chaostone shards}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[cancers_tears]} {#var jewel_mud_phrase {cancer's tears}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[emerald_dust]} {#var jewel_mud_phrase {emerald dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[emerald]} {#var jewel_mud_phrase {emerald}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[ruby_dust]} {#var jewel_mud_phrase {ruby dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[ruby]} {#var jewel_mud_phrase {ruby}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[sapphire_dust]} {#var jewel_mud_phrase {sapphire dust}};
+        #if {"$jewel_mud_phrase" == "" && $mine_jewel[sapphire]} {#var jewel_mud_phrase {sapphire}};
+    };
+    .jewel_send_or_spelunk;
+};
+
+#alias {jewelminer} {
+    #class {jewelminer} {open};
+    #act {{(A|You have found a deposit of) \w+ ore( deposit.|!)}} {
+        #undelay jminewalk;
+        #regex {%%1} {copper} {.jewel_pick_copper};
+        #regex {%%1} {bronze} {.jewel_pick_bronze};
+        #regex {%%1} {iron} {.jewel_pick_iron};
+        #regex {%%1} {steel} {.jewel_pick_steel};
+        #regex {%%1} {silver} {.jewel_pick_silver};
+        #regex {%%1} {gold} {.jewel_pick_gold};
+        #regex {%%1} {mithril} {.jewel_pick_mithril};
+        #regex {%%1} {titanium} {.jewel_pick_titanium};
+        #regex {%%1} {ebon} {.jewel_pick_ebon};
+        #regex {%%1} {adamantium} {.jewel_pick_adamantium};
+        #regex {%%1} {obsidian} {.jewel_pick_obsidian};
+        #regex {%%1} {nethernium} {.jewel_pick_nethernium};
+        #regex {%%1} {voidstone} {.jewel_pick_voidstone};
+        #regex {%%1} {phasemetal} {.jewel_pick_phasemetal};
+        #regex {%%1} {chaostone} {.jewel_pick_chaostone};
+    } {1};
+    #action {^You begin to mine} {#undelay jminewalk} {1};
+    #action {^You have exhausted} {get all;_step_jewel_room} {1};
+    #action {^It appears this part of the shaft has already been searched.} {_step_jewel_room} {1};
+    #action {^You have found nothing.} {_step_jewel_room} {1};
+    #action {^You are not skilled enough to mine this.} {_step_jewel_room} {1};
+    #action {^You should try to mine this instead.} {jewelm} {1};
+    #action {^You cannot spelunk while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};};
+    #action {^You cannot mine while you're being attacked!} {#line oneshot #action {dealt the killing blow} {corpse_trig;jewelm} {1};};
+    #action {^You have disturbed %*} {
+        #undelay jminewalk;
+        #line oneshot #action {dealt the killing blow} {corpse_trig;spelunk} {1};
+    } {1};
+    #alias {_check_jewelmine} {spelunk};
+    #alias {_step_jewel_room} {#delay jminewalk {#path walk;_check_jewelmine} {1}};
+    #class {jewelminer} {close};
+};
+
+#class {jewelminebot} {close};

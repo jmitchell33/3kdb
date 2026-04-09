@@ -122,7 +122,8 @@
     #var xdReportList $dReportList;
     #var xtoggles $toggles;
     #var xdeadmanIdleTimeout $deadmanIdleTimeout;
-         
+    #var xdeadmanTimeoutActions $deadmanTimeoutActions;
+    #var xdeadman_armed $deadman_armed;
 
     #NOP -- These variables are at a minimum used to draw somewhere;
     #var xsplit $split;
@@ -155,12 +156,14 @@
     #var dReportList $xdReportList;
     #var toggles $xtoggles;
     #var deadmanIdleTimeout $xdeadmanIdleTimeout;
+    #var deadmanTimeoutActions $xdeadmanTimeoutActions;
+    #if {"$xdeadman_armed" == "" || "$xdeadman_armed" == "xdeadman_armed"} {#var deadman_armed 1} {#var deadman_armed $xdeadman_armed};
 
     #NOP -- Restore chat blacklist from saved xblacklist so it persists across ld;
     #list blacklist clear;
     #if {&xblacklist[] > 0} {#loop 1 &xblacklist[] _blidx {#list blacklist add {$xblacklist[$_blidx]}}};
 
-    #var split $split;
+    #var split $xsplit;
     #var hpbar $xhpbar;
     #var caption $xcaption;
     #var caption_data $xcaption_data;
@@ -181,6 +184,7 @@
     #if {"$whitelist" == "$xwhitelist"} {#var whitelist {}};
     #if {"$dReportList" == "$xdReportList"} {#read common/3kReport.tin};
     #if {"$toggles" == "$xtoggles"} {#var toggles {}};
+    #if {"$deadmanTimeoutActions" == "xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};
 };
 
 #NOP Export user status every 10 mins;

@@ -1,11 +1,6 @@
 #class {player_aliases} {kill};
 #class {player_aliases} {open};
 
-#NOP -- deadman;
-#alias {_player_deadmanActions} {
-    #echo {stepper paused due to deadman timer}
-};
-
 #NOP -- auction balangool;
 #alias au-sz {
     give green capsule to robert;
@@ -16,7 +11,7 @@
     give blue capsule to robert;
     give figurine to robert;
     auction 69;
-    #delay 5 {
+    #delay 6 {
         atalk scaler 150
     }
 };
@@ -658,7 +653,9 @@
         #NOP prots_hr;
         #NOP songs;
         prots_muse;
-        prots_grace
+        prots_grace;
+        #NOP powers;
+        es
     };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any protection commands/spells in alias!!<088>};
@@ -817,7 +814,8 @@
         reflex clear;
         reflex add hp <10% hmheal;
         reflex add hp <20% eternal heal badger;
-        reflex add sp >200 cast blade dance;
+        #nop reflex add sp >200 cast blade dance;
+        reflex add sp >150 cast caustic critic;
         reflex combat on;
         reflex start
     };
@@ -2136,8 +2134,8 @@
 #NOP -- debug stuff;
 #alias {.startlog} {
     #switch {"%0"} {
-        #case {"on"} {#event {SENT OUTPUT} {#echo {<cfa>out (%0)}};#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
-        #case {"off"} {#UNEVENT {SEND OUTPUT};#unvar debug[bot];#log off};
+        #case {"on"} {#event {SENT OUTPUT} {#var _sent_output_dbg %0;#echo {<cfa>out ($_sent_output_dbg)<088>}};#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
+        #case {"off"} {#UNEVENT {SENT OUTPUT};#unvar debug[bot];#log off};
         #case {"del"} {#log remove botlog};
         #case {""} {#echo {<fff>No user input<088>}};
     };
