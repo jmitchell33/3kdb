@@ -155,9 +155,16 @@
     #var chat[log][emotes] $xchat[log][emotes];
     #var dReportList $xdReportList;
     #var toggles $xtoggles;
-    #var deadmanIdleTimeout $xdeadmanIdleTimeout;
-    #var deadmanTimeoutActions $xdeadmanTimeoutActions;
     #if {"$xdeadman_armed" == "" || "$xdeadman_armed" == "xdeadman_armed"} {#var deadman_armed 1} {#var deadman_armed $xdeadman_armed};
+    #var deadmanIdleTimeout $xdeadmanIdleTimeout;
+    #format {_dm_import_int} {%d} {$deadmanIdleTimeout};
+    #if {"$deadmanIdleTimeout" == "" || "$deadmanIdleTimeout" == "xdeadmanIdleTimeout"} {
+        #var deadmanIdleTimeout 900;
+        #var deadman_armed 1;
+    } {
+        #if {$_dm_import_int <= 0} {#var deadmanIdleTimeout 900};
+    };
+    #var deadmanTimeoutActions $xdeadmanTimeoutActions;
 
     #NOP -- Restore chat blacklist from saved xblacklist so it persists across ld;
     #list blacklist clear;

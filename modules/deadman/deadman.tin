@@ -221,7 +221,9 @@
         #var idle_flag 0;
         #var idle 0;
         #if {"$deadmanIdleTimeout" == "" || "$deadmanIdleTimeout" == "xdeadmanIdleTimeout"} {#var deadmanIdleTimeout 900};
-        #if {"$deadman_armed" == ""} {#var deadman_armed 1};
+        #format {_dm_init_int} {%d} {$deadmanIdleTimeout};
+        #if {$_dm_init_int <= 0} {#var deadmanIdleTimeout 900};
+        #if {"$deadman_armed" == "" || "$deadman_armed" == "xdeadman_armed"} {#var deadman_armed 1};
         #var deadManTimeLeft $deadmanIdleTimeout;
         #if {"$deadman_armed" != "0"} {
             #delay {deadmanSwitch} {
