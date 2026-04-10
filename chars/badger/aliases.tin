@@ -837,6 +837,11 @@
         reflex combat on;
         reflex start
     };
+    #elseif {"$guild" == "necromancer"} {
+        reflex clear;
+        reflex combat on;
+        reflex start
+    };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reflex settings in this alias!!<088>}
     };
@@ -864,6 +869,9 @@
     #elseif {"$guild" == "monk"} {
         #nop;
     };
+    #elseif {"$guild" == "necromancer"} {
+        #nop;
+    };
     #else {
         #NOP;
     }
@@ -889,6 +897,9 @@
         gag-clear
     };
     #elseif {"$guild" == "monk"} {
+        gag-clear
+    };
+    #elseif {"$guild" == "necromancer"} {
         gag-clear
     };
     #else {
@@ -967,6 +978,17 @@
         #unvar my[familiar];
         #unvar my[golem][name];
         #nop gagson;
+        mystrategy;
+        mycorpsetrig;
+        mka-on;
+        mka-clear;
+        set3kreport;
+        look
+    };
+    #elseif {"$guild" == "necromancer"} {
+        #unvar my[familiar];
+        #unvar my[golem][name];
+        gagson;
         mystrategy;
         mycorpsetrig;
         mka-on;
@@ -1266,6 +1288,9 @@
     #elseif {"$guild" == "monk"} {
         strategy-clear
     };
+    #elseif {"$guild" == "necromancer"} {
+        strategy-clear;
+    };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>}
     };
@@ -1399,6 +1424,11 @@
                 corpsetrig+ crafting;
                 corpsetrig-on;
             };
+            #elseif {"$guild" == "necromancer"} {
+                #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig-on;
+            };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any default corpsetrig settings in this alias!!<088>};
             };
@@ -1503,6 +1533,11 @@
                 corpsetrig+ crafting;
                 corpsetrig+ szCaps;
                 corpsetrig+ szGreenCap;
+                corpsetrig-on;
+            };
+            #elseif {"$guild" == "necromancer"} {
+                #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
                 corpsetrig-on;
             };
             #else {
@@ -1815,6 +1850,11 @@
                 corpsetrig+ bag1;
                 corpsetrig-on;
             };
+            #elseif {"$guild" == "necromancer"} {
+                #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig-on;
+            };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any donates corpsetrig settings in this alias!!<088>};
             };
@@ -2000,11 +2040,6 @@
 #NOP -- examining & searching;
 #alias {x} {
     exa %0
-};
-
-#NOP -- quck walk to roomvnum;
-#alias {wa} {
-    #map run %1
 };
 
 #NOP -- gathers all the pedes;
@@ -2196,6 +2231,13 @@
                 #delay {6} {#end};
             };
         };
+        #case {"necromancer"} {
+            reflex stop;gagsoff;gswap necromancer;
+            #delay {6} {
+                get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
+                #deelay {6} {#end};
+            };
+        };
         #default {
             #echo {<eaa>Unknown guild: %0<088>};
             #echo {<ceb>Use <ffd>gw-help<ceb> for valid guilds<088>};
@@ -2223,6 +2265,7 @@
     #echo {<cff>  bard        <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
     #echo {<cff>  fremen      <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
     #echo {<cff>  monk        <deb>get all / keep all / wear all / hold rock / hold tome / get coin<088>};
+    #echo {<cff>  necromancer <deb>get all / keep all / wear all / wield rod / wield shard / hold rock / hold tome / get coin<088>};
     #echo {};
     #echo {<bea>  Before actions  <dae>reflex stop / gagsoff / gswap <guild><088>};
     #echo {};
@@ -2299,7 +2342,6 @@
 #list badger3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
 #list badger3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
 #list badger3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
-#list badger3kdb add {{{name} {wa} {type} {misc} {desc} {Quick walk to roomvnum}}};
 #list badger3kdb add {{{name} {p} {type} {misc} {desc} {login exp & gxp progress}}};
 #list badger3kdb add {{{name} {p2} {type} {misc} {desc} {reset login exp & gxp progress}}};
 #list badger3kdb add {{{name} {ll} {type} {misc} {desc} {Guild light}}};
