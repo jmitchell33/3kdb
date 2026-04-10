@@ -23,9 +23,9 @@
     #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>($number)<088>  <ccf>-------    <088>};
     #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
     #echo {<cfc>  Sort using filters: library3kdb <filter> <088>};
-    #echo {    <fff>Filters:  <eaf>eternal rolm crafting town<088>};
+    #echo {    <fff>Filters:  <eaf>eternal rolm crafting mapping<088>};
     #echo {                <eaf>chaos fantasy science guild misc<088>};
-    #echo {                   <eaf>corpse combat profession<088>};
+    #echo {                   <eaf>corpse combat profession debug<088>};
     #echo {                      <eaf>trackers bot mip<088>};
     #echo {<ccf>  ---------------------------------------    <088>};
     #echo {<ceb> Use <bca>library3kdb1<ceb> for all aliases without description<088>};
@@ -58,9 +58,9 @@
     #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>($number)<088>  <ccf>-------    <088>};
     #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
     #echo {<cfc>  Sort using filters: library3kdb <filter> <088>};
-    #echo {    <fff>Filters:  <eaf>eternal rolm crafting town<088>};
+    #echo {    <fff>Filters:  <eaf>eternal rolm crafting mapping<088>};
     #echo {                <eaf>chaos fantasy science guild misc<088>};
-    #echo {                   <eaf>corpse combat profession<088>};
+    #echo {                   <eaf>corpse combat profession debug<088>};
     #echo {                      <eaf>trackers bot mip<088>};
     #echo {<ccf>  ---------------------------------------    <088>};
     #echo {<ceb> Use <bca>library3kdb<ceb> for all aliases + description<088>};
@@ -69,7 +69,7 @@
     #NOP Sort and display aliases without descriptions;
     #list library3kdb index name;
     #list library3kdb sort;
-    format_3kdblibrary {Alias};
+    format_3kdblibrary1 {Alias};
     #foreach $library3kdb[%*] index {
         #regexp {"%1"} {"$index[type]"} {
             #var tempflag 1;
@@ -135,7 +135,7 @@
 #list library3kdb add {{{name} {ewell} {type} {eternal} {desc} {redirect all damage incoming to a mob until it explodes} {usage} {ewell <mob> or 'ewell'} {helpfile} {(info energy well} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {rload} {type} {eternal} {desc} {reload unique items} {usage} {rload <cup/cooler/freezer/glimmering/feather/item>} {helpfile} {(info reload item} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {imm} {type} {eternal} {desc} {immunity to all damaging attacks upto a max of 90 rounds} {usage} {'imm'} {helpfile} {(info immortality} {location} {common/guilds/eternal/eternal.tin}}};
-#list library3kdb add {{{name} {prot} {type} {eternal} {desc} {hits above a certain % of your max hp will be greatly diminished - max of 120 rounds} {usage} {'prot'} {helpfile} {(info protection} {location} {common/guilds/eternal/eternal.tin}}};
+#list library3kdb add {{{name} {prot} {type} {eternal} {desc} {shrinks oversized hits compared to your max HP} {usage} {toggle with prot on or prot off, stacks up to 120 rounds, full rules on mud info protection} {helpfile} {(info protection} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {fry} {type} {eternal} {desc} {room or single target damage with damage type equal to your mobs weakest AC} {usage} {fry <mob> or 'fry' for all targets} {helpfile} {(info fry} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {refresh} {type} {eternal} {desc} {refresh a room that was previously defiled} {usage} {'refresh'} {helpfile} {(info refresh room} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {unload} {type} {eternal} {desc} {unload a room completely} {usage} {'unload'} {helpfile} {(info unload room} {location} {common/guilds/eternal/eternal.tin}}};
@@ -144,8 +144,8 @@
 #list library3kdb add {{{name} {tp2} {type} {eternal} {desc} {teleport present party to party member} {usage} {tp2 <playername>} {helpfile} {(info teleport} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {summ1} {type} {eternal} {desc} {summon party to you or a player to CoT} {usage} {summ1 <party/playername>} {helpfile} {(info summon} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {summ2} {type} {eternal} {desc} {summon another players party to CoT} {usage} {summ2 <playername>} {helpfile} {(info summon} {location} {common/guilds/eternal/eternal.tin}}};
-#list library3kdb add {{{name} {em} {type} {eternal} {desc} {increase your stats upto a max of 50% for 1 hour} {usage} {'em'} {helpfile} {(info embiggen} {location} {common/guilds/eternal/eternal.tin}}};
-#list library3kdb add {{{name} {hw} {type} {eternal} {desc} {xp bonus upto to a max of 32% for 1 hour} {usage} {'hw'} {helpfile} {(info heightened awareness} {location} {common/guilds/eternal/eternal.tin}}};
+#list library3kdb add {{{name} {em} {type} {eternal} {desc} {increase your stats upto a max of 50 percent for 1 hour} {usage} {'em'} {helpfile} {(info embiggen} {location} {common/guilds/eternal/eternal.tin}}};
+#list library3kdb add {{{name} {hw} {type} {eternal} {desc} {xp bonus upto to a max of 32 percent for 1 hour} {usage} {'hw'} {helpfile} {(info heightened awareness} {location} {common/guilds/eternal/eternal.tin}}};
 
 #NOP -------------------------- Rolm Aliases ----------------------------------;
 
@@ -163,15 +163,48 @@
 #list library3kdb add {{{name} {smelter-on} {type} {crafting} {desc} {smelter on: activates the enchanting smelter} {usage} {'smelter-on'} {location} {modules/crafting/enchanter.tin}}};
 #list library3kdb add {{{name} {gem-lookup} {type} {crafting} {desc} {displays information about gem recipes (use gem-lookup help for details)} {usage} {'gem-lookup help'} {location} {modules/crafting/enchanter.tin}}};
 #list library3kdb add {{{name} {make-gem} {type} {crafting} {desc} {Badger's gem maker v6.9 (use make-gem help for details)} {usage} {'make-gem help'} {location} {modules/crafting/enchanter.tin}}};
-#list library3kdb add {{{name} {miner-on} {type} {crafting} {desc} {mining on: activates automatic mining from mine entrance} {usage} {'miner-on' then mine <deposit>} {location} {modules/crafting/mining.tin}}};
-#list library3kdb add {{{name} {miner-off} {type} {crafting} {desc} {mining off: deactivates automatic mining} {usage} {'miner-off'} {location} {modules/crafting/mining.tin}}};
-#list library3kdb add {{{name} {deposit-lookup} {type} {crafting} {desc} {displays information about mining deposits (use deposit-lookup help for details)} {usage} {'deposit-lookup help'} {location} {modules/crafting/mining.tin}}};
+#list library3kdb add {{{name} {miner-on} {type} {crafting} {desc} {mining on: loads miner.tin ore and jewel bots paths} {usage} {'miner-on' then mine or minefor} {location} {modules/crafting/mining.tin}}};
+#list library3kdb add {{{name} {miner-off} {type} {crafting} {desc} {mining off: stops bots, clears paths; need miner-on to mine} {usage} {'miner-off'} {location} {modules/crafting/mining.tin}}};
+#list library3kdb add {{{name} {mine-list} {type} {crafting} {desc} {prints ore deposit names for mine after miner-on} {usage} {'mine-list'} {location} {modules/crafting/miner.tin}}};
+#list library3kdb add {{{name} {minefor-list} {type} {crafting} {desc} {prints jewel names by ore tier for minefor after miner-on} {usage} {'minefor-list'} {location} {modules/crafting/miner.tin}}};
 #list library3kdb add {{{name} {stashlist assemble} {type} {crafting} {desc} {this is a mud command with auto assemble added for frags/essence/hearts} {usage} {'stashlist assemble'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {deposit-lookup} {type} {crafting} {desc} {displays information about mining deposits (use deposit-lookup help for details)} {usage} {'deposit-lookup help'} {location} {modules/crafting/mining.tin}}};
+#list library3kdb add {{{name} {mine} {type} {crafting} {desc} {run ore deposit bot path by name after miner-on} {usage} {mine <deposit>} {location} {modules/crafting/miner.tin}}};
+#list library3kdb add {{{name} {minefor} {type} {crafting} {desc} {run jewel mining queue after miner-on} {usage} {minefor <jewel or comma list>} {location} {modules/crafting/miner.tin}}};
+#list library3kdb add {{{name} {autosmelt} {type} {crafting} {desc} {smelter auto-smelt preset after smelter-on} {usage} {autosmelt <preset>} {location} {modules/crafting/smelter.tin}}};
+#list library3kdb add {{{name} {assembler} {type} {crafting} {desc} {interactive assemble helper for crafted items} {usage} {'assembler'} {location} {modules/crafting/assemble.tin}}};
+#list library3kdb add {{{name} {killforge} {type} {crafting} {desc} {unload blacksmith forge class} {usage} {'killforge'} {location} {modules/crafting/blacksmith_forge.tin}}};
+#list library3kdb add {{{name} {build_golem} {type} {crafting} {desc} {start golem build sequence for named corpse} {usage} {build_golem <corpse name>} {location} {modules/professions/golem_master.tin}}};
+#list library3kdb add {{{name} {fill_golem} {type} {crafting} {desc} {fill golem parts from held corpses} {usage} {'fill_golem'} {location} {modules/professions/golem_master.tin}}};
 
-#NOP -------------------------- Town/Pinnacle Aliases ----------------------------------;
+#NOP -------------------------- Farmer module after read modules crafting farmer tin;
+#list library3kdb add {{{name} {farmer-on} {type} {crafting} {desc} {turn farmer script on} {usage} {'farmer-on'} {location} {modules/crafting/crafting.tin}}};
+#list library3kdb add {{{name} {farmer-off} {type} {crafting} {desc} {turn farmer script off} {usage} {'farmer-off'} {location} {modules/crafting/crafting.tin}}};
 
+#NOP -------------------------- Mapping Aliases ----------------------------------;
 
-
+#list library3kdb add {{{name} {maphelp} {type} {mapping} {desc} {echo map helper quick reference} {usage} {'maphelp'} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mapon} {type} {mapping} {desc} {start live mapping: brief off, static off} {usage} {'mapon'} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {mapoff} {type} {mapping} {desc} {stop live mapping: brief on, static on} {usage} {'mapoff'} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {mapsearch} {type} {mapping} {desc} {search map rooms by name and note text} {usage} {mapsearch <text>} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {findhere} {type} {misc} {desc} {finds where you are on the mud to correct map} {usage} {'findhere'} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {findhere2} {type} {mapping} {desc} {narrow findhere by walking one exit direction} {usage} {findhere2 <direction>} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {loadmap} {type} {mapping} {desc} {load mapper and maphelper then goto cursor vnum} {usage} {'loadmap'} {location} {modules/map/map.tin}}};
+#list library3kdb add {{{name} {hidemap} {type} {mapping} {desc} {hide vtmap split and drawmap} {usage} {'hidemap'} {location} {modules/map/map.tin}}};
+#list library3kdb add {{{name} {voidlink} {type} {mapping} {desc} {link exit to vnum and insert void between} {usage} {voidlink <dir> <vnum>} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {hmavoid} {type} {mapping} {desc} {mark CoT portal exits avoided for pathing} {usage} {'hmavoid'} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {hmfollow} {type} {mapping} {desc} {clear avoid flags on CoT portal exits} {usage} {'hmfollow'} {location} {modules/map/mapper.tin}}};
+#list library3kdb add {{{name} {mapFull} {type} {mapping} {desc} {toggle fullscreen vtmap and area list} {usage} {'mapFull'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {mapUndo} {type} {mapping} {desc} {undo last map edit step} {usage} {'mapUndo'} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mapbackup} {type} {mapping} {desc} {write dated backup map file under common map} {usage} {'mapbackup'} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mapf} {type} {mapping} {desc} {pass through to map flag subcommand} {usage} {mapf flag name then on or off} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mapvnum} {type} {mapping} {desc} {echo current map cursor vnum into curvnum} {usage} {'mapvnum'} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {maplm} {type} {mapping} {desc} {create landmark label for current vnum} {usage} {maplm landmark label text} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mapfind} {type} {mapping} {desc} {list rooms matching pattern in desc name and note} {usage} {mapfind pattern text} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mappath} {type} {mapping} {desc} {map find path to pattern then path show} {usage} {mappath pattern text} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {mapicons} {type} {mapping} {desc} {echo unicode icon palette for map symbols} {usage} {'mapicons'} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {go} {type} {misc} {desc} {map run to room vnum or speedrun name} {usage} {go <roomvnum or speedrun>} {location} {modules/map/maphelper.tin}}};
+#list library3kdb add {{{name} {go_back} {type} {mapping} {desc} {map run back to vnum saved by go alias} {usage} {'go_back'} {location} {modules/map/maphelper.tin}}};
 
 #NOP -------------------------- Chaos Aliases ----------------------------------;
 
@@ -208,6 +241,8 @@
 #list library3kdb add {{{name} {stopfishing} {type} {fantasy} {desc} {stop fishing} {usage} {'stopfishing'} {area} {Westersea} {helpfile} {help solarpeak.wilderness.fishing} {location} {common/areas/wsea_fishing.tin}}};
 #list library3kdb add {{{name} {sopem1} {type} {fantasy} {desc} {enter sopem part 1} {usage} {'sopem1'} {area} {Serinth 2.0} {location} {common/areas/serinth.tin}}};
 #list library3kdb add {{{name} {sopem2} {type} {fantasy} {desc} {enter sopem part 2} {usage} {'sopem2'} {area} {Serinth 2.0} {location} {common/areas/serinth.tin}}};
+#list library3kdb add {{{name} {run_uk} {type} {fantasy} {desc} {undead knight book and hunt loop} {usage} {'run_uk'} {location} {common/areas/misc_common.tin}}};
+
 
 #NOP -------------------------- Science Aliases ----------------------------------;
 
@@ -215,6 +250,10 @@
 #list library3kdb add {{{name} {continue40} {type} {science} {desc} {enter lvl 40 continue code} {usage} {'continue40'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
 #list library3kdb add {{{name} {set20} {type} {science} {desc} {save yourself to level 20} {usage} {'set20'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
 #list library3kdb add {{{name} {set40} {type} {science} {desc} {save yourself to level 40} {usage} {'set40'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {eat-caps1} {type} {science} {desc} {swallow one blue capsule for balangool crafts} {usage} {'eat-caps1'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {eat-caps2} {type} {science} {desc} {swallow blue and orange capsules} {usage} {'eat-caps2'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {eat-caps3} {type} {science} {desc} {swallow blue orange and green capsules} {usage} {'eat-caps3'} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
+#list library3kdb add {{{name} {gool} {type} {science} {desc} {balangool craft driver; use gool green-armour style names} {usage} {gool <piece>} {area} {Section Z} {location} {common/areas/sectionz.tin}}};
 #list library3kdb add {{{name} {gool green-armour} {type} {science} {desc} {make balangool green armour - requires 2 green capsules or stones} {usage} {'gool green-armour'} {area} {Section Z} {item} {Balangool Armour (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
 #list library3kdb add {{{name} {gool green-helmet} {type} {science} {desc} {make balangool green helmet - requires 2 green capsules or stones} {usage} {'gool green-helmet'} {area} {Section Z} {item} {Balangool Helmet (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
 #list library3kdb add {{{name} {gool green-gloves} {type} {science} {desc} {make balangool green gloves - requires 2 green capsules or stones} {usage} {'gool green-gloves'} {area} {Section Z} {item} {Balangool Gloves (Bright Green Aura)} {affects} {+WIS & +DEX} {location} {common/areas/sectionz.tin}}};
@@ -235,8 +274,14 @@
 #list library3kdb add {{{name} {refs} {type} {profession} {desc} {buys a sword then reforges it and disposes of it} {usage} {'refs'} {prof} {reforger} {location} {modules/professions/reforger.tin}}};
 #list library3kdb add {{{name} {ref} {type} {profession} {desc} {reforge item Actype to defense} {usage} {ref <item> <ACtype>} {prof} {reforger} {location} {modules/professions/reforger.tin}}};
 #list library3kdb add {{{name} {refg} {type} {profession} {desc} {reforge item Actype to defense on ground} {usage} {refg <item> <Actype>} {prof} {reforger} {location} {modules/professions/reforger.tin}}};
+#list library3kdb add {{{name} {refk1} {type} {profession} {desc} {reforger knife buy reforge dispose step one} {usage} {'refk1'} {prof} {reforger} {location} {modules/professions/reforger.tin}}};
+#list library3kdb add {{{name} {refk2} {type} {profession} {desc} {reforger knife buy reforge dispose step two} {usage} {'refk2'} {prof} {reforger} {location} {modules/professions/reforger.tin}}};
 #list library3kdb add {{{name} {transmute_ug} {type} {profession} {desc} {upgrades items to the next quality tier} {usage} {'transmute_ug <jewel> <quality> Note: requires curly braces around <quality>'} {prof} {transmuter} {location} {modules/professions/transmuter.tin}}};
 #list library3kdb add {{{name} {transmute_ratios} {type} {profession} {desc} {show transmuter ratios for jewels} {usage} {'transmute_ratios'} {prof} {transmuter} {location} {modules/professions/transmuter.tin}}};
+
+#NOP -------------------------- Guild hpbar setup ----------------------------------;
+
+#list library3kdb add {{{name} {setup_3kdb_hpbar} {type} {guild} {desc} {send hpconfig line for MIP hpbar per guild} {usage} {'setup_3kdb_hpbar'} {location} {common/guilds/GUILD/hpbar.tin gentech uses aliases.tin}}};
 
 #NOP -------------------------- Juggernaut Guild Aliases ----------------------------------;
 
@@ -251,6 +296,11 @@
 #list library3kdb add {{{name} {su3} {type} {guild} {desc} {switch support mech to assault electric & defend mech} {usage} {'su3'} {helpfile} {info support} {location} {common/guilds/juggernaut/aliases.tin}}};
 #list library3kdb add {{{name} {summonmech} {type} {guild} {desc} {summon a new support mech & into assault fire} {usage} {'summonmech'} {helpfile} {info support} {location} {common/guilds/juggernaut/aliases.tin}}};
 #list library3kdb add {{{name} {sd} {type} {guild} {desc} {switch support mech into defend mode} {usage} {'sd'} {helpfile} {info support} {location} {common/guilds/juggernaut/aliases.tin}}};
+#list library3kdb add {{{name} {jugg_report} {type} {guild} {desc} {echo gxp and mount lock summary from tracked rounds} {usage} {'jugg_report'} {location} {common/guilds/juggernaut/aliases.tin}}};
+#list library3kdb add {{{name} {reset_tracking} {type} {guild} {desc} {clear gxp vars and mount counters used by jugg report} {usage} {'reset_tracking'} {location} {common/guilds/juggernaut/aliases.tin}}};
+#list library3kdb add {{{name} {support_defense} {type} {guild} {desc} {preset support mech to armor repair defend then support reset status} {usage} {'support_defense'} {helpfile} {info support} {location} {common/guilds/juggernaut/aliases.tin}}};
+#list library3kdb add {{{name} {support_offense} {type} {guild} {desc} {preset support mech to powerplant mount assault fire then reset status} {usage} {'support_offense'} {helpfile} {info support} {location} {common/guilds/juggernaut/aliases.tin}}};
+#list library3kdb add {{{name} {donateSupport} {type} {guild} {desc} {parse juggs2 list and donate support type to low-stim online juggs} {usage} {donateSupport optional type word default airdrop} {helpfile} {info juggs2} {location} {common/guilds/juggernaut/aliases.tin}}};
 };
 
 #NOP -------------------------- Mage Guild Aliases ----------------------------------;
@@ -274,6 +324,7 @@
 #list library3kdb add {{{name} {clear_sconfig} {type} {guild} {desc} {clear summon config} {usage} {'clear_sconfig'} {helpfile} {info summon config} {ctg} {summoning} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {ms} {type} {guild} {desc} {setup summon config} {usage} {ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema'} {helpfile} {info summon config} {ctg} {summoning} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {castper} {type} {guild} {desc} {setup perform with a single target damage spell} {usage} {'castper' alone will show options - castper <option>} {helpfile} {info perform} {ctg} {enhancing} {location} {common/guilds/mage/aliases.tin}}};
+#list library3kdb add {{{name} {msc} {type} {guild} {desc} {quick-set summon config digits and golem lines} {usage} {msc two digit pairs then width tokens see mage summoning aliases} {helpfile} {info summon config} {ctg} {summoning} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {gc_ss} {type} {guild} {desc} {setup stoneskin with greater contingency} {usage} {'gc_ss'} {helpfile} {info stoneskin} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {gc_mg} {type} {guild} {desc} {setup major globe with greater contingency} {usage} {'gc_mg'} {helpfile} {info major globe} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {gc_shield} {type} {guild} {desc} {setup shield with greater contingency} {usage} {'gc_shield'} {helpfile} {info shield} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
@@ -285,20 +336,45 @@
 #list library3kdb add {{{name} {c_rs} {type} {guild} {desc} {setup rhino skin with contingency} {usage} {'c_rs'} {helpfile} {info rhino skin} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_mg} {type} {guild} {desc} {setup minor globe with contingency} {usage} {'c_mg'} {helpfile} {info minor globe} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_shield} {type} {guild} {desc} {setup shield with contingency} {usage} {'c_shield'} {helpfile} {info shield} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
-#list library3kdb add {{{name} {c_mshield} {type} {guild} {desc} {setup magnificent shield with contingency} {usage} {c_mshield} {helpfile} {info magnificent shield} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
+#list library3kdb add {{{name} {c_mshield} {type} {guild} {desc} {setup magnificent shield with contingency} {usage} {'c_mshield'} {helpfile} {info magnificent shield} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_armor} {type} {guild} {desc} {setup armor with contingency} {usage} {'c_armor'} {helpfile} {info armor} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_pfg} {type} {guild} {desc} {setup protection from good with contingency} {usage} {'c_pfg'} {helpfile} {info protection from good} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_pfe} {type} {guild} {desc} {setup protection from evil with contingency} {usage} {'c_pfe'} {helpfile} {info protection from evil} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_blur} {type} {guild} {desc} {setup blur with contingency} {usage} {'c_blur'} {helpfile} {info blur} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_blink} {type} {guild} {desc} {setup blink with contingency} {usage} {'c_blink'} {helpfile} {info blink} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
 #list library3kdb add {{{name} {c_invis} {type} {guild} {desc} {setup invisibility with contingency} {usage} {'c_invis'} {helpfile} {info invisibility} {ctg} {defensive} {location} {common/guilds/mage/aliases.tin}}};
+#list library3kdb add {{{name} {clear_align} {type} {guild} {desc} {clear prot-good and prot-evil flags in defs before recasting} {usage} {'clear_align'} {location} {common/guilds/mage/aliases.tin}}};
+#list library3kdb add {{{name} {clear_prots} {type} {guild} {desc} {remove entire defs table used by mage defense tracking} {usage} {'clear_prots'} {location} {common/guilds/mage/aliases.tin}}};
+#list library3kdb add {{{name} {summon_types} {type} {guild} {desc} {print summon roster by slot with scroll panels} {usage} {'summon_types'} {ctg} {summoning} {location} {common/guilds/mage/summoner.tin}}};
+#list library3kdb add {{{name} {summon_select} {type} {guild} {desc} {pick summon for strategy list menu off clear or monster key} {usage} {summon_select key or off or clear or empty for menu} {ctg} {summoning} {location} {common/guilds/mage/summoner.tin}}};
+#list library3kdb add {{{name} {summon_str} {type} {guild} {desc} {giant strength on each summon stack self and golem} {usage} {'summon_str'} {spell} {giant strength} {helpfile} {info giant strength} {ctg} {summoning} {location} {common/guilds/mage/summoner.tin}}};
+#list library3kdb add {{{name} {mage_gag} {type} {guild} {desc} {toggle mage combat and summon spam gags} {usage} {'mage_gag'} {location} {common/guilds/mage/gags.tin}}};
 };
 
 #NOP -------------------------- Adventurer Guild Aliases ----------------------------------;
 
 
 #NOP -------------------------- Necromancer Guild Aliases ----------------------------------;
-
+#if {"$guild" == "necromancer"} {
+#list library3kdb add {{{name} {teleport set} {type} {guild} {desc} {set necromancer teleport anchor} {usage} {'teleport set'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {teleport} {type} {guild} {desc} {necromancer teleport to saved line} {usage} {teleport line letter then slot digit see necro aliases} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {preserve_remains} {type} {guild} {desc} {preserve remains workflow} {usage} {'preserve_remains'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {topup} {type} {guild} {desc} {top up reagents or supplies run} {usage} {'topup'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {maskNP} {type} {guild} {desc} {mask corpse NP quick macros} {usage} {maskNP width and digit suffixes see necro aliases} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {conjureUndead} {type} {guild} {desc} {conjure undead combat line} {usage} {'conjureUndead'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {qtNP} {type} {guild} {desc} {quick teleport necro preset} {usage} {'qtNP'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {qtNPc} {type} {guild} {desc} {qatrance coffin unwrap then preserve absorb} {usage} {qtNPc with no args uses defaults or give corpse count} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {qtNPf} {type} {guild} {desc} {qatrance freezer deslab then preserve absorb} {usage} {qtNPf with no args uses defaults or give corpse count} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {qtNPcl} {type} {guild} {desc} {qatrance cooler uncooler then preserve absorb} {usage} {qtNPcl with no args uses defaults or give corpse count} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {check_chest} {type} {guild} {desc} {necromancer chest check helper} {usage} {'check_chest'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {nukeUndeadAbs} {type} {guild} {desc} {conjure nuke line absolute corpse path} {usage} {'nukeUndeadAbs'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {nukeUndead_noUG_Abs} {type} {guild} {desc} {conjure nuke absolute without unholy grasp} {usage} {'nukeUndead_noUG_Abs'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {nukeUndeadPres} {type} {guild} {desc} {conjure nuke preserved remains path} {usage} {'nukeUndeadPres'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {nukeUndead_noUG_Pres} {type} {guild} {desc} {conjure nuke preserved without unholy grasp} {usage} {'nukeUndead_noUG_Pres'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {power} {type} {guild} {desc} {send mud power and parse levels into client tables} {usage} {'power'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {powers} {type} {guild} {desc} {send mud powers and parse levels into client tables} {usage} {'powers'} {location} {common/guilds/necromancer/aliases.tin}}};
+#list library3kdb add {{{name} {dsave_report} {type} {guild} {desc} {necromancer dsave mob report} {usage} {'dsave_report'} {location} {common/guilds/necromancer/3kdb.tin}}};
+};
 
 #NOP -------------------------- Bard Guild Aliases ----------------------------------;
 #if {"$guild" == "bard"} {
@@ -330,6 +406,17 @@
 #list library3kdb add {{{name} {prots_grace} {type} {guild} {desc} {perform amazing grace - reduce physical harm done to you} {usage} {'prots_grace'} {helpfile} {info amazing grace} {location} {common/guilds/bard/aliases.tin}}};
 #list library3kdb add {{{name} {prots_muse} {type} {guild} {desc} {perform o muse - aura of protection} {usage} {'prots_muse'} {helpfile} {info o muse} {location} {common/guilds/bard/aliases.tin}}};
 #list library3kdb add {{{name} {buffup} {type} {guild} {desc} {perform all song buffs for yourself or others} {usage} {buffup <player>} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {blades} {type} {guild} {desc} {perform blades dance line} {usage} {'blades'} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {critic} {type} {guild} {desc} {perform critic line} {usage} {'critic'} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {ebolt} {type} {guild} {desc} {perform elemental bolt line} {usage} {'ebolt'} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {es} {type} {guild} {desc} {empowered strikes - weapon strikes do more damage} {usage} {'es'} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {fires} {type} {guild} {desc} {perform fires line} {usage} {'fires'} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {reflex_clear} {type} {guild} {desc} {clear reflex perform state} {usage} {'reflex_clear'} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {reflex_critic} {type} {guild} {desc} {reflex cast caustic critic when spell points above threshold} {usage} {reflex critic then threshold spell points number} {helpfile} {info caustic critic} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {reflex_ow} {type} {guild} {desc} {reflex dirge corpse when karma below threshold} {usage} {reflex ow then threshold karma number} {helpfile} {info dirge} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {reflex_ma} {type} {guild} {desc} {reflex martial assault when guild points above threshold} {usage} {reflex ma then threshold karma number} {helpfile} {info martial assault} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {reflex_soothe} {type} {guild} {desc} {reflex soothe when spell points below threshold} {usage} {reflex soothe then threshold spell points number} {helpfile} {info soothe} {location} {common/guilds/bard/aliases.tin}}};
+#list library3kdb add {{{name} {bardEvalPrint} {type} {guild} {desc} {echo two bard eval rating columns side by side} {usage} {bardEvalPrint first stat key then second stat key} {location} {common/guilds/bard/eval.tin}}};
 };
 
 #NOP -------------------------- Angel Guild Aliases ----------------------------------;
@@ -367,13 +454,29 @@
 #list library3kdb add {{{name} {donate_water} {type} {guild} {desc} {fill & donate litterjons at shimoom} {usage} {'donate_water'} {location} {common/guilds/fremen/aliases.tin}}};
 #list library3kdb add {{{name} {donate_water1} {type} {guild} {desc} {run to shimoom & donate water - drops all corpses from coffin/freezer/cooler and dupes them with mask} {usage} {'donate_water1'} {location} {common/guilds/fremen/aliases.tin}}};
 #list library3kdb add {{{name} {fskills} {type} {guild} {desc} {see additional information on fremen skills} {usage} {'fskills'} {helpfile} {fhelp skills} {location} {common/guilds/fremen/aliases.tin}}};
+#list library3kdb add {{{name} {fremCorpse} {type} {guild} {desc} {fremen corpse handling preset one} {usage} {'fremCorpse'} {location} {common/guilds/fremen/aliases.tin}}};
+#list library3kdb add {{{name} {fremCorpse2} {type} {guild} {desc} {fremen corpse handling preset two} {usage} {'fremCorpse2'} {location} {common/guilds/fremen/aliases.tin}}};
+#list library3kdb add {{{name} {fskills-cheap} {type} {guild} {desc} {fremen skills list cheap mode} {usage} {'fskills-cheap'} {location} {common/guilds/fremen/aliases.tin}}};
+#list library3kdb add {{{name} {gxp-stats} {type} {guild} {desc} {show gxp tracking stats} {usage} {'gxp-stats'} {location} {common/guilds/fremen/actions.tin}}};
+#list library3kdb add {{{name} {fskill-train} {type} {guild} {desc} {list captured fremen skills sorted by training cost} {usage} {'fskill-train'} {location} {common/guilds/fremen/fremen_skills.tin}}};
 };
 
 #NOP -------------------------- Gentech Guild Aliases ----------------------------------;
-
+#if {"$guild" == "gentech"} {
+#list library3kdb add {{{name} {fill_cpc} {type} {guild} {desc} {transfer item to CPC and return} {usage} {fill_cpc <item name>} {location} {common/guilds/gentech/aliases.tin}}};
+#list library3kdb add {{{name} {heal_up} {type} {guild} {desc} {run to gentech infirmary admit flow} {usage} {'heal_up'} {location} {common/guilds/gentech/aliases.tin}}};
+#list library3kdb add {{{name} {shields} {type} {guild} {desc} {gentech shields routine} {usage} {'shields'} {location} {common/guilds/gentech/aliases.tin}}};
+#list library3kdb add {{{name} {gt-repair} {type} {guild} {desc} {repair twice stabilize tactical on self or named target} {usage} {gt-repair optional target name} {location} {common/guilds/gentech/aliases.tin}}};
+#list library3kdb add {{{name} {timescan} {type} {guild} {desc} {timescan clear set query then estimate minutes to reset from flux} {usage} {'timescan'} {location} {common/guilds/gentech/aliases.tin}}};
+#list library3kdb add {{{name} {check_slide} {type} {guild} {desc} {check hp sp cpc pu gates and set timeslide able flag} {usage} {'check_slide'} {location} {common/guilds/gentech/aliases.tin}}};
+#list library3kdb add {{{name} {grav_well} {type} {guild} {desc} {smuggle inducer charge grav sequence for gravity well} {usage} {'grav_well'} {location} {common/guilds/gentech/actions.tin}}};
+};
 
 #NOP -------------------------- Jedi Guild Aliases ----------------------------------;
-
+#if {"$guild" == "jedi"} {
+#list library3kdb add {{{name} {weaponstats} {type} {guild} {desc} {show light weapon mastery and guide lines} {usage} {'weaponstats'} {location} {common/guilds/jedi/actions.tin}}};
+#list library3kdb add {{{name} {setweaponmodetime} {type} {guild} {desc} {set weapon mode timing} {usage} {'setweaponmodetime'} {location} {common/guilds/jedi/actions.tin}}};
+};
 
 #NOP -------------------------- Knight Guild Aliases ----------------------------------;
 
@@ -382,52 +485,157 @@
 
 
 #NOP -------------------------- Priest Guild Aliases ----------------------------------;
-
+#if {"$guild" == "priest"} {
+#list library3kdb add {{{name} {bless_party} {type} {guild} {desc} {bless whole party chain} {usage} {'bless_party'} {location} {common/guilds/priest/aliases.tin}}};
+#list library3kdb add {{{name} {fftouch} {type} {guild} {desc} {faithful touch routine} {usage} {'fftouch'} {location} {common/guilds/priest/aliases.tin}}};
+#list library3kdb add {{{name} {gxp_reset} {type} {guild} {desc} {reset priest gxp and round tracking counters} {usage} {'gxp_reset'} {location} {common/guilds/priest/aliases.tin}}};
+#list library3kdb add {{{name} {hp_monitor} {type} {guild} {desc} {set party heal threshold as fraction of max hit points} {usage} {hp_monitor whole number meaning percent of max} {location} {common/guilds/priest/actions.tin}}};
+#list library3kdb add {{{name} {sp_monitor} {type} {guild} {desc} {set party radiance threshold as fraction of max spell points} {usage} {sp_monitor whole number meaning percent of max} {location} {common/guilds/priest/actions.tin}}};
+};
 
 #NOP -------------------------- Psicorps Guild Aliases ----------------------------------;
-
+#if {"$guild" == "psicorps"} {
+#list library3kdb add {{{name} {addp} {type} {guild} {desc} {add power to tracker list} {usage} {'addp'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {remp} {type} {guild} {desc} {remove power from tracker list} {usage} {'remp'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {usep} {type} {guild} {desc} {use selected psicorps power} {usage} {'usep'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {showp} {type} {guild} {desc} {show power details} {usage} {'showp'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {psi_donate} {type} {guild} {desc} {donate psi resource run} {usage} {'psi_donate'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {refill_apump} {type} {guild} {desc} {refill astral pump flow} {usage} {'refill_apump'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {track_regen} {type} {guild} {desc} {track psi regen stats} {usage} {'track_regen'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {track_regen_reset} {type} {guild} {desc} {reset psi regen tracker} {usage} {'track_regen_reset'} {location} {common/guilds/psicorps/aliases.tin}}};
+#list library3kdb add {{{name} {gxp_reset} {type} {guild} {desc} {reset psicorps gxp tracker} {usage} {'gxp_reset'} {location} {common/guilds/psicorps/actions.tin}}};
+#list library3kdb add {{{name} {reset_pw_tracking} {type} {guild} {desc} {reset power word tracking} {usage} {'reset_pw_tracking'} {location} {common/guilds/psicorps/pw_tracker.tin}}};
+#list library3kdb add {{{name} {start_pw_tracking} {type} {guild} {desc} {start power word tracking} {usage} {'start_pw_tracking'} {location} {common/guilds/psicorps/pw_tracker.tin}}};
+#list library3kdb add {{{name} {stop_pw_tracking} {type} {guild} {desc} {stop power word tracking} {usage} {'stop_pw_tracking'} {location} {common/guilds/psicorps/pw_tracker.tin}}};
+#list library3kdb add {{{name} {gs_powers} {type} {guild} {desc} {after gs add tracker entries for powers you already have} {usage} {'gs_powers'} {location} {common/guilds/psicorps/actions.tin}}};
+#list library3kdb add {{{name} {aa_swap} {type} {guild} {desc} {swap animal affinity implant to named affinity} {usage} {aa_swap affinity name} {location} {common/guilds/psicorps/heartbeat.tin}}};
+};
 
 #NOP -------------------------- Sii Guild Aliases ----------------------------------;
+#if {"$guild" == "sii"} {
+#list library3kdb add {{{name} {gxp_reset} {type} {guild} {desc} {reset sii gxp tracker} {usage} {'gxp_reset'} {location} {common/guilds/sii/aliases.tin}}};
+};
 
 
 #NOP -------------------------- Misc Aliases ----------------------------------;
 
+#list library3kdb add {{{name} {setup_3kdb} {type} {misc} {desc} {Recommended mud prefs and first-run 3kdb client setup} {usage} {'setup_3kdb'} {location} {common/config.tin}}};
 #list library3kdb add {{{name} {dung_reset} {type} {misc} {desc} {announce dungeon resets} {usage} {dung_reset <mj/sz/aegis/dungeonname>} {location} {common/guilds/eternal/eternal.tin}}};
 #list library3kdb add {{{name} {speedruns} {type} {misc} {desc} {displays all available speedruns} {usage} {'speedruns'} {location} {common/map/speedruns.tin}}};
 #list library3kdb add {{{name} {ld} {type} {misc} {desc} {go linkdead saving certain variable values} {usage} {'ld'} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {th} {type} {misc} {desc} {check tellhist} {usage} {'th'} {helpfile} {help tellhist} {location} {common/aliases.tin}}};
-#list library3kdb add {{{name} {chatlog emotes} {type} {misc} {desc} {chatlog - toggle emote logging on & off} {usage} {'chatlog emotes'} {location} {modules/mip/chatlog.tin}}};
 #list library3kdb add {{{name} {exa} {type} {misc} {desc} {examine & search stuff} {usage} {exa <thing>} {helpfile} {help examine / help search} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {cwho1} {type} {misc} {desc} {list currently online clan members} {usage} {'cwho1'} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {calc} {type} {misc} {desc} {perform mathematical calculations} {usage} {calc <mathproblem> - Ex: calc 100/5*25} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {dwitch} {type} {misc} {desc} {duplicate witch then dove them & attack first witch} {usage} {'dwitch'} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {sra} {type} {misc} {desc} {examine & search room nouns using MIP} {usage} {'sra'} {location} {modules/mip/room.tin}}};
 #list library3kdb add {{{name} {gags} {type} {misc} {desc} {setup gags for a variety of things around the mud} {usage} {'gags'} {location} {common/gags/gags.tin}}};
+#list library3kdb add {{{name} {gag+} {type} {misc} {desc} {turn on one gag group by list name} {usage} {gag-plus then group name from gags output} {location} {common/gags/gags.tin}}};
+#list library3kdb add {{{name} {gag-} {type} {misc} {desc} {turn off one gag group by list name} {usage} {gag-minus then group name from gags output} {location} {common/gags/gags.tin}}};
+#list library3kdb add {{{name} {gag-all} {type} {misc} {desc} {enable every gag group in the list} {usage} {'gag-all'} {location} {common/gags/gags.tin}}};
+#list library3kdb add {{{name} {gag-clear} {type} {misc} {desc} {disable every gag group in the list} {usage} {'gag-clear'} {location} {common/gags/gags.tin}}};
 #list library3kdb add {{{name} {.gswap} {type} {misc} {desc} {kill current guild and load new one - requires gswap vaf perk} {usage} {.gswap <guild>} {helpfile} {vaf gswap} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {prys_exit} {type} {misc} {desc} {exit prysmyia room} {usage} {'prys_exit'} {location} {common/areas/misc_common.tin}}};
-#list library3kdb add {{{name} {toggle-list} {type} {misc} {desc} {3kdb current toggles list} {usage} {'toggle-list'} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {dcup} {type} {misc} {desc} {attacks mike/duplicates creature/touchs dove rune/attacks first mike} {usage} {'dcup'} {location} {common/areas/hockey.tin}}};
-#list library3kdb add {{{name} {findhere} {type} {misc} {desc} {finds where you are on the mud to correct map} {usage} {'findhere'} {location} {modules/map/mapper.tin}}};
-#list library3kdb add {{{name} {caption_view} {type} {misc} {desc} {switch data panel tab to general or bot} {usage} {caption_view general or caption_view bot} {location} {common/draw.tin}}};
 #list library3kdb add {{{name} {beepon} {type} {misc} {desc} {turn on terminal beep on events (toggle beep)} {usage} {'beepon'} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {beepoff} {type} {misc} {desc} {turn off terminal beep on events (toggle beep)} {usage} {'beepoff'} {location} {common/aliases.tin}}};
 #list library3kdb add {{{name} {qq} {type} {misc} {desc} {toggle mouse capture for clickable UI (toggle mouseActive)} {usage} {'qq'} {location} {common/events.tin}}};
+#list library3kdb add {{{name} {toggle-list} {type} {misc} {desc} {3kdb current toggles list} {usage} {'toggle-list'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {grep} {type} {misc} {desc} {search session scrollback buffer} {usage} {grep <pattern>} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {do_action} {type} {misc} {desc} {run all queued actionStack entries then clear stack} {usage} {'do_action'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {add_action} {type} {misc} {desc} {queue one action table row on actionStack if name not already queued} {usage} {add_action braced table row same shape as actionStack items} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {remove_action} {type} {misc} {desc} {remove queued row from actionStack by matching name field} {usage} {remove_action braced table row or same name token as add_action} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {beep} {type} {misc} {desc} {bell if beepon flag set} {usage} {'beep'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {bagall} {type} {misc} {desc} {bag all loose items} {usage} {'bagall'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {unbagall} {type} {misc} {desc} {remove all from bag to room} {usage} {'unbagall'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {useHeal} {type} {misc} {desc} {use healing items from heal list} {usage} {'useHeal'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {i} {type} {misc} {desc} {inventory summary helper} {usage} {'i'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {los} {type} {misc} {desc} {send lineofsight to MUD} {usage} {'los'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {stashlist} {type} {misc} {desc} {stash list helper with assemble hooks} {usage} {'stashlist'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {inputswitch} {type} {misc} {desc} {switch input to named session} {usage} {inputswitch <session>} {location} {common/events.tin}}};
+#list library3kdb add {{{name} {reset_standings} {type} {misc} {desc} {reset party standings table} {usage} {'reset_standings'} {location} {common/party.tin}}};
+#list library3kdb add {{{name} {setsplit} {type} {misc} {desc} {reapply split layout after resize} {usage} {'setsplit'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {init_screen} {type} {misc} {desc} {full screen redraw and layout} {usage} {'init_screen'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {draw_all} {type} {misc} {desc} {redraw hpbar chat caption and room strips that are toggled on} {usage} {'draw_all'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {caption-help} {type} {misc} {desc} {caption panel commands help} {usage} {'caption-help'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {caption} {type} {misc} {desc} {show data caption panel} {usage} {'caption'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {caption+} {type} {misc} {desc} {caption panel next tab} {usage} {'caption+'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {caption-} {type} {misc} {desc} {caption panel previous tab} {usage} {'caption-'} {location} {common/draw.tin}}};
+#list library3kdb add {{{name} {deadman} {type} {misc} {desc} {idle deadman arm disarm and timers} {usage} {deadman help for syntax} {location} {modules/deadman/deadman.tin}}};
+#list library3kdb add {{{name} {deadman-help} {type} {misc} {desc} {show deadman client help} {usage} {'deadman-help'} {location} {modules/deadman/deadman.tin}}};
+#list library3kdb add {{{name} {deadman-list} {type} {misc} {desc} {list deadman presets} {usage} {'deadman-list'} {location} {modules/deadman/deadman.tin}}};
+#list library3kdb add {{{name} {deadman+} {type} {misc} {desc} {add deadman named preset} {usage} {deadman+ <name>} {location} {modules/deadman/deadman.tin}}};
+#list library3kdb add {{{name} {deadman-} {type} {misc} {desc} {remove deadman preset} {usage} {deadman- <name>} {location} {modules/deadman/deadman.tin}}};
+#list library3kdb add {{{name} {deadman-clear} {type} {misc} {desc} {clear all deadman presets} {usage} {'deadman-clear'} {location} {modules/deadman/deadman.tin}}};
+#list library3kdb add {{{name} {quest_newbie} {type} {misc} {desc} {newbie quest helper} {usage} {'quest_newbie'} {location} {common/quests/aliases.tin}}};
+#list library3kdb add {{{name} {cove_gems} {type} {misc} {desc} {cove gems pickup run} {usage} {'cove_gems'} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {aoeon} {type} {misc} {desc} {armour of elements on} {usage} {'aoeon'} {location} {common/eq/armour_of_elements.tin}}};
+#list library3kdb add {{{name} {aoeoff} {type} {misc} {desc} {armour of elements off} {usage} {'aoeoff'} {location} {common/eq/armour_of_elements.tin}}};
+#list library3kdb add {{{name} {aoeimmolate} {type} {misc} {desc} {send immolate corpse once} {usage} {'aoeimmolate'} {location} {common/eq/armour_of_elements.tin}}};
+#list library3kdb add {{{name} {firebat_west} {type} {misc} {desc} {walk west into firebat hunting loop} {usage} {'firebat_west'} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {firebat_return} {type} {misc} {desc} {walk back out of firebat loop} {usage} {'firebat_return'} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {qt_firebat_west} {type} {misc} {desc} {qtrance west into firebat loop} {usage} {'qt_firebat_west'} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {qt_firebat_return} {type} {misc} {desc} {qtrance return from firebat loop} {usage} {'qt_firebat_return'} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {cow_run} {type} {misc} {desc} {gather cow herds speedwalk from southwest corner} {usage} {'cow_run'} {location} {common/areas/misc_common.tin}}};
+#list library3kdb add {{{name} {dsolve} {type} {misc} {desc} {fallout shelter door solver start with door room number} {usage} {dsolve <door number>} {location} {common/areas/falloutshelter.tin}}};
+#list library3kdb add {{{name} {stopdsolve} {type} {misc} {desc} {stop fallout shelter door solver} {usage} {'stopdsolve'} {location} {common/areas/falloutshelter.tin}}};
+#list library3kdb add {{{name} {fdkey} {type} {misc} {desc} {send saved door combo after dsolve same door number} {usage} {fdkey <door number>} {location} {common/areas/falloutshelter.tin}}};
+
+
+#NOP -------------------------- Debug Aliases ----------------------------------;
+
+#list library3kdb add {{{name} {debug} {type} {debug} {desc} {TinTin debug all on plus send echo} {usage} {'debug'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {debugoff} {type} {debug} {desc} {turn off debug and send hook} {usage} {'debugoff'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {echo_on} {type} {debug} {desc} {echo outbound sends without full debug} {usage} {'echo_on'} {location} {common/aliases.tin}}};
+#list library3kdb add {{{name} {mipdebug} {type} {debug} {desc} {turn on MIP debug output (toggle mipdebug)} {usage} {'mipdebug'} {location} {modules/mip/mip.tin}}};
+#list library3kdb add {{{name} {mipdebugoff} {type} {debug} {desc} {turn off MIP debug output (toggle mipdebug)} {usage} {'mipdebugoff'} {location} {modules/mip/mip.tin}}};
 
 #NOP -------------------------- MIP Aliases ----------------------------------;
 #list library3kdb add {{{name} {blacklist} {type} {mip} {desc} {block names from MIP chat window (still logged and Discord)} {usage} {blacklist / blacklist+ name / blacklist- name / blacklist-clear} {location} {modules/mip/blacklist.tin}}};
-#list library3kdb add {{{name} {mipdebug} {type} {mip} {desc} {turn on MIP debug output (toggle mipdebug)} {usage} {'mipdebug'} {location} {modules/mip/mip.tin}}};
-#list library3kdb add {{{name} {mipdebugoff} {type} {mip} {desc} {turn off MIP debug output (toggle mipdebug)} {usage} {'mipdebugoff'} {location} {modules/mip/mip.tin}}};
+#list library3kdb add {{{name} {mipon} {type} {mip} {desc} {enable MIP capture class} {usage} {'mipon'} {location} {modules/mip/mip.tin}}};
+#list library3kdb add {{{name} {mipoff} {type} {mip} {desc} {disable MIP capture class} {usage} {'mipoff'} {location} {modules/mip/mip.tin}}};
+#list library3kdb add {{{name} {chatlog} {type} {mip} {desc} {chat category and logging controls} {usage} {chatlog <subcommand or option>} {location} {modules/mip/chatlog.tin}}};
 
 #NOP -------------------------- Corpse Aliases ----------------------------------;
 
+#list library3kdb add {{{name} {corpsetrig} {type} {corpse} {desc} {show or edit corpse_trig queue} {usage} {see corpsetrig-help} {location} {common/corpsetrig.tin}}};
 #list library3kdb add {{{name} {corpsetrig-help} {type} {corpse} {desc} {corpse trigger help} {usage} {'corpsetrig-help'} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpse_trig} {type} {corpse} {desc} {run queued corpse actions after a kill} {usage} {'corpse_trig'} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig-all} {type} {corpse} {desc} {show active queue and guild-filtered preset list} {usage} {'corpsetrig-all'} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig-on} {type} {corpse} {desc} {enable corpse_trig firing} {usage} {'corpsetrig-on'} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig-off} {type} {corpse} {desc} {disable corpse_trig firing} {usage} {'corpsetrig-off'} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig-clear} {type} {corpse} {desc} {clear all queued corpse actions} {usage} {'corpsetrig-clear'} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig+} {type} {corpse} {desc} {add preset or custom action to queue} {usage} {corpsetrig+ action name} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig-} {type} {corpse} {desc} {remove action by name or slot number} {usage} {corpsetrig- name or number} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig++} {type} {corpse} {desc} {raise an action priority in queue} {usage} {corpsetrig++ action name} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig--} {type} {corpse} {desc} {lower an action priority in queue} {usage} {corpsetrig-- action name} {location} {common/corpsetrig.tin}}};
+#list library3kdb add {{{name} {corpsetrig-kb} {type} {corpse} {desc} {toggle killing-blow only versus all blows} {usage} {'corpsetrig-kb'} {location} {common/corpsetrig.tin}}};
 #list library3kdb add {{{name} {dcoffin} {type} {corpse} {desc} {auto run to morgue and donate coffin} {usage} {'dcoffin'} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {dcoffin1} {type} {corpse} {desc} {donate coffin variant one} {usage} {'dcoffin1'} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {dcoffin2} {type} {corpse} {desc} {donate coffin variant two} {usage} {'dcoffin2'} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {check_corpses} {type} {corpse} {desc} {refresh corpse inventory state} {usage} {'check_corpses'} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {corpse_select} {type} {corpse} {desc} {unwrap deslab or uncooler next corpse by priority} {usage} {'corpse_select'} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {cooler_rotate} {type} {corpse} {desc} {move corpses into cooler with trace glyph necro uses qtrance} {usage} {cooler_rotate count or repeat digit} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {check_box} {type} {corpse} {desc} {parse colossal box look line into corpses key count} {usage} {check_box storage table key} {location} {modules/corpsemanager/corpsemanager.tin}}};
+#list library3kdb add {{{name} {corpse_select_necro} {type} {corpse} {desc} {necromancer corpse picker} {usage} {'corpse_select_necro'} {location} {modules/corpsemanager/corpsemanager.tin}}};
 
 #NOP -------------------------- Combat Aliases ----------------------------------;
 
 #list library3kdb add {{{name} {strategy-list} {type} {combat} {desc} {3kdb available strategies} {usage} {'strategy-list'} {location} {common/strategy.tin}}};
 #list library3kdb add {{{name} {strategy-clear} {type} {combat} {desc} {clear strategies} {usage} {'strategy-clear'} {location} {common/strategy.tin}}};
+#list library3kdb add {{{name} {strategy} {type} {combat} {desc} {run named strategy} {usage} {strategy <name>} {location} {common/strategy.tin}}};
+#list library3kdb add {{{name} {strategies} {type} {combat} {desc} {list or manage strategies} {usage} {'strategies'} {location} {common/strategy.tin}}};
+#list library3kdb add {{{name} {mka-help} {type} {combat} {desc} {mob kill action help} {usage} {'mka-help'} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka-on} {type} {combat} {desc} {enable mob kill actions} {usage} {'mka-on'} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka-off} {type} {combat} {desc} {disable mob kill actions} {usage} {'mka-off'} {location} {common/mob_kill_action.tin}}};
 #list library3kdb add {{{name} {mka-all} {type} {combat} {desc} {setup mob kill actions} {usage} {'mka-all'} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka-check} {type} {combat} {desc} {list queued mob kill actions with priorities} {usage} {'mka-check'} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka-clear} {type} {combat} {desc} {clear all mob kill action queue entries} {usage} {'mka-clear'} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka+} {type} {combat} {desc} {add preset or custom action repeat once to confirm unknown name} {usage} {mka+ action name} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka-} {type} {combat} {desc} {remove action by name or list index number} {usage} {mka- name or index} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka++} {type} {combat} {desc} {raise priority of named action one step} {usage} {mka++ action name} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka--} {type} {combat} {desc} {lower priority of named action one step} {usage} {mka-- action name} {location} {common/mob_kill_action.tin}}};
+#list library3kdb add {{{name} {mka} {type} {combat} {desc} {fire queued actions then kill target or first room mob} {usage} {mka optional mob name} {location} {common/mob_kill_action.tin}}};
 
 #NOP -------------------------- Bot Aliases ----------------------------------;
 #list library3kdb add {{{name} {bot_report} {type} {bot} {desc} {displays the progress and spoils of the current bot} {usage} {'bot_report'} {location} {common/bot/generic.tin}}};
@@ -445,6 +653,12 @@
 #list library3kdb add {{{name} {bcy-} {type} {bot} {desc} {remove bot from cycler list} {usage} {bcy+ <botalias> - Ex: bcy- smurfs} {location} {common/bot/bot_cycle.tin}}};
 #list library3kdb add {{{name} {botclear} {type} {bot} {desc} {clears bot cycler} {usage} {'botclear'} {location} {common/bot/bot_cycle.tin}}};
 #list library3kdb add {{{name} {nextarea} {type} {bot} {desc} {start next area in the bot cycle list} {usage} {'nextarea'} {location} {common/bot/bot_cycle.tin}}};
+#list library3kdb add {{{name} {cycle} {type} {bot} {desc} {run bot cycler step} {usage} {'cycle'} {location} {common/bot/bot_cycle.tin}}};
+#list library3kdb add {{{name} {ba-necro} {type} {bot} {desc} {preset necro bot area list} {usage} {'ba-necro'} {location} {common/bot/bot_cycle.tin}}};
+
+#NOP -- Dragon Realms bot scale tracking;
+#list library3kdb add {{{name} {scales} {type} {bot} {desc} {print dragon scale colors already collected for ignore list} {usage} {'scales'} {location} {common/bot/bots/dragonbot.tin}}};
+#list library3kdb add {{{name} {addscale} {type} {bot} {desc} {mark a dragon color to skip after smuggle scale} {usage} {addscale color name} {location} {common/bot/bots/dragonbot.tin}}};
 
 #NOP -------------------------- Trackers Aliases ----------------------------------;
 #list library3kdb add {{{name} {3kReport} {type} {trackers} {desc} {3kdb kill report - reports all kills - filter last # of kills or by mob name} {usage} {'3kReport' or 3kReport <#/mob>} {location} {common/3kReport.tin}}};
@@ -452,8 +666,6 @@
 #list library3kdb add {{{name} {summonDmg} {type} {trackers} {desc} {mage summon damage report} {usage} {'summonDmg'} {location} {modules/dmgtracker/dmgtracker_mage.tin}}};
 #list library3kdb add {{{name} {summonDmg-clear} {type} {trackers} {desc} {mage summon damage report - clear data} {usage} {'summonDmg-clear'} {location} {modules/dmgtracker/dmgtracker_mage.tin}}};
 #list library3kdb add {{{name} {summonDmgVaf} {type} {trackers} {desc} {mage summon damage report - requires numbers vaf perk} {usage} {'summonDmgVaf'} {helpfile} {help numbers} {location} {modules/dmgtracker/dmgtracker_mage.tin}}};
-#list library3kdb add {{{name} {jugg_report} {type} {trackers} {desc} {juggernaut gxp & mount report} {usage} {'jugg_report'} {location} {common/guilds/juggernaut/aliases.tin}}};
-#list library3kdb add {{{name} {reset_tracking} {type} {trackers} {desc} {juggernaut report - clear data} {usage} {'reset_tracking'} {location} {common/guilds/juggernaut/aliases.tin}}};
 #list library3kdb add {{{name} {reset_gxp} {type} {trackers} {desc} {general guild gxp tracking reset} {usage} {'reset_gxp'} {location} {common/status.tin}}};
 #list library3kdb add {{{name} {dstats} {type} {trackers} {desc} {damage tracking report - requires numbers vaf perk} {usage} {'dstats'} {location} {modules/dmgtracker/dmgtracker.tin}}};
 #list library3kdb add {{{name} {dreset} {type} {trackers} {desc} {reset damage tracker} {usage} {'dreset'} {location} {modules/dmgtracker/dmgtracker.tin}}};
@@ -463,6 +675,10 @@
 #list library3kdb add {{{name} {defStats} {type} {trackers} {desc} {defense tracking report} {usage} {'defStats'} {location} {modules/defense_tracker/defense_tracker.tin}}};
 #list library3kdb add {{{name} {istats} {type} {trackers} {desc} {item tracker extraordinaire} {usage} {'istats'} {location} {common/eq/item_tracker.tin}}};
 #list library3kdb add {{{name} {istats_reset} {type} {trackers} {desc} {reset item tracker} {usage} {'istats_reset'} {location} {common/eq/item_tracker.tin}}};
-#list library3kdb add {{{name} {reset_trackers} {type} {trackers} {desc} {reset all damage & item tracking} {usage} {'reset_trackers'} {location} {common/config.tin}}};
+#list library3kdb add {{{name} {defStats_reset} {type} {trackers} {desc} {reset defense stats tracker} {usage} {'defStats_reset'} {location} {modules/defense_tracker/defense_tracker.tin}}};
+#list library3kdb add {{{name} {spellDmg-clear} {type} {trackers} {desc} {clear spell damage tracker} {usage} {'spellDmg-clear'} {location} {modules/dmgtracker/dmgtracker_mage.tin}}};
+#list library3kdb add {{{name} {3kReport-config} {type} {trackers} {desc} {configure kill report options} {usage} {'3kReport-config'} {location} {common/3kReport.tin}}};
+#list library3kdb add {{{name} {3kReport+} {type} {trackers} {desc} {add kill report filter} {usage} {'3kReport+'} {location} {common/3kReport.tin}}};
+#list library3kdb add {{{name} {3kReport-} {type} {trackers} {desc} {remove kill report filter} {usage} {'3kReport-'} {location} {common/3kReport.tin}}};
 
 #class {3kdb_library} {close}

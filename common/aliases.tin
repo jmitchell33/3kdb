@@ -340,6 +340,7 @@
     
     #NOP -- Reload everything in proper order;
     #read common/index.tin;
+    #read modules/helpers/helpers.tin;
     #read common/guilds/$guild/index.tin;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
@@ -355,6 +356,14 @@
 
     #NOP -- Initialize deadman;
     _init_deadman;
+
+    #NOP -- Gag spam;
+    #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
+    #line oneshot #gag {^You find nothing of interest.};
+    #line oneshot #gag {^Perform touch at whom?};
+    #line oneshot #gag {^There is no reason to '(powers' here.};
+    #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
+    #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
     
     #NOP -- Wait for MIP to initialize before drawing;
     #delay 3 {
@@ -365,14 +374,6 @@
         .update_gags;
         _mob_status_clear;
         reset_trackers;
-        
-        #NOP -- Gag spam;
-        #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
-        #line oneshot #gag {^You find nothing of interest.};
-        #line oneshot #gag {^Perform touch at whom?};
-        #line oneshot #gag {^There is no reason to '(powers' here.};
-        #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
-        #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
     };
     
     #NOP -- Initialize screen after everything is loaded;
