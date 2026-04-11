@@ -287,6 +287,14 @@
             #send {!info %0};
         };
     };
+    #elseif {"$guild" == "necromancer"} {
+        #if {"%0" == ""} {
+            #send {!info};
+        };
+        #else {
+            #send {!info %0};
+        }
+    };
 };
 
 #NOP -- see guild info on others;
@@ -307,6 +315,9 @@
         #send {!frecall %0};
     };
     #elseif {"$guild" == "monk"} {
+        #send {!gfinger %0};
+    };
+    #elseif {"$guild" == "necromancer"} {
         #send {!gfinger %0};
     };
 };
@@ -839,6 +850,7 @@
     };
     #elseif {"$guild" == "necromancer"} {
         reflex clear;
+        reflex add sp >5% invoke psionic;
         reflex combat on;
         reflex start
     };
@@ -1290,6 +1302,7 @@
     };
     #elseif {"$guild" == "necromancer"} {
         strategy-clear;
+        strategy+ call
     };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>}
@@ -1427,6 +1440,13 @@
             #elseif {"$guild" == "necromancer"} {
                 #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
                 corpsetrig-clear;
+                corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ absorbSp2;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ conworth;
                 corpsetrig-on;
             };
             #else {
@@ -1901,6 +1921,12 @@
                 #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
                 corpsetrig-clear;
                 corpsetrig-off
+            };
+            #NOP -- necromancer;
+            #elseif {"$guild" == "necromancer"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ conWorth
             };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any party corpsetrig settings in this alias!!<088>};

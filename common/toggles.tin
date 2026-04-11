@@ -1,0 +1,67 @@
+#class {common_toggles} {kill};
+#class {common_toggles} {open};
+
+#NOP -- Generic toggle switch;
+#delay 6 {
+    #if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
+    #if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 1};
+    #if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
+    #if {"${toggles[chatlog_says]}" == ""} {#var toggles[chatlog_says] 1};
+    #if {"${toggles[cult]}" == ""} {#var toggles[cult] 0};
+    #if {"${toggles[corpse_echo]}" == ""} {#var toggles[corpse_echo] 0};
+    #if {"${toggles[emote_follow]}" == ""} {#var toggles[emote_follow] 1};
+    #if {"${toggles[emote_heal]}" == ""} {#var toggles[emote_heal] 1};
+    #if {"${toggles[emote_eheal]}" == ""} {#var toggles[emote_eheal] 1};
+    #if {"${toggles[emote_rally]}" == ""} {#var toggles[emote_rally] 1};
+    #if {"${toggles[emote_corpse]}" == ""} {#var toggles[emote_corpse] 1};
+    #if {"${toggles[emote_dungeon_clear]}" == ""} {#var toggles[emote_dungeon_clear] 1};
+    #if {"${toggles[teleport]}" == ""} {#var toggles[teleport] 1};
+
+    #if {"$guild" == "necromancer"} {
+        #if {"${toggles[emote_aid]}" == ""} {#var toggles[emote_aid] 1};
+    };
+
+    #if {"${toggles[go_echo]}" == ""} {#var toggles[go_echo] 1};
+    #if {"${toggles[discord_post]}" == ""} {#var toggles[discord_post] 0};
+    #var discordPost $toggles[discord_post];
+};
+
+#alias {toggle} {
+    #format toggle_var {%l} {%0};
+    #format toggle_var {%p} {$toggle_var};
+    #if {"$toggle_var" == ""} {
+        #echo {<ffe>   -----  No toggle provided.  Use 'toggle-list' to see available options.  -----<088>};
+    } {
+        #if {"$toggles[$toggle_var]" == ""} {
+            #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
+        } {
+            #if $toggles[$toggle_var] {
+                #var toggles[$toggle_var] 0;
+                #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
+            } {
+                #var toggles[$toggle_var] 1;
+                #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
+            };
+            #if {"$toggle_var" == "discord_post"} {#var discordPost $toggles[discord_post]};
+        };
+    };
+};
+
+#alias {toggle-list} {
+    #echo {<cfb>   ---++---       3kdb Current Toggle Status      ---++---<088>};
+    #echo {<fff>       Usage: toggle <toggle alias> <088>};
+    #format tmpLine {       %-25s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
+    #echo {$tmpLine};
+    #foreach *toggles[] item {
+        #if {$toggles[$item]} {
+            #format tmpLine {        %-25s         %+8s} {$item} {on};
+            #echo {<dfc>$tmpLine<088>};
+        } {
+            #format tmpLine {        %-25s         %+9s} {$item} { off};
+            #echo {<fbb>$tmpLine<088>};
+        };
+    };
+    #echo {<cfb>   ---++---        ---++---        ---++---       ---++---<088>};
+};
+
+#class {common_toggles} {close};
