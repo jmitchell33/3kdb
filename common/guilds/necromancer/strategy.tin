@@ -30,6 +30,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {conjure2} {active} {0} {description} {Conjure Undead: Conjure, Nuke, UA, Rapture (No Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {gemino} {active} {0} {description} {Preserve Gemino Corpses}}};
 #list strategyList add {{{guild} {necromancer} {name} {ug} {active} {0} {description} {Unholy Ground}}};
+#list strategyList add {{{guild} {necromancer} {name} {spark} {active} {0} {description} {Lich: Spark}}};
 #list strategyList indexate name;
 
 #NOP -- Actions to perform at any time in the fight;
@@ -111,11 +112,12 @@
     checkStrategy {scythe} {scythe};
     checkStrategy {call} {call};
     checkStrategy {psibleed} {psibleed};
-    checkStrategy {fury_prime} {#if {$my[necromancer][glamors][current]} {fury prime}};
-    checkStrategy {fury} {#if {$my[necromancer][glamors][current]} {fury}};
-    checkStrategy {rage_prime} {#if {$my[necromancer][glamors][current]} {rage prime}};
-    checkStrategy {rage} {#if {$my[necromancer][glamors][current]} {rage}};
+    checkStrategy {fury_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {fury prime}};
+    checkStrategy {fury} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {fury}};
+    checkStrategy {rage_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {rage prime}};
+    checkStrategy {rage} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {rage}};
     checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
+    checkStrategy {spark} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {spark}};
 };
 
 #class {guild_strategy} {close};

@@ -287,6 +287,14 @@
             #send {!info %0};
         };
     };
+    #elseif {"$guild" == "necromancer"} {
+        #if {"%0" == ""} {
+            #send {!info};
+        };
+        #else {
+            #send {!info %0};
+        }
+    };
 };
 
 #NOP -- see guild info on others;
@@ -307,6 +315,9 @@
         #send {!frecall %0};
     };
     #elseif {"$guild" == "monk"} {
+        #send {!gfinger %0};
+    };
+    #elseif {"$guild" == "necromancer"} {
         #send {!gfinger %0};
     };
 };
@@ -839,6 +850,7 @@
     };
     #elseif {"$guild" == "necromancer"} {
         reflex clear;
+        reflex add sp >5% invoke psionic;
         reflex combat on;
         reflex start
     };
@@ -1290,6 +1302,8 @@
     };
     #elseif {"$guild" == "necromancer"} {
         strategy-clear;
+        strategy call;
+        strategy spark
     };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>}
@@ -1427,6 +1441,13 @@
             #elseif {"$guild" == "necromancer"} {
                 #echo {<ffa>No argument provided - setting up default corpsetrig for guild: <fff>$guild!!<088>};
                 corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ absorb prime;
+                corpsetrig+ absorb prime;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ conworth;
                 corpsetrig-on;
             };
             #else {
@@ -1538,6 +1559,15 @@
             #elseif {"$guild" == "necromancer"} {
                 #echo {<ffa>sz argument passed - setting up sz corpsetrig for guild: <fff>$guild!!<088>};
                 corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ absorb prime;
+                corpsetrig+ absorb prime;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ conworth;
+                corpsetrig+ szCaps;
+                corpsetrig+ szGreenCap;
                 corpsetrig-on;
             };
             #else {
@@ -1853,6 +1883,15 @@
             #elseif {"$guild" == "necromancer"} {
                 #echo {<ffa>donates argument passed - setting up donates corpsetrig for guild: <fff>$guild!!<088>};
                 corpsetrig-clear;
+                corpsetrig+ wrap;
+                corpsetrig+ absorb prime;
+                corpsetrig+ absorb prime;
+                corpsetrig+ divvy;
+                corpsetrig+ getAll;
+                corpsetrig+ crafting;
+                corpsetrig+ conworth;
+                corpsetrig+ bag1;
+                corpsetrig+ bag1;
                 corpsetrig-on;
             };
             #else {
@@ -1902,6 +1941,12 @@
                 corpsetrig-clear;
                 corpsetrig-off
             };
+            #NOP -- necromancer;
+            #elseif {"$guild" == "necromancer"} {
+                #echo {<ffa>party argument passed - setting up party corpsetrig for guild: <fff>$guild!!<088>};
+                corpsetrig-clear;
+                corpsetrig+ conWorth
+            };
             #else {
                 #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any party corpsetrig settings in this alias!!<088>};
             };
@@ -1910,6 +1955,22 @@
             #echo {<fff>Mycorpsetrig '%0' Unknown. Use 'mycorpsetrig help' to see available options.<088>};
         };
     };
+};
+
+#nop -- corpsetrig for sewers;
+#alias {mycorpsetrig-sewers} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ absorb prime;
+    corpsetrig+ absorb prime;
+    corpsetrig+ divvy;
+    corpsetrig+ badgers_corpsegrab;
+    corspetrig+ badgers_corpsegrab;
+    corpsetrig+ crafting;
+    corpsetrig+ conworth;
+    corpsetrig+ bag1;
+    corpsetrig+ bag1;
+    corpsetrig-on;
 };
 
 #NOP -- fai above 50% gp1 otherwise reclaim;
@@ -2178,6 +2239,92 @@
 
 #alias {writelog} {
     #system {echo ROUND COUNT: $total_rounds >> chars/badger/badgerslog.log}
+};
+
+#NOP -- badgers priority ground loot table and grab alias after corpsetrig shows room;
+#list badgers_lootgrab_list clear;
+#list badgers_lootgrab_list add {{{long} {A hard iron lockbox} {target} {lockbox}}};
+#list badgers_lootgrab_list add {{{long} {A worn lockbox} {target} {lockbox}}};
+#list badgers_lootgrab_list add {{{long} {A shining trident} {target} {trident}}};
+#list badgers_lootgrab_list add {{{long} {A%* machete%*} {target} {machete}}};
+#list badgers_lootgrab_list add {{{long} {A%* mattock%*} {target} {mattock}}};
+#list badgers_lootgrab_list add {{{long} {A%* axe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* pickaxe%*} {target} {pickaxe}}};
+#list badgers_lootgrab_list add {{{long} {A%* morningstar%*} {target} {morningstar}}};
+#list badgers_lootgrab_list add {{{long} {A%* club%*} {target} {club}}};
+#list badgers_lootgrab_list add {{{long} {A%* shortsword%*} {target} {shortsword}}};
+#list badgers_lootgrab_list add {{{long} {A%* knife%*} {target} {knife}}};
+#list badgers_lootgrab_list add {{{long} {A%* rapier%*} {target} {rapier}}};
+#list badgers_lootgrab_list add {{{long} {A%* no-dachi%*} {target} {no-dachi}}};
+#list badgers_lootgrab_list add {{{long} {A%* katana%*} {target} {katana}}};
+#list badgers_lootgrab_list add {{{long} {A%* claymore%*} {target} {claymore}}};
+#list badgers_lootgrab_list add {{{long} {A%* cutlass%*} {target} {cutlass}}};
+#list badgers_lootgrab_list add {{{long} {A%* sai%*} {target} {sai}}};
+#list badgers_lootgrab_list add {{{long} {A%* dagger%*} {target} {dagger}}};
+#list badgers_lootgrab_list add {{{long} {A%* falchion%*} {target} {falchion}}};
+#list badgers_lootgrab_list add {{{long} {A%* sledgehammer%*} {target} {hammer}}};
+#list badgers_lootgrab_list add {{{long} {A%* dirk%*} {target} {dirk}}};
+#list badgers_lootgrab_list add {{{long} {A%* handaxe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* warhammer%*} {target} {hammer}}};
+#list badgers_lootgrab_list add {{{long} {A%* battleaxe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* sabre%*} {target} {sabre}}};
+#list badgers_lootgrab_list add {{{long} {A%* war-axe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* khopesh%*} {target} {khopesh}}};
+#list badgers_lootgrab_list add {{{long} {A%* mace%*} {target} {mace}}};
+#list badgers_lootgrab_list add {{{long} {A%* nunchaku%*} {target} {nunchaku}}};
+#list badgers_lootgrab_list add {{{long} {A%* flail%*} {target} {flail}}};
+#list badgers_lootgrab_list add {{{long} {A%* kynac%*} {target} {kynac}}};
+#list badgers_lootgrab_list add {{{long} {A%* blade%*} {target} {blade}}};
+#list badgers_lootgrab_list add {{{long} {A%* stiletto%*} {target} {stiletto}}};
+#list badgers_lootgrab_list add {{{long} {A%* sword%*} {target} {sword}}};
+#list badgers_lootgrab_list add {{{long} {A%* foil%*} {target} {foil}}};
+#list badgers_lootgrab_list add {{{long} {A%* hatchet%*} {target} {hatchet}}};
+#list badgers_lootgrab_list add {{{long} {A%* main gauche%*} {target} {gauche}}};
+#list badgers_lootgrab_list add {{{long} {A%* trident%*} {target} {trident}}};
+#list badgers_lootgrab_list add {{{long} {A blue stone necklace} {target} {necklace}}};
+#list badgers_lootgrab_list add {{{long} {Leather girdle} {target} {girdle}}};
+#list badgers_lootgrab_list add {{{long} {A magic scroll} {target} {scroll}}};
+#list badgers_lootgrab_list add {{{long} {Crystal ball} {target} {ball}}};
+#list badgers_lootgrab_list add {{{long} {%*Shield} {target} {shield}}};
+#list badgers_lootgrab_list add {{{long} {%*shield} {target} {shield}}};
+#list badgers_lootgrab_list add {{{long} {%*amulet%*} {target} {amulet}}};
+#list badgers_lootgrab_list add {{{long} {%*Amulet%*} {target} {amulet}}};
+#list badgers_lootgrab_list add {{{long} {%*bracers} {target} {bracers}}};
+#list badgers_lootgrab_list add {{{long} {%*ring} {target} {ring}}};
+#list badgers_lootgrab_list add {{{long} {%*Girdle} {target} {girdle}}};
+#list badgers_lootgrab_list add {{{long} {%*Cloak%*} {target} {cloak}}};
+#list badgers_lootgrab_list add {{{long} {%*cloak%*} {target} {cloak}}};
+#list badgers_lootgrab_list add {{{long} {%*Boots} {target} {boots}}};
+#list badgers_lootgrab_list add {{{long} {%*boots} {target} {boots}}};
+#list badgers_lootgrab_list add {{{long} {%*gloves} {target} {gloves}}};
+#list badgers_lootgrab_list add {{{long} {%*Gloves} {target} {gloves}}};
+#list badgers_lootgrab_list add {{{long} {%*Gauntlets} {target} {gauntlets}}};
+#list badgers_lootgrab_list add {{{long} {%*Armour} {target} {armour}}};
+#list badgers_lootgrab_list add {{{long} {%*Helmet} {target} {helmet}}};
+#list badgers_lootgrab_list add {{{long} {%*flask%*} {target} {flask}}};
+#list badgers_lootgrab_list add {{{long} {%*necklace} {target} {necklace}}};
+#list badgers_lootgrab_list add {{{long} {%*wand} {target} {wand}}};
+#list badgers_lootgrab_list add {{{long} {%*staff%*} {target} {staff}}};
+#list badgers_lootgrab_list add {{{long} {%*sword} {target} {sword}}};
+#list badgers_lootgrab_list add {{{long} {%*Codpiece} {target} {codpiece}}};
+#list badgers_lootgrab_list add {{{long} {%* gemstone} {target} {gemstone}}};
+#list badgers_lootgrab_list add {{{long} {%* gold coins} {target} {coins}}};
+#list badgers_lootgrab_list add {{{long} {Candle} {target} {candle}}};
+#list badgers_lootgrab_list add {{{long} {%*Chainmail%*} {target} {chainmail}}};
+#list badgers_lootgrab_list add {{{long} {A suit of armor} {target} {armor}}};
+#list badgers_lootgrab_list add {{{long} {%* fragment of %*} {target} {fragment}}};
+#list badgers_lootgrab_list add {{{long} {%* essence of %*} {target} {essence}}};
+#list badgers_lootgrab_list add {{{long} {%* heart of %*} {target} {heart}}};
+#alias {badgers_corpsegrab} {
+    #loop 1 &badgers_lootgrab_list[] _badger_cl_i {
+        #var _badger_lpat {$badgers_lootgrab_list[$_badger_cl_i][long]};
+        #replace {_badger_lpat} {%*} {.*};
+        #list _badger_cg_hits create;
+        #grep {$_badger_lpat} {_badger_cg_hits} {_badger_cg_cnt};
+        #if {&_badger_cg_hits[] > 0} {
+            #send {get $badgers_lootgrab_list[$_badger_cl_i][target]};
+        };
+    };
 };
 
 #nop -- gswap;

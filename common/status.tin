@@ -121,6 +121,7 @@
     #var xchat[log][emotes] $chat[log][emotes];
     #var xdReportList $dReportList;
     #var xtoggles $toggles;
+    #var xdiscordPost $discordPost;
     #var xdeadmanIdleTimeout $deadmanIdleTimeout;
     #var xdeadmanTimeoutActions $deadmanTimeoutActions;
     #var xdeadman_armed $deadman_armed;
@@ -191,6 +192,8 @@
     #if {"$whitelist" == "$xwhitelist"} {#var whitelist {}};
     #if {"$dReportList" == "$xdReportList"} {#read common/3kReport.tin};
     #if {"$toggles" == "$xtoggles"} {#var toggles {}};
+    #if {"$xdiscordPost" == "" || "$xdiscordPost" == "xdiscordPost"} {#var discordPost 0} {#var discordPost $xdiscordPost};
+    #var toggles[discord_post] $discordPost;
     #if {"$deadmanTimeoutActions" == "xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};
 };
 

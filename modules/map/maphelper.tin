@@ -35,7 +35,7 @@
 			#format _go_map_int {%d} {%1};
 			#if {"$_go_map_int" == "%1"} {
 				#var roomfound 1;
-				#echo {<dfa>Running to room vnum <faa>%1<fcd> (direct).<088>};
+				#if {"$toggles[go_echo]" != "0"} {#echo {<dfa>Running to room vnum <faa>%1<fcd> (direct).<088>}};
 				#map run %1;
 			};
 		};
@@ -43,7 +43,7 @@
 			#foreach $speedruns[%*] index {
 				#regexp {"%1"} {"$index[name]"} {
 					#var roomfound 1;
-					#echo {<dfa>Running to speedrun <faa>$index[name]<fcd> (vnum <faa>$index[vnum]<fcd>).<088>};
+					#if {"$toggles[go_echo]" != "0"} {#echo {<dfa>Running to speedrun <faa>$index[name]<fcd> (vnum <faa>$index[vnum]<fcd>).<088>}};
 					#map run $index[vnum];
 				};
 			};
