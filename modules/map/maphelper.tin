@@ -3,25 +3,27 @@
 #action {You have arrived at a dungeon entrance.} {rating};
 
 #alias {maphelp} {
-	#show mapsave/mapload - save/load from map/3k_map.tin;
-	#show map <roomname> - set map at roomname;
-	#show infoPane - get current room info;
-	#show mapexit <exit> <command> - tell the exit dir to execute command;
-	#show mapname <name> - rename current room;
-	#show mapnote <note> - set current room note;
-	#show mapsym <char> - set the current rooms symbol;
-	#show mapgo <num> - Move the map to room #;
-	#show mapdig <dir> [new]- makes an exit in dir, new argument leads to new room;
-	#show mapdelete <exit> - deletes the exit (unlinks and deletes the room);
-	#show mapunlink <exit> - unlinks the exit from the room it points to;
-	#show maplink <exit> <room#> - link exit to a room;
-	#show mapinsert <room#> - insert a room	?;
-	#show mapm <dir> - move the map in dir;
-	#show maparea <name> - set area name for the current room;
-	#show areamapped <area> - show which rooms are mapped in this area;
+	#echo {mapsave / mapload - save or load common/map/3k_shared.map};
+	#echo {map <roomname> - set map at roomname};
+	#echo {infoPane - get current room info};
+	#echo {mapexit <exit> <command> - exit direction runs that command};
+	#echo {mapname <name> - rename current room};
+	#echo {mapnote <note> - set current room note};
+	#echo {mapsym <char> - set the current room symbol};
+	#echo {mapgo <num> - move the map cursor to room vnum};
+	#echo {mapdig <dir> [new] - new exit and room; optional second arg links back};
+	#echo {mapdelete <exit> - delete exit (unlinks and removes room)};
+	#echo {mapunlink <exit> - unlink exit from destination};
+	#echo {maplink <exit> <room#> - link exit to a room vnum};
+	#echo {mapinsert <room#> - insert a room};
+	#echo {mapm <dir> - move the map cursor one step};
+	#echo {maparea <name> - set area name for the current room};
+	#echo {areamapped <area> - list rooms mapped in that area};
+	#echo {go <name or vnum> - map run to speedrun name or numeric room vnum};
 };
 
-#alias {go} {
+#NOP -- go %1 in the alias pattern binds the first argument for TinTin++;
+#alias {go %1} {
 	#if {$bloodarc_active} {
 		#echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
 		#var bloodarc_active 0;
@@ -29,14 +31,24 @@
 		#if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
 		#map get roomvnum go_back;
 		#var roomfound 0;
-		#foreach $speedruns[%*] index {
-			#regexp {"%1"} {"$index[name]"} {
+		#if {"%1" != ""} {
+			#format _go_map_int {%d} {%1};
+			#if {"$_go_map_int" == "%1"} {
 				#var roomfound 1;
-				#showme {Found room %1 - here we go!};
-				#map run $index[vnum];
-			}
+				#echo {<dfa>Running to room vnum <faa>%1<fcd> (direct).<088>};
+				#map run %1;
+			};
 		};
-		#if !$roomfound {#showme {Unable to find %1}};
+		#if {!$roomfound} {
+			#foreach $speedruns[%*] index {
+				#regexp {"%1"} {"$index[name]"} {
+					#var roomfound 1;
+					#echo {<dfa>Running to speedrun <faa>$index[name]<fcd> (vnum <faa>$index[vnum]<fcd>).<088>};
+					#map run $index[vnum];
+				};
+			};
+		};
+		#if {!$roomfound} {#echo {<eaa>Unable to find %1<088>}};
 	};
 };
 
@@ -70,16 +82,17 @@
 	#format time %t {%m-%d-%y};
 	#var filename common/map/3k_shared_$time.tin;
 	#map write $filename;
+	.map_restore_static_if_not_mapping;
 };
 
-#alias {mapsave} { #map write common/map/3k_shared.map force;#show Map saved.;};
-#alias {mapload} { #map read common/map/3k_shared.map;#show Map loaded.;};
+#alias {mapsave} { #map write common/map/3k_shared.map force;#show Map saved.;.map_restore_static_if_not_mapping;};
+#alias {mapload} { #map read common/map/3k_shared.map;#show Map loaded.;.map_restore_static_if_not_mapping;};
 
 
 /* Modify/extend the map helpers: */
 #alias {mapf} {#map flag %1 %2};
 #alias {mapexit} {#map exit {%1} {COMMAND} {%2};#show Map exit created. %2 will lead %1.;mapsave;};
-#alias {mapname} {#map name %1;#show Map room named: %1;mapsave;};
+#alias {mapname} {#map name %0;#show Map room named: %0;mapsave;};
 #alias {mapdig} {
 	#map get roomvnum mapCurrentVnum;
 	#map dig {%1} new;
@@ -100,7 +113,7 @@
 #alias {maplink} {#map link {%1} {%2};#show Map linked: %1 will lead to %2;mapsave};
 #alias {mapinsert} {#map insert {%1};#show Room inserted: %1;,mapsave};
 #alias {mapm} {#map move %0};
-#alias {maparea} {#map set areaname %0;mapsave};
+#alias {maparea} {#map set roomarea %0;mapsave};
 
 
 #alias {mapfind} {
