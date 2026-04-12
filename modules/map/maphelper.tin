@@ -22,34 +22,24 @@
 	#echo {go <name or vnum> - map run to speedrun name or numeric room vnum};
 };
 
-#NOP -- go %1 in the alias pattern binds the first argument for TinTin++;
-#alias {go %1} {
-	#if {$bloodarc_active} {
-		#echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
-		#var bloodarc_active 0;
-	} {
-		#if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
-		#map get roomvnum go_back;
-		#var roomfound 0;
-		#if {"%1" != ""} {
-			#format _go_map_int {%d} {%1};
-			#if {"$_go_map_int" == "%1"} {
+#alias {go} {
+    #if {$bloodarc_active} {
+        #echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
+        #var bloodarc_active 0;
+    } {
+        #if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
+        #map get roomvnum go_back;
+        #var roomfound 0;
+		#loop 1 $speedruns_name[] tmpItem {
+			#if {"%1" == "$speedruns_name[$tmpItem]"} {
 				#var roomfound 1;
-				#if {"$toggles[go_echo]" != "0"} {#echo {<dfa>Running to room vnum <faa>%1<fcd> (direct).<088>}};
-				#map run %1;
+                #showme {Found room %1 - here we go!};
+                #map run $index[vnum];
+				#break;
 			};
 		};
-		#if {!$roomfound} {
-			#foreach $speedruns[%*] index {
-				#regexp {"%1"} {"$index[name]"} {
-					#var roomfound 1;
-					#if {"$toggles[go_echo]" != "0"} {#echo {<dfa>Running to speedrun <faa>$index[name]<fcd> (vnum <faa>$index[vnum]<fcd>).<088>}};
-					#map run $index[vnum];
-				};
-			};
-		};
-		#if {!$roomfound} {#echo {<eaa>Unable to find %1<088>}};
-	};
+        #if !$roomfound {#showme {Unable to find %1}};
+    };
 };
 
 #NOP -- Slowwalks based on getting new rooms;
