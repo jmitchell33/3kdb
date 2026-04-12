@@ -54,13 +54,13 @@
 
 #alias {mapgo} {
 	#var roomfound 0;
-	#foreach $speedruns[%*] index {
-        #regexp {"%1"} {"$index[name]"} {
+	#loop 1 &speedruns_name[] tmpItem {
+		#if {"%1" == "$speedruns_name[$tmpItem]"} {
 			#var roomfound 1;
-            #showme {Found room %1 - teleporting map there!};
-			#map go $index[vnum];
-        };
-    };
+            #echo {Found room %1 - teleporting map there!};
+			#map go $speedruns_vnum[$tmpItem];
+		};
+	};
 	#if !$roomfound {#showme {Unable to find %1}};
 };
 
