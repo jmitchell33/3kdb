@@ -30,15 +30,14 @@
         #if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
         #map get roomvnum go_back;
         #var roomfound 0;
-		#loop 1 $speedruns_name[] tmpItem {
+		#loop 1 &speedruns_name[] tmpItem {
 			#if {"%1" == "$speedruns_name[$tmpItem]"} {
 				#var roomfound 1;
                 #showme {Found room %1 - here we go!};
-                #map run $index[vnum];
-				#break;
+                #map run $speedruns_vnum[$tmpItem];
 			};
 		};
-        #if !$roomfound {#showme {Unable to find %1}};
+        #if !$roomfound {#echo {Unable to find %1}};
     };
 };
 
