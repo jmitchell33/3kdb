@@ -143,28 +143,31 @@
     };
 };
 
-#nop Solve Slot C;
 #alias {solveSlotC} {
-    #if {$dsolve_cancel == 0 && "$slotC" == {}} {
-        enter a $slotA, b $slotB, c $phase2List[$idx], d $controlcolor;
-        #delay {6} {
-            #if {"$line21" == "X"} {
-                #var slotC $phase2List[$idx];
-                #list {phase2List} {delete} {$idx};
-                #var slotD $phase2List[1];
-                #var phase2Complete 1;
-		#list {doorcombos} {set} {$doornum} {a $slotA, b $slotB, c $slotC, d $slotD};
-		};
-		#echo {Door code: $slotA, $slotB, $slotC, $slotD};
-		#echo {Door combo for room $doornum saved. Use "fdkey" to unlock door in future visits.};
-		enter a $slotA, b $slotB, c $slotC, d $slotD;
-		}; #else {
-                #math idx {$idx + 1};
-                solveSlotC;
-            };
-        };
-   };
+ #if {$dsolve_cancel == 0 && "$slotC" == {}} {
+  enter a $slotA, b $slotB, c $phase2List[$idx], d $controlcolor;
+  #delay {6} {
+   #if {"$line21" == "X"} {
+    #var slotC $phase2List[$idx];
+    #list {phase2List} {delete} {$idx};
+    #var slotD $phase2List[1];
+    #var phase2Complete 1;
 
+    #list {doorcombos} {set} {$doornum} {a $slotA, b $slotB, c $slotC, d $slotD};
+
+    #echo {Door code: $slotA, $slotB, $slotC, $slotD};
+    #echo {Door combo for room $doornum saved.
+Use "fdkey" to unlock door in future visits.};
+
+    enter a $slotA, b $slotB, c $slotC, d $slotD;
+   };
+   #else {
+    #math idx {$idx + 1};
+    solveSlotC;
+   };
+  };
+ };
+};
 
 #nop Alias for unlocking door when your code is valid;
 
