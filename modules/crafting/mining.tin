@@ -1,9 +1,47 @@
 #class {mining} {kill}
 #class {mining} {open}
 
-#NOP -- turn miner on and off;
-#alias {miner-on} {#read modules/crafting/miner.tin};
-#alias {miner-off} {killbot};
+#NOP -- miner-on reads miner tin miner-off tears down all miner classes;
+#alias {miner-on} {
+    #read modules/crafting/miner.tin
+};
+
+#alias {miner-off} {
+    #undelay minewalk;
+    #undelay jminewalk;
+    #class {miner} {kill};
+    #class {jewelminer} {kill};
+    #path stop;
+    #var {_miner_path_driver} {};
+    #class {minebot} {kill};
+    #class {jewelminebot} {kill}
+};
+
+#event {END OF PATH} {
+    #if {"$_miner_path_driver" == "ore"} {
+        #math curr_level {$curr_level + 1};
+        #if {$curr_level > $num_levels} {
+            #var {_miner_path_driver} {};
+            miner-off;
+        } {
+            #path load ${mine$mine_levels[${curr_level}]};
+            miner;
+            _step_room;
+        };
+    } {
+        #if {"$_miner_path_driver" == "jewel"} {
+            #math jewel_curr_level {$jewel_curr_level + 1};
+            #if {$jewel_curr_level > $jewel_num_levels} {
+                #var {_miner_path_driver} {};
+                miner-off;
+            } {
+                #path load ${mine$jewel_mine_levels[${jewel_curr_level}]};
+                jewelminer;
+                _step_jewel_room;
+            };
+        };
+    };
+};
 
 #NOP -- lookup mining deposits;
 #alias deposit-lookup {
@@ -75,6 +113,5 @@
         #echo {<fba>------------------------------------------------------------------<088>};
     };
 };
-
 
 #class {mining} {close}

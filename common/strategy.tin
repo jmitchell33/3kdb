@@ -90,13 +90,13 @@
 #list strategyList indexate name;
 
 #alias checkStrategy {
-    #if $debug[strategy] {#echo {<efc>RECEIVED %0<088>}};
+    #if {"$debug[strategy]" == "1"} {#echo {<efc>RECEIVED %0<088>}};
     #var strategy_found 0;
     #if {&strategyActive[] > 0} {
         #foreach $strategyActive[%*] item {
             #if {"$item[name]" == "%1"} {
                 #var strategy_found 1;
-                #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %2<088>}};
+                #if {"$debug[strategy]" == "1"} {#echo {<efc>Strategy: %1   <fab>ACTION: %2<088>}};
                 %2;
             };
         };
@@ -104,8 +104,8 @@
     #NOP -- If there is a 3rd arguement, do this if the strategy isn't listed;
     #NOP -- This is useful for items like gemino preservations where you still want to do;
     #NOP -- a different action if the strategy isn't active;
-    #if {!$strategy_found && "%3" !== ""} {
-        #if $debug[strategy] {#echo {<efc>Strategy: %1   <fab>ACTION: %3<088>}};
+    #if {!$strategy_found && "%3" != ""} {
+        #if {"$debug[strategy]" == "1"} {#echo {<efc>Strategy: %1   <fab>ACTION: %3<088>}};
         %3;
     };
 };
