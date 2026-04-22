@@ -257,11 +257,14 @@
 	#var mapstatic 1;
 	#var mapping on;
 }
+#alias {.map_restore_static_if_not_mapping} {#if {"$mapping" != "on"} {#map flag static on};};
+
 #alias {mapoff}{
 	#send !brief on yes;
 	#map flag static on;
 	#unvar mapstatic;
 	#unvar mapping;
+	#unticker {update_room_name} {} {};
 }
 #map flag static on;
 #unvar mapstatic;

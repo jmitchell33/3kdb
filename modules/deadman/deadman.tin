@@ -1,45 +1,245 @@
 #class {deadman} {open}
 
-#format deadmanIdleTimeout {%d} {$deadmanIdleTimeout}; 
+#format deadmanIdleTimeout {%d} {$deadmanIdleTimeout};
 #if {"$deadmanIdleTimeout" == "0"} {#var deadmanIdleTimeout 900};
 
+#nop -- Double-enter confirmation for custom deadman+ actions (same pattern as corpsetrig+);
+#var deadmanCustomActionConfirmToggle 1;
+
+#nop -- Optional preset catalog (same shape as corpseList entries). Add rows with #list deadmanPresetList add;
+#list deadmanPresetList clear;
+
+#nop -- Generic echo presets e.g. deadman+ stepper / deadman+ dmidle. One trailing <088> per coloured echo only;
+#list deadmanPresetList add {{{name} {stepper} {guild} {all} {action} {#echo {stepper paused due to deadman timer}} {active} {0} {preview} {stepper paused due to deadman timer}}};
+#list deadmanPresetList add {{{name} {dmidle} {guild} {all} {action} {#echo {<ffa>Deadman: idle timeout — check your session.<088>}} {active} {0} {preview} {Deadman: idle timeout — check your session.}}};
+#list deadmanPresetList add {{{name} {afk} {guild} {all} {action} {#echo {<ffa>AFK: deadman timer fired — you may be unattended.<088>}} {active} {0} {preview} {AFK: deadman timer fired — you may be unattended.}}};
+#list deadmanPresetList add {{{name} {away} {guild} {all} {action} {#echo {<ffa>Away: no input for deadman window — review combat or linkdead.<088>}} {active} {0} {preview} {Away: no input for deadman window — review combat or linkdead.}}};
+#list deadmanPresetList add {{{name} {ping} {guild} {all} {action} {#echo {<ffb>*** DEADMAN *** idle timer — check the session window.<088>}} {active} {0} {preview} {*** DEADMAN *** idle timer — check the session window.}}};
+
 #alias deadman {
-    #if {"%1" == "off"} {
-        #undelay {deadmanSwitch};
-        #echo {\n<efd>   ===============  <fac>DEADMAN OFF <efd>=============== \n};
+    #if {"%1" == ""} {
+        _deadman_show_help;
     } {
-        #math deadmanIdleTimeout {60 * %1};
-        #echo {\n<efd>   ===============  <fac>DEADMAN ENABLED FOR %1 MINUTES <efd>=============== \n};
-        #delay {deadmanSwitch} {
-            #if !$idle_flag {deadmanActions};
-        } {$deadmanIdleTimeout};
-        #delay 1 {#var idle_flag 1};
+        #if {"%1" == "help"} {
+            #echo {\n<fac>Type <efa>deadman<faa> alone for the full reference.<088>\n};
+        } {
+            #var _deadman_min_arg %1;
+            #format {_deadman_min_arg} {%p} {$_deadman_min_arg};
+            #format {_deadman_min_int} {%d} {$_deadman_min_arg};
+            #if {"$_deadman_min_arg" != "" && "$_deadman_min_int" == "$_deadman_min_arg" && "$_deadman_min_int" != "0"} {
+                #math deadmanIdleTimeout {60 * $_deadman_min_int};
+                #if {$deadmanIdleTimeout > 0} {
+                    #echo {\n<efd>=============== <fac>DEADMAN ENABLED FOR $_deadman_min_arg MINUTES <efd>===============<088>\n};
+                    #var idle_flag 0;
+                    #var deadman_armed 1;
+                    #var deadManTimeLeft $deadmanIdleTimeout;
+                    #delay {deadmanSwitch} {
+                        #if !$idle_flag {deadmanActions};
+                    } {$deadmanIdleTimeout};
+                } {
+                    #echo {<caa>deadman: that minute value is too large for the timer. Type <efa>deadman<faa> alone for help.<088>};
+                };
+            } {
+                #echo {<caa>deadman: minutes must be a positive whole number. Type <efa>deadman<faa> alone for help.<088>};
+            };
+        };
     };
+};
+
+#alias _deadman_show_help {
+    #echo {\n<ffb>====================  <dfa>DEADMAN <ffb>====================<088>};
+    #echo {\n<fbb>IDLE TIMER<088>};
+    #format deadmanFmtLine {  <efa>%-18s<fdc>%s<088>} {deadman} {Show this reference screen (no arguments).};
+    #echo {$deadmanFmtLine};
+    #format deadmanFmtLine {  <efa>%-18s<fdc>%s<088>} {deadman N} {N = positive whole minutes only. Any input resets the countdown.};
+    #echo {$deadmanFmtLine};
+    #echo {\n<fbb>ON TIMEOUT<088>};
+    #echo {  <fdc>Pauses the bot if active, runs <efa>_player_deadmanActions<fdc>, then runs each\n     <efa>deadmanTimeoutActions<fdc> entry in list order.<088>};
+    #echo {\n<fbb>ACTION QUEUE<088>};
+    #format deadmanFmtLine {  <efa>%-18s<fdc>%s<088>} {deadman- name|#} {Remove by preset or action name or by numeric index from deadman-list.};
+    #echo {$deadmanFmtLine};
+    #format deadmanFmtLine {  <efa>%-18s<fdc>%s<088>} {deadman-clear} {Remove every queued timeout action.};
+    #echo {$deadmanFmtLine};
+    #format deadmanFmtLine {  <efa>%-18s<fdc>%s<088>} {deadman-list} {Show the queue presets with exact echo text and quick-reference lines.};
+    #echo {$deadmanFmtLine};
+    #echo {\n<fbb>PRESETS<088>};
+    #format deadmanFmtLine {  <efa>%-18s<fdc>%s<088>} {deadman+ name} {Queue a built-in preset by name or type the same custom line twice};
+    #echo {$deadmanFmtLine};
+    #echo {                    <fdc>within 10s to confirm it.<088>};
+    #echo {\n<fbb>PERSISTENCE<088>};
+    #echo {  <fdc>Saved with <efa>_variable_export<fdc> and restored on <efa>_variable_import<fdc>\n     (e.g. ld) and on the periodic status export.<088>};
+    #echo {\n<ffb>============================================================<088>\n};
+};
+
+#alias deadman-help {_deadman_show_help};
+
+#alias deadman-list {
+    #echo {\n<ffb>  Timeout action queue\n  <fdc>(runs after _player_deadmanActions)<088>};
+    #if {&deadmanTimeoutActions[] > 0} {
+        #format deadmanFmtLine {  <fbb>%-4s  %-36s<088>} {#} {Name};
+        #echo {$deadmanFmtLine};
+        #format deadmanFmtLine {  <fcd>%-4s  %-36s<088>} {----} {------------------------------------};
+        #echo {$deadmanFmtLine};
+        #loop 1 &deadmanTimeoutActions[] deadmanListIdx {
+            #format deadmanFmtLine {  <afc>%-4d  <efe>%-36s<088>} {$deadmanListIdx} {$deadmanTimeoutActions[$deadmanListIdx][name]};
+            #echo {$deadmanFmtLine};
+        };
+    } {
+        #echo {  <fdc>(no actions queued)<088>};
+    };
+    #list deadmanPresetList indexate name;
+    #if {&deadmanPresetList[] > 0} {
+        #echo {\n<ffb>  Presets <fdc>(deadman+ uses the Name column)<088>};
+        #format deadmanFmtLine {  <fbb>%-12s  %-52s<088>} {Name} {Echo text you will see when it runs};
+        #echo {$deadmanFmtLine};
+        #format deadmanFmtLine {  <fcd>%-12s  %-52s<088>} {------------} {----------------------------------------------------};
+        #echo {$deadmanFmtLine};
+        #foreach $deadmanPresetList[%*] deadmanPresetRow {
+            #if {"$deadmanPresetRow[guild]" == "all" || "$deadmanPresetRow[guild]" == "$guild"} {
+                #if {"$deadmanPresetRow[preview]" != ""} {
+                    #format deadmanFmtLine {  <afc>%-12s<fcd>  <fdc>%s<088>} {$deadmanPresetRow[name]} {$deadmanPresetRow[preview]};
+                } {
+                    #format deadmanFmtLine {  <afc>%-12s<fcd>  <fdc>%s<088>} {$deadmanPresetRow[name]} {(no preview text)};
+                };
+                #echo {$deadmanFmtLine};
+            };
+        };
+    };
+    #echo {\n<fbb>  Quick reference<088>};
+    #format deadmanFmtLine {    <efa>%-18s<fcd>  <fdc>%s<088>} {deadman+ name} {Add a preset or confirm a custom line twice within 10s.};
+    #echo {$deadmanFmtLine};
+    #format deadmanFmtLine {    <efa>%-18s<fcd>  <fdc>%s<088>} {deadman} {Show the full reference (no arguments).};
+    #echo {$deadmanFmtLine};
+    #echo {};
+};
+
+#alias deadman+ {
+    #if {"%0" != ""} {
+        #list deadmanPresetList indexate name;
+        #list deadmanPresetList {find} {%i%0} {deadmanPresetIndex};
+        #var deadmanPresetEntry $deadmanPresetList[+$deadmanPresetIndex];
+        #if {&deadmanPresetEntry[] > 0} {
+            #if {&deadmanTimeoutActions[] > 0} {
+                #list deadmanTimeoutActions indexate name;
+                #list deadmanTimeoutActions {find} {%i%0} {deadmanAlreadyIdx};
+                #if {$deadmanAlreadyIdx} {
+                    #echo {<caa>----  <fff>%0 <faa>is already in <fff>deadmanTimeoutActions <caa>----<088>};
+                } {
+                    #list deadmanTimeoutActions add {{{name} {$deadmanPresetEntry[name]} {action} {$deadmanPresetEntry[action]} {active} {1}}};
+                    #echo {<caa>----  <fff>%0 <bfd>added <faa>to deadman timeout queue  <caa>----<088>};
+                };
+            } {
+                #list deadmanTimeoutActions add {{{name} {$deadmanPresetEntry[name]} {action} {$deadmanPresetEntry[action]} {active} {1}}};
+                #echo {<caa>----  <fff>%0 <bfd>added <faa>to deadman timeout queue  <caa>----<088>};
+            };
+        } {
+            #if $deadmanCustomActionConfirmToggle {
+                #delay 10 {#var deadmanCustomActionConfirmToggle 1};
+                #var deadmanCustomActionConfirmToggle 0;
+                #var deadmanPendingCustomAction %0;
+                #echo {<caa>----  <fff>%0 <faa>not in deadman preset list.  <caa>----<088>};
+                #echo {<caa>----  <faa>Run <efa>deadman+ %0<faa> again within 10s to add it as a custom action.\n<caa>----<088>};
+            } {
+                #if {"$deadmanPendingCustomAction" == "%0"} {
+                    #var deadmanCustomActionConfirmToggle 1;
+                    #if {&deadmanTimeoutActions[] > 0} {
+                        #list deadmanTimeoutActions indexate name;
+                        #list deadmanTimeoutActions {find} {%i%0} {deadmanAlreadyIdx};
+                        #if {$deadmanAlreadyIdx} {
+                            #echo {<caa>----  <fff>%0 <faa>is already in the queue.  <caa>----<088>};
+                        } {
+                            #list deadmanTimeoutActions add {{{name} {%0} {action} {%0} {active} {1}}};
+                            #echo {<caa>----  <fff>Custom action <bfd>added<faa>: <efe>%0  <caa>----<088>};
+                        };
+                    } {
+                        #list deadmanTimeoutActions add {{{name} {%0} {action} {%0} {active} {1}}};
+                        #echo {<caa>----  <fff>Custom action <bfd>added<faa>: <efe>%0  <caa>----<088>};
+                    };
+                } {
+                    #delay 10 {#var deadmanCustomActionConfirmToggle 1};
+                    #var deadmanCustomActionConfirmToggle 0;
+                    #var deadmanPendingCustomAction %0;
+                    #echo {<caa>----  <fff>%0 <faa>not in deadman preset list.  <caa>----<088>};
+                    #echo {<caa>----  <faa>Run <efa>deadman+ %0<faa> again within 10s to add it as a custom action.\n<caa>----<088>};
+                };
+            };
+        };
+    } {
+        #echo {<fac>Usage: <efa>deadman+ <bcc>name-or-command <faa>(see bare <efa>deadman<faa>)<088>};
+    };
+};
+
+#alias deadman- {
+    #var deadmanUseIndex 0;
+    #if {"%0" != ""} {
+        #regex {%0} {^%+1..2d$} {#var deadmanRemoveIndex %0;#var deadmanUseIndex 1};
+        #if $deadmanUseIndex {
+            #echo {<caa>----  <efe>$deadmanTimeoutActions[+$deadmanRemoveIndex][name] <baa>removed <faa>from deadman queue  <caa>----<088>};
+            #list deadmanTimeoutActions delete %0;
+            #if {&deadmanTimeoutActions[] > 0} {#list deadmanTimeoutActions indexate name};
+        } {
+            #list deadmanTimeoutActions indexate name;
+            #list deadmanTimeoutActions {find} {%i%0} {deadmanRemoveHit};
+            #if {$deadmanRemoveHit} {
+                #echo {<caa>----  <fff>%0 <baa>removed <faa>from deadman queue  <caa>----<088>};
+                #list deadmanTimeoutActions delete $deadmanRemoveHit;
+            } {
+                #echo {<caa>----  <fff>%0 <faa>not found in deadman queue.  <caa>----<088>};
+            };
+            #if {&deadmanTimeoutActions[] > 0} {#list deadmanTimeoutActions indexate name};
+        };
+    } {
+        #echo {<fac>Usage: <efa>deadman- <bcc>name <faa>or <bcc>#<088>};
+    };
+};
+
+#alias deadman-clear {
+    #list deadmanTimeoutActions clear;
+    #echo {<caa>----  <fff>deadmanTimeoutActions <faa>cleared  <caa>----<088>};
 };
 
 #alias deadmanActions {
     #if $bot[active] {.pause};
+    #nop {-- Gag MUD error if _player_deadmanActions alias is missing; oneshot + delayed #unaction clears stray trigger when alias exists};
+    #line oneshot #action {^There is no reason to '_player_deadmanActions' here.} {#line gag};
     _player_deadmanActions;
+    #if {&deadmanTimeoutActions[] > 0} {
+        #loop 1 &deadmanTimeoutActions[] deadmanActionIdx {
+            $deadmanTimeoutActions[$deadmanActionIdx][action];
+        };
+    };
     #var idle_flag 1;
-    #echo {\n<efd>   ===============  <fac>DEADMAN TIMEOUT <efd>=============== \n};
-}
+    #echo {\n<efd>=============== <fac>DEADMAN TIMEOUT <efd>===============<088>\n};
+    #delay 5 {#unaction {^There is no reason to '_player_deadmanActions' here.}};
+};
 
-#var chat_delay 1
+#var chat_delay 1;
 
-#NOP -- Initialize deadman timer on file load;
+#nop -- Initialize deadman timer on file load;
 #alias _init_deadman {
     #delay 3 {
         #var idle_flag 0;
         #var idle 0;
-        #if {"${xdeadmanIdleTimeout}" === ""} {#var deadmanIdleTimeout 900};
+        #if {"$deadmanIdleTimeout" == "" || "$deadmanIdleTimeout" == "xdeadmanIdleTimeout"} {#var deadmanIdleTimeout 900};
+        #format {_dm_init_int} {%d} {$deadmanIdleTimeout};
+        #if {$_dm_init_int <= 0} {#var deadmanIdleTimeout 900};
+        #if {"$deadman_armed" == "" || "$deadman_armed" == "xdeadman_armed"} {#var deadman_armed 1};
         #var deadManTimeLeft $deadmanIdleTimeout;
-        #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+        #if {"$deadman_armed" != "0"} {
+            #delay {deadmanSwitch} {
+                #if !$idle_flag {deadmanActions};
+            } {$deadmanIdleTimeout};
+        };
 
         #event {RECEIVED INPUT} {
             #var idle_flag 0;
             #var idle 0;
-            #var deadManTimeLeft $deadmanIdleTimeout;
-            #delay {deadmanSwitch} {deadmanActions} {$deadmanIdleTimeout};
+            #if {"$deadman_armed" != "0"} {
+                #var deadManTimeLeft $deadmanIdleTimeout;
+                #delay {deadmanSwitch} {
+                    #if !$idle_flag {deadmanActions};
+                } {$deadmanIdleTimeout};
+            };
             #if $sessionActive {
                 #if $chat_delay {
                     #var chat_delay 0;
@@ -52,4 +252,4 @@
     };
 };
 
-#class {deadman} {close}
+#class {deadman} {close};
