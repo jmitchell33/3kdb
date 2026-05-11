@@ -16,6 +16,21 @@
     #class farmer kill;
 };
 
+#alias {fill-moulding} {
+    #send {examine moulding};
+    #act {{^[0-9]+ [A-z' ]+$}} {
+        #regex {%%0} {{[0-9]}} {#var item_quan &1};
+        #regex {%%0} {{[A-z ']+} } {#var item_name &1};
+        #$item_quan unstash2 best $item_name; 
+        #$item_quan insert $item_name;
+    } {1};
+    insert moulding;
+    #delay 1 {
+        #unaction {{^[0-9]+ [A-z' ]+$}};
+    };
+    #line oneshot #action {You have created something new!} {retrieve all};
+};
+
 #NOP -- lookup jewels;
 #alias jewel-lookup {
     #var foundJewel 0;
