@@ -457,14 +457,30 @@
 };
 
 #ALIAS {.mipProcessGlineMonk} {
-	#NOP No monk-specific gline 1 processing;
-	#IF {%1 == 1} {};
-	#ELSEIF {%1 == 2} {
-		#NOP No monk-specific gline 2 processing;
-	};
-	#ELSE {
-		#ECHO {<171> Invalid Gline Number <088>};
-	};
+    #IF {%1 == 1} {
+        #REGEX {$mip[gline][1]} {<cMthd>: <y%w>} {
+    		#IF {"&1" != "$my[monk][method]"} {#VAR {my[monk][crane_block]} {}};
+    		#VAR {my[monk][method]} {&1};
+		};
+        #REGEX {$mip[gline][1]} {<cC>: <gOn>} {#VAR {my[monk][crit]} {ON}};
+        #REGEX {$mip[gline][1]} {<cC>: <rOFF>} {#VAR {my[monk][crit]} {OFF}};
+        #REGEX {$mip[gline][1]} {<cS>: <gOn>} {#VAR {my[monk][stun]} {ON}};
+        #REGEX {$mip[gline][1]} {<cS>: <rOFF>} {#VAR {my[monk][stun]} {OFF}};
+        #REGEX {$mip[gline][1]} {<cH>: <rOFF>} {#VAR {my[monk][hide_of_the_dragon]} {OFF}};
+        #REGEX {$mip[gline][1]} {<cH>: <g\*ACTIVE\*>} {#VAR {my[monk][hide_of_the_dragon]} {ACTIVE}};
+        #REGEX {$mip[gline][1]} {<cD>: <gOn>} {#VAR {my[monk][deflect]} {ON}};
+        #REGEX {$mip[gline][1]} {<cD>: <rOFF>} {#VAR {my[monk][deflect]} {OFF}};
+    }; #ELSEIF {%1 == 2} {
+        #REGEX {$mip[gline][2]} {G2N: <y%d>} {#VAR {my[monk][gxp]} {&1}};
+        #REGEX {$mip[gline][2]} {<cChi Focus>: <g%w>} {#VAR {my[monk][chifocus]} {&1}};
+        #REGEX {$mip[gline][2]} {<yAE>: <g%d>/%d\%} {
+            #VAR {my[monk][ae][current]} {&1};
+            #VAR {my[monk][ae][reset]} {&2};
+        };
+        #REGEX {$mip[gline][2]} {CB: !} {#VAR {my[monk][crane_block]} {<bea>CB: <ade>ON}};
+    }; #ELSE {
+        #ECHO {<171> Invalid Gline Number <088>};
+    };
 };
 
 #ALIAS {.mipProcessGlinePriest} {

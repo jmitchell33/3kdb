@@ -1,27 +1,54 @@
 #class {player_actions} {kill};
 #class {player_actions} {open};
 
+#nop -- monk meditation;
+#action {You need not meditate further, type 'stopmed' to stop.} {
+    #if {!$idle_flag} {
+        #send {!stopmed};
+        #if {$bot[active]} {#delay 1 {..}};
+    };
+} {1};
+
+#action {You cannot meditate with anyone around you.} {
+    #if {!$idle_flag} {
+        #if {$bot[active]} {..};
+    };
+} {1};
+
+#action {Badger has reached Monk Level} {
+    #if {!$idle_flag} {
+        reset_gxp;
+    };
+} {1};
+
+#nop -- mask drop;
+#action {The mask clatters to the ground.} {
+    #if {!$idle_flag} {
+        ptell mask dropped!;
+    };
+} {1};
+
 #NOP -- Kwik-E-Mart Pride (+5 wis);
 #action {The last of the oil leaks from your body.} {
     #if {!$idle_flag} {
         #send {get pride from satchel};
-        #send {eat pride}
-    }
+        #send {eat pride};
+    };
 } {1};
 
 #NOP -- tacos;
 #action {The melting cheese finally evaporates from Badger.} {
     #if {!$idle_flag} {
         wield rod;
-        wield shard
-    }
+        wield shard;
+    };
 } {1};
 
 #nop slippery that none of your armor seems to want to stay on!;
 #action {The guacamole coating Badger finally oozes off.} {
     #if {!$idle_flag} {
-        wear all
-    }
+        wear all;
+    };
 } {1};
 
 #NOP -- if i accidently pick up corpses durning a stepper;
@@ -45,7 +72,7 @@
     };
     #if {!$idle_flag && $bot[active] && "$guild" == "fremen"} {
         drop corpse;
-        fai
+        fai;
     };
 } {1};
 
@@ -54,54 +81,50 @@
     #if {!$idle_flag && "$guild" == "fremen"} {
         draw crysknife;
         wield crysknife;
-        keep crysknife
-    }
+        keep crysknife;
+    };
 };
 
 #action {^You already have your crysknife drawn.} {
     #if {!$idle_flag} {
         wield crysknife;
-        keep crysknife
-    }
+        keep crysknife;
+    };
 };
 
 #NOP -- automagically toggle truck pfocus;
 #action {A tank named Mushroom arrives in a cloud of dust.} {
-    truck pfocus
+    truck pfocus;
 };
 
 #NOP -- Immort immediately on seeing inductor since i'm usually idle/iaw;
 #act {^-M-_A Colossal Inductor} {(immortality} {1};
 
 #NOP -- auto update linktell list;
-#action {[%w enters the game]} {
+/*#action {[%w enters the game]} {
     #if {!$idle_flag} {
-        mywhosync
-    }
+        mywhosync;
+    };
 } {1};
 
 #action {[%w reconnects]} {
     #if {!$idle_flag} {
-        mywhosync
-    }
+        mywhosync;
+    };
 } {1};
 
 #action {[%w disconnects]} {
     #if {!$idle_flag} {
-        mywhosync
-    }
-} {1};
+        mywhosync;
+    };
+} {1};*/
 
 #NOP -- hurinteons tome;
 #action {Hurinteon's tome vibrates and flashes brightly for a moment.} {
     #if {!$idle_flag} {
-        ptell Hurinteon's tome has reset
-    }
+        ptell Hurinteon's tome has reset;
+    };
 };
-
-#NOP -- QUICK FIX FOR BANSHEES STEPPER;
-#action {You fail to penetrate the magical barrier.} {dispel;mapUndo};
-#nop #action {You cannot find your way around the MASSIVE boulder that blocks that exit.} {smash boulder;down};
 
 #NOP -- reflexes;
 #variable {tmp_explosive_release} {0};
@@ -111,86 +134,102 @@
     #if {!$idle_flag} {
         #if {"$guild" == "juggernaut"} {
             stimheal1;
-            fdeener
+            fdeener;
         };
         #if {"$guild" == "mage"} {
             #if {$my[super][current] == 0} {
                 #if {$tmp_unwrap == 0} {
                     #var tmp_unwrap 1;
                     unwrap 1;
-                    #delay {2} {#var tmp_unwrap 0}
+                    #delay {2} {#var tmp_unwrap 0};
                 };
-                cast corpse blast
+                cast corpse blast;
             };
             #else {
                 #if {$tmp_explosive_release == 0} {
                     #var tmp_explosive_release 1;
                     cast explosive release;
-                    #delay {5} {#var tmp_explosive_release 0}
-                }
-            }
+                    #delay {5} {#var tmp_explosive_release 0};
+                };
+            };
         };
         #if {"$guild" == "elemental"} {
             #if {$tmp_unwrap == 0} {
                 #var tmp_unwrap 1;
                 unwrap 1;
-                #delay {2} {#var tmp_unwrap 0}
+                #delay {2} {#var tmp_unwrap 0};
             };
-            evoke mental depletion on corpse
+            evoke mental depletion on corpse;
         };
         #if {"$guild" == "bard"} {
             cease;
             #if {$tmp_unwrap == 0} {
                 #var tmp_unwrap 1;
                 unwrap 1;
-                #delay {2} {#var tmp_unwrap 0}
+                #delay {2} {#var tmp_unwrap 0};
             };
-            perform dirge
+            perform dirge;
         };
         #if {"$guild" == "fremen"} {
             #if {$tmp_unwrap == 0} {
                 #var tmp_unwrap 1;
                 unwrap 1;
-                #delay {2} {#var tmp_unwrap 0}
+                #delay {2} {#var tmp_unwrap 0};
             };
-            reclaim
+            reclaim;
         };
         #if {"$guild" == "monk"} {
             #nop do nothing;
-        }
-    }
-};
+        };
+        #if {"$guild" == "necromancer"} {
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                .cycle_corpses;
+                #delay {2} {#var tmp_unwrap 0};
+            };
+        };
+    };
+} {1};
+
+#action {You have no shorts.} {
+    #if {!$idle_flag} {
+        #if {"$guild" == "necromancer"} {
+            #send {!envision dream};
+            #send {!qtrance dream 20};
+        };
+    };
+} {1};
 
 #NOP -- emergency airdrop;
 /*#action {The computer chirps 'WARNING Stim energy levels too low to compensate} {
     #if {!$idle_flag} {
-        airdrop
+        airdrop;
     };
 };*/
 
 #NOP -- jugger ammo;
 #action {The computer chirps 'FStrm Lrm 20 ammo supplies exhausted.'} {
     #if {!$idle_flag} {
-        truck ammo vbuy missile 6 1 40000
-    }
+        truck ammo vbuy missile 6 1 40000;
+    };
 };
 
 #action {The computer chirps 'Light Lrm 20 ammo supplies exhausted.'} {
     #if {!$idle_flag} {
-        truck ammo vbuy missile 6 1 40000
-    }
+        truck ammo vbuy missile 6 1 40000;
+    };
 };
 
 #NOP -- jugger cdefend for party;
 #action {The computer chirps 'Switching to PARTY defense mode.'} {
-    ptell cdefend ON for party
+    ptell cdefend ON for party;
 };
 
 #NOP -- cult;
 #action {Gargoyle <cgame>: The remaining roles were:} {
     #if {$cultjoin && !$idle_flag} {
-        #delay 6 {cult join}
-    }
+        #delay 6 {cult join};
+    };
 };
 
 #NOP - beloch bot;
@@ -198,8 +237,8 @@
 	#if {$auto_beloch} {
 		challenge_all;
         kill beloch;
-        arena_kill_all
-	}
+        arena_kill_all;
+	};
 };
 
 #NOP -- hobbit pipe;
@@ -214,14 +253,14 @@
 
 #action {A voice whispers in your mind.  You may proceed.} {
     #if {!$idle_flag && "$tao_toggle" == "1" && "$area" == "Tao Te Cheng"} {
-        #send {!continue}
-    }
+        #send {!continue};
+    };
 } {1};
 
 #action {You bow deeply in respect to the ancients.} {
     #if {!$idle_flag && "$tao_toggle" == "1" && "$area" == "Tao Te Cheng"} {
-        #send {!flipbird all}
-    }
+        #send {!flipbird all};
+    };
 } {1};
 
 #class {player_actions} {close};
