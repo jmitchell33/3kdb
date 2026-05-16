@@ -1065,6 +1065,7 @@
 
 #NOP -- setup configs;
 #alias {setup_config} {
+    #config {PACKET PATCH} {1.00};
     #if {"$guild" == "juggernaut"} {
         #unvar my[familiar];
         #unvar my[golem][name];
@@ -1075,6 +1076,7 @@
         mka-clear;
         #NOP p2;
         set3kreport;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #elseif {"$guild" == "mage"} {
@@ -1089,6 +1091,7 @@
         #NOP p2;
         set3kreport;
         ash;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #elseif {"$guild" == "elemental"} {
@@ -1102,6 +1105,7 @@
         #NOP p2;
         set3kreport;
         autodrain;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #elseif {"$guild" == "bard"} {
@@ -1116,6 +1120,7 @@
         mka+ harmony;
         #NOP p2;
         set3kreport;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #elseif {"$guild" == "fremen"} {
@@ -1128,6 +1133,7 @@
         mka-clear;
         mka+ ambush;
         set3kreport;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #elseif {"$guild" == "monk"} {
@@ -1139,6 +1145,7 @@
         mka-on;
         mka-clear;
         set3kreport;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #elseif {"$guild" == "necromancer"} {
@@ -1150,6 +1157,7 @@
         mka-on;
         mka-clear;
         set3kreport;
+        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
         look;
     };
     #else {
@@ -1470,6 +1478,9 @@
         strategy-clear;
         strategy call;
         strategy spark;
+        strategy iprime;
+        strategy ug;
+        strategy soulbind;
     };
     #else {
         #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any strategy settings in this alias!!<088>};
@@ -2579,6 +2590,7 @@
     };
 };
 
+#var tmpgswap 0;
 #nop -- gswap;
 #alias {gw} {
     #if {"%0" == ""} {
@@ -2589,6 +2601,7 @@
     _variable_export;
     #switch {"%0"} {
         #case {"juggernaut"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap juggernaut;
             #delay {6} {
                 get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
@@ -2596,6 +2609,7 @@
             };
         };
         #case {"mage"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap mage;
             #delay {6} {
                 get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
@@ -2603,6 +2617,7 @@
             };
         };
         #case {"elemental"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap elemental;
             #delay {6} {
                 get all;keep all;wear all;hold rock;hold tome;get coin;
@@ -2610,6 +2625,7 @@
             };
         };
         #case {"bard"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap bard;
             #delay {6} {
                 get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
@@ -2617,6 +2633,7 @@
             };
         };
         #case {"fremen"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap fremen;
             #delay {6} {
                 get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
@@ -2624,6 +2641,7 @@
             };
         };
         #case {"monk"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap monk;
             #delay {6} {
                 get all;keep all;wear all;hold rock;hold tome;get coin;
@@ -2631,6 +2649,7 @@
             };
         };
         #case {"necromancer"} {
+            #var tmpgswap 1;
             reflex stop;gagsoff;gswap necromancer;
             #delay {6} {
                 get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
