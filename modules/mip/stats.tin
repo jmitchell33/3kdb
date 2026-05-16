@@ -289,7 +289,21 @@
 			#VAR {my[shrouds]}		{&7};
 			#VAR {my[reset]}		{&8};
 		};
-		#REGEX {$mip[gline][2]} {G2N: <%w%d>}			{#VAR {my[g2n]}			{&2}};
+		#REGEX {$mip[gline][2]} {G2N: <v%d>} {
+			#VAR {my[g2n]}			{&1};
+			#math {my[gxp][last_round]} {$g2n_last_round - $my[g2n]};
+        	#math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
+        	#math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
+        	#math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
+        	#math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+        	#if {$my[gxp][best] < $my[gxp][last_round]} {#var my[gxp][best] $my[gxp][last_round]};
+        	#format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
+        	#format {my[gxp][str_total]} {%M} {$my[gxp][total]};
+        	#format {my[gxp][str_rounds]} {%d} {$my[gxp][rounds_tracked]};
+        	.gxp_t30_add;
+        	.gxp_time;
+		#var g2n_last_round $my[g2n];
+		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};

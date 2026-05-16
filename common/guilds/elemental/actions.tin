@@ -1,6 +1,14 @@
-#class {guild_actions} {kill}
-#class {guild_actions} {open}
+#class {guild_actions} {kill};
+#class {guild_actions} {open};
 
 #NOP --- ELEMENTAL ACTIONS;
 
-#class {guild_actions} {close}
+#nop -- reset gxp when you gain a glvl;
+#action {You have become size %d!} {
+    #if {!$idle_flag} {
+        reset_gxp;
+    };
+} {2};
+
+
+#class {guild_actions} {close};
