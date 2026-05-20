@@ -215,12 +215,12 @@
 
 #ALIAS {.mipProcessGlineCyborg} {
     #IF {%1 == 1} {
-        #regex {$mip[gline][1]} {ND:> <yYes%%} {
+        #regex {$mip[gline][1]} {ND:> <yYes%*} {
             #var my[nanos][available] Yes;
             #var tmpReg &1;
             #regex $tmpReg {><g[><y%d} {#var my[nanos][reset] &&1};
         };
-        #regex {$mip[gline][1]} {ND:> <yNo%%} {
+        #regex {$mip[gline][1]} {ND:> <yNo%*} {
             #var my[nanos][available] No;
             #var tmpReg &1;
             #regex $tmpReg {><g[><y%d} {#var my[nanos][reset] &&1};

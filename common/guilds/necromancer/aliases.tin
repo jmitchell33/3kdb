@@ -10,6 +10,13 @@
 
 #var _nukeUndead 1;
 
+#NOP -- This alias works along with the gags to track unholy ground hits;
+#alias .trackUG {
+    #if $gags[combat_guild] {#line gag};
+    #math stats[unholy_ground] {$stats[unholy_ground] + 1};
+};
+
+
 #NOP -- Switch invoke damage types using comtrance;
 #alias {comt} {
     #switch {"%0"} {
