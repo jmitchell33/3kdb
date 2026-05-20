@@ -8,6 +8,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {harvest} {active} {0} {description} {Reaper: Grim Harvest}}};
 #list strategyList add {{{guild} {necromancer} {name} {soulbind} {active} {0} {description} {Reaper: Soulbind}}};
 #list strategyList add {{{guild} {necromancer} {name} {blaze} {active} {0} {description} {Reaper: Blaze}}};
+#list strategyList add {{{guild} {necromancer} {name} {blaze_prime} {active} {0} {description} {Reaper: Blaze Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {rabies} {active} {0} {description} {Were: Rabies}}};
 #list strategyList add {{{guild} {necromancer} {name} {fury_prime} {active} {0} {description} {Were: Fury Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {fury} {active} {0} {description} {Were: Fury}}};
@@ -31,6 +32,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {gemino} {active} {0} {description} {Preserve Gemino Corpses}}};
 #list strategyList add {{{guild} {necromancer} {name} {ug} {active} {0} {description} {Unholy Ground}}};
 #list strategyList add {{{guild} {necromancer} {name} {spark} {active} {0} {description} {Lich: Spark}}};
+#list strategyList add {{{guild} {necromancer} {name} {spark_prime} {active} {0} {description} {Lich: Spark Prime}}};
 #list strategyList indexate name;
 
 #NOP -- Actions to perform at any time in the fight;
@@ -96,10 +98,7 @@
     #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][illuming]} {
         checkStrategy {illume} {illume};
     };
-    
-    #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][blazing]} {
-        checkStrategy {blaze} {blaze};
-    };
+ 
 };
 
 #NOP -- Actions to perform the first rounds of combat;
@@ -117,7 +116,10 @@
     checkStrategy {rage_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {rage prime}};
     checkStrategy {rage} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {rage}};
     checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
+    checkStrategy {spark_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 2} {spark prime}};
     checkStrategy {spark} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {spark}};
+    checkStrategy {blaze_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 2} {blaze prime}};
+    checkStrategy {blaze} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {blaze}};
 };
 
 #class {guild_strategy} {close};

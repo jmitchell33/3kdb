@@ -1,5 +1,5 @@
-#class {default_aliases} {kill}
-#class {default_aliases} {open}
+#class {default_aliases} {kill};
+#class {default_aliases} {open};
 
 #alias {echo_on} {#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
 #alias {debug} {#debug all on;#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
@@ -171,7 +171,7 @@
     #delay 0.2 {
         #if !$action_found {
             #list actionStack add {%1};
-        }
+        };
     };
 };
 
@@ -227,13 +227,13 @@
     };
 };
 
-#NOP -- gswap - guild swap;
+#NOP -- guild swap;
 #alias {.gswap} {
     #NOP -- Validate guild argument;
     #if {"%0" == ""} {
         #echo {<eaa>Usage: .gswap <guild><088>};
         #echo {<eaa>Example: .gswap mage<088>};
-        #return
+        #return;
     };
     
     #NOP -- Check if guild file exists;
@@ -245,7 +245,7 @@
         #echo {<eaa>Guild not found: %0<088>};
         #echo {<eaa>File missing: $guild_file<088>};
         #echo {<eaa>----------------------------------------------------<088>};
-        #return
+        #return;
     };
     
     #echo {<dfa>----------------------------------------------------<088>};
@@ -320,6 +320,13 @@
     
     #NOP -- Initialize screen after everything is loaded;
     #delay 6 {
+        #nop --- remove the oneshot gags incase they were not used;
+        #ungag {^That is not here or it is uninteresting. (cooler?)};
+        #ungag {^You find nothing of interest.};
+        #ungag {^Perform touch at whom?};
+        #ungag {^There is no reason to '(powers' here.};
+        #ungag {^There is no reason to 'spellDmg-clear' here.};
+        #ungag {^There is no reason to 'summonDmg-clear' here.};
         #NOP -- Read draw.tin to ensure all draw functions exist;
         #read common/draw.tin;
         init_screen;
@@ -339,8 +346,8 @@
         
         #echo {<dfa>----------------------------------------------------<088>};
         #echo {<dfa>Guild swap complete: $guild<088>};
-        #echo {<dfa>----------------------------------------------------<088>}
-    }
+        #echo {<dfa>----------------------------------------------------<088>};
+    };
 };
 
-#class {default_aliases} {close}
+#class {default_aliases} {close};

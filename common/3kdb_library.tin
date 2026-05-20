@@ -171,6 +171,7 @@
 .add_library {killforge} {crafting} {unload blacksmith forge class} {'killforge'} {modules/crafting/blacksmith_forge.tin};
 .add_library {build_golem} {crafting} {start golem build sequence for named corpse} {build_golem <corpse name>} {modules/professions/golem_master.tin};
 .add_library {fill_golem} {crafting} {fill golem parts from held corpses} {'fill_golem'} {modules/professions/golem_master.tin};
+.add_library {fill-moulding} {crafting} {examine moulding and unstash best quality you have} {'fill-moulding'} {modules/crafting/crafting.tin};
 
 #NOP -------------------------- Farming aliases ----------------------------------;
 
@@ -350,17 +351,17 @@
 #NOP -------------------------- Necromancer Guild Aliases ----------------------------------;
 #if {"$guild" == "necromancer"} {
 .add_library {teleport set} {guild} {set necromancer teleport anchor} {'teleport set'} {common/guilds/necromancer/aliases.tin};
-.add_library {teleport} {guild} {necromancer teleport to saved line} {teleport line letter then slot digit see necro aliases} {common/guilds/necromancer/aliases.tin};
+.add_library {teleport} {guild} {necromancer teleport to saved teleport anchor} {'teleport'} {common/guilds/necromancer/aliases.tin};
 .add_library {preserve_remains} {guild} {preserve remains workflow} {'preserve_remains'} {common/guilds/necromancer/aliases.tin};
 .add_library {topup} {guild} {top up reagents or supplies run} {'topup'} {common/guilds/necromancer/aliases.tin};
 .add_library {maskNP} {guild} {mask corpse NP quick macros} {maskNP width and digit suffixes see necro aliases} {common/guilds/necromancer/aliases.tin};
-.add_library {conjureUndead} {guild} {conjure undead combat line} {'conjureUndead'} {common/guilds/necromancer/aliases.tin};
+.add_library {conjureUndead} {guild} {conjure undead} {'conjureUndead'} {common/guilds/necromancer/aliases.tin};
 .add_library {qtNP} {guild} {quick teleport necro preset} {'qtNP'} {common/guilds/necromancer/aliases.tin};
 .add_library {qtNPc} {guild} {qatrance coffin unwrap then preserve absorb} {qtNPc with no args uses defaults or give corpse count} {common/guilds/necromancer/aliases.tin};
 .add_library {qtNPf} {guild} {qatrance freezer deslab then preserve absorb} {qtNPf with no args uses defaults or give corpse count} {common/guilds/necromancer/aliases.tin};
 .add_library {qtNPcl} {guild} {qatrance cooler uncooler then preserve absorb} {qtNPcl with no args uses defaults or give corpse count} {common/guilds/necromancer/aliases.tin};
 .add_library {check_chest} {guild} {necromancer chest check helper} {'check_chest'} {common/guilds/necromancer/aliases.tin};
-.add_library {nukeUndeadAbs} {guild} {conjure nuke line absolute corpse path} {'nukeUndeadAbs'} {common/guilds/necromancer/aliases.tin};
+.add_library {nukeUndeadAbs} {guild} {nuke undead} {'nukeUndeadAbs'} {common/guilds/necromancer/aliases.tin};
 .add_library {nukeUndead_noUG_Abs} {guild} {conjure nuke absolute without unholy grasp} {'nukeUndead_noUG_Abs'} {common/guilds/necromancer/aliases.tin};
 .add_library {nukeUndeadPres} {guild} {conjure nuke preserved remains path} {'nukeUndeadPres'} {common/guilds/necromancer/aliases.tin};
 .add_library {nukeUndead_noUG_Pres} {guild} {conjure nuke preserved without unholy grasp} {'nukeUndead_noUG_Pres'} {common/guilds/necromancer/aliases.tin};
@@ -400,9 +401,9 @@
 .add_library {prots_grace} {guild} {perform amazing grace - reduce physical harm done to you} {'prots_grace'} {common/guilds/bard/aliases.tin};
 .add_library {prots_muse} {guild} {perform o muse - aura of protection} {'prots_muse'} {common/guilds/bard/aliases.tin};
 .add_library {buffup} {guild} {perform all song buffs for yourself or others} {buffup <player>} {common/guilds/bard/aliases.tin};
-.add_library {blades} {guild} {perform blades dance line} {'blades'} {common/guilds/bard/aliases.tin};
-.add_library {critic} {guild} {perform critic line} {'critic'} {common/guilds/bard/aliases.tin};
-.add_library {ebolt} {guild} {perform elemental bolt line} {'ebolt'} {common/guilds/bard/aliases.tin};
+.add_library {blades} {guild} {perform blades dance} {'blades'} {common/guilds/bard/aliases.tin};
+.add_library {critic} {guild} {perform caustic critic} {'critic'} {common/guilds/bard/aliases.tin};
+.add_library {ebolt} {guild} {perform energy bolt} {'ebolt'} {common/guilds/bard/aliases.tin};
 .add_library {es} {guild} {empowered strikes - weapon strikes do more damage} {'es'} {common/guilds/bard/aliases.tin};
 .add_library {reflex_clear} {guild} {clear reflex perform state} {'reflex_clear'} {common/guilds/bard/aliases.tin};
 .add_library {reflex_critic} {guild} {reflex cast caustic critic when spell points above threshold} {reflex critic then threshold spell points number} {common/guilds/bard/aliases.tin};
@@ -606,7 +607,7 @@
 .add_library {check_corpses} {corpse} {refresh corpse inventory state} {'check_corpses'} {modules/corpsemanager/corpsemanager.tin};
 .add_library {corpse_select} {corpse} {unwrap deslab or uncooler next corpse by priority} {'corpse_select'} {modules/corpsemanager/corpsemanager.tin};
 .add_library {cooler_rotate} {corpse} {move corpses into cooler with trace glyph necro uses qtrance} {cooler_rotate count or repeat digit} {modules/corpsemanager/corpsemanager.tin};
-.add_library {check_box} {corpse} {parse colossal box look line into corpses key count} {check_box storage table key} {modules/corpsemanager/corpsemanager.tin};
+.add_library {check_box} {corpse} {parse colossal box into corpses key count} {check_box storage table key} {modules/corpsemanager/corpsemanager.tin};
 .add_library {corpse_select_necro} {corpse} {necromancer corpse picker} {'corpse_select_necro'} {modules/corpsemanager/corpsemanager.tin};
 
 #NOP -------------------------- Combat Aliases ----------------------------------;
