@@ -1,0 +1,16 @@
+#class {guild_hpbar} {kill}
+#class {guild_hpbar} {open}
+
+#action {HP: %* PWR: %* HT: %* SI: \[%*\%\]} {
+    #regex {%2} {\(%d\)} {#var my[gp1][regen] &1};
+    #var my[gxp][last_round] $my[gxp][total];
+    #var my[gxp][total] %4;
+    #if $gags[hpbar] {#line gag};
+} {2};
+
+#action {ND: %* C: %* TARG: %*} {
+    #if $gags[hpbar] {#line gag}
+} {2};
+
+
+#class {guild_hpbar} {close}

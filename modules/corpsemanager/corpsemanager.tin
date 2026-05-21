@@ -85,6 +85,7 @@
     #map run $donate_go_back;
     #if $bot[active] {
 		#delay 10 {
+			i;
 			#var bot[paused] 0;
 			.bot
 		};
@@ -101,7 +102,11 @@
 	#10 {wrap all;donate coffin};
 	#5 {get all;donate all};
     #map run $donate_go_back;
-    #if $bot[active] {#var bot[paused] 0;.bot};
+    #if $bot[active] {
+		i;
+		#var bot[paused] 0;
+		.bot
+	};
 };
 
 #alias dcoffin2 {
@@ -521,6 +526,12 @@
             #math mob[corpses_used] {$mob[corpses_used] + 1};
         };
     };
+};
+
+#if {"$guild" == "cyborg"} {
+	#action {You plunge your %* into the chest cavity of the remains and} {
+		.corpseRecord
+	} {2};
 };
 
 #if {"$guild" == "mage"} {

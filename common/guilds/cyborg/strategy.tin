@@ -11,8 +11,10 @@
     #if {$enemy[hp] > 0} {
         #if {"$my[nanos][available]" == "Yes" && "$mob[nano]" == "0"} {
             #if {$mip[round] > 5 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 10 && $enemy[hp] > 50} {
-                #echo {<fab>  +-+-+-+-     <dfd>DECONSTRUCT MODE INITIATED     <fab>+-+-+-+-<088>};
-                #send {!deconstruct};
+                checkStrategy {nano} {
+                    #echo {<fab>  +-+-+-+-     <dfd>DECONSTRUCT MODE INITIATED     <fab>+-+-+-+-<088>};
+                    #send {!deconstruct};
+                };
             };
         }
         

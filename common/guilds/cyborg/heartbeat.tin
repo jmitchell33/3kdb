@@ -1,9 +1,17 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
+#var power_crit 100;
+#var corpse_use 1;
+
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
-		#NOP;
+		#if {$corpse_use && $my[gp1][current] < $power_crit} {
+			#var corpse_use 0;
+			corpse_select;
+			#send {!decompose};
+			#line oneshot #action {You plunge your %* into the chest cavity of the remains and} {#var corpse_use 1} {1};
+		};
 	} {#NOP;};
 };
 
