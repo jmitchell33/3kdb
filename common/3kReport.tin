@@ -4,6 +4,7 @@
 #NOP --- Byron's Extravagant Reporting Machina ---;
 #NOP --- 3kReport to see the report            ---;
 
+
 #NOP -- dreport is the object we use to select/customize which items to include in the report;
 #list dReportList clear;
 #list dReportList add {{{key} {killer} {lookup} {tmpKiller} {header_text} {Killer} {totals} {} {width} {15} {active} {1}}};
@@ -20,6 +21,12 @@
 #list dReportList add {{{key} {mob_attacks_melee} {lookup} {tmpMobAttacksMelee} {header_text}   {Melee} {totals} {tmpTotalMobAttacksMelee} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {mob_attacks_special} {lookup} {tmpMobAttacksSpecial} {header_text}   {Specials} {totals} {tmpTotalMobAttacksSpecial} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {eternal_gxp} {lookup} {tmpEternalGxp} {header_text} {Eternal GXP} {totals} {tmpTotalEternalGxp} {width} {15} {active} {0}}}
+
+#list xdReportList indexate key;
+#loop 1 &dReportList[] tmpIndex {
+    #list xdReportList find {$dReportList[$tmpIndex][key]} {tmpItem};
+    #var dReportList[$tmpIndex][active] $xdReportList[$tmpItem][active];
+};
 
 
 #NOP -- Necromancer Specific;

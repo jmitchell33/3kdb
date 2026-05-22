@@ -175,11 +175,11 @@
 		#case {"BreedOOC"}          {#var {commcol} {<258>};#var tmpCommGuild 1};
 		
 		#NOP -- Cyborg;
-		#case {"Cyborg Com"}        {#var {commcol} {<138>};#var tmpCommGuild 1};
-		#case {"Cyborg Death"}      {#var {commcol} {<218>};#var tmpCommGuild 1};
-		#case {"Cyborg Guild"}      {#var {commcol} {<228>};#var tmpCommGuild 1};
-		#case {"Cyborg Notify"}     {#var {commcol} {<268>};#var tmpCommGuild 1};
-		#case {"Cyborg Syndicate"}  {#var {commcol} {<128>};#var tmpCommGuild 1};
+		#case {"Cyborg Com"}        {#var {commcol} {${theme[chatcolor][gline]}};#var tmpCommGuild 1};
+		#case {"Cyborg Syndicate"}  {#var {commcol} {${theme[chatcolor][gline]}};#var tmpCommGuild 1};
+		#case {"Cyborg Death"}      {#NOP}; #NOP -- block so login, logout, training, etc doesnt spam;
+		#case {"Cyborg Guild"}      {#NOP}; #NOP -- block so login, logout, training, etc doesnt spam;
+		#case {"Cyborg Notify"}     {#NOP}; #NOP -- block so login, logout, training, etc doesnt spam;
 
 		#NOP -- Elemental;
 		#case {"EL-75"} 			{#var {commcol} {<118>};#var tmpCommGuild 1};
@@ -315,8 +315,13 @@
 		.handleCommLine {$mip[comm][line]};
 		
 		#var {mip[comm][cdata]} {$mip[comm][data]};
-		#replace {mip[comm][cdata]} {:} {:<099>};
-		#replace {mip[comm][cdata]} {]} {]<099>};
+		#if {"$mip[comm][line]" == "Cyborg Com"} {
+			#replace {mip[comm][cdata]} {COM::%w :} {COM::&4 :<099>};
+		} {
+			#replace {mip[comm][cdata]} {:} {:<099>};
+			#replace {mip[comm][cdata]} {]} {]<099>};
+		};
+		
 		
 		#var {mip[comm][cdata]} {${commcol}${mip[comm][cdata]}<099>};
 
