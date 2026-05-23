@@ -9,7 +9,12 @@
 } {2};
 
 #action {ND: %* C: %* TARG: %*} {
-    #if $gags[hpbar] {#line gag}
+    #if $gags[hpbar] {#line gag};
+    #regex {%2} {\[%*\] \[%*\]} {
+        #var tmpList &2;
+        #list tmpList explode {|};
+        #var my[implants] $tmpList;
+    };
 } {2};
 
 
