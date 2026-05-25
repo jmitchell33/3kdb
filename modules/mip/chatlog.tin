@@ -118,6 +118,8 @@
 	#var tmpCommClan 0;
 	#var tmpCommParty 0;
 	#var tmpCommHM 0;
+
+	#var tmpProcessComm 1;
 	#switch {"$tmpCommLine"} {
 		#NOP -- Some of these might be guild lines, if they are update to the guild below;
 		#case {"Auction"}      	  	{#var {commcol} {${theme[chatcolor][auction]}}};
@@ -175,11 +177,11 @@
 		#case {"BreedOOC"}          {#var {commcol} {<258>};#var tmpCommGuild 1};
 		
 		#NOP -- Cyborg;
-		#case {"Cyborg Com"}        {#var {commcol} {<138>};#var tmpCommGuild 1};
-		#case {"Cyborg Death"}      {#var {commcol} {<218>};#var tmpCommGuild 1};
-		#case {"Cyborg Guild"}      {#var {commcol} {<228>};#var tmpCommGuild 1};
-		#case {"Cyborg Notify"}     {#var {commcol} {<268>};#var tmpCommGuild 1};
-		#case {"Cyborg Syndicate"}  {#var {commcol} {<128>};#var tmpCommGuild 1};
+		#case {"Cyborg Com"}        {#var {commcol} {${theme[chatcolor][gline]}};#var tmpCommGuild 1};
+		#case {"Cyborg Syndicate"}  {#var {commcol} {${theme[chatcolor][gline]}};#var tmpCommGuild 1};
+		#case {"Cyborg Death"}      {#var tmpProcessComm 0;}; #NOP -- block so login, logout, training, etc doesnt spam;
+		#case {"Cyborg Guild"}      {#var tmpProcessComm 0;}; #NOP -- block so login, logout, training, etc doesnt spam;
+		#case {"Cyborg Notify"}     {#var tmpProcessComm 0;}; #NOP -- block so login, logout, training, etc doesnt spam;
 
 		#NOP -- Elemental;
 		#case {"EL-75"} 			{#var {commcol} {<118>};#var tmpCommGuild 1};
@@ -196,7 +198,7 @@
 
 		#NOP Fremen;
 		#case {"Fremen Tp"}    		{#var {commcol} {<128>};#var tmpCommGuild 1};
-		#case {"Fremen Guild"}    	{}; #NOP -- block so guild skill training etc doesnt spam;
+		#case {"Fremen Guild"}    	{#var tmpProcessComm 0;}; #NOP -- block so guild skill training etc doesnt spam;
 		#case {"Fremen Ntp"}    	{#var {commcol} {<128>};#var tmpCommGuild 1};
 		#case {"Fremen Rtp"}    	{#var {commcol} {<128>};#var tmpCommGuild 1};
 
@@ -207,7 +209,7 @@
 		#case {"Ggent"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
 		#case {"Gamma"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
 		#case {"Offense"}          	{#var {commcol} {<168>};#var tmpCommGuild 1};
-		#case {"Notify"}          	{}; #NOP -- block so echelon etc doesnt spam;
+		#case {"Notify"}          	{#var tmpProcessComm 0;}; #NOP -- block so echelon etc doesnt spam;
 		#case {"Sci"}          		{#var {commcol} {<168>};#var tmpCommGuild 1};
 
 
@@ -261,8 +263,8 @@
 		#case {"Gprie"}      	    {#var {commcol} {<158>};#var tmpCommGuild 1};
 		#case {"Light Path"}      	{#var {commcol} {<158>};#var tmpCommGuild 1};
 		#case {"Priest"}      	    {#var {commcol} {<158>};#var tmpCommGuild 1};
-		#case {"Priest Announce"}   {}; #NOP -- block this line from logging;
-		#case {"Priest Broadcast"}  {}; #NOP -- block this line from logging;
+		#case {"Priest Announce"}   {#var tmpProcessComm 0;}; #NOP -- block this line from logging;
+		#case {"Priest Broadcast"}  {#var tmpProcessComm 0;}; #NOP -- block this line from logging;
 		
 		#NOP -- Psicorps;
 		#case {"Psi Main"}        	{#var {commcol} {<168>};#var tmpCommGuild 1};
@@ -314,24 +316,31 @@
 		#var discordChannel $webhook[url][general];
 		.handleCommLine {$mip[comm][line]};
 		
-		#var {mip[comm][cdata]} {$mip[comm][data]};
-		#replace {mip[comm][cdata]} {:} {:<099>};
-		#replace {mip[comm][cdata]} {]} {]<099>};
-		
-		#var {mip[comm][cdata]} {${commcol}${mip[comm][cdata]}<099>};
-
-		#NOP if it's the same as the last line, do nothing to prevent spam;
-		#if {"$mip[comm][cdata]" != "$lastData"} {
-			#line log {logs/$sysUser/$datestamp} {$timestamp\};
-			#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
-			_mip_chat_sender_blacklisted;
-			#if {$_mip_blacklist_hit == 1} {
-				#NOP Blacklisted: still log and Discord, only skip chat window;
-				#var discordText ${mip[comm][source]}: ${mip[comm][data]};
-				#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
-				#if {"$chatCategory" != "general"} {postChatCategory};
+		#if $tmpProcessComm {
+			#var {mip[comm][cdata]} {$mip[comm][data]};
+			#if {"$mip[comm][line]" == "Cyborg Com"} {
+				#replace {mip[comm][cdata]} {COM::%w :} {COM::&4 :<099>};
 			} {
-				update_chat {$mip[comm][cdata]};
+				#replace {mip[comm][cdata]} {:} {:<099>};
+				#replace {mip[comm][cdata]} {]} {]<099>};
+			};
+			
+			
+			#var {mip[comm][cdata]} {${commcol}${mip[comm][cdata]}<099>};
+
+			#NOP if it's the same as the last line, do nothing to prevent spam;
+			#if {"$mip[comm][cdata]" != "$lastData"} {
+				#line log {logs/$sysUser/$datestamp} {$timestamp\};
+				#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
+				_mip_chat_sender_blacklisted;
+				#if {$_mip_blacklist_hit == 1} {
+					#NOP Blacklisted: still log and Discord, only skip chat window;
+					#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+					#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+					#if {"$chatCategory" != "general"} {postChatCategory};
+				} {
+					update_chat {$mip[comm][cdata]};
+				};
 			};
 		};
 	};
@@ -406,6 +415,7 @@
 	#var logSay 1;
 	#regex $tmpText {%*, %* always} {#var logSay 0};
 	#regex $tmpText {all, you are now in group %*} {#var logSay 0};
+	#regex $tmpText {golem, %*} {#var logSay 0};
 	#regex $tmpText {%*, ibc} {#var logSay 0};
 	#regex $tmpText {Brigga Bragga! Hizzie wizzie snizzie lizzie! CHOWDA CHOWDA CHOWDA!!!!} {#var logSay 0};
 	#regex $tmpText {Wizza Wazza! Da bibble for rizzle Wikkie Wakky Yakko Wakko and Dot!} {#var logSay 0};

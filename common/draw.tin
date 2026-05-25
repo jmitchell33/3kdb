@@ -28,13 +28,15 @@
 #var caption_toggle[strategy][active] 1;
 #var caption_toggle[bot][active] 1;
 #var caption_toggle[bot_cycle][active] 1;
+#var caption_toggle[map][active] 1;
 
 #var caption_toggle[corpses][order] 1;
 #var caption_toggle[eternal][order] 2;
 #var caption_toggle[bot][order] 3;
 #var caption_toggle[strategy][order] 4;
 #var caption_toggle[bot_cycle][order] 5;
-#format caption_title_string {%+9sGeneral    Bot%-9s};;
+#var caption_toggle[map][order] 6;
+#format caption_title_string {%+9sGeneral    Bot    Map%-9s};;
 
 #NOP -- Mouse press events;
 #EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
@@ -46,6 +48,9 @@
     #if {"$tmpClickItem" == "Bot"} {
        caption_view bot; 
     };
+    #if {"$tmpClickItem" == "Map"} {
+       caption_view map;
+    };
 };
 
 
@@ -53,13 +58,18 @@
     #format {tmpItem} {%p} {%0};
     #if {"$tmpItem" == ""} {#NOP} {
         #if {"$tmpItem" == "general"} {
-            #format caption_title_string {%+9s<cfc>General<088>    <cde>Bot<088>%-9s};
+            #format caption_title_string {%+9s<cfc>General<088>    <cde>Bot<088>    <cde>Map<088>%-9s};
             #var caption[tab] general;
             _update_caption_data;
         };
         #if {"$tmpItem" == "bot"} {
-            #format caption_title_string {%+9s<cde>General<088>    <cfc>Bot<088>%-9s};
+            #format caption_title_string {%+9s<cde>General<088>    <cfc>Bot<088>    <cde>Map<088>%-9s};
             #var caption[tab] bot;
+            _update_caption_data;
+        };
+        #if {"$tmpItem" == "map"} {
+            #format caption_title_string {%+9s<cde>General<088>    <cde>Bot<088>    <cfc>Map<088>%-9s};
+            #var caption[tab] map;
             _update_caption_data;
         };
     };
@@ -390,6 +400,29 @@
     #var bot[stats][xp_time_str] $xp_time_str;
 };
 
+
+#function setMapIconSize {
+    #format tmpIcon {%.5s} {%0};
+    #format tmpItemLength %L {$tmpIcon};
+    #switch {"$tmpItemLength"} {
+        #case {"1"} {
+            #var result {  $tmpIcon  };
+        };
+        #case {"2"} {
+            #var result {  $tmpIcon };
+        };
+        #case {"3"} {
+            #var result { $tmpIcon };
+        };
+        #case {"4"} {
+            #var result { $tmpIcon};
+        };
+        #case {"5"} {
+            #var result {$tmpIcon};
+        };
+    };
+};
+
 #NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
 #alias draw_caption {
     #list caption_data clear;
@@ -439,10 +472,72 @@
             #list caption_data add {$totalLoop};
             #list caption_data add {$caption_toggle[bot_cycle][string]};
         };
-    } {
+    };
+    
+    #if {"$caption[tab]" == "general"} {
         #foreach $caption_order[] key {
             #if $caption_toggle[$key][active] {
                 #list caption_data add {\n $caption_toggle[$key][string]};
+            };
+        };
+    };
+
+    #if {"$caption[tab]" == "map"} {
+        #NOP -- These aliases are stored in map/mapnotes.tin;
+        #NOP -- Loop up to 15 lines, we'll use a MOD to see if it's even to insert a line;
+        #LIST {caption_data} add {<dad>-== <efd>Map Legend <dad>==-<088>};
+        #loop 1 30 tmpNote {
+            #if {"${notes_l[$tmpNote]}" === ""} {
+                #break
+            } {
+                #math testEven {$tmpNote % 2};
+                #if {$testEven} {
+                    #var tmpArr $notes_l[$tmpNote];
+                    #list tmpArr explode {:};
+                    
+                    #format tmpItemLength %L {$tmpArr[1]};
+                    #switch {"$tmpItemLength"} {
+                        #case {"1"} {
+                            #var tmpLine2 {$tmpArr[1]  : $tmpArr[1]};
+                        };
+                        #case {"2"} {
+                            #var tmpLine2 {${tmpArr[1]} : ${tmpArr[2]}};
+                        };
+                        #case {"3"} {
+                            #var tmpLine2 {${tmpArr[1]} : ${tmpArr[2]}};
+                        };
+                        #case {"4"} {
+                            #var tmpLine2 {${tmpArr[1]}: ${tmpArr[2]}};
+                        };
+                        #case {"5"} {
+                            #var tmpLine2 {${tmpArr[1]}: ${tmpArr[2]}};
+                        };
+                    };
+                    #format tmpLine {%-20s   %+20s} {$tmpLine1} {$tmpLine2};
+                    #list caption_data add {$tmpLine}; 
+                } {
+                    #var tmpArr $notes_l[$tmpNote];
+                    #list tmpArr explode {:};
+                    
+                    #format tmpItemLength %L {$tmpArr[1]};
+                    #switch {"$tmpItemLength"} {
+                        #case {"1"} {
+                            #var tmpLine1 {$tmpArr[1]  : $tmpArr[1]};
+                        };
+                        #case {"2"} {
+                            #var tmpLine1 {${tmpArr[1]} : ${tmpArr[2]}};
+                        };
+                        #case {"3"} {
+                            #var tmpLine1 {${tmpArr[1]} : ${tmpArr[2]}};
+                        };
+                        #case {"4"} {
+                            #var tmpLine1 {${tmpArr[1]}: ${tmpArr[2]}};
+                        };
+                        #case {"5"} {
+                            #var tmpLine1 {${tmpArr[1]}: ${tmpArr[2]}};
+                        };
+                    };
+                };
             };
         };
     };
@@ -520,7 +615,24 @@
                 #cat bot_string {\n<cde>Playercheck:<eab> ✔ OFF   <088>};
             };
 
-        } {
+        };
+        #if {"$caption[tab]" == "general"} {
+            #if $bot[paused] {
+                #var bot_string {<088>Bot Status:<DAA><aaa> 🖐 <088>};
+            } {
+                #var bot_string {Bot Status:<ACA><fff> ▶ <088>};
+            };
+
+            #if $bot[playercheck] {
+                #cat bot_string {<ACA><fff> ✔ <088>};
+            } {
+                #cat bot_string {<DAA><aaa> ✔ <088>};
+            };
+
+            #cat bot_string {\n Path: $bot_current_room/$bot_total_rooms ($bot_progress% in $xp_time_str)};
+            #cat bot_string {\n Kills: $bot[stats][mobs] XP: $temp_xp ($xp_rate_str/hr)};
+        };
+        #if {"$caption[tab]" == "map"} {
             #if $bot[paused] {
                 #var bot_string {<088>Bot Status:<DAA><aaa> 🖐 <088>};
             } {
@@ -562,6 +674,11 @@
 
     #var caption_toggle[bot_cycle][string] $bot_cycle_string;
     draw_caption;
+};
+
+#alias _caption_data_map {
+    .loopnotes;
+
 };
 
     

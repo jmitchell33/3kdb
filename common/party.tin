@@ -191,54 +191,6 @@
     };
 } {1};
 
-
-#NOP -- Need to rewrite this to work with 3kReport;
-#act {~\e[%*;%+m[PARTY]%* %w: 3kdb bot standings} {
-    #if {$bot[active] && !$idle_flag} {
-        #var total_kills 0;
-        #var other_kills 0;
-        #var other_member 0;
-        ptell --------------- CURRENT BOT STANDINGS ---------------;
-        #format {temp_name} {%-25s} {------    Name};
-        #format {temp_kills} {%+27s} {Kills    ------};
-        ptell $temp_name $temp_kills;
-
-        #foreach $party[member][%*] idx {
-            #if {"$idx[name]" == ""} {
-                #math other_kills {$other_kills + $idx[kills]};
-                #var other_member 1;
-            };
-            #math total_kills {$total_kills + $idx[kills]};
-        };
-
-        #foreach $party[member][%*] idx {
-            #if {"$idx[name]" != ""} {
-                #format {temp_name} {%-25s} {------    $idx[name]};
-                #format {temp_kills} {%+27s} {$idx[kills]    ------};
-                ptell $temp_name $temp_kills;
-            };
-        };
-
-
-        #if {$other_member} {
-            #format {temp_name} {%-25s} {------    Unassigned};
-            #format {temp_kills} {%+27s} {$other_kills    ------};
-            ptell $temp_name $temp_kills;
-        };
-
-        #format {temp_name} {%-25s} {------    Total};
-        #format {temp_kills} {%+27s} {$total_kills    ------};
-        ptell $temp_name $temp_kills;
-        ptell -----------------------------------------------------;
-    }
-} {1};
-
-#alias {reset_standings} {
-    #unvar party;
-    members;
-};
-
-
 #action {[PARTY] {%w}: nofollow: %*} {
     #format followInviter {%l} {%1};
     #if {"$following" == "$followInviter"} {%2};
@@ -250,7 +202,7 @@
     #if {!$idle_flag && $bot[active]} {
         #var partyReportPath {Path to find me is: $bot[steps][1]};
         #loop 2 $bot[step] step {
-            #cat partyReportPath {;${$bot[steps][${step}]}};
+            #cat partyReportPath {;$bot[steps][$step]};
         };
         #delay .2 {#send {ptell ${partyReportPath}}};
     };
@@ -263,7 +215,6 @@
             ptell -----            3kdb Bot Helpers             -----;
             ptell -----                                         -----;
             ptell -----     status: XP Report & Progress Report -----;
-            ptell -----  standings: Who's puttin in the work?   -----;
             ptell -----  path-find: Directions to find leader   -----;
             ptell -----    corpses: Report corpse count         -----;
             ptell -----       Add "gimme-x" to attempt to       -----;

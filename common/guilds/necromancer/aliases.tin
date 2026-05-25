@@ -10,19 +10,26 @@
 
 #var _nukeUndead 1;
 
+#NOP -- This alias works along with the gags to track unholy ground hits;
+#alias .trackUG {
+    #if $gags[combat_guild] {#line gag};
+    #math stats[unholy_ground] {$stats[unholy_ground] + 1};
+};
+
+
 #NOP -- Switch invoke damage types using comtrance;
 #alias {comt} {
     #switch {"%0"} {
-        #case {"edged"} {comtrance invoke edged};
-        #case {"blunt"} {comtrance invoke crushing};
-        #case {"fire"} {comtrance invoke flame};
-        #case {"ice"} {comtrance invoke cold};
-        #case {"acid"} {comtrance invoke corrosion};
-        #case {"electric"} {comtrance invoke lightning};
-        #case {"mind"} {comtrance invoke psionic};
-        #case {"energy"} {comtrance invoke power};
-        #case {"poison"} {comtrance invoke virulence};
-        #case {"radiation"} {comtrance invoke light};
+        #case {"edged"} {comtrance invoke edged;#var my[necromancer][invoke] edged};
+        #case {"blunt"} {comtrance invoke crushing;#var my[necromancer][invoke] crushing};
+        #case {"fire"} {comtrance invoke flame;#var my[necromancer][invoke] flame};
+        #case {"ice"} {comtrance invoke cold;#var my[necromancer][invoke] cold};
+        #case {"acid"} {comtrance invoke corrosion;#var my[necromancer][invoke] corrosion};
+        #case {"electric"} {comtrance invoke lightning;#var my[necromancer][invoke] lightning};
+        #case {"mind"} {comtrance invoke psionic;#var my[necromancer][invoke] psionic};
+        #case {"energy"} {comtrance invoke power;#var my[necromancer][invoke] power};
+        #case {"poison"} {comtrance invoke virulence;#var my[necromancer][invoke] virulence};
+        #case {"radiation"} {comtrance invoke light;#var my[necromancer][invoke] light};
         #case {""} {
             #echo {<cbf>Damage Type      Spell Name<088>};
             #echo {<fff>-------------------------------<088>};
