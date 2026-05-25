@@ -80,10 +80,28 @@
 #action {That creature is already enraged.} {#var mob[enrage] 1;} {6};
 
 #NOP -- Bard Stat Screen Modifications;
-#action {^-= Monetary gifts  : %d coins                                      =-} {#var my[guild][donate_coins] %1} {2};
+#action {^-= Monetary gifts  : %d coins                                      =-} {
+    #var my[guild][donate_coins] %1
+} {2};
 #action {^-= Item gift value : %d coins                                     =-} {
     #var my[guild][donate_items] %1;
     #math my[guild][donate_total] {$my[guild][donate_coins] + $my[guild][donate_items]};
 } {2};
+
+
+#NOP -- Track wings;
+#action {^As you complete your invocation, you begin to feel a fiery heat consume} {
+    #var my[fly] 1;
+    #var my[bard_wings] 1;
+} {2};
+
+#action {^With an elegant grace, you make a perfect landing.$} {
+    #var my[fly] 0;
+} {2};
+
+#action {^Rapidly flapping your wings, you once again take to the air.$} {
+    #var my[fly] 1;
+} {2};
+
 
 #class {guild_actions} {close}
