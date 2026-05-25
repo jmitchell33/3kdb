@@ -22,10 +22,12 @@
 #list dReportList add {{{key} {mob_attacks_special} {lookup} {tmpMobAttacksSpecial} {header_text}   {Specials} {totals} {tmpTotalMobAttacksSpecial} {width} {11} {active} {0}}};
 #list dReportList add {{{key} {eternal_gxp} {lookup} {tmpEternalGxp} {header_text} {Eternal GXP} {totals} {tmpTotalEternalGxp} {width} {15} {active} {0}}}
 
-#list xdReportList indexate key;
-#loop 1 &dReportList[] tmpIndex {
-    #list xdReportList find {$dReportList[$tmpIndex][key]} {tmpItem};
-    #var dReportList[$tmpIndex][active] $xdReportList[$tmpItem][active];
+#if {"${xdReportList}" !== ""} {
+    #list xdReportList indexate key;
+    #loop 1 &dReportList[] tmpIndex {
+        #list xdReportList find {$dReportList[$tmpIndex][key]} {tmpItem};
+        #var dReportList[$tmpIndex][active] $xdReportList[$tmpItem][active];
+    };
 };
 
 
