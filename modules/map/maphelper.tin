@@ -4,22 +4,65 @@
 #action {You have arrived at a dungeon entrance.} {rating};
 
 #alias .goHome {
-	#send {!home};
-	#delay .01 {#map goto $my[home]};
+	#send {!home $my[home_id]};
+	#delay .01 {#map goto $my[home_vnum]};
 };
 
 #alias .setHome {
-	#map get roomvnum my[home];
-	#echo {   <cee> Home has been updated to vnum <ddb>$my[home]<cee>.  When exiting, use the alias <eeb>ld<cee>to save this for the future.<088>};
+	#format tmpNumber {%p} {%1};
+	#if {"$tmpNumber" == ""} {
+		#echo {     <efd>Please provide a house #.  Enter <cfc>showkeys<efd to see your house numbers.};
+	} {
+		
+		#var my[home_id] $tmpNumber;
+	};
+	#map get roomvnum my[home_vnum];
+	#echo {   <cee> Home <bfc>$tmpNumber <cee>has been updated to vnum <bfc>$my[home_vnum]<cee>.  When exiting, use the alias <bfc>ld<cee> to save this for the future.<088>};
 };
 
+#NOP -- Enter the mapped exit (shop, magic, etc.) first, then the house flavor exit;
 #alias .mapHousePortal {
-	#switch {"%1"} {
-		#case {"magic"} {
-			#map dig 
-		}
-	};
+    #switch {"%1"} {
+        #case {"shop"} {#map exit {%2} VNUM {2}};
+        #case {"magic"} {#map exit {%2} VNUM {148}};
+        #case {"crafting"} {#map exit {%2} VNUM {26}};
+        #case {"chaos"} {#map exit {%2} VNUM {24}};
+        #case {"science"} {#map exit {%2} VNUM {71}};
+        #case {"reception"} {#map exit {%2} VNUM {6673}};
+        #case {"smithy"} {#map exit {%2} VNUM {67}};
+        #case {"bank"} {#map exit {%2} VNUM {7}};
+        #case {"morgue"} {#map exit {%2} VNUM {107}};
+        #case {"pound"} {#map exit {%2} VNUM {113}};
+        #case {"newbie"} {#map exit {%2} VNUM {88}};
+        #case {"gypsy"} {#map exit {%2} VNUM {17}};
+        #case {"real_estate"} {#map exit {%2} VNUM {20}};
+        #case {"pub"} {#map exit {%2} VNUM {17537}};
+        #case {"resi"} {#map exit {%2} VNUM {85}};
+		#case {"arundin"} {#map exit {%2} VNUM {150}};
+    };
 };
+
+#alias .mapDigPortal {
+    #switch {"%1"} {
+        #case {"shop"} {#map dig {%2} {2}};
+        #case {"magic"} {#map dig {%2} {148}};
+        #case {"crafting"} {#map dig {%2} {26}};
+        #case {"chaos"} {#map dig {%2} {24}};
+        #case {"science"} {#map dig {%2} {71}};
+        #case {"reception"} {#map dig {%2} {6673}};
+        #case {"smithy"} {#map dig {%2} {67}};
+        #case {"bank"} {#map dig {%2} {7}};
+        #case {"morgue"} {#map dig {%2} {107}};
+        #case {"pound"} {#map dig {%2} {113}};
+        #case {"newbie"} {#map dig {%2} {88}};
+        #case {"gypsy"} {#map dig {%2} {17}};
+        #case {"real_estate"} {#map dig {%2} {20}};
+        #case {"pub"} {#map dig {%2} {17537}};
+        #case {"resi"} {#map dig {%2} {85}};
+		#case {"arundin"} {#map dig {%2} {150}};
+    };
+};
+
 
 #alias {maphelp} {
 	#echo {mapsave / mapload - save or load common/map/3k_shared.map};
@@ -310,6 +353,8 @@
 #action {^You can't get past the huge earth elemental in front of you.$} {mapUndo} {2};
 #action {^The Elemental blocks your path as you try to go %*!$} {mapUndo} {2};
 #action {^The elemental stands in your way!$} {mapUndo} {2};
+#action {^As you near the crystal matrix, the blue aura surrounding it} {mapUndo} {2};
+
 
 
 #action {^You begin climbing up, but soon slip on a patch of ice and plummet} {
