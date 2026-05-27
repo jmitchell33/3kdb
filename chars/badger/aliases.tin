@@ -260,7 +260,7 @@
 
 #NOP -- turn toggles on or off;
 #alias {togg} {
-    toggle 3kreport;
+    toggle discord_post;
     toggle mission;
 };
 
@@ -573,7 +573,9 @@
 #NOP -- aliases to setup strategies for phantasmal killer;
 #NOP -- toggle phantasmal killer on and off;
 #alias {pkiller} {
+    strategy feeblemind;
     strategy phantasmal;
+    pkmf;
 };
 
 #NOP -- toggle casting monstrous fortitude on phantasmal killer on and off;
@@ -954,7 +956,7 @@
         reflex add hp <60% evoke rebuild;
         #nop reflex add sp <20% evoke mental depletion;
         #nop reflex add sp <10% evoke natural convergence;
-        #nop reflex add sp <40% eternal heal badger;
+        reflex add sp <5% eternal heal badger;
         #NOP reflex add gp1 <25% evoke energy drain;
         reflex combat on;
         reflex start;
@@ -1076,7 +1078,7 @@
         mka-clear;
         #NOP p2;
         set3kreport;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #elseif {"$guild" == "mage"} {
@@ -1091,7 +1093,7 @@
         #NOP p2;
         set3kreport;
         ash;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #elseif {"$guild" == "elemental"} {
@@ -1105,7 +1107,7 @@
         #NOP p2;
         set3kreport;
         autodrain;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #elseif {"$guild" == "bard"} {
@@ -1120,7 +1122,7 @@
         mka+ harmony;
         #NOP p2;
         set3kreport;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #elseif {"$guild" == "fremen"} {
@@ -1133,7 +1135,7 @@
         mka-clear;
         mka+ ambush;
         set3kreport;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #elseif {"$guild" == "monk"} {
@@ -1145,7 +1147,7 @@
         mka-on;
         mka-clear;
         set3kreport;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #elseif {"$guild" == "necromancer"} {
@@ -1157,7 +1159,7 @@
         mka-on;
         mka-clear;
         set3kreport;
-        #if {"$tmpgswap" == "1"} {toggle discord_post;toggle mission;#var tmpgswap 0};
+        #if {"$tmpgswap" == "1"} {togg;#delay 1 {#var tmpgswap 0}};
         look;
     };
     #else {
@@ -1284,19 +1286,6 @@
 #NOP -- get all items from truck;
 #alias {gii} {
     get all from mushroom;
-};
-
-#NOP -- toggle levitate using jumpjets;
-#alias {fly1} {
-    #if {"$guild" == "juggernaut"} {
-        jumpjet;
-    };
-    #elseif {"$guild" == "mage"} {
-        cast levitate;
-    };
-    #else {
-        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have a guild flying command in alias!!<088>};
-    };
 };
 
 #NOP -- change attacks to another target;
@@ -2601,7 +2590,6 @@
     _variable_export;
     #switch {"%0"} {
         #case {"juggernaut"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap juggernaut;
             #delay {6} {
                 get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
@@ -2609,7 +2597,6 @@
             };
         };
         #case {"mage"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap mage;
             #delay {6} {
                 get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
@@ -2617,7 +2604,6 @@
             };
         };
         #case {"elemental"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap elemental;
             #delay {6} {
                 get all;keep all;wear all;hold rock;hold tome;get coin;
@@ -2625,7 +2611,6 @@
             };
         };
         #case {"bard"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap bard;
             #delay {6} {
                 get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
@@ -2633,7 +2618,6 @@
             };
         };
         #case {"fremen"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap fremen;
             #delay {6} {
                 get all;keep all;wear all;wield rod;wield shard;hold rock;hold tome;get coin;
@@ -2641,7 +2625,6 @@
             };
         };
         #case {"monk"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap monk;
             #delay {6} {
                 get all;keep all;wear all;hold rock;hold tome;get coin;
@@ -2649,7 +2632,6 @@
             };
         };
         #case {"necromancer"} {
-            #var tmpgswap 1;
             reflex stop;gagsoff;gswap necromancer;
             #delay {6} {
                 get all;keep all;wear all;wield rod;hold rock;hold tome;get coin;
@@ -2820,7 +2802,6 @@
     #list badger3kdb add {{{name} {en} {type} {guild} {desc} {Enhance at a certain percentage of hp or heal your hps - 'en' or en <hp%>}}};
     #list badger3kdb add {{{name} {gi} {type} {guild} {desc} {Give all items to truck}}};
     #list badger3kdb add {{{name} {gii} {type} {guild} {desc} {Get all items from truck}}};
-    #list badger3kdb add {{{name} {fly1} {type} {guild} {desc} {Jumpjet: toggle levitate using jumpjets}}};
     #list badger3kdb add {{{name} {kk} {type} {guild} {desc} {Retarget attacks to another mob: kk <mob>}}};
     #list badger3kdb add {{{name} {rt} {type} {guild} {desc} {Rtech: check costs of techs in the field}}};
     #list badger3kdb add {{{name} {tpf} {type} {guild} {desc} {Truck pfocus: toggle plasma focusing for truck}}};
