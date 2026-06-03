@@ -1,5 +1,5 @@
-#CLASS draw {kill}
-#CLASS draw {open}
+#CLASS draw {kill};
+#CLASS draw {open};
 
 #unvar draw[index];
 #var draw[initiated] 0;
@@ -36,7 +36,7 @@
 #var caption_toggle[strategy][order] 4;
 #var caption_toggle[bot_cycle][order] 5;
 #var caption_toggle[map][order] 6;
-#format caption_title_string {%+9sGeneral    Bot    Map%-9s};;
+#format caption_title_string {%+9sGeneral    Bot    Map%-9s};
 
 #NOP -- Mouse press events;
 #EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
@@ -75,7 +75,7 @@
     };
 };
 
-#NOP /* Pass 0-100 percentage number to split the current screen at. */
+#NOP Pass 0-100 percentage number to split the current screen at.;
 #alias {setsplit} {
     #math _perc {%1 * .01}; 
     #var map[widthperc] $_perc;
@@ -83,7 +83,7 @@
     init_screen;
 };
 
-#NOP /* Calculate various area dimensions, called on start and SCREEN RESIZE */
+#NOP Calculate various area dimensions, called on start and SCREEN RESIZE;
 #alias init_screen {
     #screen get rows screen[height];
     #screen get cols screen[width];
@@ -210,7 +210,7 @@
     #echo {$tmpItem};
     #format tmpItem {%-15s %-50s} {    <fbc>caption-} {<ddd>Remove an item<088>};
     #echo {$tmpItem};
-    #format tmpItem {%-15s %-50s} {    <fbc>caption--} {<ddd>Lower an item item up on the display. (soon-TH)<088>};
+    #format tmpItem {%-15s %-50s} {    <fbc>caption--} {<ddd>Lower an item up on the display. (soon-TH)<088>};
     #echo {$tmpItem};
 
     #echo {    <cde>=============================================<088>};
@@ -325,8 +325,7 @@
     _caption_data_bot_cycle;
     _caption_data_corpses;
     _caption_data_eternal;
-    _caption_data_strategy
-
+    _caption_data_strategy;
 };
 
 #alias draw_all {
@@ -336,7 +335,7 @@
     #if {"$draw[room][active]" == "on"} { draw_room };
 };
 
-#NOP /* calculate hpbar size and draws initial line above hpbar area */
+#NOP calculate hpbar size and draws initial line above hpbar area;
 #alias {init_hpbar} {
     #if {"$draw[hpbar][active]" == "on"} {
         #math hpbar[top] {$screen[height] - $hpbar[height]};
@@ -475,9 +474,15 @@
     };
     
     #if {"$caption[tab]" == "general"} {
+        #var tmpFirst 1;
         #foreach $caption_order[] key {
             #if $caption_toggle[$key][active] {
-                #list caption_data add {\n $caption_toggle[$key][string]};
+                #if $tmpFirst {
+                    #list caption_data add {$caption_toggle[$key][string]};
+                    #var tmpFirst 0;
+                } {
+                    #list caption_data add {\n $caption_toggle[$key][string]};
+                };
             };
         };
     };
@@ -546,11 +551,11 @@
         #draw calign grid table $caption[top] $caption[left]+1 $caption[bottom] -1 $caption_data[];
     } {
 		#draw $theme[caption] calign jeweled filled line $caption[top]+1 $caption[left]+1 $caption[top]+1 -1 {$caption_title_string};
-        #draw calign blanked box $caption[top]+2 $caption[left]+1 $caption[bottom] -1 $caption_data[];
+        #draw calign talign blanked box $caption[top]+2 $caption[left]+1 $caption[bottom] -1 $caption_data[];
     };
 };
 
-#NOP /* -- TICKER (Idle timer, Deadman, Current Round etc) -- */
+#NOP -- TICKER (Idle timer, Deadman, Current Round etc) --;
 #alias draw_ticker {
     #if {&ticker_data[]} {
         #list ticker_data set 1 {<fba>Idle: $idle_cap  <fba>Deadman: $deadManTimeLeft_cap};
@@ -578,7 +583,7 @@
 };
 
 
-#NOP /* -- Bot status -- */
+#NOP -- Bot status --;
 #alias _caption_data_bot {
     #if $bot[active] {
         #var bot_total_rooms &bot[steps][];
@@ -650,7 +655,7 @@
         };
 
     } {
-        #var bot_string {\n <ccc>Bot: <fff>OFF<088>};
+        #var bot_string {<ccc>Bot: <fff>OFF<088>};
     };
 
     #var caption_toggle[bot][string] $bot_string;
@@ -658,7 +663,7 @@
 };
 
 #alias _caption_data_bot_cycle {
-    #var bot_cycle_string {\n <cde>Bot Cycler:<088>};
+    #var bot_cycle_string {<cde>Bot Cycler:<088>};
 
     #if {&{botcycle[]} > 0} {
         #list botlist indexate alias;
@@ -669,7 +674,7 @@
             #cat bot_cycle_string { -> <afa>$bot_cycle_name<088>};
         };
     } {
-        #var bot_cycle_string {\n <cde>Bot Cycler: <fac>N/A<088>};
+        #var bot_cycle_string {<cde>Bot Cycler: <fac>N/A<088>};
     };
 
     #var caption_toggle[bot_cycle][string] $bot_cycle_string;
@@ -678,13 +683,10 @@
 
 #alias _caption_data_map {
     .loopnotes;
-
 };
 
-    
 
-
-#NOP /* -- MAP -- */
+#NOP -- MAP --;
 #alias init_map {
     #if {"$draw[map][active]" == "on"} {
         #draw {tile} $map[top]-1 -$map[width] $map[bottom]+1 -1 {};
@@ -696,11 +698,11 @@
             #draw <ccc> tubed box $map[top]-1 -$map[width] $map[bottom] -1;
         };
     } {
-        #map flag vtmap off
+        #map flag vtmap off;
     };
 };
 
-#NOP /* -- ROOM -- */
+#NOP -- ROOM --;
 #alias draw_room {
     #NOP Notes from mapper;
     #map get roomname roomMapNameStr;
@@ -722,10 +724,10 @@
 #alias draw-map-top {
     #var draw[map][position] top;
     init_screen;
-    draw_all
+    draw_all;
 };
 
 #EVENT {SCREEN RESIZE} {#delay 3 {init_screen};};
 
 
-#CLASS draw {close}
+#CLASS draw {close};

@@ -6,7 +6,7 @@
     {1} {Bink}
     {2} {Caeli}
 }
-#VARIABLE {result} {<acf>        <afc>9:  <efe>ted<088><088>}
+#VARIABLE {result} {10.8M}
 #VARIABLE {xblacklist}
 {
     {1} {Bink}
@@ -14,18 +14,19 @@
 }
 #VARIABLE {xcaption}
 {
-    {bottom} {-7}
+    {bottom} {-9}
     {left} {112}
     {tab} {general}
     {top} {19}
 }
 #VARIABLE {xcaption_data}
 {
-    {1} {\n <088>💀 <ceb>46 <088>Corpses 💀\n C: 46}
-    {2} {\n <fff>Eternal: <faa>EWELL<088> <bfa>HEAL<088> <bfa>SHRED<088> <bfa>DUPE-C<088> <bfa>ENLARGE<088> <faa>FRY<088> <bfa>PROT<088><088>}
-    {3} {\n \n <ccc>Bot: <fff>OFF<088>}
-    {4} {\n <bef>Strategy:<088> <afa>Blasts<088>}
-    {5} {\n \n <cde>Bot Cycler: <fac>N/A<088>}
+    {1} {<088>💀 <ceb>46 <088>Corpses 💀\n C: 46}
+    {2} {\n <fff>Eternal: <bfa>EWELL<088> <bfa>HEAL<088> <bfa>SHRED<088> <bfa>DUPE-C<088> <bfa>ENLARGE<088> <faa>FRY<088> <bfa>PROT<088><088>}
+    {3} {\n <ccc>Bot: <fff>OFF<088>}
+    {4} {\n <bef>Strategy:<088> <afa>Slow<088> <afa>Golem_assist<088> <afa>Summon_mf<088> <afa>Spelltap<088> <afa>Gstrength<088> <afa>Shoosummons<088> <afa>Rolm<088> <afa>Epowers<088>}
+    {5} {\n <cde>Bot Cycler: <fac>N/A<088>}
+    {6} {\n }
 }
 #VARIABLE {xchat}
 {
@@ -38,39 +39,51 @@
 {
     {1} 
     {
+        {action} {cast spell tap on corpse}
+        {active} {1}
+        {name} {spelltap}
+    }
+    {2} 
+    {
         {action} {wrap remains}
         {active} {1}
         {name} {wrap}
     }
-    {2} 
-    {
-        {action} {evoke corpse drain;evoke corpse drain}
-        {active} {1}
-        {name} {cdrain2}
-    }
     {3} 
+    {
+        {action} {cast corpse blast;cast corpse blast}
+        {active} {1}
+        {name} {cBlast2}
+    }
+    {4} 
     {
         {action} {divvy gold}
         {active} {1}
         {name} {divvy}
     }
-    {4} 
+    {5} 
     {
         {action} {get all}
         {active} {1}
         {name} {getAll}
     }
-    {5} 
+    {6} 
     {
         {action} {stash all;keep all component}
         {active} {1}
         {name} {crafting}
     }
-    {6} 
+    {7} 
     {
-        {action} {fuse 100}
+        {action} {study spellbook}
         {active} {1}
-        {name} {cocoon}
+        {name} {study spellbook}
+    }
+    {8} 
+    {
+        {action} {cuddle bear}
+        {active} {1}
+        {name} {ted2}
     }
 }
 #VARIABLE {xcurvnum} {1}
@@ -202,11 +215,28 @@
         {totals} {tmpTotalEternalGxp}
         {width} {15}
     }
+    {15} 
+    {
+        {active} {0}
+        {header_text} {SP Spent}
+        {key} {sp_spent}
+        {lookup} {tmpMobSpSpent}
+        {totals} {tmpTotalSpSpent}
+        {width} {8}
+    }
 }
 #VARIABLE {xdeadmanIdleTimeout} {39960}
-#VARIABLE {xdeadmanTimeoutActions} {$deadmanTimeoutActions}
+#VARIABLE {xdeadmanTimeoutActions}
+{
+    {1} 
+    {
+        {action} {#echo {<ffb>*** DEADMAN *** idle timer — check the session window.<088>}}
+        {active} {1}
+        {name} {ping}
+    }
+}
 #VARIABLE {xdeadman_armed} {$deadman_armed}
-#VARIABLE {xdiscordPost} {0}
+#VARIABLE {xdiscordPost} {1}
 #VARIABLE {xdraw_room}
 {
     {bottom} {17}
@@ -215,28 +245,35 @@
 }
 #VARIABLE {xgags}
 {
+    {combat_area} {0}
+    {combat_generic} {0}
+    {combat_guild} {0}
+    {combat_items} {0}
+    {combat_numbers} {0}
     {hpbar} {1}
 }
 #VARIABLE {xhpbar}
 {
     {bottom} {43}
-    {height} {4}
+    {height} {6}
     {prompt} 
     {
-        {1} {<eeb>HP: <ffe>53130/53130 <eeb>SP: <ffe>43242/42604 <eeb>NRG: <ffe>1385/1390 <eeb>C: <ffe>100/100 <eeb>E: <ffe>%<088>}
-        {2} {<eeb>H: <008><AFA>   100%   <088> <eeb>S: <006>   101%   <088> <eeb>NRG: <008><AEA>    99%  <088>  <eeb>C: <008><AFA>   100%   <088> <eeb>E:           }
-        {3} {<dea>Emit<cfe>: <ade>10 <dea>Form<cfe>: <cad>Fire <cfe>(<ccd>84<cfe>) <bea>Rating<cfe>: <ccd>177 <dea>Blasts<cfe>/<dea>Waves<cfe>: <bfc>2<cfe>/<bfc>3 <cfe>(36%) <dea>Solidify<cfe>:<088> <faa>OFF<088>}
-        {4} {<dea>G2N<cfe>: <cae>30952 <eeb>Gxp (0.47 Mins): <ffe>0.00  <dea>T-30 <dfe>| <ffe>0.00 <dea>/Hr <dfe>| <ffe>0<dea>/Rnd <dfe>| <ffe>0.00  <dea>Total<088>}
+        {1} {<eeb>HP:<ffe>51287/51165 <eeb>SP:<ffe>19113/15506 <eeb>Sat:<ffe>   0/ 100  <eeb>C:<ffe>  31/ 100  <eeb>E:<ffe>      %<088>}
+        {2} {H:<008><AFA>   100%   <088> S:<006>   123%   <088> Sat:<070>     0%   <088> C:<008><EBA>   <070> 31%   <088> E:          <088>}
+        {3} {<eeb>Prots: <ffe><ACA><fff> GS <088> <eeb>Gem: <ffe>90%  <eeb>MC: <ffe>99% ASH: <ACA><fff>ALL<088><088>}
+        {4} {<eeb>Golem: 3/28%  <eeb>Super: <ffe>3/18%  <eeb>I: <ffe>2 <eeb>ST: <ffe>3/0 <eeb>G2N: <ffe>10.8M<088>}
+        {5} {<eeb>Gxp (1.85 Hrs): <dea>28.8K T-30 <dfe>|<dea> 28.8K/Hr <dfe>|<dea> 53.4K Total<088>}
+        {6} {Monsters(5) 💪<088>: <088><eab>(3) Devil<088>, <eab>Sprite<088>, <eab>Golem<088>}
     }
     {right} {166}
-    {top} {40}
+    {top} {38}
 }
 #VARIABLE {xlastBot}
 {
     {area} {}
-    {curVnum} {27707}
-    {file} {banshees}
-    {pause_room} {27707}
+    {curVnum} {53588}
+    {file} {czodiacs}
+    {pause_room} {53588}
 }
 #VARIABLE {xmap}
 {
@@ -247,82 +284,122 @@
     {width} {54}
     {widthperc} {.33}
 }
-#VARIABLE {xmkaActions} {}
+#VARIABLE {xmkaActions}
+{
+    {1} 
+    {
+        {action} {cast haste}
+        {active} {1}
+        {name} {haste}
+    }
+}
 #VARIABLE {xmy}
 {
-    {blasts} {2}
+    {casting} {mind warp}
+    {coins} {421038}
     {dead} {0}
     {drunk} {1}
-    {emit} 
-    {
-        {level} {10}
-    }
     {eternal} 
     {
         {duplicate creature} {1}
-        {energy well} {0}
+        {energy well} {1}
         {enlarge} {1}
         {fry} {0}
         {gxp} 
         {
-            {current} {1008517}
-            {last} {0}
-            {last_fight} {0}
+            {current} {643374}
+            {last} {643563}
+            {last_fight} {189}
         }
         {heal} {1}
         {protection} {1}
         {shred} {1}
     }
-    {form} 
+    {familiar} {Mushroom the beautiful swan}
+    {g2n} {10896540}
+    {gem} {90}
+    {golem} 
     {
-        {size} {84}
-        {type} {Fire}
+        {active} {1}
+        {current} {3}
+        {name} {Beetlejuice}
+        {reset} {28}
     }
-    {g2n} {30952}
     {gp1} 
     {
-        {change} {0}
-        {current} {1385}
-        {graph} {<008><AEA>    99%  <088> }
-        {max} {1390}
-        {percent} {1.00}
+        {change} {-1}
+        {current} {0}
+        {graph} {<070>     0%   <088>}
+        {max} {100}
+        {percent} {0.00}
     }
     {gp2} 
     {
-        {change} {0}
-        {current} {100}
-        {graph} {<008><AFA>   100%   <088>}
+        {change} {1}
+        {current} {31}
+        {graph} {<008><EBA>   <070> 31%   <088>}
         {max} {100}
-        {percent} {1.00}
+        {percent} {0.31}
     }
     {gxp} 
     {
-        {average} {0}
-        {average_per_hr} {0}
-        {best} {0}
-        {delta-time} {0.47}
+        {average} {16}
+        {average_per_hr} {28800}
+        {best} {34}
+        {delta-time} {1.85}
+        {g2n} 
+        {
+            {current} {10896540}
+            {last_round} {10896540}
+        }
         {last_round} {0}
-        {report-time} {1778929716}
-        {rounds_tracked} {0}
-        {start-time} {1778929688}
+        {report-time} {1779879262}
+        {rounds_tracked} {3207}
+        {start-time} {1779872608}
         {starting_round} {0}
-        {str_average_per_hr} {0.00 }
-        {str_rounds} {0}
-        {str_t30_per_hr} {0.00 }
-        {str_time} {(0.47 Mins)}
-        {str_total} {0.00 }
+        {str_average_per_hr} {28.8K}
+        {str_rounds} {3,207}
+        {str_t30_per_hr} {28.8K}
+        {str_time} {(1.85 Hrs)}
+        {str_total} {53.4K}
         {t30} 
         {
-            {1} {0}
-            {2} {0}
-            {3} {0}
-            {4} {0}
-            {5} {0}
+            {1} {17}
+            {2} {17}
+            {3} {17}
+            {4} {17}
+            {5} {17}
+            {6} {17}
+            {7} {17}
+            {8} {17}
+            {9} {17}
+            {10} {17}
+            {11} {17}
+            {12} {17}
+            {13} {17}
+            {14} {17}
+            {15} {17}
+            {16} {17}
+            {17} {17}
+            {18} {17}
+            {19} {17}
+            {20} {17}
+            {21} {17}
+            {22} {17}
+            {23} {17}
+            {24} {17}
+            {25} {17}
+            {26} {17}
+            {27} {17}
+            {28} {17}
+            {29} {17}
+            {30} {17}
+            {31} {0}
         }
-        {t30_average} {0}
-        {t30_per_hr} {0}
-        {t30_total} {0}
-        {total} {0}
+        {t30_average} {16}
+        {t30_per_hr} {28800}
+        {t30_total} {510}
+        {total} {53406}
     }
     {hm} 
     {
@@ -332,35 +409,133 @@
     {hp} 
     {
         {change} {0}
-        {current} {53130}
+        {current} {51287}
         {graph} {<008><AFA>   100%   <088>}
-        {max} {53130}
-        {percent} {1.00}
+        {max} {51165}
+        {percent} {1.01}
     }
-    {rating} {177}
-    {reset} {36}
-    {shrouds} {3}
-    {solidify} {<faa>OFF<088>}
+    {immersion} 
+    {
+        {active} {0}
+        {count} {2}
+        {rounds} {0}
+    }
+    {mental_cognition} {99}
+    {prots} 
+    {
+        {A} {0}
+        {B} {0}
+        {GS} {1}
+        {M} {0}
+        {MB} {0}
+        {MG} {0}
+        {MS} {0}
+        {PA} {0}
+        {PE} {0}
+        {PG} {0}
+        {PS} {0}
+        {RS} {0}
+        {S} {0}
+        {SB} {0}
+        {SS} {0}
+        {mg} {0}
+    }
     {sp} 
     {
-        {change} {29}
-        {current} {43271}
-        {graph} {<006>   101%   <088>}
-        {max} {42604}
-        {percent} {1.02}
+        {change} {-600}
+        {current} {19113}
+        {graph} {<006>   123%   <088>}
+        {max} {15506}
+        {percent} {1.23}
     }
-    {waves} {3}
-    {xp} {10823692412416}
+    {spelltap} 
+    {
+        {bonus} {3}
+        {corpses} {0}
+    }
+    {summons} 
+    {
+        {1} 
+        {
+            {count} {3}
+            {haste} {0}
+            {key} {Devil}
+            {mf} {1}
+            {name} {Devil}
+            {tanking} {0}
+        }
+        {2} 
+        {
+            {count} {1}
+            {haste} {0}
+            {key} {Sprite}
+            {mf} {1}
+            {name} {Sprite}
+            {tanking} {0}
+        }
+        {3} 
+        {
+            {count} {1}
+            {haste} {0}
+            {key} {Golem}
+            {mf} {1}
+            {name} {Golem}
+            {tanking} {0}
+        }
+    }
+    {super} 
+    {
+        {current} {3}
+        {reset} {19}
+    }
+    {xp} {11124153550848}
 }
 #VARIABLE {xrolm}
 {
+    {aegis} {1}
+    {anchor} {1}
     {anchor_point} {1}
-    {charges} {144}
+    {angel} {1}
+    {arachne} {1}
+    {armillary} {1}
+    {aurora} {1}
+    {cairn} {1}
+    {charges} {151}
+    {comet} {1}
+    {crown} {0}
+    {diamond} {1}
+    {dove} {1}
+    {dragon} {1}
+    {eagle} {1}
+    {eye} {1}
+    {frost} {1}
+    {ghost} {1}
+    {gremlin} {1}
+    {heart} {1}
+    {hp_regen} {0}
+    {infinity} {0}
+    {lasso} {1}
+    {last_reset} {1779865124}
+    {lightning} {1}
+    {orrery} {1}
+    {owl} {0}
+    {raven} {1}
+    {reaper} {1}
+    {scales} {1}
+    {scroll} {1}
+    {skull} {1}
+    {sp_regen} {1}
+    {spark} {1}
+    {star} {1}
+    {t1_reset} {}
+    {type} {Mace/Mind}
+    {viper} {1}
+    {winch} {1}
 }
 #VARIABLE {xspiceBeers} {$spiceBeers}
 #VARIABLE {xsplit}
 {
-    {bottom} {5}
+    {bottom} {7}
     {left} {0}
     {right} {55}
     {top} {12}
@@ -370,7 +545,42 @@
     {1} 
     {
         {active} {1}
-        {name} {blasts}
+        {name} {slow}
+    }
+    {2} 
+    {
+        {active} {1}
+        {name} {golem_assist}
+    }
+    {3} 
+    {
+        {active} {1}
+        {name} {summon_mf}
+    }
+    {4} 
+    {
+        {active} {1}
+        {name} {spelltap}
+    }
+    {5} 
+    {
+        {active} {1}
+        {name} {gstrength}
+    }
+    {6} 
+    {
+        {active} {1}
+        {name} {shoosummons}
+    }
+    {7} 
+    {
+        {active} {1}
+        {name} {rolm}
+    }
+    {8} 
+    {
+        {active} {1}
+        {name} {epowers}
     }
 }
 #VARIABLE {xtheme}
@@ -390,6 +600,7 @@
     {
         {auction} {<cea>}
         {gjugg} {<cfb>}
+        {gline} {<dfd>}
         {hm} {<fad>}
         {party} {<ffb>}
     }
@@ -408,7 +619,7 @@
     {chatlog_says} {1}
     {corpse_echo} {0}
     {cult} {0}
-    {discord_post} {0}
+    {discord_post} {1}
     {emote_corpse} {1}
     {emote_dungeon_clear} {1}
     {emote_eheal} {1}
@@ -416,7 +627,7 @@
     {emote_heal} {1}
     {emote_rally} {1}
     {go_echo} {1}
-    {mission} {0}
+    {mission} {1}
     {teleport} {1}
     {worlddrops} {0}
 }

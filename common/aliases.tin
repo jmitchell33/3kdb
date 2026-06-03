@@ -265,6 +265,7 @@
     #class botcycle kill;
     #class common_mka kill;
     #class draw kill;
+    #class maphelper kill;
     
     #NOP -- Unset draw variables to prevent errors;
     #unvar draw;
@@ -347,6 +348,8 @@
         #echo {<dfa>----------------------------------------------------<088>};
         #echo {<dfa>Guild swap complete: $guild<088>};
         #echo {<dfa>----------------------------------------------------<088>};
+
+        #var tmpgswap 1;
     };
 };
 
@@ -363,6 +366,9 @@
         cast wings of the phoenix;
         soar;
     };
+    #if {"$guild" == "juggernaut"} {
+        jumpjet;
+    };
 };
 
 #alias {.land} {
@@ -370,10 +376,13 @@
         shapeshift;
     };
     #if {"$guild" == "mage"} {
-        deplete levitate
+        deplete levitate;
     };
     #if {"$guild" == "bard"} {
         land;
+    };
+    #if {"$guild" == "juggernaut"} {
+        jumpjet;
     };
 };
 
