@@ -29,8 +29,9 @@
 	#if {$my[defs][hs] > 0}		{#if $defs[hs]		{#var hs_string <ACA><fff>HS:$my[defs][hs]*<088>}	{#var hs_string HS:$my[defs][hs]*}} {#var hs_string {}};
 	#if {$my[defs][es] > 0}		{#if $defs[es]		{#var es_string <ACA><fff>ES:$my[defs][es]*<088>}	{#var es_string ES:$my[defs][es]*}} {#var es_string {}};
 	#if {$my[defs][ra] > 0}							{#var ra_string <088>RA:$my[defs][ra]*<088>}		{#var ra_string {}};
-	
-	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $ab1_string $hr_string $fr_string $r_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
+	#if {$my[defs][cc] > 0}		{#if $defs[cc]		{#var cc_string <ACA><fff>cc*<088>}					{#var cc_string cc*}} 				{#var cc_string {}};
+
+	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $ab1_string $cc_string $hr_string $fr_string $r_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
 	#replace prot_string  { } {};
 	#replace prot_string  {*} { };
 	#NOP -- Display: current prot_string. Backup prot_string_display when non-empty so Prots line persists if gline empty/partial. When prot_string empty, clear backup so we show nothing;
