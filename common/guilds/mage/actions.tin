@@ -45,11 +45,13 @@
 } {2};
                                
 #NOP --- MAINTENANCE ACTIONS;
-#ACTION {^You entwine your hands in flows of magic and weave them around yourself} {#var my[prots][GS] 1} {2};
+#nop -- gstrength and strength spells;
 #ACTION {^You imbue yourself with great strength!$} {#var my[prots][GS] 1} {2};
-#ACTION {^You may not imbue yourself with any more strength!$} {#var my[prots][GS] 1} {2};
-#ACTION {^Your giant strength has faded.$} {#var my[prots][GS] 0} {2};
-#ACTION {^You feel weaker as the power of the Strength spell wanes.$} {#var my[prots][GS] 0} {2};
+#ACTION {^You may not imbue yourself with any more strength!$} {#var my[prots][GS] 1;#var my[prots][GS] 1} {2};
+
+#nop #ACTION {^Your giant strength has faded.$} {#var my[prots][GS] 0} {2};
+#nop #ACTION {^You feel weaker as the power of the Strength spell wanes.$} {#var my[prots][GS] 0} {2};
+
 #ACTION {Your deeppocket begins to fade} {#var deeppocket 0} {1};
 #ACTION {^You reinforce the magic within your deeppocket.$} {#var deeppocket 1} {1};
 #ACTION {^You already have a deeppockets spell functioning.$} {#var deeppocket 1} {1};

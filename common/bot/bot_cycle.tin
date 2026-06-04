@@ -1,17 +1,24 @@
-#class {botcycle} {kill}
-#class {botcycle} {open}
+#class {botcycle} {kill};
+#class {botcycle} {open};
 
-#var cycle 0
+#var cycle 0;
 #NOP Initialize botcycle as an empty list;
 #var botcycle [];
 
 #alias {bcy+} {
 	#NOP -- Check if the bot exists, and if it does, add it;
 	#local tmpIndex 0;
+	#local tmpFound 0;
 	#format tmpName {%p} {%0};
-	#list {botlist} indexate alias;
-	#list {botlist} find {$tmpName} {tmpIndex};
-	#if {$tmpIndex > 0} {
+	#foreach {botlist_chaos;botlist_fantasy;botlist_science;botlist_misc} tmpList {
+		#list $tmpList indexate alias;
+		#list $tmpList find {$tmpName} tmpIndex;
+		#if {$tmpIndex > 0} {
+			#var tmpFound 1;
+			#break;
+		};
+	};
+	#if {$tmpFound} {
 		#list {botcycle} {add} {$tmpName};
 		_caption_data_bot_cycle;
 		#echo {<bfa> +++ +++ <088> <efe>$botcycle[&botcycle[]] added to bot cycle <bfa> +++ +++ <088>};
@@ -53,18 +60,26 @@
 
 
 #alias {nextarea} {
-	#var tmpIndex 0;
+	#local tmpIndex 0;
+	#local tmpLoop 0;
 	#list {botcycle} {get} {1} {currentarea};
-	#list {botlist} {get} {$currentarea} {tmpIndex};
-	
+
+	#foreach {botlist_chaos;botlist_fantasy;botlist_science;botlist_misc} tmpList {
+		#list $tmpList indexate alias;
+		#list $tmpList find {$currentarea} tmpIndex;
+		#if {$tmpIndex > 0} {
+			#var tmpLoop ${$tmpList[$tmpIndex][loop]};
+			#break;
+		};
+	};
+
 	#delay {3} {+$currentarea};
 
 	#NOP -- If the area is not 'looped' then remove it from the botlist;
-	#if $botlist[$tmpIndex][loop] {#NOP} {
+	#if $tmpLoop {#NOP} {
 		#list botcycle {delete} {1};
-
 	};
-_caption_data_bot_cycle;
+	_caption_data_bot_cycle;
 };
 
 #alias {botclear} {
@@ -128,6 +143,6 @@ _caption_data_bot_cycle;
 };
 
 
-#alias {ba-necro}	{ba {whores;catacombs2;banshees13;whorehouse;catacombs2;banshees13;}};
+#alias {ba-necro} {ba {whores;catacombs2;banshees13;whorehouse;catacombs2;banshees13;}};
 
-#class {botcycle} {close}
+#class {botcycle} {close};

@@ -4,6 +4,9 @@
 #var corpse_delay 1;
 #var corpse_use 200;
 #var pausedtoregen 1;
+#var shelter_pause 1;
+#var tmp_shelter_return 0;
+#var secure_shelter_switch 1;
 
 #alias {_player_heartbeat} {
     #if {!$idle_flag} {
@@ -15,17 +18,53 @@
             };
         };
         #if {"$guild" == "mage"} {
-            #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
+            #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0} {
                 cast explosive release;
+            };
+            #if {"$secure_shelter_switch" == "1"} {
+                #if {$my[gp1][current] > 78 && "$my[super][current]" == "0" && "$shelter_pause" == "1"} {
+                    #if {$bot[active]} {.pause};
+                    #var shelter_pause 0;
+                    #if {"$tmp_shelter_exit" == "1"} {
+                        #var tmp_shelter_exit 0;
+                        #var tmp_shelter_return 1;
+                        portal;
+                        cast secure shelter;
+                    } {
+                        cast secure shelter;
+                    };
+                };
+            };
+            #if {"$secure_shelter_switch" == "1"} {
+                #if {"$my[gp1][current]" == "0" && "$shelter_pause" == "0"} {
+                    #if {"$tmp_shelter_return" == "1"} {
+                        #var shelter_pause 1;
+                        #var tmp_shelter_return 0;
+                        out;
+                        portal;
+                        #if {$bot[active]} {.unpause};
+                        glance;
+                        kill mimic;
+                    } {
+                        #var shelter_pause 1;
+                        out;
+                        #if {$bot[active]} {.unpause}
+                        glance;
+                    };
+                };
             };
             #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
                 .pause;
                 #var pausedtoregen 0;
             };
             #if {$my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-                #if {$bot[paused]} {.unpause};
-                #if {$bot[active]} {..};
-                #var pausedtoregen 1;
+                #if {"$shelter_pause" == "1"} {
+                    #var pausedtoregen 1;
+                    #if {$bot[paused]} {.unpause};
+                    #if {$bot[active]} {..};
+                } {
+                    #var pausedtoregen 1;
+                };
             };
         };
         #if {"$guild" == "fremen"} {

@@ -1,6 +1,15 @@
 #class {player_aliases} {kill};
 #class {player_aliases} {open};
 
+#nop -- secure shelter;
+#alias {shelter} {
+    #switch {"0"} {
+        #case {"off"} {#var secure_shelter_switch 0};
+        #case {"on"} {#var secure_shelter_switch 1};
+        #default {cast secure shelter};
+    };
+};
+
 #nop -- mask aliases;
 #alias {maskon} {
     remove helmet;wear mask;
@@ -46,6 +55,7 @@
 
 #alias {cdonate3} {
     maskoff;
+    pg;unkeep all preservation;store all;
     pg;unkeep all preservation;store all;
     pg;unkeep all preservation;store all;
     pg;unkeep all preservation;store all;
@@ -666,6 +676,7 @@
             ms 11##2#1500#70#defend#summons#always;
             ms 11##2#1500#70#assist#summons#always;
             ms golema;
+            castper mind;
         };
         #default {
             #echo {<fff>Unknown killmode '%0'. Use 'killmode help' to see available modes.<088>};
@@ -1019,7 +1030,7 @@
         gag+ hpbar;
     };
     #elseif {"$guild" == "bard"} {
-        #nop;
+        gag+ hpbar;
     };
     #elseif {"$guild" == "fremen"} {
         gag+ hpbar;
@@ -1428,7 +1439,6 @@
     #elseif {"$guild" == "mage"} {
         strategy-clear;
         strategy slow;
-        #nop strategy super_er;
         strategy golem_assist;
         strategy summon_mf;
         strategy spelltap;

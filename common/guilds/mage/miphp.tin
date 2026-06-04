@@ -1,10 +1,11 @@
-#class guild_miphp kill;
-#class guild_miphp open;
+#class {guild_miphp} {kill};
+#class {guild_miphp} {open};
 
 #var guild_miphp 1;
 #NOP -- Initialize so prompt never shows literal $prots_show / $prots_string_display before first _guild_miphp run;
 #var prots_string_display {};
 #var prots_show {};
+#var gs_string {};
 
 #alias {_guild_miphp} {
     #if {&my[summons][] > 0} {#var summoner 1};
@@ -24,7 +25,7 @@
 	#if $my[prots][PG] {#if $defs[pg] {#var pg_string <ACA><fff>*PG*<088>} {#var pg_string *PG*} } {#var pg_string {}};
 	#if $my[prots][PE] {#if $defs[pe] {#var pe_string <ACA><fff>*PE*<088>} {#var pe_string *PE*} } {#var pe_string {}};
 	#if $my[prots][SB] {#var sb_string *SB*} {#var sb_string {}};
-	#if $my[prots][GS] {checkStrategy {gstrength} {#var gs_string <ACA><fff>*GS*<088>} {#var gs_string *GS*}} {#var gs_string {}};
+	#if $my[prots][GS] {checkStrategy {gstrength} {#var gs_string <ACA><fff>*GS*<088>} {#var gs_string {}}};
 	
 	#if {$my[immersion][rounds] > 0} {#var immersion_string $my[immersion][count]/$my[immersion][rounds]} {#var immersion_string $my[immersion][count]};
 
@@ -53,4 +54,4 @@
 	#var hpbar[prompt] $temp;
 };
 
-#class guild_miphp close
+#class {guild_miphp} {close};
