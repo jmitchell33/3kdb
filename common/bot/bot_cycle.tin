@@ -9,8 +9,7 @@
 	#NOP -- Check if the bot exists, and if it does, add it;
 	#local tmpIndex 0;
 	#format tmpName {%p} {%0};
-	#list {botlist} indexate alias;
-	#list {botlist} find {$tmpName} {tmpIndex};
+	#list botlist_alias find {$tmpName} {tmpIndex};
 	#if {$tmpIndex > 0} {
 		#list {botcycle} {add} {$tmpName};
 		_caption_data_bot_cycle;
@@ -55,16 +54,15 @@
 #alias {nextarea} {
 	#var tmpIndex 0;
 	#list {botcycle} {get} {1} {currentarea};
-	#list {botlist} {get} {$currentarea} {tmpIndex};
+	#list {botlist_alias} {get} {$currentarea} {tmpIndex};
 	
 	#delay {3} {+$currentarea};
 
 	#NOP -- If the area is not 'looped' then remove it from the botlist;
-	#if $botlist[$tmpIndex][loop] {#NOP} {
+	#if $botlist_loop[$tmpIndex] {#NOP} {
 		#list botcycle {delete} {1};
-
 	};
-_caption_data_bot_cycle;
+	_caption_data_bot_cycle;
 };
 
 #alias {botclear} {

@@ -432,9 +432,8 @@
     };
 
     #if {"$caption[tab]" == "bot"} {
-        #list botlist indexate alias;
-        #list botlist find {$bot[alias]} tmpIndex;
-        #var tmpName $botlist[$tmpIndex][desc];
+        #list botlist_alias find {$bot[alias]} tmpIndex;
+        #var tmpName $botlist_desc[$tmpIndex];
         #if {"${tmpName}" == ""} {
             #list caption_data add {<cde>Current Bot: <fbc>N/A<088>};
         } {
@@ -666,10 +665,9 @@
     #var bot_cycle_string {<cde>Bot Cycler:<088>};
 
     #if {&{botcycle[]} > 0} {
-        #list botlist indexate alias;
         #loop 1 &botcycle[] index {
-            #list botlist find {$botcycle[$index]} {tmpIndex};
-            #format bot_cycle_name {%n} {${botlist[$tmpIndex][desc]}};
+            #list botlist_alias find {$botcycle[$index]} {tmpIndex};
+            #format bot_cycle_name {%n} {${botlist_desc[$tmpIndex]}};
             #format strat_name {%n} {$index[name]};
             #cat bot_cycle_string { -> <afa>$bot_cycle_name<088>};
         };
