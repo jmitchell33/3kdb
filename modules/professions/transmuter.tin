@@ -20,7 +20,6 @@
 #NOP        train-leg             -Consolidate components until Legendary (that provide pxp);
 
 
-#nop #action {Profession #1 : Transmuter%s\(Level %d\)%s\[%*\]} {#var transmuter[level] %2};
 #action {Profession #1 : Transmuter%s\(Level %d\)%*} {#var transmuter[level] %2} {2};
 
 #alias satchel_retrieve_xmute {
@@ -34,19 +33,10 @@
 
     #if {$sets_available >= 1} {
         #loop 1 $sets_available index {
-            #if {"$item_quality" == "worthless"} {
-                #2 {unstash $item_quality $item};
-                transmute 2 $item quality to average;
-            };
-            #if {"$item_quality" == "crude"} {
-                #2 {unstash $item_quality $item};
-                transmute 2 $item quality to average;
-            };
             #if {"$item_quality" == "poor"} {
                 #2 {unstash $item_quality $item};
                 transmute 2 $item quality to average;
             };
-
             #if {"$item_quality" == "average"} {
                 #3 {unstash $item_quality $item};
                 transmute 3 $item quality to good;
@@ -59,22 +49,67 @@
                 #5 {unstash $item_quality $item};
                 transmute 5 $item quality to legendary;
             };
-
-            #NOP -- Above Level 50 the transmute ratio drops by 1 for average and above;
-         #NOP   #if {"$item_quality" == "average"} {
-         #NOP       #2 {unstash $item_quality $item};
-         #NOP       transmute 2 $item quality to good;
-         #NOP   };
-         #NOP   #if {"$item_quality" == "good"} {
-         #NOP       #3 {unstash $item_quality $item};
-         #NOP       transmute 3 $item quality to superior;
-         #NOP   };
-         #NOP   #if {"$item_quality" == "superior"} {
-         #NOP       #4 {unstash $item_quality $item};
-         #NOP       transmute 4 $item quality to legendary;
-         #NOP   };
         };
     };
+};
+
+#NOP -- This will attempt to transmute all items except ore, using the;
+#NOP -- 'transmute all x quality to y' which is most efficient color-wise;
+#alias transmute_burn2 {
+    #if {"%1" == ""} {
+        help_transmute_burn2;
+    } {
+        #switch {"%1"} {
+            #case {"legendary"} {
+                update_satchel;
+                #delay 1 {
+                    #var tmpList $craft[satchel];
+                    #list tmpList indexate name;
+                    #list tmpList filter {} {%*ore%*};
+                    #loop 1 &tmpList[] tmpItem {
+                        #var tmpName $tmpList[$tmpItem][name]; 
+                        unstash all $tmpName;
+                        transmute all $tmpName quality to legendary;
+                        stash all;
+                    };
+                    #unvar tmpName;
+                    #unvar tmpList;
+                    #unvar tmpItem;
+                };
+            };
+            #case {"superior"} {
+                update_satchel;
+                #delay 1 {
+                    #var tmpList $craft[satchel];
+                    #list tmpList indexate name;
+                    #list tmpList filter {} {%*ore%*};
+                    #loop 1 &tmpList[] tmpItem {
+                        #var tmpName $tmpList[$tmpItem][name]; 
+                        unstash all $tmpName;
+                        transmute all $tmpName quality to superior;
+                        stash all;
+                    };
+                    #unvar tmpName;
+                    #unvar tmpList;
+                    #unvar tmpItem;
+                };
+            };
+            #default {help_transmute_burn2};
+        };
+    };
+};
+
+#alias help_transmute_burn2 {
+    #echo {    <dbb>===============================================================<088>};
+    #echo {    <dbb>===                <eec>Oscar's DELUXE Transmuter                <dbb>===<088>};
+    #echo {    <dbb>===============================================================<088>};
+    #echo {    <dbb>===   <dfd>transmute_burn2 <eee>will transmute all available items    <dbb>===<088>};
+    #echo {    <dbb>===   <eee>   except ore to either <dfd>superior <eee>or <dfd>legendary<ded>.        <dbb>===<088>};
+    #echo {    <dbb>===                                                         <dbb>===<088>};
+    #echo {    <dbb>===     <eee>Acceptable arguments are:                           <dbb>===<088>};
+    #echo {    <dbb>===       <dfd>transmute_burn2 legendary                         <dbb>===<088>};
+    #echo {    <dbb>===       <dfd>transmute_burn2 superior                          <dbb>===<088>};
+    #echo {    <dbb>===============================================================<088>};
 };
 
 #alias transmute_burn {
@@ -104,8 +139,6 @@
                             #if {$transmuter[level] >= $index[min-level]} {
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
-                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
                                         #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
                                         #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
                                         #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
@@ -123,8 +156,6 @@
                             #if {$transmuter[level] >= $index[min-level]} {                                
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
-                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
                                         #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
                                         #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
                                         #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};
@@ -143,8 +174,6 @@
                             #if {$transmuter[level] >= $index[min-level] && $transmuter[level] < $index[max-level]} {
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
-                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
                                         #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
                                         #if {$satchel_item[average] >= 3} {satchel_retrieve_xmute 3 average {$satchel_item[name]} $satchel_item[average];};
                                         #if {$satchel_item[good] >= 4} {satchel_retrieve_xmute 4 good {$satchel_item[name]} $satchel_item[good];};
@@ -170,8 +199,6 @@
                             #if {$transmuter[level] >= $index[min-level] && $transmuter[level] <= $index[max-level]} {                                
                                 #foreach $craft[satchel][%*] satchel_item {
                                     #if {"$satchel_item[name]" == "$index[component]" && $satchel_item[total] > 0} {
-                                        #if {$satchel_item[worthless] >= 2} {satchel_retrieve_xmute 2 worthless {$satchel_item[name]} $satchel_item[worthless];};
-                                        #if {$satchel_item[crude] >= 2} {satchel_retrieve_xmute 2 crude {$satchel_item[name]} $satchel_item[crude];};
                                         #if {$satchel_item[poor] >= 2} {satchel_retrieve_xmute 2 poor {$satchel_item[name]} $satchel_item[poor];};
                                         #if {$satchel_item[average] >= 2} {satchel_retrieve_xmute 2 average {$satchel_item[name]} $satchel_item[average];};
                                         #if {$satchel_item[good] >= 3} {satchel_retrieve_xmute 3 good {$satchel_item[name]} $satchel_item[good];};

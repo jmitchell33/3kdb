@@ -102,10 +102,16 @@ _caption_data_bot_cycle;
 	#echo {<228> +-----------------------------------------+}<088>;
 	#echo {<228> |<138>              Area Cycler                <228>|<088>};
 	#echo {<228> +-----------------------------------------+}<088>;
-	#if {&{botcycle[]} == 0} {
-		.cycler_help_file
+	#if {"%1" == "clear"} {
+		#echo {       <fab>  Bot cycler has been cleared. <088>};
+		#unvar botcycle;
+		_caption_data_bot_cycle;
 	} {
-		.cycler_list_bots
+		#if {&{botcycle[]} == 0} {
+			.cycler_help_file
+		} {
+			.cycler_list_bots
+		};
 	};
 };
 

@@ -1,7 +1,7 @@
 #class helpers open
 
-#action {^Component Name            |   T |  L |  S |  G |  A |  P |  C |  W |} {
-    #action {%* |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |} {
+#action {^Component Name            |   T |  L |  S |  G |  A |  P |} {
+    #action {%* |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |} {
         #format {lower} {%l} {%%1};
         #format {lower} {%p} {$lower};
         #format {satchel_total} {%d} {%%3};
@@ -10,8 +10,6 @@
         #format {satchel_good} {%d} {%%9};
         #format {satchel_average} {%d} {%%11};
         #format {satchel_poor} {%d} {%%13};
-        #format {satchel_crude} {%d} {%%15};
-        #format {satchel_worthless} {%d} {%%17};
         #list temp_satchel add {{
             {name} {$lower}
             {total} {$satchel_total}
@@ -20,8 +18,6 @@
             {good} {$satchel_good}
             {average} {$satchel_average}
             {poor} {$satchel_poor}
-            {crude} {$satchel_crude}
-            {worthless} {$satchel_worthless}
         }};
     } {2};
 } {2}
@@ -31,7 +27,7 @@
     #send {stashlist};
     #line oneshot #action {You have %d/%d items in your satchel.} {
         #var craft[satchel] $temp_satchel;
-        #unaction {%*|%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |};
+        #unaction {%*|%s%d |%s%d |%s%d |%s%d |%s%d |%s%d |};
     };
 };
 
