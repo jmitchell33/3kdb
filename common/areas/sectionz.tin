@@ -58,7 +58,34 @@
         #case {"blue-helmet"} {open figurine;insert blue stone near head;insert blue capsule near head;close figurine;insert blue stone;insert blue capsule;keep helmet};
         #case {"blue-gloves"} {open figurine;insert blue stone near hands;insert blue capsule near hands;close figurine;insert blue stone;insert blue capsule;keep gloves};
         #case {"blue-boots"} {open figurine;insert blue stone near feet;insert blue capsule near feet;close figurine;insert blue stone;insert blue capsule;keep boots};
-        #case {""}   {#echo {<efb>==========<088> <faa>NO GEAR PROVIDED<088> <efb>==========<088>}};
+        #default   {
+            #if {"%0"== ""} {
+                #var tmpString <dee>No gear was provided.<088>;
+            } {
+                #var tmpString <fbb>%0 <dee>did not match any options.  Please verify spelling.<088>;
+            };
+            #echo {   <efb>===================   <088> <faa>Badger's Balangool Bits<088> <efb>   ===================<088>};
+            #echo {};
+            #echo {        $tmpString};
+            #echo {};
+            #echo {        <dee>Syntax is "gool <ecd>color<dee>-<bec>slot<088>"};
+            #echo {        <dee>For example to make a green helmet, you would enter:};
+            #echo {           <bfc>gool green-helmet<088>};
+            #echo {};
+            #echo {        <dee>Available colors include:<088>};
+            #echo {            <bfc>green  <bef>blue  <ecb>orange<088>};
+            #echo {};
+            #echo {        <dee>Available slots include:<088>};
+            #echo {            <bfc>boots gloves armour helmet<088>};
+            #echo {};
+            #echo {        <dee>Colors provide the following benefits:<088>};
+            #echo {            <bfc>green - <dee>wisdom and dexterity stat boost<088>};
+            #echo {            <ecb>orange - <dee>HP and SP Regen<088>};
+            #echo {            <bef>blue - <dee>Increased SMD<088>};
+            #echo {};
+            #echo {       <fbb>Note: <dee>Alias will attempt to use stones first before capsules.<088>};
+            #echo {   <efb>=====================================================================<088>}
+        };
 	};
 };
 

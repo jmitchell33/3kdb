@@ -35,13 +35,13 @@
 		#send !fish;
 		#draw Yellow scroll line 1 1 1 30;
 		#echo {<fff>YOU CAUGHT SOMETHING!<088>};
-		#draw Yellow scroll line 1 1 1 30
-	}
+		#draw Yellow scroll line 1 1 1 30;
+		#math {fish[caught]} {$fish[caught] + 1};
+	};
 } {2};
 
 #action {^%*fish: Ok.$} {
 	#if {!$idle_flag} {
-		#math {fish[caught]} {$fish[caught] + 1};
 		#draw Yellow scroll line 1 1 1 30;
 		#echo {<fff>YOU CAUGHT A FISH!!!!<088>};
 		#draw Yellow scroll line 1 1 1 30
@@ -146,11 +146,13 @@
 		#if {$fish[end] < $fish[req]} {#send !catch};
  		#if {$fish[ten] > 30 || "$fish[ten]" == "H" } {#send !slack};
 		#if {$fish[catch] > 20} {#send !catch};
-		#if {$fish[dist] > 100} {#send !reel};
-		#elseif {"$fish[dir]" == "R"} {#send !pull left};
-		#elseif {"$fish[dir]" == "L"} {#send !pull right};
+		#if {"$fish[dir]" == "R++"} {#send !pull left};
+		#if {"$fish[dir]" == "R+"} {#send !pull left};
+		#elseif {"$fish[dir]" == "L++"} {#send !pull right};
+		#elseif {"$fish[dir]" == "L+"} {#send !pull right};
 		#elseif {$fish[dist] > 0} {#send !reel};
 		#else {#NOP};
+		
 		#line oneshot #action {^Your fishing rod bends violently and cracks in two!} {
 			#if {!$flag_flag} {
 				thread rod;
