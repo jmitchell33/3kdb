@@ -54,16 +54,7 @@
 	#math fish[advancement] {$fish[advancement] + 1};
 } {2};
 
-#action {^%*fish: Ok.$} {
-	#if {!$idle_flag} {
-		#draw Yellow scroll line 1 1 1 65;
-		#echo {<fff>YOU CAUGHT A FISH!!!!<088>};
-		#draw Yellow scroll line 1 1 1 30;
-		#math {fish[caught]} {$fish[caught] + 1};
-	};
-} {2};
-
-#action {^%*lobster: Ok.$} {
+#action {{^.* (fish|scale|lobster): Ok\.$}} {
 	#if {!$idle_flag} {
 		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>YOU CAUGHT A FISH!!!!<088>};
