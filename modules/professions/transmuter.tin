@@ -22,6 +22,61 @@
 
 #action {Profession #1 : Transmuter%s\(Level %d\)%*} {#var transmuter[level] %2} {2};
 
+#list transmuter_resets clear;
+#var transmuter_resets_graph[1] 0;
+#var transmuter_resets_graph[2] 0;
+#var transmuter_resets_graph[3] 0;
+#var transmuter_resets_graph[4] 0;
+#var transmuter_resets_graph[5] 0;
+#var transmuter_resets_graph[6] 0;
+#var transmuter_resets_total 0;
+#var transmuter_resets_total_stones 0;
+#var transmuter_resets_avg 0;
+
+#action {^Your transmuter's stone bursts with %d new colours!$} {
+    #list transmuter_resets add %1;
+    #math transmuter_resets_total {$transmuter_resets_total + 1};
+    #math transmuter_resets_total_stones {$transmuter_resets_total_stones + %1};
+    #math transmuter_resets_graph[%1] {$transmuter_resets_graph[%1] + 1};
+    #math transmuter_resets_avg {$transmuter_resets_total_stones / &transmuter_resets[] * 1.00};
+} {2};
+
+#alias {transmuter-stats} {
+    #if {&transmuter_resets[] > 0} {
+        #echo {    <dbb>===============================================================<088>};
+        #echo {    <dbb>===              <eec>Oscar's DELUXE Transmuter Stats            <dbb>===<088>};
+        #echo {    <dbb>===============================================================<088>};
+        #echo {    <dbb>===                                                         <dbb>===<088>};
+        #echo {    <dbb>===       <ced>You are a level <bfc>$transmuter[level] Transmuter.                   <dbb>===<088>};
+        #echo {    <dbb>===                                                         <dbb>===<088>};
+        #echo {    <dbb>===       <ced>You have had <bfc>&transmuter_resets[] <ced>resets yielding an average         <dbb>===<088>};
+        #echo {    <dbb>===       <ced>of $transmuter_resets_avg stones per reset.                         <dbb>===<088>};
+        #echo {    <dbb>===                                                         <dbb>===<088>};
+        #echo {    <dbb>===       <ced>Frequency of Resets:                              <dbb>===<088>};
+        #loop 1 &transmuter_resets_graph[] tmpItem {
+            #math tmpPercent {$transmuter_resets_graph[$tmpItem] / $transmuter_resets_total * 100.00};
+            #format tmpPrint {%-56s %+10s} {    <dbb>===         <cdd>$tmpItem Stones:  $transmuter_resets_graph[$tmpItem] times  (${tmpPercent}% of total)} {<dbb>===<088>};
+            #echo $tmpPrint;
+        };
+        #echo {    <dbb>===============================================================<088>};
+
+    } {
+        #echo {    <dbb>===============================================================<088>};
+        #echo {    <dbb>===              <eec>Oscar's DELUXE Transmuter Stats            <dbb>===<088>};
+        #echo {    <dbb>===============================================================<088>};
+        #echo {    <dbb>===                                                         <dbb>===<088>};
+        #echo {    <dbb>===       <ced>You are a level <bfc>$transmuter[level] Transmuter.                   <dbb>===<088>};
+        #echo {    <dbb>===                                                         <dbb>===<088>};
+        #echo {    <dbb>===        <eee>Your colours have not yet reset this login.      <dbb>===<088>};
+        #echo {    <dbb>===                                                         <dbb>===<088>};
+        #echo {    <dbb>===============================================================<088>};        
+    };
+};
+
+#action {Transmuters can convert crafting components from one item to another, usually at a cost.} {
+    #echo {<ced>   3kdb Helper -- You can type <bfc>transmuter-stats<ced> to see a summary of your transmuter colour resets this boot.};
+} {2};
+
 #alias satchel_retrieve_xmute {
     #var items_required %1;
     #var item_quality %2;

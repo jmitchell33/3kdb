@@ -175,17 +175,17 @@
             #echo {Bot Areas not populated...repopulating list};
             _area_bots
         } {
-            #var botlist_tmp {};
-            #var botlist_tmp $botlist_area;
-            #if {"${botlist_tmp}" === ""} {#NOP} {
-                #list botlist_tmp filter {$area};
-                #if {&botlist_tmp[] > 0} {
+            #list tmpKeys clear;
+            #loop 1 &botlist_area[] tmpItem {
+                #if {"$botlist_area[$tmpItem]" == "$area"} {
+                    #list tmpKeys add $tmpItem;
+                };
+            };
+            #if {"${tmpKeys}" === ""} {#NOP} {
+                #if {&tmpKeys[] > 0} {
                     #echo {   <cfc>Bots in $area include:<088>};
-                    #var tmpItem {};
-                    #loop 1 &botlist_area[] tmpItem {
-                        #if {"$botlist_area[$tmpItem]" == "$area"} {
-                            format_botlist {     $botlist_alias[$tmpItem]} {$botlist_desc[$tmpItem]};
-                        };
+                    #loop 1 &tmpKeys[] tmpItem {
+                        format_botlist {     $botlist_alias[$tmpKeys[$tmpItem]]} {$botlist_desc[$tmpKeys[$tmpItem]]};
                     };
                     #echo {};
                 };
@@ -296,7 +296,7 @@
 
 #NOP -------------------------- Fantasy Steppers ----------------------------------;
 
-.add_bot {abyss} {abyss} {The Abyss} {#NOP} {0} {1};
+.add_bot {abyss} {abyss} {The Abyss} {26522} {0} {1};
 .add_bot {catacombs} {catacombs} {Catacombs} {7996} {1} {1};
 .add_bot {catacombs} {catacombs2} {Catacombs v2.0} {20967} {1} {1};
 .add_bot {catacombs-easy} {catacombs2-easy} {Catacombs v2.0 - No Duke/Runner} {20967} {1} {1};
