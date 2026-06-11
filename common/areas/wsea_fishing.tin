@@ -12,6 +12,24 @@
 #var fish[break-line] 0;
 #var fish[break-rod] 0;
 #var fish[advancement] 0;
+#var fish[catch-peak] 0;
+
+
+#if {"${my[fish_catch_level]}" === ""} {
+	#var my[fish_catch_level] 30;
+};
+
+#alias .setCatchLevel {
+	#if {"%1" == ""} {
+		#echo {    <dec>No level provided.  Provide a number 1-99 that should you catch the fish at.<088>};
+		#echo {    <dec>Current catch level is <bfc>$my[fish_catch_level]% <088>};
+	} {
+		#var my[fish_catch_level] %1;
+		#echo {    <dec>Catch Level Updated.  You will now attempt to catch a fish at or above <bfc>${my[fish_catch_level]}% <dec>chance to catch.<088>};
+	};
+};
+
+
 #action {^Suddenly something grabs hold of your line!!!} {
 	#if {!$idle_flag} {
 		#send !reel;
@@ -25,6 +43,7 @@
 #action {^Even though you do everything right the catch manages to wriggle free} {
 	#if {!$idle_flag} {
 		#send !fish;
+		#var fish[catch-peak] 0;
 		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>THE FISH WIGGLED FREE!<088>};
 		#draw Yellow scroll line 1 1 1 65;
@@ -32,9 +51,22 @@
 	};
 } {2};
 
+#action {^Your caught fish manages to wriggle free and vanishes into the deep ocean.$} {
+	#if {!$idle_flag} {
+		#send !fish;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
+		#echo {<faa>THE FISH WIGGLED FREE!<088>};
+		#draw Yellow scroll line 1 1 1 65;
+		#math fish[fail-wriggle] {$fish[fail-wriggle] + 1};
+	};
+} {2};
+
+
 #action {^You fail to retrieve your catch!} {
 	#if {!$idle_flag} {
 		fish;
+		#var fish[catch-peak] 0;
 		#math fish[fail] {$fish[fail] + 1};
 	};
 } {2};
@@ -43,6 +75,7 @@
 	#if {!$idle_flag} {
 		#send !take all; 
 		#send !fish;
+		#var fish[catch-peak] 0;
 		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>YOU CAUGHT SOMETHING!<088>};
 		#draw Yellow scroll line 1 1 1 65;
@@ -66,15 +99,18 @@
 
 #action {^You're too tired to do that.} {
 	#if {!$idle_flag} {
-		catch;
-		fish
-	}
+		cease;
+		#echo {<bfc> Fish Conclusion: Ceasing - Highest % = $fish[catch-peak]};
+		#send !fish;
+		#var fish[catch-peak] 0;
+	};
 } {2};
 
 #action {^As no fish appear to be interested in your line, you pull it back up.} {
 	#if {!$idle_flag} {
 		#send !bait rod;
 		#send !fish;
+		#var fish[catch-peak] 0;
 		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>REBAITING FISHING ROD!<088>};
 		#draw Yellow scroll line 1 1 1 30
@@ -85,6 +121,7 @@
 	#if {!$idle_flag} {
 		#send !bait rod;
 		#send !fish;
+		#var fish[catch-peak] 0;
 		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>REBAITING FISHING ROD!<088>};
 		#draw Yellow scroll line 1 1 1 30
@@ -96,6 +133,7 @@
 		#send !thread rod;
 		#send !bait rod;
 		#send !fish;
+		#var fish[catch-peak] 0;
 		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>RETHREADING FISHING ROD!<088>};
 		#draw Yellow scroll line 1 1 1 30
@@ -162,10 +200,36 @@
 			#default 	{#nop}
 		};
 
+		#if {$fish[catch-peak] < $fish[catch]} {
+			#var fish[catch-peak] $fish[catch];
+		};
+
+		#if {$fish[catch] == "H"} {
+			#var fish[catch-peak] H;
+			#send !catch;
+			#echo {<bfc> Fish Conclusion: Catching - Highest % = $fish[catch-peak]};
+		};
+		#elseif {$fish[catch] == "M"} {
+			#var fish[catch-peak] M;
+			#send !catch;
+			#echo {<bfc> Fish Conclusion: Catching - Highest % = $fish[catch-peak]};
+		};
+		#elseif {$fish[req] + 40 > $fish[end] && $fish[catch] > $my[fish_catch_level]} {
+			#send !catch;
+			#echo {<bfc> Fish Conclusion: Catching - Highest % = $fish[catch-peak]};
+		};
+		#elseif {$fish[catch] > $my[fish_catch_level]} {
+			#send !catch;
+			#echo {<bfc> Fish Conclusion: Catching - Highest % = $fish[catch-peak]};
+		};
+
 		#if {"$fish[dist]" == "H"} {#var fish[dist] 200};
-		#if {$fish[end] < $fish[req]} {#send !catch};
+		#if {$fish[end] < $fish[req]} {
+			#send !cease;
+			#echo {<bfc> Fish Conclusion: Ceasing - Highest % = $fish[catch-peak]};
+		};
  		#if {$fish[ten] > 30 || "$fish[ten]" == "H" } {#send !slack};
-		#if {$fish[catch] > 20} {#send !catch};
+		
 		#if {"$fish[dir]" == "R++"} {#send !pull left};
 		#if {"$fish[dir]" == "R+"} {#send !pull left};
 		#elseif {"$fish[dir]" == "L++"} {#send !pull right};
@@ -199,11 +263,7 @@
 				#math fish[break-line] {$fish[break-line] + 1};
 			}
 		} {2};
-
-		#if {$fish[req] + 40 > $fish[end] && $fish[catch] > 15} {
-			#send !catch
-		}
-	}
+	};
 } {2};
 
 #gag {^You can't do another action yet.};
