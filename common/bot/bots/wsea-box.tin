@@ -1,0 +1,49 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var bot_message_1 '---- WESTERSEA LOCKBOX HUNTER ----';
+#var bot_message_2 '---- Examines guards, attacks only if lockbox present ----';
+#echo $bot_message_1;#echo $bot_message_2;
+
+#var check_room 1;
+
+#var {bot[path]} {n;n;n;ne;n;nw;w;sw;w;w;w;w;w;w;w;nw;w;w;sw;w;w;w;w;w;w;w;nw;w;sw;nw;se;s;se;s;s;s;s;s;s;s;s;sw;s;sw;ne;se;e;ne;e;e;e;e;e;e;e;se;e;e;ne;e;e;e;e;e;e;e;se;e;ne;n;nw;n;n;n;n;n};
+
+#NOP -- Guards are NOT in botmobs - we examine them first before deciding to attack;                       
+#list botmobs clear;
+
+#alias .check_room {
+    #unvar tmpIndex;
+    #var bot[lockbox_found] 0;
+    #if {&room[mobs][] > 0} {
+        #var bot[foundmob] 1;
+        #loop 1 &room[mobs][] tmpIndex {
+            #unvar tmpMob;
+            #var tmpMob $room[mobs][$tmpIndex][autoName] $room[mobs][$tmpIndex][index];
+            examine $tmpMob;
+            #line oneshot #action {^-i-A hard iron lockbox\.$} {
+                #var bot[lockbox_found] 1;
+                kill $tmpMob;
+                #var bot[foundobject] 1;
+            } {1};
+        };
+    } {
+        .botStep;    
+    };
+    #delay {moveOn} {#if !$bot[lockbox_found] {#var bot[walk] 1;.botStep;}} {3};
+};
+
+
+#NOP -- Detect the lockbox line in examine output;                       
+#act {^-i-A hard iron lockbox\.$} {
+    #var bot[lockbox_found] 1;
+    #var bot[foundobject] 1;#var object_action {}
+} {1};
+
+
+#class {bot} {close}
+#read common/bot/generic.tin;
+#unticker bot_kick;
+#unticker bot_restart;
+#unticker bot_ticker;
+.check_room;
