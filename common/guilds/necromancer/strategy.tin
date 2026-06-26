@@ -26,6 +26,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {diurnum} {active} {0} {description} {Necro: Diurnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {nocturnum} {active} {0} {description} {Necro: Nocturnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {iprime} {active} {0} {description} {Invoke Prime}}};
+#list strategyList add {{{guild} {necromancer} {name} {iprime1} {active} {0} {description} {Invoke Prime MAXXXXX (requires any 2 of BGH, DM, or Assassin Proc'ing)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure} {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure1} {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (No Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure2} {active} {0} {description} {Conjure Undead: Conjure, Nuke, UA, Rapture (No Unholy Ground)}}};
@@ -37,6 +38,24 @@
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
+    #if {$mip[round] > 5 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 40} {
+        #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
+            checkStrategy {iprime1} {
+                #if {$my[necromancer][repower][current] < 70} {
+                    #math iprime_boosts {$cmbt[affects][BGH] + $cmbt[affects][DM] + $cmbt[affects][assassin]};
+                    #if {$iprime_boosts >= 2} {
+                        #var iprime_round 0;
+                        ip1;
+                        #delay 10 {#var iprime_round 1};
+                    };
+                } {
+                    #var iprime_round 0;
+                    ip1;
+                    #delay 10 {#var iprime_round 1};
+                };
+            };
+        };
+    };
     #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
         #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
             checkStrategy {iprime} {#var iprime_round 0;ip1;#delay 10 {#var iprime_round 1}};
