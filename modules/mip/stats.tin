@@ -178,6 +178,7 @@
 			#CASE {"fremen"}        {.mipProcessGlineFremen {%1}};
 			#CASE {"gentech"}		{.mipProcessGlineGentech {%1}};
 			#CASE {"juggernaut"}	{.mipProcessGlineJuggernaut {%1}};
+			#CASE {"knight"}		{.mipProcessGlineKnight {%1}};
 			#CASE {"necromancer"}	{.mipProcessGlineNecromancer {%1}};
 			#CASE {"mage"}			{.mipProcessGlineMage {%1}};
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
@@ -404,6 +405,45 @@
 		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
+	};
+};
+
+#ALIAS {.mipProcessGlineKnight} {
+	#IF {%1 == 1} {
+		#NOP;
+	}; #ELSEIF {%1 == 2} {
+		#var tmpList $mip[gline][2];
+		#list tmpList EXPLODE {] [};
+		#loop 1 &tmpList[] i {
+			#var tmpItem $tmpList[$i];
+			#replace tmpItem {[} {};
+			#regex {$tmpItem} {%w} {#var tmpKey &1};
+			#regex {$tmpItem} {:%*\%} {#var tmpValue &1};
+			#format tmpLength {%L} {$tmpKey};
+			#if @checkKstat{$tmpKey} {
+				#var my[kstats][$tmpKey] $tmpValue;
+			};
+		};
+	}; #ELSE {
+		#ECHO {<171> Invalid Gline Number <088>};
+	};
+};
+
+#NOP -- We perform this check since MIP is often garbled and we don't want bad keys slipping through;
+#function checkKstat {
+	#var result 0;
+	#switch {"%1"} {
+		#case {"OFN"} {#var result 1};
+		#case {"DFN"} {#var result 1};
+		#case {"HMN"} {#var result 1};
+		#case {"FSN"} {#var result 1};
+		#case {"BCN"} {#var result 1};
+		#case {"PAN"} {#var result 1};
+		#case {"DLN"} {#var result 1};
+		#case {"SBN"} {#var result 1};
+		#case {"SN"}  {#var result 1};
+		#case {"ENN"} {#var result 1};
+		#default {#var result 0};
 	};
 };
 
