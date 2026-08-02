@@ -669,7 +669,11 @@
             #list botlist_alias find {$botcycle[$index]} {tmpIndex};
             #format bot_cycle_name {%n} {${botlist_desc[$tmpIndex]}};
             #format strat_name {%n} {$index[name]};
-            #cat bot_cycle_string { -> <afa>$bot_cycle_name<088>};
+            #if {"$index" == "1"} {
+                #cat bot_cycle_string { <afa>$bot_cycle_name<088>};
+            } {
+                #cat bot_cycle_string { -> <afa>$bot_cycle_name<088>};
+            };
         };
     } {
         #var bot_cycle_string {<cde>Bot Cycler: <fac>N/A<088>};

@@ -23,6 +23,21 @@
     };
 };
 
+#alias .drink_spice {
+    #line oneshot #action {Drink what?} {#var my[spice][inventory] 0;.update_spice};
+    #if {$my[spice][total] > 0} {
+        #if {$my[spice][inventory] > 0} {
+            drink spice;
+        } {
+            #if {$my[spice][smuggled] > 0} {
+                #action {That's not being smuggled...} {#var my[spice][smuggled] 0} {1};
+                smuggle remove beer;
+                drink beer;
+                #delay 2 {#unaction {That's not being smuggled...}}
+            };
+        };
+    };
+};
 
 
 #NOP -- fill and donate literjons at shamoom;

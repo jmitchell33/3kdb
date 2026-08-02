@@ -1,9 +1,36 @@
 #class {guild_heartbeat} {kill}
 #class {guild_heartbeat} {open}
 
+#var bot_toggle 1;
+#var litany_danger 6;
+
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
-		#NOP;
+		#NOP -- Conditions to stop bot (vexed+ mind);
+        checkStrategy {suspend} {
+            #if {$my[litany][points] >= $litany_danger && $bot_toggle && $bot[active]} {
+                #send {ptell Pausing to suspend mind.};
+                #var bot_toggle 0;
+                .pause;
+                #ticker suspendStart {
+                    #if {!$incombat} {
+                        suspend;
+                        #unticker suspendStart;
+                    };
+                } {2};
+                #ticker suspendResume {
+                    #NOP -- The false statement for suspend is since a few actions break suspension;
+                    #NOP -- but there is no output from 3k;
+                    #if {$my[litany][points] == 1} {
+                        #send {ptell Litany mind luminous, continuing.};
+                        #var bot_toggle 1;
+                        #if {!$incombat} {..};
+                        #unticker suspendResume;
+                        #undelay suspendTimeout;
+                    } {suspend};
+                } {2};
+            };
+        };
 	};
 };
 

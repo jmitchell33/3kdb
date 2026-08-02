@@ -82,6 +82,14 @@
             #var my[necromancer][decanters][powered] 0;
             check_chest;
         };
+        #if {"$guild" == "fremen"} {
+            #var my[spice][inventory] 0;
+            #action {%* Spice Beer.} {
+                #format tmpItem {%d} {%%1};
+                .update_spice inventory $tmpItem;
+            } {1};
+            #delay 2 {#unaction {%* Spice Beer.}};
+        };
         #var inventory_check 1;
         #var corpse_check 1;
         #var corpses[inventory] 0;

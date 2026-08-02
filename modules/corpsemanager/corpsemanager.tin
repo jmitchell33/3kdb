@@ -487,6 +487,12 @@
 	#delay 2 {
 		#var smuggle_update 0;
 	};
+
+	#NOP -- Check spice beers if fremen;
+	#if {"$guild" == "fremen"} {
+		#var my[spice][smuggled] 0;
+		#action {^> Spice Beer$} {#if $smuggle_update {.update_spice smuggled 1}};
+	};
 	
 } {2};
 

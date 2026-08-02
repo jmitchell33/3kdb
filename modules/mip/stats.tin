@@ -333,7 +333,20 @@
 
 #ALIAS {.mipProcessGlineFremen} {
 	#IF {%1 == 1} {
-		#REGEX {$mip[gline][1]} {FOCUS: %w} {#VAR {my[litany][focus]} {&1}}; 
+		#REGEX {$mip[gline][1]} {FOCUS: %w} {
+			#VAR {my[litany][focus]} {&1};
+			#switch {"&1"} {
+				#case {"Wracked"} {#var my[litany][points] 9};
+				#case {"Pained"} {#var my[litany][points] 8};
+				#case {"Vexed"} {#var my[litany][points] 7};
+				#case {"Suffering"} {#var my[litany][points] 6};
+				#case {"Hindered"} {#var my[litany][points] 5};
+				#case {"Unhindered"} {#var my[litany][points] 4};
+				#case {"Sharp"} {#var my[litany][points] 3};
+				#case {"Lucid"} {#var my[litany][points] 2};
+				#case {"Luminous"} {#var my[litany][points] 1};
+			};
+		}; 
 		#REGEX {$mip[gline][1]} {GXP: %d} {#VAR {my[g2n]} {&1}};
 		#VAR {my[gxp][last_round]} {$my[g2n]};
         #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};

@@ -62,10 +62,18 @@
 
 #action {^%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
 #action {^The daemon hisses: Dost thou choose to graft with me %w?} {#format {graft} {%l} {%1};#if {"$user" == "$graft"} {say yes}};
-#action {^%1 begins to follow %2\.$} {#format {follower} {%l} {%1};#if {"$user" == "$follower"} {#format {following} {%n} {%2}}};
-#action {^You stop following %1} {#unvar following};
+#action {^%1 begins to follow %2\.$} {
+    #format {follower} {%l} {%1};
+    #if {"$user" == "$follower"} {#format {following} {%n} {%2}};
+    #var mapFollow 1;
+} {2};;
+#action {^You stop following %1} {
+    #unvar following;
+    #var mapFollow 0;
+} {2};
+
 #action {^%1 leaves %2\.$} {
-    #if {"%1" == "$following"} {
+    #if {"%1" == "$following" && $mapFollow} {
         #format {follow_target} {%l} {%1};
         #local follow_dir %2;
         #switch {"$follow_dir"} {
@@ -82,7 +90,7 @@
             #default            {#map move $follow_dir};
         };
     }
-}; 
+} {2}; 
 
 #NOP -- Rewear the knight shield if you use the wrong one;
 #action {There is no reason to 'bash' here.} {

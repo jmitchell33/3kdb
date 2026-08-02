@@ -2,46 +2,36 @@
 
 #map read common/map/3k_shared.map;
 
-	/* Move Event */
-	#alias {mapupdate} {
-		#map {get} {ROOMVNUM} {roomvnum};
-		#map {get} {ROOMAREA} {roomarea};
-		#map {get} {ROOMNAME} {roomname};
-		#map {get} {ROOMDESC} {roomdesc};
-		#format {roomname_len}	{%L} {${roomname}};
-		#format {roomvnum_len}	{%L} {${roomvnum}};
-		#format {roomarea_len}	{%L} {${roomarea}};
-		#format {roomdesc_len}	{%L} {${roomdesc}};
-	#NOP	#math {name_len} {42-$roomvnum_len-3};
-	#NOP	#format {name_trunc} {%.${name_len}s} {$roomname};
-	#NOP	#unvar area_mapped;
-	#NOP	#map list {} {} {} {$roomarea} {variable} {area_mapped};
-	#NOP	#var {room_cnt} {&area_mapped[]};
-	}
+/* Move Event */
+#alias {mapupdate} {
+	#map {get} {ROOMVNUM} {roomvnum};
+	#map {get} {ROOMAREA} {roomarea};
+	#map {get} {ROOMNAME} {roomname};
+	#map {get} {ROOMDESC} {roomdesc};
+	#format {roomname_len}	{%L} {${roomname}};
+	#format {roomvnum_len}	{%L} {${roomvnum}};
+	#format {roomarea_len}	{%L} {${roomarea}};
+	#format {roomdesc_len}	{%L} {${roomdesc}};
+#NOP	#math {name_len} {42-$roomvnum_len-3};
+#NOP	#format {name_trunc} {%.${name_len}s} {$roomname};
+#NOP	#unvar area_mapped;
+#NOP	#map list {} {} {} {$roomarea} {variable} {area_mapped};
+#NOP	#var {room_cnt} {&area_mapped[]};
+}
 
 #event {MAP UPDATED VTMAP} {
 	#delay {0.05} {mapupdate}
-}
+};
 
 #event {MAP ENTER ROOM} {
 	#if {"$mapping" == "on"} {
 		mapupdate;
 	}
-}
+};
 
 #event {MAP EXIT ROOM} {
 	#list nouns clear
-}
-
-/* Map Follow on Following Others */
-
-#act {%1 leaves following %2} {
-	#format {follower} {%l} {%1};
-	#if {"$follower" == "$user"} {
-		#format {following} {%l} {%2};
-		#map move $foldir
-	};
-} {4};
+};
 
 /* Data Grab Trigger */
 #var finding_here off;

@@ -132,25 +132,7 @@
 
             #NOP -- Actions to perform the first rounds of combat;
             #if {$mip[round] >= 1 && $mip[round] <= 3} {
-                #if {"$guild" == "necromancer"} {_strategy_guild_start};
-                #if {"$guild" == "fremen"} {_strategy_guild_start};
-                #if {"$guild" == "juggernaut"} {_strategy_guild_start};
-                #if {"$guild" == "bard"} {_strategy_guild_start};
-                #if {"$guild" == "priest"} {_strategy_guild_start};
-                #if {"$guild" == "monk"} {_strategy_guild_start};
-                #if {"$guild" == "breed"} {_strategy_guild_start};
-                #if {"$guild" == "changeling"} {_strategy_guild_start};
-                #if {"$guild" == "mage"} {_strategy_guild_start};
-                #if {"$guild" == "psicorps"} {_strategy_guild_start};
-                #if {"$guild" == "elemental"} {_strategy_guild_start};
-                #if {"$guild" == "jedi"} {_strategy_guild_start};
-                #if {"$guild" == "cyborg"} {_strategy_guild_start};
-                #if {"$guild" == "gentech"} {_strategy_guild_start};
-                #if {"$guild" == "sii"} {_strategy_guild_start};
-                #if {"$guild" == "angel"} {_strategy_guild_start};
-                #if {"$guild" == "knight"} {_strategy_guild_start};
-                #if {"$guild" == "bladesinger"} {_strategy_guild_start};
-                #if {"$guild" == "adventurer"} {_strategy_guild_start};
+                _strategy_guild_start;
             };
 
             #NOP -- Actions to perform only in the beginning of the fight;
@@ -158,7 +140,17 @@
                 #if {"${eternal}" != "" && "${my[eternal]}" != ""} {
                     checkStrategy {epowers} {
                         #if $eternal {
-                            #if {$my[eternal][energy well]} {(energy well;#var mob[ewell] 1;#delay 180 {#var mob[ewell] 0};} {#if {${my[eternal][shred]} && !$mob[ewell]} {(shred;};};
+                            #if {$my[eternal][energy well]} {
+                                (energy well;
+                                #var mob[ewell] 1;
+                                #delay 180 {#var mob[ewell] 0};
+                            } {
+                                #if {!$mob[ewell]} {
+                                    #if {${my[eternal][shred]}} {
+                                        (shred;
+                                    };
+                                };
+                            };
                             #if {$my[eternal][fry]} {(fry;};
                         };
                     };
@@ -197,25 +189,7 @@
             };
 
             #NOP -- Actions to perform at any time in the fight;
-            #if {"$guild" == "necromancer"} {_strategy_guild};
-            #if {"$guild" == "fremen"} {_strategy_guild};
-            #if {"$guild" == "juggernaut"} {_strategy_guild};
-            #if {"$guild" == "bard"} {_strategy_guild};
-            #if {"$guild" == "priest"} {_strategy_guild};
-            #if {"$guild" == "monk"} {_strategy_guild};
-            #if {"$guild" == "breed"} {_strategy_guild};
-            #if {"$guild" == "changeling"} {_strategy_guild};
-            #if {"$guild" == "mage"} {_strategy_guild};
-            #if {"$guild" == "psicorps"} {_strategy_guild};
-            #if {"$guild" == "elemental"} {_strategy_guild};
-            #if {"$guild" == "jedi"} {_strategy_guild};
-            #if {"$guild" == "cyborg"} {_strategy_guild};
-            #if {"$guild" == "gentech"} {_strategy_guild};
-            #if {"$guild" == "sii"} {_strategy_guild};
-            #if {"$guild" == "angel"} {_strategy_guild};
-            #if {"$guild" == "knight"} {_strategy_guild};
-            #if {"$guild" == "bladesinger"} {_strategy_guild};
-            #if {"$guild" == "adventurer"} {_strategy_guild}; 
+            _strategy_guild;
         };
     };
 };

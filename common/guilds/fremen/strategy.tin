@@ -11,7 +11,7 @@
 #list strategyList add {{{guild} {fremen} {name} {voicefeeble} {active} {0} {description} {Fremen: Mind AC shred}}};
 #list strategyList add {{{guild} {fremen} {name} {spicebeer} {active} {0} {description} {Fremen: Drink spice beer}}};
 #list strategyList add {{{guild} {fremen} {name} {focus} {active} {0} {description} {Fremen: Concentrate your attacks on a single mob}}};
-#list strategyList add {{{guild} {fremen} {name} {suspend} {active} {0} {description} {Fremen: Refocus your mind after every fight}}};
+#list strategyList add {{{guild} {fremen} {name} {suspend} {active} {0} {description} {Fremen: Pause bot and refocus your mind if vexed or worse}}};
 #list strategyList add {{{guild} {fremen} {name} {donate_water} {active} {0} {description} {Fremen: Donate Water When >100 corpses}}};
 #list strategyList add {{{guild} {fremen} {name} {donate_water1} {active} {0} {description} {Fremen: Donate Water When Coffin is Full}}};
 
@@ -25,7 +25,7 @@
         checkStrategy {stun} {#if {$my[gp1][current] > 110 && "$toggles[fremen][stun]" == "1"} {stun}};
         checkStrategy {voicehold} {#if {$my[gp1][current] > 100 && "$toggles[fremen][hold]" == "1"} {voice}};
         checkStrategy {voicefeeble} {#if {$my[gp1][current] > 100 && "$toggles[fremen][enfeeblement]" == "1"} {voice $mob[target] to enfeeblement}};
-        checkStrategy {spicebeer} {#if {"$spicebeertoggle" == "1" && $spiceBeers > 0} {smuggle remove spice beer;drink spice beer}};
+        checkStrategy {spicebeer} {#if {"$spicebeertoggle" == "1" && $my[spice][total] > 0} {.drink_spice}};
     };
 };
 
