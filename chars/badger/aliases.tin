@@ -1,6 +1,15 @@
 #class {player_aliases} {kill};
 #class {player_aliases} {open};
 
+#nop -- secure shelter;
+#alias {shelter} {
+    #switch {"%0"} {
+        #case {"off"} {#var secure_shelter_switch 0;#echo {SECURE SHELTER OFF!!}};
+        #case {"on"} {#var secure_shelter_switch 1;#echo {SECURE SHELTER ON!!}};
+        #default {cast secure shelter};
+    };
+};
+
 #nop -- mask aliases;
 #alias {maskon} {
     remove helmet;wear mask;
@@ -46,6 +55,7 @@
 
 #alias {cdonate3} {
     maskoff;
+    pg;unkeep all preservation;store all;
     pg;unkeep all preservation;store all;
     pg;unkeep all preservation;store all;
     pg;unkeep all preservation;store all;
@@ -260,7 +270,7 @@
 
 #NOP -- turn toggles on or off;
 #alias {togg} {
-    toggle discord_post;
+    #nop toggle discord_post;
     toggle mission;
 };
 
@@ -589,23 +599,22 @@
         #NOP -- view available options;
         #case {"help"} {
             #echo {<fff>Available killmodes:<088>};
-            #echo {<eaf>No argument <bec>(2 summons defending & 2 summons assisting & golem assisting)<088>};
-            #echo {<eaf>2 <bec>(4 summons assisting & golem assisting)<088>};
+            #echo {<eaf>No argument <bec>(4 summons assisting & golem assisting)<088>};
+            #echo {<eaf>2 <bec>(2 summons defending & 2 summons assisting & golem assisting)<088>};
             #echo {<eaf>3 <bec>(4 summons defending & golem assisting)<088>};
             #echo {<eaf>4 <bec>(3 summons assisting & 1 summon defending & golem assisting)<088>};
             #echo {<eaf>5 <bec>(1 summon defending & 3 summons assisting & golem defending)<088>};
-            #echo {<eaf>golem <bec>(golem assisting with no summons - self tanking)<088>};
-            #echo {<eaf>selftank <bec>(golem assisting with 4 assisting summons - self tanking)};
         };
-        #NOP -- 4 summons assisting;
+        #NOP -- 2 summons defending and 2 summons assisting;
         #case {"2"} {
             clear_sconfig;
             shoo;
             shoo golem;
             mystrategy;
-            strategy shoosummons;
-            ms 11##4#1500#70#assist#summons#always;
+            ms 11##2#1500#70#defend#summons#always;
+            ms 11##2#1500#70#assist#summons#always;
             ms golema;
+            castper mind;
         };
         #NOP -- 4 summons defending;
         #case {"3"} {
@@ -637,25 +646,6 @@
             ms 11##3#1500#70#assist#summons#always;
             ms golemd;
         };
-        #NOP -- offensive mage - golem assisting;
-        #case {"golem"} {
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy;
-            strategy shoosummons;
-            ms golema;
-        };
-        #NOP -- offensive mage with summons;
-        #case {"selftank"} {
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy;
-            strategy shooshummons;
-            ms 11##4#1500#70#assist#summons#always;
-            ms golema;
-        };
         #NOP -- default for summoner 2 summons defending and 2 summons assisting;
         #case {""} {
             #echo {<ffa>No argument provided - running default killmode<088>};
@@ -663,8 +653,7 @@
             shoo;
             shoo golem;
             mystrategy;
-            ms 11##2#1500#70#defend#summons#always;
-            ms 11##2#1500#70#assist#summons#always;
+            ms 11##4#1500#70#assist#summons#always;
             ms golema;
         };
         #default {
@@ -1019,7 +1008,7 @@
         gag+ hpbar;
     };
     #elseif {"$guild" == "bard"} {
-        #nop;
+        gag+ hpbar;
     };
     #elseif {"$guild" == "fremen"} {
         gag+ hpbar;
@@ -1428,12 +1417,11 @@
     #elseif {"$guild" == "mage"} {
         strategy-clear;
         strategy slow;
-        #nop strategy super_er;
         strategy golem_assist;
         strategy summon_mf;
         strategy spelltap;
         strategy gstrength;
-        strategy shoosummons;
+        #nop strategy shoosummons;
         strategy rolm;
     };
     #elseif {"$guild" == "elemental"} {
