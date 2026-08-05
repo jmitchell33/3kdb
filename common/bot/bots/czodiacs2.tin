@@ -58,7 +58,7 @@ touch angel rune;
 #list botmobs add {{{long} {Rotseer of Ivy} {target} {rotseer}}};
 #list botmobs add {{{long} {Rotseer of Vine} {target} {rotseer}}};
 
-#list botmobs add {{{long} {Deceiver of Al-Ilm} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-'Ilm} {target} {deceiver}}};
 #list botmobs add {{{long} {Deceiver of Al-Mawt} {target} {deceiver}}};
 #list botmobs add {{{long} {Deceiver of Al-Ta'asa} {target} {deceiver}}};
 #list botmobs add {{{long} {Deceiver of Al-Qisma} {target} {deceiver}}};
@@ -117,9 +117,7 @@ touch angel rune;
 #list botmobs add {{{long} {Warlord of the Dragon} {target} {warlord}}};
 #list botmobs add {{{long} {Warlord of the Rabbit} {target} {warlord}}};
 #list botmobs add {{{long} {Warlord of the Dog} {target} {warlord}}};
-
-#list botmobs add {{{long} {Nyxara, Warlord of the Cat} {target} {nyxara}}};
-
+#list botmobs add {{{long} {Warlord of the Rat} {target} {warlord}}};
 #list botmobs add {{{long} {Warlord of the Cat} {target} {warlord}}};
 #list botmobs add {{{long} {Warlord of the Horse} {target} {warlord}}};
 #list botmobs add {{{long} {Warlord of the Tiger} {target} {warlord}}};
@@ -139,6 +137,7 @@ touch angel rune;
 #list botmobs add {{{long} {Blackguard of Taurus} {target} {blackguard}}};
 #list botmobs add {{{long} {Blackguard of Scorpio} {target} {blackguard}}};
 
+#list botmobs add {{{long} {Nyxara, Warlord of the Cat} {target} {nyxara}}};
 #list botmobs add {{{long} {Zephyrak, the Void Sunderer} {target} {zephyrak}}};
 #list botmobs add {{{long} {Treasure Chest of Corruption} {target} {mimic}}};
 
@@ -153,16 +152,20 @@ touch angel rune;
         #echo {<fff>RIFT ROOM OPEN!<088>};
         ptell rift room open! roomvnum: $zodiac_riftVnum;
         #var toggle_rift_room 0;
-        #delay 5 {
-            rift;
-            #map goto 54572;
-            open first chest;
-            open second chest;
-            open third chest;
-            open fourth chest;
-            open fifth chest;
-            open sixth chest;
-        };
+        #ticker riftRoom {
+            #if !$incombat {
+                rift;
+                fracture;
+                #map goto 54572;
+                open first chest;
+                open second chest;
+                open third chest;
+                open fourth chest;
+                open fifth chest;
+                open sixth chest;
+                #unticker riftRoom;
+            };
+        } {4};
         #line oneshot #action {As the chest opens, panic washes over you!} {
             #if {"$guild" == "juggernaut"} {
                 checkStrategy {mechwarrior} {support defend};
@@ -174,7 +177,7 @@ touch angel rune;
 
 #action {As you land the final blow upon the mimic} {
     #delay 10 {
-        #if {"$zodiac_riftVnum" != ""} {rift;#map goto $zodiac_riftVnum};
+        #if {"$zodiac_riftVnum" != ""} {rift;fracture;#map goto $zodiac_riftVnum};
         #delay 3 {..};
     };
 } {1};
