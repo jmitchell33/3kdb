@@ -325,6 +325,11 @@
     #NOP -- the bunker botpaths;
     #showme {------- BOT COMPLETE -----};
     #echo {<dfa>BOT HAS COMPLETED LOOP ENTERED<088>};
+
+
+    #list botlist_alias find {$bot[alias]} {tmpIndex};
+    #format tmpName {%n} {${botlist_desc[$tmpIndex]}};
+
     #if !$bot[paused] {
         #if {!$bot[loop]} {
             #echo {<dfa>\nBot finished.<088>};
@@ -340,7 +345,7 @@
                 #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
             };
             #var temp_xp $bot[stats][xp];
-            ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str);
+            #send {ptell $tmpName Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str)};
             #echo {<dfa>Coins Earned: $bot[stats][coins]<088>};
             #if {&{botcycle[]} > 0} {
                 .stop;
@@ -370,7 +375,7 @@
                     #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
                 };
                 #var temp_xp $bot[stats][xp];
-                ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str);
+                #send {ptell $tmpName Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str)};
                 #echo {Coins Earned: $bot[stats][coins]};
                 #if {&{botcycle[]} > 0} {
                     .stop;
