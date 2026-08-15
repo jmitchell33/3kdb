@@ -111,11 +111,17 @@
 #alias _bootVar_import {
     #read vars/boot.tin;
     #var doorcombos $xdoorcombos;
+    #var rolm $xrolm;
+
+    #if {"$doorcombos" == "$xdoorcombos"} {#var doorcombos {}};
+    #if {"$rolm" == "$xrolm"} {#var rolm {}};
 };
 
 #alias _bootVar_export {
+    #class bootVars open;
+    #var xrolm $rolm;
+    #class bootVars close;
     #class bootVars write vars/boot.tin;
-    #echo {  <dee>3kdb:  Boot variables have been updated.<088>};
 };
 
 #alias _variable_export {
@@ -126,7 +132,6 @@
     #var xmkaActions $mkaActions;
     #var xspiceBeers $spiceBeers;
     #var xlastBot $lastBot;
-    #var xrolm $rolm;
     #var xtheme $theme;
     #var xgags $gags;
     #var xmy $my;
@@ -152,6 +157,7 @@
 
     #class global close;
     #class global write chars/$user/vars.tin;
+    _bootVar_export;
 };
 
 #alias _variable_import {
@@ -162,7 +168,7 @@
     #var mkaActions $xmkaActions;
     #var hpbar $xhpbar;
     #var spiceBeers $xspiceBeers;
-    #var rolm $xrolm;
+    
     #var lastBot $xlastBot;
     #var theme $xtheme;
     #var gags $xgags;
@@ -199,7 +205,6 @@
     #if {"$mkaActions" == "xmkaActions"} {#var mkaActions {}};
     #if {"$hpbar" == "$xhpbar"} {#var hpbar {}};
     #if {"$spiceBeers" == "$xspiceBeers"} {#var spiceBeers {$xspiceBeers}};
-    #if {"$rolm" == "$xrolm"} {#var rolm {}};
     #if {"$lastBot" == "$xlastBot"} {#var lastBot {}};
     #if {"$theme" == "$xtheme"} {#var theme {}};
     #if {"$gags" == "$xgags"} {#var gags {}};
@@ -210,6 +215,8 @@
     #if {"$xdiscordPost" == "" || "$xdiscordPost" == "xdiscordPost"} {#var discordPost 0} {#var discordPost $xdiscordPost};
     #var toggles[discord_post] $discordPost;
     #if {"$deadmanTimeoutActions" == "xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};
+
+    _bootVar_import;
 };
 
 #NOP Export user status every 10 mins;

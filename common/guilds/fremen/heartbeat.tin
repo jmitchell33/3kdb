@@ -19,15 +19,15 @@
                     };
                 } {2};
                 #ticker suspendResume {
-                    #NOP -- The false statement for suspend is since a few actions break suspension;
-                    #NOP -- but there is no output from 3k;
                     #if {$my[litany][points] == 1} {
                         #send {ptell Litany mind luminous, continuing.};
                         #var bot_toggle 1;
                         #if {!$incombat} {..};
                         #unticker suspendResume;
                         #undelay suspendTimeout;
-                    } {suspend};
+                    } {
+                        #if {"$suspend_toggle" == "0"} {suspend};
+                    };
                 } {2};
             };
         };
