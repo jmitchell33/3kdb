@@ -25,10 +25,14 @@
     bcy+ catacombs2;
 };
 
+#NOP -- This donate restarts bot from entrance, since some areas will result in running through aggros;
 #alias {donate_water2} {
     #map get roomvnum donate_go_back;
     #if {"$area" == "Chaotic Sewers"} {.stop;#var sewer_winch 1} {#var sewer_winch 0};
-    #if {"$area" == "Section Z"} {pause game;#var section_z 1} {#var section_z 0};
+    #if {"$area" == "Section Z"} {pause game;#var section_z 1;.pause} {#var section_z 0;.stop};
+    #NOP -- Drop 2 corpses for reclaiming upon return;
+    unwrap;
+    unwrap;
     go fremen_shimoom;
     #line oneshot #action {The Wisdom Board containing %*} {
         unwrap all;
@@ -38,11 +42,14 @@
         };
         #delay 4 {
             #100 {#5 {fill all;donate all};reclaim};
-            #if $section_z {go sz;unpause game} {
-                #map run $donate_go_back;
+            #if $section_z {
+                go sz;
+                unpause game;
                 .unpause;
+            } {
+                +${lastBot[alias]};
             };
-
+            #4 {reclaim};
         };
     } {1};
 };

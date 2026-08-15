@@ -113,7 +113,9 @@
 } {2};
 
 #alias .processDeathReport {
-    #var deathReport[mob_rounds_to_kill] $mip[round];
+    #NOP -- Using last round + 1 tends to be more accurate than mip[round] since it captures blicks and;
+    #NOP -- instances that the mip data comes through with an update upon death to set the round to 0;
+    #math deathReport[mob_rounds_to_kill] {$mip[last_round] + 1}; 
     #var deathReport[damage_dealt] 0;
     #var deathReport[corpses_used] $mob[corpses_used];
     #var deathReport[summons_killed] $mob[summons_killed];

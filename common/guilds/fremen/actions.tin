@@ -133,19 +133,36 @@
 
 #action {You shock your body out of its catalepsis and awaken to this world.} {
     #var suspend_toggle 1;
+    #if {$bot[active]} {
+        #if {$my[litany][points] == 1} {
+            #send {ptell Litany mind luminous, continuing.};
+            #var bot_toggle 1;
+            #var suspend_toggle 1;
+            #if {!$incombat} {..};
+            #unticker suspendResume;
+            #undelay suspendTimeout;
+            .unpause;..;#var bot_toggle 1;
+        } {suspend};
+    };
 } {2};
 
 #action {Having regained your mental focus completely, you emerge from the Bindu} {
     #var suspend_toggle 1;
     #undelay suspendTimeout;
     #unticker suspendResume;
-    #if {$bot[active]} {.unpause;..};
+    #if {$bot[active]} {
+        #send {ptell Litany mind luminous, continuing.};
+        #var bot_toggle 1;
+        #var suspend_toggle 1;
+        #unticker suspendResume;
+        #undelay suspendTimeout;
+        .unpause;..;#var bot_toggle 1;
+    };
 } {2};
 
 #NOP -- Deadman timer: if the focus state doesn't relinquish again within 12 seconds, re-suspend since it was interrupted;
 #action {^Your focus turns inward, relinquishing its %w state.$} {
     #if {!$idle_flag} {
-        #undelay suspendTimeout;
         #delay suspendTimeout {suspend} {12};
     };
 } {2};
