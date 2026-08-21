@@ -72,25 +72,45 @@
     #var mapFollow 0;
 } {2};
 
-#action {^%1 leaves %2\.$} {
-    #if {"%1" == "$following" && $mapFollow} {
-        #format {follow_target} {%l} {%1};
-        #local follow_dir %2;
-        #switch {"$follow_dir"} {
-            #case {"north"}     {#map move n};
-            #case {"northeast"} {#map move ne};
-            #case {"northwest"} {#map move nw};
-            #case {"south"}     {#map move s};
-            #case {"southeast"} {#map move se};
-            #case {"southwest"} {#map move sw};
-            #case {"east"}      {#map move e};
-            #case {"west"}      {#map move w};
-            #case {"down"}      {#map move d};
-            #case {"up"}        {#map move u};
-            #default            {#map move $follow_dir};
+#NOP -- Converts a direction word (north, southeast, ...) into a #map move;
+#alias {.followMapMove} {
+    #switch {"%1"} {
+        #case {"north"}     {#map move n};
+        #case {"northeast"} {#map move ne};
+        #case {"northwest"} {#map move nw};
+        #case {"south"}     {#map move s};
+        #case {"southeast"} {#map move se};
+        #case {"southwest"} {#map move sw};
+        #case {"east"}      {#map move e};
+        #case {"west"}      {#map move w};
+        #case {"down"}      {#map move d};
+        #case {"up"}        {#map move u};
+        #default            {#if {"%1" != ""} {#map move %1}};
+    };
+};
+
+#NOP -- "$user leaves following $following" never states a direction -- that;
+#NOP -- direction was printed on an earlier line, so we will;
+#NOP -- walk backwards through the last 15 buffer lines for the first one that;
+#NOP -- isn't itself a "leaves following" line;
+#action {^%1 leaves following %2\.$} {
+    #if {"%1" == "$userCap" && "%2" == "$following" && $mapFollow} {
+        #local scan -1;
+        #var follow_dir {};
+        #while {$scan >= -15} {
+            #buffer get bufline ${scan};
+            #regex {$bufline} {leaves following} {
+                #math scan {$scan - 1};
+            } {
+                #regexp {$bufline} {^%* %w.} {
+                    #var follow_dir {&2};
+                };
+                #local scan -99;
+            };
         };
-    }
-} {2}; 
+        .followMapMove {$follow_dir};
+    };
+} {1};
 
 #NOP -- Rewear the knight shield if you use the wrong one;
 #action {There is no reason to 'bash' here.} {

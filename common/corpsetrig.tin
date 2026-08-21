@@ -35,6 +35,11 @@
     #regex {$tmpName} {$enemy[target]} {#var fakeKill 1};
 };
 
+#NOP -- Sometimes the mob name has artifacts from gobj, etc. in it.  Common with necros;
+#alias _cleanMobKilled {
+    #replace deathReport[mob_killed] {>} {};
+};
+
 #NOP -- This is to ignore necromancers killing their undead horde of summons;
 #action {^Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
 
@@ -46,6 +51,7 @@
     #NOP -- Set this to NA here and it will be picked up if the killer comes through on the next line;
     #var deathReport[mob_killer] NA;
     #var deathReport[mob_killed] %1;
+    _cleanMobKilled;
     #var kbIgnore 0;
     #var fakeKill 0;
     _kbCheckIgnore;
