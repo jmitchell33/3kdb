@@ -41,13 +41,15 @@
             #${corpses[cooler]} {uncooler corpse};
         };
         #delay 4 {
-            #100 {#5 {fill all;donate all};reclaim};
-            #if $section_z {
-                go sz;
-                unpause game;
-                .unpause;
-            } {
-                +${lastBot[alias]};
+            #200 {#5 {fill all;donate all};reclaim};
+            #if $bot[active] {
+                #if $section_z {
+                    go sz;
+                    unpause game;
+                    .unpause;
+                } {
+                    +${lastBot[alias]};
+                };
             };
             #4 {reclaim};
         };

@@ -5,6 +5,7 @@
 #NOP #list strategyList add {{{guild} {knight} {name} {example} {active} {0} {description} {Knight: brief description of example strategy}}};
 
 #list strategyList add {{{guild} {knight} {name} {second-wind} {active} {0} {description} {Knight: Automatically use SecondWind}}};
+#list strategyList add {{{guild} {knight} {name} {battlecry} {active} {0} {description} {Knight: Automatically use Battlecry}}};
 #list strategyList indexate name;
 
 
@@ -28,7 +29,9 @@
 
 #NOP -- Actions to perform the first rounds of combat;
 #alias {_strategy_guild_start} {
-    #NOP;
+    checkStrategy {battlecry} {
+        #if {"$mob[battlecry]" == "0"} {.battlecry};
+    };
 };
 
 #class {guild_strategy} {close};

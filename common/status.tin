@@ -155,6 +155,11 @@
     #var xmap $map;
     #var xdraw_room $draw_room;
 
+    #NOP -- Guild Specific;
+    #if {"$guild" == "knight"} {
+        #var xbattlecry $battlecry;
+    };
+
     #class global close;
     #class global write chars/$user/vars.tin;
     _bootVar_export;
@@ -215,6 +220,11 @@
     #if {"$xdiscordPost" == "" || "$xdiscordPost" == "xdiscordPost"} {#var discordPost 0} {#var discordPost $xdiscordPost};
     #var toggles[discord_post] $discordPost;
     #if {"$deadmanTimeoutActions" == "xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};
+
+    #if {"$guild" == "knight"} {
+        #var battlecry $xbattlecry;
+        #if {"$battlecry" == "$xbattlecry"} {#var battlecry {}};
+    };
 
     _bootVar_import;
 };
