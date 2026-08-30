@@ -1,5 +1,5 @@
-#class {worlddrops} {kill};
-#class {worlddrops} {open};
+#class {item_checker} {kill};
+#class {item_checker} {open};
 
 #NOP -- To be added if below pattern works;
 #NOP Amulet of Voraxis|Amulet of Waves|An exploding kitten|Buckler of Eternia|Frosted armour of Aylin|Frosted boots of Aylin|Frosted breastplate of Aylin|Frosted gauntlets of Aylin|Frosted helmet of Aylin|Frosted shield of Aylin|Golden Robes of Intellect|Molok's Titanium Breastplate|QT Amulet|Redoubt Cloak|Robe of Therlasia|Shieldbreaker|Shimmering cloak of Aylin|Skull of the Dracolich, Yaxtan|Staff of Elemental Fury|Thundering|TimeRender|Frosted shield of Aylin;
@@ -18,15 +18,23 @@
 	};
 };
 
-#NOP -- Need to test this section when I find a world drop again;
-#action {~\e[0;33mThe Soul Drinker Blade (enchanted)} {.notifyWorldDrop The Soul Drinker Blade (enchanted)} {1};
-#NOP #action {~\e[0;33m%* flask} {.notifyWorldDrop LEGENDARY XP POTION} {1};
-#action {~\e[0;33ma red robe made of a fine fabric} {.notifyWorldDrop a red robe made of a fine fabric} {1};
-#action {~\e[0;33mIridescent Incense} {.notifyWorldDrop Iridescent Incense} {1};
-#action {~\e[0;33mPICNP Device} {.notifyWorldDrop PICNP Device} {1};
-#action {~\e[0;33mAmulet of Tanooki} {.notifyWorldDrop Amulet of Tanooki} {1};
-#action {~\e[0;33mAmulet of Voraxis} {.notifyWorldDrop Amulet of Voraxis} {1};
-#action {~\e[0;33mBuckler of Eternia <X>.\e[0m} {.notifyWorldDrop Buckler of Eternia} {1};
+#alias .checkItem {
+    #var tmpFoundWorldDrop 0;
+    #format tmpName {%p} {%0};
+	#var tmpWorldIx 1;
+	#loop 1 &items_world_drops[] tmpWorldIx {
+		#regex {$tmpName} {$items_world_drops[$tmpWorldIx]} {.notifyWorldDrop $items_world_drops[$tmpWorldIx]};
+	};
+};
+
+#list items_world_drops add {\e[0;33m%* flask};
+#list items_world_drops add {The Soul Drinker Blade};
+#list items_world_drops add {a red robe made of a fine fabric};
+#list items_world_drops add {Iridescent Incense};
+#list items_world_drops add {PICNP Device};
+#list items_world_drops add {Amulet of Tanooki};
+#list items_world_drops add {Amulet of Voraxis};
+#list items_world_drops add {Buckler of Eternia};
 
 
-#class {worlddrops} {close};
+#class {item_checker} {close};

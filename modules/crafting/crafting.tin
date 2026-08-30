@@ -16,6 +16,49 @@
     #class farmer kill;
 };
 
+#list tomeTypes add {chef};
+#list tomeTypes add {miner};
+#list tomeTypes add {enchanter};
+#list tomeTypes add {wrangler};
+#list tomeTypes add {farmer};
+#list tomeTypes add {blacksmith};
+
+#alias {borrow-tomes} {
+    #if {"%1" == "{i|ii|iii|1|2|3|one|two|three}"} {
+        #var ix 1;
+        #loop 1 &tomeTypes[] ix {
+            borrow $tomeTypes[$ix] volume %1;
+        };
+    } {
+        #echo {  <dfc>Tome Kit:  <efd>Please provide which level tome you'd like to borrow, acceptable inputs are:<088>};
+        #echo {             <cfd>i,ii,iii <efd>or<cfd> 1,2,3 <efd>or<cfd> one,two,three};
+    };
+};
+
+#alias {buy-tomes} {
+    #if {"%1" == "{i|ii|iii|1|2|3|one|two|three}"} {
+        #var ix 1;
+        #loop 1 &tomeTypes[] ix {
+            buy $tomeTypes[$ix] volume %1;
+        };
+    } {
+        #echo {  <dfc>Tome Kit:  <efd>Please provide which level tome you'd like to buy, acceptable inputs are:<088>};
+        #echo {             <cfd>i,ii,iii <efd>or<cfd> 1,2,3 <efd>or<cfd> one,two,three};
+    };
+};
+
+#alias {box-tomes} {
+    #if {"%1" == "{i|ii|iii|1|2|3|one|two|three}"} {
+        #var ix 1;
+        #loop 1 &tomeTypes[] ix {
+            get $tomeTypes[$ix] volume %1 from box;
+        };
+    } {
+        #echo {  <dfc>Tome Kit:  <efd>Please provide which level tome you'd like to retrieve from the box, acceptable inputs are:<088>};
+        #echo {             <cfd>i,ii,iii <efd>or<cfd> 1,2,3 <efd>or<cfd> one,two,three};
+    };
+};
+
 #alias {fill-moulding} {
     #send {examine moulding};
     #act {{^[0-9]+ [A-z' ]+$}} {

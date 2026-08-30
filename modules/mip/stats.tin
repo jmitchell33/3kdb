@@ -423,7 +423,14 @@
 
 #ALIAS {.mipProcessGlineKnight} {
 	#IF {%1 == 1} {
-		#NOP;
+		#regex {$mip[gline][1]} {Stance: %w} {
+			#format my[knight][stance] {%n} {&1};
+		};
+		#regex {$mip[gline][1]} {Method: %w} {
+			#format my[knight][method] {%n} {&1};
+		};
+		#regex {$mip[gline][1]} {Morale: %d} {#var my[knight][morale] &1};
+		#regex {$mip[gline][1]} {Sec Wind: %d\.} {#var my[knight][swind] &1};
 	}; #ELSEIF {%1 == 2} {
 		#var tmpList $mip[gline][2];
 		#list tmpList EXPLODE {] [};
@@ -435,11 +442,19 @@
 			#format tmpLength {%L} {$tmpKey};
 			#if @checkKstat{$tmpKey} {
 				#var my[kstats][$tmpKey] $tmpValue;
+				#NOP .recordKstatGXP  $tmpKey $tmpValue;
 			};
 		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};
+};
+
+#alias .recordKstatGXP {
+	#if {"%1" == "start" || "%1" == "reset"} {
+		#var kstat[first_round] $total_rounds;
+	};
+	#var kstat[$my[knight][stance]][$my[knight][method]][%1]
 };
 
 #NOP -- We perform this check since MIP is often garbled and we don't want bad keys slipping through;

@@ -13,20 +13,21 @@
                 #var bot_toggle 0;
                 .pause;
                 #ticker suspendStart {
-                    #if {!$incombat} {
+                    #if {!$$incombat} {
                         suspend;
                         #unticker suspendStart;
+                        #delay suspendTimeout {suspend} {12};
                     };
                 } {2};
                 #ticker suspendResume {
-                    #if {$my[litany][points] == 1} {
+                    #if {$$my[litany][points] == 1} {
                         #send {ptell Litany mind luminous, continuing.};
                         #var bot_toggle 1;
                         #if {!$incombat} {..};
                         #unticker suspendResume;
                         #undelay suspendTimeout;
                     } {
-                        #if {"$suspend_toggle" == "0"} {suspend};
+                        #if {"$$suspend_toggle" == "0"} {suspend};
                     };
                 } {2};
             };

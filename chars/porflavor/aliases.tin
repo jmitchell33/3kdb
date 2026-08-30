@@ -27,12 +27,13 @@
 
 #NOP -- This donate restarts bot from entrance, since some areas will result in running through aggros;
 #alias {donate_water2} {
+    #if $bot[active] {#var bot_resume 1;.pause} {#var bot_resume 0};
     #map get roomvnum donate_go_back;
     #if {"$area" == "Chaotic Sewers"} {.stop;#var sewer_winch 1} {#var sewer_winch 0};
-    #if {"$area" == "Section Z"} {pause game;#var section_z 1;.pause} {#var section_z 0;.stop};
-    #NOP -- Drop 2 corpses for reclaiming upon return;
-    unwrap;
-    unwrap;
+    #if {"$area" == "Section Z"} {pause game;#var section_z 1} {#var section_z 0;};
+    #if {"$lastbot[area]" == "Dundee Swamp"} {
+        #map run 3148;give all to hunter
+    };
     go fremen_shimoom;
     #line oneshot #action {The Wisdom Board containing %*} {
         unwrap all;
@@ -41,17 +42,21 @@
             #${corpses[cooler]} {uncooler corpse};
         };
         #delay 4 {
-            #200 {#5 {fill all;donate all};reclaim};
-            #if $bot[active] {
+            #300 {#3 {fill all;donate all};reclaim};
+            #if $bot_resume {
+                .pause;
                 #if $section_z {
                     go sz;
                     unpause game;
                     .unpause;
                 } {
+                    touch cairn rune;
+                    reclaim;
+                    reclaim;
+                    reclaim;
                     +${lastBot[alias]};
                 };
             };
-            #4 {reclaim};
         };
     } {1};
 };

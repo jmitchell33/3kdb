@@ -167,6 +167,13 @@
             };
         };
     };
+
+    #delay checkItems {
+        #var tmpIx 1;
+        #loop 1 &room[items][] $tmpIx {
+            .checkItem $room[items][$tmpIx]
+        };
+    } {.1};
 } {2};
 
 #function checkPeriod {
@@ -385,5 +392,7 @@
         };
     }
 } {2};
+
+#action {^You have been offered the mission %*.} {mission accept} {2};
 
 #class {common_room} {close};

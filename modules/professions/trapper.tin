@@ -1,0 +1,240 @@
+#class trapper kill;
+#class trapper open;
+
+#NOP -- Scrounge material preference order (highest priority first).  Defaults to metal, wood, hide;
+#if {"${scroungeOrder}" == ""} {
+    #list scroungeOrder add {metal};
+    #list scroungeOrder add {wood};
+    #list scroungeOrder add {hide};
+};
+
+#NOP -- Status Tracking;
+#action {^You reach into your rucksack, grab a %* trap, and launch it at %*} {
+    #switch {"%1"} {
+        #case {"blinding"} {
+            #var mob[trap_blind] 1;
+            #var trapper[active_trap] blind;
+        };
+        #case {"slowing"} {
+            #var mob[trap_slow] 1;
+            #var trapper[active_trap] slow;
+        };
+    };
+    #var trapper[launch_round] $total_rounds;
+} {2};
+
+#action {^TRAPPER: The %* trap on %*} {
+    #math trapper[trap_rounds] {$total_rounds - $trapper[launch_round]};
+    #switch {"%1"} {
+        #case {"blind"} {#var mob[trap_blind] 0};
+        #case {"slow"} {#var mob[trap_slow] 0};
+    };
+    #var trapper[active_trap] none;
+    #echo {  <fdc>TRAPPER:  <fff>Your %1 trap lasted <dfc>$trapper[trap_rounds] <fff>rounds.<088>};
+} {2};
+
+#NOP -- Get rucksack trap capacity;
+#action {^You peer inside your rucksack to see what you have stored within.$} {
+    #line gag;
+} {2};
+#action {^You have %d\/%d traps stored in your rucksack.} {
+    #line gag;
+    #var trapper[traps][capacity] %2;
+    #var trapper[traps][total] %1;
+} {2};
+
+#NOP -- Tally trap stock (e.g. "The traps stored are: blind, blind, slow, stun and blind.") into a per-type count line;
+#action {^The traps stored are: %*\.$} {
+    #line gag;
+    #var trapListRaw {%1};
+    #var trapWords {$trapListRaw};
+    #replace trapWords {,} { };
+    #replace trapWords {and} {};
+    #list trapWords explode {  };
+    
+    #var trapper[traps][blind] 0;
+    #var trapper[traps][slow] 0;
+    #var trapper[traps][stun] 0;
+    #var trapper[traps][snare] 0;
+    #var trapper[traps][wound] 0;
+    
+    #loop 1 &trapWords[] ix {
+        #math trapper[traps][$trapWords[$ix]] {$trapper[traps][$trapWords[$ix]] + 1};
+    };
+
+} {2};
+
+#NOP -- Tally material stock (e.g. "Wood :  3   Metal :  4   Hide :  4 (11/33 items)") into per-material counts;
+#act {Wood :%s%d%s Metal :%s%d%s Hide :%s%d \(%d\/%d items\)} {
+    #line gag;
+    #var trapper[items][wood] %2;
+    #var trapper[items][metal] %5;
+    #var trapper[items][hide] %8;
+    #var trapper[items][total] %9;
+    #var trapper[items][capacity] %10;
+} {2};
+
+
+#action {^You can launch %d traps right now.$} {
+    #line gag;
+    #var trapper[charges] %1;
+    .traps;
+} {2};
+
+#NOP -- Right-pads a colored trapsack row with spaces so it fills the fixed 75-wide box;
+#function trapRowPad {
+    #var tmpRowPlain {%0};
+    #replace tmpRowPlain {<ded>} {};
+    #replace tmpRowPlain {<bdf>} {};
+    #replace tmpRowPlain {<aff>} {};
+    #replace tmpRowPlain {<afa>} {};
+    #replace tmpRowPlain {<ffa>} {};
+    #replace tmpRowPlain {<fca>} {};
+    #replace tmpRowPlain {<eec>} {};
+    #replace tmpRowPlain {<dfc>} {};
+    #replace tmpRowPlain {<fda>} {};
+    #replace tmpRowPlain {<088>} {};
+    #format tmpRowLen %L {$tmpRowPlain};
+    #math tmpRowPadLen {75 - $tmpRowLen};
+    #var result {};
+    #loop 1 $tmpRowPadLen i {#cat result { }};
+};
+
+#alias {.traps} {
+    #format tmpUser {%u} {$user};
+    #var trapSummary <ded>Traps:;
+    #var trapMatSummary <ded>Materials:;
+
+    #foreach *trapper[traps][] ix {
+        #format tmpName {%n} {$ix};
+        #switch {"$ix"} {
+            #case {"blind"} {#cat trapSummary { <bdf>$tmpName: $trapper[traps][$ix]<088>}};
+            #case {"slow"} {#cat trapSummary { <aff>$tmpName: $trapper[traps][$ix]<088>}};
+            #case {"stun"} {#cat trapSummary { <afa>$tmpName: $trapper[traps][$ix]<088>}};
+            #case {"snare"} {#cat trapSummary { <ffa>$tmpName: $trapper[traps][$ix]<088>}};
+            #case {"wound"} {#cat trapSummary { <fca>$tmpName: $trapper[traps][$ix]<088>}};
+        };
+    };
+
+    #foreach *trapper[items][] ix {
+        #format tmpName {%n} {$ix};
+        #switch {"$ix"} {
+            #case {"hide"} {#cat trapMatSummary { <bdf>$tmpName: $trapper[items][$ix]<088>}};
+            #case {"metal"} {#cat trapMatSummary { <aff>$tmpName: $trapper[items][$ix]<088>}};
+            #case {"wood"} {#cat trapMatSummary { <afa>$tmpName: $trapper[items][$ix]<088>}};
+        };
+    };
+
+    #NOP -- Center the title within the fixed 75-wide box;
+    #var tmpTitle {${tmpUser}'S TRAPSACK};
+    #format tmpTitleLen %L {$tmpTitle};
+    #math tmpTitlePadL {(75 - $tmpTitleLen) / 2};
+    #math tmpTitlePadR {75 - $tmpTitleLen - $tmpTitlePadL};
+    #var tmpTitlePadLStr {};
+    #loop 1 $tmpTitlePadL i {#cat tmpTitlePadLStr { }};
+    #var tmpTitlePadRStr {};
+    #loop 1 $tmpTitlePadR i {#cat tmpTitlePadRStr { }};
+
+    #var tmpMatRow { $trapMatSummary <eec>($trapper[items][total]/$trapper[items][capacity] items)};
+    #var tmpTrapRow { $trapSummary <eec>($trapper[traps][total]/$trapper[traps][capacity] traps)};
+    #var tmpLaunchRow { <eec>You may launch <dfc>$trapper[charges] traps.<088>};
+
+    #echo {  <bdf>╔═══════════════════════════════════════════════════════════════════════════╗<088>};
+    #echo {  <bdf>║<088>$tmpTitlePadLStr<fda>$tmpTitle<bdf>$tmpTitlePadRStr║<088>};
+    #echo {  <bdf>╠═══════════════════════════════════════════════════════════════════════════╣<088>};
+    #echo {  <bdf>║<088>$tmpMatRow@trapRowPad{$tmpMatRow}<bdf>║<088>};
+    #echo {  <bdf>║<088>$tmpTrapRow@trapRowPad{$tmpTrapRow}<bdf>║<088>};
+    #echo {  <bdf>║<088>$tmpLaunchRow@trapRowPad{$tmpLaunchRow}<bdf>║<088>};
+    #echo {  <bdf>╚═══════════════════════════════════════════════════════════════════════════╝<088>};
+};
+
+#alias {.scrounge} {
+    #if {"%1" == ""} {
+        #echo {  <fcc>Usage: <fff>.scrounge <item><088>};
+    } {
+        #var scroungeTarget {%1};
+        #var scroungeIx 1;
+        scrounge $scroungeOrder[$scroungeIx] from $scroungeTarget;
+    };
+};
+
+#NOP -- Only advance to the next material in scroungeOrder if the current one isn't found on the item;
+#action {^You cannot find any suitable %* on %*} {
+    #if {"$scroungeIx" != ""} {
+        #math scroungeIx {$scroungeIx + 1};
+        #if {$scroungeIx <= &scroungeOrder[]} {
+            scrounge $scroungeOrder[$scroungeIx] from $scroungeTarget;
+        } {
+            #var scroungeIx {};
+        };
+    };
+} {2};
+
+#NOP -- Stop the sequence on a successful scrounge;
+#action {^You find a nice chunk of %* on %* for your %*\.$} {
+    #var scroungeIx {};
+} {2};
+
+#alias {.scrounge-pref} {
+    #echo {  <bbd>═══════════════════════════════════════════════════<088>};
+    #echo {  <fab>            <fda>SCROUNGE PREFERENCE ORDER<fab>  <088>};
+    #echo {  <bbd>═══════════════════════════════════════════════════<088>};
+    #loop 1 &scroungeOrder[] ix {
+        #echo {   <fab>[$ix]<088> <fff>$scroungeOrder[$ix]<088>};
+    };
+    #echo {  <bbd>═══════════════════════════════════════════════════<088>};
+    #echo {     <deb>.scrounge+ <material> <eee>to raise a material's priority.<088>};
+    #echo {     <deb>.scrounge- <material> <eee>to lower a material's priority.<088>};
+};
+
+#alias {.scrounge+} {
+    #if {"%1" == ""} {
+        #echo {  <fcc>Usage: <fff>.scrounge+ <metal|wood|hide><088>};
+    } {
+        #format tmpScroungeMat {%l} {%1};
+        #var tmpScroungeIx 0;
+        #loop 1 &scroungeOrder[] ix {
+            #if {"$scroungeOrder[$ix]" == "$tmpScroungeMat"} {#var tmpScroungeIx $ix};
+        };
+        #if {$tmpScroungeIx == 0} {
+            #echo {  <fcc>'%1' is not a valid scrounge material.<088>};
+        } {
+            #if {$tmpScroungeIx == 1} {
+                #echo {  <fcc>$tmpScroungeMat is already the highest priority.<088>};
+            } {
+                #var tmpScroungeSwap $scroungeOrder[$tmpScroungeIx];
+                #math tmpScroungeAbove {$tmpScroungeIx - 1};
+                #list scroungeOrder set $tmpScroungeIx {$scroungeOrder[$tmpScroungeAbove]};
+                #list scroungeOrder set $tmpScroungeAbove {$tmpScroungeSwap};
+                .scrounge-pref;
+            };
+        };
+    };
+};
+
+#alias {.scrounge-} {
+    #if {"%1" == ""} {
+        #echo {  <fcc>Usage: <fff>.scrounge- <metal|wood|hide><088>};
+    } {
+        #format tmpScroungeMat {%l} {%1};
+        #var tmpScroungeIx 0;
+        #loop 1 &scroungeOrder[] ix {
+            #if {"$scroungeOrder[$ix]" == "$tmpScroungeMat"} {#var tmpScroungeIx $ix};
+        };
+        #if {$tmpScroungeIx == 0} {
+            #echo {  <fcc>'%1' is not a valid scrounge material.<088>};
+        } {
+            #if {$tmpScroungeIx == &scroungeOrder[]} {
+                #echo {  <fcc>$tmpScroungeMat is already the lowest priority.<088>};
+            } {
+                #var tmpScroungeSwap $scroungeOrder[$tmpScroungeIx];
+                #math tmpScroungeBelow {$tmpScroungeIx + 1};
+                #list scroungeOrder set $tmpScroungeIx {$scroungeOrder[$tmpScroungeBelow]};
+                #list scroungeOrder set $tmpScroungeBelow {$tmpScroungeSwap};
+                .scrounge-pref;
+            };
+        };
+    };
+};
+
+#class trapper close;

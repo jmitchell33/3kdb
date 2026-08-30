@@ -1,0 +1,497 @@
+#class area_reps kill;
+#class area_reps open;
+
+#NOP -- For now tracks rep gains in an area, in the future...maybe more;
+#var rep_record 0;
+#var rep_seed 0;
+
+#NOP -- Seconds of quiet before the burst is considered over and queried.;
+#NOP -- Kept under the 1s corpsetrig deathSummary snapshot so kill reps land;
+#NOP -- in that kill summary rather than in the next one.;
+#var rep_burst_window {0.4};
+
+#NOP -- Nothing is waiting on rep that was not earned on a kill, so shop and;
+#NOP -- quest bursts get a slower window.  Selling a bag of items has a longer window;
+#var rep_burst_window_slow {2};
+#var rep_burst_seq 0;
+#var repBurst {};
+
+#NOP -- Running hit count against the count the last query already asked;
+#NOP -- about, so a debounce that trails a query with nothing new to report;
+#NOP -- does not spend a second round trip;
+#var rep_hits_total 0;
+#var rep_hits_queried 0;
+
+
+#NOP -- Hits already reported by an earlier query in case of multiple bursts with a pause;
+#var repBurstUsed {};
+#var deathReport[reps] 0;
+
+#NOP -- Event typing - a rep burst is Combat Based when a mob died within;
+#NOP -- rep_kill_window seconds of the burst, otherwise it is Non-Combat;
+#NOP -- such as quests or item turn-ins.;
+#NOP -- Combat based is marked in common/corpsetrig.tin with .reps_combat_mark on each kill;
+#var rep_kill_flag 0;
+#var rep_kill_seq 0;
+#var rep_kill_window {3};
+
+
+#NOP -- Fallback to common/heartbeat.tin which tracks time_out_of_combat;
+#NOP -- rep_combat_idle_window sets how many seconds the rep landed close since you were in combat;
+#NOP -- to determine wether to count it, to catch kill reps when the corpse string is bad;
+#var rep_combat_idle_window {4};
+#var rep_burst_combat 0;
+#var rep_burst_fast 0;
+
+#NOP -- Query generation counter.  A burst can need more than one round trip;
+#NOP -- so the cleanup that follows a faction list must know whether a newer;
+#NOP -- query has since gone out, otherwise it wipes the state that query needs;
+#var rep_query_seq 0;
+
+#NOP -- Faction lists read so far.  Trailing rep_query_seq means another list is;
+#NOP -- still on the way, which tells a flat looking row to wait for it;
+#var rep_list_seq 0;
+
+#NOP -- Hits the faction list actually accounted for, against the hits the query;
+#NOP -- went out to ask about.  A shortfall means a faction was dropped somewhere;
+#NOP -- so the burst gets one more round trip before the state is thrown away;
+#var rep_hits_filed 0;
+#var rep_retry 0;
+#var rep_retry_max {1};
+#var debug[reps] 0;
+
+#NOP -- Toggle debugging of reps tracking;
+#alias .reps_debug {
+    #if {$debug[reps]} {
+        #var debug[reps] 0;
+        #echo {<efb> REPS DEBUG OFF <088>};
+    } {
+        #var debug[reps] 1;
+        #echo {<efb> REPS DEBUG ON <088>};
+    };
+};
+
+#alias .reps_combat_mark {
+    #var rep_kill_flag 1;
+    #math rep_kill_seq {$rep_kill_seq + 1};
+    #NOP -- The kill summary counts rep earned from this kill forward.  Resetting;
+    #NOP -- here rather than per query keeps a burst that needs two round trips;
+    #NOP -- from zeroing out what the first round trip already filed;
+    #var deathReport[reps] 0;
+    #if {$debug[reps]} {#echo {<ffa>debug reps - kill mark set, seq $rep_kill_seq<088>}};
+    #delay {$rep_kill_window} {.reps_combat_clear $rep_kill_seq};
+};
+
+#NOP -- Only the newest mark clears the flag, so back to back reps earned (like in Zodiacs) do not;
+#NOP -- expire the other early;
+#alias .reps_combat_clear {
+    #if {%1 == $rep_kill_seq} {
+        #var rep_kill_flag 0;
+        #if {$debug[reps]} {#echo {<ffa>debug reps - kill mark expired, seq %1<088>}};
+    };
+} {2};
+
+#NOP -- Sets the named variable to 1 when the rep looks combat earned, either;
+#NOP -- because the corpse trigger marked a kill or because combat only just;
+#NOP -- ended.  arg 1 is the variable name that takes the result.;
+#alias .reps_combat_test {
+    #if {$rep_kill_flag || $time_out_of_combat < $rep_combat_idle_window} {
+        #var {%1} 1;
+    } {
+        #var {%1} 0;
+    };
+} {2};
+
+#alias .check_reps {
+    #if {"%1" == "start"} {
+        #var rep_record 1;
+        #var rep_seed 1;
+        #math rep_query_seq {$rep_query_seq + 1};
+        reps -short;
+    } {
+        #var rep_record 1;
+        #var rep_seed 0;
+        #NOP -- Stamp the burst type now, before the query round trip.  A retry keeps;
+        #NOP -- the type the burst was first stamped with, since combat can end while;
+        #NOP -- the extra round trip is in flight;
+        #if {"%1" != "retry"} {
+            .reps_combat_test {rep_burst_combat};
+        };
+        #var rep_hits_queried $rep_hits_total;
+        #math rep_query_seq {$rep_query_seq + 1};
+        #if {$debug[reps]} {#echo {<ffa>debug reps - query $rep_query_seq stamped, kill flag is $rep_kill_flag, out of combat $time_out_of_combat, combat is $rep_burst_combat, hits $rep_hits_total<088>}};
+        reps -short;
+    };
+} {2};
+
+
+#NOP -- Tally hits locally per faction, the MUD is only queried once, after;
+#NOP -- the burst goes quiet, so 20 messages in a row will still only send a single reps check at the end;
+#action {^Your reputation with %* has %*.} {
+    #format tmpRepKey {%p} {%1};
+    #list repData indexate rep_key;
+    #NOP -- Seed the result so a lookup that misses cannot leave the index from;
+    #NOP -- the previous message in place and credit the wrong faction;
+    #var tmpRepIx 0;
+    #list repData find {$tmpRepKey} {tmpRepIx};
+    #if $tmpRepIx {
+        #math repData[$tmpRepIx][rep_moves] {$repData[$tmpRepIx][rep_moves] + 1};
+        #math rep_hits_total {$rep_hits_total + 1};
+        #if {"$repBurst[$tmpRepKey]" == ""} {
+            #var repBurst[$tmpRepKey] 1;
+        } {
+            #math repBurst[$tmpRepKey] {$repBurst[$tmpRepKey] + 1};
+        };
+        #if {$debug[reps]} {#echo {<ffa>debug reps - hit on $tmpRepKey, burst count $repBurst[$tmpRepKey], running total $rep_hits_total<088>}};
+    } {
+        #echo {<fab>REPS - unknown faction <efc>$tmpRepKey<fab> is not in repData so its rep is not tracked<088>};
+    };
+
+    #NOP -- Debouncer for rapid events to not check reps multiple times if you get a burst of messages;
+    #math rep_burst_seq {$rep_burst_seq + 1};
+    .reps_combat_test {rep_burst_fast};
+    #if {$rep_burst_fast} {
+        #delay {$rep_burst_window} {.reps_fire $rep_burst_seq};
+    } {
+        #delay {$rep_burst_window_slow} {.reps_fire $rep_burst_seq};
+    };
+} {2};
+
+#NOP -- Fires one reps -short only if no further messages arrived;
+#alias {.reps_fire} {
+    #if {%1 == $rep_burst_seq} {
+        #if {$rep_hits_total > $rep_hits_queried} {
+            .check_reps;
+        } {
+            #if {$debug[reps]} {#echo {<ffa>debug reps - no new hits, query skipped<088>}};
+        };
+    };
+} {2};
+
+
+#action {FACTION LIST :: %*} {
+    #if $rep_record {
+        #line gag;
+        #math rep_list_seq {$rep_list_seq + 1};
+        #line oneshot #action {Name                                Reputation     Value} {#line gag} {1};
+        #line oneshot #action {-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-} {#line gag} {1};
+        #NOP -- With debug on, echo every line of the reps output so a faction row;
+        #NOP -- the standing word pattern fails to match is still visible.  Removed;
+        #NOP -- again by .reps_cleanup;
+        #if {$debug[reps]} {
+            #action {^%*} {#if {$rep_record && $debug[reps]} {#echo {<ffa>debug reps - raw line [%%1]<088>}}} {5};
+        };
+        
+        #action {%*%s{condemned|hated|despised|scorned|disliked|neutral|liked|respected|admired|beloved|idolized}%s%*} {
+            #if $rep_record {
+                #line gag;
+                #format tmpFaction {%p} {%%1};
+                #format tmpRep {%d} {%%5};
+                #var tmpIx 0;
+                #list repData indexate rep_key;
+                #list repData find {$tmpFaction} {tmpIx};
+                #if $tmpIx {
+                    #if $rep_seed {
+                        #var repData[$tmpIx][start_value] $tmpRep;
+                        #var repData[$tmpIx][current_value] $tmpRep;
+                        #var repData[$tmpIx][last_value] $tmpRep;
+                    } {
+                        #var repData[$tmpIx][current_value] $tmpRep;
+                        #NOP -- last_value is the accounting baseline rather than the;
+                        #NOP -- previous snapshot.  It only moves when a change is filed,;
+                        #NOP -- so a rep message that lands after the snapshot it belongs;
+                        #NOP -- to is still credited on the next query instead of vanishing;
+                        #if {"$repData[$tmpIx][last_value]" == ""} {
+                            #var repData[$tmpIx][last_value] $tmpRep;
+                        };
+                        #if {"$repData[$tmpIx][start_value]" == ""} {
+                            #var repData[$tmpIx][start_value] $tmpRep;
+                        };
+                    };
+                };
+                #if {$debug[reps] && !$rep_seed} {#echo {<ffa>debug reps - list row $tmpFaction, ix $tmpIx, value $tmpRep, burst {$repBurst[$tmpFaction]}, used {$repBurstUsed[$tmpFaction]}<088>}};
+                #if {"$repBurst[$tmpFaction]" != "" && !$rep_seed} {
+                    #NOP -- Count only the hits this query is reporting on;
+                    #if {"$repBurstUsed[$tmpFaction]" == ""} {
+                        #var rep_used 0;
+                    } {
+                        #var rep_used $repBurstUsed[$tmpFaction];
+                    };
+                    #math rep_hits {$repBurst[$tmpFaction] - $rep_used};
+                    #var rep_change 0;
+                    #math rep_change {$repData[$tmpIx][current_value] - $repData[$tmpIx][last_value]};
+                    #NOP -- A message can land after the query it belongs to was already;
+                    #NOP -- sent, in which case this snapshot predates the change and reads;
+                    #NOP -- flat.  Another query is already on the way whenever hits are;
+                    #NOP -- outstanding, so hold the hits back rather than burning them;
+                    #NOP -- against a value that has not moved yet;
+                    #var rep_hold 0;
+                    #if {$rep_change == 0 && ($rep_hits_total > $rep_hits_queried || $rep_query_seq > $rep_list_seq)} {
+                        #var rep_hold 1;
+                    };
+                    #NOP -- File the burst under its event type;
+                    #if {$debug[reps]} {#echo {<ffa>debug reps - filing $tmpFaction, combat is $rep_burst_combat, change $rep_change over $rep_hits new hits, hold is $rep_hold<088>}};
+                    #if {$rep_hits > 0 && !$rep_hold} {
+                        #NOP -- The change is accounted for now, so the hits are spent and;
+                        #NOP -- the baseline moves up;
+                        #var repBurstUsed[$tmpFaction] $repBurst[$tmpFaction];
+                        #math rep_hits_filed {$rep_hits_filed + $rep_hits};
+                        #var repData[$tmpIx][last_value] $repData[$tmpIx][current_value];
+                        #if {$rep_burst_combat} {
+                            #var rep_type_str {Combat};
+                            #math repData[$tmpIx][combat_moves] {$repData[$tmpIx][combat_moves] + $rep_hits};
+                            #math repData[$tmpIx][combat_change] {$repData[$tmpIx][combat_change] + $rep_change};
+                            #NOP -- Only combat reps belong to the kill death report;
+                            #math deathReport[reps] {$deathReport[reps] + $rep_change};
+                        } {
+                            #var rep_type_str {Non-Combat};
+                            #math repData[$tmpIx][noncombat_moves] {$repData[$tmpIx][noncombat_moves] + $rep_hits};
+                            #math repData[$tmpIx][noncombat_change] {$repData[$tmpIx][noncombat_change] + $rep_change};
+                        };
+                        #if {$rep_change != 0} {
+                            .reps_num {$rep_change} {rep_change_str};
+                            #math rep_hundredths {$rep_change * 100 / $rep_hits};
+                            .reps_avg {$rep_hundredths} {rep_each_str};
+                            #if {$rep_hits == 1} {
+                                #var rep_hits_str {1 move};
+                            } {
+                                #var rep_hits_str {$rep_hits moves};
+                            };
+                            #if {$rep_change > 0} {
+                                #echo {  <eed>=== REPS REPORT [$rep_type_str] === $tmpFaction <dfd>$rep_change_str<088> over $rep_hits_str (<dfd>$rep_each_str<088> ea) ===};
+                            } {
+                                #echo {  <eed>=== REPS REPORT [$rep_type_str] === $tmpFaction <fab>$rep_change_str<088> over $rep_hits_str (<fab>$rep_each_str<088> ea) ===};
+                            };
+                        };
+                    };
+                };
+            };
+        } {2};
+    };
+    #delay .5 {.reps_cleanup $rep_query_seq};
+} {2};
+
+#NOP -- Clears the burst state once a faction list has been read.  Two guards;
+#NOP -- keep a multi faction burst from losing rows.  A cleanup left over from;
+#NOP -- an older query stands down so it cannot switch off rep_record while a;
+#NOP -- newer query is still in flight, and a cleanup holds the per faction;
+#NOP -- counters when hits are still waiting on their own round trip;
+#alias .reps_cleanup {
+    #if {%1 == $rep_query_seq} {
+        #var rep_record 0;
+        #var rep_seed 0;
+        #unaction {^%%*};
+        #if {$rep_hits_total > $rep_hits_queried} {
+            #if {$debug[reps]} {#echo {<ffa>debug reps - cleanup held, $rep_hits_total hits with only $rep_hits_queried queried<088>}};
+        } {
+            #NOP -- Safety net.  Whatever the reason a faction went unaccounted, the;
+            #NOP -- shortfall is visible here, so spend one more round trip rather;
+            #NOP -- than dropping the hits on the floor;
+            #if {$rep_hits_filed < $rep_hits_queried && $rep_retry < $rep_retry_max} {
+                #math rep_retry {$rep_retry + 1};
+                #if {$debug[reps]} {#echo {<ffa>debug reps - only $rep_hits_filed of $rep_hits_queried hits filed, retry $rep_retry<088>}};
+                .check_reps retry;
+            } {
+                #var repBurst {};
+                #var repBurstUsed {};
+                #var rep_hits_total 0;
+                #var rep_hits_queried 0;
+                #var rep_hits_filed 0;
+                #var rep_retry 0;
+                #NOP -- Resync so a query whose list never arrived cannot leave every;
+                #NOP -- flat row holding forever;
+                #var rep_list_seq $rep_query_seq;
+                #if {$debug[reps]} {#echo {<ffa>debug reps - burst state cleared after query %1<088>}};
+            };
+        };
+    } {
+        #if {$debug[reps]} {#echo {<ffa>debug reps - stale cleanup for query %1 skipped, query $rep_query_seq is newer<088>}};
+    };
+} {2};
+
+#NOP -- Rep database;
+#list repData add {{{rep_key} {Aegis Global} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Brotherhood of the Blade} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Council of Light} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Cow Haters Anonymous} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Cowville} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Deep Mountain Duergar} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Detroit Metro Police Department} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Dominion of Darkness} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Dundee Poachers} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Hardcore Mercs} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Global Security} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Illithid Enclave} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Knights of the Realm} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Longshadow Orcs} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Mahjongg} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Mantle Corps, Inc.} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Merchange Guild} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Noldor Elves} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Pinnacle Pound} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Pinnacle Tower} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Rohm Giddor} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Saboteurs} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {TSA} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {The City of Westersea} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {The Mercenaries of Thiras} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {The Order of Lost Knights} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {The Vigilant} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Thieves Alliance} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Turkey Farm} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Wayhaven Consortium} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Wheel of Dragons} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Zodiacs of Aeonos} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {Zodiacs of Zephyrak} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+#list repData add {{{rep_key} {fe dar Shad} {start_value} {} {current_value} {} {last_value} {} {rep_moves} {0} {combat_change} {0} {combat_moves} {0} {noncombat_change} {0} {noncombat_moves} {0}}};
+
+
+
+
+
+#list repData indexate rep_key
+
+
+#NOP -- Summary of all reps that moved, split by how the rep was earned.;
+#NOP -- Combat Based means the rep landed on a kill.  Non-Combat Based is;
+#NOP -- everything else, such as quests, turn-ins and donations.;
+#alias {.reps} {
+    #var repsGrandChange 0;
+    #var repsGrandMoves 0;
+    #var repsGrandRows 0;
+    #echo {};
+    #echo {<eed>  ===================               REPS SUMMARY               ===================};
+    .reps_section {combat} {COMBAT BASED (on kill)};
+    .reps_section {noncombat} {NON-COMBAT BASED};
+    #if {$repsGrandRows == 0} {
+        #echo {\n     <fdd>If you feel this is in error, input <efc>.check_reps start <fdd>to seed rep tracking.<088>};
+    } {
+        .reps_num {$repsGrandChange} {repsChangeStr};
+        #if {$repsGrandMoves > 0} {
+            #math {repsHundredths} {$repsGrandChange * 100 / $repsGrandMoves};
+            .reps_avg {$repsHundredths} {repsAvgStr};
+        } {
+            #var repsAvgStr {-};
+        };
+        #echo {};
+        #echo {<088>  ================================================================================};
+        #format {repsLine} {  %-34s %+7s   %+7s %+8s %+7s %+10s} {GRAND TOTAL} {} {} {$repsChangeStr} {$repsGrandMoves} {$repsAvgStr};
+        #echo {<cff>$repsLine<088>};
+    };
+    #echo {};
+    #unvar repsGrandChange;
+    #unvar repsGrandMoves;
+    #unvar repsGrandRows;
+    #unvar repsChangeStr;
+    #unvar repsAvgStr;
+    #unvar repsHundredths;
+    #unvar repsLine;
+};
+
+#NOP -- arg 1 is the bucket, either combat or noncombat.  arg 2 is the heading.;
+#alias {.reps_section} {
+    #var repsBucket {%1};
+    #var repsSecChange 0;
+    #var repsSecMoves 0;
+    #var repsSecRows 0;
+    #echo {};
+    #echo {<ffa>  -- %2 --<088>};
+    #format {repsLine} {  %-34s %+7s   %+7s %+8s %+7s %+10s} {Faction} {Start} {Now} {Change} {Moves} {Per Move};
+    #echo {<cff>$repsLine<088>};
+    #echo {<088>  --------------------------------------------------------------------------------};
+    #loop 1 &repData[] {repsIx} {
+        #if {"$repsBucket" == "combat"} {
+            #var repsChange $repData[$repsIx][combat_change];
+            #var repsMoves $repData[$repsIx][combat_moves];
+        } {
+            #var repsChange $repData[$repsIx][noncombat_change];
+            #var repsMoves $repData[$repsIx][noncombat_moves];
+        };
+        #if {$repsChange != 0 || $repsMoves > 0} {
+            #math {repsSecChange} {$repsSecChange + $repsChange};
+            #math {repsSecMoves} {$repsSecMoves + $repsMoves};
+            #math {repsSecRows} {$repsSecRows + 1};
+            .reps_num {$repsChange} {repsChangeStr};
+            #if {$repsMoves > 0} {
+                #math {repsHundredths} {$repsChange * 100 / $repsMoves};
+                .reps_avg {$repsHundredths} {repsAvgStr};
+            } {
+                #var repsAvgStr {-};
+            };
+            #format tmpStartReps {%g} {$repData[$repsIx][start_value]};
+            #format tmpNowReps {%g} {$repData[$repsIx][current_value]};
+            #format {repsLine} {  %-34s %+7s   %+7s %+8s %+7s %+10s} {$repData[$repsIx][rep_key]} {$tmpStartReps} {$tmpNowReps} {$repsChangeStr} {$repsMoves} {$repsAvgStr};
+            #if {$repsChange > 0} {
+                #echo {<dfd>$repsLine<088>};
+            } {
+                #if {$repsChange < 0} {
+                    #echo {<fab>$repsLine<088>};
+                } {
+                    #echo {<ccc>$repsLine<088>};
+                };
+            };
+        };
+    };
+    #if {$repsSecRows == 0} {
+        #echo {                           <fdd>No rep changes recorded.<088>};
+    } {
+        #echo {<088>  --------------------------------------------------------------------------------};
+        .reps_num {$repsSecChange} {repsChangeStr};
+        #if {$repsSecMoves > 0} {
+            #math {repsHundredths} {$repsSecChange * 100 / $repsSecMoves};
+            .reps_avg {$repsHundredths} {repsAvgStr};
+        } {
+            #var repsAvgStr {-};
+        };
+        #format {repsLine} {  %-34s %+7s   %+7s %+8s %+7s %+10s} {SUBTOTAL ($repsSecRows factions)} {} {} {$repsChangeStr} {$repsSecMoves} {$repsAvgStr};
+        #echo {<cff>$repsLine<088>};
+    };
+    #math {repsGrandChange} {$repsGrandChange + $repsSecChange};
+    #math {repsGrandMoves} {$repsGrandMoves + $repsSecMoves};
+    #math {repsGrandRows} {$repsGrandRows + $repsSecRows};
+    #unvar repsIx;
+    #unvar repsBucket;
+    #unvar repsSecChange;
+    #unvar repsSecMoves;
+    #unvar repsSecRows;
+    #unvar repsChange;
+    #unvar repsMoves;
+    #unvar tmpStartReps;
+    #unvar tmpNowReps;
+} {2};
+
+#NOP -- Add a plus sign in front of the rep if its a positive change;
+#alias {.reps_num} {
+    #if {%1 > 0} {
+        #format {%2} {%g} {+%1};
+    } {
+        #format {%2} {%g} {%1};
+    };
+};
+
+#NOP -- Average Function.  arg 1 is the value scaled by 100, arg 2 is the var name that holds the result;
+#alias {.reps_avg} {
+    #format {repsAvgRaw} {%d} {%1};
+    #if {$repsAvgRaw < 0} {
+        #var repsAvgSign {-};
+        #math {repsAvgRaw} {0 - $repsAvgRaw};
+    } {
+        #var repsAvgSign {+};
+    };
+    #math {repsAvgWhole} {$repsAvgRaw * .01};
+    #format {repsAvgWhole} {%d} {$repsAvgWhole};
+    #math {repsAvgFrac} {$repsAvgRaw % 100};
+    #format {repsAvgFrac} {%d} {$repsAvgFrac};
+    #if {$repsAvgFrac < 10} {
+        #var {%2} {$repsAvgSign$repsAvgWhole.0$repsAvgFrac};
+    } {
+        #var {%2} {$repsAvgSign$repsAvgWhole.$repsAvgFrac};
+    };
+    #unvar repsAvgRaw;
+    #unvar repsAvgSign;
+    #unvar repsAvgWhole;
+    #unvar repsAvgFrac;
+};
+
+
+#class area_reps close;

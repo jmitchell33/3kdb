@@ -18,20 +18,21 @@
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
-    #if {$enemy[hp] > 0} {
-        #if {$my[gp1][perecent] < $my[strategy][swind] && $my[swind] > 50} {
+    #if {$incombat} {
+        #if {$my[gp1][perecent] < $my[strategy][swind] && $my[knight][swind] > 50} {
             checkStrategy {second-wind} {
                 secondwind
             };
+        };
+        checkStrategy {battlecry} {
+            #if {"$mob[battlecry]" == "0"} {battlecry};
         };
     };
 };
 
 #NOP -- Actions to perform the first rounds of combat;
 #alias {_strategy_guild_start} {
-    checkStrategy {battlecry} {
-        #if {"$mob[battlecry]" == "0"} {.battlecry};
-    };
+    #NOP;
 };
 
 #class {guild_strategy} {close};

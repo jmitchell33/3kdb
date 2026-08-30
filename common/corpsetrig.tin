@@ -56,6 +56,8 @@
     #var fakeKill 0;
     _kbCheckIgnore;
     #if !$kbIgnore {
+        #NOP -- Types any rep gained around now as Combat Based - see common/reps.tin;
+        .reps_combat_mark;
         #line oneshot #action {^%* dealt the killing blow to %*.} {
             #var deathReport[mob_killer] %%1;
             _killerCheckIgnore;
@@ -176,6 +178,7 @@
         #list deathSummary_mob_attacks_total add {$deathReport[mob_attacks_total]};
         #list deathSummary_eternal_gxp add {$deathReport[eternal_gxp]};
         #list deathSummary_eternal_erad add {$deathReport[eternal_erad]};
+        #list deathSummary_reps add {$deathReport[reps]};
         
 
         #if {"$guild" == "necromancer"} {
@@ -469,9 +472,12 @@
 #list corpseList add {{{name} {mDepletion} {guild} {elemental} {action} {evoke mental depletion on corpse} {active} {0} {description} {Elemental: Mental Depletion}}};
 #list corpseList add {{{name} {vortex} {guild} {elemental} {action} {put all in vortex} {active} {0} {description} {Elemental: Put all in vortex}}};
 
-#NOP -- knight;
+#NOP -- Knight;
 #list corpseList add {{{name} {bury} {guild} {knight} {action} {bury corpse}  {active} {0} {description} {Knight: Bury Corpse}}};
 #list corpseList add {{{name} {bury2} {guild} {knight} {action} {bury corpse;bury corpse}  {active} {0} {description} {Knight: Bury Corpse 2x}}};
+#list corpseList add {{{name} {stake} {guild} {knight} {action} {cut head;get head;impale head on stake}  {active} {0} {description} {Knight: Headhunter -> Impale Heads on Stakes}}};
+
+
 
 #NOP -- necromancer;
 #list corpseList add {{{name} {preserve} {guild} {necromancer} {action} {qtrance preserve get/keep all preservation}  {active} {0} {description} {Necro: Preserve Remains}}};
