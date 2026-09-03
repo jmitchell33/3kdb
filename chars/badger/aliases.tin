@@ -1,6 +1,19 @@
 #class {player_aliases} {kill};
 #class {player_aliases} {open};
 
+#NOP Prevents accidental quitting by overriding the mud's "quit" command. This in turn can be overriden;
+#NOP by typing "quit REALLY";
+#alias {quit} {
+    #if { "%1" == "REALLY"} {
+        #SEND quit;
+    } {
+        #SEND shakeno;
+        #SEND {emote pulls out a mirror and looks at himself.};
+        #SEND {say YOU are GOOD ENOUGH!};
+        #SEND {badger};
+    };
+};
+
 #nop -- secure shelter;
 #alias {shelter} {
     #switch {"%0"} {
@@ -84,6 +97,40 @@
     auction 69;
     #delay 6 {
         atalk scaler 150;
+    };
+};
+
+#alias {.au} {
+    #switch {"%0"} {
+        #case {"sz"} {
+            give green capsule to robert;
+            give green capsule to robert;
+            give orange capsule to robert;
+            give orange capsule to robert;
+            give blue capsule to robert;
+            give blue capsule to robert;
+            give figurine to robert;
+            auction 69;
+            #delay 6 {
+                atalk scaler 150;
+            };
+        };
+        #case {"spite-ring"} {
+            #8 give stone to robert;
+            give ring of spite to robert;
+            auction 69;
+            #delay 6 {
+                atalk scaler 150;
+            };
+        };
+        #case {""} {
+            #echo {<bea>-------------------------------------------------<088>};
+            #echo {<fff>            Auction Items                        <088>};
+            #echo {<bea>-------------------------------------------------<088>};
+            #echo {<ccd>sz         - auction figurine and capsules<088>};
+            #echo {<ccd>spite-ring - auction spite ring and all 8 stones<088>};
+            #echo {<bea>-------------------------------------------------<088>};
+        };
     };
 };
 

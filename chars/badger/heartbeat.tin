@@ -10,6 +10,8 @@
 #var tmp_shelter_vnum 0;
 #var tmp_shelter_exit 0;
 #var tmp_shelter_command 0;
+#var zodiac_riftVnum 0;
+#var zodiac_portalVnum 0;
 
 #alias {_player_heartbeat} {
     #if {!$idle_flag} {
@@ -72,8 +74,10 @@
                 };
             };
             #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
-                .pause;
-                #var pausedtoregen 0;
+                #if {"$roomvnum" != "54572" || "$zodiac_riftVnum" || "$zodiac_portalVnum"} {
+                    .pause;
+                    #var pausedtoregen 0;
+                };
             };
             #if {$my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
                 #if {"$shelter_pause" == "1"} {

@@ -1,0 +1,65 @@
+#class {bot} {kill};
+#class {bot} {open};
+
+#var {area} {Celestial Zodiacs};
+#var check_room 0;
+
+#NOP -- mobs are evil, set rolm to angel;
+touch angel rune;
+
+#var bot_message_1 '---- Celestial Zodiacs Shadows - Spite ring and stones  ----';
+#showme $bot_message_1;
+
+#var {bot[path]} {shadows;w;nw;w;nw;ne;e;ne;n;u;n;nw;n;e;w;nw;d;nw;w;sw;se;s;sw;w;sw;w;d;s;sw;s;sw;ne;se;s;d;ne;e;se;e;ne;sw;se;sw;w;sw;s;d;s;w;sw;nw;se;ne;e;se;s;d;s;se;s;d;nw;w;sw;w;sw;s;w;nw;w;nw;d;w;sw;s;se;s;sw;s;sw;s;se;e;ne;n;ne;n;ne;n;nw;n;nw;u;se;e;se;e;se;e;ne;e;ne;n;u;n;nw;n;u;n;nw;n;u;se;e;ne;nw;w;nw;w;nw;n;u;n;nw;n;ne;n;u;e;ne;e;ne;e;ne;n;u;se;s;se;s;d;s;sw;w;sw;se;e;se;e;ne};
+
+#list botmobs clear;
+
+#nop spite ring;
+#list botmobs add {{{long} {Desecrator of Ptah} {target} {desecrator}}};
+
+#nop amethyst stone;
+#list botmobs add {{{long} {Asura of Ganesha} {target} {asura}}};
+
+#nop tigers eye stone;
+#list botmobs add {{{long} {Rotseer of Willow} {target} {rotseer}}};
+
+#nop malachite stone;
+#list botmobs add {{{long} {Deceiver of Al-Nasr} {target} {deceiver}}};
+
+#nop opal stone;
+#list botmobs add {{{long} {Heretic of the Elephant} {target} {heretic}}};
+
+#nop jade stone;
+#list botmobs add {{{long} {Bloodseer of Ixchel} {target} {bloodseer}}};
+
+#nop obsidian stone;
+#list botmobs add {{{long} {Skinwalker of the Salmon} {target} {skinwalker}}};
+
+#nop rose quartz stone;
+#list botmobs add {{{long} {Warlord of the Monkey} {target} {warlord}}};
+
+#nop turqoise stone;
+#list botmobs add {{{long} {Blackguard of Scorpio} {target} {blackguard}}};
+
+#action {You are blind.} {
+    .pause;
+} {1};
+
+#action {Sight returns to your eyes, darkness becomes light again.} {
+    .unpause;.botStep;
+} {1};
+
+#action {^The warrior deftly disarms you!$} {
+    wield rod;
+} {1};
+
+#action {^You cannot leave while dark celestials still roam this level.$} {
+    .stop;
+    mapUndo;
+    #delay .3 {glance};
+    #delay 3 {ptell You need tattoo for this stepper};
+} {1};
+
+
+#class {bot} {close};
+#read common/bot/generic.tin;
