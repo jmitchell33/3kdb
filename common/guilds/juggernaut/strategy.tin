@@ -34,8 +34,13 @@
                 #if {$enemy[hp] > 10} {
                     checkStrategy {mechwarrior} {
                         #delay 10 {
+                          #if {"$mob[target]" == "soldier" || "$mob[target]" == "sentry"} {
+                                #send {!support assault electric};
+                                #send {!hp};
+                            } {
                             #send {!support assault fire};
                             #send {!hp};
+                            };
                         };
                     };
                 };
@@ -71,8 +76,13 @@
         #if {!$mech_toggle} {
             #var mech_toggle 1;
             #delay 6 {
+                #if {"$mob[target]" == "soldier" || "$mob[target]" == "sentry"} {
+                    #send {!support assault electric};
+                    #send {!hp};
+                } {
                 #send {!support assault fire};
                 #send {!hp};
+                };
             };
         };
     };
