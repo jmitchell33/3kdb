@@ -47,6 +47,24 @@
     donate all
 };
 
+#NOP -- fai water from all coffins/freezers/etc.;
+#alias {fai_water} {
+    unwrap all;
+    deslab all;
+    #if {$corpses[cooler] > 0} {
+        #${corpses[cooler]} {uncooler corpse};
+    };
+    #delay 4 {
+        #NOP -- Reclaim 2 corpses if below 65% water;
+        #if {$my[gp1][percent] < .65} {reclaim;reclaim};
+        #300 fai;
+    };
+    #delay 8 {
+        ..
+    };
+};
+
+
 #NOP -- donate corpses to shimoom;
 #var go_donate_water 0;
 #alias {donate_water1} {

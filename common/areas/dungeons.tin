@@ -1,0 +1,130 @@
+#class dungeons kill;
+#class dungeons open;
+
+#NOP ---------------------------------------------------------------------------;
+#NOP -- Preferred dungeon scalers, queried with .scalers and set with .set_scaler;
+#NOP --;
+#NOP -- A scaler is the difficulty step you ask a dungeon to roll at. Scaler 0;
+#NOP -- clears it so the dungeon matches your mud level, 1 takes the bottom of;
+#NOP -- your range and 150 the top. This file only remembers what you like to;
+#NOP -- run each dungeon at, it does not set anything on the mud for you;
+#NOP --;
+#NOP -- One list holds everything. dungeon[scalers] is one row per dungeon in;
+#NOP -- the order the rows are seeded below, so the table is a single pass;
+#NOP --;
+#NOP -- dungeon[scalers] fields;
+#NOP --   key      short single word handle used on the command line;
+#NOP --   name     full area name as the wiki lists it;
+#NOP --   scaler   your preferred scaler, 0 when you have not picked one;
+#NOP --;
+#NOP -- The seeded rows only load when dungeon[scalers] is empty, so anything;
+#NOP -- you set survives a reload as long as your variables are saved;
+#NOP --;
+#NOP -- Adding a dungeon. Append a #list add line in the block below and keep;
+#NOP -- the key unique, since .set_scaler matches on key alone;
+#NOP --;
+#NOP -- Companion file. common/areas/dungeon_data.tin holds the class sizes each;
+#NOP -- of these dungeons rolls at a given scaler, read it with ddata <key>;
+#NOP ---------------------------------------------------------------------------;
+
+#NOP -- Table colors. Slate frame, amber accent, white data;
+#NOP -- In a tintin color code the letters are rgb levels where a is 0 and f is 5;
+#NOP -- so anything built from a or b reads as black on a black terminal. Every;
+#NOP -- color below sits at level 2 or higher so the whole table stays legible;
+#var dgFrame  {<ddd>};
+#var dgTitle  {<fda>};
+#var dgLabel  {<fec>};
+#var dgName   {<fff>};
+#var dgKey    {<eda>};
+#var dgSet    {<ffa>};
+#var dgUnset  {<ccc>};
+#var dgHint   {<dde>};
+
+#NOP -- Parameters are %1 = key %2 = scaler;
+#alias .set_scaler {
+    #list dungeon[scalers] indexate key;
+    #format tmpKey {%p} {%1};
+    #var tmpIx 0;
+    #var tmpScaler 0;
+    #list dungeon[scalers] find {$tmpKey} {tmpIx};
+    #if {$tmpIx} {
+        #format tmpScaler {%d} {%2};
+        #if {$tmpScaler <= 150} {
+            #if {$tmpScaler >= 1} {
+                #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler is now $dgSet$tmpScaler<088>};
+                #var dungeon[scalers][$tmpIx][scaler] $tmpScaler;
+            } {
+                #echo {  <fab>Scaler must be greater than 0.<088>};
+            };
+        } {
+            #echo {  <fab>Maximum possible scaler is 150.<088>};
+            #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler is now ${dgSet}150<088>};
+            #var dungeon[scalers][$tmpIx][scaler] 150;
+        };
+    } {
+        #echo {  <fab>No dungeon key <efc>%1<fab> found. Run <fff>.scalers<fab> to view all dungeons and keys.<088>};
+    };
+} {2};
+
+#NOP -------------------------- Scaling dungeons ----------------------------;
+
+#if {"${dungeon[scalers]}" === ""} {
+    #list dungeon[scalers] add {{{key} {aegis}       {name} {Aegis Global}               {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {alphabet}    {name} {Alphabet Land}              {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {android}     {name} {Android Showroom}           {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {banshee}     {name} {Banshee's Lair}             {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {carebears}   {name} {Care Bears}                 {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {carnegie}    {name} {Carnegie Hall 2.0}          {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {zodiacs}     {name} {Celestial Zodiacs}          {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {chess}       {name} {Chess Board}                {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {deathtaco}   {name} {Death Taco}                 {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {halo}        {name} {Halo}                       {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {hotel}       {name} {Hotel Transylvania}         {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {kayos}       {name} {The Kayos Wars}             {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {mahjongg}    {name} {Mahjongg}                   {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {plinths}     {name} {Marble Plinths}             {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {puppymill}   {name} {Puppy Mill}                 {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {sectionz}    {name} {Section Z}                  {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {smurfland}   {name} {Smurfland}                  {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {terras}      {name} {Terra's Terrific Treehouse} {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {zelligar}    {name} {Zelligar's Castle}          {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {anchorman}   {name} {Anchorman}                  {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {knightarena} {name} {Knight Training Arena}      {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {icepeople}   {name} {Land of the Ice People}     {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {summerset}   {name} {Summerset Warrens 2.0}      {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {treeoflife}  {name} {Tree of Life 2.0}           {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {bombfreaks}  {name} {Bombfreaks' Abbey}          {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {fachan}      {name} {Fachan Village}             {scaler} {0}}};
+    #list dungeon[scalers] add {{{key} {rimalkins}   {name} {Rimalkins Cave 2.0}         {scaler} {0}}};
+};
+
+
+#alias .dg_rule {
+    #echo {$dgFrame  -------------------------------------------------------<088>};
+} {2};
+
+#alias {.scalers} {
+    .dg_rule;
+    #format {dpLine} {  $dgTitle%-28s $dgLabel%-14s %+7s<088>} {PREFERRED SCALERS} {Key} {Scaler};
+    #echo {$dpLine};
+    .dg_rule;
+    #var tmpIx 1;
+    #loop 1 &dungeon[scalers][] tmpIx {
+        #if {$dungeon[scalers][$tmpIx][scaler] > 0} {
+            #var dpMark {$dgSet};
+        } {
+            #var dpMark {$dgUnset};
+        };
+        #format {dpLine} {  $dgName%-28s $dgKey%-14s $dpMark%+7s<088>} {$dungeon[scalers][$tmpIx][name]} {$dungeon[scalers][$tmpIx][key]} {$dungeon[scalers][$tmpIx][scaler]};
+        #echo {$dpLine};
+    };
+    .dg_rule;
+    #echo {  ${dgHint}.set_scaler $dgSet<key> <scaler>$dgHint to update dungeon scaler.<088>};
+    #echo {  ${dgHint}ddata $dgSet<key>$dgHint for the class table behind the dungeon.<088>};
+    .dg_rule;
+};
+
+.add_library {.scalers} {misc} {table of your preferred scaler for every scaling dungeon} {.scalers} {common/areas/dungeons.tin};
+.add_library {.set_scaler} {misc} {set your preferred scaler for one dungeon for the session} {.set_scaler <key> <scaler>} {common/areas/dungeons.tin};
+
+#class dungeons close;

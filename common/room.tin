@@ -101,6 +101,7 @@
 
 #act {{^-R-_(.*)-R-_}} {
     .clearRoomData;
+    #var got_room_short 1;
     #var room_short %1;
     
     #line oneshot #action {^>$} {
@@ -124,6 +125,8 @@
 } {2};
 
 #action {^-D-_%*\n%a-D-_$} {
+    #NOP -- If you look, you wont get the room short, so we'll clear in that case;
+    #if $got_room_short {#NOP} {.clearRoomData};
     #unvar room[long];
     #unvar long;
     #format long1 {%p} {%1};
@@ -131,6 +134,7 @@
     #var long {$long1 $long2};
     #replace long {\n} { };
     #var room[long] {${long}};
+    #var got_room_short 0;
 } {2};
 
 

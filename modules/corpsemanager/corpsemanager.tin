@@ -383,6 +383,12 @@
 		#ticker waterRun {#if !$$incombat {donate_water2;#unticker waterRun}} {2};
 	};
 
+	checkStrategy {fai_water} {
+		.pause;
+		#NOP -- Once out of combat, fai coffin;
+		#ticker faiWater {#if !$$incombat {fai_water;#unticker faiWater}} {2};
+	};
+
 } {2};
 
 #action {^All your corpses are already bigger than what is here.$} {

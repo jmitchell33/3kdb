@@ -1,6 +1,8 @@
 #class area_reps kill;
 #class area_reps open;
 
+#NOP -- Isolated test on AI building a reps tracker for me.  Here might be dragons;
+
 #NOP -- For now tracks rep gains in an area, in the future...maybe more;
 #var rep_record 0;
 #var rep_seed 0;
@@ -58,6 +60,12 @@
 #var rep_hits_filed 0;
 #var rep_retry 0;
 #var rep_retry_max {1};
+
+#NOP -- The faction list is ground truth for values, so a faction whose value moved;
+#NOP -- with no message behind it still gets filed as a single move.  Set to 0 if;
+#NOP -- passive rep drift ever starts reporting factions you did not earn rep with;
+#var rep_orphan_fill {1};
+#var rep_orphan 0;
 #var debug[reps] 0;
 
 #NOP -- Toggle debugging of reps tracking;
@@ -102,6 +110,44 @@
     };
 } {2};
 
+#NOP -- Files one faction row into its bucket and prints the burst report.  Reads;
+#NOP -- tmpFaction, tmpIx, rep_hits, rep_change and rep_burst_combat.  rep_orphan;
+#NOP -- marks a change the faction list found with no message behind it;
+#alias .reps_file {
+    #var repData[$tmpIx][last_value] $repData[$tmpIx][current_value];
+    #if {$rep_burst_combat} {
+        #var rep_type_str {Combat};
+        #math repData[$tmpIx][combat_moves] {$repData[$tmpIx][combat_moves] + $rep_hits};
+        #math repData[$tmpIx][combat_change] {$repData[$tmpIx][combat_change] + $rep_change};
+        #NOP -- Only combat reps belong to the kill death report;
+        #math deathReport[reps] {$deathReport[reps] + $rep_change};
+    } {
+        #var rep_type_str {Non-Combat};
+        #math repData[$tmpIx][noncombat_moves] {$repData[$tmpIx][noncombat_moves] + $rep_hits};
+        #math repData[$tmpIx][noncombat_change] {$repData[$tmpIx][noncombat_change] + $rep_change};
+    };
+    #if {$rep_change != 0} {
+        .reps_num {$rep_change} {rep_change_str};
+        #math rep_hundredths {$rep_change * 100 / $rep_hits};
+        .reps_avg {$rep_hundredths} {rep_each_str};
+        #if {$rep_hits == 1} {
+            #var rep_hits_str {1 move};
+        } {
+            #var rep_hits_str {$rep_hits moves};
+        };
+        #NOP -- Flag the report when the move count came from the faction list;
+        #NOP -- rather than from a message we actually saw;
+        #if {$rep_orphan} {
+            #var rep_type_str {$rep_type_str, no msg};
+        };
+        #if {$rep_change > 0} {
+            #echo {  <eed>=== REPS REPORT [$rep_type_str] === $tmpFaction <dfd>$rep_change_str<088> over $rep_hits_str (<dfd>$rep_each_str<088> ea) ===};
+        } {
+            #echo {  <eed>=== REPS REPORT [$rep_type_str] === $tmpFaction <fab>$rep_change_str<088> over $rep_hits_str (<fab>$rep_each_str<088> ea) ===};
+        };
+    };
+};
+
 #alias .check_reps {
     #if {"%1" == "start"} {
         #var rep_record 1;
@@ -127,7 +173,10 @@
 
 #NOP -- Tally hits locally per faction, the MUD is only queried once, after;
 #NOP -- the burst goes quiet, so 20 messages in a row will still only send a single reps check at the end;
-#action {^Your reputation with %* has %*.} {
+#NOP -- Matched on the shortest distinctive run of the message and left unanchored.;
+#NOP -- The MUD splits a line across packets often enough to matter and a split;
+#NOP -- inside the opening word has been seen, which an anchored Your cannot survive;
+#action {reputation with %* has %*.} {
     #format tmpRepKey {%p} {%1};
     #list repData indexate rep_key;
     #NOP -- Seed the result so a lookup that misses cannot leave the index from;
@@ -210,58 +259,48 @@
                     };
                 };
                 #if {$debug[reps] && !$rep_seed} {#echo {<ffa>debug reps - list row $tmpFaction, ix $tmpIx, value $tmpRep, burst {$repBurst[$tmpFaction]}, used {$repBurstUsed[$tmpFaction]}<088>}};
-                #if {"$repBurst[$tmpFaction]" != "" && !$rep_seed} {
-                    #NOP -- Count only the hits this query is reporting on;
-                    #if {"$repBurstUsed[$tmpFaction]" == ""} {
-                        #var rep_used 0;
-                    } {
-                        #var rep_used $repBurstUsed[$tmpFaction];
-                    };
-                    #math rep_hits {$repBurst[$tmpFaction] - $rep_used};
+                #if {$tmpIx && !$rep_seed} {
                     #var rep_change 0;
                     #math rep_change {$repData[$tmpIx][current_value] - $repData[$tmpIx][last_value]};
-                    #NOP -- A message can land after the query it belongs to was already;
-                    #NOP -- sent, in which case this snapshot predates the change and reads;
-                    #NOP -- flat.  Another query is already on the way whenever hits are;
-                    #NOP -- outstanding, so hold the hits back rather than burning them;
-                    #NOP -- against a value that has not moved yet;
-                    #var rep_hold 0;
-                    #if {$rep_change == 0 && ($rep_hits_total > $rep_hits_queried || $rep_query_seq > $rep_list_seq)} {
-                        #var rep_hold 1;
-                    };
-                    #NOP -- File the burst under its event type;
-                    #if {$debug[reps]} {#echo {<ffa>debug reps - filing $tmpFaction, combat is $rep_burst_combat, change $rep_change over $rep_hits new hits, hold is $rep_hold<088>}};
-                    #if {$rep_hits > 0 && !$rep_hold} {
-                        #NOP -- The change is accounted for now, so the hits are spent and;
-                        #NOP -- the baseline moves up;
-                        #var repBurstUsed[$tmpFaction] $repBurst[$tmpFaction];
-                        #math rep_hits_filed {$rep_hits_filed + $rep_hits};
-                        #var repData[$tmpIx][last_value] $repData[$tmpIx][current_value];
-                        #if {$rep_burst_combat} {
-                            #var rep_type_str {Combat};
-                            #math repData[$tmpIx][combat_moves] {$repData[$tmpIx][combat_moves] + $rep_hits};
-                            #math repData[$tmpIx][combat_change] {$repData[$tmpIx][combat_change] + $rep_change};
-                            #NOP -- Only combat reps belong to the kill death report;
-                            #math deathReport[reps] {$deathReport[reps] + $rep_change};
+                    #if {"$repBurst[$tmpFaction]" != ""} {
+                        #NOP -- Count only the hits this query is reporting on;
+                        #if {"$repBurstUsed[$tmpFaction]" == ""} {
+                            #var rep_used 0;
                         } {
-                            #var rep_type_str {Non-Combat};
-                            #math repData[$tmpIx][noncombat_moves] {$repData[$tmpIx][noncombat_moves] + $rep_hits};
-                            #math repData[$tmpIx][noncombat_change] {$repData[$tmpIx][noncombat_change] + $rep_change};
+                            #var rep_used $repBurstUsed[$tmpFaction];
                         };
-                        #if {$rep_change != 0} {
-                            .reps_num {$rep_change} {rep_change_str};
-                            #math rep_hundredths {$rep_change * 100 / $rep_hits};
-                            .reps_avg {$rep_hundredths} {rep_each_str};
-                            #if {$rep_hits == 1} {
-                                #var rep_hits_str {1 move};
-                            } {
-                                #var rep_hits_str {$rep_hits moves};
-                            };
-                            #if {$rep_change > 0} {
-                                #echo {  <eed>=== REPS REPORT [$rep_type_str] === $tmpFaction <dfd>$rep_change_str<088> over $rep_hits_str (<dfd>$rep_each_str<088> ea) ===};
-                            } {
-                                #echo {  <eed>=== REPS REPORT [$rep_type_str] === $tmpFaction <fab>$rep_change_str<088> over $rep_hits_str (<fab>$rep_each_str<088> ea) ===};
-                            };
+                        #math rep_hits {$repBurst[$tmpFaction] - $rep_used};
+                        #NOP -- A message can land after the query it belongs to was already;
+                        #NOP -- sent, in which case this snapshot predates the change and reads;
+                        #NOP -- flat.  Another query is already on the way whenever hits are;
+                        #NOP -- outstanding, so hold the hits back rather than burning them;
+                        #NOP -- against a value that has not moved yet;
+                        #var rep_hold 0;
+                        #if {$rep_change == 0 && ($rep_hits_total > $rep_hits_queried || $rep_query_seq > $rep_list_seq)} {
+                            #var rep_hold 1;
+                        };
+                        #if {$debug[reps]} {#echo {<ffa>debug reps - filing $tmpFaction, combat is $rep_burst_combat, change $rep_change over $rep_hits new hits, hold is $rep_hold<088>}};
+                        #if {$rep_hits > 0 && !$rep_hold} {
+                            #NOP -- The change is accounted for now, so the hits are spent;
+                            #var repBurstUsed[$tmpFaction] $repBurst[$tmpFaction];
+                            #math rep_hits_filed {$rep_hits_filed + $rep_hits};
+                            #var rep_orphan 0;
+                            .reps_file;
+                        };
+                    } {
+                        #NOP -- The value moved with no message behind it.  A message can;
+                        #NOP -- be lost outright when the MUD breaks the line across two;
+                        #NOP -- packets, leaving the trigger nothing to match, so the;
+                        #NOP -- faction list is the only record the rep was earned at all.;
+                        #NOP -- File it as a single move rather than lose it;
+                        #if {$rep_change != 0 && $rep_orphan_fill} {
+                            #var rep_hits 1;
+                            #var rep_orphan 1;
+                            #NOP -- Book the hit so a later query does not file it twice;
+                            #var repBurst[$tmpFaction] 1;
+                            #var repBurstUsed[$tmpFaction] 1;
+                            #if {$debug[reps]} {#echo {<ffa>debug reps - no message seen for $tmpFaction but value moved $rep_change, filing as one move<088>}};
+                            .reps_file;
                         };
                     };
                 };
