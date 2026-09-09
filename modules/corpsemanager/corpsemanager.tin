@@ -335,6 +335,15 @@
 	};
 };
 
+#NOP -- Coffin for Jedis;
+#ACTION {%*An enchanted coffin (%1 corpses)%*} {
+    #VAR inventory[coffin] 1;
+    #IF {$corpse_check} {
+        #IF {%1 != $corpses[coffin]} {
+            #MATH corpses[coffin] {%1};
+        };
+    };
+};
 
 #NOP -- Corpse Management COFFIN / FREEZER;
 #act {the coffin's protective hold!$} {#math corpses[coffin] {$corpses[coffin] + 1}} {2};
