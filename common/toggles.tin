@@ -26,23 +26,37 @@
     #var discordPost $toggles[discord_post];
 };
 
+
+#NOP -- Fremen also have a toggle guildside, which needs to be able to bypass;
+#list {fremenToggleList} {create} {fblock} {audible} {litany} {quasibrief} {showdodge};
+
 #alias {toggle} {
     #format toggle_var {%l} {%0};
     #format toggle_var {%p} {$toggle_var};
+    #var fremen_toggle 0;
+    #if {"$toggle_var" != ""} {#list {fremenToggleList} {find} {$toggle_var} {fremen_toggle}};
     #if {"$toggle_var" == ""} {
         #echo {<ffe>   -----  No toggle provided.  Use 'toggle-list' to see available options.  -----<088>};
+        #if {"$guild" == "fremen"} {
+            #echo {  <ffe> Fremen toggles (these are mudside) are below and will bypass the 3kdb commands};
+            #send {toggle};
+        };
     } {
-        #if {"$toggles[$toggle_var]" == ""} {
-            #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
-        } {
-            #if $toggles[$toggle_var] {
-                #var toggles[$toggle_var] 0;
-                #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
+        #if {!$fremen_toggle} {
+            #if {"$toggles[$toggle_var]" == ""} {
+                #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
             } {
-                #var toggles[$toggle_var] 1;
-                #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
+                #if $toggles[$toggle_var] {
+                    #var toggles[$toggle_var] 0;
+                    #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
+                } {
+                    #var toggles[$toggle_var] 1;
+                    #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
+                };
+                #if {"$toggle_var" == "discord_post"} {#var discordPost $toggles[discord_post]};
             };
-            #if {"$toggle_var" == "discord_post"} {#var discordPost $toggles[discord_post]};
+        } {
+            #send {!toggle $toggle_var};
         };
     };
 };
