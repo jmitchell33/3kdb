@@ -180,7 +180,7 @@ touch angel rune;
 #action {As you land the final blow upon the mimic} {
     #delay 10 {
         #if {"$zodiac_riftVnum" != ""} {rift;fracture;#map goto $zodiac_riftVnum};
-        #delay 3 {.unpause;.botStep};
+        #delay 3 {.unpause;glance};
     };
 } {1};
 
@@ -189,7 +189,7 @@ touch angel rune;
         #var toggle_rift_room_empty 0;
         rift;
         #map goto $zodiac_riftVnum;
-        #delay 3 {.unpause;.botStep};
+        #delay 3 {.unpause;glance};
     };
 } {1};
 
@@ -197,7 +197,7 @@ touch angel rune;
     .pause;
     kill abomination;
     #delay 6 {
-        .unpause;
+        .unpause;glance;
     };
 } {1};
 
@@ -206,7 +206,7 @@ touch angel rune;
 } {1};
 
 #action {Sight returns to your eyes, darkness becomes light again.} {
-    .unpause;.botStep;
+    .unpause;glance;
 } {1};
 
 #action {^The warrior deftly disarms you!$} {
@@ -222,14 +222,14 @@ touch angel rune;
 
 #action {You find some gold coins in the chest!} {get coins;exa chest} {1};
 
-#action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;.botStep} {1};
+#action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;glance} {1};
 
 
 #alias {.zodiac_resume_normal} {
     #var bot[zodiac_bt] 0;
     #var bot[zodiac_purge_kill] 0;
     .unpause;
-    .botStep;
+    glance;
 };
 
 #alias {.zodiac_resume_backtrack} {
@@ -284,7 +284,7 @@ touch angel rune;
             #var bot[zodiac_bt] 0;
             .unpause;
             #showme {Zodiac backstep unknown token $zodiac_tok};
-            .botStep;
+            glance;
         };
     };
     #if {"$bot[zodiac_bt]" == "1"} {

@@ -227,7 +227,7 @@ touch demon rune;
 } {1};
 
 #action {Sight returns to your eyes, darkness becomes light again.} {
-    .unpause;.botStep;
+    .unpause;glance;
 } {1};
 
 #action {^The warrior deftly disarms you!$} {
@@ -244,7 +244,7 @@ touch demon rune;
 
 #action {You find some gold coins in the chest!} {get coins;exa chest} {1};
 
-#action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;.botStep} {1};
+#action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;glance} {1};
 
 #action {The Treasury \(w,se\)} {#if {$bot[foundmob] == 1} {return};#unact {The Treasury \(w,se\)};.chest_action} {1};
 #action {Chamber of treasure \(s,ne\)} {#if {$bot[foundmob] == 1} {return};#unact {Chamber of treasure \(s,ne\)};.chest_action} {1};
@@ -255,7 +255,7 @@ touch demon rune;
 #alias {.zodiac_resume_normal} {
     #var bot[zodiac_bt] 0;
     .unpause;
-    .botStep;
+    glance;
 };
 
 #alias {.zodiac_find_level_bounds} {
@@ -304,7 +304,7 @@ touch demon rune;
             #var bot[zodiac_bt] 0;
             .unpause;
             #showme {Zodiac backstep unknown token $zodiac_tok};
-            .botStep;
+            glance;
         };
     };
     #if {"$bot[zodiac_bt]" == "1"} {
