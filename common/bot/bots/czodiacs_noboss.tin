@@ -152,15 +152,18 @@ touch demon rune;
         #echo {<fff>PORTAL ROOM OPEN!<088>};
         ptell portal room open! roomvnum: $zodiac_portalVnum;
         #var toggle_portal_room 0;
-        #delay 5 {
-            portal;
-            open first chest;
-            open second chest;
-            open third chest;
-            open fourth chest;
-            open fifth chest;
-            open sixth chest;
-        };
+        #ticker portalRoom {
+            #if !$incombat {
+                portal;
+                open first chest;
+                open second chest;
+                open third chest;
+                open fourth chest;
+                open fifth chest;
+                open sixth chest;
+                #unticker portalRoom;
+            };
+        } {4};
         #line oneshot #action {As the chest opens, panic washes over you!} {
             #if {"$guild" == "juggernaut"} {
                 checkStrategy {mechwarrior} {support defend};
@@ -198,7 +201,7 @@ touch demon rune;
 #action {As you land the final blow upon the mimic} {
     #delay 10 {
         #if {"$zodiac_portalVnum" != ""} {portal};
-        .unpause;.botStep;
+        .unpause;glance;
     };
 } {1};
 
@@ -206,14 +209,15 @@ touch demon rune;
     #if {"$toggle_portal_room_empty" == "1"} {
         #var toggle_portal_room_empty 0;
         portal;
-        .unpause;.botStep;
+        .unpause;glance;
     };
 } {1};
 
 #action {A COLOSSAL MONSTROSITY STOMPS INTO VIEW} {
     .pause;
+    kill colossal;
     #delay 6 {
-        .unpause;
+        .unpause;glance;
     };
 } {1};
 
@@ -222,7 +226,7 @@ touch demon rune;
 } {1};
 
 #action {Sight returns to your eyes, darkness becomes light again.} {
-    .unpause;.botStep;
+    .unpause;glance;
 } {1};
 
 #action {^The warrior deftly disarms you!$} {
@@ -234,7 +238,7 @@ touch demon rune;
     examine chest;
     search chest;
     #echo {chest found};
-    #delay 2 {.unpause;.botStep};
+    #delay 2 {.unpause;glance};
 };
 
 #alias .zodiac_check_chest_room {
@@ -249,7 +253,7 @@ touch demon rune;
 
 #action {You find some gold coins in the chest!} {get coins;exa chest} {1};
 
-#action {Your vision becomes blurry. While your surroundings are intriguing, your} {.unpause;.botStep} {1};
+#action {Your vision becomes blurry. While your surroundings are intriguing, your} {.unpause;glance} {1};
 
 #action {The Treasury \(w,se\)} {.pause;#delay .3 {.zodiac_check_chest_room {The Treasury \(w,se\)}}} {1};
 #action {Chamber of treasure \(s,ne\)} {.pause;#delay .3 {.zodiac_check_chest_room {Chamber of treasure \(s,ne\)}}} {1};
@@ -261,7 +265,7 @@ touch demon rune;
     #var bot[zodiac_bt] 0;
     #var bot[zodiac_purge_kill] 0;
     .unpause;
-    .botStep;
+    glance;
 };
 
 #alias {.zodiac_resume_backtrack} {
@@ -316,7 +320,7 @@ touch demon rune;
             #var bot[zodiac_bt] 0;
             .unpause;
             #showme {Zodiac backstep unknown token $zodiac_tok};
-            .botStep;
+            glance;
         };
     };
     #if {"$bot[zodiac_bt]" == "1"} {
