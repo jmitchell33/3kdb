@@ -312,13 +312,17 @@
 #if {"$guild" == "knight" || "$guild" == "fremen"} {
     #alias .gxp_t30_add {
         #if {&my[gxp][t30][] > 30} {
-            #math my[gxp][t30_total] {$my[gxp][t30_total] - $my[gxp][t30][1]};
             #list my[gxp][t30] delete 1;
             #list my[gxp][t30] add $my[gxp][last_round];
-            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
         } {
             #list my[gxp][t30] add $my[gxp][last_round];
-            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
+        };
+        #if {&my[gxp][t30][] > 0} {
+            #var my[gxp][t30_total] 0;
+            #var tmpIx 1;
+            #loop 1 &my[gxp][t30][] tmpIx {
+                #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][t30][$tmpIx]};
+            };
         };
         #math my[gxp][t30_average] {$my[gxp][t30_total] / &my[gxp][t30][]};
         #math my[gxp][t30_per_hr] {$my[gxp][t30_average] * 30 * 60};
