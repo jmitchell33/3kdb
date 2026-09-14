@@ -304,8 +304,8 @@
 
 
 #alias {mapFull} {
-    #NOP -- We will start a dummy server port with the map layout and send commands for seed data;
-    #echo {<ffc>------------------ INITIALIZING FULL MAP ------------------<088>};
+    #NOP -- Working copy of mapFull, see common/draw_mapFull.tin;
+    #echo {<ffc>------------------ INITIALIZING FULL MAP 2 ------------------<088>};
     #info session save;
     #math map[fullLower] {$screen[height] - 2};
     #map get roomvnum map[full][startVnum];
@@ -313,6 +313,20 @@
     #port {init} {port_mapFull} {0};
     #delay 1 {
         #{port_mapFull} {#var parentSession $info[SESSION][NAME]};
+
+        #NOP -- Seed the child session explicitly.  A port session does;
+        #NOP -- not inherit parent variables, which is what the undefined;
+        #NOP -- @gts calls in the original file were reaching for.;
+        #NOP -- A session name in the selector is resolved before variables;
+        #NOP -- are substituted, so #{$parentSession} never reaches this;
+        #NOP -- session.  Bake the real name into a sender alias here,;
+        #NOP -- where the expansion happens parent side, exactly the way;
+        #NOP -- area and startVnum below are passed across.;
+        #{port_mapFull} {#alias {.mapFullSend} {#{$info[SESSION][NAME]} {%0}}};
+
+        #{port_mapFull} {#var area {$area}};
+        #{port_mapFull} {#var map[full][startVnum] {$map[full][startVnum]}};
+
         #{port_mapFull} {#read common/draw_mapFull.tin};
         #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
         #{port_mapFull} {_init_mapFull};

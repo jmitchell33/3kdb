@@ -798,6 +798,19 @@
 	};
 };
 
+#NOP -- For notifications we'll put these into the general chat log but won't post to discord;
+#ALIAS {.notify} {
+	#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
+	#if {&chat[general][] >= $chat[max]} {
+		#list chat[general] del 1;
+	};
+	#var chat[text]  <edc>NOTE: <ddd>%0<088>;
+	
+	#var chat[entry] ${timestamp}${chat[text]};
+	#list chat[general] ins -1 $chat[entry];
+	#if {"$chatCategory" != "general"} {postChatCategory};
+	draw_chat;
+};
 
 #ALIAS {update_chat} {
 	#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
