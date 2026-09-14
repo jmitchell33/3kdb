@@ -1,0 +1,484 @@
+#class {common_search} {kill};
+#class {common_search} {open};
+
+#NOP -- Room description noun extraction, pull the interesting words out of a room long;
+
+#NOP -- Filler words that are never worth pulling out of a room long;
+#NOP -- Edit these lines to taste then run .buildRoomNounStop to reload;
+#var roomNounStopWords {};
+#cat roomNounStopWords {a an the this that these those some any all both each every either neither no none other another such same };
+#cat roomNounStopWords {and or but nor so yet for if then than as because while whereas although though unless until whether };
+#cat roomNounStopWords {of in on at to from by with without into onto upon over under above below across through throughout };
+#cat roomNounStopWords {between among around near beside besides behind before after against along amid amidst beneath };
+#cat roomNounStopWords {underneath within inside outside toward towards off out up down about beyond past per via during despite };
+#cat roomNounStopWords {i me my mine myself you your yours yourself he him his himself she her hers herself it its itself };
+#cat roomNounStopWords {we us our ours ourselves they them their theirs themselves who whom whose which what where when why how };
+#cat roomNounStopWords {is are was were be been being am has have had having do does did doing can could will would shall };
+#cat roomNounStopWords {should may might must let lets seems seem appears appear looks look lies lying stands standing sits };
+#cat roomNounStopWords {sitting hangs hanging leads leading goes going makes making gives giving allows allowing seen };
+#cat roomNounStopWords {not very more most much many few little less least too also just only even still well almost nearly };
+#cat roomNounStopWords {quite rather somewhat slightly barely perhaps maybe here there now again once ever never always often };
+#cat roomNounStopWords {sometimes usually far away };
+#cat roomNounStopWords {one two three four five six seven eight nine ten };
+#NOP -- Verb forms that show up constantly in room descriptions but never name a thing;
+#cat roomNounStopWords {hang dominates dominate flanked flanks rests resting adorns adorned surrounded surrounds };
+#cat roomNounStopWords {extends extend extending stretches stretching continues continuing placed scattered strewn };
+#cat roomNounStopWords {littered situated located reveals revealing provides providing visible };
+#NOP -- More filler the examine replies keep handing back, edit to taste;
+#cat roomNounStopWords {found finds finding made make makes varies vary varying tends tend tending };
+#cat roomNounStopWords {roam roams roaming travel travels travelling traveling wander wanders wandering };
+#cat roomNounStopWords {change changes changing become becomes becoming remains remaining seemingly };
+#cat roomNounStopWords {somewhere anywhere everywhere nowhere apparent excessive echoing echoed };
+#cat roomNounStopWords {spotted flows flowing carrying carried created creating sticking };
+#cat roomNounStopWords {designed winding surviving survive attempt attempts imagine cannot however due };
+
+
+#NOP -- Expand the stop word string into a table so each lookup is a single index;
+#alias .buildRoomNounStop {
+    #var roomNounStop {};
+    #var rnStopList {$roomNounStopWords};
+    #list rnStopList explode { };
+    #if {&rnStopList[] > 0} {
+        #var rnIx 1;
+        #loop 1 &rnStopList[] rnIx {
+            #if {"$rnStopList[$rnIx]" != ""} {
+                #var roomNounStop[$rnStopList[$rnIx]] 1;
+            };
+        };
+    };
+    #unvar rnStopList;
+};
+.buildRoomNounStop;
+
+#NOP -- Core word splitter, reads the text in nounWork[src] and fills nounWork[out];
+#NOP -- Result is a deduped lowercase list in first seen order;
+#alias .extractNouns {
+    #NOP -- Trailing space so the final word gets the same treatment as the rest;
+    #var rnSource {$nounWork[src] };
+
+    #NOP -- Drop possessive endings so a dragon s hoard reduces to dragon hoard;
+    #replace rnSource {'s } { };
+    #replace rnSource {' } { };
+
+    #NOP -- Punctuation becomes whitespace so it never stays glued to a word;
+    #replace rnSource {\n} { };
+    #replace rnSource {--} { };
+    #replace rnSource {.} { };
+    #replace rnSource {,} { };
+    #replace rnSource {:} { };
+    #replace rnSource {;} { };
+    #replace rnSource {!} { };
+    #replace rnSource {?} { };
+    #replace rnSource {"} { };
+    #replace rnSource {(} { };
+    #replace rnSource {)} { };
+    #replace rnSource {[} { };
+    #replace rnSource {]} { };
+    #replace rnSource {/} { };
+    #NOP -- Braces sigils bars and slashes would be read as script syntax later;
+    #replace {rnSource} {\\x7B} { };
+    #replace {rnSource} {\\x7D} { };
+    #replace {rnSource} {\\x7C} { };
+    #replace {rnSource} {\\x5C} { };
+    #replace rnSource {$} { };
+    #replace rnSource {@} { };
+
+    #var rnWords {$rnSource};
+    #list rnWords explode { };
+
+    #list nounWork[out] clear;
+    #var rnSeen {};
+
+    #if {&rnWords[] > 0} {
+        #var rnIx 1;
+        #loop 1 &rnWords[] rnIx {
+            #format rnWord {%l} {$rnWords[$rnIx]};
+            #format rnLen {%L} {$rnWord};
+            #var rnDrop 0;
+
+            #NOP -- Single letters are never useful targets;
+            #if {$rnLen < 2} {#var rnDrop 1};
+
+            #NOP -- Plain words only, anything else is unsafe as a table key;
+            #NOP -- tintin reads a key holding odd characters as a pattern not a name;
+            #NOP -- This drops bare numbers and leftover map or tag art as well;
+            #var rnPlain 0;
+            #regex {$rnWord} {^{[a-z][a-z-]+}$} {#var rnPlain 1};
+            #if {!$rnPlain} {#var rnDrop 1};
+
+            #NOP -- Only reach for the tables once the word is known to be safe;
+            #if {!$rnDrop} {
+                #if {"$roomNounStop[$rnWord]" != ""} {#var rnDrop 1};
+                #NOP -- Skip anything already collected so the list stays deduped;
+                #if {"$rnSeen[$rnWord]" != ""} {#var rnDrop 1};
+            };
+
+            #if {!$rnDrop} {
+                #var rnSeen[$rnWord] 1;
+                #list nounWork[out] add {$rnWord};
+            };
+        };
+    };
+
+    #unvar rnWords;
+    #unvar rnSeen;
+};
+
+#NOP -- Split a room description into its meaningful words and drop the filler;
+#NOP -- Pass a string to parse that, or pass nothing to parse the current room long;
+#NOP -- Result lands in room[nouns] as a deduped lowercase list in first seen order;
+#alias .roomNouns {
+    #var nounWork[src] {%0};
+    #if {"$nounWork[src]" == ""} {#var nounWork[src] {$room[long]}};
+    .extractNouns;
+
+    #list room[nouns] clear;
+    #if {&nounWork[out][] > 0} {
+        #var rnIx 1;
+        #loop 1 &nounWork[out][] rnIx {
+            #list room[nouns] add {$nounWork[out][$rnIx]};
+        };
+    };
+};
+
+#NOP -- Print whatever is sitting in room[nouns] right now;
+#alias .showRoomNouns {
+    #var rnOut {};
+    #if {&room[nouns][] > 0} {
+        #var rnIx 1;
+        #loop 1 &room[nouns][] rnIx {
+            #cat rnOut { $room[nouns][$rnIx]};
+        };
+    };
+    #echo {<ffa>Room nouns <088>(<cfc>&room[nouns][]<088>)<ffa>:<088>$rnOut};
+    #unvar rnOut;
+};
+
+#NOP -- room[long] only refreshes when the mud sends a description block;
+#NOP -- With brief on that never happens on a move, so the long we hold still;
+#NOP -- belongs to the last room we looked at.  Ask for a new one first;
+#NOP -- Raise search[lookdelay] if a slow link lets the parse beat the reply;
+#var search[lookdelay] 1.5;
+
+#NOP -- How long a pass listens after its commands go out, raise it on a slow link;
+#var search[capdelay] 2.5;
+
+
+#NOP -- Ask for a description then run the alias named in search[afterlook];
+#alias .sraLook {
+    .sraFixCounters;
+    #send {look};
+    .sraTrace {look sent, running $search[afterlook] in $search[lookdelay]s};
+    #delay {sraLookWait} {$search[afterlook]} {$search[lookdelay]};
+};
+
+#NOP -- Reparse the freshly arrived room long and print what came out;
+#alias .roomNounsShow {
+    .roomNouns;
+    .showRoomNouns;
+};
+
+#NOP -- Show the nouns for the current room, or for any string you hand it;
+#NOP -- With no argument it looks first so the words match the room you are in;
+#alias roomnouns {
+    #if {"%0" == ""} {
+        #var search[afterlook] {.roomNounsShow};
+        .sraLook;
+    } {
+        .roomNouns %0;
+        .showRoomNouns;
+    };
+};
+
+
+#NOP -- Search sweep, examine and search every noun then mine the replies for more nouns;
+#NOP -- search[done]    words already sent this sweep so none of them repeat;
+#NOP -- search[queue]   words the current pass is working through;
+#NOP -- search[capture] raw text the mud sent back during the pass;
+#NOP -- search[new]     words the pass revealed that have not been searched yet;
+
+#NOP -- Lines that carry no new nouns and would only pollute the word list;
+#function sraCaptureIgnore {
+    #var result 0;
+    #local sraIgLine {%0};
+    #regex {$sraIgLine} {^$} {#var result 1};
+    #regex {$sraIgLine} {That is not here or it is uninteresting} {#var result 1};
+    #regex {$sraIgLine} {You find nothing of interest} {#var result 1};
+    #NOP -- The mud answers this when in room finds nothing to target;
+    #regex {$sraIgLine} {Can't find room} {#var result 1};
+    #regex {$sraIgLine} {^You search } {#var result 1};
+    #regex {$sraIgLine} {^You examine } {#var result 1};
+    #NOP -- Skip the tagged lines the mapper and item code feed on;
+    #regex {$sraIgLine} {-D-_} {#var result 1};
+    #regex {$sraIgLine} {-R-_} {#var result 1};
+    #regex {$sraIgLine} {^{-i-|-w-|-a-|-o-}} {#var result 1};
+    #NOP -- Skip chat and tell traffic so other players never seed the word list;
+    #regex {$sraIgLine} {<c%*>%*:} {#var result 1};
+    #regex {$sraIgLine} { tells you:} {#var result 1};
+    #regex {$sraIgLine} { says:} {#var result 1};
+};
+
+#NOP -- Older builds left their gags behind in tmpGag, clear them on load;
+#class {tmpGag} {kill};
+
+#NOP -- sra2 is the first pass and sra10 the last, so the counter is the alias number;
+#var search[maxpass] 10;
+
+#NOP -- Turn on with sradebug to trace what each pass sends and captures;
+#if {"$search[debug]" == ""} {#var search[debug] 0};
+#alias sradebug {
+    #if {$search[debug]} {
+        #var search[debug] 0;
+        #echo {<ffa>Search debug <cfc>off<ffa>.<088>};
+    } {
+        #var search[debug] 1;
+        #echo {<ffa>Search debug <cfc>on<ffa>.<088>};
+    };
+};
+#NOP -- Same toggle under the other name in case that is the one you reach for;
+#alias searchdebug {sradebug};
+
+
+#NOP -- One place to print a trace line so every step looks the same;
+#alias .sraTrace {
+    #if {$search[debug]} {
+        #echo {<088>[<cfc>sra<088>] %1};
+    };
+};
+
+#NOP -- A counter left empty makes every comparison against it fail silently;
+#alias .sraFixCounters {
+    #if {"$search[maxpass]" == ""} {#var search[maxpass] 10};
+    #if {"$search[pass]" == ""} {#var search[pass] 2};
+    #if {"$search[debug]" == ""} {#var search[debug] 0};
+    #if {"$search[lines]" == ""} {#var search[lines] 0};
+    #NOP -- An empty delay length means the timer is never created and nothing runs;
+    #if {"$search[lookdelay]" == ""} {#var search[lookdelay] 1.5};
+    #if {"$search[capdelay]" == ""} {#var search[capdelay] 2.5};
+};
+
+#NOP -- Wipe the sweep memory so the next sra2 starts the room fresh;
+#alias .sraReset {
+    #var search[done] {};
+    #list search[queue] clear;
+    #list search[new] clear;
+    #var search[capture] {};
+    #var search[capturing] 0;
+    #NOP -- The counter is the alias number, so sra2 is where every sweep starts;
+    #var search[pass] 2;
+};
+.sraReset;
+
+#NOP -- Scrub a captured line in place, kept shallow so the escapes survive;
+#alias .sraCleanLine {
+    #replace {sraLine} {\\x7B} { };
+    #replace {sraLine} {\\x7D} { };
+    #replace {sraLine} {\\x7C} { };
+    #replace {sraLine} {\\x5C} { };
+    #replace sraLine {;} { };
+    #replace sraLine {$} { };
+    #replace sraLine {@} { };
+};
+
+#NOP -- Start listening to everything the mud sends back while a pass runs;
+#alias .sraCaptureStart {
+    .sraTrace {capture starting};
+    #class {tmpSearchCap} {kill};
+    #class {tmpSearchCap} {open};
+
+    #var search[capture] {};
+    #var search[capturing] 1;
+    #var search[lines] 0;
+
+    #NOP -- These three dead end replies are the only lines the sweep ever hides;
+    #NOP -- They live in this class so they die with it and never touch normal play;
+    #gag {That is not here or it is uninteresting. (%*)};
+    #gag {You find nothing of interest.};
+    #gag {Can't find room.};
+
+    #event {PROCESSED LINE} {
+        #format sraLine {%p} {%%1};
+
+        #NOP -- Clean the line before anything can read it as script syntax;
+        #NOP -- The escapes live in their own alias because a body nested two;
+        #NOP -- deep unescapes them early and breaks the braces around it;
+        .sraCleanLine;
+
+        #var sraSkip @sraCaptureIgnore{$sraLine};
+        #if {!$sraSkip} {
+            #cat {search[capture]} { $sraLine};
+            #math search[lines] {$search[lines] + 1};
+        };
+    };
+
+    #class {tmpSearchCap} {close};
+};
+
+#NOP -- Stop listening, turn what came back into the word list for the next pass;
+#alias .sraCaptureEnd {
+    .sraFixCounters;
+    .sraTrace {capture end reached};
+
+    #undelay {sraCapEnd};
+    #class {tmpSearchCap} {kill};
+    #var search[capturing] 0;
+
+    #var nounWork[src] {$search[capture]};
+    .extractNouns;
+
+    #list search[new] clear;
+    #if {&nounWork[out][] > 0} {
+        #var sraIx 1;
+        #loop 1 &nounWork[out][] sraIx {
+            #var sraWord {$nounWork[out][$sraIx]};
+            #NOP -- Anything already sent this sweep is not worth a second look;
+            #if {"$search[done][$sraWord]" == ""} {
+                #list search[new] add {$sraWord};
+            };
+        };
+    };
+
+    #format sraCapLen {%L} {$search[capture]};
+    .sraTrace {pass $search[pass] of $search[maxpass] kept $search[lines] lines and $sraCapLen chars, &{nounWork[out][]} words, &{search[new][]} new};
+
+    #NOP -- Every miss is gagged, so without this a working pass can look silent;
+    #echo {<ffa>Pass done, <cfc>&{search[queue][]}<ffa> targets sent, <cfc>$search[lines]<ffa> lines of description came back.<088>};
+
+    #NOP -- Flat tests, a nested if that errors would swallow the whole message;
+    #if {&search[new][] < 1} {
+        #echo {<ffa>Search sweep done, nothing new turned up.<088>};
+    };
+    #if {&search[new][] > 0} {
+        searchnew;
+        #math sraNextPassNo {$search[pass] + 1};
+        #if {$sraNextPassNo <= $search[maxpass]} {
+            #echo {<ffa>Type <cfc>sra${sraNextPassNo}<ffa> to search them.<088>};
+        };
+        #if {$sraNextPassNo > $search[maxpass]} {
+            #echo {<ffa><cfc>sra${search[maxpass]}<ffa> was the last pass, run <cfc>sra2<ffa> to sweep again.<088>};
+        };
+    };
+};
+
+#NOP -- Show the words waiting for the next pass, under either name;
+#alias sranew {searchnew};
+#alias searchnew {
+    #var sraOut {};
+    #if {&search[new][] > 0} {
+        #var sraIx 1;
+        #loop 1 &search[new][] sraIx {
+            #cat sraOut { $search[new][$sraIx]};
+        };
+    };
+    #echo {<ffa>New nouns <088>(<cfc>&search[new][]<088>)<ffa>:<088>$sraOut};
+    #unvar sraOut;
+};
+
+#NOP -- Work through search[queue], capturing everything the mud replies with;
+#alias .sraRun {
+    .sraTrace {run called with &{search[queue][]} words queued};
+    #if {&search[queue][] > 0} {
+        .sraCaptureStart;
+        #var sraIx 1;
+        #loop 1 &search[queue][] sraIx {
+            #var sraWord {$search[queue][$sraIx]};
+            #var search[done][$sraWord] 1;
+            #NOP -- in room keeps the target off our own kit and off anything carried;
+            examine $sraWord in room;
+            search $sraWord in room;
+        };
+        .sraTrace {pass $search[pass] sent &{search[queue][]} pairs, closing in $search[capdelay]s};
+        #NOP -- One fixed window, long enough for the replies and short enough that;
+        #NOP -- whatever else the room is doing has little chance to land inside it;
+        #delay {sraCapEnd} {.sraCaptureEnd} {$search[capdelay]};
+    } {
+        #echo {<ffa>Nothing queued to search.<088>};
+    };
+};
+
+#NOP -- Queue every noun in the room long and start the first pass;
+#alias .sraFromRoom {
+    .roomNouns;
+    .sraTrace {room long parsed into &{room[nouns][]} nouns};
+    #list search[queue] clear;
+    #if {&room[nouns][] > 0} {
+        #var sraIx 1;
+        #loop 1 &room[nouns][] sraIx {
+            #list search[queue] add {$room[nouns][$sraIx]};
+        };
+        #echo {<cfc>sra${search[pass]}<ffa>: searching <cfc>&{room[nouns][]}<ffa> room nouns.<088>};
+        .sraRun;
+    } {
+        #echo {<ffa>No room nouns found.<088>};
+    };
+};
+
+#NOP -- First pass, look for a current description then work through its nouns;
+#alias sra2 {
+    .sraReset;
+    #var search[afterlook] {.sraFromRoom};
+    .sraLook;
+};
+
+#NOP -- Every pass after the first works the same way, so they share one body;
+#NOP -- sra3 through sra10 all just ask for the next pass in the sweep;
+#NOP -- Flat tests with an early return, a nested if that errors takes the;
+#NOP -- whole branch with it and the pass then looks like it did nothing;
+#alias .sraNextPass {
+    .sraFixCounters;
+    #list search[queue] clear;
+    .sraTrace {next pass asked for at pass $search[pass] of $search[maxpass] with &{search[new][]} words waiting};
+
+    #if {&search[new][] < 1} {
+        #echo {<ffa>No new nouns to search, run <cfc>sra2<ffa> to start a sweep.<088>};
+        #return;
+    };
+    #if {$search[pass] >= $search[maxpass]} {
+        #echo {<ffa>Already at <cfc>sra${search[maxpass]}<ffa>, run <cfc>sra2<ffa> to sweep again.<088>};
+        #return;
+    };
+
+    #math search[pass] {$search[pass] + 1};
+    #var sraIx 1;
+    #loop 1 &search[new][] sraIx {
+        #list search[queue] add {$search[new][$sraIx]};
+    };
+    #list search[new] clear;
+    #echo {<cfc>sra${search[pass]}<ffa>: searching <cfc>&{search[queue][]}<ffa> newly revealed nouns.<088>};
+    .sraRun;
+};
+
+#NOP -- The sweep always runs the next pass, whichever of these you happen to type;
+#alias sra3 {.sraNextPass};
+#alias sra4 {.sraNextPass};
+#alias sra5 {.sraNextPass};
+#alias sra6 {.sraNextPass};
+#alias sra7 {.sraNextPass};
+#alias sra8 {.sraNextPass};
+#alias sra9 {.sraNextPass};
+#alias sra10 {.sraNextPass};
+
+#NOP -- Force the pass to finish now instead of waiting on the idle timer;
+#NOP -- If this prints the word list but the timer never does, the delay is the fault;
+#alias sraend {.sraCaptureEnd};
+
+#NOP -- Report the sweep state, this answers where a stuck pass got to;
+#alias srastate {
+    .sraFixCounters;
+    #format sraCapLen {%L} {$search[capture]};
+    #echo {<ffa>capturing <cfc>$search[capturing]<ffa>  pass <cfc>$search[pass]<ffa> of <cfc>$search[maxpass]<ffa>  debug <cfc>$search[debug]<088>};
+    #echo {<ffa>lines <cfc>$search[lines]<ffa>  chars <cfc>$sraCapLen<ffa>  queue <cfc>&{search[queue][]}<ffa>  new <cfc>&{search[new][]}<088>};
+    #echo {<ffa>pending delays and the capture class follow<088>};
+    #delay;
+    #class {tmpSearchCap} {list};
+};
+
+#NOP -- Bail out of a pass early if the room gets busy;
+#alias sraabort {
+    #undelay {sraCapEnd};
+    #class {tmpSearchCap} {kill};
+    #var search[capturing] 0;
+    #echo {<ffa>Search capture aborted.<088>};
+};
+
+#class {common_search} {close};

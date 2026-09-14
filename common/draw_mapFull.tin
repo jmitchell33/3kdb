@@ -1,7 +1,27 @@
 #class draw_mapFull kill;
 #class draw_mapFull open;
 
-#NOP #event {MAP REGION PRESSED MOUSE BUTTON ONE} {#echo {CLICKED MAP REGION (%0,%1) vnum %4 [%5]}};
+#NOP -------------------------------------------------------------------;
+#NOP  FULL SCREEN MAP -- working copy of common/draw_mapFull.tin;
+#NOP;
+#NOP  Launched with mapFull.  The original file and the mapFull alias;
+#NOP  are left untouched so the two can be compared side by side.;
+#NOP;
+#NOP  This runs in its own port session, so it does NOT inherit the;
+#NOP  parent variables.  Seed data is pushed in by the launcher in;
+#NOP  common/draw.tin before this file is read.;
+#NOP;
+#NOP  The map is only ever read, never written.  Room colours set here;
+#NOP  live in memory for this session and never reach 3k_shared.map.;
+#NOP;
+#NOP  USAGE;
+#NOP    just type       the list filters live, per keystroke;
+#NOP    backspace       widens the filter again, empty shows everything;
+#NOP    click an area   select it, highlight it, jump the map to it;
+#NOP    click a room    select it, highlight it, show its detail;
+#NOP    mouse wheel     scroll the list;
+#NOP    mapFull        close;
+#NOP -------------------------------------------------------------------;
 
 #screen get rows screen[height];
 #screen get cols screen[width];
@@ -24,8 +44,157 @@
 
 #var tmpRoomSelected {};
 
-#var area @gts{$area};
-#var map @gts{$map};
+#NOP -------------------------------------------------------------------;
+#NOP  COLOURS -- change these to taste;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- every area name in the list;
+#var map[full][color][area] <fff>;
+
+#NOP -- the area you clicked in the list on the left.  Letter form;
+#NOP -- codes run a to f, where a is level 0 and f is level 5, so red;
+#NOP -- is faa.  Mixing a letter with digits, as in f00, is not a valid;
+#NOP -- code and simply fails to colour anything;
+#var map[full][color][selected_area] <faa>;
+
+#NOP -- the room you clicked on the map.  Digit form is used here to;
+#NOP -- match the roomcolor codes already used in common/map;
+#var map[full][color][selected_room] <258>;
+
+#NOP -- The marker drawn on the room the character is standing in.  The;
+#NOP -- map file ships this as an at sign in graphics mode and a lower;
+#NOP -- case x in ascii mode, under the USER legend key.  A terminal;
+#NOP -- cell is one character wide, so the boldest a star can get is a;
+#NOP -- solid glyph.  Swap it for another if this one renders thin.;
+#NOP -- Alternatives worth trying are the four pointed and six pointed;
+#NOP -- stars, or a plain asterisk if the font lacks the others;
+#var map[full][symbol][user] ★;
+
+#NOP -- The mark put on the room you click.  Map symbols are three;
+#NOP -- characters wide here, the same shape as the [H] and [2] markers;
+#NOP -- already on the map, and symbol rooms pick up the CSYMBOLS colour;
+#NOP -- from the map file, so this shows even where a plain colour does;
+#NOP -- not.  Unlike roomcolor, roomsymbol can be read back, so whatever;
+#NOP -- the room had before is saved and put back exactly;
+#var map[full][symbol][selected_room] [*];
+
+#NOP -------------------------------------------------------------------;
+#NOP  LAYOUT;
+#NOP;
+#NOP  FIX -- the gap at the bottom of the area list.  bounds used to be;
+#NOP  hardcoded to 15, which feeds the box 31 entries, but the box;
+#NOP  height is derived from the screen height.  The two only agree on a;
+#NOP  46 row terminal.  Taller leaves blank rows, shorter overflows.;
+#NOP;
+#NOP  The list box is drawn from row 2 to row -mapAreaBotRow with a;
+#NOP  bottom border and no top border, so it holds this many entries.;
+#NOP  If the list still comes up a row short or long, nudge rowfudge.;
+#NOP -------------------------------------------------------------------;
+
+#var map[full][list][rowfudge] 0;
+#math map[full][list][rows] {$screen[height] - $mapAreaBotRow - 1 + $map[full][list][rowfudge]};
+
+#NOP -- Row the first list entry is drawn on.  A click at screen row R;
+#NOP -- therefore lands on list index start + R - click_offset.;
+#NOP -- Verified against event_test.tin, which draws a tile at a row and;
+#NOP -- compares the click row against that same number, so click rows;
+#NOP -- and draw rows share one coordinate space.  The box is drawn at;
+#NOP -- row 2 with no top border, so the first entry sits on row 2.;
+#NOP -- The original file hardcoded 5 here, which is 7 rows out;
+#var map[full][list][click_offset] 2;
+
+#NOP -- rows the mouse wheel moves per notch;
+#var map[full][list][scroll_step] 3;
+
+#NOP -------------------------------------------------------------------;
+#NOP  MAP PAN;
+#NOP;
+#NOP  The view offset is held here rather than being thrown straight at;
+#NOP  the mapper, so the arrows, the mouse drag and the layer keys all;
+#NOP  share one position and the key can report it.  z is the floor,;
+#NOP  which is what moves you between the two maps a staircase joins.;
+#NOP;
+#NOP  Argument order follows the drag handler already in this file,;
+#NOP  which calls map center with y first, then x, then z.  If an arrow;
+#NOP  pans the wrong way, flip the sign on that macro;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- FIX -- the two axes were the wrong way round, so an arrow;
+#NOP -- panned ninety degrees off.  They are named for the compass now;
+#NOP -- rather than x and y, since ns is the one that ends up second in;
+#NOP -- the map center call and ew the one that ends up first;
+#var map[full][pan][ns] 0;
+#var map[full][pan][ew] 0;
+#var map[full][pan][z] 0;
+
+#NOP -- cells moved per arrow press;
+#var map[full][pan][step] 2;
+
+#NOP -------------------------------------------------------------------;
+#NOP  CARDINAL KEY GEOMETRY;
+#NOP;
+#NOP  The key owns the bottom left box and every control on it can be;
+#NOP  clicked.  Hit testing needs to know where each control landed, so;
+#NOP  the rows are worked out from the same box coordinates the draw;
+#NOP  uses rather than being guessed at.;
+#NOP;
+#NOP  The box is drawn at -mapInfoButtonTop, which is this row, and the;
+#NOP  border takes the first row, so the first line of content sits one;
+#NOP  below that.  Nudge rowfudge if the hit rows sit off the labels;
+#NOP -------------------------------------------------------------------;
+
+#var map[full][key][rowfudge] 0;
+
+#NOP -- Eight content rows.  A blank sits above N, between N and the;
+#NOP -- middle row, and between that and S, so the rose has room to;
+#NOP -- breathe.  Only the three letter rows take clicks;
+#NOP;
+#NOP   1  Navigate;
+#NOP   2  Floor 0  XY 0,0;
+#NOP   3;
+#NOP   4      N          +;
+#NOP   5;
+#NOP   6  W   o   E      -;
+#NOP   7;
+#NOP   8      S;
+#math map[full][key][row_title] {$screen[height] - $mapInfoButtonTop + 2 + $map[full][key][rowfudge]};
+#math map[full][key][row_stat]  {$map[full][key][row_title] + 1};
+#math map[full][key][row_one]   {$map[full][key][row_title] + 3};
+#math map[full][key][row_two]   {$map[full][key][row_title] + 5};
+#math map[full][key][row_thr]   {$map[full][key][row_title] + 7};
+
+#NOP -- The compass is 16 wide and is centred in the box interior, which;
+#NOP -- runs from column 2 to one short of the right border.  All three;
+#NOP -- rows share this one pad, which is what keeps N, o and S in a;
+#NOP -- single column, and every hit span is measured off it;
+#var map[full][key][width] 16;
+#math map[full][key][pad] {($mapAreaRightCol - 2 - $map[full][key][width]) / 2};
+#format map[full][key][pad] {%d} {$map[full][key][pad]};
+#if {$map[full][key][pad] < 1} {#var map[full][key][pad] 1};
+#math map[full][key][base] {2 + $map[full][key][pad]};
+
+#var tmpKeyPadN $map[full][key][pad];
+#format map[full][key][padstr] {%+${tmpKeyPadN}s} { };
+#unvar tmpKeyPadN;
+
+#NOP -- spans widened past each letter so a near miss still lands;
+#math map[full][key][ns_lo] {$map[full][key][base] + 2};
+#math map[full][key][ns_hi] {$map[full][key][base] + 6};
+#math map[full][key][w_lo]  {$map[full][key][base] - 1};
+#math map[full][key][w_hi]  {$map[full][key][base] + 1};
+#math map[full][key][o_lo]  {$map[full][key][base] + 3};
+#math map[full][key][o_hi]  {$map[full][key][base] + 5};
+#math map[full][key][e_lo]  {$map[full][key][base] + 7};
+#math map[full][key][e_hi]  {$map[full][key][base] + 9};
+#math map[full][key][z_lo]  {$map[full][key][base] + 13};
+#math map[full][key][z_hi]  {$map[full][key][base] + 17};
+
+#NOP -- Filter state.  filtering is a number and is never assigned an;
+#NOP -- empty brace pair, because doing that turns the variable into an;
+#NOP -- empty table which then renders on screen as a literal brace pair;
+#var map[full][list][filtering] 0;
+#var map[full][list][filter] none;
+#var map[full][list][lastinput] none;
 
 #alias _init_mapFull {
     #buffer clear;
@@ -34,158 +203,610 @@
     #unmacro %*;
     #map read common/map/3k_shared.map;
     #var tmpRoomSelected[area] $area;
-    #map goto $map[full][startVnum];
+
+    #NOP -- FIX -- guard the goto.  startVnum is seeded by the launcher;
+    #NOP -- and an empty goto throws rather than quietly doing nothing;
+    #if {"$map[full][startVnum]" != ""} {#map goto $map[full][startVnum]};
+
     #map map;
     #map flag vtmap on;
-    #Map offset 1 $mapLeftCol $mapOffset $mapOffset;
+
+    #NOP -- Repoint the USER legend entry at the star.  Both the graphics;
+    #NOP -- and the ascii legend are set, so the marker survives whatever;
+    #NOP -- graphics mode the map ends up in.  This only touches the map;
+    #NOP -- held in memory, and nothing here ever writes the map file;
+    #map legend {NESW MISC} {USER} {$map[full][symbol][user]};
+    #map legend {ASCII NESW MISC} {USER} {$map[full][symbol][user]};
+    #NOP -- FIX -- the map viewport.  Signature is top, left, bottom,;
+    #NOP -- right, per common/draw.tin and event_test.tin.  The original;
+    #NOP -- passed mapOffset, a number derived from the screen HEIGHT, as;
+    #NOP -- the right hand COLUMN bound.  That leaves a strip between the;
+    #NOP -- map edge and the screen edge which the map never repaints, so;
+    #NOP -- stale columns pile up and read as the map repeating itself;
+    #map offset 1 $mapLeftCol -$mapAreaBotRow -2;
     #config mouse on;
     #read common/data/areas.tin;
-    #macro {q} {#{ats} {#port {untilialize}};#zap {port_mapFull}};
+    #macro {~} {.mapFullExit};
+
+    #NOP -- Arrow escapes are the ones chars/badger/numpad.tin uses,;
+    #NOP -- A up, B down, C right, D left;
+    #macro {\e[A} {.mapPan {-$map[full][pan][step]} {0} {0}};
+    #macro {\e[B} {.mapPan {$map[full][pan][step]} {0} {0}};
+    #macro {\e[C} {.mapPan {0} {-$map[full][pan][step]} {0}};
+    #macro {\e[D} {.mapPan {0} {$map[full][pan][step]} {0}};
+
+    #NOP -- Floor controls.  Page up and page down do the same thing, so;
+    #NOP -- a hyphen can still be typed into the filter when it is needed.;
+    #NOP -- FIX -- the floor axis ran the wrong way, so plus was dropping;
+    #NOP -- a floor while the key said it climbed one.  Labels stay put,;
+    #NOP -- the movement is what swapped;
+    #macro {+} {.mapPan {0} {0} {1}};
+    #macro {-} {.mapPan {0} {0} {-1}};
+    #macro {\e[5~} {.mapPan {0} {0} {1}};
+    #macro {\e[6~} {.mapPan {0} {0} {-1}};
+    #macro {=} {.mapPanReset};
     #delay 3 {_draw_mapAreas_initiate};
 };
 
 #function {min} {#if {%1 < %2} {#return %1} {#return %2}};
 #function {max} {#if {%1 > %2} {#return %1} {#return %2}};
 
-#alias {_draw_mapAreas_initiate} {
-    #NOP -- Set how large of a slice we should be taking;
-    #math map[full][list][bounds] 15;
+#NOP -------------------------------------------------------------------;
+#NOP  AREA LIST;
+#NOP;
+#NOP  tmpMapAreaList      every area name, built once;
+#NOP  tmpMapAreaLower     the same names lowercased, built once, so the;
+#NOP                      filter never has to lowercase 766 names again;
+#NOP  tmpMapAreaFiltered  what the filter left.  This is what gets drawn;
+#NOP                      and what a click indexes into;
+#NOP  tmpMapAreaView      the handful of rows currently on screen;
+#NOP -------------------------------------------------------------------;
 
-    #NOP -- Populate area list and set where the area list box starts at since;
-    #NOP -- we want the current area to be highlighted and centered on the list to start;
-    #unvar tmpMapAreaList;
-    #if {"$area" == "" || "$area" == "$area"} {
-        #var area Pinnacle;
-        #list tmpMapAreaList find {Pinnacle} {map[full][list][current_area_index]}
+#NOP -- Centre the visible window on index %1 and clamp it so the box is;
+#NOP -- always completely full.  Clamping only one end leaves blank rows;
+#NOP -- at the top or bottom, which is the gap being fixed;
+#alias {.mapAreaWindow} {
+    #math map[full][list][start] {%1 - ($map[full][list][rows] / 2)};
+    #format map[full][list][start] {%d} {$map[full][list][start]};
+    #if {$map[full][list][start] < 1} {#var map[full][list][start] 1};
+
+    #math map[full][list][end] {$map[full][list][start] + $map[full][list][rows] - 1};
+
+    #if {$map[full][list][end] > $map[full][list][max]} {
+        #var map[full][list][end] $map[full][list][max];
+        #math map[full][list][start] {$map[full][list][end] - $map[full][list][rows] + 1};
+        #if {$map[full][list][start] < 1} {#var map[full][list][start] 1};
     };
+};
 
-    #loop 1 &data[areas][] index {
-        #if {"$area" == "$data[areas][$index][name]"} {
-            #list tmpMapAreaList add {<fff> ** $data[areas][$index][name] ** <ada>};
-            #var map[full][list][current_area_index] $index;
+#NOP -- Copy the whole area list into the filtered list unchanged;
+#alias {.mapAreaFilterAll} {
+    #unvar tmpMapAreaFiltered;
+    #loop 1 $map[full][list][total] tmpFilterIx {
+        #list tmpMapAreaFiltered add {$tmpMapAreaList[$tmpFilterIx]};
+    };
+    #var map[full][list][filtering] 0;
+    #var map[full][list][max] $map[full][list][total];
+};
+
+#NOP -- Rebuild the filtered list from the text in %0.;
+#NOP;
+#NOP  FIX -- the first attempt matched with a bare pattern and no;
+#NOP  wildcards, so it demanded the whole name equal the search text;
+#NOP  and dund matched nothing.  The pattern needs a wildcard on both;
+#NOP  sides, the form used in common/3kReport.tin and corpsetrig.tin.;
+#NOP  Case is handled by matching against the prebuilt lowercase list;
+#NOP  instead of relying on a case insensitive flag.;
+#NOP;
+#NOP  FIX -- the count is tallied by hand rather than read back with the;
+#NOP  ampersand form.  When nothing matched the filtered variable was;
+#NOP  never created, so the count and every visible row rendered as the;
+#NOP  literal unresolved variable name;
+#alias {.mapAreaFilter} {
+    #NOP -- #format, not #var, so a two word search stays a string;
+    #format tmpFilterText {%s} {%0};
+
+    #if {"$tmpFilterText" == "" || "$tmpFilterText" == "*"} {
+        .mapAreaFilterAll;
+    } {
+        #format tmpFilterLower {%l} {$tmpFilterText};
+
+        #unvar tmpMapAreaFiltered;
+        #var tmpFilterCount 0;
+
+        #loop 1 $map[full][list][total] tmpFilterIx {
+            #regexp {$tmpMapAreaLower[$tmpFilterIx]} {%*$tmpFilterLower%*} {
+                #list tmpMapAreaFiltered add {$tmpMapAreaList[$tmpFilterIx]};
+                #math tmpFilterCount {$tmpFilterCount + 1};
+            };
+        };
+
+        #NOP -- nothing matched, so keep showing everything rather than;
+        #NOP -- drawing a box full of unresolved variable names;
+        #if {$tmpFilterCount < 1} {
+            .mapAreaFilterAll;
         } {
-            #if {"$area" != ""} {#list tmpMapAreaList add {$data[areas][$index][name]}};
+            #var map[full][list][filtering] 1;
+            #format map[full][list][filter] {%s} {$tmpFilterText};
+            #var map[full][list][max] $tmpFilterCount;
         };
     };
 
-    #var map[full][list][max] &data[areas][];
-
-    #if {$map[full][list][current_area_index] > 0} {
-        #math map[full][list][start] {$map[full][list][current_area_index] - $map[full][list][bounds]};
-        #math map[full][list][end] {$map[full][list][current_area_index] + $map[full][list][bounds]};
-
-        #var map[full][list][start] @max{1;$map[full][list][start]};
-        #var map[full][list][end] @min{$map[full][list][max];$map[full][list][end]};
-    } {
-        #var map[full][list][start] 1;
+    #NOP -- Narrowed to exactly one area, so treat it as picked.  The;
+    #NOP -- guard on the name keeps every later keystroke from firing;
+    #NOP -- another goto for an area that is already selected;
+    #if {$map[full][list][filtering] > 0 && $map[full][list][max] == 1} {
+        #format tmpOnlyArea {%s} {$tmpMapAreaFiltered[1]};
+        #if {"$tmpOnlyArea" != "$map[full][list][selected][name]"} {
+            .mapAreaSelect {$tmpOnlyArea};
+        };
     };
 
+    #NOP -- land on the current area when it survived the filter,;
+    #NOP -- otherwise start at the top of whatever matched;
+    #var tmpAreaHome 0;
+    #loop 1 $map[full][list][max] tmpFilterIx {
+        #if {"$tmpMapAreaFiltered[$tmpFilterIx]" == "$area"} {
+            #var tmpAreaHome $tmpFilterIx;
+        };
+    };
+    #if {$tmpAreaHome > 0} {
+        .mapAreaWindow {$tmpAreaHome};
+    } {
+        .mapAreaWindow {1};
+    };
+
+    _draw_mapAreas;
+};
+
+#NOP -- Select an area by name -- jump the map to it, clear any room;
+#NOP -- detail left over from a previous pick, and mark it in the list.;
+#NOP -- Shared by the mouse click and by the single match auto select,;
+#NOP -- so both routes land in exactly the same state.  Redrawing is;
+#NOP -- left to the caller, which is about to redraw anyway;
+#alias {.mapAreaSelect} {
+    #var map[full][list][selected][name] {%0};
+
+    #var tmpRoomSelected[area] %0;
+    #var tmpRoomSelected[roomname]  ;
+    #var tmpRoomSelected[roomdesc]  ;
+    #var tmpRoomSelected[roomnote]  ;
+
+    #NOP -- FIX -- the original cleared roomexits, but the panel reads;
+    #NOP -- exits, so stale exits stayed on screen;
+    #var tmpRoomSelected[exits]  ;
+
+    #NOP -- no specific room was picked, so drop the room mark;
+    .mapRoomHighlightClear;
+
+    #map list {roomarea}{%0} {variable}{arealist};
+    #map goto *arealist[+1];
+
+    #NOP -- a jump lands centred, otherwise the new area arrives shifted;
+    #NOP -- by however far the view had been panned off the last one;
+    #var map[full][pan][ns] 0;
+    #var map[full][pan][ew] 0;
+    #var map[full][pan][z] 0;
+    #map center 0 0 0;
+
+    #map map;
+};
+
+#NOP -- Act on a click landing inside the cardinal key.;
+#NOP -- %1 is the row, %2 the column;
+#alias {.mapKeyClick} {
+    #NOP -- top row, north and a floor up;
+    #if {%1 == $map[full][key][row_one]} {
+        #if {%2 >= $map[full][key][ns_lo] && %2 <= $map[full][key][ns_hi]} {
+            .mapPan {-$map[full][pan][step]} {0} {0};
+        };
+        #if {%2 >= $map[full][key][z_lo] && %2 <= $map[full][key][z_hi]} {
+            .mapPan {0} {0} {1};
+        };
+    };
+
+    #NOP -- middle row, west, the recentre and east, then a floor down;
+    #if {%1 == $map[full][key][row_two]} {
+        #if {%2 >= $map[full][key][w_lo] && %2 <= $map[full][key][w_hi]} {
+            .mapPan {0} {$map[full][pan][step]} {0};
+        };
+        #if {%2 >= $map[full][key][o_lo] && %2 <= $map[full][key][o_hi]} {
+            .mapPanReset;
+        };
+        #if {%2 >= $map[full][key][e_lo] && %2 <= $map[full][key][e_hi]} {
+            .mapPan {0} {-$map[full][pan][step]} {0};
+        };
+        #if {%2 >= $map[full][key][z_lo] && %2 <= $map[full][key][z_hi]} {
+            .mapPan {0} {0} {-1};
+        };
+    };
+
+    #NOP -- bottom row, south on its own;
+    #if {%1 == $map[full][key][row_thr]} {
+        #if {%2 >= $map[full][key][ns_lo] && %2 <= $map[full][key][ns_hi]} {
+            .mapPan {$map[full][pan][step]} {0} {0};
+        };
+    };
+};
+
+#NOP -- Shift the view by %1 across, %2 down, %3 floors;
+#NOP -- Close the map.  Kept as an alias so the tilde macro and the;
+#NOP -- double click cannot drift apart.;
+#NOP -- ats is not a session name, it resolves to the active session,;
+#NOP -- so leave it alone;
+#alias {.mapFullExit} {
+    #{ats} {#port {untilialize}};
+    #zap {port_mapFull};
+};
+
+#NOP -- Build the run of spaces that centres a line of length %1,;
+#NOP -- leaving it in tmpKeyPadStr.;
+#NOP;
+#NOP  FIX -- the previous version handed back the finished centred;
+#NOP  string and the caller dropped it into the middle of a value, as;
+#NOP  in colour then variable then colour.  A variable holding spaces;
+#NOP  placed mid value makes TinTin store a table, which then drew as;
+#NOP  brace wrapped text.  The compass rows never had the problem;
+#NOP  because their pad sits at the very front of the value, so that;
+#NOP  is the shape every line uses now -- pad first, then literals;
+#alias {.mapKeyPadFor} {
+    #math tmpKeyPadN {($mapAreaRightCol - 2 - %1) / 2};
+    #format tmpKeyPadN {%d} {$tmpKeyPadN};
+    #if {$tmpKeyPadN < 1} {#var tmpKeyPadN 1};
+    #format tmpKeyPadStr {%+${tmpKeyPadN}s} { };
+};
+
+#NOP -- %1 moves north or south, %2 east or west, %3 up or down a floor.;
+#NOP;
+#NOP  FIX -- the floor counter used to hold whatever the mapper wanted,;
+#NOP  which runs negative upwards, so climbing a floor read as minus;
+#NOP  one.  It now counts the way a person would, up being positive,;
+#NOP  and the sign is flipped only on the way into map center;
+#alias {.mapPan} {
+    #math map[full][pan][ns] {$map[full][pan][ns] + %1};
+    #math map[full][pan][ew] {$map[full][pan][ew] + %2};
+    #math map[full][pan][z] {$map[full][pan][z] + %3};
+    #math tmpPanZ {$map[full][pan][z] * -1};
+    #map center $map[full][pan][ew] $map[full][pan][ns] $tmpPanZ;
+    #map update;
+    _draw_mapAreas;
+};
+
+#NOP -- Drop back to the room the character is standing in, floor and all;
+#alias {.mapPanReset} {
+    #var map[full][pan][ns] 0;
+    #var map[full][pan][ew] 0;
+    #var map[full][pan][z] 0;
+    #map center 0 0 0;
+    #map update;
+    _draw_mapAreas;
+};
+
+#NOP -- explicit command form, handy for testing;
+#alias {af} {.mapAreaFilter {%0}};
+
+#NOP -- Type sendtest in the map to check the hand off on its own,;
+#NOP -- separately from whether the double click event fires.  The;
+#NOP -- message should appear in the game session, not this one;
+#alias {sendtest} {.mapFullSend {#echo {PARENT SESSION RECEIVED THIS}}};
+
+#alias {_draw_mapAreas_initiate} {
+    #unvar tmpMapAreaList;
+    #unvar tmpMapAreaLower;
+
+    #NOP -- FIX -- this test used to compare the area against itself,;
+    #NOP -- which is always true, so the real area was thrown away on;
+    #NOP -- every open and the map always fell back to Pinnacle;
+    #if {"$area" == ""} {#var area Pinnacle};
+
+    #NOP -- FIX -- the list is stored plain now.  Highlighting is applied;
+    #NOP -- at draw time, by name, so it survives filtering and so the;
+    #NOP -- whole list never needs rebuilding to move the highlight;
+    #loop 1 &data[areas][] index {
+        #list tmpMapAreaList add {$data[areas][$index][name]};
+        #format tmpLowerName {%l} {$data[areas][$index][name]};
+        #list tmpMapAreaLower add {$tmpLowerName};
+    };
+
+    #NOP -- total is read once here, where the ampersand form is known;
+    #NOP -- to resolve, and every later count is plain arithmetic;
+    #var map[full][list][total] &tmpMapAreaList[];
+
+    .mapAreaFilterAll;
+    .mapAreaWindow {1};
     _draw_mapAreas;
 };
 
 #alias {_draw_mapAreas} {
-    #var tmpString  ;
-    #if {"$tmpRoomSelected[area]" != ""} {#var tmpString $tmpRoomSelected[area]};
-    #if {"$tmpRoomSelected[roomname]" != ""} {#var tmpString {$tmpString \n  <fff>Room : $tmpRoomSelected[roomname]<088>}};
-    #if {"$tmpRoomSelected[exits]" != ""} {#var tmpString {$tmpString \n  <fff>Exits: $tmpRoomSelected[exits]<088>}};
-    #if {"$tmpRoomSelected[roomnote]" != ""} {#var tmpString {$tmpString \n  <fff>Notes: $tmpRoomSelected[roomnote]<088>}};
-    #line sub var #line sub esc #draw green left right bottom side 2 1 -$mapAreaBotRow $mapAreaRightCol $tmpMapAreaList[$map[full][list][start]..$map[full][list][end]];
+    #NOP -- Build the visible slice fresh each draw.  Names are white,;
+    #NOP -- the area you clicked is red and carries an arrow, and the;
+    #NOP -- area you are standing in keeps a star.  Every prefix is three;
+    #NOP -- characters wide so the names stay aligned down the column.;
+    #NOP -- Both marks match by name, so the filter cannot knock the;
+    #NOP -- highlight onto the wrong row;
+    #unvar tmpMapAreaView;
+    #loop $map[full][list][start] $map[full][list][end] tmpAreaIx {
+        #format tmpAreaName {%s} {$tmpMapAreaFiltered[$tmpAreaIx]};
+
+        #if {"$tmpAreaName" != "" && "$tmpAreaName" == "$map[full][list][selected][name]"} {
+            #list tmpMapAreaView add {$map[full][color][selected_area]-> $tmpAreaName<088>};
+        } {
+            #if {"$tmpAreaName" != "" && "$tmpAreaName" == "$area"} {
+                #list tmpMapAreaView add {$map[full][color][area] * $tmpAreaName<088>};
+            } {
+                #list tmpMapAreaView add {$map[full][color][area]   $tmpAreaName<088>};
+            };
+        };
+    };
+
+    #NOP -- count by hand, never read back with the ampersand form;
+    #math tmpMapAreaViewCount {$map[full][list][end] - $map[full][list][start] + 1};
+
+    #NOP -- FIX -- this built the title with #var and a multi token;
+    #NOP -- braced value, which makes TinTin store a table rather than a;
+    #NOP -- string.  The title then drew as brace wrapped tokens.;
+    #NOP -- #format always produces a plain string and is the form used;
+    #NOP -- for every other title in the codebase;
+    #if {$map[full][list][filtering] > 0} {
+        #format tmpAreaTitle {AREAS FOUND (%s)} {$map[full][list][max]};
+    } {
+        #format tmpAreaTitle {%s} {AREA LIST};
+    };
+
+    #NOP -- Bottom left is the navigation key and nothing else.  Every;
+    #NOP -- letter is clickable as well as keyboard driven.  Each value;
+    #NOP -- below opens with its pad variable and then runs literal, the;
+    #NOP -- one shape that reliably stays a string rather than a table;
+    .mapKeyPadFor {8};
+    #var tmpString {$tmpKeyPadStr<fca>Navigate<088>};
+
+    #NOP -- measured rather than fixed, the digits change width as you pan;
+    #format tmpKeyFloorLen {%L} {Floor $map[full][pan][z]  XY $map[full][pan][ew],$map[full][pan][ns]};
+    .mapKeyPadFor {$tmpKeyFloorLen};
+    #var tmpString {$tmpString \n$tmpKeyPadStr<fff>Floor $map[full][pan][z]  XY $map[full][pan][ew],$map[full][pan][ns]<088>};
+
+    #NOP -- the three compass rows share one pad, which is what holds N,;
+    #NOP -- o and S in a single column;
+    #var tmpString {$tmpString \n};
+    #var tmpString {$tmpString \n$map[full][key][padstr]<fff>    N          +<088>};
+    #var tmpString {$tmpString \n};
+    #var tmpString {$tmpString \n$map[full][key][padstr]<fff>W   o   E      -<088>};
+    #var tmpString {$tmpString \n};
+    #var tmpString {$tmpString \n$map[full][key][padstr]<fff>    S<088>};
+
+    #NOP -- help, starting two lines under the rose;
+    #var tmpString {$tmpString \n};
+    .mapKeyPadFor {28};
+    #var tmpString {$tmpString \n$tmpKeyPadStr<fff>Double Click to go to a room<088>};
+    .mapKeyPadFor {13};
+    #var tmpString {$tmpString \n$tmpKeyPadStr<fff>~ to exit map<088>};
+
+    #NOP -- Bottom right carries the whole detail stack, area name first,;
+    #NOP -- then the room, its exits and notes, then the long description;
+    #var tmpDetail  ;
+    #if {"$tmpRoomSelected[area]" != ""} {#var tmpDetail {<fca>$tmpRoomSelected[area]<088>}};
+    #if {"$tmpRoomSelected[roomname]" != ""} {#var tmpDetail {$tmpDetail \n  <fff>Room : $tmpRoomSelected[roomname] [$tmpRoomSelected[vnumtext]]<088>}};
+    #if {"$tmpRoomSelected[exits]" != ""} {#var tmpDetail {$tmpDetail \n  <fff>Exits: $tmpRoomSelected[exits]<088>}};
+    #NOP -- Notes always show for a picked room, with a dash when the;
+    #NOP -- room has none, so an empty note reads as empty rather than;
+    #NOP -- looking like the panel forgot to include the field;
+    #if {"$tmpRoomSelected[vnumtext]" != ""} {
+        #if {"$tmpRoomSelected[roomnote]" != ""} {
+            #var tmpDetail {$tmpDetail \n  <fff>Notes: $tmpRoomSelected[roomnote]<088>};
+        } {
+            #var tmpDetail {$tmpDetail \n  <fff>Notes: -<088>};
+        };
+    };
+    #if {"$tmpRoomSelected[roomdesc]" != ""} {#var tmpDetail {$tmpDetail \n\n<fff>$tmpRoomSelected[roomdesc]<088>}};
+
+    #line sub var #line sub esc #draw green left right bottom side 2 1 -$mapAreaBotRow $mapAreaRightCol $tmpMapAreaView[1..$tmpMapAreaViewCount];
     #draw <fba> box -$mapInfoButtonTop 1 -2 $mapAreaRightCol {$tmpString};
-    #draw <fba> box -$mapInfoButtonTop $mapAreaRightCol -2 -1 {<fff>$tmpRoomSelected[roomdesc]<088>};
-    #draw green calign jeweled line 1 1 1 ${mapAreaRightCol}  {    AREA LIST    };
+    #draw <fba> box -$mapInfoButtonTop $mapAreaRightCol -2 -1 {$tmpDetail};
+    #draw green calign jeweled line 1 1 1 ${mapAreaRightCol}  {    $tmpAreaTitle    };
 };
 
 #alias {_draw_mapAreasScrollUp} {
     #if {$map[full][list][start] > 1} {
-        #math map[full][list][start] {$map[full][list][start] - 1};
-        #math map[full][list][end] {$map[full][list][end] - 1};
-    } {
-        #NOP
+        #math map[full][list][start] {$map[full][list][start] - $map[full][list][scroll_step]};
+        #if {$map[full][list][start] < 1} {#var map[full][list][start] 1};
+        #math map[full][list][end] {$map[full][list][start] + $map[full][list][rows] - 1};
+        #if {$map[full][list][end] > $map[full][list][max]} {#var map[full][list][end] $map[full][list][max]};
+        _draw_mapAreas;
     };
-    _draw_mapAreas;
 };
 
 #alias {_draw_mapAreasScrollDown} {
-    #if {$map[full][list][end] <= $map[full][list][max]} {
-        #math map[full][list][start] {$map[full][list][start] + 1};
-        #math map[full][list][end] {$map[full][list][end] + 1};
-    } {
-        #NOP
+    #NOP -- FIX -- this used to test end <= max, which lets end run one;
+    #NOP -- past the end of the list.  The slice then comes back one;
+    #NOP -- entry short and the box renders a blank row at the bottom;
+    #if {$map[full][list][end] < $map[full][list][max]} {
+        #math map[full][list][end] {$map[full][list][end] + $map[full][list][scroll_step]};
+        #if {$map[full][list][end] > $map[full][list][max]} {#var map[full][list][end] $map[full][list][max]};
+        #math map[full][list][start] {$map[full][list][end] - $map[full][list][rows] + 1};
+        #if {$map[full][list][start] < 1} {#var map[full][list][start] 1};
+        _draw_mapAreas;
     };
-    _draw_mapAreas;
 };
 
+#NOP -------------------------------------------------------------------;
+#NOP  ROOM HIGHLIGHT;
+#NOP -------------------------------------------------------------------;
 
+#NOP -- Paint the clicked room and put the previous one back the way it;
+#NOP -- was.  Setting roomcolor with no value clears it, which is the;
+#NOP -- same reset used in modules/map/mapper.tin, so a room that had no;
+#NOP -- colour to begin with goes back to having none;
+#alias {.mapRoomHighlight} {
+    #NOP -- put whatever was marked before back the way it was;
+    .mapRoomHighlightClear;
+
+    #NOP -- FIX -- colour on its own was not showing, so the room now;
+    #NOP -- also takes a symbol.  roomsymbol is read back first, using;
+    #NOP -- the three argument get that modules/map/mapnotes.tin uses,;
+    #NOP -- so the original symbol goes back exactly on deselect;
+    #map get {roomsymbol} {tmpRoomSelected[oldsymbol]} {%1};
+    #var tmpRoomSelected[vnum] %1;
+
+    #map at %1 {#map set {roomsymbol} {$map[full][symbol][selected_room]}};
+    #map at %1 {#map set {roomcolor} {$map[full][color][selected_room]}};
+    #map update;
+};
+
+#NOP -- Drop the room highlight entirely, used when jumping to a new area;
+#alias {.mapRoomHighlightClear} {
+    #if {"$tmpRoomSelected[vnum]" != ""} {
+        #NOP -- symbol back to what it was, colour back to none, which is;
+        #NOP -- the reset modules/map/mapper.tin uses;
+        #map at $tmpRoomSelected[vnum] {#map set {roomsymbol} {$tmpRoomSelected[oldsymbol]}};
+        #map at $tmpRoomSelected[vnum] {#map set roomcolor};
+        #unvar tmpRoomSelected[vnum];
+        #unvar tmpRoomSelected[oldsymbol];
+        #unvar tmpRoomSelected[vnumtext];
+        #map update;
+    };
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  EVENTS;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- Live filter, one redraw per keystroke.  The input line is read;
+#NOP -- back with cursor get, the same call common/events.tin uses, so;
+#NOP -- backspace widens the filter again with no extra handling.;
+#NOP -- The guard on lastinput stops arrow keys and the like from;
+#NOP -- rebuilding the list when nothing actually changed;
+#event {PROCESSED KEYPRESS} {
+    #cursor get {tmpMapInput};
+    #if {"$tmpMapInput" != "$map[full][list][lastinput]"} {
+        #format map[full][list][lastinput] {%s} {$tmpMapInput};
+        .mapAreaFilter {$tmpMapInput};
+    };
+};
+
+#NOP -- Enter would otherwise send the search text nowhere useful.;
+#NOP -- Swallow it and clear the input so the next search starts clean,;
+#NOP -- while the filter itself stays applied;
+#event {CATCH SEND OUTPUT} {
+    #cursor clear;
+    #var map[full][list][lastinput] none;
+};
 
 #NOP -- Click and drag map;
-#NOP #event {MAP REGION PRESSED MOUSE BUTTON ONE} {   ;
-#NOP     #var {o_x} %0;   ;
-#NOP     #var {o_y} %1;   ;
-#NOP };   ;
-
 #event {MAP REGION MOVED MOUSE BUTTON ONE} {
+    #NOP -- the drag writes the shared offset rather than its own, so;
+    #NOP -- the arrows carry on from wherever a drag left the view, the;
+    #NOP -- key stays accurate, and the current floor is not lost;
     #var d_x %0;
     #var d_y %1;
-    #math {c_x} {$o_x - $d_x};
-    #math {c_y} {$d_y - $o_y};
-    #map center $c_y $c_x 0;
+    #math {map[full][pan][ns]} {$o_x - $d_x};
+    #math {map[full][pan][ew]} {$d_y - $o_y};
+    #math tmpPanZ {$map[full][pan][z] * -1};
+    #map center $map[full][pan][ew] $map[full][pan][ns] $tmpPanZ;
 };
 
-
 #EVENT {SCROLLED MOUSE WHEEL UP} {
-    _draw_mapAreasScrollUp
+    _draw_mapAreasScrollUp;
 };
 
 #EVENT {SCROLLED MOUSE WHEEL DOWN} {
-    _draw_mapAreasScrollDown
+    _draw_mapAreasScrollDown;
 };
 
+#NOP -- Click the area list on the left.  %0 is the row, %1 the column;
 #EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {
     #if $mapClick {#NOP} {
-        #NOP -- %0 is row from the top, %1 is column;
-        
-        #math map[full][list][selected][index] {$map[full][list][start] + %0 + 5};
-        #var map[full][list][selected][name] $tmpMapAreaList[$map[full][list][selected][index]];
+        #NOP -- the key sits below the list in the same column, so send;
+        #NOP -- clicks on its rows there and leave the list alone;
+        #if {%1 <= $mapAreaRightCol && %0 >= $map[full][key][row_one] && %0 <= $map[full][key][row_thr]} {
+            .mapKeyClick {%0} {%1};
+            #return;
+        };
 
-        #var tmpRoomSelected[area] $map[full][list][selected][name];
-        #var tmpRoomSelected[roomname]  ;
-        #var tmpRoomSelected[roomdesc]  ;
-        #var tmpRoomSelected[roomexits]  ;
-        _draw_mapAreas;
+        #math map[full][list][selected][index] {$map[full][list][start] + %0 - $map[full][list][click_offset]};
 
-        #map list {roomarea}{$map[full][list][selected][name]} {variable}{arealist};
-        #map goto *arealist[+1];
-        #map map;
-        _draw_mapAreas;
+        #NOP -- ignore clicks that land outside the list;
+        #if {$map[full][list][selected][index] >= $map[full][list][start] && $map[full][list][selected][index] <= $map[full][list][end]} {
+            #format tmpClickedArea {%s} {$tmpMapAreaFiltered[$map[full][list][selected][index]]};
+            .mapAreaSelect {$tmpClickedArea};
+            _draw_mapAreas;
+        };
     };
 };
 
+#NOP -- Double click walks the character to the room.  This session is;
+#NOP -- a dummy port with no mud behind it, so the walk is handed over;
+#NOP -- with .mapFullSend, an alias the launcher defines with the live;
+#NOP -- session name already baked in.  Writing the selector as a;
+#NOP -- variable here does not work, the name is resolved before the;
+#NOP -- substitution happens.  A single click still only inspects a;
+#NOP -- room and leaves the map alone.;
+#NOP -- %4 is the vnum, the same slot the press event below uses;
+#event {MAP REGION DOUBLE-CLICKED MOUSE BUTTON ONE} {
+    #if {"%4" == "0"} {#NOP} {
+        #NOP -- One command per send.  A semicolon inside the argument;
+        #NOP -- would split the line before the alias ever saw it;
+        .mapFullSend {.pause};
+        .mapFullSend {#echo {RUNNING TO %4}};
+        .mapFullSend {#map run %4};
+        .mapFullExit;
+    };
+};
+
+#NOP -- Click a room on the map;
 #EVENT {MAP REGION PRESSED MOUSE BUTTON ONE} {
     #var mapClick 1;
     #var {o_x} %0;
     #var {o_y} %1;
 
     #if {"%4" == "0"} {#NOP} {
-        #map goto %4;
-        #map get roomname tmpRoomSelected[roomname];
-        #map get roomdesc tmpRoomSelected[roomdesc];
-        #map get roomnote tmpRoomSelected[roomnote];
-        #map get roomexits tmpRoomExits;
+        #NOP -- FIX -- this used to goto the clicked room, which recentres;
+        #NOP -- the map on it and throws the whole view sideways.  Reading;
+        #NOP -- a room in place needs no movement at all, so the map holds;
+        #NOP -- still and only the detail panel changes.  The at form and;
+        #NOP -- the three argument get are both used in common/map;
+        .mapRoomHighlight {%4};
+
+        #NOP -- FIX -- one three argument get per field, the form proven;
+        #NOP -- in common/map/rej_rotate.tin.  Stacking five commands in;
+        #NOP -- a single map at block is not a form used anywhere else;
+        #map get {roomname} {tmpRoomSelected[roomname]} {%4};
+        #map get {roomdesc} {tmpRoomSelected[roomdesc]} {%4};
+        #NOP -- cleared first, otherwise a room with no note of its own;
+        #NOP -- keeps showing whatever the last room had;
+        #var tmpRoomSelected[roomnote]  ;
+        #map get {roomnote} {tmpRoomSelected[roomnote]} {%4};
+        #map get {roomarea} {tmpRoomSelected[area]} {%4};
+        #map at %4 {#map get roomexits tmpRoomExits};
+        #var tmpRoomSelected[vnumtext] %4;
+
+        #NOP -- keep the list highlight in step with the room you clicked;
+        #var map[full][list][selected][name] $tmpRoomSelected[area];
+
         #var tmpRoomSelected[exits]  ;
         #foreach *tmpRoomExits[] key {
             #cat tmpRoomSelected[exits] {$key,};
         };
+
+        #NOP -- FIX -- a room with no exits gave a length of 0, so the;
+        #NOP -- trailing comma trim built a malformed format string;
         #format exitLen {%L} {$tmpRoomSelected[exits]};
-        #math exitLen {$exitLen - 1};
-        
-        #format tmpRoomSelected[exits] {%.${exitLen}s} {$tmpRoomSelected[exits]};
-        
+        #if {$exitLen > 0} {
+            #math exitLen {$exitLen - 1};
+            #format tmpRoomSelected[exits] {%.${exitLen}s} {$tmpRoomSelected[exits]};
+        };
+
         #replace tmpRoomSelected[roomdesc] {\n} { };
         #replace tmpRoomSelected[roomname] {\n%*} {};
+
+        #NOP -- FIX -- nothing moves any more, and vtmap only repaints;
+        #NOP -- by itself when the current room changes, so a new room;
+        #NOP -- colour never reached the screen.  map update is the vtmap;
+        #NOP -- refresh, used in event_test.tin;
+        #map update;
+        #map map;
         _draw_mapAreas;
     };
     #delay .2 {#var mapClick 0};
 };
-
 
 #class draw_mapFull close;

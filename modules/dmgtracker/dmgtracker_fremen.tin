@@ -1,0 +1,464 @@
+#class {dmgtracker_fremen} {kill}
+#class {dmgtracker_fremen} {open}
+
+#NOP -------------------------------------------------------------------;
+#NOP  FREMEN DMG TRACKER;
+#NOP  Damage is organised by source, so crysknife, agony and anything;
+#NOP  added later each keep their own band table and their own totals.;
+#NOP;
+#NOP  To add a source;
+#NOP    1. .fdmgSource to declare it;
+#NOP    2. .fdmgBand once per emote band, lowest to highest;
+#NOP    3. an #action per mud pattern, calling .fdmgHit;
+#NOP -------------------------------------------------------------------;
+
+#unvar fdmg_source;
+#unvar fdmg_data;
+#unvar fdmg_stat;
+#unvar fdmg_all;
+
+#NOP -------------------------------------------------------------------;
+#NOP  REGISTRATION;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- declare a damage source -- %1 key, %2 display name;
+#alias {.fdmgSource} {
+    #list fdmg_source add {%1};
+    #var fdmg_data[%1][text] %2;
+    .fdmgZero {%1};
+};
+
+#NOP -- declare a band -- %1 source, %2 key, %3 display, %4 min, %5 max;
+#NOP -- a max of 0 marks the band open ended, it has no known ceiling;
+#alias {.fdmgBand} {
+    #list fdmg_data[%1][key] add {%2};
+    #var fdmg_data[%1][band][%2][text] %3;
+    #var fdmg_data[%1][band][%2][min_dmg] %4;
+    #var fdmg_data[%1][band][%2][max_dmg] %5;
+    #var fdmg_data[%1][band][%2][count] 0;
+    #var fdmg_data[%1][band][%2][est] 0;
+
+    #if {%5 > 0} {
+        #NOP -- the +1 makes the truncating format round the midpoint up;
+        #math fdmgMid {(%4 + %5 + 1) / 2};
+        #format fdmg_data[%1][band][%2][avg_dmg] {%d} {$fdmgMid};
+        #var fdmg_data[%1][band][%2][cap_dmg] %5;
+        #unvar fdmgMid;
+    } {
+        #var fdmg_data[%1][band][%2][avg_dmg] %4;
+        #var fdmg_data[%1][band][%2][cap_dmg] %4;
+    };
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  TRACKING;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- record one hit -- %1 source, %2 band key, %3 target;
+#alias {.fdmgHit} {
+    #NOP -- roll the round window whenever the mud round counter moves;
+    #if {$fdmg_stat[%1][last_round] == $total_rounds} {#NOP} {
+        #math fdmg_stat[%1][rounds] {$fdmg_stat[%1][rounds] + 1};
+        #if {$fdmg_stat[%1][first_round] < 0} {#var fdmg_stat[%1][first_round] $total_rounds};
+        #var fdmg_stat[%1][last_round] $total_rounds;
+        #var fdmg_stat[%1][round][est] 0;
+        #var fdmg_stat[%1][round][hits] 0;
+    };
+
+    #NOP -- per band;
+    #math fdmg_data[%1][band][%2][count] {$fdmg_data[%1][band][%2][count] + 1};
+    #math fdmg_data[%1][band][%2][est] {$fdmg_data[%1][band][%2][est] + $fdmg_data[%1][band][%2][avg_dmg]};
+
+    #NOP -- lifetime, est is the midpoint and min and max bound it;
+    #math fdmg_stat[%1][hits] {$fdmg_stat[%1][hits] + 1};
+    #math fdmg_stat[%1][est]  {$fdmg_stat[%1][est]  + $fdmg_data[%1][band][%2][avg_dmg]};
+    #math fdmg_stat[%1][min]  {$fdmg_stat[%1][min]  + $fdmg_data[%1][band][%2][min_dmg]};
+    #math fdmg_stat[%1][max]  {$fdmg_stat[%1][max]  + $fdmg_data[%1][band][%2][cap_dmg]};
+
+    #NOP -- current round;
+    #math fdmg_stat[%1][round][hits] {$fdmg_stat[%1][round][hits] + 1};
+    #math fdmg_stat[%1][round][est]  {$fdmg_stat[%1][round][est]  + $fdmg_data[%1][band][%2][avg_dmg]};
+
+    #NOP -- best round so far, checked as the round builds;
+    #if {$fdmg_stat[%1][round][est] > $fdmg_stat[%1][best_round]} {
+        #var fdmg_stat[%1][best_round] $fdmg_stat[%1][round][est];
+    };
+
+    #NOP -- best single hit;
+    #if {$fdmg_data[%1][band][%2][avg_dmg] > $fdmg_stat[%1][best_hit]} {
+        #var fdmg_stat[%1][best_hit] $fdmg_data[%1][band][%2][avg_dmg];
+        #var fdmg_stat[%1][best_band] $fdmg_data[%1][band][%2][text];
+    };
+
+    #NOP -- Total rows;
+    #if {$fdmg_all[last_round] == $total_rounds} {#NOP} {
+        #math fdmg_all[rounds] {$fdmg_all[rounds] + 1};
+        #if {$fdmg_all[first_round] < 0} {#var fdmg_all[first_round] $total_rounds};
+        #var fdmg_all[last_round] $total_rounds;
+        #var fdmg_all[round][est] 0;
+    };
+    #math fdmg_all[hits] {$fdmg_all[hits] + 1};
+    #math fdmg_all[est]  {$fdmg_all[est]  + $fdmg_data[%1][band][%2][avg_dmg]};
+    #math fdmg_all[min]  {$fdmg_all[min]  + $fdmg_data[%1][band][%2][min_dmg]};
+    #math fdmg_all[max]  {$fdmg_all[max]  + $fdmg_data[%1][band][%2][cap_dmg]};
+    #math fdmg_all[round][est] {$fdmg_all[round][est] + $fdmg_data[%1][band][%2][avg_dmg]};
+    #if {$fdmg_all[round][est] > $fdmg_all[best_round]} {
+        #var fdmg_all[best_round] $fdmg_all[round][est];
+    };
+
+    #var fdmg_stat[%1][last] $fdmg_data[%1][band][%2][text];
+    #var fdmg_stat[%1][target] %3;
+};
+
+#NOP -- zero every counter for one source -- %1 source;
+#alias {.fdmgZero} {
+    #var fdmg_stat[%1][hits] 0;
+    #var fdmg_stat[%1][est] 0;
+    #var fdmg_stat[%1][min] 0;
+    #var fdmg_stat[%1][max] 0;
+    #var fdmg_stat[%1][rounds] 0;
+    #var fdmg_stat[%1][best_round] 0;
+    #var fdmg_stat[%1][best_hit] 0;
+    #var fdmg_stat[%1][best_band] {};
+    #var fdmg_stat[%1][last] {};
+    #var fdmg_stat[%1][target] {};
+    #var fdmg_stat[%1][round][est] 0;
+    #var fdmg_stat[%1][round][hits] 0;
+    #NOP -- -1 so the very first hit always opens a fresh round;
+    #var fdmg_stat[%1][last_round] -1;
+    #var fdmg_stat[%1][first_round] -1;
+};
+
+#NOP -- zero the totals;
+#alias {.fdmgZeroAll} {
+    #var fdmg_all[hits] 0;
+    #var fdmg_all[est] 0;
+    #var fdmg_all[min] 0;
+    #var fdmg_all[max] 0;
+    #var fdmg_all[rounds] 0;
+    #var fdmg_all[best_round] 0;
+    #var fdmg_all[round][est] 0;
+    #var fdmg_all[last_round] -1;
+    #var fdmg_all[first_round] -1;
+};
+
+#NOP -- a hits over rounds ratio to two places, kept in integer math --;
+#NOP -- %1 out var, %2 hits, %3 rounds.  Whole numbers would read 1 for;
+#NOP -- nearly everything, hiding the gap between 1.02 and 1.98.;
+#alias {.fdmgHpr} {
+    #math fdmgHprX {%2 * 100 / %3};
+    #format fdmgHprX {%d} {$fdmgHprX};
+    #math fdmgHprI {$fdmgHprX / 100};
+    #format fdmgHprI {%d} {$fdmgHprI};
+    #math fdmgHprD {$fdmgHprX - ($fdmgHprI * 100)};
+    #format fdmgHprD {%d} {$fdmgHprD};
+    #if {$fdmgHprD < 10} {#var %1 {$fdmgHprI.0$fdmgHprD}} {#var %1 {$fdmgHprI.$fdmgHprD}};
+};
+
+.fdmgZeroAll;
+
+#NOP -------------------------------------------------------------------;
+#NOP CRYSKNIFE;
+#NOP -------------------------------------------------------------------;
+
+.fdmgSource {crysknife} {Crysknife};
+
+.fdmgBand {crysknife} {scratch}            {Scratch}             {1}     {1};
+.fdmgBand {crysknife} {cut}                {Cut}                 {2}     {25};
+.fdmgBand {crysknife} {deeply_cut}         {Deeply Cut}          {27}    {75};
+.fdmgBand {crysknife} {tear_into}          {Tear Into}           {76}    {149};
+.fdmgBand {crysknife} {severely_wound}     {Severely Wound}      {150}   {299};
+.fdmgBand {crysknife} {swiftly_dissect}    {Swiftly Dissect}     {300}   {499};
+.fdmgBand {crysknife} {stab}               {Stab}                {500}   {799};
+.fdmgBand {crysknife} {drive}              {Drive}               {800}   {1199};
+.fdmgBand {crysknife} {bury}               {Bury}                {1200}  {1699};
+.fdmgBand {crysknife} {thin}               {Thin}                {1700}  {1754};
+.fdmgBand {crysknife} {small}              {Small}               {1755}  {1809};
+.fdmgBand {crysknife} {decent_sized}       {Decent Sized}        {1810}  {1864};
+.fdmgBand {crysknife} {substantial}        {Substantial}         {1865}  {1919};
+.fdmgBand {crysknife} {sizeable}           {Sizeable}            {1920}  {1974};
+.fdmgBand {crysknife} {large}              {Large}               {1975}  {2029};
+.fdmgBand {crysknife} {big}                {Big}                 {2030}  {2084};
+.fdmgBand {crysknife} {huge}               {Huge}                {2085}  {2139};
+.fdmgBand {crysknife} {massive}            {Massive}             {2140}  {2194};
+.fdmgBand {crysknife} {enormous}           {Enormous}            {2195}  {2249};
+.fdmgBand {crysknife} {epic}               {Epic}                {2250}  {2299};
+.fdmgBand {crysknife} {debilitatingly_cut} {Debilitatingly Cut}  {2300}  {2999};
+.fdmgBand {crysknife} {run_through}        {Run Through}         {3000}  {3999};
+.fdmgBand {crysknife} {dismember}          {Dismember}           {4000}  {5499};
+.fdmgBand {crysknife} {disembowel}         {Disembowel}          {5500}  {7499};
+.fdmgBand {crysknife} {decapitate}         {Decapitate}          {7500}  {9999};
+.fdmgBand {crysknife} {devastatingly}      {Devastatingly}       {10000} {0};
+
+#NOP -------------------------------------------------------------------;
+#NOP  CRYSKNIFE PATTERNS;
+#NOP -------------------------------------------------------------------;
+
+#action {^You drive your %* into %*\.$} {.fdmgHit {crysknife} {drive} {%2}} {2};
+#action {^You bury your %* into %*\.$}  {.fdmgHit {crysknife} {bury} {%2}} {2};
+
+#action {^You swiftly dissect %*\.$}           {.fdmgHit {crysknife} {swiftly_dissect} {%1}} {2};
+#action {^You debilitatingly cut %*\.$}        {.fdmgHit {crysknife} {debilitatingly_cut} {%1}} {2};
+#action {^You run through %*\.$}               {.fdmgHit {crysknife} {run_through} {%1}} {2};
+#action {^You dismember %*\.$}                 {.fdmgHit {crysknife} {dismember} {%1}} {2};
+#action {^You nearly disembowel %*\.$}         {.fdmgHit {crysknife} {disembowel} {%1}} {2};
+
+#NOP -- Plain stab needs a regex so that it does not also swallow others;
+#act {{^You stab ([A-Z][^.]*)\.$}} {.fdmgHit {crysknife} {stab} {%2}} {2};
+
+#NOP -- %2 is the noun (lump, piece, part, chunk) and %3 the target.;
+#action {^You %* thin %* from %*\.$}           {.fdmgHit {crysknife} {thin} {%3}} {2};
+#action {^You %* small %* from %*\.$}          {.fdmgHit {crysknife} {small} {%3}} {2};
+#action {^You %* decent sized %* from %*\.$}   {.fdmgHit {crysknife} {decent_sized} {%3}} {2};
+#action {^You %* substantial %* from %*\.$}    {.fdmgHit {crysknife} {substantial} {%3}} {2};
+#action {^You %* sizeable %* from %*\.$}       {.fdmgHit {crysknife} {sizeable} {%3}} {2};
+#action {^You %* large %* from %*\.$}          {.fdmgHit {crysknife} {large} {%3}} {2};
+#action {^You %* big %* from %*\.$}            {.fdmgHit {crysknife} {big} {%3}} {2};
+#action {^You %* huge %* from %*\.$}           {.fdmgHit {crysknife} {huge} {%3}} {2};
+#action {^You %* massive %* from %*\.$}        {.fdmgHit {crysknife} {massive} {%3}} {2};
+#action {^You %* enormous %* from %*\.$}       {.fdmgHit {crysknife} {enormous} {%3}} {2};
+#action {^You %* epic %* from %*\.$}           {.fdmgHit {crysknife} {epic} {%3}} {2};
+
+#NOP -- NEED TO CONFIRM THESE AS I'VE NEVER GOTTEN THEM;
+#action {^You scratch %*\.$}                   {.fdmgHit {crysknife} {scratch} {%1}} {2};
+#action {^You cut %*\.$}                       {.fdmgHit {crysknife} {cut} {%1}} {2};
+#action {^You deeply cut %*\.$}                {.fdmgHit {crysknife} {deeply_cut} {%1}} {2};
+#action {^You tear into %*\.$}                 {.fdmgHit {crysknife} {tear_into} {%1}} {2};
+#action {^You severely wound %*\.$}            {.fdmgHit {crysknife} {severely_wound} {%1}} {2};
+#action {^You decapitate %*\.$}                {.fdmgHit {crysknife} {decapitate} {%1}} {2};
+#action {^You devastatingly %* %*\.$}          {.fdmgHit {crysknife} {devastatingly} {%2}} {2};
+
+#NOP -------------------------------------------------------------------;
+#NOP AGONY;
+#NOP -------------------------------------------------------------------;
+
+.fdmgSource {agony} {Agony};
+
+.fdmgBand {agony} {probe}             {Probe}                {0}     {50};
+.fdmgBand {agony} {tired}             {Tired}                {51}    {100};
+.fdmgBand {agony} {pain}              {Pain}                 {101}   {200};
+.fdmgBand {agony} {inflict_pain}      {Inflict Pain}         {201}   {400};
+.fdmgBand {agony} {some_pain}         {Some Pain}            {401}   {700};
+.fdmgBand {agony} {momentary_seizure} {Momentary Seizure}    {701}   {1100};
+.fdmgBand {agony} {seizure}           {Seizure}              {1101}  {1600};
+.fdmgBand {agony} {dreadful_seizure}  {Dreadful Seizure}     {1601}  {2500};
+.fdmgBand {agony} {causing_agony}     {Causing Agony}        {2501}  {3500};
+.fdmgBand {agony} {crumble_barrier}   {Crumble The Barrier}  {3501}  {5000};
+.fdmgBand {agony} {intense_agony}     {Intense Agony}        {5001}  {7000};
+.fdmgBand {agony} {wave_of_pain}      {Wave Of Pain}         {7001}  {10000};
+.fdmgBand {agony} {full_force}        {Full Force Of Anger}  {10001} {14000};
+.fdmgBand {agony} {shatter_defenses}  {Shatter Defenses}     {14001} {20000};
+.fdmgBand {agony} {imaginary_fire}    {Imaginary Fire}       {20001} {30000};
+.fdmgBand {agony} {invade_mind}       {Invade The Mind}      {30001} {40000};
+.fdmgBand {agony} {childs_ease}       {Child's Ease}         {40001} {0};
+
+#NOP -------------------------------------------------------------------;
+#NOP  AGONY PATTERNS;
+#NOP -------------------------------------------------------------------;
+
+#action {^You probe %* mind ineffectually\.$}                        {.fdmgHit {agony} {probe} {%1}} {1};
+#action {^Though tired, you cause some pain in %* mind\.$}           {.fdmgHit {agony} {tired} {%1}} {1};
+#action {^You invade %* mind, causing %* pain\.$}                    {.fdmgHit {agony} {pain} {%1}} {1};
+#action {^You inflict pain on %*\.$}                                 {.fdmgHit {agony} {inflict_pain} {%1}} {1};
+#action {^You find %* mind open to you as you cause %* some pain\.$} {.fdmgHit {agony} {some_pain} {%1}} {1};
+#action {^You cause %* to have a momentary seizure!$}                {.fdmgHit {agony} {momentary_seizure} {%1}} {1};
+#action {^Your mind powers cause %* to have a seizure\.$}            {.fdmgHit {agony} {seizure} {%1}} {1};
+#action {^You set off %* nerves in a dreadful seizure\.$}            {.fdmgHit {agony} {dreadful_seizure} {%1}} {1};
+#action {^You project your mind into %*, causing %* agony\.$}        {.fdmgHit {agony} {causing_agony} {%1}} {1};
+#action {^You crumble the barrier between your minds and overwhelm %*\.$} {.fdmgHit {agony} {crumble_barrier} {%1}} {1};
+#action {^You tear into %* mind, causing intense agony!$}            {.fdmgHit {agony} {intense_agony} {%1}} {1};
+#action {^You assail %* mind with wave after wave of pain\.$}        {.fdmgHit {agony} {wave_of_pain} {%1}} {1};
+#action {^You unleash the full force of your anger on %*\.$}         {.fdmgHit {agony} {full_force} {%1}} {1};
+#action {^Your relentless mental blows shatter %* mental defenses\.$} {.fdmgHit {agony} {shatter_defenses} {%1}} {1};
+#action {^You force an imaginary fire to rage through %* mind\.$}    {.fdmgHit {agony} {imaginary_fire} {%1}} {1};
+
+
+#NOP -------------------------------------------------------------------;
+#NOP  REPORTING;
+#NOP -------------------------------------------------------------------;
+
+#var fdmg_box[top] {╔══════════════════════════════════════════════════════════════════════════╗};
+#var fdmg_box[hvy] {╠══════════════════════════════════════════════════════════════════════════╣};
+#var fdmg_box[lgt] {╟──────────────────────────────────────────────────────────────────────────╢};
+#var fdmg_box[bot] {╚══════════════════════════════════════════════════════════════════════════╝};
+
+#NOP -- Centre a string inside the interior -- %1 out var, %2 text.
+#alias {.fdmgCentre} {
+    #format fdmgCtrS {%s} {%2};
+    #format fdmgCtrL {%L} {$fdmgCtrS};
+    #math fdmgCtrP {(74 - $fdmgCtrL) / 2};
+    #format fdmgCtrP {%d} {$fdmgCtrP};
+    #if {$fdmgCtrP < 0} {#var fdmgCtrP 0};
+    #NOP -- right align to set the left margin, then left align to fill;
+    #NOP -- out the right, which lands the text on 74 either way.;
+    #math fdmgCtrP {$fdmgCtrP + $fdmgCtrL};
+    #format fdmgCtrS {%+${fdmgCtrP}s} {$fdmgCtrS};
+    #format %1 {%-74s} {$fdmgCtrS};
+};
+
+#NOP -- REPORTING ALIASES;
+#alias {fdmgStats} {
+    #echo {<fda>$fdmg_box[top]<088>};
+    #echo {<fda>║<088><ffa>     -=[ >|< ]=-   F R E M E N   D M G   T R A C K E R   -=[ >|< ]=-      <088><fda>║<088>};
+    #echo {<fda>║<088><eda>                     .:  fear is the mind-killer  :.                      <088><fda>║<088>};
+    #NOP -- The closing line carries the player name, so it is centred;
+    #NOP -- at run time rather than baked in.;
+    .fdmgCentre {fdmgWho} {.:  $user, the body.  :.};
+    #echo {<fda>║<088><eda>$fdmgWho<088><fda>║<088>};
+    #echo {<fda>$fdmg_box[hvy]<088>};
+
+    #format fdmgHeader {%+10s %+6s %+5s %+8s %+8s %+7s %+9s %+12s} {Source} {Hits} {Rnds} {Dmg/Hit} {Dmg/Rnd} {Hit/Rnd} {Best Rnd} {Total};
+    #echo {<fda>║<088> <cfd>$fdmgHeader<088> <fda>║<088>};
+    #echo {<fda>$fdmg_box[lgt]<088>};
+
+    #var fdmgAnyHits 0;
+
+    #foreach {$fdmg_source[%*]} {fdmgSrc} {
+        #if {$fdmg_stat[$fdmgSrc][hits] > 0} {
+            #var fdmgAnyHits 1;
+            #NOP -- inside the hits check both divisors are always 1 or more;
+            #NOP -- the first hit of a source always opens a round;
+            #var fdmgDivH $fdmg_stat[$fdmgSrc][hits];
+            #var fdmgDivR $fdmg_stat[$fdmgSrc][rounds];
+
+            #math fdmgPerHit {$fdmg_stat[$fdmgSrc][est] / $fdmgDivH};
+            #format fdmgPerHit {%d} {$fdmgPerHit};
+            #format fdmgPerHit {%g} {$fdmgPerHit};
+
+            #math fdmgPerRnd {$fdmg_stat[$fdmgSrc][est] / $fdmgDivR};
+            #format fdmgPerRnd {%d} {$fdmgPerRnd};
+            #format fdmgPerRnd {%g} {$fdmgPerRnd};
+
+            .fdmgHpr {fdmgHpr} {$fdmgDivH} {$fdmgDivR};
+
+            #format fdmgHits  {%g} {$fdmg_stat[$fdmgSrc][hits]};
+            #format fdmgRnds  {%g} {$fdmg_stat[$fdmgSrc][rounds]};
+            #format fdmgBest  {%g} {$fdmg_stat[$fdmgSrc][best_round]};
+            #format fdmgTotal {%g} {$fdmg_stat[$fdmgSrc][est]};
+
+            #format fdmgRow {%+10s %+6s %+5s %+8s %+8s %+7s %+9s %+12s} {$fdmg_data[$fdmgSrc][text]} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgTotal};
+            #echo {<fda>║<088> <eee>$fdmgRow<088> <fda>║<088>};
+
+        };
+    };
+
+    #NOP -- nothing has landed yet, say so rather than print an empty frame;
+    #if {$fdmgAnyHits == 0} {
+        #format fdmgRow {%-72s} {           no blood drawn yet};
+        #echo {<fda>║<088> <ccc>$fdmgRow<088> <fda>║<088>};
+        #echo {<fda>$fdmg_box[bot]<088>};
+    } {
+        #NOP -- TOTAL is not the sum of the rows above.  Rounds and best;
+        #NOP -- round come from .fdmgHit, so a round;
+        #NOP -- both sources landed in counts once rather than twice, and;
+        #NOP -- best round is the best combined round rather than the best;
+        #NOP -- any single source managed.  Hits and damage do simply sum.;
+        #echo {<fda>$fdmg_box[hvy]<088>};
+
+        #var fdmgDivH $fdmg_all[hits];
+        #var fdmgDivR $fdmg_all[rounds];
+
+        #math fdmgPerHit {$fdmg_all[est] / $fdmgDivH};
+        #format fdmgPerHit {%d} {$fdmgPerHit};
+        #format fdmgPerHit {%g} {$fdmgPerHit};
+
+        #math fdmgPerRnd {$fdmg_all[est] / $fdmgDivR};
+        #format fdmgPerRnd {%d} {$fdmgPerRnd};
+        #format fdmgPerRnd {%g} {$fdmgPerRnd};
+
+        .fdmgHpr {fdmgHpr} {$fdmgDivH} {$fdmgDivR};
+
+        #format fdmgHits  {%g} {$fdmg_all[hits]};
+        #format fdmgRnds  {%g} {$fdmg_all[rounds]};
+        #format fdmgBest  {%g} {$fdmg_all[best_round]};
+        #format fdmgTotal {%g} {$fdmg_all[est]};
+
+        #format fdmgRow {%+10s %+6s %+5s %+8s %+8s %+7s %+9s %+12s} {TOTAL} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgTotal};
+        #echo {<fda>║<088> <ffa>$fdmgRow<088> <fda>║<088>};
+
+        #echo {<fda>$fdmg_box[bot]<088>};
+    };
+};
+
+#NOP -- damage distribution -- optional arg limits it to one source;
+#alias {fdmgTable} {
+    #foreach {$fdmg_source[%*]} {fdmgSrc} {
+        #if {"%0" == "" || "%0" == "$fdmgSrc"} {
+            #echo {<fda>$fdmg_box[top]<088>};
+            .fdmgCentre {fdmgTitle} {-=[ >|< ]=-   $fdmg_data[$fdmgSrc][text] Damage Distribution   -=[ >|< ]=-};
+            #echo {<fda>║<088><ffa>$fdmgTitle<088><fda>║<088>};
+            #echo {<fda>$fdmg_box[hvy]<088>};
+
+            #format fdmgHeader {%+19s %+8s %+8s %+8s %+6s %+6s %+11s} {Emote} {Min} {Max} {Avg} {Hits} {Pct} {Est};
+            #echo {<fda>║<088> <cfd>$fdmgHeader<088> <fda>║<088>};
+            #echo {<fda>$fdmg_box[lgt]<088>};
+
+            #NOP -- the table can be read before any hits land;
+            #var fdmgDivH $fdmg_stat[$fdmgSrc][hits];
+            #if {$fdmgDivH < 1} {#var fdmgDivH 1};
+
+            #foreach {$fdmg_data[$fdmgSrc][key][%*]} {fdmgKey} {
+                #NOP -- the band itself reads the same whether or not it;
+                #NOP -- has ever landed, so these three are built once;
+                #format fdmgMin {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][min_dmg]};
+                #format fdmgAvg {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][avg_dmg]};
+
+                #NOP -- a max of zero marks the open ended top band;
+                #var fdmgMax {$fdmg_data[$fdmgSrc][band][$fdmgKey][max_dmg]};
+                #if {$fdmgMax == 0} {
+                    #var fdmgMax {+};
+                } {
+                    #format fdmgMax {%g} {$fdmgMax};
+                };
+
+                #if {$fdmg_data[$fdmgSrc][band][$fdmgKey][count] > 0} {
+                    #format fdmgCnt {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][count]};
+                    #format fdmgBandEst {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][est]};
+
+                    #NOP -- share of hits to one decimal, kept in integer math;
+                    #NOP -- whole percents would read 0 for every tail band;
+                    #math fdmgPctX {1000 * $fdmg_data[$fdmgSrc][band][$fdmgKey][count] / $fdmgDivH};
+                    #format fdmgPctX {%d} {$fdmgPctX};
+                    #math fdmgPctI {$fdmgPctX / 10};
+                    #format fdmgPctI {%d} {$fdmgPctI};
+                    #math fdmgPctD {$fdmgPctX - ($fdmgPctI * 10)};
+                    #format fdmgPctD {%d} {$fdmgPctD};
+                    #var fdmgPct {$fdmgPctI.$fdmgPctD};
+
+                    #format fdmgRow {%+19s %+8s %+8s %+8s %+6s %+6s %+11s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {$fdmgCnt} {${fdmgPct}%} {$fdmgBandEst};
+                    #echo {<fda>║<088> <aff>$fdmgRow<088> <fda>║<088>};
+                } {
+                    #format fdmgRow {%+19s %+8s %+8s %+8s %+6s %+6s %+11s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {-} {-} {-};
+                    #echo {<fda>║<088> <ccc>$fdmgRow<088> <fda>║<088>};
+                };
+            };
+
+            #if {$fdmg_stat[$fdmgSrc][best_hit] > 0} {
+                #echo {<fda>$fdmg_box[hvy]<088>};
+                #format fdmgBestHit {%g} {$fdmg_stat[$fdmgSrc][best_hit]};
+                .fdmgCentre {fdmgFoot} {.:  best hit $fdmg_stat[$fdmgSrc][best_band] at $fdmgBestHit  :.};
+                #echo {<fda>║<088><eda>$fdmgFoot<088><fda>║<088>};
+            };
+
+            #echo {<fda>$fdmg_box[bot]<088>};
+        };
+    };
+};
+
+#NOP -- zero the counters but keep the band tables intact;
+#alias {fdmgReset} {
+    .fdmgZeroAll;
+    #foreach {$fdmg_source[%*]} {fdmgSrc} {
+        .fdmgZero {$fdmgSrc};
+        #foreach {$fdmg_data[$fdmgSrc][key][%*]} {fdmgKey} {
+            #var fdmg_data[$fdmgSrc][band][$fdmgKey][count] 0;
+            #var fdmg_data[$fdmgSrc][band][$fdmgKey][est] 0;
+        };
+    };
+    #echo {<fda>$fdmg_box[top]<088>};
+    #echo {<fda>║<088><ffa>  -=[ >|< ]=-  T H E   S A N D   T A K E S   I T   B A C K  -=[ >|< ]=-   <088><fda>║<088>};
+    #echo {<fda>║<088><ffa>  -=[ >|< ]=- .. D A M A G E   T R A C K E R   R E S E T .. -=[ >|< ]=-   <088><fda>║<088>};
+    #echo {<fda>$fdmg_box[bot]<088>};
+};
+
+#class {dmgtracker_fremen} {close}

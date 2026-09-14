@@ -25,6 +25,7 @@
     #list room[items] clear;
     #list room[players] clear;
     #list room[botmobs] clear;
+    #list room[nouns] clear;
     #unvar room[name];
     #var room[updated] 0;
     #var room_coins 0;
@@ -124,7 +125,7 @@
     } {1};
 } {2};
 
-#action {^-D-_%*\n%a-D-_$} {
+#action {-D-_%*\n%a-D-_} {
     #NOP -- If you look, you wont get the room short, so we'll clear in that case;
     #if $got_room_short {#NOP} {.clearRoomData};
     #unvar room[long];
