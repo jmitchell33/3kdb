@@ -88,9 +88,14 @@
     #screen get rows screen[height];
     #screen get cols screen[width];
 
-    #NOP -- If the screen width is less than 100, we can assume it's mobile so we'll draw differently;
-    #NOP -- The map will reduce by 5 rows and the status window will be larger so items like;
-    #NOP -- corpses don't get cutoff.;
+    #NOP -- Mobile goal: readable play and gauges on Blunt's iPhone 17 Pro;
+    #NOP -- in portrait/landscape terminals over SSH/tmux. Detect terminal cells,;
+    #NOP -- not device identity or pixel size: font, keyboard and tmux affect these.;
+    #NOP -- Width <= 75 selects portrait first, otherwise height <= 20 selects;
+    #NOP -- landscape, otherwise desktop. Landscape currently uses standard panes.;
+    #NOP -- Human/AI maintainers: keep detection here and reset both values on resize.;
+    #NOP -- Extend using measured rows/cols and check 75/76 cols and 20/21 rows,;
+    #NOP -- rotation, desktop reattach, pane toggles and mapFull entry/exit.;
 
 #if {$screen[width] <= 75} {
     #var draw[mobile][active] 1;
@@ -106,6 +111,8 @@
 };
 
 
+    #NOP -- Reserve five chat rows in portrait. The enabled-chat block below;
+    #NOP -- recalculates height as rows + 1. Keep ticker and configured HP bars.;
     #if {"$draw[mobile][mode]" == "portrait"} {
     #var chat[rows] 5;
     #math chat[height] {$chat[rows] + 2};
@@ -194,6 +201,9 @@
     
     #var    split[left]     0;
 
+    #NOP -- Portrait releases the sidebar for full-width game output and input.;
+    #NOP -- Suppress rendering without changing pane preferences, so resizing back;
+    #NOP -- restores the configured map, caption and room-detail regions.;
 #if {"$draw[mobile][mode]" == "portrait"} {
     #var split[right] 0;
 } {
@@ -327,8 +337,11 @@
 
 
 #alias {mapFull} {
-    #NOP -- We will start a dummy server port with the map layout and send commands for seed data;
-    #echo {<ffc>------------------ INITIALIZING FULL MAP ------------------<088>};
+    #NOP -- Full-screen map owns a separate port session and its own vtmap layout.;
+    #NOP -- Preserve upstream seeding/sender setup below. Portrait sidebar suppression;
+    #NOP -- applies to the game session, not this optional map viewer.;
+    #NOP -- Working copy of mapFull, see common/draw_mapFull.tin;
+    #echo {<ffc>------------------ INITIALIZING FULL MAP 2 ------------------<088>};
     #info session save;
     #math map[fullLower] {$screen[height] - 2};
     #map get roomvnum map[full][startVnum];
@@ -336,6 +349,20 @@
     #port {init} {port_mapFull} {0};
     #delay 1 {
         #{port_mapFull} {#var parentSession $info[SESSION][NAME]};
+
+        #NOP -- Seed the child session explicitly.  A port session does;
+        #NOP -- not inherit parent variables, which is what the undefined;
+        #NOP -- @gts calls in the original file were reaching for.;
+        #NOP -- A session name in the selector is resolved before variables;
+        #NOP -- are substituted, so #{$parentSession} never reaches this;
+        #NOP -- session.  Bake the real name into a sender alias here,;
+        #NOP -- where the expansion happens parent side, exactly the way;
+        #NOP -- area and startVnum below are passed across.;
+        #{port_mapFull} {#alias {.mapFullSend} {#{$info[SESSION][NAME]} {%0}}};
+
+        #{port_mapFull} {#var area {$area}};
+        #{port_mapFull} {#var map[full][startVnum] {$map[full][startVnum]}};
+
         #{port_mapFull} {#read common/draw_mapFull.tin};
         #{port_mapFull} {#alias mapFull {#ses -;#zap port_mapFull;}};
         #{port_mapFull} {_init_mapFull};
@@ -352,6 +379,7 @@
 };
 
 #alias draw_all {
+    #NOP -- Portrait retains enabled chat/HP gauges, but hides caption and room panes.;
     #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
     #if {"$draw[chat][active]" == "on"} { draw_chat };
 
@@ -450,6 +478,7 @@
 
 #NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
 #alias draw_caption {
+    #NOP -- Data callbacks also call this directly, so draw_all alone cannot guard it.;
     #if {"$draw[mobile][mode]" == "portrait"} {
         #return;
     };
@@ -719,6 +748,9 @@
 
 #NOP -- MAP --;
 #alias init_map {
+    #NOP -- vtmap paints automatically: hiding the border alone leaves map output;
+    #NOP -- over portrait game text. Disable it here and restore it on wider layouts;
+    #NOP -- only when the map preference is on. Keep mapFull's child session separate.;
     #if {"$draw[map][active]" == "on" && "$draw[mobile][mode]" != "portrait"} {
         #draw {tile} $map[top]-1 -$map[width] $map[bottom]+1 -1 {};
         #map offset $map[top] -$map[width]+2 $map[bottom]-1 -2;
@@ -735,6 +767,7 @@
 
 #NOP -- ROOM --;
 #alias draw_room {
+    #NOP -- Direct room updates must obey the same portrait guard as draw_all.;
     #if {"$draw[mobile][mode]" == "portrait"} {
         #return;
     };
@@ -761,6 +794,8 @@
     draw_all;
 };
 
+#NOP -- Rotation/SSH/tmux size changes reuse initialization after the existing delay.;
+#NOP -- Future layouts must guard direct draws and validate box bounds on short screens.;
 #EVENT {SCREEN RESIZE} {#delay 3 {init_screen};};
 
 
