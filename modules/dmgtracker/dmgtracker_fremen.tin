@@ -16,6 +16,7 @@
 #unvar fdmg_data;
 #unvar fdmg_stat;
 #unvar fdmg_all;
+#unvar fdmg_pend;
 
 #NOP -------------------------------------------------------------------;
 #NOP  REGISTRATION;
@@ -37,6 +38,8 @@
     #var fdmg_data[%1][band][%2][max_dmg] %5;
     #var fdmg_data[%1][band][%2][count] 0;
     #var fdmg_data[%1][band][%2][est] 0;
+    #var fdmg_data[%1][band][%2][gxp] 0;
+    #var fdmg_data[%1][band][%2][gxp_rnds] 0;
 
     #if {%5 > 0} {
         #NOP -- the +1 makes the truncating format round the midpoint up;
@@ -108,6 +111,13 @@
 
     #var fdmg_stat[%1][last] $fdmg_data[%1][band][%2][text];
     #var fdmg_stat[%1][target] %3;
+
+    #NOP -- Pencil the band in for this round.  The gxp is not known yet,;
+    #NOP -- the mud only reports it on the prompt that closes the round,;
+    #NOP -- so .fdmgSettle is what turns these marks into gxp.  A band;
+    #NOP -- landing twice in one round leaves one mark, the round counts;
+    #NOP -- once either way.;
+    #var fdmg_pend[%1][%2] 1;
 };
 
 #NOP -- zero every counter for one source -- %1 source;
@@ -124,6 +134,8 @@
     #var fdmg_stat[%1][target] {};
     #var fdmg_stat[%1][round][est] 0;
     #var fdmg_stat[%1][round][hits] 0;
+    #var fdmg_stat[%1][gxp] 0;
+    #var fdmg_stat[%1][gxp_rnds] 0;
     #NOP -- -1 so the very first hit always opens a fresh round;
     #var fdmg_stat[%1][last_round] -1;
     #var fdmg_stat[%1][first_round] -1;
@@ -138,8 +150,56 @@
     #var fdmg_all[rounds] 0;
     #var fdmg_all[best_round] 0;
     #var fdmg_all[round][est] 0;
+    #var fdmg_all[gxp] 0;
+    #var fdmg_all[gxp_rnds] 0;
     #var fdmg_all[last_round] -1;
     #var fdmg_all[first_round] -1;
+};
+
+#NOP -- Close out a round and hand its gxp to every band that landed in;
+#NOP -- it -- %1 the gxp earned that round.  Each band is credited the;
+#NOP -- whole round, so the average reads as the gxp of a round in which;
+#NOP -- that band happened, which is what makes a bury and a debilitate;
+#NOP -- comparable.  A round that ran both crysknife and agony feeds both;
+#NOP -- of them, it is not a split of the round between sources.;
+#alias {.fdmgSettle} {
+    #if {&fdmg_pend[] > 0} {
+        #NOP -- my[gxp][last_round] is empty until the first gxp lands, and;
+        #NOP -- empty is not something #math can add;
+        #if {"%1" == ""} {#var fdmgGxp 0} {#var fdmgGxp %1};
+
+        #foreach {*fdmg_pend[]} {fdmgSrc} {
+            #math fdmg_stat[$fdmgSrc][gxp] {$fdmg_stat[$fdmgSrc][gxp] + $fdmgGxp};
+            #math fdmg_stat[$fdmgSrc][gxp_rnds] {$fdmg_stat[$fdmgSrc][gxp_rnds] + 1};
+            #foreach {*fdmg_pend[$fdmgSrc][]} {fdmgKey} {
+                #math fdmg_data[$fdmgSrc][band][$fdmgKey][gxp] {$fdmg_data[$fdmgSrc][band][$fdmgKey][gxp] + $fdmgGxp};
+                #math fdmg_data[$fdmgSrc][band][$fdmgKey][gxp_rnds] {$fdmg_data[$fdmgSrc][band][$fdmgKey][gxp_rnds] + 1};
+            };
+        };
+        #NOP -- the total row counts the round once however many sources;
+        #NOP -- were in it, matching how it counts rounds elsewhere;
+        #math fdmg_all[gxp] {$fdmg_all[gxp] + $fdmgGxp};
+        #math fdmg_all[gxp_rnds] {$fdmg_all[gxp_rnds] + 1};
+        #unvar fdmg_pend;
+    };
+};
+
+#NOP -- The hpbar prints once per round, after that round's combat text,;
+#NOP -- which makes it the one place where the round's hits are all in and;
+#NOP -- my[gxp][last_round] has caught up.  Reading the gxp at emote time;
+#NOP -- instead would credit each hit with the previous round's gxp.;
+#action {Gxp: \[%p\] G: \[%d/Rnd\]} {.fdmgSettle {$my[gxp][last_round]}} {3};
+
+#NOP -- an average that reads "-" rather than dividing by nothing --;
+#NOP -- %1 out var, %2 total, %3 count;
+#alias {.fdmgAvg} {
+    #if {%3 > 0} {
+        #math fdmgAvgT {%2 / %3};
+        #format fdmgAvgT {%d} {$fdmgAvgT};
+        #format %1 {%g} {$fdmgAvgT};
+    } {
+        #var %1 {-};
+    };
 };
 
 #NOP -- a hits over rounds ratio to two places, kept in integer math --;
@@ -274,6 +334,27 @@
 
 
 #NOP -------------------------------------------------------------------;
+#NOP MAULA PISTOL AND LASGUN;
+#NOP;
+#NOP  Declared so the framework carries them, but neither reports yet.;
+#NOP  Both still need two things, the emote bands and the actions that;
+#NOP  feed them.  A source with no bands is skipped by both reports, so;
+#NOP  these stay invisible until the bands below are filled in.;
+#NOP;
+#NOP  The mud text is what is missing.  tmp/dmgMsg.log carries no maula;
+#NOP  or lasgun fire anywhere in its 249k lines, the only two mentions;
+#NOP  are the help file for pain, so the emotes could not be read off it.;
+#NOP  That log is crysknife, agony, Voice and stunner only.;
+#NOP;
+#NOP  To finish, per weapon, add one .fdmgBand line per emote lowest to;
+#NOP  highest in the same shape as the crysknife block above, then one;
+#NOP  action per mud pattern calling .fdmgHit with this source key.;
+#NOP -------------------------------------------------------------------;
+
+.fdmgSource {maula} {Maula};
+.fdmgSource {lasgun} {Lasgun};
+
+#NOP -------------------------------------------------------------------;
 #NOP  REPORTING;
 #NOP -------------------------------------------------------------------;
 
@@ -282,7 +363,7 @@
 #var fdmg_box[lgt] {╟──────────────────────────────────────────────────────────────────────────╢};
 #var fdmg_box[bot] {╚══════════════════════════════════════════════════════════════════════════╝};
 
-#NOP -- Centre a string inside the interior -- %1 out var, %2 text.
+#NOP -- Centre a string inside the interior -- %1 out var, %2 text.;
 #alias {.fdmgCentre} {
     #format fdmgCtrS {%s} {%2};
     #format fdmgCtrL {%L} {$fdmgCtrS};
@@ -307,7 +388,9 @@
     #echo {<fda>║<088><eda>$fdmgWho<088><fda>║<088>};
     #echo {<fda>$fdmg_box[hvy]<088>};
 
-    #format fdmgHeader {%+10s %+6s %+5s %+8s %+8s %+7s %+9s %+12s} {Source} {Hits} {Rnds} {Dmg/Hit} {Dmg/Rnd} {Hit/Rnd} {Best Rnd} {Total};
+    #NOP -- Gxp/Rnd sits beside Dmg/Rnd on purpose, the pair is the;
+    #NOP -- whole point, damage put out against what it actually earned.;
+    #format fdmgHeader {%+9s %+5s %+5s %+7s %+7s %+7s %+8s %+7s %+9s} {Source} {Hits} {Rnds} {Dmg/Hit} {Dmg/Rnd} {Hit/Rnd} {Best Rnd} {Gxp/Rnd} {Total};
     #echo {<fda>║<088> <cfd>$fdmgHeader<088> <fda>║<088>};
     #echo {<fda>$fdmg_box[lgt]<088>};
 
@@ -336,7 +419,10 @@
             #format fdmgBest  {%g} {$fdmg_stat[$fdmgSrc][best_round]};
             #format fdmgTotal {%g} {$fdmg_stat[$fdmgSrc][est]};
 
-            #format fdmgRow {%+10s %+6s %+5s %+8s %+8s %+7s %+9s %+12s} {$fdmg_data[$fdmgSrc][text]} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgTotal};
+            #NOP -- averaged over the rounds this source landed in;
+            .fdmgAvg {fdmgGxpR} {$fdmg_stat[$fdmgSrc][gxp]} {$fdmg_stat[$fdmgSrc][gxp_rnds]};
+
+            #format fdmgRow {%+9s %+5s %+5s %+7s %+7s %+7s %+8s %+7s %+9s} {$fdmg_data[$fdmgSrc][text]} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgGxpR} {$fdmgTotal};
             #echo {<fda>║<088> <eee>$fdmgRow<088> <fda>║<088>};
 
         };
@@ -373,7 +459,9 @@
         #format fdmgBest  {%g} {$fdmg_all[best_round]};
         #format fdmgTotal {%g} {$fdmg_all[est]};
 
-        #format fdmgRow {%+10s %+6s %+5s %+8s %+8s %+7s %+9s %+12s} {TOTAL} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgTotal};
+        .fdmgAvg {fdmgGxpR} {$fdmg_all[gxp]} {$fdmg_all[gxp_rnds]};
+
+        #format fdmgRow {%+9s %+5s %+5s %+7s %+7s %+7s %+8s %+7s %+9s} {TOTAL} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgGxpR} {$fdmgTotal};
         #echo {<fda>║<088> <ffa>$fdmgRow<088> <fda>║<088>};
 
         #echo {<fda>$fdmg_box[bot]<088>};
@@ -383,13 +471,18 @@
 #NOP -- damage distribution -- optional arg limits it to one source;
 #alias {fdmgTable} {
     #foreach {$fdmg_source[%*]} {fdmgSrc} {
-        #if {"%0" == "" || "%0" == "$fdmgSrc"} {
+        #NOP -- a source can be declared before its bands are known, there;
+        #NOP -- is no table to draw for it until they land;
+        #if {("%0" == "" || "%0" == "$fdmgSrc") && &fdmg_data[$fdmgSrc][key][] > 0} {
             #echo {<fda>$fdmg_box[top]<088>};
             .fdmgCentre {fdmgTitle} {-=[ >|< ]=-   $fdmg_data[$fdmgSrc][text] Damage Distribution   -=[ >|< ]=-};
             #echo {<fda>║<088><ffa>$fdmgTitle<088><fda>║<088>};
             #echo {<fda>$fdmg_box[hvy]<088>};
 
-            #format fdmgHeader {%+19s %+8s %+8s %+8s %+6s %+6s %+11s} {Emote} {Min} {Max} {Avg} {Hits} {Pct} {Est};
+            #NOP -- Gxp/Rnd is the average gxp of a round this emote;
+            #NOP -- showed up in, so a bury row and a debilitate row;
+            #NOP -- can be read straight against each other.;
+            #format fdmgHeader {%+19s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {Emote} {Min} {Max} {Avg} {Hits} {Pct} {Est Dmg.} {Gxp/Rnd};
             #echo {<fda>║<088> <cfd>$fdmgHeader<088> <fda>║<088>};
             #echo {<fda>$fdmg_box[lgt]<088>};
 
@@ -425,10 +518,14 @@
                     #format fdmgPctD {%d} {$fdmgPctD};
                     #var fdmgPct {$fdmgPctI.$fdmgPctD};
 
-                    #format fdmgRow {%+19s %+8s %+8s %+8s %+6s %+6s %+11s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {$fdmgCnt} {${fdmgPct}%} {$fdmgBandEst};
+                    #NOP -- a band can have hits but no gxp yet, the round;
+                    #NOP -- it landed in has not closed, so this reads -;
+                    .fdmgAvg {fdmgBandGxp} {$fdmg_data[$fdmgSrc][band][$fdmgKey][gxp]} {$fdmg_data[$fdmgSrc][band][$fdmgKey][gxp_rnds]};
+
+                    #format fdmgRow {%+19s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {$fdmgCnt} {${fdmgPct}%} {$fdmgBandEst} {$fdmgBandGxp};
                     #echo {<fda>║<088> <aff>$fdmgRow<088> <fda>║<088>};
                 } {
-                    #format fdmgRow {%+19s %+8s %+8s %+8s %+6s %+6s %+11s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {-} {-} {-};
+                    #format fdmgRow {%+19s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {-} {-} {-} {-};
                     #echo {<fda>║<088> <ccc>$fdmgRow<088> <fda>║<088>};
                 };
             };
@@ -448,11 +545,14 @@
 #NOP -- zero the counters but keep the band tables intact;
 #alias {fdmgReset} {
     .fdmgZeroAll;
+    #if {&fdmg_pend[] > 0} {#unvar fdmg_pend};
     #foreach {$fdmg_source[%*]} {fdmgSrc} {
         .fdmgZero {$fdmgSrc};
         #foreach {$fdmg_data[$fdmgSrc][key][%*]} {fdmgKey} {
             #var fdmg_data[$fdmgSrc][band][$fdmgKey][count] 0;
             #var fdmg_data[$fdmgSrc][band][$fdmgKey][est] 0;
+            #var fdmg_data[$fdmgSrc][band][$fdmgKey][gxp] 0;
+            #var fdmg_data[$fdmgSrc][band][$fdmgKey][gxp_rnds] 0;
         };
     };
     #echo {<fda>$fdmg_box[top]<088>};

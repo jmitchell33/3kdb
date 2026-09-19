@@ -40,6 +40,39 @@
 #var dgUnset  {<ccc>};
 #var dgHint   {<dde>};
 
+#action {You have arrived at a dungeon entrance.} {
+    #send {!rating};
+    #delay .5 {.get_scaler $area};
+} {2};
+
+#action {  Your current scaler is %d.} {
+    #var currentScaler %1;
+} {2};
+
+#action {Your dungeon scaler is currently set to level: %d} {
+    #var currentScaler %1;
+} {2};
+
+#alias .update_scaler {
+    #if {"$currentScaler" == "$prefScaler"} {
+        #NOP
+    } {
+        #echo {  <dfc>Updating <bff>$dungeon[scalers][$tmpIx][name] <dfc>scaler to preference: $dungeon[scalers][$tmpIx][scaler]};
+        #send {!scaler $prefScaler}
+    };
+} {2};
+
+#alias .get_scaler {
+    #var tmpName %0;
+    #list dungeon[scalers] indexate name;
+    #list dungeon[scalers] find $tmpName tmpIx;
+    #if {$tmpIx > 0} {
+        #var prefScaler $dungeon[scalers][$tmpIx][scaler];
+        #echo {  <bff>$dungeon[scalers][$tmpIx][name] <dfc>scaler preference is $dungeon[scalers][$tmpIx][scaler]};
+        .update_scaler;
+    };
+};
+
 #NOP -- Parameters are %1 = key %2 = scaler;
 #alias .set_scaler {
     #list dungeon[scalers] indexate key;
@@ -126,5 +159,7 @@
 
 .add_library {.scalers} {misc} {table of your preferred scaler for every scaling dungeon} {.scalers} {common/areas/dungeons.tin};
 .add_library {.set_scaler} {misc} {set your preferred scaler for one dungeon for the session} {.set_scaler <key> <scaler>} {common/areas/dungeons.tin};
+
+
 
 #class dungeons close;
