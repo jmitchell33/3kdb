@@ -19,7 +19,7 @@
     #var my[gp2][current] %7;
     #var my[gp2][max] $gp2_max;
     #var my[attackers] %11;
-    #var ehealth %12
+    #var ehealth %12;
 };
 
 #action {Li: %w S: %w Pa: %d\% M: %p Cl: %d St: %p Wr: %d C: %p B: %d} {
@@ -28,13 +28,11 @@
     #var my[pain][stored] %3;
     #var my[maula][pistol] %4;
     #var my[maula][clips] %5;
-    #var my[sandtrout][reset] %6;
-    #if {"$my[sandtrout][reset]" == ""} {
-        #var my[sandtrout][reset] OFF;
+    #format my[sandtrout][reset] {%p} {%6};
+    #if {"${my[sandtrout][reset]}" == "D"} {
+        #var my[sandtrout][reset] READY!;
     } {
-        #if {"$my[sandtrout][reset]" == "D"} {
-            #var my[sandtrout][reset] READY!;
-        };
+        #var my[sandtrout][reset] OFF;
     };
     #var my[water][round] %7;
     #var corpses[coffin] %8;
@@ -60,7 +58,7 @@
 
 #action {Gxp: \[%p\] G: \[%d/Rnd\]} {
     #if $gags[hpbar] {#line gag};
-    #format {my[fremen][gxp][spend]} {%p} {%1};
+    #format {my[fremen][gxp][total]} {%p} {%1};
 };
 
 #class guild_hpbar close

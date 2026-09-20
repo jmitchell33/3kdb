@@ -25,6 +25,7 @@
     #list room[items] clear;
     #list room[players] clear;
     #list room[botmobs] clear;
+    #list room[nouns] clear;
     #unvar room[name];
     #var room[updated] 0;
     #var room_coins 0;
@@ -36,6 +37,8 @@
         #var bot[foundobject] 0;
         #var bot[foundplayer] 0;
         #var bot[aggro-mob] 0;
+        #NOP -- Set a delay that if no new room is received for 10 seconds, assume bot is not walking;
+        #delay botWalkCheck {#var bot[walking] 0} {10};
     };
 };
 
@@ -99,6 +102,7 @@
 
 #act {{^-R-_(.*)-R-_}} {
     .clearRoomData;
+    #var got_room_short 1;
     #var room_short %1;
     
     #line oneshot #action {^>$} {
@@ -121,7 +125,9 @@
     } {1};
 } {2};
 
-#action {^-D-_%*\n%a-D-_$} {
+#action {-D-_%*\n%a-D-_} {
+    #NOP -- If you look, you wont get the room short, so we'll clear in that case;
+    #if $got_room_short {#NOP} {.clearRoomData};
     #unvar room[long];
     #unvar long;
     #format long1 {%p} {%1};
@@ -129,6 +135,7 @@
     #var long {$long1 $long2};
     #replace long {\n} { };
     #var room[long] {${long}};
+    #var got_room_short 0;
 } {2};
 
 
@@ -165,6 +172,13 @@
             };
         };
     };
+
+    #delay checkItems {
+        #var tmpIx 1;
+        #loop 1 &room[items][] $tmpIx {
+            .checkItem $room[items][$tmpIx]
+        };
+    } {.1};
 } {2};
 
 #function checkPeriod {
@@ -299,9 +313,11 @@
     #regex {$mob[long]} {^$my[golem][name] \(%w Golem\) %*$} {#var mobFamiliar 1};
     #regex {$mob[long]} {A shadowbound follower of %*} {#var mobFamiliar 1};
 
+
     #NOP -- Knight Familiars;
     #regex {$mob[long]} {%*, %*'s %* Percheron} {#var mobFamiliar 1};
     #regex {$mob[long]} {%*, %*'s %* Kiso} {#var mobFamiliar 1};
+    #regex {$mob[long]} {%* Shetland Pony} {#var mobFamiliar 1};
 
     #if $mobFamiliar {
         #list room[familiars] add {{{name} {$mob[long]}}};
@@ -381,5 +397,7 @@
         };
     }
 } {2};
+
+#action {^You have been offered the mission %*.} {mission accept} {2};
 
 #class {common_room} {close};

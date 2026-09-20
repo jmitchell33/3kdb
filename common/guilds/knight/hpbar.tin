@@ -14,10 +14,10 @@
 	#var {my[gp1][current]}	{%6};
 	#var {my[gp1][max]}	{%7};
 	#var {my[gp2][current]}	{%8};
-    #var {swind} {%9};
-    #format {swind} {%d} {$swind};
-	#var {stance}		{%10};
-	#var {method}		{%11};
+    #var {my[knight][swind]} {%9};
+    #format {my[knight][swind]} {%d} {$my[knight][swind]};
+	#var {my[knight][stance]}		{%10};
+	#var {my[knight][method]}		{%11};
 };
 
 #act {PPD(%w) End(%w) Cry(%p) Dfl(%w) Study(%w) Dodge(%w) Brawl(%w) Shield(%w) Parry(%w)} {
@@ -29,8 +29,8 @@
     #if {"$kskills[endurance]" == "Y"} {#var kskills[endurance] <ffa>ON<088>};
     #if {"$kskills[endurance]" == "n"} {#var kskills[endurance] <faa>OFF<088>};
 	#var {kskills[battlecry]}	{%3};
-    #if {"$kskills[battlecry]" == "Y"} {#var kskills[battlecry] <ffa>ON<088>};
-    #if {"$kskills[battlecry]" == "n"} {#var kskills[battlecry] <faa>OFF<088>};
+    #if {"$kskills[battlecry]" == "Y"} {#var kskills[battlecry] <ffa>ON<088>;#var mob[battlecry] 1};
+    #if {"$kskills[battlecry]" == "n"} {#var kskills[battlecry] <faa>OFF<088>;#var mob[battlecry] 0};
 	#var {kskills[deflect]}		{%4};
     #if {"$kskills[deflect]" == "Y"} {#var kskills[deflect] <ffa>ON<088>};
     #if {"$kskills[deflect]" == "n"} {#var kskills[deflect] <faa>OFF<088>};
@@ -59,17 +59,21 @@
     #if {"$joust" != "READY"} {#var joust <faa>%3<088>};
     #if {"$joust" == "READY"} {#var joust <ffa>%3<088>};
 	#var {ehealth}	{%5};
-    #math {my[gxp][last_round]} {$g2n_last_round - %1};
-    #math {my[gxp][total]} {$my[gxp][total] - $my[gxp][last_round]};
+    #math {my[gxp][last_round]} {%1 - $g2n_last_round};
+    #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
     #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
     #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
     #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+    #math {my[gxp][average_per_rnd]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
     #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
     #format {my[gxp][str_total]} {%M} {$my[gxp][total]};
     #format {my[gxp][str_total]} {%p} {$my[gxp][str_total]};
-    #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
+    #format {my[gxp][str_rounds]} {%g} {$my[gxp][rounds_tracked]};
+    #format {my[gxp][average_per_rnd]} {%d} {$my[gxp][average_per_rnd]};
     .gxp_time;
 	#var g2n_last_round %1;
 };
+
+
 
 #class {hpbar} {close}

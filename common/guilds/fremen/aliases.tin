@@ -23,6 +23,21 @@
     };
 };
 
+#alias .drink_spice {
+    #line oneshot #action {Drink what?} {#var my[spice][inventory] 0;.update_spice};
+    #if {$my[spice][total] > 0} {
+        #if {$my[spice][inventory] > 0} {
+            drink spice;
+        } {
+            #if {$my[spice][smuggled] > 0} {
+                #action {That's not being smuggled...} {#var my[spice][smuggled] 0} {1};
+                smuggle remove beer;
+                drink beer;
+                #delay 2 {#unaction {That's not being smuggled...}}
+            };
+        };
+    };
+};
 
 
 #NOP -- fill and donate literjons at shamoom;
@@ -31,6 +46,46 @@
     fill all;
     donate all
 };
+
+#NOP -- fai water from all coffins/freezers/etc.;
+#alias {fai_water} {
+    #if $equipped[mask] {
+        unwrap all;
+        deslab all;
+        #if {$corpses[cooler] > 0} {
+            #${corpses[cooler]} {uncooler corpse};
+        };
+        #delay 4 {
+            #NOP -- Reclaim 2 corpses if below 65% water;
+            #if {$my[gp1][percent] < .65} {reclaim;reclaim};
+            #300 fai;
+        };
+        #delay 8 {
+            ..
+        };
+    } {
+        remove string;
+        wear mask;
+        #delay 35 {
+            unwrap all;
+            deslab all;
+            #if {$corpses[cooler] > 0} {
+                #${corpses[cooler]} {uncooler corpse};
+            };
+            #delay 4 {
+                #NOP -- Reclaim 2 corpses if below 65% water;
+                #if {$my[gp1][percent] < .65} {reclaim;reclaim};
+                #300 fai;
+            };
+            #delay 8 {
+                remove mask;wear string;
+                ..
+            };
+        };
+    };
+    
+};
+
 
 #NOP -- donate corpses to shimoom;
 #var go_donate_water 0;

@@ -26,8 +26,11 @@
 		#if {$corpses[total] > 1} {
 			#if {$my[gp1][percent] < $corpse_burn_np && $corpse_burn} {
 				#var corpse_burn 0;
-				#delay 6 {#if {$my[gp1][percent] < $corpse_burn_np} {corpse_select_necro @min{15;$corpses[total]}}};
-				#delay 7 {#var corpse_burn 1};
+				#delay delay_corpse_burn {#if {$my[gp1][percent] < $corpse_burn_np} {corpse_select_necro @min{15;$corpses[total]}}} 10;
+				#delay 11 {#var corpse_burn 1};
+			};
+			#if {!$corpse_burn} {
+				#if {!$incombat || $my[gp1][percent] > $corpse_burn_np} {#undelay delay_corpse_burn};
 			};
 		} {
 			#var corpse_empty 1;

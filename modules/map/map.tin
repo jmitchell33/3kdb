@@ -6,25 +6,5 @@
 	#map goto $curvnum;
 };
 
-#alias {oldmap} {
-    #map destroy;
-    #map read common/map/3k_map.tin;
-	#map goto $curvnum;
-	#map flag static on;
-};
-
-#alias {killmap} {
-    #class {mapper} {kill};
-    #class {maphelper} {kill};
-    #class {drawmap} {kill};
-    undrawmap;
-};
-
-#alias {hidemap} {
-    #class {drawmap} {kill};
-    #alias {mapupdate_draw} { #nop overwritten/handled by personal draw.tin; };
-    #unsplit;
-};
-
 
 #class {map} {close};

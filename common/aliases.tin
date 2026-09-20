@@ -1,5 +1,5 @@
-#class {default_aliases} {kill}
-#class {default_aliases} {open}
+#class {default_aliases} {kill};
+#class {default_aliases} {open};
 
 #alias {echo_on} {#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
 #alias {debug} {#debug all on;#EVENT {SEND OUTPUT} {#line ignore #showme {<038>%0}};};
@@ -10,64 +10,6 @@
 #alias {th} {#send {!tellhist}};
 #alias {cwho1} {#send {!cwho -O}};
 #alias {los} {#send {lineofsight}};
-
-#NOP -- Generic toggle switch;
-#delay 6 {
-    #if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
-    #if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 1};
-    #if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
-    #if {"${toggles[chatlog_says]}" == ""} {#var toggles[chatlog_says] 1};
-    #if {"${toggles[cult]}" == ""} {#var toggles[cult] 0};
-    #if {"${toggles[corpse_echo]}" == ""} {#var toggles[corpse_echo] 0};
-    #if {"${toggles[emote_follow]}" == ""} {#var toggles[emote_follow] 1};
-    #if {"${toggles[emote_heal]}" == ""} {#var toggles[emote_heal] 1};
-    #if {"${toggles[emote_eheal]}" == ""} {#var toggles[emote_eheal] 1};
-    #if {"${toggles[emote_rally]}" == ""} {#var toggles[emote_rally] 1};
-    #if {"${toggles[emote_corpse]}" == ""} {#var toggles[emote_corpse] 1};  
-    #if {"${toggles[emote_dungeon_clear]}" == ""} {#var toggles[emote_dungeon_clear] 1};
-    #if {"${toggles[teleport]}" == ""} {#var toggles[teleport] 1};
-
-    #if {"$guild" == "necromancer"} {
-        #if {"${toggles[emote_aid]}" == ""} {#var toggles[emote_aid] 1};  
-    };
-};
-
-#alias {toggle} {
-    #format toggle_var {%l} {%0};
-    #format toggle_var {%p} {$toggle_var};
-    #if {"$toggle_var" == ""} {
-        #echo {<ffe>   -----  No toggle provided.  Use 'toggle-list' to see available options.  -----<088>};
-    } {
-        #if {"$toggles[$toggle_var]" == ""} {
-            #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
-        } {
-            #if $toggles[$toggle_var] {
-                #var toggles[$toggle_var] 0;
-                #echo {<faa>   -----  $toggle_var has been turned off -----<088>};
-            } {
-                #var toggles[$toggle_var] 1;
-                #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
-            };
-        };
-    };
-};
-
-#alias {toggle-list} {
-    #echo {<cfb>   ---++---       3kdb Current Toggle Status      ---++---<088>};
-    #echo {<fff>       Usage: toggle <toggle alias> <088>};
-    #format tmpLine {       %-25s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
-    #echo {$tmpLine};
-    #foreach *toggles[] item {
-        #if {$toggles[$item]} {
-            #format tmpLine {        %-25s         %+8s} {$item} {on};
-            #echo {<dfc>$tmpLine<088>};
-        } {
-            #format tmpLine {        %-25s         %+9s} {$item} { off};
-            #echo {<fbb>$tmpLine<088>};
-        };
-    };
-    #echo {<cfb>   ---++---        ---++---        ---++---       ---++---<088>};
-};
 
 #NOP -- calculator;
 #alias {calc} {
@@ -139,6 +81,14 @@
             #var my[necromancer][decanters][full] 0;
             #var my[necromancer][decanters][powered] 0;
             check_chest;
+        };
+        #if {"$guild" == "fremen"} {
+            #var my[spice][inventory] 0;
+            #action {%* Spice Beer.} {
+                #format tmpItem {%d} {%%1};
+                .update_spice inventory $tmpItem;
+            } {1};
+            #delay 2 {#unaction {%* Spice Beer.}};
         };
         #var inventory_check 1;
         #var corpse_check 1;
@@ -229,7 +179,7 @@
     #delay 0.2 {
         #if !$action_found {
             #list actionStack add {%1};
-        }
+        };
     };
 };
 
@@ -252,119 +202,6 @@
 #ALIAS {ld} {
     _variable_export;
     #delay 1 {#end};
-};
-
-#alias {donate_house} {
-    #var bot[paused] 1;
-    keep all equip;
-    #map get roomvnum donate_go_back;
-    go house_box;
-    #line oneshot #action {Byron's Treetop Gambling Emporium (d)} {
-        put all in box;
-        go morgue;
-    } {1};
-
-    #line oneshot #action {Pinnacle Morgue (n)} {
-        donate all;
-        donate coffin;
-        #map run $donate_go_back;
-        #delay 10 {
-            #var bot[paused] 0;
-        };
-    } {1};
-};
-
-
-#alias {donate_necro} {
-    #var bot[paused] 1;
-    keep all equip;
-    #map get roomvnum donate_go_back;
-    #Map run 49586;
-    #line oneshot #action {The Manager's Office (s,sw)} {
-        qtrance {unkeep flask/put flask in box>50};
-        go necro_box;
-    } {1};
-
-    #line oneshot #action {Theela the Necromancer (moral).} {
-        #10 donate all;
-        go necro_corpse;
-    } {1};
-
-    #line oneshot #action {Duncan, Keeper of the Dead.} {
-        unwrap all;
-        #if $inventory[freezer] {deslab all};
-        #if $inventory[cooler] {#50 uncooler corpse};
-        unkeep all corpse;
-        store all;
-        #delay 6 {
-            qtrance preserve gemino/get corpse>50;
-            get all;
-            store all;
-            qtrance preserve gemino/get corpse>50;
-            get all;
-            store all;
-            qtrance preserve gemino/get corpse>50;
-            get all;
-            store all;
-        };
-        #delay 10 {#map run $donate_go_back};
-        #delay 20 {#var bot[paused] 0;};
-    } {1};
-};
-
-#alias {sell_catacombs} {
-    #list add items slicer;
-    #list add items chainmail;
-    #list add items bone sword;
-    #list add items leather armor;
-    #list add items silver platemail;
-    #list add items ragged cloak;
-    stash all;
-    keep all component;
-    go shop2;
-    #line oneshot #action {%* says: You do not have a %*.$} {
-        #list items filter {} {%%2};
-    };
-    #16 sell chainmail;
-    go shop4;
-    #16 sell chainmail;
-    go shop5;
-    #16 sell chainmail;
-    go shop6;
-    #16 sell chainmail;
-    go shop7;
-    #16 sell chainmail;
-    go shop8;
-    #16 sell chainmail;
-    go shop10;
-};
-
-#alias {sell_banshee} {
-    stash all;
-    keep all component;
-    go shop2;
-    #16 {sell bow;sell bracers};
-    go shop4;
-    #16 {sell bow;sell bracers};
-    go shop5;
-    #16 {sell bow;sell bracers};
-    go shop6;
-    #16 {sell bow;sell bracers};
-    go shop7;
-    #16 {sell bow;sell bracers};
-    go shop8;
-    #16 {sell bow;sell bracers};
-    go shop10;
-};
-
-
-#alias {sell_whores} {
-    stash all;
-    keep all component;
-    #loop 1 10 i {
-        go shop$i;
-        #16 {sell yeast;sell skoal;sell bitch boots;sell bitch blade;sell whips;sell purple heart;sell bitch plate;sell pimp shells;sell pimp gun;sell slickness;sell voucher;sell dermal plating}
-    };
 };
 
 #alias {stashlist} {
@@ -398,13 +235,13 @@
     };
 };
 
-#NOP -- gswap - guild swap;
+#NOP -- guild swap;
 #alias {.gswap} {
     #NOP -- Validate guild argument;
     #if {"%0" == ""} {
         #echo {<eaa>Usage: .gswap <guild><088>};
         #echo {<eaa>Example: .gswap mage<088>};
-        #return
+        #return;
     };
     
     #NOP -- Check if guild file exists;
@@ -416,7 +253,7 @@
         #echo {<eaa>Guild not found: %0<088>};
         #echo {<eaa>File missing: $guild_file<088>};
         #echo {<eaa>----------------------------------------------------<088>};
-        #return
+        #return;
     };
     
     #echo {<dfa>----------------------------------------------------<088>};
@@ -436,6 +273,7 @@
     #class botcycle kill;
     #class common_mka kill;
     #class draw kill;
+    #class maphelper kill;
     
     #NOP -- Unset draw variables to prevent errors;
     #unvar draw;
@@ -453,6 +291,7 @@
     
     #NOP -- Reload everything in proper order;
     #read common/index.tin;
+    #read modules/helpers/helpers.tin;
     #read common/guilds/$guild/index.tin;
     #read chars/$user/actions.tin;
     #read chars/$user/aliases.tin;
@@ -468,6 +307,14 @@
 
     #NOP -- Initialize deadman;
     _init_deadman;
+
+    #NOP -- Gag spam;
+    #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
+    #line oneshot #gag {^You find nothing of interest.};
+    #line oneshot #gag {^Perform touch at whom?};
+    #line oneshot #gag {^There is no reason to '(powers' here.};
+    #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
+    #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
     
     #NOP -- Wait for MIP to initialize before drawing;
     #delay 3 {
@@ -478,18 +325,17 @@
         .update_gags;
         _mob_status_clear;
         reset_trackers;
-        
-        #NOP -- Gag spam;
-        #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
-        #line oneshot #gag {^You find nothing of interest.};
-        #line oneshot #gag {^Perform touch at whom?};
-        #line oneshot #gag {^There is no reason to '(powers' here.};
-        #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
-        #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
     };
     
     #NOP -- Initialize screen after everything is loaded;
     #delay 6 {
+        #nop --- remove the oneshot gags incase they were not used;
+        #ungag {^That is not here or it is uninteresting. (cooler?)};
+        #ungag {^You find nothing of interest.};
+        #ungag {^Perform touch at whom?};
+        #ungag {^There is no reason to '(powers' here.};
+        #ungag {^There is no reason to 'spellDmg-clear' here.};
+        #ungag {^There is no reason to 'summonDmg-clear' here.};
         #NOP -- Read draw.tin to ensure all draw functions exist;
         #read common/draw.tin;
         init_screen;
@@ -509,8 +355,43 @@
         
         #echo {<dfa>----------------------------------------------------<088>};
         #echo {<dfa>Guild swap complete: $guild<088>};
-        #echo {<dfa>----------------------------------------------------<088>}
-    }
+        #echo {<dfa>----------------------------------------------------<088>};
+
+        #var tmpgswap 1;
+    };
 };
 
-#class {default_aliases} {close}
+
+#NOP -- Guild Fly Powers;
+#alias {.fly} {
+    #if {"$guild" == "necromancer"} {
+        shapeshift raven;
+    };
+    #if {"$guild" == "mage"} {
+        cast levitate;
+    };
+    #if {"$guild" == "bard"} {
+        cast wings of the phoenix;
+        soar;
+    };
+    #if {"$guild" == "juggernaut"} {
+        jumpjet;
+    };
+};
+
+#alias {.land} {
+    #if {"$guild" == "necromancer"} {
+        shapeshift;
+    };
+    #if {"$guild" == "mage"} {
+        deplete levitate;
+    };
+    #if {"$guild" == "bard"} {
+        land;
+    };
+    #if {"$guild" == "juggernaut"} {
+        jumpjet;
+    };
+};
+
+#class {default_aliases} {close};

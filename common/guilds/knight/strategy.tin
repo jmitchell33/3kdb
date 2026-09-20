@@ -2,14 +2,31 @@
 #class {guild_strategy} {open};
 
 #NOP -- Below is an example of how to add strategies - it can be edited if you have a strategy to add;
-#list strategyList add {{{guild} {knight} {name} {example} {active} {0} {description} {Knight: brief description of example strategy}}};
+#NOP #list strategyList add {{{guild} {knight} {name} {example} {active} {0} {description} {Knight: brief description of example strategy}}};
 
+#list strategyList add {{{guild} {knight} {name} {second-wind} {active} {0} {description} {Knight: Automatically use SecondWind}}};
+#list strategyList add {{{guild} {knight} {name} {battlecry} {active} {0} {description} {Knight: Automatically use Battlecry}}};
 #list strategyList indexate name;
+
+
+#NOP -- % of your stamina you should use secondwind at;
+#if {"${my[strategy][swind]}" === ""} {
+    #var my[strategy][swind] .30;
+} {
+    #NOP;
+};
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
-    #if {$enemy[hp] > 0} {
-        #NOP;
+    #if {$incombat} {
+        #if {$my[gp1][perecent] < $my[strategy][swind] && $my[knight][swind] > 50} {
+            checkStrategy {second-wind} {
+                secondwind
+            };
+        };
+        checkStrategy {battlecry} {
+            #if {"$mob[battlecry]" == "0"} {battlecry};
+        };
     };
 };
 

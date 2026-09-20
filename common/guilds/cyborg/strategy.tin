@@ -2,14 +2,22 @@
 #class {guild_strategy} {open};
 
 #NOP -- Below is an example of how to add strategies - it can be edited if you have a strategy to add;
-#list strategyList add {{{guild} {cyborg} {name} {example} {active} {0} {description} {Cyborg: brief description of example strategy}}};
+#list strategyList add {{{guild} {cyborg} {name} {nano} {active} {0} {description} {Cyborg: Use nano deconstructors}}};
 
 #list strategyList indexate name;
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
     #if {$enemy[hp] > 0} {
-        #NOP;
+        #if {"$my[nanos][available]" == "Yes" && "$mob[nano]" == "0"} {
+            #if {$mip[round] > 5 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 10 && $enemy[hp] > 50} {
+                checkStrategy {nano} {
+                    #echo {<fab>  +-+-+-+-     <dfd>DECONSTRUCT MODE INITIATED     <fab>+-+-+-+-<088>};
+                    #send {!deconstruct};
+                };
+            };
+        }
+        
     };
 };
 

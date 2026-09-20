@@ -5,11 +5,35 @@
     #NOP;
 };
 
+#alias {baby-bot} {
+    bcy clear;
+    bcy+ whores;
+    bcy+ alphabet;
+    bcy+ bombfreaks;
+    bcy+ chicken;
 
+    bcy+ chin2;
+    bcy+ elven-woods;
+    bcy+ encampment;
+    bcy+ enchanted-spring;
+    bcy+ fire-giants;
+    bcy+ hippies;
+    bcy+ hyperfunk2;
+    bcy+ land2;
+    bcy+ larem-cemetery;
+
+    bcy+ catacombs2;
+};
+
+#NOP -- This donate restarts bot from entrance, since some areas will result in running through aggros;
 #alias {donate_water2} {
+    #if $bot[active] {#var bot_resume 1;.pause} {#var bot_resume 0};
     #map get roomvnum donate_go_back;
     #if {"$area" == "Chaotic Sewers"} {.stop;#var sewer_winch 1} {#var sewer_winch 0};
-    #if {"$area" == "Section Z"} {pause game;#var section_z 1} {#var section_z 0};
+    #if {"$area" == "Section Z"} {pause game;#var section_z 1} {#var section_z 0;};
+    #if {"$lastbot[area]" == "Dundee Swamp"} {
+        #map run 3148;give all to hunter
+    };
     go fremen_shimoom;
     #line oneshot #action {The Wisdom Board containing %*} {
         unwrap all;
@@ -18,8 +42,23 @@
             #${corpses[cooler]} {uncooler corpse};
         };
         #delay 4 {
-            #100 {#5 {fill all;donate all};reclaim};
-            #if $section_z {go sz;unpause game};
+            #300 {#3 {fill all;donate all};reclaim};
+            #if $bot_resume {
+                .pause;
+                #if $section_z {
+                    go sz;
+                    unpause game;
+                    .unpause;
+                } {
+                    #delay 20 {
+                        touch cairn rune;
+                        reclaim;
+                        reclaim;
+                        reclaim;
+                        +${lastBot[alias]};
+                    };
+                };
+            };
         };
     } {1};
 };

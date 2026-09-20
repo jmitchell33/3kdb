@@ -9,16 +9,14 @@
 	#NOP -- Check if the bot exists, and if it does, add it;
 	#local tmpIndex 0;
 	#format tmpName {%p} {%0};
-	#list {botlist} indexate alias;
-	#list {botlist} find {$tmpName} {tmpIndex};
+	#list botlist_alias find {$tmpName} {tmpIndex};
 	#if {$tmpIndex > 0} {
 		#list {botcycle} {add} {$tmpName};
 		_caption_data_bot_cycle;
-		#var tmpName $botlist[$tmpIndex][alias];
-		#echo {<bfa> +++ +++ <088> <efe>$tmpName added to bot cycle <bfa> +++ +++ <088>};
+		#echo {<bfa> +++ +++ <088> <efe>%0 added to bot cycle <bfa> +++ +++ <088>};
 	} {
-		#echo {<fbb> -+- <088> <fdc>This was not found in the botlist.  Verify the alias <ded>$tmpName<088><fdc> and try again. <fbb> -+- <088>};
-	};	
+		#echo {<fbb> -+- <088> <fdc>This was not found in the botlist.  Verify the alias <ded>%0<088><fdc> and try again. <fbb> -+- <088>};
+	};
 };
 
 #alias {bcy-} {
@@ -54,26 +52,23 @@
 
 
 #alias {nextarea} {
-	#if {$cycle < &{botcycle[]}} {
-		#math cycle {$cycle + 1};
-	} {
-		#var cycle 1;
-	};
 	#var tmpIndex 0;
-	#list {botcycle} {get} {$cycle} {currentarea};
-	#list {botlist} {get} {$currentarea} {tmpIndex};
+	#list {botcycle} {get} {1} {currentarea};
+	#list {botlist_alias} {get} {$currentarea} {tmpIndex};
 	
-	#delay {3} {+$currentarea};
+	#delay {16} {+$currentarea};
 
 	#NOP -- If the area is not 'looped' then remove it from the botlist;
-	#if $botlist[$tmpIndex][loop] {#NOP} {
-		#list botcycle {delete} {$cycle};
+	#if $botlist_loop[$tmpIndex] {#NOP} {
+		#list botcycle {delete} {1};
 	};
+	_caption_data_bot_cycle;
 };
 
 #alias {botclear} {
 	#var botcycle [];
 	#var cycle 0;
+	_caption_data_bot_cycle;
 	#echo {<fbb> -+- <088> <dfe>Bot cycle is now empty. Thanks for shopping! <fbb> -+- <088>};
 };
 
@@ -81,7 +76,7 @@
 	#echo {<228> |<fab>             No areas loaded             <228>|<088>};
 	#echo {<228> |<178>  bcy+ bot_alias<dfe>   to add an area.       <228>|<088>};
 	#echo {<228> |<178>  bcy- bot_alias<dfe>   remove an area.       <228>|<088>};
-	#echo {<228> |<178>  botlist <dfe>       to see available bots.<228>|<088>};
+	#echo {<228> |<178>  botlist <dfe>       to see available bots.  <228>|<088>};
 	#echo {<228> +-----------------------------------------+}<088>;
 };
 
@@ -103,12 +98,18 @@
 
 #alias {bcy} {
 	#echo {<228> +-----------------------------------------+}<088>;
-	#echo {<228> |<138>            Area Cycler                <228>|<088>};
+	#echo {<228> |<138>              Area Cycler                <228>|<088>};
 	#echo {<228> +-----------------------------------------+}<088>;
-	#if {&{botcycle[]} == 0} {
-		.cycler_help_file
+	#if {"%1" == "clear"} {
+		#echo {       <fab>  Bot cycler has been cleared. <088>};
+		#unvar botcycle;
+		_caption_data_bot_cycle;
 	} {
-		.cycler_list_bots
+		#if {&{botcycle[]} == 0} {
+			.cycler_help_file
+		} {
+			.cycler_list_bots
+		};
 	};
 };
 

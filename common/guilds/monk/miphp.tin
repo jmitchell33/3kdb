@@ -4,6 +4,20 @@
 #var guild_miphp 1;
 
 #alias {_guild_miphp} {
+    #list temp clear;
+    #list temp add {<eeb>HP:<ffe>$my[hp][current]/$my[hp][max] <eeb>SP:<ffe>$my[sp][current]/$my[sp][max] <eeb>Chi:<ffe>$my[gp1][current]/$my[gp1][max]  <eeb>Mind:<ffe>$my[gp2][current]/$my[gp2][max]  <eeb>E:<ffe>$ehealth<088>};
+    #list temp add {<eeb>H:$my[hp][graph] <eeb>S:$my[sp][graph] <eeb>Chi:$my[gp1][graph] <eeb>Mind:$my[gp2][graph] <eeb>E:$enemy[graph]<088>};
+    #list temp add {<bea>Method: <ade>$my[monk][method] <bea>Crit: <ade>$my[monk][crit] <bea>Stun: <ade>$my[monk][stun] <bea>Hide: <ade>$my[monk][hide_of_the_dragon] <bea>Deflect: <ade>$my[monk][deflect]<088>};
+    #if {"$my[monk][crane_block]" != ""} {#var crane_str { $my[monk][crane_block]}} {#var crane_str {}};
+    #list temp add {<bea>Chi Focus: <ade>$my[monk][chifocus] <bea>Ancient Energy: <ade>$my[monk][ae][current]/$my[monk][ae][reset]%$crane_str <bea>GXP: <eaf>$my[monk][gxp]<088>};
+    #list temp add {<eeb>Gxp $my[gxp][str_time]: <ffe>$my[gxp][str_t30_per_hr] <dea>T-30 <dfe>|<ffe>$my[gxp][str_average_per_hr]<dea>/Hr <dfe>| <ffe>$my[gxp][last_round]<dea>/Rnd <dfe>| <ffe>$my[gxp][str_total] <dea>Total<088>};
+    #var hpbar[prompt] $temp;
+};
+
+
+
+#nop keeping this here as a reference for showing default mip data;
+/*#alias {_guild_miphp} {
 	#var hpbar_gline_1 @fMipColourConv{$mip[gline][1]};
 	#var hpbar_gline_2 @fMipColourConv{$mip[gline][2]};
 
@@ -20,7 +34,7 @@
 	#list temp add {$hpbar_gline_2};
 	#list temp add {<eeb>Gxp $my[gxp][str_time]: <ffe>$my[gxp][str_t30_per_hr] <dea>T-30 <dfe>|<ffe>$my[gxp][str_average_per_hr]<dea>/Hr <dfe>| <ffe>$my[gxp][last_round]<dea>/Rnd <dfe>| <ffe>$my[gxp][str_total] <dea>Total<088>};
 	#var hpbar[prompt] $temp;
-};
+};*/
 
 
 

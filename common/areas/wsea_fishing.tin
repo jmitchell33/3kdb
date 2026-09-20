@@ -5,62 +5,163 @@
 #NOP -- fishing bot;
 
 #var fish[caught] 0;
-#action {^Suddenly something grabs hole of your line!!!} {
+#var fish[success] 0;
+#var fish[fail] 0;
+#var fish[fail-wriggle] 0;
+#var fish[fish-on] 0;
+#var fish[break-line] 0;
+#var fish[break-rod] 0;
+#var fish[advancement] 0;
+#var fish[catch-peak] 0;
+
+
+#if {"${my[fish_catch_level]}" === ""} {
+	#var my[fish_catch_level] 30;
+};
+
+#list fish[journal] clear;
+#alias .updateFishingJournal {
+	#format tmpOutcome {%n} {%1};
+	#format tmpAction {%n} {$fish[final-action]};
+	#format tmpCatch {%n} {$fish[catch-peak]};
+
+	#if {"%2" == ""} {
+		#format tmpFish {%n} {No Fish};
+ 		#echo {<bfc> Fish Conclusion: Unfortunately you did not catch a fish.  Your final action was to $fish[final-action].};
+	} {		
+		#format tmpFish {%n} {$fish[tmpFish]};
+		#echo {<bfc> Fish Conclusion: You caught a %2!};
+	};
+
+	#list fish[journal] add {{{outcome} {$tmpOutcome} {action} {$tmpAction} {catch} {$tmpCatch} {fish} {$tmpFish}}};
+	#unvar tmpFish;
+};
+
+#alias fishlog {
+	#var tmpItem 1;
+    #echo {   <aed>===============================================================================<088>};
+    #echo {   <aed>                            BYRON'S FISH TALES  <088>};
+    #echo {   <bde>   ><(((('>      <aeb>~ The fish may flee, but the lure remains. ~      <bde><'))))>< <088>};
+    #echo {   <aed>=============================================================================== <088>};
+	#if {&fish[journal][] > 0} {
+		#format row {         %-15s  %-15s  %-10s  %-16s } {<aef>Outcome} {Final Action} {Top Catch %} {Fish Caught<088>};
+		#echo $row;
+		#loop 1 &fish[journal][] tmpItem {
+			#format row {          %-15s  %-15s  %-10s    %-16s } {$fish[journal][$tmpItem][outcome]} {$fish[journal][$tmpItem][action]} {   $fish[journal][$tmpItem][catch]} {$fish[journal][$tmpItem][fish]};
+			#echo $row;
+		};
+	} {
+			#echo {};
+			#echo {   <aee>                     A lonely bard upon the strand};
+			#echo {   <aee>                  Cast hopeful lines with patient hand.};
+			#echo {   <aee>                  The sea replied with wind and spray,};
+			#echo {   <aee>                     And carried all his bait away.};
+			#echo {};
+			#echo {   <aed>          This journal currently carries all tales and no scales...};
+	};
+    #echo {};
+    #echo {   <aed>===============================================================================<088>};
+};
+
+#alias .setCatchLevel {
+	#if {"%1" == ""} {
+		#echo {    <dec>No level provided.  Provide a number 1-99 that should you catch the fish at.<088>};
+		#echo {    <dec>Current catch level is <bfc>$my[fish_catch_level]% <088>};
+	} {
+		#var my[fish_catch_level] %1;
+		#echo {    <dec>Catch Level Updated.  You will now attempt to catch a fish at or above <bfc>${my[fish_catch_level]}% <dec>chance to catch.<088>};
+	};
+};
+
+
+#action {^Suddenly something grabs hold of your line!!!} {
 	#if {!$idle_flag} {
 		#send !reel;
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>REELING<088>};
-		#draw Yellow scroll line 1 1 1 30
-	}
+		#draw Yellow scroll line 1 1 1 65;
+		#math fish[fish-on] {$fish[fish-on] + 1};
+	};
 } {2};
 
 #action {^Even though you do everything right the catch manages to wriggle free} {
 	#if {!$idle_flag} {
 		#send !fish;
-		#draw Yellow scroll line 1 1 1 30;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>THE FISH WIGGLED FREE!<088>};
-		#draw Yellow scroll line 1 1 1 30
-	}
+		#draw Yellow scroll line 1 1 1 65;
+		#math fish[fail-wriggle] {$fish[fail-wriggle] + 1};
+		.updateFishingJournal {wriggled free};
+	};
 } {2};
+
+#action {^Your caught fish manages to wriggle free and vanishes into the deep ocean.$} {
+	#if {!$idle_flag} {
+		#send !fish;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
+		#echo {<faa>THE FISH WIGGLED FREE!<088>};
+		#draw Yellow scroll line 1 1 1 65;
+		#math fish[fail-wriggle] {$fish[fail-wriggle] + 1};
+		.updateFishingJournal {wriggled free};
+	};
+} {2};
+
 
 #action {^You fail to retrieve your catch!} {
 	#if {!$idle_flag} {
-		fish
-	}
+		fish;
+		#var fish[catch-peak] 0;
+		#math fish[fail] {$fish[fail] + 1};
+		.updateFishingJournal {failed to retrieve catch};
+	};
 } {2};
 
 #action {^You successfully manage to retrieve your catch!} {
 	#if {!$idle_flag} {
 		#send !take all; 
 		#send !fish;
-		#draw Yellow scroll line 1 1 1 30;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>YOU CAUGHT SOMETHING!<088>};
-		#draw Yellow scroll line 1 1 1 30
-	}
+		#draw Yellow scroll line 1 1 1 65;
+		#math {fish[success]} {$fish[success] + 1};
+
+		#line oneshot #action {{^.*(fish|scale|lobster): Ok\.$}} {
+			#if {!$idle_flag} {
+				#draw Yellow scroll line 1 1 1 65;
+				#echo {<fff>YOU CAUGHT A FISH!!!!<088>};
+				#draw Yellow scroll line 1 1 1 30;
+				#math {fish[caught]} {$fish[caught] + 1};
+				#var tmpFish %1;
+				#replace tmpFish {: Ok.} {};
+				.updateFishingJournal {Caught} {$tmpFish};
+			};
+		} {2};
+	};
 } {2};
 
-#action {^%*fish: Ok.$} {
-	#if {!$idle_flag} {
-		#math {fish[caught]} {$fish[caught] + 1};
-		#draw Yellow scroll line 1 1 1 30;
-		#echo {<fff>YOU CAUGHT A FISH!!!!<088>};
-		#draw Yellow scroll line 1 1 1 30
-	}
+#action {^You feel more experienced in fishing!$} {
+	#math fish[advancement] {$fish[advancement] + 1};
 } {2};
 
 
 #action {^You're too tired to do that.} {
 	#if {!$idle_flag} {
-		catch;
-		fish
-	}
+		cease;
+		#var fish[final-action] cease;
+		#send !fish;
+		#var fish[catch-peak] 0;
+	};
 } {2};
 
 #action {^As no fish appear to be interested in your line, you pull it back up.} {
 	#if {!$idle_flag} {
 		#send !bait rod;
 		#send !fish;
-		#draw Yellow scroll line 1 1 1 30;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>REBAITING FISHING ROD!<088>};
 		#draw Yellow scroll line 1 1 1 30
 	}
@@ -70,7 +171,8 @@
 	#if {!$idle_flag} {
 		#send !bait rod;
 		#send !fish;
-		#draw Yellow scroll line 1 1 1 30;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>REBAITING FISHING ROD!<088>};
 		#draw Yellow scroll line 1 1 1 30
 	}
@@ -81,7 +183,8 @@
 		#send !thread rod;
 		#send !bait rod;
 		#send !fish;
-		#draw Yellow scroll line 1 1 1 30;
+		#var fish[catch-peak] 0;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<faa>RETHREADING FISHING ROD!<088>};
 		#draw Yellow scroll line 1 1 1 30
 	}
@@ -91,43 +194,48 @@
 	#if {!$idle_flag} {
 		draw Yellow scroll line 1 1 1 30;
 		#echo {<fff>GET MORE FISHING EXPERIENCE!<088>};
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#send !return
 	}
 } {2};
 
 #action {You can't thread a fragile fishing line to that.} {
 	#if {!$idle_flag} {
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>GO BUY ANOTHER FISHING ROD!<088>};
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#send !return
 	}
 } {2};
 
 #action {^You have nothing to bait the rod with!} {
 	#if {!$idle_flag} {
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>GO BUY BAIT!<088>};
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#send !return
 	}
 } {2};
 
 #action {^You have nothing to thread the rod with!} {
 	#if {!$idle_flag} {
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#echo {<fff>GO BUY THREAD!<088>};
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
 		#send !return
 	}
 } {2};
 
 #action {{^End:(\d+) E Req:(\d+|[LHM]) Dis:(\d+|[LHM])(?:cm)? Dir:([LRC+]+) Ten:(\d+|[LMH]) Line:(\d+|[LMH])+\%? Catch:(\d+|[LMH])+\%?$}} {
 	#if {!$idle_flag} {
-		#draw Yellow scroll line 1 1 1 30;
-		#echo {<ccf>Number of Fish Caught:<088> <fff>($fish[caught])<088>};
-		#draw Yellow scroll line 1 1 1 30;
+		#draw Yellow scroll line 1 1 1 65;
+		#echo {<ccf>Fishing Stats: <dec>$fish[fish-on] Fish On ($fish[success] Catches, $fish[caught] Fish, $fish[fail-wriggle] Wriggled Free<088>};
+		#echo {<ccf>                          <dec>$fish[fail] Fails, $fish[break-line] Line Breaks, $fish[break-rod] Rod Breaks)<088>};
+		#if {$fish[advancement] > 0} {
+			#echo {<ccf>                          <bfc>You advanced fishing skill $fish[advancement] points!<088>};
+		};
+		
+		#draw Yellow scroll line 1 1 1 65;
 		#var fish[end]		%2;
 		#var fish[req]		%3;
 		#var fish[dist]		%4;
@@ -142,20 +250,50 @@
 			#default 	{#nop}
 		};
 
+		#if {$fish[catch-peak] < $fish[catch]} {
+			#var fish[catch-peak] $fish[catch];
+		};
+
+		#if {$fish[catch] == "H"} {
+			#var fish[catch-peak] H;
+			#send !catch;
+			#var fish[final-action] catch;
+		};
+		#elseif {$fish[catch] == "M"} {
+			#var fish[catch-peak] M;
+			#var fish[final-action] catch;
+			#send !catch;
+		};
+		#elseif {$fish[req] + 40 > $fish[end] && $fish[catch] > $my[fish_catch_level]} {
+			#var fish[final-action] catch;
+			#send !catch;
+		};
+		#elseif {$fish[catch] > $my[fish_catch_level]} {
+			#var fish[final-action] catch;
+			#send !catch;
+		};
+
 		#if {"$fish[dist]" == "H"} {#var fish[dist] 200};
-		#if {$fish[end] < $fish[req]} {#send !catch};
+		#if {$fish[end] < $fish[req]} {
+			#var fish[final-action] cease;
+			#send !cease;
+		};
  		#if {$fish[ten] > 30 || "$fish[ten]" == "H" } {#send !slack};
-		#if {$fish[catch] > 20} {#send !catch};
-		#if {$fish[dist] > 100} {#send !reel};
-		#elseif {"$fish[dir]" == "R"} {#send !pull left};
-		#elseif {"$fish[dir]" == "L"} {#send !pull right};
+		
+		#if {"$fish[dir]" == "R++"} {#send !pull left};
+		#if {"$fish[dir]" == "R+"} {#send !pull left};
+		#elseif {"$fish[dir]" == "L++"} {#send !pull right};
+		#elseif {"$fish[dir]" == "L+"} {#send !pull right};
 		#elseif {$fish[dist] > 0} {#send !reel};
 		#else {#NOP};
+
 		#line oneshot #action {^Your fishing rod bends violently and cracks in two!} {
 			#if {!$flag_flag} {
 				thread rod;
 				bait rod;
-				fish
+				fish;
+				#math fish[break-rod] {$fish[break-rod] + 1};
+				.updateFishingJournal {Broken Rod};
 			};
 		} {2};
 	
@@ -163,22 +301,22 @@
 			#if {!$idle_flag} {
 				thread rod;
 				bait rod;
-				fish
-			}
+				fish;
+				#math fish[break-line] {$fish[break-line] + 1};
+				.updateFishingJournal {Line Broken};
+			};
 		} {2};
 
 		#line oneshot #action {^With a loud 'thwang', your line snaps. Perhaps you should pay more} {
 			#if {!$idle_flag} {
 				thread rod;
 				bait rod;
-				fish
+				fish;
+				#math fish[break-line] {$fish[break-line] + 1};
+				.updateFishingJournal {Line Broken};
 			}
 		} {2};
-
-		#if {$fish[req] + 40 > $fish[end] && $fish[catch] > 15} {
-			#send !catch
-		}
-	}
+	};
 } {2};
 
 #gag {^You can't do another action yet.};

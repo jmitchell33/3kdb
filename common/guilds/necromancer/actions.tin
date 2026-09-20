@@ -182,6 +182,11 @@
 #action {You scream with the power of the netherworld and thrust your hands toward} {
     stat_record;
     #var my[necromancer][unholy_ground] 0;
+    #var stats[unholy_ground] 0;
+} {2};
+
+#action {^Your grounding to the negative material plane dissipates in a sparkle.$} {
+    #echo {<fcd> Necro Stats: Unholy Ground struck <cfc>$stats[unholy_ground] <fcd>times.};
 } {2};
 
 #action {  You must wait until repower to rend flesh again %w.} {
@@ -325,6 +330,13 @@
         qtrance preserve remains>50;
     };
 } {6};
+
+#ACTION {^%w brandishes his weapon before you.$} {
+    #if !$idle_flag {
+        #format {lower} {%l} {%1};
+        rapture $lower;
+    };
+} {2}
 
 #ACTION {You see a shadowy form escape from %w and disappear!} {
     #if !$idle_flag {

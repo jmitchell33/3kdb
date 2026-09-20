@@ -35,6 +35,11 @@
     #regex {$tmpName} {$enemy[target]} {#var fakeKill 1};
 };
 
+#NOP -- Sometimes the mob name has artifacts from gobj, etc. in it.  Common with necros;
+#alias _cleanMobKilled {
+    #replace deathReport[mob_killed] {>} {};
+};
+
 #NOP -- This is to ignore necromancers killing their undead horde of summons;
 #action {^Undead{ (screeches in agony and falls to the ground, dead|gasps for breath, then slumps into death|gurgles in his own blood as he dies|gurgles in her own blood as she dies|gurgles in its own blood as it dies){1}\.$}} {#NOP} {1};
 
@@ -46,15 +51,18 @@
     #NOP -- Set this to NA here and it will be picked up if the killer comes through on the next line;
     #var deathReport[mob_killer] NA;
     #var deathReport[mob_killed] %1;
+    _cleanMobKilled;
     #var kbIgnore 0;
     #var fakeKill 0;
     _kbCheckIgnore;
     #if !$kbIgnore {
+        #NOP -- Types any rep gained around now as Combat Based - see common/reps.tin;
+        .reps_combat_mark;
         #line oneshot #action {^%* dealt the killing blow to %*.} {
             #var deathReport[mob_killer] %%1;
             _killerCheckIgnore;
         };
-
+        #delay .3 {
         #if !$fakeKill {
             #if {$corpsetrigKB} {
                 #if {"$deathReport[mob_killer]" == "$user_cap"} {corpse_trig}
@@ -63,6 +71,7 @@
             };
             update_xp;
             update_coins;
+            #if {"$eternal" == "1"} {_update_eternal_gxp};
             #NOP -- Clean up other tracking from modules/dmgtracker.tin and common/status.tin;
             #if $dmgtracker {.dmg_round_reset;#var cmbt[affects][convoke] 0};
 
@@ -86,7 +95,6 @@
                         #var toggles[fremen][enfeeblement] 1;
                         #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot off - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
                     };
-                    checkStrategy {suspend} {#send {!suspend}};
                 };
                 #NOP -- juggernaut;
                 #if {"$guild" == "juggernaut"} {
@@ -100,7 +108,7 @@
             };
         };
     };
-            
+};
     #if $bot[active] {
         #showme {----- BOT REGISTERED KILL -----};
         #NOP #local lastItem &deathSummary[];
@@ -113,7 +121,9 @@
 } {2};
 
 #alias .processDeathReport {
-    #var deathReport[mob_rounds_to_kill] $mip[round];
+    #NOP -- Using last round + 1 tends to be more accurate than mip[round] since it captures blicks and;
+    #NOP -- instances that the mip data comes through with an update upon death to set the round to 0;
+    #math deathReport[mob_rounds_to_kill] {$mip[last_round] + 1}; 
     #var deathReport[damage_dealt] 0;
     #var deathReport[corpses_used] $mob[corpses_used];
     #var deathReport[summons_killed] $mob[summons_killed];
@@ -123,6 +133,7 @@
     #var deathReport[mob_attacks_melee] $defense[current_mob_attempts][melee];
     #var deathReport[mob_attacks_special] $defense[current_mob_attempts][special];
     #var deathReport[mob_attacks_total] $defense[current_mob_attempts][total];
+    #var deathReport[mob_eradication] $mob[eternal_erad];
     #if {"$area" != ""} {#var deathReport[area] $area};
     #if {"$gxp[last-fight]" != ""} {#var deathReport[gxp_earned] $gxp[last-fight]};
     #if {"$gxp[last-fight-per-round]" != ""} {#var deathReport[gxp_earned_per_round] $gxp[last-fight-per-round]};
@@ -140,11 +151,13 @@
         #var deathReport[dsave_count] 0;
         #var deathReport[dsave_nps] 0;
     };
+
     
     #NOP -- Small delay to make sure we get the variables from the updates;
     #delay 1 {
         #var deathReport[xp_earned] $fight_xp;
         #var deathReport[coins_earned] $fight_coins;
+        #var deathReport[eternal_gxp] $my[eternal][gxp][last_fight];
         #math deathReport[xp_to_class] {$fight_xp / $deathReport[class] * 1.00};
 
         #list deathSummary_mob add {$deathReport[mob_killed]};
@@ -163,6 +176,9 @@
         #list deathSummary_mob_attacks_melee add {$deathReport[mob_attacks_melee]};
         #list deathSummary_mob_attacks_specials add {$deathReport[mob_attacks_special]};
         #list deathSummary_mob_attacks_total add {$deathReport[mob_attacks_total]};
+        #list deathSummary_eternal_gxp add {$deathReport[eternal_gxp]};
+        #list deathSummary_eternal_erad add {$deathReport[eternal_erad]};
+        #list deathSummary_reps add {$deathReport[reps]};
         
 
         #if {"$guild" == "necromancer"} {
@@ -430,6 +446,7 @@
 #list corpseList add {{{name} {spoon} {guild} {all} {action} {eat corpse} {active} {0} {description} {Spoon: Eat Corpse}}};
 #list corpseList add {{{name} {cocoon} {guild} {all} {action} {fuse 100} {active} {0} {description} {Cocoon: Fuse 100hps}}};
 #list corpseList add {{{name} {cocoon500} {guild} {all} {action} {fuse 500} {active} {0} {description} {Cocoon: Fuse 500hps}}};
+#list corpseList add {{{name} {zsatchel} {guild} {all} {action} {put soul in satchel} {active} {0} {description} {Zodiac Satchel: Puts orbs and souls into satchel}}};
 
 #NOP -- bard;
 #list corpseList add {{{name} {dirge} {guild} {bard} {action} {perform dirge}  {active} {0} {description} {Bard: Perform Dirge}}};
@@ -455,6 +472,13 @@
 #list corpseList add {{{name} {cdrain2} {guild} {elemental} {action} {evoke corpse drain;evoke corpse drain} {active} {0} {description} {Elemental: Corpse Drain x2}}};
 #list corpseList add {{{name} {mDepletion} {guild} {elemental} {action} {evoke mental depletion on corpse} {active} {0} {description} {Elemental: Mental Depletion}}};
 #list corpseList add {{{name} {vortex} {guild} {elemental} {action} {put all in vortex} {active} {0} {description} {Elemental: Put all in vortex}}};
+
+#NOP -- Knight;
+#list corpseList add {{{name} {bury} {guild} {knight} {action} {bury corpse}  {active} {0} {description} {Knight: Bury Corpse}}};
+#list corpseList add {{{name} {bury2} {guild} {knight} {action} {bury corpse;bury corpse}  {active} {0} {description} {Knight: Bury Corpse 2x}}};
+#list corpseList add {{{name} {stake} {guild} {knight} {action} {cut head;get head;impale head on stake}  {active} {0} {description} {Knight: Headhunter -> Impale Heads on Stakes}}};
+
+
 
 #NOP -- necromancer;
 #list corpseList add {{{name} {preserve} {guild} {necromancer} {action} {qtrance preserve get/keep all preservation}  {active} {0} {description} {Necro: Preserve Remains}}};
@@ -500,8 +524,7 @@
                 #if {"$corpseActions[$item][name]" == "delay"} {
                     #if {$bot[active]} {
                         #NOP -- If the bot has already been paused, note that and don't unpause automatically after delay;
-                        #if $bot[paused] {#var pauseCorpseActionBot 1} {#var pauseCorpseActionBot 0};
-                        .pause
+                        #if !$bot[paused] {#var pauseCorpseActionBot 1;.pause};
                     };
                     #var pauseCorpseAction 1;
                     #var lastItem $item;
@@ -515,10 +538,9 @@
                 #delay 2 {
                     #loop $nextItem &corpseActions[] item {
                         $corpseActions[$item][action];
-                        #var pauseCorpseAction 0;
                     };
                     #if {$bot[active]} {
-                        #if !$pauseCorpseActionBot {.unpause};
+                        #if $pauseCorpseActionBot {.unpause;#var pauseCorpseActionBot 0};
                         .bot
                     };
                 };

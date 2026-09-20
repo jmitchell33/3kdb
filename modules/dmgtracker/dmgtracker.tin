@@ -260,9 +260,6 @@ dreset;
     #var cmbt[affects][shield_bash] 1;
 } {2};
 
-#action {^A bolt of pure energy flies out of the sky striking %*!$} {
-    #var cmbt[affects][eradication] 1;
-} {2};
 
 #action {^With iron will, you finally guide the deadly spell toward its target!$} {
     #var cmbt[affects][iprime] 1;
@@ -334,11 +331,26 @@ dreset;
 };
 
 #action {^%* hits you for %d damage!$} {
-    #local dmgAmount {};
+    #var incombat 1;
     #format dmgAmount {%d} {%2};
     #format dmgDisplay {%g} {$dmgAmount};
-    #line gag;
-    #echo {%1 hits you for $dmgDisplay damage!};
+    
+    #var dmgt[curr] $dmgAmount;
+    #math dmgt[dmg] {$dmgt[dmg] + $dmgAmount};
+    #math dmgt[count] {$dmgt[count] + 1};
+    #math dmgt[avg] {$dmgt[dmg] / $dmgt[count]};
+    
+    #if $gags[combat_numbers] {
+        #line gag;
+    } {
+        #line gag;
+        #if {"$theme[idmg_display]" == ""} {
+            #echo {%1 hits you for $dmgDisplay damage!};
+        } {
+            #format dmgEcho {$theme[idmg_display]} {$enemy[name_numbers]} {$dmgDisplay};
+            #echo {$dmgEcho};
+        };
+    };
 } {2};
 
 #NOP -- If you've just conjured undeads with necromancer, ignore those;
@@ -482,13 +494,6 @@ dreset;
     }
 } {2};
     
-#act {%1 hits you for %2 damage!} {
-    #var incombat 1;
-    #var dmgt[curr] %2;
-    #math dmgt[dmg] {$dmgt[dmg] + %2};
-    #math dmgt[count] {$dmgt[count] + 1};
-    #math {dmgt[avg]} {$dmgt[dmg] / $dmgt[count]};
-} {2};
 
 
 

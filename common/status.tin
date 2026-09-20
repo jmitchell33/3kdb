@@ -74,6 +74,14 @@
 		#NOP #var workings[quicken] 0;
 		#NOP #var workings[deathfield] 0;
     };
+
+    #if {"$guild" == "cyborg"} {
+        #var mob[nano] 0;
+    };
+
+    #if {"$major_prof" == "trapper"} {
+        #var mob[trap_blind] 0;
+    };
     
     #var mob[ewell] 0;
     #var mob[shred] 0;
@@ -86,6 +94,7 @@
     #var mob[class] 0;
     #var mob[gremlin] 0;
     #var mob[shred] 0;
+    #var mob[eternal_erad] 0;
 
     #var enemy[last_round] 1;
     #var enemy[round_change] 0;
@@ -93,6 +102,8 @@
     #unvar enemy[kill_rate];
 
     #var defense[current_mob_attempts] {};
+
+    #var rep_change 0;
 };
 
 #alias stat_record {
@@ -103,6 +114,29 @@
     };
 };
 
+#alias _bootVar_import {
+    #read vars/boot.tin;
+    #var doorcombos $xdoorcombos;
+    #var rolm $xrolm;
+    #var boot_number $xboot_number;
+
+    #if {"$doorcombos" == "$xdoorcombos"} {#var doorcombos {}};
+    #if {"$rolm" == "$xrolm"} {#var rolm {}};
+
+};
+
+#alias _bootVar_export {
+    #class bootVars open;
+    #unvar xrolm;
+    #unvar xdoorcombos;
+    #unvar xboot;
+    #if {"$boot_number" == ""} {#NOP} {#var xboot_number $boot_number};
+    #if {"$rolm" == ""} {#NOP} {#var xrolm $rolm};
+    #if {"$doorcombos" == ""} {#NOP} {#var xdoorcombos $doorcombos};
+    #class bootVars close;
+    #class bootVars write vars/boot.tin;
+};
+
 #alias _variable_export {
     #class global open;
     #map get roomvnum xcurvnum;
@@ -111,15 +145,21 @@
     #var xmkaActions $mkaActions;
     #var xspiceBeers $spiceBeers;
     #var xlastBot $lastBot;
-    #var xrolm $rolm;
     #var xtheme $theme;
     #var xgags $gags;
     #var xmy $my;
     #var xwhitelist $whitelist;
+    #var xdungeon $dungeon;
+    #NOP -- Chat blacklist (list) for MIP chat window;
+    #list xblacklist copy blacklist;
     #var xchat[log][emotes] $chat[log][emotes];
     #var xdReportList $dReportList;
     #var xtoggles $toggles;
+    #var xdiscordPost $discordPost;
     #var xdeadmanIdleTimeout $deadmanIdleTimeout;
+    #var xdeadmanTimeoutActions $deadmanTimeoutActions;
+    #var xdeadman_armed $deadman_armed;
+    #var xmajor_prof $major_prof;
 
     #NOP -- These variables are at a minimum used to draw somewhere;
     #var xsplit $split;
@@ -130,8 +170,18 @@
     #var xmap $map;
     #var xdraw_room $draw_room;
 
+    #NOP -- Class/Guild/Prof/Etc. Specific;
+    #if {"$guild" == "knight"} {
+        #var xbattlecry $battlecry;
+    };
+
+    #if {"$major_prof" == "trapper"} {
+        #var xscroungeOrder $scroungeOrder;
+    };
+
     #class global close;
     #class global write chars/$user/vars.tin;
+    _bootVar_export;
 };
 
 #alias _variable_import {
@@ -142,7 +192,9 @@
     #var mkaActions $xmkaActions;
     #var hpbar $xhpbar;
     #var spiceBeers $xspiceBeers;
-    #var rolm $xrolm;
+    #var major_prof $xmajor_prof;
+    
+    #var dungeon $xdungeon;
     #var lastBot $xlastBot;
     #var theme $xtheme;
     #var gags $xgags;
@@ -151,9 +203,22 @@
     #var chat[log][emotes] $xchat[log][emotes];
     #var dReportList $xdReportList;
     #var toggles $xtoggles;
+    #if {"$xdeadman_armed" == "" || "$xdeadman_armed" == "xdeadman_armed"} {#var deadman_armed 1} {#var deadman_armed $xdeadman_armed};
     #var deadmanIdleTimeout $xdeadmanIdleTimeout;
-    
-    #var split $split;
+    #format {_dm_import_int} {%d} {$deadmanIdleTimeout};
+    #if {"$deadmanIdleTimeout" == "" || "$deadmanIdleTimeout" == "xdeadmanIdleTimeout"} {
+        #var deadmanIdleTimeout 900;
+        #var deadman_armed 1;
+    } {
+        #if {$_dm_import_int <= 0} {#var deadmanIdleTimeout 900};
+    };
+    #var deadmanTimeoutActions $xdeadmanTimeoutActions;
+
+    #NOP -- Restore chat blacklist from saved xblacklist so it persists across ld;
+    #list blacklist clear;
+    #if {&xblacklist[] > 0} {#loop 1 &xblacklist[] _blidx {#list blacklist add {$xblacklist[$_blidx]}}};
+
+    #var split $xsplit;
     #var hpbar $xhpbar;
     #var caption $xcaption;
     #var caption_data $xcaption_data;
@@ -161,12 +226,11 @@
     #var map $xmap;
     #var draw_room $xdraw_room;
 
-    #if {"$strategyActive" == "xstrategyActive"} {#var strategyActive {}};
-    #if {"$corpseActions" == "xcorpseActions"} {#var corpseActions {}};
-    #if {"$mkaActions" == "xmkaActions"} {#var mkaActions {}};
+    #if {"$strategyActive" == "$xstrategyActive"} {#var strategyActive {}};
+    #if {"$corpseActions" == "$xcorpseActions"} {#var corpseActions {}};
+    #if {"$mkaActions" == "$xmkaActions"} {#var mkaActions {}};
     #if {"$hpbar" == "$xhpbar"} {#var hpbar {}};
     #if {"$spiceBeers" == "$xspiceBeers"} {#var spiceBeers {$xspiceBeers}};
-    #if {"$rolm" == "$xrolm"} {#var rolm {}};
     #if {"$lastBot" == "$xlastBot"} {#var lastBot {}};
     #if {"$theme" == "$xtheme"} {#var theme {}};
     #if {"$gags" == "$xgags"} {#var gags {}};
@@ -174,6 +238,23 @@
     #if {"$whitelist" == "$xwhitelist"} {#var whitelist {}};
     #if {"$dReportList" == "$xdReportList"} {#read common/3kReport.tin};
     #if {"$toggles" == "$xtoggles"} {#var toggles {}};
+    #if {"$xdiscordPost" == "" || "$xdiscordPost" == "xdiscordPost"} {#var discordPost 0} {#var discordPost $xdiscordPost};
+    #var toggles[discord_post] $discordPost;
+    #if {"$deadmanTimeoutActions" == "$xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};
+    #if {"$major_prof" == "$xmajor_prof"} {#var major_prof {}};
+    #if {"$dungeon" == "$xdungeon"} {#var dungeon {}};
+
+    #if {"$guild" == "knight"} {
+        #var battlecry $xbattlecry;
+        #if {"$battlecry" == "$xbattlecry"} {#var battlecry {}};
+    };
+
+    #if {"$major_prof" == "trapper"} {
+        #var scroungeOrder $xscroungeOrder;
+        #if {"$scroungeOrder" == "$xscroungeOrder"} {#var scroungeOrder {}};
+    };
+
+    _bootVar_import;
 };
 
 #NOP Export user status every 10 mins;
@@ -186,7 +267,7 @@
 
 
 #NOP -- Guild GXP Trackers;
-#if {"$guild" == "mage" || "$guild" == "monk"} {
+#if {"$guild" == "mage" || "$guild" == "monk" || "$guild" == "elemental"} {
     #NOP -- 30 round rolling gxp average;
     #alias .gxp_t30_add {
         #if {&my[gxp][t30][] > 30} {
@@ -232,6 +313,25 @@
 };
 
 #if {"$guild" == "knight" || "$guild" == "fremen"} {
+    #alias .gxp_t30_add {
+        #if {&my[gxp][t30][] > 30} {
+            #list my[gxp][t30] delete 1;
+            #list my[gxp][t30] add $my[gxp][last_round];
+        } {
+            #list my[gxp][t30] add $my[gxp][last_round];
+        };
+        #if {&my[gxp][t30][] > 0} {
+            #var my[gxp][t30_total] 0;
+            #var tmpIx 1;
+            #loop 1 &my[gxp][t30][] tmpIx {
+                #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][t30][$tmpIx]};
+            };
+        };
+        #math my[gxp][t30_average] {$my[gxp][t30_total] / &my[gxp][t30][]};
+        #math my[gxp][t30_per_hr] {$my[gxp][t30_average] * 30 * 60};
+        #format my[gxp][str_t30_per_hr] {%M} {$my[gxp][t30_per_hr]};
+    };
+
     #alias .gxp_time {
         #format {my[gxp][report-time]} {%T} {};
         #math my[gxp][delta-time] {$my[gxp][report-time] - $my[gxp][start-time]};
@@ -244,6 +344,10 @@
         };
     };
 
+    #alias .gxp_total_add {
+        #format my[gxp][current_gxp] {%d} $my[fremen][gxp][total];
+    };
+
     #alias reset_gxp {
         #var my[gxp][hour] 0;
         #var my[gxp][total] 0;
@@ -251,9 +355,24 @@
         #var my[gxp][average] 0;
         #var my[gxp][rounds_tracked] 0;
         #var my[gxp][starting_round] $total_rounds;
+        #var my[gxp][t30] {};
         #format {my[gxp][start-time]} {%T} {};
+        
+        #switch {"$guild"} {
+            #case {"fremen"} {
+                #format my[gxp][starting_gxp] {%d} $my[fremen][gxp][total];
+            };
+            #default {
+                #var my[gxp][starting_gxp] 0;
+            };
+        };
     };
     #delay 10 {reset_gxp};
+};
+
+#alias _get_boot {
+    #send {!uptime};
+    #line oneshot #action {|  Current Reboot : \#%d %*} {#var boot_number %%1} {1};
 };
 
 #class player_status close

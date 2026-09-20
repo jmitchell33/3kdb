@@ -8,6 +8,7 @@
 #list strategyList add {{{guild} {necromancer} {name} {harvest} {active} {0} {description} {Reaper: Grim Harvest}}};
 #list strategyList add {{{guild} {necromancer} {name} {soulbind} {active} {0} {description} {Reaper: Soulbind}}};
 #list strategyList add {{{guild} {necromancer} {name} {blaze} {active} {0} {description} {Reaper: Blaze}}};
+#list strategyList add {{{guild} {necromancer} {name} {blaze_prime} {active} {0} {description} {Reaper: Blaze Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {rabies} {active} {0} {description} {Were: Rabies}}};
 #list strategyList add {{{guild} {necromancer} {name} {fury_prime} {active} {0} {description} {Were: Fury Prime}}};
 #list strategyList add {{{guild} {necromancer} {name} {fury} {active} {0} {description} {Were: Fury}}};
@@ -25,15 +26,36 @@
 #list strategyList add {{{guild} {necromancer} {name} {diurnum} {active} {0} {description} {Necro: Diurnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {nocturnum} {active} {0} {description} {Necro: Nocturnum}}};
 #list strategyList add {{{guild} {necromancer} {name} {iprime} {active} {0} {description} {Invoke Prime}}};
+#list strategyList add {{{guild} {necromancer} {name} {iprime1} {active} {0} {description} {Invoke Prime MAXXXXX (requires any 2 of BGH, DM, or Assassin Proc'ing)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure} {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure1} {active} {0} {description} {Conjure Undead: Conjure and Nuke Them (No Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {conjure2} {active} {0} {description} {Conjure Undead: Conjure, Nuke, UA, Rapture (No Unholy Ground)}}};
 #list strategyList add {{{guild} {necromancer} {name} {gemino} {active} {0} {description} {Preserve Gemino Corpses}}};
 #list strategyList add {{{guild} {necromancer} {name} {ug} {active} {0} {description} {Unholy Ground}}};
+#list strategyList add {{{guild} {necromancer} {name} {spark} {active} {0} {description} {Lich: Spark}}};
+#list strategyList add {{{guild} {necromancer} {name} {spark_prime} {active} {0} {description} {Lich: Spark Prime}}};
 #list strategyList indexate name;
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
+    #if {$mip[round] > 5 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 40} {
+        #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
+            checkStrategy {iprime1} {
+                #if {$my[necromancer][repower][current] < 70} {
+                    #math iprime_boosts {$cmbt[affects][BGH] + $cmbt[affects][DM] + $cmbt[affects][assassin]};
+                    #if {$iprime_boosts >= 2} {
+                        #var iprime_round 0;
+                        ip1;
+                        #delay 10 {#var iprime_round 1};
+                    };
+                } {
+                    #var iprime_round 0;
+                    ip1;
+                    #delay 10 {#var iprime_round 1};
+                };
+            };
+        };
+    };
     #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
         #if {$iprime_round && $my[necromancer][invoke-prime] > 0} {
             checkStrategy {iprime} {#var iprime_round 0;ip1;#delay 10 {#var iprime_round 1}};
@@ -74,7 +96,7 @@
             checkStrategy {skullfire} {skullfire};
         };
 
-        #if {$my[necromancer][conjure_undead] > 0} {
+        #if {$my[necromancer][conjure_undead] > 0 && $_nukeUndead} {
             #if {$my[gp1][current] < 50000} {
                 checkStrategy {conjure} {nukeUndeadAbs};
                 checkStrategy {conjure1} {nukeUndead_noUG_Abs};
@@ -95,10 +117,7 @@
     #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][illuming]} {
         checkStrategy {illume} {illume};
     };
-    
-    #if {$my[necromancer][glamors][current] >= 1 && $my[gp1][current] < 50000 && !$my[necromancer][glamors][blazing]} {
-        checkStrategy {blaze} {blaze};
-    };
+ 
 };
 
 #NOP -- Actions to perform the first rounds of combat;
@@ -111,11 +130,15 @@
     checkStrategy {scythe} {scythe};
     checkStrategy {call} {call};
     checkStrategy {psibleed} {psibleed};
-    checkStrategy {fury_prime} {#if {$my[necromancer][glamors][current]} {fury prime}};
-    checkStrategy {fury} {#if {$my[necromancer][glamors][current]} {fury}};
-    checkStrategy {rage_prime} {#if {$my[necromancer][glamors][current]} {rage prime}};
-    checkStrategy {rage} {#if {$my[necromancer][glamors][current]} {rage}};
+    checkStrategy {fury_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {fury prime}};
+    checkStrategy {fury} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {fury}};
+    checkStrategy {rage_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {rage prime}};
+    checkStrategy {rage} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {rage}};
     checkStrategy {bloodlet} {#if {$my[necromancer][decanters][empty] > 0} {#if $vaf[numbers] {bloodlet $enemy[name_numbers]} {bloodlet $enemy[target]}};};
+    checkStrategy {spark_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 2} {spark prime}};
+    checkStrategy {spark} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {spark}};
+    checkStrategy {blaze_prime} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 2} {blaze prime}};
+    checkStrategy {blaze} {#if {"$my[necromancer][glamors][current]" != "" && $my[necromancer][glamors][current] >= 1} {blaze}};
 };
 
 #class {guild_strategy} {close};

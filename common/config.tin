@@ -42,11 +42,14 @@
     examine cooler;
     touch diamond rune;
     #send {(powers};
+    
     .update_gags;
     init_screen;
     draw_all;
     _mob_status_clear;
     reset_trackers;
+
+    #if {"$eternal" == "1"} {_update_eternal_gxp init};
     #NOP -- Gag the few things this checks if it's not there for spam;
     #line oneshot #gag {^That is not here or it is uninteresting. (cooler?)};
     #line oneshot #gag {^You find nothing of interest.};
@@ -54,6 +57,17 @@
     #line oneshot #gag {^There is no reason to '(powers' here.};
     #line oneshot #gag {^There is no reason to 'spellDmg-clear' here.};
     #line oneshot #gag {^There is no reason to 'summonDmg-clear' here.};
+
+    #NOP -- Set reps starting values;
+    .check_reps start;
+
+
+    #NOP -- Some files don't seem to read in changes always, read these in again just because;
+    #read common/themes.tin;
+    #read common/3kReport.tin;
+
+    #NOP -- Get boot number;
+    _get_boot;
 };
 
 #alias {reset_trackers} {
@@ -78,8 +92,8 @@
      #map flag terrain on;
      #map flag direction on;
      #delay {1} {hp};
-     #delay {4} {_update_players};
      #delay {6} {_area_speedruns;_area_bots;3kdb_banner};
+     #delay {10} {_update_players};
 };
 
 #alias {load_guild} {
@@ -94,6 +108,7 @@
     notify on;
     init_screen;
     #send {aset look_monster_pref -M-_};
+    #send {aset look_monster_suff};
 	#send {aset look_player -P-_};
 	#send {aset room_short_pref -R-_};
 	#send {aset room_short_suff -R-_};
@@ -107,12 +122,17 @@
 	#send {aset look_armour -a-};
 	#send {aset look_other -i-};
     #send {aset say_pref hicyan};
+    #send {aset say_suff};
 	#send {prompt >$nl$};
     #send {aset world_drop_pref -!!!-};
     #line oneshot #action {^You will no longer see the HP bar on the main screen.$} {forcehp};
     #line oneshot #action {^Notify off for all.$} {notify on};
     mka-on;
     mka-clear;
+
+    #NOP -- Read some files that need to be read in once for some reason;
+    #read common/themes.tin;
+    #read common/3kReport.tin;
 	#echo {Setup successful!};
 };
 
@@ -204,24 +224,40 @@
 #NOP -- Choose which profession to load;
 #alias {_load_profession} {
     #class tmp_profession open;
-    #action {Profession #1 : Transmuter%s\(Level %d\)%*} {
+    #action {Profession #1 : Transmuter%s\(Level%s%d\)%*} {
         #read modules/professions/transmuter.tin;
-        #var transmuter[level] %%2;
+        #var transmuter[level] %%3;
+        #var major_prof transmuter;
     } {1};
 
-    #action {Profession #1 : Reforger%s\(Level %d\)%*} {
+    #action {Profession #1 : Reforger%s\(Level%s%d\)%*} {
         #read modules/professions/reforger.tin;
-        #var reforger[level] %%2;
+        #var reforger[level] %%3;
+        #var major_prof reforger;
     } {1};
 
-    #action {Profession #1 : Golem Master%s\(Level %d\)%*} {
+    #action {Profession #1 : Golem Master%s\(Level%s%d\)%*} {
         #read modules/professions/golem_master.tin;
-        #var golem_master[level] %%2;
+        #var golem_master[level] %%3;
+        #var major_prof golem_master;
     } {1};
 
-    #action {Profession #1 : Marshal%s\(Level %d\)%s\[%*\]} {
+    #action {Profession #1 : Marshal%s\(Level%s%d\)%s\[%*\]} {
         #read modules/professions/marshal.tin;
-        #var marshal[level] %%2;
+        #var marshal[level] %%3;
+        #var major_prof marshal;
+    } {1};
+
+    #action {Profession #1 : Herbologist%s\(Level%s%d\)%s\[%*\]} {
+        #read modules/professions/herbologist.tin;
+        #var herbologist[level] %%3;
+        #var major_prof herbologist;
+    } {1};
+
+    #action {Profession #1 : Trapper%s\(Level%s%d\)%*} {
+        #read modules/professions/trapper.tin;
+        #var trapper[level] %%3;
+        #var major_prof trapper;
     } {1};
     #class tmp_profession close;
 

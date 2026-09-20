@@ -1,9 +1,79 @@
 #class {mining} {kill}
 #class {mining} {open}
 
-#NOP -- turn miner on and off;
-#alias {miner-on} {#read modules/crafting/miner.tin};
-#alias {miner-off} {killbot};
+#NOP -- miner-on reads miner tin miner-off tears down all miner classes;
+#alias {miner-on} {
+    #read modules/crafting/miner.tin
+};
+
+#alias {miner-off} {
+    #undelay minewalk;
+    #undelay jminewalk;
+    #class {miner} {kill};
+    #class {jewelminer} {kill};
+    #path stop;
+    #var {_miner_path_driver} {};
+    #class {minebot} {kill};
+    #class {jewelminebot} {kill}
+};
+
+#action {^-M-_Daniel - The Grizzled Old Miner.$} {
+    #delay {minerInfo} {
+        #echo {<cdd> --------------     <cdb>3kdb MINER<cdd>      -------------};
+        #echo {<cdd>   Use the alias <cfb>miner-on<cdd> to read the mining bot};
+        #echo {<cdd>   Use the alias <fab>miner-off<cdd> to stop the mining bot};
+        #echo {<cdd> ------------------------------------------------};
+    } {.3};
+    #NOP -- If you don't have a miner level, grab it;
+    #if {"${craft_mining[data][skill_level]}" == ""} {
+        #echo {<cdd> 3kdb: Player Miner level not found, attempting to find it...};
+        #send {craftstats};
+    };
+} {1};
+
+#NOP -- Detect miner level capture using the mud command craftstats;
+#action {^  Mining     : %s%d / %s%d \(%s%d\%\) \[%s%*%s\]$} {
+    #var craft_mining[data][skill_level] %2;
+} {2};
+
+#alias {_mining_get_training_deposits} {
+    #var tmpList $crafting_deposits[data][deposits];
+    #var mine_training_list <cdd>Craft GXP will be earned from: ;
+    #if {&tmpList[] > 0} {
+        #loop 1 &tmpList[] i {
+            #if {$tmpList[$i][max-level] >= $craft_mining[data][skill_level] && $tmpList[$i][min-level] <= $craft_mining[data][skill_level]} {
+                #cat mine_training_list {<efd>$tmpList[$i][deposit] };
+            };
+        };
+    };
+};
+
+
+#event {END OF PATH} {
+    #if {"$_miner_path_driver" == "ore"} {
+        #math curr_level {$curr_level + 1};
+        #if {$curr_level > $num_levels} {
+            #var {_miner_path_driver} {};
+            miner-off;
+        } {
+            #path load ${mine$mine_levels[${curr_level}]};
+            miner;
+            _step_room;
+        };
+    } {
+        #if {"$_miner_path_driver" == "jewel"} {
+            #math jewel_curr_level {$jewel_curr_level + 1};
+            #if {$jewel_curr_level > $jewel_num_levels} {
+                #var {_miner_path_driver} {};
+                miner-off;
+            } {
+                #path load ${mine$jewel_mine_levels[${jewel_curr_level}]};
+                jewelminer;
+                _step_jewel_room;
+            };
+        };
+    };
+};
 
 #NOP -- lookup mining deposits;
 #alias deposit-lookup {
@@ -75,6 +145,5 @@
         #echo {<fba>------------------------------------------------------------------<088>};
     };
 };
-
 
 #class {mining} {close}

@@ -6,6 +6,14 @@
     #delay 2 {#foreach $party[member][%*] member {bless $member[name-lower]};};
 };
 
+#alias {buff} {
+    bless %0;beneficence %0;
+};
+
+#alias {buff_party} {
+    members;
+    #delay 2 {#foreach $party[member][%*] member {bless $member[name-lower];beneficence $member[name-lower];}};
+};
 
 #NOP -- reset priest gxp tracking;
 #alias gxp_reset {

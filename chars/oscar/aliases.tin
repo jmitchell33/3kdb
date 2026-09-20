@@ -20,26 +20,26 @@
 };
 
 #alias {setup_defense} {
-     clear_gc;
-     setup_gc;
-     #delay 2 {prots_ss};
-     #delay 4 {prots_MG};
-     #delay 6 {prots_ms};
-     #delay 8 {prots_armor};
-     #delay 10 {prots_ps};
-     #delay 12 {cast mantle};
+     #delay 2 {cast mantle};
+     #delay 4 {prots_ss};
+     #delay 6 {prots_MG};
+     #delay 8 {prots_ms};
+     #delay 10 {prots_armor};
+     #delay 12 {prots_ps};
      #delay 14 {prots_pfe};
+     #delay 16 {cast mindblank};
+     #delay 18 {clear_gc;setup_gc};
 };
 
 
 #alias {setup_gc} {
-     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
-     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
-     cast greater contingency as major globe#cast major globe;
-     cast greater contingency as stoneskin#cast stoneskin;
-     cast greater contingency as shield#cast magnificent shield;
-     cast greater contingency as armor#cast armor;
-     cast greater contingency as prot_evil#cast protection from evil;
+     #ticker {gc_mantle} {#if {$my[sp][current] > 2500} {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;#unticker gc_mantle}} {2};
+     #ticker {gc_prismatic} {#if {$my[sp][current] > 2500} {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;#unticker gc_prismatic}} {2};
+     #ticker {gc_major} {#if {$my[sp][current] > 2500} {cast greater contingency as major globe#cast major globe;#unticker gc_major}} {2};
+     #ticker {gc_stoneskin} {#if {$my[sp][current] > 2500} {cast greater contingency as stoneskin#cast stoneskin;#unticker gc_stoneskin}} {2};
+     #ticker {gc_shield} {#if {$my[sp][current] > 2500} {cast greater contingency as shield#cast magnificent shield;#unticker gc_shield}} {2};
+     #ticker {gc_armor} {#if {$my[sp][current] > 2500} {cast greater contingency as armor#cast armor;#unticker gc_armor}} {2};
+     #ticker {gc_prot_evil} {#if {$my[sp][current] > 2500} {cast greater contingency as prot_evil#cast protection from evil;#unticker gc_prot_evil}} {2};
 };
 
 #alias {clear_c} {

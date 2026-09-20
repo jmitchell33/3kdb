@@ -2,6 +2,48 @@
 #class {guild_aliases} {open}
 
 #NOP --- GUILD SPECIFIC ALIASES
+#alias battlecry {
+    #if {&battlecry[] > 0} {
+        #var ix &battlecry[];
+        #math randNum 1d${ix};
+        #send {!battlecry $battlecry[$randNum]};
+    } {
+        #send {!battlecry};
+    };
+};
 
+#alias battlecry+ {
+    #echo {  <bfc>Battlecry added: <fff>%0<088>};
+    #list battlecry add {%0};
+};
+
+#alias battlecry- {
+    #format tmpIx {%d} {%1};
+    #if {$tmpIx <= &battlecry[]} {
+        #echo {  <fcc>Removing battlecry: <fff>$battlecry[$tmpIx]<088>};
+        #list battlecry delete $tmpIx;
+    } {
+        #echo {  <bfc>Battlecry <fcc>$tmpIx <bfc>not found in the index.  There are currently a total of <fcc>&battlecry[] <bfc>battlecries.<088>};
+    };
+};
+
+#alias battlecry-list {
+    #format tmpUser {%u} {$user};
+    #echo {  <bbd>═══════════════════════════════════════════════════<088>};
+    #echo {  <fab>          ⚔  <fda>${tmpUser}'S BATTLECRIES<fab>  ⚔<088>};
+    #echo {  <bbd>═══════════════════════════════════════════════════<088>};
+    #if {&battlecry[] > 0} {
+        #loop 1 &battlecry[] ix {
+            #echo {   <fab>[$ix]<088> <fff>$battlecry[$ix]<088>};
+        };
+    } {
+        #echo {     <deb>No battlecries have been set.<088>};
+    };
+    #echo {\n  <bbd>═══════════════════════════════════════════════════<088>};
+    #echo {     <deb>battlecry+ <message> <eee>to add a battlecry.<088>};
+    #echo {     <deb>battlecry- # <eee>to remove a battlecry.<088>};
+
+    #echo {  <bbd>═══════════════════════════════════════════════════<088>};
+};
 
 #class {guild_aliases} {close}

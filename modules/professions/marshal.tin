@@ -1,6 +1,8 @@
 #class {marshal} kill;
 #class {marshal} open;
 
+#var cmbt[affects][marshal] 0;
+
 #NOP -- For right now this just burns heal
 #action {^A surge of leadership rushes through your veins,} {
     #if !$idle_flag {
@@ -30,8 +32,8 @@
 
 #NOP -- We'll use marshal on longer fights, but fire in the beginning;
 #ticker strategy_marshal {
-    #if {$mip[round] > 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] < 15} {
-        #if {$incombat && $my[marshal][charges] > 0 && $bot[active]} {
+    #if {$mip[round] >= 7 && $enemy[kill_rate_avg] >= 30 && $mip[round] <= 15} {
+        #if {$incombat && $my[marshal][charges] > 0} {
             #if {"$cmbt[affects][marshal]" == "0"} {
                 checkStrategy {rallycry-o} {
                     #if $vaf[numbers] {

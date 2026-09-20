@@ -1,8 +1,8 @@
 #class {guild_hpbar} kill;
 #class {guild_hpbar} open;
 
-#act {%*HP: %d/%d PP: %d/%d Chi: %d/%d G2:%d Mind: %d AE:%d/%d%} {
-    #line gag;
+#act {%*HP: %d/%d PP: %d/%d Chi: %d/%d G2:%p Mind: %d AE:%d/%d%} {
+    #if $gags[hpbar] {#line gag};
     #var my[monk][gxp] %8;
     #if {!$my[monk][gxp]} {#var g2n_last_round $my[monk][gxp]};
     #var my[monk][ae][current] %10;

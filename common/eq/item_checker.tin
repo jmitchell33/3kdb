@@ -1,0 +1,15 @@
+#class {item_checker} {kill};
+#class {item_checker} {open};
+
+
+#alias .checkItem {
+    #var tmpFoundWorldDrop 0;
+    #format tmpName {%p} {%0};
+	#var tmpWorldIx 1;
+	#loop 1 &items_world_drops[] tmpWorldIx {
+		#regex {$tmpName} {$items_world_drops[$tmpWorldIx]} {.notifyWorldDrop $items_world_drops[$tmpWorldIx]};
+	};
+};
+
+
+#class {item_checker} {close};

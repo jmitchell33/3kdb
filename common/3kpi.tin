@@ -5,8 +5,15 @@
 #alias jsonFormatEternal {
     #var apiPayload "character" : "$user";
     #foreach $eternalList[%*] index {
-        #if {"$index[cur_cd]" == "RDY"} {#var powerStatus "true"} {#var powerStatus "false"};
+        #if {"$index[cur_cd]" == "RDY"} {
+            #var powerStatus "true";
+            #var powerCooldown null;
+        } {
+            #var powerStatus "false";
+            #var powerCooldown $index[cur_cd];
+        };
         #cat apiPayload { , "$index[key]" : $powerStatus};
+        #cat apiPayload { , "cooldown_$index[key]" : $powerCooldown};
     };
 };
 
@@ -115,63 +122,46 @@
     jsonFormatEternal;
     #echo {Posting $user eternal powers to 3kdb in 3 seconds...};
     #delay 3 {
-        #script {python3 scripts/3kpiConnector.py $endpoint $apiPayload};
+        #script {apiPostEternalResult} {python3 scripts/3kpiConnector.py $endpoint $apiPayload 2>&1};
+        #echo {3kpi response: $apiPostEternalResult};
     };
 };
 
 #alias jsonFormatSatchel {
     update_satchel;
     #list apiSatchel clear;
-    #var apiCharacter "character" : "$user";
     #foreach $craft[satchel][%*] index {
         #var apiComponentName $index[name];
         #replace apiComponentName {'} {};
-        #var apiComponentName "component" : "$apiComponentName";
         #if {$index[legendary] > 0} {
-            #var apiData "component_quality" : "legendary", "quantity" : $index[legendary];
-            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+            #list apiSatchel add {$user,$apiComponentName,legendary,$index[legendary]};
         };
         #if {$index[superior] > 0} {
-            #var apiData "component_quality" : "superior", "quantity" : $index[superior];
-            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+            #list apiSatchel add {$user,$apiComponentName,superior,$index[superior]};
         };
         #if {$index[good] > 0} {
-            #var apiData "component_quality" : "good", "quantity" : $index[good];
-            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+            #list apiSatchel add {$user,$apiComponentName,good,$index[good]};
         };
         #if {$index[average] > 0} {
-            #var apiData "component_quality" : "average", "quantity" : $index[average];
-            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+            #list apiSatchel add {$user,$apiComponentName,average,$index[average]};
         };
         #if {$index[poor] > 0} {
-            #var apiData "component_quality" : "poor", "quantity" : $index[poor];
-            #list apiSatchel add {$apiCharacter , $apiComponentName , $apiData};
+            #list apiSatchel add {$user,$apiComponentName,poor,$index[poor]};
         };
     };
 };
 
 #alias apiPostSatchel {
-    #unvar apiSatchelPayload;
-    #var endpoint https://www.3kpi.icu/api/satchel/;
     jsonFormatSatchel;
-    #delay 1 {#echo {Posting $user satchel to 3kdb...}};
-    #delay 3 {
-        #var apiSatchelPayload [;
+    #echo {Posting $user satchel to 3kdb (&apiSatchel[] items)...};
+    #delay 1 {
+        #var apiSatchelPayload {};
         #loop 1 &apiSatchel[] item {
-            #if {$item < &apiSatchel[]} {
-                #cat apiSatchelPayload {\x7B};
-                #cat apiSatchelPayload {$apiSatchel[$item]};
-                #cat apiSatchelPayload {\x7D};
-                #cat apiSatchelPayload {,};
-            } {
-                #cat apiSatchelPayload {\x7B};
-                #cat apiSatchelPayload {$apiSatchel[$item]};
-                #cat apiSatchelPayload {\x7D};
-            };
+            #if {$item > 1} {#cat apiSatchelPayload {~}};
+            #cat apiSatchelPayload {$apiSatchel[$item]};
         };
-        #cat apiSatchelPayload {]};
-        #var apiSatchelPayload "satchel" : $apiSatchelPayload;
-        #NOP #script {python3 scripts/3kpiConnector.py $endpoint $apiSatchelPayload}
+        #script {apiSatchelResult} {python3 scripts/3kpiConnector_crafting.py https://www.3kpi.icu/api/satchel/ $apiSatchelPayload 2>&1};
+        #echo {3kpi satchel response: $apiSatchelResult};
     };
 };
 

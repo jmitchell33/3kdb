@@ -21,6 +21,30 @@
 	#if {"$draw[caption][active]" == "on"} {_caption_data_eternal};
 };
 
+
+#alias {_update_eternal_gxp} {
+	#if {"%1" == "init"} {#var initGxp 1} {#var initGxp 0};
+	#line oneshot #action {{^HP: (\d+)/(\d+)\s+Energy: (\d+)/(\d+)\s+G2L: (\d+)(?:\s+T:(\d+)%)?}} {
+		#if $initGxp {
+			#format my[eternal][gxp][current] {%d} {%%6};
+			#var my[eternal][gxp][last] 0;
+			#var my[eternal][gxp][last_fight] 0;
+		} {
+			#var my[eternal][gxp][last] $my[eternal][gxp][current];
+			#format my[eternal][gxp][current] {%d} {%%6};
+			#math my[eternal][gxp][last_fight] {$my[eternal][gxp][last] - $my[eternal][gxp][current]};
+		};		
+	} {1};
+	#send {!(hp};
+};
+
+#action {^A bolt of pure energy flies out of the sky striking %*!$} {
+    #var cmbt[affects][eradication] 1;
+    #math cmbt[erad][total] {$cmbt[erad][total] + 1};
+	#math mob[eternal_erad] {$mob[eternal_erad] + 1};
+} {2};
+
+
 #NOP -- Shortcuts for powers;
 
 #NOP -- embiggen - boost your stats;
@@ -61,6 +85,15 @@
 #alias {ewell} {
 	#echo {<efb>========== <baf>FIRING ENERGY WELL <efb>==========<088>};
 	#send {eternal energy well %0}
+};
+
+#NOP -- Function to toggle monsters not to automatically use Epowers on (high dodge, etc.);
+#alias _checkmob_epower {
+	#switch {"$enemy[name]"} {
+		#case {"Snare"} {
+			#var use_epower 0;
+		};
+	};
 };
 
 #NOP -- reload item;

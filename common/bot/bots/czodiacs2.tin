@@ -1,0 +1,336 @@
+#class {bot} {kill};
+#class {bot} {open};
+
+#var {area} {Celestial Zodiacs};
+#var check_room 0;
+#var toggle_rift_room 1;
+#var toggle_rift_room_empty 1;
+#var bot[zodiac_bt] 0;
+#var bot[zodiac_purge_kill] 0;
+
+#NOP -- mobs are evil, set rolm to angel;
+touch angel rune;
+
+#var bot_message_1 '---- Celestial Zodiacs - All Targets  ----';
+#showme $bot_message_1;
+
+#var {bot[path]} {shadows;w;nw;ne;n;e;se;nw;w;sw;s;w;n;nw;s;ne;e;w;sw;w;sw;se;e;w;nw;n;s;w;nw;n;ne;e;s;n;se;nw;ne;e;s;n;se;e;w;nw;ne;e;se;s;n;u;se;e;ne;n;w;nw;sw;nw;n;nw;n;ne;e;se;s;w;n;ne;n;ne;e;se;s;sw;nw;w;sw;s;sw;e;ne;se;w;s;sw;e;ne;n;ne;w;e;n;w;e;s;se;s;sw;w;nw;sw;nw;n;nw;d;s;sw;w;n;nw;s;se;sw;w;n;nw;s;se;sw;w;nw;n;ne;e;s;w;nw;n;ne;s;sw;w;nw;n;ne;e;se;e;s;se;n;nw;ne;e;se;s;sw;n;ne;e;se;s;sw;w;nw;w;sw;se;sw;w;d;s;sw;nw;w;se;e;s;w;sw;e;s;sw;w;ne;e;se;s;sw;w;nw;n;nw;n;e;ne;w;sw;nw;n;ne;e;se;s;w;n;ne;n;ne;e;se;s;sw;s;sw;s;se;w;e;ne;n;s;d;s;se;e;n;ne;s;sw;se;e;n;se;s;sw;s;n;w;nw;n;ne;e;ne;s;e;se;sw;ne;n;nw;ne;s;n;e;se;s;sw;w;nw;n;ne;nw;w;sw;s;se;sw;w;nw;n;ne;nw;w;sw;s;se;e;se;e;se;sw;w;nw;d;s;w;sw;e;ne;se;s;sw;w;nw;n;e;s;sw;nw;w;se;e;s;sw;w;nw;n;ne;n;e;ne;w;sw;nw;n;ne;se;e;ne;w;sw;nw;e;w;n;ne;e;se;s;se;s;se;s;d;s;se;ne;e;sw;w;s;se;e;ne;w;n;e;s;sw;w;s;se;e;ne;n;w;e;ne;n;nw;w;e;n;ne;n;nw;w;sw;s;e;se;w;nw;sw;s;e;n;nw;w;sw;s;se;s;d;s;sw;w;n;nw;s;se;sw;w;n;nw;s;se;sw;w;nw;n;ne;e;s;w;nw;n;ne;s;sw;w;nw;n;ne;e;se;e;s;se;n;nw;ne;e;se;s;sw;se;e;ne;n;nw;w;sw;w;nw;w;nw;w;sw;s;d;se;s;w;sw;e;ne;se;s;w;sw;e;ne;se;s;sw;w;nw;n;e;s;sw;nw;w;se;e;s;sw;w;nw;n;ne;n;e;ne;w;sw;nw;n;ne;e;w;n;ne;e;se;s;sw;s;se;s;sw;s;sw;w;enter;d;fall};
+
+#NOP -- Sometimes if a soul is on the ground, you try to kill that instead of the mob;
+#action {Soul is not a living thing.} {kill soul 2} {2};
+
+#list botmobs clear;
+#list botmobs add {{{long} {Lost Soul of the Zodiac} {target} {soul}}};
+
+#list botmobs add {{{long} {Desecrator of Anubis} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Thoth} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Hathor} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Isis} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Sekhmet} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Ptah} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Ra} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Osiris} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Sobek} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Bastet} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Ma'at} {target} {desecrator}}};
+#list botmobs add {{{long} {Desecrator of Horus} {target} {desecrator}}};
+
+#list botmobs add {{{long} {Asura of Brahma} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Durga} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Shiva} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Saraswati} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Hanuman} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Krishna} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Lakshmi} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Parvati} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Rama} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Ganesha} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Kali} {target} {asura}}};
+#list botmobs add {{{long} {Asura of Vishnu} {target} {asura}}};
+
+#list botmobs add {{{long} {Rotseer of Alder} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Holly} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Willow} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Birch} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Rowan} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Oak} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Hazel} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Ash} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Hawthorn} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Elder} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Ivy} {target} {rotseer}}};
+#list botmobs add {{{long} {Rotseer of Vine} {target} {rotseer}}};
+
+#list botmobs add {{{long} {Deceiver of Al-'Ilm} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Mawt} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Ta'asa} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Qisma} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Zawaj} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Sihha} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Sa'a} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Nasr} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Samt} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Rizq} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Mal} {target} {deceiver}}};
+#list botmobs add {{{long} {Deceiver of Al-Karir} {target} {deceiver}}};
+
+#list botmobs add {{{long} {Heretic of the Dragon} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Snow Lion} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Garuda} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Yeti} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Tiger} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Yak} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Rabbit} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Monkey} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Horse} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Sheep} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Elephant} {target} {heretic}}};
+#list botmobs add {{{long} {Heretic of the Partridge} {target} {heretic}}};
+
+#list botmobs add {{{long} {Bloodseer of Yum Kaax} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Ix} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Ixchel} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Hunahpu} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Kinich Ahau} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Akbal} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Ahau} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Chac} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Kukulkan} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Ah Puch} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Itzamna} {target} {bloodseer}}};
+#list botmobs add {{{long} {Bloodseer of Ixtab} {target} {bloodseer}}};
+
+#list botmobs add {{{long} {Skinwalker of the Rodent} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Falcon} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Otter} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Wolf} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Deer} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Woodpecker} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Bear} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Raven} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Goose} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Salmon} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Snake} {target} {skinwalker}}};
+#list botmobs add {{{long} {Skinwalker of the Owl} {target} {skinwalker}}};
+
+#list botmobs add {{{long} {Warlord of the Snake} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Monkey} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Ox} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Goat} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Dragon} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Rabbit} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Dog} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Rat} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Cat} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Horse} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Tiger} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Rooster} {target} {warlord}}};
+#list botmobs add {{{long} {Warlord of the Pig} {target} {warlord}}};
+
+#list botmobs add {{{long} {Blackguard of Cancer} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Libra} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Aries} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Aquarius} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Pisces} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Gemini} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Capricorn} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Virgo} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Leo} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Sagittarius} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Taurus} {target} {blackguard}}};
+#list botmobs add {{{long} {Blackguard of Scorpio} {target} {blackguard}}};
+
+#list botmobs add {{{long} {Nyxara, Warlord of the Cat} {target} {nyxara}}};
+#list botmobs add {{{long} {Zephyrak, the Void Sunderer} {target} {zephyrak}}};
+#list botmobs add {{{long} {Treasure Chest of Corruption} {target} {mimic}}};
+
+#list botmobs add {{{long} {%*, the Abomination} {target} {abomination}}};
+
+#list botmobs add {{{long} {Mimic} {target} {mimic}}};
+
+#action {A rift to forbidden treasures materializes before you!} {
+        #if {"$toggle_rift_room" == "1"} { 
+        .pause;
+        #map get roomvnum zodiac_riftVnum;
+        #echo {<fff>RIFT ROOM OPEN!<088>};
+        ptell rift room open! roomvnum: $zodiac_riftVnum;
+        #var toggle_rift_room 0;
+        #ticker riftRoom {
+            #if !$incombat {
+                rift;
+                fracture;
+                #map goto 54572;
+                open first chest;
+                open second chest;
+                open third chest;
+                open fourth chest;
+                open fifth chest;
+                open sixth chest;
+                #unticker riftRoom;
+            };
+        } {4};
+        #line oneshot #action {As the chest opens, panic washes over you!} {
+            #if {"$guild" == "juggernaut"} {
+                checkStrategy {mechwarrior} {support defend};
+            };
+            kill mimic;
+        } {1};
+    };
+} {1};
+
+#action {As you land the final blow upon the mimic} {
+    #delay 10 {
+        #if {"$zodiac_riftVnum" != ""} {rift;fracture;#map goto $zodiac_riftVnum};
+        #delay 3 {.unpause;glance};
+    };
+} {1};
+
+#action {This chest has already been opened.} {
+    #if {"$toggle_rift_room_empty" == "1"} {
+        #var toggle_rift_room_empty 0;
+        rift;
+        #map goto $zodiac_riftVnum;
+        #delay 3 {.unpause;glance};
+    };
+} {1};
+
+#action {A HORRIFIC ABOMINATION TEARS INTO EXISTENCE} {
+    .pause;
+    kill abomination;
+    #delay 6 {
+        .unpause;glance;
+    };
+} {1};
+
+#action {You are blind.} {
+    .pause;
+} {1};
+
+#action {Sight returns to your eyes, darkness becomes light again.} {
+    .unpause;glance;
+} {1};
+
+#action {^The warrior deftly disarms you!$} {
+    wield rod;
+} {1};
+
+#alias .chest_action {
+    .pause;
+    examine chest;
+    search chest;
+    #echo {chest found}
+};
+
+#action {You find some gold coins in the chest!} {get coins;exa chest} {1};
+
+#action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;glance} {1};
+
+
+#alias {.zodiac_resume_normal} {
+    #var bot[zodiac_bt] 0;
+    #var bot[zodiac_purge_kill] 0;
+    .unpause;
+    glance;
+};
+
+#alias {.zodiac_resume_backtrack} {
+    .pause;
+    glance;
+    #delay 2 {.zodiac_after_glance};
+};
+
+#alias {.zodiac_find_level_bounds} {
+    #var {zodiac_d_index} {0};
+    #var {zodiac_prev_d_index} {0};
+    #loop {1} {$bot[step]} {_zbi} {
+        #if {"${bot[steps][$_zbi]}" == "d"} {
+            #var {zodiac_prev_d_index} {$zodiac_d_index};
+            #var {zodiac_d_index} {$_zbi};
+        };
+    };
+    #if {$zodiac_d_index == 0} {
+        #var {zodiac_d_index} {$bot[step]};
+    };
+    #if {$zodiac_prev_d_index == 0} {
+        #var {zodiac_level_start} {1};
+    } {
+        #math {zodiac_level_start} {$zodiac_prev_d_index + 1};
+    };
+};
+
+#alias {.zodiac_physical_backstep} {
+    #if {"$bot[zodiac_bt]" != "1"} {#return};
+    #if {$bot[step] <= $zodiac_level_start} {#return};
+    #math {_zidx} {$bot[step] - 1};
+    #if {$_zidx < $zodiac_level_start} {#return};
+    #list {bot[steps]} {get} {$_zidx} {zodiac_tok};
+    #format {zodiac_tok} {%p} $zodiac_tok;
+    #switch {"$zodiac_tok"} {
+        #case {"n"} {#send s};
+        #case {"s"} {#send n};
+        #case {"e"} {#send w};
+        #case {"w"} {#send e};
+        #case {"ne"} {#send sw};
+        #case {"nw"} {#send se};
+        #case {"se"} {#send nw};
+        #case {"sw"} {#send ne};
+        #case {"u"} {#send d};
+        #case {"d"} {#send u};
+        #case {"enter"} {#send out};
+        #case {"out"} {#send enter};
+        #case {"portal"} {#send portal};
+        #case {"fall"} {#send fall};
+        #case {"shadows"} {#nop};
+        #default {
+            #var bot[zodiac_bt] 0;
+            .unpause;
+            #showme {Zodiac backstep unknown token $zodiac_tok};
+            glance;
+        };
+    };
+    #if {"$bot[zodiac_bt]" == "1"} {
+        #math {bot[step]} {$bot[step] - 1};
+        #var {bot[walk]} {0};
+    };
+};
+
+#alias {.zodiac_after_glance} {
+    #if {"$bot[zodiac_bt]" != "1"} {#return};
+    #if {$bot[step] <= $zodiac_level_start} {
+        .zodiac_resume_normal;
+        #return;
+    };
+    #if {$bot[foundmob]} {
+        #if {"$mob[target]" == "soul" || "$mob[target]" == "colossus" || "$mob[target]" == "mimic"} {
+            #var bot[zodiac_purge_kill] 1;
+            .unpause;
+            .determineBotAction;
+        } {
+            #var bot[zodiac_bt] 0;
+            .unpause;
+            .determineBotAction;
+        };
+    } {
+        .pause;
+        .zodiac_physical_backstep;
+        #delay .3 {glance};
+        #delay 2 {.zodiac_after_glance};
+    };
+};
+
+#action {^You cannot leave while dark celestials still roam this level.$} {
+    #var bot[zodiac_bt] 1;
+    .pause;
+    .zodiac_find_level_bounds;
+    #math {zodiac_undo_count} {$bot[step] - $zodiac_d_index};
+    #if {$zodiac_undo_count < 1} {#var zodiac_undo_count 1};
+    #loop {1} {$zodiac_undo_count} {_zu} {#map undo};
+    #var bot[step] $zodiac_d_index;
+    #var bot[walk] 0;
+    #delay .3 {glance};
+    #delay 2 {.zodiac_after_glance};
+} {1};
+
+
+#class {bot} {close};
+#read common/bot/generic.tin;

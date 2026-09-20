@@ -1,43 +1,106 @@
-#class {maphelper} {open}
+#class {maphelper} {kill};
+#class {maphelper} {open};
 
 #action {You have arrived at a dungeon entrance.} {rating};
 
+#alias .goHome {
+	#send {!home $my[home_id]};
+	#delay .01 {#map goto $my[home_vnum]};
+};
+
+#alias .setHome {
+	#format tmpNumber {%p} {%1};
+	#if {"$tmpNumber" == ""} {
+		#echo {     <efd>Please provide a house #.  Enter <cfc>showkeys<efd> to see your house numbers.};
+	} {
+		
+		#var my[home_id] $tmpNumber;
+	};
+	#map get roomvnum my[home_vnum];
+	#echo {   <cee> Home <bfc>$tmpNumber <cee>has been updated to vnum <bfc>$my[home_vnum]<cee>.  When exiting, use the alias <bfc>ld<cee> to save this for the future.<088>};
+};
+
+#NOP -- Enter the mapped exit (shop, magic, etc.) first, then the house flavor exit;
+#alias .mapHousePortal {
+    #switch {"%1"} {
+        #case {"shop"} {#map exit {%2} VNUM {2}};
+        #case {"magic"} {#map exit {%2} VNUM {148}};
+        #case {"crafting"} {#map exit {%2} VNUM {26}};
+        #case {"chaos"} {#map exit {%2} VNUM {24}};
+        #case {"science"} {#map exit {%2} VNUM {71}};
+        #case {"reception"} {#map exit {%2} VNUM {6673}};
+        #case {"smithy"} {#map exit {%2} VNUM {67}};
+        #case {"bank"} {#map exit {%2} VNUM {7}};
+        #case {"morgue"} {#map exit {%2} VNUM {107}};
+        #case {"pound"} {#map exit {%2} VNUM {113}};
+        #case {"newbie"} {#map exit {%2} VNUM {88}};
+        #case {"gypsy"} {#map exit {%2} VNUM {17}};
+        #case {"real_estate"} {#map exit {%2} VNUM {20}};
+        #case {"pub"} {#map exit {%2} VNUM {17537}};
+        #case {"resi"} {#map exit {%2} VNUM {85}};
+		#case {"arundin"} {#map exit {%2} VNUM {150}};
+    };
+};
+
+#alias .mapDigPortal {
+    #switch {"%1"} {
+        #case {"shop"} {#map dig {%2} {2}};
+        #case {"magic"} {#map dig {%2} {148}};
+        #case {"crafting"} {#map dig {%2} {26}};
+        #case {"chaos"} {#map dig {%2} {24}};
+        #case {"science"} {#map dig {%2} {71}};
+        #case {"reception"} {#map dig {%2} {6673}};
+        #case {"smithy"} {#map dig {%2} {67}};
+        #case {"bank"} {#map dig {%2} {7}};
+        #case {"morgue"} {#map dig {%2} {107}};
+        #case {"pound"} {#map dig {%2} {113}};
+        #case {"newbie"} {#map dig {%2} {88}};
+        #case {"gypsy"} {#map dig {%2} {17}};
+        #case {"real_estate"} {#map dig {%2} {20}};
+        #case {"pub"} {#map dig {%2} {17537}};
+        #case {"resi"} {#map dig {%2} {85}};
+		#case {"arundin"} {#map dig {%2} {150}};
+    };
+};
+
+
 #alias {maphelp} {
-	#show mapsave/mapload - save/load from map/3k_map.tin;
-	#show map <roomname> - set map at roomname;
-	#show infoPane - get current room info;
-	#show mapexit <exit> <command> - tell the exit dir to execute command;
-	#show mapname <name> - rename current room;
-	#show mapnote <note> - set current room note;
-	#show mapsym <char> - set the current rooms symbol;
-	#show mapgo <num> - Move the map to room #;
-	#show mapdig <dir> [new]- makes an exit in dir, new argument leads to new room;
-	#show mapdelete <exit> - deletes the exit (unlinks and deletes the room);
-	#show mapunlink <exit> - unlinks the exit from the room it points to;
-	#show maplink <exit> <room#> - link exit to a room;
-	#show mapinsert <room#> - insert a room	?;
-	#show mapm <dir> - move the map in dir;
-	#show maparea <name> - set area name for the current room;
-	#show areamapped <area> - show which rooms are mapped in this area;
+	#echo {mapsave / mapload - save or load common/map/3k_shared.map};
+	#echo {map <roomname> - set map at roomname};
+	#echo {infoPane - get current room info};
+	#echo {mapexit <exit> <command> - exit direction runs that command};
+	#echo {mapname <name> - rename current room};
+	#echo {mapnote <note> - set current room note};
+	#echo {mapsym <char> - set the current room symbol};
+	#echo {mapgo <num> - move the map cursor to room vnum};
+	#echo {mapdig <dir> [new] - new exit and room; optional second arg links back};
+	#echo {mapdelete <exit> - delete exit (unlinks and removes room)};
+	#echo {mapunlink <exit> - unlink exit from destination};
+	#echo {maplink <exit> <room#> - link exit to a room vnum};
+	#echo {mapinsert <room#> - insert a room};
+	#echo {mapm <dir> - move the map cursor one step};
+	#echo {maparea <name> - set area name for the current room};
+	#echo {areamapped <area> - list rooms mapped in that area};
+	#echo {go <name or vnum> - map run to speedrun name or numeric room vnum};
 };
 
 #alias {go} {
-	#if {$bloodarc_active} {
-		#echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
-		#var bloodarc_active 0;
-	} {
-		#if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
-		#map get roomvnum go_back;
-		#var roomfound 0;
-		#foreach $speedruns[%*] index {
-			#regexp {"%1"} {"$index[name]"} {
+    #if {$bloodarc_active} {
+        #echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
+        #var bloodarc_active 0;
+    } {
+        #if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
+        #map get roomvnum go_back;
+        #var roomfound 0;
+		#loop 1 &speedruns_name[] tmpItem {
+			#if {"%1" == "$speedruns_name[$tmpItem]"} {
 				#var roomfound 1;
-				#showme {Found room %1 - here we go!};
-				#map run $index[vnum];
-			}
+                #if {"$toggles[go_echo]" != "0"} {#echo {Found room %1 - here we go!}};
+                #map run $speedruns_vnum[$tmpItem];
+			};
 		};
-		#if !$roomfound {#showme {Unable to find %1}};
-	};
+        #if !$roomfound {#echo {Unable to find %1}};
+    };
 };
 
 #NOP -- Slowwalks based on getting new rooms;
@@ -53,14 +116,14 @@
 
 #alias {mapgo} {
 	#var roomfound 0;
-	#foreach $speedruns[%*] index {
-        #regexp {"%1"} {"$index[name]"} {
+	#loop 1 &speedruns_name[] tmpItem {
+		#if {"%1" == "$speedruns_name[$tmpItem]"} {
 			#var roomfound 1;
-            #showme {Found room %1 - teleporting map there!};
-			#map go $index[vnum];
-        };
-    };
-	#if !$roomfound {#showme {Unable to find %1}};
+            #echo {Found room %1 - teleporting map there!};
+			#map go $speedruns_vnum[$tmpItem];
+		};
+	};
+	#if !$roomfound {#echo {Unable to find %1}};
 };
 
 #alias {infoPane} {#map info};
@@ -70,47 +133,46 @@
 	#format time %t {%m-%d-%y};
 	#var filename common/map/3k_shared_$time.tin;
 	#map write $filename;
+	.map_restore_static_if_not_mapping;
 };
 
-#alias {mapsave} { #map write common/map/3k_shared.map force;#show Map saved.;};
-#alias {mapload} { #map read common/map/3k_shared.map;#show Map loaded.;};
+#alias {mapsave} { #map write common/map/3k_shared.map force;#echo {Map saved.};.map_restore_static_if_not_mapping;};
+#alias {mapload} { #map read common/map/3k_shared.map;#echo {Map loaded.};.map_restore_static_if_not_mapping;};
 
 
 /* Modify/extend the map helpers: */
 #alias {mapf} {#map flag %1 %2};
-#alias {mapexit} {#map exit {%1} {COMMAND} {%2};#show Map exit created. %2 will lead %1.;mapsave;};
-#alias {mapname} {#map name %1;#show Map room named: %1;mapsave;};
+#alias {mapexit} {#map exit {%1} {COMMAND} {%2};#echo {Map exit created. %2 will lead %1.};mapsave;};
+#alias {mapname} {#map name %0;#echo {Map room named: %0};mapsave;};
 #alias {mapdig} {
 	#map get roomvnum mapCurrentVnum;
 	#map dig {%1} new;
-	#show New exit and room created: %1;
+	#echo {New exit and room created: %1};
 	%1;
-	#show Reverse dir: %1;
+	#echo {Reverse dir: %1};
 	#map link {%2} {$mapCurrentVnum};
 	mapsave;
 };
 
-#alias {mapvnum} {#map get roomvnum curvnum;#show Map vnum $curvnum set to \$curvnum.;};
-#alias {maplm} {#map landmark {%0} {$curvnum};#show Map landmark created for room $curvnum: %0};
+#alias {mapvnum} {#map get roomvnum curvnum;#echo {Map vnum $curvnum set to \$curvnum.};};
+#alias {maplm} {#map landmark {%0} {$curvnum};#echo {Map landmark created for room $curvnum: %0}};
 
-#alias {mapsym} {#map set roomsymbol %1;#show Map symbol set to: %1;mapsave;};
-#alias {mapnote} {#map set roomnote %0;#show Room note set to: %0;mapsave;};
-#alias {mapdelete} {#map delete {%1};#show Exit deleted: %1;mapsave;};
-#alias {mapunlink} {#map unlink {%0};#show Exit unlinked: %0;mapsave};
-#alias {maplink} {#map link {%1} {%2};#show Map linked: %1 will lead to %2;mapsave};
-#alias {mapinsert} {#map insert {%1};#show Room inserted: %1;,mapsave};
+#alias {mapsym} {#map set roomsymbol %1;#echo {Map symbol set to: %1};mapsave;};
+#alias {mapnote} {#map set roomnote %0;#echo {Room note set to: %0};mapsave;};
+#alias {mapdelete} {#map delete {%1};#echo {Exit deleted: %1};mapsave;};
+#alias {mapunlink} {#map unlink {%0};#echo {Exit unlinked: %0};mapsave};
+#alias {maplink} {#map link {%1} {%2};#echo {Map linked: %1 will lead to %2};mapsave};
+#alias {mapinsert} {#map insert {%1};#echo {Room inserted: %1};,mapsave};
 #alias {mapm} {#map move %0};
-#alias {maparea} {#map set areaname %0;mapsave};
+#alias {maparea} {#map set roomarea %0;mapsave};
 
 
 #alias {mapfind} {
-	#show <129>Desc matches<088>;
+	#echo {<129>Desc matches<088>};
 	#map list {roomdesc} {%i%*%0%*};
-	#show \n;
-	#show <129>Name matches:<088>;
+	#echo {\n<129>Name matches:<088>};
 	#map list {roomname} {%i%*%0%*};
-	#show \n;
-	#show <129>Note matches:<088>;
+	#echo {\n<129>Note matches:<088>};
 	#map list {roomnote} {%i%*%0%*};
 };
 
@@ -149,6 +211,9 @@
 #action {BING! The button light goes off and the elevator doors open.} {enter elevator}
 #action {The elevator jerks to a halt and the doors open.} {out}
 #action {The elevator is already here. How about you enter it?} {enter elevator}
+
+#NOP Antimammonist Vault;
+#action {^A guard blocks your way.$} {mapUndo} {2};
 
 #NOP Ao
 #action {-R-_** The Docks of Ao ** (se)} {#map goto 15463} {1}
@@ -192,12 +257,22 @@
 	#map goto $tvroom
 }
 
+#action {AREA NAME: Dexter's Laboratory [Adalius]} {
+		#var {area} {Dexter's Laboratory};
+		#map get {roomvnum} {tvroom};
+		#map goto 29055;
+} {1}
+#action {You cautiously enter the static and appear elsewhere.} {
+	#map goto $tvroom
+}
+
 #NOP -- carebears;
 #action {^You Take one of the bikes and fly to the Care Bear village.} {#map goto 36038};
 #action {^Grumpy shoves you back and shouts: There's nothing in there!} {mapUndo};
 
 #NOP Celestial Zodiacs;
 #action {Just as your lungs are starting to burn you see an opening ahead.} {mapgo zodiacs};
+#action {The light engulfs you and the darkness shatters.} {mapgo zodiacs};
 
 #NOP Witch's Hat;
 #action {^You grab the velvet hat and try it on. You disappear in a} {#map goto 44363} {1};
@@ -205,7 +280,10 @@
 #NOP Death
 #action {^You die.$} {
 	#map get roomvnum bot_go_back;
-	#var my[dead] 1;.pause;#map goto 6247
+	.notify You died in $roomvnum;
+	#var my[dead] 1;
+	.pause;
+	#map goto 6247;
 } {2};
 
 #NOP Death Taco
@@ -220,6 +298,10 @@
 
 #NOP Funkytown
 #action {^The intense gravity of the sun pulls the coaster to its surface where you} {#map goto 17497}
+
+#NOP Gamal;
+#action {^The ninjas prevent you from entering!$} {mapUndo};
+
 
 #NOP Global Merc Training Theatre
 #action {^You have exited the simulation, thank you for playing.} {#map goto 15144}
@@ -281,6 +363,19 @@
 
 #NOP Mystic Seal;
 #action {^The Elemental steps in the way as you attempt to go %*!$} {mapUndo} {2};
+#action {^You can't get past the huge earth elemental in front of you.$} {mapUndo} {2};
+#action {^The Elemental blocks your path as you try to go %*!$} {mapUndo} {2};
+#action {^The elemental stands in your way!$} {mapUndo} {2};
+#action {^As you near the crystal matrix, the blue aura surrounding it} {mapUndo} {2};
+
+
+
+#action {^You begin climbing up, but soon slip on a patch of ice and plummet} {
+	#map goto 37520;
+#NOP	#if {$bot[active]};
+};
+
+
 
 #NOP Necromancers
 #action {^You tumble down the river and find yourself on a rocky bank inside} {#map goto 7613}
@@ -482,6 +577,13 @@
 #NOP Land;
 #action {^You are caught like a fly in a spider web, burning and twisting as} {mapUndo};
 
+#NOP Larem Cemetery;
+#action {^As you turn to walk out, a vampire jumps out from inside the coffin} {mapUndo} {2};
+#action {^As you turn to walk out, a vampire jumps out from behind the dirt mound} {mapUndo} {2};
+#action {^As you turn to walk out, a vampire jumps out of one of the coffins and attacks!} {mapUndo} {2};
+#action {^As you turn to walk out, a vampire jumps out of the coffin and attacks!} {mapUndo} {2};
+
+
 #NOP Longshadow;
 #action {^The drawbridge is currently upright denying you access to the castle.} {mapUndo};
 
@@ -511,8 +613,10 @@
 #action {^Waving their rusty scimitars and growling loudly, the jackalmen} {mapUndo};
 
 #NOP Section Z
-#action {^The %1 will not let you pass!} {mapUndo};
-#action {^The portal %w is electrified and ZAPS you!} {mapUndo};
+#action {^The %1 will not let you pass!} {mapUndo} {2};
+#action {^The portal %w is electrified and ZAPS you!} {mapUndo} {2};
+#action {A rush of wind tickles your nerves, and you find yourself elsewhere.} {#map goto 52275} {2};
+#action {You can not pause the game while engaged in battle!} {mapUndo} {2};
 
 #NOP Serinth;
 #action {^The hill giant guard stands in your way.} {mapUndo};
@@ -540,7 +644,7 @@
 #NOP Theatre of Souls
 #action {^A closed door blocks your way.} {mapUndo};
 
-#NOP Tomb of Kingn Alaren
+#NOP Tomb of King Alaren;
 #action {^The skeletal royal guard steps in front of you barring your progress.} {mapUndo};
 #action {^The skeletal guard steps in front of you barring your progress.} {mapUndo};
 

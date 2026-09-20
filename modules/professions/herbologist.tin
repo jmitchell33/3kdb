@@ -1,0 +1,59 @@
+#class {herbologist} {kill};
+#class {herbologist} {open};
+
+#unvar herb; 
+ 
+#NOP -- Substitutes to give detail on effect;
+#sub {Pinnacle nettle} {Pinnacle nettle (+dodge)};
+#sub {Ginkgo biloba} {Ginkgo biloba (+free cast)};
+#sub {Yellow pom weed} {Yellow pom weed (+50hp)};
+#sub {Lightning wort} {Lightning wort (+attack speed)};
+#sub {Blood's eye} {Blood's eye (+critical hit)};
+#sub {Meadowsweet} {Meadowsweet (sp/hp regen)};
+
+#alias .track_herb {
+    #if {"${herb[%1][1]}" === ""} {
+        #if {"%2" == "start"} {
+            #var herbIndex 1;
+            #format {herb[%1][1][start]} {%T};
+        };
+    } {
+        #if {"%2" == "start"} {
+            #math herbIndex {&herb[%1][] + 1};
+            #format {herb[%1][${herbIndex}][start]} {%T};
+        };
+        #if {"%2" == "end"} {
+            #format {herb[%1][$herbIndex][end]} {%T};
+            #math herb[%1][$herbIndex][duration] {$herb[%1][$herbIndex][end] - $herb[%1][$herbIndex][start]};
+            #unvar herb[%1][$herbIndex][start];
+            #unvar herb[%1][$herbIndex][end];
+            #echo {  🌱 ++ 🌱      <dee>HERBOLOGIST (Lvl. $herbologist[level]):  The effects of <cfc>%1 <dee>lasted $herb[%1][$herbIndex][duration] seconds.      🌱 ++ 🌱 };
+        };
+    };
+};
+
+#action {^You eat the lightning wort.} {
+    .track_herb {lightning wort} start;
+} {2};
+
+#action {^You eat the ginkgo biloba.} {
+    .track_herb {ginkgo biloba} start;
+} {2};
+
+#action {^You eat the blood's eye.} {
+    .track_herb {blood's eye} start;
+} {2};
+
+#action {^You eat the pinnacle nettle.} {
+    .track_herb {pinnacle nettle} start;
+} {2};
+
+#action {^The effects of the %* wear off.} {
+    .track_herb {%1} end;
+} {2};
+
+
+
+
+
+ #class {herbologist} {close};

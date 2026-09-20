@@ -57,27 +57,28 @@
     #var bot_xp $bot[stats][xp];
     #var bot_loop_coins $bot[stats][loop][coins];
     #var bot_coins $bot[stats][coins];
-    
-    #format loop1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][loop][mobs]};
-    #format loop2 {%+20s %-20s} {<BBB><aad>            XP Gained: @thousandsFormatNumber{$bot_loop_xp}};
-    #format loop3 {%+20s %-20s} {<BBB><aad>         Coins Earned: @thousandsFormatNumber{$bot_loop_coins}};
-    
-    #format total1 {%+20s %-20s} {<BBB><aad>          Mobs Killed: $bot[stats][mobs]};
-    #format total2 {%+20s %-20s} {<BBB><aad>            XP Gained: @thousandsFormatNumber{$bot_xp}};
-    #format total3 {%+20s %-20s} {<BBB><aad>         Coins Earned: @thousandsFormatNumber{$bot_coins}};
-    
-    #echo {<BBB><aad>---------------------------------------------------<088>};
-    #echo {<BBB><aad>--------------     Current Loop     ---------------<088>};
+
+    #format loop1  {%+20s %-20s} {<BBB><fbb>☠<fff>  Mobs Killed:  <fff>$bot[stats][loop][mobs]};
+    #format loop2  {%+20s %-20s} {<BBB><acf>★<fff>  XP Gained:    <fff>@thousandsFormatNumber{$bot_loop_xp}};
+    #format loop3  {%+20s %-20s} {<BBB><ffe>●<fff>  Coins Earned: <fff>@thousandsFormatNumber{$bot_loop_coins}};
+
+    #format total1 {%+20s %-20s} {<BBB><fbb>☠<fff>  Mobs Killed:  <fff>$bot[stats][mobs]};
+    #format total2 {%+20s %-20s} {<BBB><acf>★<fff>  XP Gained:    <fff>@thousandsFormatNumber{$bot_xp}};
+    #format total3 {%+20s %-20s} {<BBB><ffe>●<fff>  Coins Earned: <fff>@thousandsFormatNumber{$bot_coins}};
+
+    #echo {<BBB><bbb>┌───────────────────────────────────────────────────┐<088>};
+    #echo {<BBB><bbb>│<fff>               <ffa>⚔ Current Loop ⚔<fff>               <bbb>│<088>};
+    #echo {<BBB><bbb>├───────────────────────────────────────────────────┤<088>};
     #echo {$loop1};
     #echo {$loop2};
     #echo {$loop3};
-    #echo {<BBB><aad>---------------------------------------------------<088>};
-    #echo {<BBB><aad>--------------     Total Run        ---------------<088>};
+    #echo {<BBB><bbb>├───────────────────────────────────────────────────┤<088>};
+    #echo {<BBB><bbb>│<fff>                <afa>★ Total Run ★<fff>                <bbb>│<088>};
+    #echo {<BBB><bbb>├───────────────────────────────────────────────────┤<088>};
     #echo {$total1};
     #echo {$total2};
     #echo {$total3};
-    #echo {<BBB><aad>---------------------------------------------------<088>};
-    #echo {<BBB><aad>---------------------------------------------------<088>};
+    #echo {<BBB><bbb>└───────────────────────────────────────────────────┘<088>};
 };
 
 #alias playercheck {
@@ -97,8 +98,11 @@
         #unvar lastBot;
         #map get roomvnum bot[pause_room];
         #var lastBot[file] $bot[file];
+        #var lastBot[alias] $bot[alias];
         #var lastBot[curVnum] $bot[curVnum];
         #var lastBot[pause_room] $bot[pause_room];
+        #var lastBot[area] $area;
+        #var lastBot[step] $bot[step];
     };
 };
 
@@ -145,6 +149,13 @@
 
 #alias {.determineBotAction} {
     #if !$bot[paused] {
+        #if {"$bot[alias]" == "zodiacs-easy"} {
+            #if {"$bot[zodiac_bt]" != "1" && "$bot[zodiac_aeonos_seen]" != "1"} {
+                #if {"$mob[target]" == "soul" || "$mob[target]" == "colossus"} {
+                    #var bot[foundmob] 0;
+                };
+            };
+        };
         .botStopWalking;
         #if {$bot[foundplayer]} {
             #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Found player - calling .botStep<088>}};
@@ -216,7 +227,6 @@
                 #var toggles[fremen][enfeeblement] 1;
                 #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
             };
-            checkStrategy {suspend} {#send {!suspend}};
         };
         #NOP -- juggernaut;
         #if {"$guild" == "juggernaut"} {
@@ -228,17 +238,26 @@
             };
         };
         
-        #var bot[foundmob] 0;
-        #var bot[aggro-mob] 0;
-        #if !$idle_flag {
-            #if {"$bot[alias]" == "knights"} {#NOP} {
-                #if $actions_stacked {
-                    do_action;
-                    #delay 2 {
-                        .bot;
+        #if {"$bot[zodiac_purge_kill]" == "1"} {
+            #var bot[zodiac_purge_kill] 0;
+            #var bot[foundmob] 0;
+            #var bot[aggro-mob] 0;
+            #if !$idle_flag {
+                #delay .5 {.zodiac_resume_backtrack};
+            };
+        } {
+            #var bot[foundmob] 0;
+            #var bot[aggro-mob] 0;
+            #if !$idle_flag {
+                #if {"$bot[alias]" == "knights"} {#NOP} {
+                    #if $actions_stacked {
+                        do_action;
+                        #delay 2 {
+                            .bot;
+                        };
+                    } {
+                        #delay .5 {.bot};
                     };
-                } {
-                    #delay .5 {.bot};
                 };
             };
         };
@@ -286,7 +305,6 @@
                     #var toggles[fremen][enfeeblement] 1;
                     #if {$debug[fremen][toggle]} {#echo {<ffa>debug toggles: corpsetrig fired with bot active - enfeeblement toggle set to 1:<088> $toggles[fremen][enfeeblement]}};
                 };
-                checkStrategy {suspend} {#send {!suspend}};
             };
             #NOP -- juggernaut;
             #if {"$guild" == "juggernaut"} {
@@ -309,6 +327,11 @@
     #NOP -- the bunker botpaths;
     #showme {------- BOT COMPLETE -----};
     #echo {<dfa>BOT HAS COMPLETED LOOP ENTERED<088>};
+
+
+    #list botlist_alias find {$bot[alias]} {tmpIndex};
+    #format tmpName {%n} {${botlist_desc[$tmpIndex]}};
+
     #if !$bot[paused] {
         #if {!$bot[loop]} {
             #echo {<dfa>\nBot finished.<088>};
@@ -324,7 +347,7 @@
                 #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
             };
             #var temp_xp $bot[stats][xp];
-            ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str);
+            #send {ptell $tmpName Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str)};
             #echo {<dfa>Coins Earned: $bot[stats][coins]<088>};
             #if {&{botcycle[]} > 0} {
                 .stop;
@@ -354,7 +377,7 @@
                     #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
                 };
                 #var temp_xp $bot[stats][xp];
-                ptell Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str);
+                #send {ptell $tmpName Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str)};
                 #echo {Coins Earned: $bot[stats][coins]};
                 #if {&{botcycle[]} > 0} {
                     .stop;

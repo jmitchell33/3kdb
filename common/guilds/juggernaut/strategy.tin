@@ -14,6 +14,7 @@
 #list strategyList add {{{guild} {juggernaut} {name} {mech_resummon} {active} {0} {description} {Jugger: Mech - Dismiss & resummon back into defend mode}}};
 #list strategyList add {{{guild} {juggernaut} {name} {enhance} {active} {0} {description} {Jugger: Enhance: If at max sps/stim but below max enhance, use an enhance}}};
 #list strategyList add {{{guild} {juggernaut} {name} {mechwarrior} {active} {0} {description} {Jugger: Switch from defend to assault (best used with mech_resummon strategy)}}};
+#list strategyList add {{{guild} {juggernaut} {name} {mechelectric} {active} {0} {description} {Jugger: Switch from default fire to electric (specifically designed for Aegis)}}};
 
 #list strategyList indexate name;
 
@@ -32,10 +33,27 @@
                 #send {!hp};
                 #NOP -- if enemy is higher than 10% hp then check mechwarrior strategy and switch mech into assault mode;
                 #if {$enemy[hp] > 10} {
-                    checkStrategy {mechwarrior} {
-                        #delay 10 {
+                    #if {"$area" == "Aegis %*"} {
+                        checkStrategy {mechelectric} {
+                            #if {!$mech_toggle} {
+                                #var mech_toggle 1;
+                                #delay 10 {
+                                    #if {"$mob[target]" == "soldier" || "$mob[target]" == "sentry"} {
+                                        #send {!support assault electric};
+                                        #send {!hp};
+                                    }   {
+                                        #send {!support assault fire};
+                                        #send {!hp};
+                                    };
+                                };
+                            };
+                        };
+                    }   {
+                        checkStrategy {mechwarrior} {
+                            #delay 10 {
                             #send {!support assault fire};
                             #send {!hp};
+                            };
                         };
                     };
                 };
@@ -67,16 +85,29 @@
 
 #NOP -- Actions to perform the first rounds of combat;
 #alias {_strategy_guild_start} {
-    checkStrategy {mechwarrior} {
-        #if {!$mech_toggle} {
-            #var mech_toggle 1;
+    #if {"$area" == "Aegis %*"} {
+        checkStrategy {mechelectric} {
+            #if {!$mech_toggle} {
+                #var mech_toggle 1;
+                #delay 6 {
+                    #if {"$mob[target]" == "soldier" || "$mob[target]" == "sentry"} {
+                        #send {!support assault electric};
+                        #send {!hp};
+                    }   {
+                        #send {!support assault fire};
+                        #send {!hp};
+                    };
+                };
+            };
+        };
+    }   {
+        checkStrategy {mechwarrior} {
             #delay 6 {
-                #send {!support assault fire};
-                #send {!hp};
+            #send {!support assault fire};
+            #send {!hp};
             };
         };
     };
 };
-
 
 #class {guild_strategy} {close};

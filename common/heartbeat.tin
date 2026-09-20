@@ -1,6 +1,10 @@
 #class common_heartbeat kill
 #class common_heartbeat open
 
+#NOP -- Seconds since combat last ended, stepped by this 2 second beat.;
+#NOP -- Seeded high so a fresh session does not look like it just fought.;
+#var time_out_of_combat 999;
+
 #alias {_common_heartbeat} {
     #NOP -- Actions to be attempted only 1x/round;
     #if {!$idle_flag && $action_round < $mip[round]} {
@@ -8,6 +12,12 @@
         #if {$mip[round] > 2 && $mip[round] < 6} {
             #NOP;
         };
+    };
+
+    #if {$incombat} {
+        #var time_out_of_combat 0;
+    } {
+        #math time_out_of_combat {$time_out_of_combat + 2};
     };
 }
 

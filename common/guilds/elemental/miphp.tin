@@ -1,20 +1,21 @@
-#class {guild_miphp} {kill}
-#class {guild_miphp} {open}
+#class {guild_miphp} {kill};
+#class {guild_miphp} {open};
 
 #var guild_miphp 1;
 
 #alias {_guild_miphp} {
-	#format gp2_max {%p} {$gp2_max};
+
 	#list temp clear;
 
 	#format {ehealth} {%p} {$ehealth};
-	#format {my[g2n]} {%p} {$my[g2n]};
 
-	#list temp add {HP:$my[hp][current]/$my[hp][max] SP:$my[sp][current]/$my[sp][max] NRG:$my[gp1][current]/$my[gp1][max] C:$my[gp2][current]/$gp2_max  E:$ehealth};
-	#list temp add {H:$my[hp][graph] S:$my[sp][graph] NRG:$my[gp1][graph] C:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {<dea>Emit<cfe>: <faa>$my[emit][level] <dea>Form<cfe>: <cad>$my[form][type] <cfe>(<dba>$my[form][size]<cfe>) <bde>Rating<cfe>: <faa>$my[rating] <dea>Blasts<cfe>/<dea>Waves<cfe>: <bfc>$my[blasts]<cfe>/<bfc>$my[waves] <cfe>($my[reset]%) <dea>Solidify<cfe>:<088> $my[solidify] <dea>G2N<cfe>: <cae>$my[g2n]<088>};
+	#list temp add {<eeb>HP: <ffe>$my[hp][current]/$my[hp][max] <eeb>SP: <ffe>$my[sp][current]/$my[sp][max] <eeb>NRG: <ffe>$my[gp1][current]/$my[gp1][max] <eeb>C: <ffe>$my[gp2][current]/$my[gp2][max] <eeb>E: <ffe>$ehealth<088>};
+	#list temp add {<eeb>H: $my[hp][graph] <eeb>S: $my[sp][graph] <eeb>NRG: $my[gp1][graph] <eeb>C: $my[gp2][graph] <eeb>E: $enemy[graph]};
+	#list temp add {<dea>Emit<cfe>: <ade>$my[emit][level] <dea>Form<cfe>: <cad>$my[form][type] <cfe>(<ccd>$my[form][size]<cfe>) <bea>Rating<cfe>: <ccd>$my[rating] <dea>Blasts<cfe>/<dea>Waves<cfe>: <bfc>$my[blasts]<cfe>/<bfc>$my[waves] <cfe>($my[reset]%) <dea>Solidify<cfe>:<088> $my[solidify]};
+	#list temp add {<dea>G2N<cfe>: <cae>$my[g2n] <eeb>Gxp $my[gxp][str_time]: <ffe>$my[gxp][str_t30_per_hr] <dea>T-30 <dfe>| <ffe>$my[gxp][str_average_per_hr]<dea>/Hr <dfe>| <ffe>$my[gxp][last_round]<dea>/Rnd <dfe>| <ffe>$my[gxp][str_total] <dea>Total<088>};
+	
 	#var hpbar[prompt] $temp;
 };
 
 
-#class {guild_miphp} {close}
+#class {guild_miphp} {close};

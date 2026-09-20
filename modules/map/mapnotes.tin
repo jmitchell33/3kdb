@@ -1,0 +1,32 @@
+#class map_notes kill;
+#class map_notes open;
+
+#NOP setlegend sets the distance between the player and how far notes;
+#NOP will be included in the legend;
+#ALIAS {.setlegend} {#VAR l_y %1; #MATH {l_x} {1 * $l_y}};
+.setlegend 20;
+
+#ALIAS {.getnotes} {#MAP list {roomnote}{{\w+}}{distance}{$l_y}{roomarea}{$area} {variable}{note}};
+
+#ALIAS {.loopnotes} {
+    #LIST {notes_l} clear;
+    #FOREACH {*note[%*]} attr #IF {
+            $note[$attr][z] == 0 && 
+            $note[$attr][x] > -$l_x && 
+            $note[$attr][x] < $l_x && 
+            $note[$attr][y] > -$l_y && 
+            $note[$attr][y] < $l_y
+    } {
+        #MAP GET {roomnote} {notetext} {$attr};
+        #MAP GET {roomsymbol} {notesymbol} {$attr};
+        #format notesymbol {%p} {$notesymbol};
+        #format tmpItemLength %L {$notesymbol};
+        #if {$tmpItemLength > 0} {
+            #CAT {notesymbol} {<fff>: $notetext};
+            #LIST {notes_l} add $notesymbol;
+        };        
+    };
+};
+
+
+#class map_notes close;

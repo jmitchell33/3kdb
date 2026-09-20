@@ -5,6 +5,11 @@
 #var my[hm][heal_other] 1;
 #var inventory[encumberance] 0;
 
+#NOP -- Psicorp delivery;
+#action {^**ZZZZOTTT** **PING** %* appears on the ground before you!} {
+    #echo {   <efc>SPECIAL DELIVERY!!!! You have been sent a <dfc> %1};
+} {2};
+
 #NOP -- Inventory;
 #action {^%*: Too heavy.$} {
     #var inventory[encumberance] 100
@@ -26,9 +31,11 @@
             perform dirge
         };
     };
+    #if {"$guild" == "monk"} {study corpse;eat corpse};
     #if {"$guild" == "cyborg"} {decompose};
     #if {"$guild" == "fremen"} {reclaim};
     #if {"$guild" == "gentech"} {recharge;reclaim};
+    #if {"$guild" == "knight"} {bury corpse};
     #if {"$guild" == "juggernaut"} {deener;truck deener;fdeener};
     #if {"$guild" == "mage"} {cast corpse blast};
     #if {"$guild" == "necromancer"} {
@@ -60,27 +67,55 @@
 
 #action {^%w begs you.} {#if !$idle_flag {#format {lower} {%l} {%1};unkeep blue;give blue to $lower;unkeep orange;give orange to $lower};} {6};
 #action {^The daemon hisses: Dost thou choose to graft with me %w?} {#format {graft} {%l} {%1};#if {"$user" == "$graft"} {say yes}};
-#action {^%1 begins to follow %2\.$} {#format {follower} {%l} {%1};#if {"$user" == "$follower"} {#format {following} {%n} {%2}}};
-#action {^You stop following %1} {#unvar following};
-#action {^%1 leaves %2\.$} {
-    #if {"%1" == "$following"} {
-        #format {follow_target} {%l} {%1};
-        #local follow_dir %2;
-        #switch {"$follow_dir"} {
-            #case {"north"}     {#map move n};
-            #case {"northeast"} {#map move ne};
-            #case {"northwest"} {#map move nw};
-            #case {"south"}     {#map move s};
-            #case {"southeast"} {#map move se};
-            #case {"southwest"} {#map move sw};
-            #case {"east"}      {#map move e};
-            #case {"west"}      {#map move w};
-            #case {"down"}      {#map move d};
-            #case {"up"}        {#map move u};
-            #default            {#map move $follow_dir};
+#action {^%1 begins to follow %2\.$} {
+    #format {follower} {%l} {%1};
+    #if {"$user" == "$follower"} {#format {following} {%n} {%2}};
+    #var mapFollow 1;
+} {2};;
+#action {^You stop following %1} {
+    #unvar following;
+    #var mapFollow 0;
+} {2};
+
+#NOP -- Converts a direction word (north, southeast, ...) into a #map move;
+#alias {.followMapMove} {
+    #switch {"%1"} {
+        #case {"north"}     {#map move n};
+        #case {"northeast"} {#map move ne};
+        #case {"northwest"} {#map move nw};
+        #case {"south"}     {#map move s};
+        #case {"southeast"} {#map move se};
+        #case {"southwest"} {#map move sw};
+        #case {"east"}      {#map move e};
+        #case {"west"}      {#map move w};
+        #case {"down"}      {#map move d};
+        #case {"up"}        {#map move u};
+        #default            {#if {"%1" != ""} {#map move %1}};
+    };
+};
+
+#NOP -- "$user leaves following $following" never states a direction -- that;
+#NOP -- direction was printed on an earlier line, so we will;
+#NOP -- walk backwards through the last 15 buffer lines for the first one that;
+#NOP -- isn't itself a "leaves following" line;
+#action {^%1 leaves following %2\.$} {
+    #if {"%1" == "$userCap" && "%2" == "$following" && $mapFollow} {
+        #local scan -1;
+        #var follow_dir {};
+        #while {$scan >= -15} {
+            #buffer get bufline ${scan};
+            #regex {$bufline} {leaves following} {
+                #math scan {$scan - 1};
+            } {
+                #regexp {$bufline} {^%* %w.} {
+                    #var follow_dir {&2};
+                };
+                #local scan -99;
+            };
         };
-    }
-}; 
+        .followMapMove {$follow_dir};
+    };
+} {1};
 
 #NOP -- Rewear the knight shield if you use the wrong one;
 #action {There is no reason to 'bash' here.} {
@@ -95,7 +130,7 @@
 #action {^You fit the mask on and your eyes glow dimly green.$} {#var equipped[mask] 1} {2};
 #action {^You already wear the Mask of Gemino Mortis!} {#var equipped[mask] 1} {2};
 #action {^As you look through the mask, the eyes flash briefly with a dim, blue light.} {#var mask[active] 1} {2};
-#action {^Your eyes darken as you remove the mask.} {#var equipped[mask] 0} {2};
+#action {^Your eyes darken as you remove the mask.} {#var equipped[mask] 0;#var mask[active] 0} {2};
 
 #format userCap {%n} {$user};
 #action {^${userCap}'s eyes glow bright green upon} {#var mask[active] 1} {2};

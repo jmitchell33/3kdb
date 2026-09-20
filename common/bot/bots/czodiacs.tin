@@ -5,6 +5,8 @@
 #var check_room 0;
 #var toggle_portal_room 1;
 #var toggle_portal_room_empty 1;
+#var bot[zodiac_bt] 0;
+#var bot[zodiac_purge_kill] 0;
 
 #NOP -- mobs are good, set rolm to demon;
 touch demon rune;
@@ -13,6 +15,9 @@ touch demon rune;
 #showme $bot_message_1;
 
 #var {bot[path]} {light;e;se;s;se;s;se;s;sw;w;nw;n;e;s;n;w;ne;sw;e;nw;w;n;ne;sw;e;nw;w;sw;s;se;s;e;se;s;n;w;nw;n;e;w;s;sw;s;se;e;d;ne;e;se;s;se;s;se;s;sw;w;nw;n;e;s;n;w;ne;sw;e;nw;w;n;ne;sw;e;nw;w;sw;s;se;s;e;se;s;n;w;nw;n;e;w;s;sw;s;se;e;ne;n;ne;n;ne;n;nw;n;u;n;ne;e;s;n;ne;e;s;n;ne;e;se;s;sw;w;n;e;w;sw;s;w;e;ne;e;w;sw;n;w;s;sw;w;e;n;s;se;e;ne;n;s;e;n;ne;s;n;e;se;s;sw;w;nw;d;se;s;w;sw;s;e;n;nw;w;n;ne;sw;s;sw;s;se;e;w;s;e;se;w;nw;sw;s;se;e;ne;n;ne;n;w;s;se;e;ne;n;nw;w;e;n;s;se;s;d;ne;e;w;sw;s;se;e;w;s;se;e;w;s;se;e;ne;n;ne;n;nw;sw;s;sw;ne;w;se;nw;n;nw;n;s;e;n;s;se;ne;n;nw;w;n;ne;e;se;s;n;u;e;ne;n;nw;w;s;sw;n;s;w;n;s;sw;w;nw;n;s;w;nw;n;ne;e;s;se;n;e;s;ne;e;ne;n;nw;w;sw;se;e;w;nw;s;n;w;u;ne;sw;w;nw;n;ne;e;se;w;nw;n;nw;n;ne;n;s;e;se;w;ne;sw;s;e;sw;ne;se;w;ne;sw;e;s;n;w;s;se;e;ne;n;nw;n;nw;n;nw;w;u;sw;w;nw;n;e;ne;n;w;s;se;e;ne;n;nw;n;ne;n;nw;n;s;w;sw;s;e;se;w;nw;sw;s;sw;nw;n;ne;e;se;s;w;n;s;e;sw;ne;w;se;s;se;nw;e;n;s;sw;w;nw;n;nw;n;ne;e;w;sw;s;se;s;d;s;n;nw;w;sw;w;sw;w;sw;s;se;e;n;ne;e;s;w;nw;se;sw;se;e;ne;n;nw;ne;nw;s;se;e;w;n;e;se;sw;s;ne;n;e;se;s;sw;w;nw;ne;n;nw;w;sw;s;w;sw;w;nw;n;enter;swim;swim};
+
+#NOP -- Sometimes if a soul is on the ground, you try to kill that instead of the mob;
+#action {Soul is not a living thing.} {kill soul 2} {2};
 
 #list botmobs clear;
 #list botmobs add {{{long} {Lost Soul of the Zodiac} {target} {soul}}};
@@ -148,15 +153,18 @@ touch demon rune;
         #echo {<fff>PORTAL ROOM OPEN!<088>};
         ptell portal room open! roomvnum: $zodiac_portalVnum;
         #var toggle_portal_room 0;
-        #delay 5 {
-            portal;
-            open first chest;
-            open second chest;
-            open third chest;
-            open fourth chest;
-            open fifth chest;
-            open sixth chest;
-        };
+        #ticker portalRoom {
+            #if !$incombat {
+                portal;
+                open first chest;
+                open second chest;
+                open third chest;
+                open fourth chest;
+                open fifth chest;
+                open sixth chest;
+                #unticker portalRoom;
+            };
+        } {4};
         #line oneshot #action {As the chest opens, panic washes over you!} {
             #if {"$guild" == "juggernaut"} {
                 checkStrategy {mechwarrior} {support defend};
@@ -194,7 +202,7 @@ touch demon rune;
 #action {As you land the final blow upon the mimic} {
     #delay 10 {
         #if {"$zodiac_portalVnum" != ""} {portal};
-        ..;
+        .unpause;glance;
     };
 } {1};
 
@@ -202,14 +210,15 @@ touch demon rune;
     #if {"$toggle_portal_room_empty" == "1"} {
         #var toggle_portal_room_empty 0;
         portal;
-        ..;
+        .unpause;glance;
     };
 } {1};
 
 #action {A COLOSSAL MONSTROSITY STOMPS INTO VIEW} {
     .pause;
+    kill colossal;
     #delay 6 {
-        .unpause;
+        .unpause;glance;
     };
 } {1};
 
@@ -218,7 +227,7 @@ touch demon rune;
 } {1};
 
 #action {Sight returns to your eyes, darkness becomes light again.} {
-    ..;
+    .unpause;glance;
 } {1};
 
 #action {^The warrior deftly disarms you!$} {
@@ -229,18 +238,133 @@ touch demon rune;
     .pause;
     examine chest;
     search chest;
-    #echo {chest found}
+    #echo {chest found};
+    #delay 2 {.unpause;glance};
+};
+
+#alias .zodiac_check_chest_room {
+    #if {$bot[foundmob]} {
+        .unpause;
+        .determineBotAction;
+    } {
+        #unact {%1};
+        .chest_action;
+    };
 };
 
 #action {You find some gold coins in the chest!} {get coins;exa chest} {1};
 
-#action {Your vision becomes blurry. While your surroundings are intriguing, your} {..} {1};
+#action {Your vision becomes blurry. While your surroundings are intriguing, your} {.unpause;glance} {1};
 
-#action {The Treasury \(w,se\)} {#if {$bot[foundmob] == 1} {return};#unact {The Treasury \(w,se\)};.chest_action} {1};
-#action {Chamber of treasure \(s,ne\)} {#if {$bot[foundmob] == 1} {return};#unact {Chamber of treasure \(s,ne\)};.chest_action} {1};
-#action {Monk's Dormitory \(w,s,nw,ne\)} {#if {$bot[foundmob] == 1} {return};#unact {Monk's Dormitory \(w,s,nw,ne\)};.chest_action} {1};
-#action {Chamber of the chest \(e,sw\)} {#if {$bot[foundmob] == 1} {return};#unact {Chamber of the chest \(e,sw\)};.chest_action} {1};
-#action {Explorer's Lounge \(e,sw\)} {#if {$bot[foundmob] == 1} {return};#unact {Explorer's Lounge \(e,sw\)};.chest_action} {1};
+#action {The Treasury \(w,se\)} {.pause;#delay .3 {.zodiac_check_chest_room {The Treasury \(w,se\)}}} {1};
+#action {Chamber of treasure \(s,ne\)} {.pause;#delay .3 {.zodiac_check_chest_room {Chamber of treasure \(s,ne\)}}} {1};
+#action {Monk's Dormitory \(w,s,nw,ne\)} {.pause;#delay .3 {.zodiac_check_chest_room {Monk's Dormitory \(w,s,nw,ne\)}}} {1};
+#action {Chamber of the chest \(e,sw\)} {.pause;#delay .3 {.zodiac_check_chest_room {Chamber of the chest \(e,sw\)}}} {1};
+#action {Explorer's Lounge \(e,sw\)} {.pause;#delay .3 {.zodiac_check_chest_room {Explorer's Lounge \(e,sw\)}}} {1};
+
+#alias {.zodiac_resume_normal} {
+    #var bot[zodiac_bt] 0;
+    #var bot[zodiac_purge_kill] 0;
+    .unpause;glance;
+};
+
+#alias {.zodiac_resume_backtrack} {
+    .pause;
+    glance;
+    #delay 2 {.zodiac_after_glance};
+};
+
+#alias {.zodiac_find_level_bounds} {
+    #var {zodiac_d_index} {0};
+    #var {zodiac_prev_d_index} {0};
+    #loop {1} {$bot[step]} {_zbi} {
+        #if {"${bot[steps][$_zbi]}" == "d"} {
+            #var {zodiac_prev_d_index} {$zodiac_d_index};
+            #var {zodiac_d_index} {$_zbi};
+        };
+    };
+    #if {$zodiac_d_index == 0} {
+        #var {zodiac_d_index} {$bot[step]};
+    };
+    #if {$zodiac_prev_d_index == 0} {
+        #var {zodiac_level_start} {1};
+    } {
+        #math {zodiac_level_start} {$zodiac_prev_d_index + 1};
+    };
+};
+
+#alias {.zodiac_physical_backstep} {
+    #if {"$bot[zodiac_bt]" != "1"} {#return};
+    #if {$bot[step] <= $zodiac_level_start} {#return};
+    #math {_zidx} {$bot[step] - 1};
+    #if {$_zidx < $zodiac_level_start} {#return};
+    #list {bot[steps]} {get} {$_zidx} {zodiac_tok};
+    #format {zodiac_tok} {%p} $zodiac_tok;
+    #switch {"$zodiac_tok"} {
+        #case {"n"} {#send s};
+        #case {"s"} {#send n};
+        #case {"e"} {#send w};
+        #case {"w"} {#send e};
+        #case {"ne"} {#send sw};
+        #case {"nw"} {#send se};
+        #case {"se"} {#send nw};
+        #case {"sw"} {#send ne};
+        #case {"u"} {#send d};
+        #case {"d"} {#send u};
+        #case {"enter"} {#send out};
+        #case {"out"} {#send enter};
+        #case {"portal"} {#send portal};
+        #case {"swim"} {#send swim};
+        #case {"light"} {#nop};
+        #default {
+            #var bot[zodiac_bt] 0;
+            .unpause;
+            #showme {Zodiac backstep unknown token $zodiac_tok};
+            glance;
+        };
+    };
+    #if {"$bot[zodiac_bt]" == "1"} {
+        #math {bot[step]} {$bot[step] - 1};
+        #var {bot[walk]} {0};
+    };
+};
+
+#alias {.zodiac_after_glance} {
+    #if {"$bot[zodiac_bt]" != "1"} {#return};
+    #if {$bot[step] <= $zodiac_level_start} {
+        .zodiac_resume_normal;
+        #return;
+    };
+    #if {$bot[foundmob]} {
+        #if {"$mob[target]" == "soul" || "$mob[target]" == "colossus" || "$mob[target]" == "mimic"} {
+            #var bot[zodiac_purge_kill] 1;
+            .unpause;
+            .determineBotAction;
+        } {
+            #var bot[zodiac_bt] 0;
+            .unpause;
+            .determineBotAction;
+        };
+    } {
+        .pause;
+        .zodiac_physical_backstep;
+        #delay .3 {glance};
+        #delay 2 {.zodiac_after_glance};
+    };
+};
+
+#action {^You cannot leave while there are still celestials present on this level.$} {
+    #var bot[zodiac_bt] 1;
+    .pause;
+    .zodiac_find_level_bounds;
+    #math {zodiac_undo_count} {$bot[step] - $zodiac_d_index};
+    #if {$zodiac_undo_count < 1} {#var zodiac_undo_count 1};
+    #loop {1} {$zodiac_undo_count} {_zu} {#map undo};
+    #var bot[step] $zodiac_d_index;
+    #var bot[walk] 0;
+    #delay .3 {glance};
+    #delay 2 {.zodiac_after_glance};
+} {1};
 
 #class {bot} {close};
 #read common/bot/generic.tin;
