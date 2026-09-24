@@ -1,0 +1,73 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var bot_message_1 '---- COWVILLE ARENA ----';
+#echo $bot_message_1;
+
+#var check_room 1;
+
+#NOP -- Have a room to step/finish the mob when arena is clear;
+#var {bot[path]} {s};
+
+#NOP -- The roster of members standing in the arena changes visit to visit so;
+#NOP -- botmobs is populated dynamically from the names parsed out of room long;
+#list botmobs clear;
+
+#var arena[looked] 0;
+#var arena[parsed] 0;
+#list arenaTargets clear;
+#list arenaBotMobs clear;
+
+#alias {.parseArenaTargets} {
+    #var arena[parsed] 1;
+    #var arenaRaw {};
+    #if $debug[room] {#echo {<cfa>DEBUG ROOM: room[long] is $room[long]<088>}};
+    #regex {$room[long]} {Presently %* are standing back from the edge of the arena waiting for a challenge} {
+        #var arenaRaw &1;
+    };
+    #replace arenaRaw {,} {};
+    #replace arenaRaw { and } { };
+    #var arenaTargets $arenaRaw;
+    #list arenaTargets {explode} { };
+    #if $debug[room] {#echo {<cfa>DEBUG ROOM: parsed &arenaTargets[] arena targets - $arenaTargets<088>}};
+
+    #list arenaBotMobs clear;
+    #var arenaIndex 1;
+    #loop 1 &arenaTargets[] arenaIndex {
+        #format arenaLower {%l} {$arenaTargets[$arenaIndex]};
+        #list arenaBotMobs add {{{long} {$arenaTargets[$arenaIndex] the %* C.R.A.P. Cow} {target} {$arenaLower}}};
+        #if $debug[room] {#echo {<cfa>DEBUG ROOM: registered bot mob pattern for $arenaTargets[$arenaIndex] target $arenaLower<088>}};
+    };
+    #var bot[mobs] $arenaBotMobs;
+    #if $debug[room] {#echo {<cfa>DEBUG ROOM: bot[mobs] now holds &bot[mobs][] entries<088>}};
+};
+
+#alias {.check_room} {
+    #if !$arena[looked] {
+        #var arena[looked] 1;
+        #if $debug[room] {#echo {<cfa>DEBUG ROOM: sending look to capture the full room description<088>}};
+        look;
+    } {
+        #if !$arena[parsed] {.parseArenaTargets};
+        #if {&arenaTargets[] > 0} {
+            #format mob[target] {%l} {$arenaTargets[1]};
+            #list arenaTargets delete 1;
+            #if $debug[room] {#echo {<cfa>DEBUG ROOM: challenging $mob[target] - &arenaTargets[] targets remaining<088>}};
+            challenge $mob[target];
+            #var bot[foundmob] 1;
+            kill $mob[target];
+        } {
+            #if {$incombat} {
+                #if $debug[room] {#echo {<cfa>DEBUG ROOM: no arena targets left to challenge but still in combat - waiting<088>}};
+                #delay 1 {.check_room};
+            } {
+                #if $debug[room] {#echo {<cfa>DEBUG ROOM: no arena targets remaining - walking on<088>}};
+                #var bot[walk] 1;
+                .botStep;
+            };
+        };
+    };
+};
+
+#class {bot} {close}
+#read common/bot/generic.tin;

@@ -9,6 +9,26 @@
 
 #action {There is no reason to '(powers' here.} {#var eternal 0} {1};
 
+#alias {_quicken} {
+	#if {!$idle_flag && $incombat} {
+		#if {$my[eternal][quicken]} {
+			#send {(quicken};
+			#action {^You must wait %* to use that ability.$} {
+				#var my[eternal][quicken] 0;
+				#delay resetQuicken {#var my[eternal][quicken] 1} 240;
+			} {2};
+
+			#delay 2 {#unaction {^You must wait %* to use that ability.$}};
+		};
+	};
+};
+
+#var my[eternal][quicken] 1;
+#action {In a remarkable feat of cheating, you attack again!} {
+	#var my[eternal][quicken] 0;
+	#delay resetQuicken {#var my[eternal][quicken] 1} 240;
+};
+
 #alias {_update_eternal_status} {
 	#if {$my[eternal][heal]} {#format {heal_string} {<bfa>HEAL<088>}} {#format {heal_string} {<faa>HEAL<088>}};
 	#if {$my[eternal][energy well]} {#format {ewell_string} {<bfa>EWELL<088>}} {#format {ewell_string} {<faa>EWELL<088>}};

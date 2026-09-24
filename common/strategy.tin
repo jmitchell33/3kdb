@@ -87,6 +87,7 @@
 #list strategyList add {{{guild} {all} {name} {bplate}  {active} {0} {description} {Blood Plate: Automatically feed}}};
 #list strategyList add {{{guild} {all} {name} {tickler}  {active} {0} {description} {Bot: Leave mobs at 3%}}};
 #list strategyList add {{{guild} {all} {name} {coffinRun}  {active} {0} {description} {Bot: Donate Coffin When Full (after combat ends)}}};
+#list strategyList add {{{guild} {all} {name} {quicken}  {active} {0} {description} {Eternal: Use Quicken}}};
 #list strategyList indexate name;
 
 #alias checkStrategy {
@@ -194,6 +195,9 @@
 
             #NOP -- Actions to perform at any time in the fight;
             _strategy_guild;
+            checkStrategy {quicken} {
+                _quicken;
+            };
         };
     };
 };
