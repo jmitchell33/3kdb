@@ -216,6 +216,26 @@
     #replace mob[long] { [dying]%*} {};
     #replace mob[long] { <%*>} {};
 
+    #NOP -- Some debuffs (demoralize, etc.) show up as a random flavor word in;
+    #NOP -- parens -- demoralized, eeyored, and whatever else -- so there's no;
+    #NOP -- fixed list to strip. Only strip the first paren group here if doing;
+    #NOP -- so is actually needed to match one of the current bot's targets;
+    #NOP -- otherwise leave it alone, since some mobs have a permanent;
+    #NOP -- parenthetical as part of their real name (e.g. "A ghoul (elvish)").;
+    #if {$bot[active] && &bot[mobs][] > 0} {
+        #var tmpMobLongStatusStrip $mob[long];
+        #replace tmpMobLongStatusStrip { \(%*\)%*} {};
+        #if {"$tmpMobLongStatusStrip" != "$mob[long]"} {
+            #var tmpStatusStripMatch 0;
+            #foreach $bot[mobs][%*] tmpStatusStripBotmob {
+                #if {!$tmpStatusStripMatch} {
+                    #regexp {$tmpMobLongStatusStrip} {%i$tmpStatusStripBotmob[long]} {#var tmpStatusStripMatch 1};
+                };
+            };
+            #if {$tmpStatusStripMatch} {#var mob[long] $tmpMobLongStatusStrip};
+        };
+    };
+
     #NOP -- If there is a period at the end, remove it;
     #var isPeriod @checkPeriod{$mob[long]};
     #format mobLength {%L} $mob[long];

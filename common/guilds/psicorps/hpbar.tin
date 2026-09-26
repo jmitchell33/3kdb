@@ -78,10 +78,15 @@
         };
     };
 
-    #NOP -- Add new powers or update time on existing ones;
+    #NOP -- Add new powers or refresh existing ones;
+    #NOP -- Timed powers appear in the raw source as "CODE: NNNN" (a remaining-duration value);
+    #NOP -- untimed/toggle powers (and the plain hp/prompt POW: list, which never includes numbers);
+    #NOP -- only ever show the bare code, so default to a safe non-expiring time and override it;
+    #NOP -- with the real value when one is present;
     #loop 1 &powers_keys[] key_index {
+        #var my[powers][$powers_keys[$key_index]][active] 1;
+        #var my[powers][$powers_keys[$key_index]][time] 99;
         #regex $powers {$powers_keys[$key_index]: %d} {
-            #var my[powers][$powers_keys[$key_index]][active] 1;
             #var my[powers][$powers_keys[$key_index]][time] &1;
         };
     };

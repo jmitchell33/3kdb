@@ -1,0 +1,68 @@
+#NOP -- Set Player specific variables;
+#var user meatloaf;
+#read chars/$user/private.tin;
+#read chars/$user/vars.tin;
+#var guild mage;
+#var my[familiar] Lemmywinks the shiny hamster;
+
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
+#read common/index.tin;
+
+#NOP -- Load specific modules for this character;
+#read modules/dmgtracker/dmgtracker_mage.tin;
+
+
+
+/* Defensive contingencies */
+#alias {c1} {cast greater contingency as armor#cast armor;cast armor};
+#alias {c2} {cast greater contingency as shield#cast magnificent shield;cast magnificent shield};
+#alias {c3} {cast greater contingency as stoneskin#cast stoneskin;cast stoneskin};
+#alias {c4} {cast greater contingency as major globe#cast major globe;cast major globe};
+#alias {c5} {cast greater contingency as prismatic sphere#400#cast prismatic sphere;cast prismatic sphere};
+#alias {c6} {cast greater contingency as mantle#400#cast mantle;cast mantle};
+/* .... unused ...
+#alias {c5} {cast greater contingency as blinking#cast blink;cast blink};
+#alias {c6} {cast contingency as prismatic aura#cast prismatic aura;cast prismatic aura};
+*/
+
+/* Offensive perform */
+#alias {cperf} {cast perform as cast $cast[ospell];cast activate combat};
+
+/* QOL */
+#alias {cost} {cast rcost}
+
+/* Light
+#if {$cast[light]} {cast light};
+#act {^The Orb of Light goes dark.$} {#if {$cast[light]} {cast light}};
+#act {^It is too dark.$} {cast light};
+#act {^You can see again.$} {glance};
+*/
+
+/* Deeppockets */
+#act {^  -> Your deeppocket begins to fade... <-$} {recast_dp}
+#alias {recast_dp} {#if {$mip[round] > 1} {cast deeppockets} {#delay {3} {recast_dp}}}
+#delay {cast_dp} {recast_dp};
+
+/* Attack! */
+#alias {k %1} {kill %1;#if {$cast[slow]} {cast slow};#if {$cast[darkness]} {#delay {3} {cast darkness}}};
+
+/* Haste */
+#if {$cast[haste]} {cast haste};
+#if {$cast[golem_haste]} {cast haste on golem};
+
+#act {^You feel slower as the haste wears off.$} {#if {$cast[haste]} {cast haste}};
+#act {seems to slow down...$} {#if {$cast[golem_haste]} {cast haste on golem}};
+
+/* Killing blow/bot management */
+/*#alias {corpsetrig} {
+	#regex {$mip[gline][1]} {{Gem:(\d+)\%}} {#if {&2 < 90} {ffetch gem}};
+	#regex {$mip[gline][1]} {MC} {#delay {1} {ss}}
+	}
+*/
+#var cast[darkness] 0;
+#var cast[light] 1;
+#var cast[slow] 1;
+#var cast[haste] 1;
+#var cast[golem_haste] 1;
+#var cast[ospell] incinerate;
