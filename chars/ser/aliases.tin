@@ -19,7 +19,7 @@
 }
 
 #NOP ---MISC;
-#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box;golem give all to byron;put all in box};
+#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box};
 #alias {bag_all %1} {get all from disc;#loop 1 %1 i {put all in bag $i}};
 
 
@@ -160,3 +160,96 @@ addp Ac6;
 addp BC;
 addp PC;
 }
+
+#alias {boostup} {
+        psychofeedback wis for str;
+        #delay {2} {improved vigor};
+        #delay {4} {displacement};
+        #delay {6} {improved biofeedback};
+        #delay {8} {energy barrier};
+        #delay {10} {psychofeedback off};
+        #delay {12} {psychofeedback wis for con};
+        #delay {14} {greater valor};
+        #delay {16} {inertial barrier};
+        #delay {18} {ablating};
+        #delay {20} {psychofeedback off}
+        };
+
+#NOP --- Gear-up run: 4 psiwield weapons (ray gun, stick, sword, flamethrower)
+#NOP --- plus shield(aegis)/gloves/boots/headband/amulet. Mainhand still open --
+#NOP --- psimetal is only a temporary WC 55 power-summon, not a real weapon.
+#NOP --- Each stage is a separate dungeon instance, so this is a checklist + quick
+#NOP --- launchers, not one unattended macro -- run gearup to see what's next.;
+
+#var gearup[cocoon] 0;
+#var gearup[carebears] 0;
+#var gearup[zelligar] 0;
+#var gearup[aegis] 0;
+#var gearup[sectionz] 0;
+#var gearup[dryad] 0;
+#var gearup[mainhand] 0;
+#var gearup[spitering] 0;
+#var gearup[aeonos] 0;
+#var gearup[zephyrak] 0;
+
+#alias {gearup} {
+    #echo {<efb>========================  GEAR-UP CHECKLIST  ========================<088>};
+    #echo { <bfc>1. Cocoon<088>            -- @gearup_status{$gearup[cocoon]}   -- run: get_cocoon};
+    #echo { <bfc>2. Carebears gear<088>    -- @gearup_status{$gearup[carebears]} -- run: carebears-gear bot (boots/cupcake/gun/gloves/sword/stick)};
+    #echo { <bfc>3. Zelligar headband<088> -- @gearup_status{$gearup[zelligar]} -- run: #read chars/ser/zelligars_boss.tin (watch the Zelligar fight!)};
+    #echo { <bfc>4. Aegis vault<088>       -- @gearup_status{$gearup[aegis]}    -- set scaler to 150, run: aegis-vault bot (passcard + flamethrower + vault shield; skips the lvl 1-6 grind)};
+    #echo { <bfc>5. Section Z caps<088>    -- @gearup_status{$gearup[sectionz]} -- run: gearup_sectionz_loot; then sectionz-fast bot};
+    #echo { <bfc>6. Dryad amulet<088>      -- @gearup_status{$gearup[dryad]}   -- run: get_dryad_amulet (UNCONFIRMED mechanic, fallback only)};
+    #echo { <bfc>7. Mainhand weapon<088>   -- @gearup_status{$gearup[mainhand]} -- TODO, no bot yet. Candidates: Isleth 2.0, or try to duplicate a rod. Psimetal is only a temporary WC 55 power-summon.};
+    #echo { <bfc>8. Ring of Spite<088>     -- @gearup_status{$gearup[spitering]} -- run: czodiacs-spitering bot (ring + amethyst/tiger's eye/malachite/opal/jade stones)};
+    #echo { <bfc>9. Aeonos helmet<088>     -- @gearup_status{$gearup[aeonos]}   -- run: czodiacs bot -- FULL CLEAR, no shortcut (level-gated, must kill everything to descend)};
+    #echo { <bfc>10. Zephyrak sword<088>   -- @gearup_status{$gearup[zephyrak]} -- run: czodiacs2 bot -- FULL CLEAR, no shortcut (same level-gating as Aeonos); also gets the Grimoire of Zephyrak (held item, passive HP heal)};
+    #echo {<efb>=======================================================================<088>};
+    #echo { <fbb>Mark a stage done with: gearup_done <cocoon|carebears|zelligar|aegis|sectionz|dryad|mainhand|spitering|aeonos|zephyrak><088>};
+    #echo {};
+    #echo { <fbb>Still ungeared after this list: waist, legs, arms, face, body/chest (unless<088>};
+    #echo { <fbb>balangool orange/green from Section Z covers those), neck (unless dryad works out,<088>};
+    #echo { <fbb>or use Aeonos/Zephyrak wings for gear I haven't catalogued yet).<088>};
+};
+
+#function {gearup_status} {
+    #if {%1} {#return <afa>DONE<088>} {#return <fda>TODO<088>};
+};
+
+#alias {gearup_done} {
+    #var gearup[%1] 1;
+    #echo {<afa>Marked $gearup[%1] complete for %1.<088>};
+};
+
+#NOP -- Stage 1: Cocoon is a single-room equipment pickup, not a farm loop;
+#alias {get_cocoon} {
+    #map goto 5868;
+    look;
+    get all;
+};
+
+#NOP -- Stage 5: swap corpsetrig to a Section Z loot profile before running sectionz-fast;
+#NOP -- Compresses orange/green capsules into stones as they're picked up.
+#NOP -- Mirrors chars/badger/aliases.tin's mycorpsetrig-gearupsz pattern.;
+#alias {gearup_sectionz_loot} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ getAll;
+    corpsetrig+ compress orange;
+    corpsetrig+ compress orange;
+    corpsetrig+ compress green;
+    corpsetrig+ compress green;
+    corpsetrig-on;
+    #echo {<afa>Section Z loot profile active -- run the sectionz-fast bot now.<088>};
+    #echo {<fbb>Remember to switch your corpsetrig back afterward (corpse_trig is your normal one).<088>};
+};
+
+#NOP -- Stage 6: UNCONFIRMED. vnum 19915 is "Dryad Tree" (At the bottom of a tree, forest),
+#NOP -- currently only referenced in this repo as an herb-gathering spot, not a mob/loot area.
+#NOP -- This is a best-guess starting point (goto + look + try kill dryad) -- check what's
+#NOP -- actually in the room and adjust once you've seen it firsthand;
+#alias {get_dryad_amulet} {
+    #map goto 19915;
+    look;
+    kill dryad;
+};

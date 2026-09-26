@@ -234,7 +234,7 @@
       #elseif {$my[powers][%1][time] < 10} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] refreshing %2<088>}};
         _use_power %2;
-		#send {hp};
+        #if {$hbp} {#var my[powers][%1][time] 99};
       };
       #else {
         #NOP;
@@ -243,7 +243,7 @@
       #if {$my[implants][%1][active]} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] turning on %2<088>}};
         _use_power %2;
-		#send {hp};
+        #if {$hbp} {#var my[powers][%1][active] 1;#var my[powers][%1][time] 99};
       };
       #else {
         #NOP;

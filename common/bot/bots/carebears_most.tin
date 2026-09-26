@@ -49,19 +49,27 @@ touch demon rune;
 #list botmobs add {{{long} {Secret Bear} {target} {secret bear}}};
 
 #NOP -- bedtime bear room;
-#action {^As you shake the lump you hear a gutteral growl come from} {#delay 5 {.unpause}} {1};
+#action {^As you shake the lump you hear a gutteral growl come from} {
+    #ticker bedtimeBearWait {#if {!$incombat} {.unpause;#unticker bedtimeBearWait}} {2};
+} {1};
 #action {^Heh, it was just a pillow.} {.unpause;..} {1};
 
 #NOP -- hugs and tugs bear room;
-#action {^As you approach the bed you can clearly hear muffled sobs coming from} {#delay 5 {.unpause;..}} {1};
+#action {^As you approach the bed you can clearly hear muffled sobs coming from} {
+    #ticker hugsTugsBearWait {#if {!$incombat} {.unpause;..;#unticker hugsTugsBearWait}} {2};
+} {1};
 #action {^The bed and blanket appear to have been recently disturbed.} {.unpause;..} {1};
 
 #NOP -- bathroom bear room;
-#action {^A large figure jumps off the toilet and attacks you.} {#delay 5 {.unpause}} {1};
+#action {^A large figure jumps off the toilet and attacks you.} {
+    #ticker bathroomBearWait {#if {!$incombat} {.unpause;#unticker bathroomBearWait}} {2};
+} {1};
 #action {^You burst open the door and find nothing but a leaky toilet badly rust} {.unpause;..} {1};
 
 #NOP -- burning bear room;
-#action {^begins to move among the embers and a burning ball of fur jumps out at you.} {#delay 5 {.unpause}} {1};
+#action {^begins to move among the embers and a burning ball of fur jumps out at you.} {
+    #ticker burningBearWait {#if {!$incombat} {.unpause;#unticker burningBearWait}} {2};
+} {1};
 #action {^You reach inside and grasp the diamond greedily. You drop it quickly and} {.unpause;..} {1};
 
 #class {bot} {close}

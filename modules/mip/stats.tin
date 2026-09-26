@@ -183,6 +183,7 @@
 			#CASE {"mage"}			{.mipProcessGlineMage {%1}};
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
 			#CASE {"priest"}        {.mipProcessGlinePriest {%1}};
+			#CASE {"psicorps"}		{.mipProcessGlinePsicorps {%1}};
 			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
 		};
 	};
@@ -581,6 +582,16 @@
 		};
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
+	};
+};
+
+#NOP Psicorps push their active power codes as gline 1: "[[ D Ap GV Bo Ab ... ]]".;
+#NOP This is the same list the hpbar's hp/prompt parser reads (see _hpbar_handle_powers in;
+#NOP common/guilds/psicorps/hpbar.tin), reused here so power state also updates from the mud's;
+#NOP own MIP push instead of only when a fresh HP:/POW: line happens to print.;
+#ALIAS {.mipProcessGlinePsicorps} {
+	#IF {%1 == 1} {
+		#REGEX {$mip[gline][1]} {\[\[ %* \]\]} {_hpbar_handle_powers {&1}};
 	};
 };
 
