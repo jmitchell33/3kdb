@@ -54,15 +54,22 @@
 } {2};
 
 #alias .update_scaler {
-    #if {"$currentScaler" == "$prefScaler"} {
+    #if {$prefScaler == 0} {
         #NOP
     } {
-        #echo {  <dfc>Updating <bff>$dungeon[scalers][$tmpIx][name] <dfc>scaler to preference: $dungeon[scalers][$tmpIx][scaler]};
-        #send {!scaler $prefScaler}
+        #if {"$currentScaler" == "$prefScaler"} {
+            #NOP
+        } {
+            #echo {  <dfc>Updating <bff>$dungeon[scalers][$tmpIx][name] <dfc>scaler to preference: $dungeon[scalers][$tmpIx][scaler]};
+            #send {!scaler $prefScaler}
+        };
     };
 } {2};
 
 #alias .get_scaler {
+    #if {&dungeon[scalers][] == 0} {
+        .dg_init_vars;
+    };
     #var tmpName %0;
     #list dungeon[scalers] indexate name;
     #list dungeon[scalers] find $tmpName tmpIx;
