@@ -183,6 +183,7 @@
 			#CASE {"mage"}			{.mipProcessGlineMage {%1}};
 			#CASE {"monk"} 			{.mipProcessGlineMonk {%1}};
 			#CASE {"priest"}        {.mipProcessGlinePriest {%1}};
+			#CASE {"psicorps"}      {.mipProcessGlinePsicorps {%1}};
 			#CASE {"sii"}			{.mipProcessGlineSii {%1}};
 		};
 	};
@@ -625,6 +626,16 @@
 			};
 			#if !$song_match {#unvar my[song][title];#var my[song][rounds] 0;};
 		};
+	}; #ELSE {
+		#ECHO {<171> Invalid Gline Number <088>};
+	};
+};
+
+#ALIAS {.mipProcessGlinePsicorps} {
+	#IF {%1 == 1} {
+		#REGEX {$mip[gline][1]} {\[\[ %* \]\]} {_hpbar_handle_powers {&1}};
+	}; #ELSEIF {%1 == 2} {
+		#NOP;
 	}; #ELSE {
 		#ECHO {<171> Invalid Gline Number <088>};
 	};

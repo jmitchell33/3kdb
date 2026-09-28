@@ -80,8 +80,9 @@
 
     #NOP -- Add new powers or update time on existing ones;
     #loop 1 &powers_keys[] key_index {
+        #var my[powers][$powers_keys[$key_index]][active] 1;
+        #var my[powers][$powers_keys[$key_index]][time] 99;
         #regex $powers {$powers_keys[$key_index]: %d} {
-            #var my[powers][$powers_keys[$key_index]][active] 1;
             #var my[powers][$powers_keys[$key_index]][time] &1;
         };
     };

@@ -196,7 +196,7 @@
     #if {%3 > 0} {
         #math fdmgAvgT {%2 / %3};
         #format fdmgAvgT {%d} {$fdmgAvgT};
-        #format %1 {%g} {$fdmgAvgT};
+        .fdmgAbbrev {%1} {$fdmgAvgT};
     } {
         #var %1 {-};
     };
@@ -213,6 +213,40 @@
     #math fdmgHprD {$fdmgHprX - ($fdmgHprI * 100)};
     #format fdmgHprD {%d} {$fdmgHprD};
     #if {$fdmgHprD < 10} {#var %1 {$fdmgHprI.0$fdmgHprD}} {#var %1 {$fdmgHprI.$fdmgHprD}};
+};
+
+#NOP -- brief a number over 5 digits to k/m/b, one decimal place -- %1 out;
+#NOP -- var, %2 the number.  Keeps the report columns from stretching once;
+#NOP -- a damage or gxp total runs past 99999.;
+#alias {.fdmgAbbrev} {
+    #if {%2 >= 1000000000} {
+        #var fdmgAbbrDiv 1000000000;
+        #var fdmgAbbrSuf {b};
+    } {
+        #if {%2 >= 1000000} {
+            #var fdmgAbbrDiv 1000000;
+            #var fdmgAbbrSuf {m};
+        } {
+            #if {%2 >= 100000} {
+                #var fdmgAbbrDiv 1000;
+                #var fdmgAbbrSuf {k};
+            } {
+                #var fdmgAbbrDiv 0;
+            };
+        };
+    };
+
+    #if {$fdmgAbbrDiv == 0} {
+        #format %1 {%g} {%2};
+    } {
+        #math fdmgAbbrX {%2 * 10 / $fdmgAbbrDiv};
+        #format fdmgAbbrX {%d} {$fdmgAbbrX};
+        #math fdmgAbbrI {$fdmgAbbrX / 10};
+        #format fdmgAbbrI {%d} {$fdmgAbbrI};
+        #math fdmgAbbrD {$fdmgAbbrX - ($fdmgAbbrI * 10)};
+        #format fdmgAbbrD {%d} {$fdmgAbbrD};
+        #var %1 {${fdmgAbbrI}.${fdmgAbbrD}${fdmgAbbrSuf}};
+    };
 };
 
 .fdmgZeroAll;
@@ -358,30 +392,30 @@
 #NOP  REPORTING;
 #NOP -------------------------------------------------------------------;
 
-#var fdmg_box[top] {╔══════════════════════════════════════════════════════════════════════════╗};
-#var fdmg_box[hvy] {╠══════════════════════════════════════════════════════════════════════════╣};
-#var fdmg_box[lgt] {╟──────────────────────────────────────────────────────────────────────────╢};
-#var fdmg_box[bot] {╚══════════════════════════════════════════════════════════════════════════╝};
+#var fdmg_box[top] {╔════════════════════════════════════════════════════════════════════════════════════╗};
+#var fdmg_box[hvy] {╠════════════════════════════════════════════════════════════════════════════════════╣};
+#var fdmg_box[lgt] {╟────────────────────────────────────────────────────────────────────────────────────╢};
+#var fdmg_box[bot] {╚════════════════════════════════════════════════════════════════════════════════════╝};
 
 #NOP -- Centre a string inside the interior -- %1 out var, %2 text.;
 #alias {.fdmgCentre} {
     #format fdmgCtrS {%s} {%2};
     #format fdmgCtrL {%L} {$fdmgCtrS};
-    #math fdmgCtrP {(74 - $fdmgCtrL) / 2};
+    #math fdmgCtrP {(84 - $fdmgCtrL) / 2};
     #format fdmgCtrP {%d} {$fdmgCtrP};
     #if {$fdmgCtrP < 0} {#var fdmgCtrP 0};
     #NOP -- right align to set the left margin, then left align to fill;
-    #NOP -- out the right, which lands the text on 74 either way.;
+    #NOP -- out the right, which lands the text on 84 either way.;
     #math fdmgCtrP {$fdmgCtrP + $fdmgCtrL};
     #format fdmgCtrS {%+${fdmgCtrP}s} {$fdmgCtrS};
-    #format %1 {%-74s} {$fdmgCtrS};
+    #format %1 {%-84s} {$fdmgCtrS};
 };
 
 #NOP -- REPORTING ALIASES;
 #alias {fdmgStats} {
     #echo {<fda>$fdmg_box[top]<088>};
-    #echo {<fda>║<088><ffa>     -=[ >|< ]=-   F R E M E N   D M G   T R A C K E R   -=[ >|< ]=-      <088><fda>║<088>};
-    #echo {<fda>║<088><eda>                     .:  fear is the mind-killer  :.                      <088><fda>║<088>};
+    #echo {<fda>║<088><ffa>          -=[ >|< ]=-   F R E M E N   D M G   T R A C K E R   -=[ >|< ]=-           <088><fda>║<088>};
+    #echo {<fda>║<088><eda>                          .:  fear is the mind-killer  :.                           <088><fda>║<088>};
     #NOP -- The closing line carries the player name, so it is centred;
     #NOP -- at run time rather than baked in.;
     .fdmgCentre {fdmgWho} {.:  $user, the body.  :.};
@@ -390,7 +424,7 @@
 
     #NOP -- Gxp/Rnd sits beside Dmg/Rnd on purpose, the pair is the;
     #NOP -- whole point, damage put out against what it actually earned.;
-    #format fdmgHeader {%+9s %+5s %+5s %+7s %+7s %+7s %+8s %+7s %+9s} {Source} {Hits} {Rnds} {Dmg/Hit} {Dmg/Rnd} {Hit/Rnd} {Best Rnd} {Gxp/Rnd} {Total};
+    #format fdmgHeader {%+11s %+9s %+9s %+7s %+7s %+7s %+8s %+7s %+9s} {Source} {Hits} {Rnds} {Dmg/Hit} {Dmg/Rnd} {Hit/Rnd} {Best Rnd} {Gxp/Rnd} {Total};
     #echo {<fda>║<088> <cfd>$fdmgHeader<088> <fda>║<088>};
     #echo {<fda>$fdmg_box[lgt]<088>};
 
@@ -406,23 +440,23 @@
 
             #math fdmgPerHit {$fdmg_stat[$fdmgSrc][est] / $fdmgDivH};
             #format fdmgPerHit {%d} {$fdmgPerHit};
-            #format fdmgPerHit {%g} {$fdmgPerHit};
+            .fdmgAbbrev {fdmgPerHit} {$fdmgPerHit};
 
             #math fdmgPerRnd {$fdmg_stat[$fdmgSrc][est] / $fdmgDivR};
             #format fdmgPerRnd {%d} {$fdmgPerRnd};
-            #format fdmgPerRnd {%g} {$fdmgPerRnd};
+            .fdmgAbbrev {fdmgPerRnd} {$fdmgPerRnd};
 
             .fdmgHpr {fdmgHpr} {$fdmgDivH} {$fdmgDivR};
 
             #format fdmgHits  {%g} {$fdmg_stat[$fdmgSrc][hits]};
             #format fdmgRnds  {%g} {$fdmg_stat[$fdmgSrc][rounds]};
-            #format fdmgBest  {%g} {$fdmg_stat[$fdmgSrc][best_round]};
-            #format fdmgTotal {%g} {$fdmg_stat[$fdmgSrc][est]};
+            .fdmgAbbrev {fdmgBest}  {$fdmg_stat[$fdmgSrc][best_round]};
+            .fdmgAbbrev {fdmgTotal} {$fdmg_stat[$fdmgSrc][est]};
 
             #NOP -- averaged over the rounds this source landed in;
             .fdmgAvg {fdmgGxpR} {$fdmg_stat[$fdmgSrc][gxp]} {$fdmg_stat[$fdmgSrc][gxp_rnds]};
 
-            #format fdmgRow {%+9s %+5s %+5s %+7s %+7s %+7s %+8s %+7s %+9s} {$fdmg_data[$fdmgSrc][text]} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgGxpR} {$fdmgTotal};
+            #format fdmgRow {%+11s %+9s %+9s %+7s %+7s %+7s %+8s %+7s %+9s} {$fdmg_data[$fdmgSrc][text]} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgGxpR} {$fdmgTotal};
             #echo {<fda>║<088> <eee>$fdmgRow<088> <fda>║<088>};
 
         };
@@ -430,7 +464,7 @@
 
     #NOP -- nothing has landed yet, say so rather than print an empty frame;
     #if {$fdmgAnyHits == 0} {
-        #format fdmgRow {%-72s} {           no blood drawn yet};
+        #format fdmgRow {%-82s} {           no blood drawn yet};
         #echo {<fda>║<088> <ccc>$fdmgRow<088> <fda>║<088>};
         #echo {<fda>$fdmg_box[bot]<088>};
     } {
@@ -446,22 +480,22 @@
 
         #math fdmgPerHit {$fdmg_all[est] / $fdmgDivH};
         #format fdmgPerHit {%d} {$fdmgPerHit};
-        #format fdmgPerHit {%g} {$fdmgPerHit};
+        .fdmgAbbrev {fdmgPerHit} {$fdmgPerHit};
 
         #math fdmgPerRnd {$fdmg_all[est] / $fdmgDivR};
         #format fdmgPerRnd {%d} {$fdmgPerRnd};
-        #format fdmgPerRnd {%g} {$fdmgPerRnd};
+        .fdmgAbbrev {fdmgPerRnd} {$fdmgPerRnd};
 
         .fdmgHpr {fdmgHpr} {$fdmgDivH} {$fdmgDivR};
 
         #format fdmgHits  {%g} {$fdmg_all[hits]};
         #format fdmgRnds  {%g} {$fdmg_all[rounds]};
-        #format fdmgBest  {%g} {$fdmg_all[best_round]};
-        #format fdmgTotal {%g} {$fdmg_all[est]};
+        .fdmgAbbrev {fdmgBest}  {$fdmg_all[best_round]};
+        .fdmgAbbrev {fdmgTotal} {$fdmg_all[est]};
 
         .fdmgAvg {fdmgGxpR} {$fdmg_all[gxp]} {$fdmg_all[gxp_rnds]};
 
-        #format fdmgRow {%+9s %+5s %+5s %+7s %+7s %+7s %+8s %+7s %+9s} {TOTAL} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgGxpR} {$fdmgTotal};
+        #format fdmgRow {%+11s %+9s %+9s %+7s %+7s %+7s %+8s %+7s %+9s} {TOTAL} {$fdmgHits} {$fdmgRnds} {$fdmgPerHit} {$fdmgPerRnd} {$fdmgHpr} {$fdmgBest} {$fdmgGxpR} {$fdmgTotal};
         #echo {<fda>║<088> <ffa>$fdmgRow<088> <fda>║<088>};
 
         #echo {<fda>$fdmg_box[bot]<088>};
@@ -482,7 +516,7 @@
             #NOP -- Gxp/Rnd is the average gxp of a round this emote;
             #NOP -- showed up in, so a bury row and a debilitate row;
             #NOP -- can be read straight against each other.;
-            #format fdmgHeader {%+19s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {Emote} {Min} {Max} {Avg} {Hits} {Pct} {Est Dmg.} {Gxp/Rnd};
+            #format fdmgHeader {%+29s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {Emote} {Min} {Max} {Avg} {Hits} {Pct} {Est Dmg.} {Gxp/Rnd};
             #echo {<fda>║<088> <cfd>$fdmgHeader<088> <fda>║<088>};
             #echo {<fda>$fdmg_box[lgt]<088>};
 
@@ -493,20 +527,20 @@
             #foreach {$fdmg_data[$fdmgSrc][key][%*]} {fdmgKey} {
                 #NOP -- the band itself reads the same whether or not it;
                 #NOP -- has ever landed, so these three are built once;
-                #format fdmgMin {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][min_dmg]};
-                #format fdmgAvg {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][avg_dmg]};
+                .fdmgAbbrev {fdmgMin} {$fdmg_data[$fdmgSrc][band][$fdmgKey][min_dmg]};
+                .fdmgAbbrev {fdmgAvg} {$fdmg_data[$fdmgSrc][band][$fdmgKey][avg_dmg]};
 
                 #NOP -- a max of zero marks the open ended top band;
                 #var fdmgMax {$fdmg_data[$fdmgSrc][band][$fdmgKey][max_dmg]};
                 #if {$fdmgMax == 0} {
                     #var fdmgMax {+};
                 } {
-                    #format fdmgMax {%g} {$fdmgMax};
+                    .fdmgAbbrev {fdmgMax} {$fdmgMax};
                 };
 
                 #if {$fdmg_data[$fdmgSrc][band][$fdmgKey][count] > 0} {
-                    #format fdmgCnt {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][count]};
-                    #format fdmgBandEst {%g} {$fdmg_data[$fdmgSrc][band][$fdmgKey][est]};
+                    .fdmgAbbrev {fdmgCnt} {$fdmg_data[$fdmgSrc][band][$fdmgKey][count]};
+                    .fdmgAbbrev {fdmgBandEst} {$fdmg_data[$fdmgSrc][band][$fdmgKey][est]};
 
                     #NOP -- share of hits to one decimal, kept in integer math;
                     #NOP -- whole percents would read 0 for every tail band;
@@ -522,17 +556,17 @@
                     #NOP -- it landed in has not closed, so this reads -;
                     .fdmgAvg {fdmgBandGxp} {$fdmg_data[$fdmgSrc][band][$fdmgKey][gxp]} {$fdmg_data[$fdmgSrc][band][$fdmgKey][gxp_rnds]};
 
-                    #format fdmgRow {%+19s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {$fdmgCnt} {${fdmgPct}%} {$fdmgBandEst} {$fdmgBandGxp};
+                    #format fdmgRow {%+29s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {$fdmgCnt} {${fdmgPct}%} {$fdmgBandEst} {$fdmgBandGxp};
                     #echo {<fda>║<088> <aff>$fdmgRow<088> <fda>║<088>};
                 } {
-                    #format fdmgRow {%+19s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {-} {-} {-} {-};
+                    #format fdmgRow {%+29s %+6s %+6s %+6s %+6s %+6s %+9s %+7s} {$fdmg_data[$fdmgSrc][band][$fdmgKey][text]} {$fdmgMin} {$fdmgMax} {$fdmgAvg} {-} {-} {-} {-};
                     #echo {<fda>║<088> <ccc>$fdmgRow<088> <fda>║<088>};
                 };
             };
 
             #if {$fdmg_stat[$fdmgSrc][best_hit] > 0} {
                 #echo {<fda>$fdmg_box[hvy]<088>};
-                #format fdmgBestHit {%g} {$fdmg_stat[$fdmgSrc][best_hit]};
+                .fdmgAbbrev {fdmgBestHit} {$fdmg_stat[$fdmgSrc][best_hit]};
                 .fdmgCentre {fdmgFoot} {.:  best hit $fdmg_stat[$fdmgSrc][best_band] at $fdmgBestHit  :.};
                 #echo {<fda>║<088><eda>$fdmgFoot<088><fda>║<088>};
             };
@@ -556,8 +590,8 @@
         };
     };
     #echo {<fda>$fdmg_box[top]<088>};
-    #echo {<fda>║<088><ffa>  -=[ >|< ]=-  T H E   S A N D   T A K E S   I T   B A C K  -=[ >|< ]=-   <088><fda>║<088>};
-    #echo {<fda>║<088><ffa>  -=[ >|< ]=- .. D A M A G E   T R A C K E R   R E S E T .. -=[ >|< ]=-   <088><fda>║<088>};
+    #echo {<fda>║<088><ffa>       -=[ >|< ]=-  T H E   S A N D   T A K E S   I T   B A C K  -=[ >|< ]=-        <088><fda>║<088>};
+    #echo {<fda>║<088><ffa>       -=[ >|< ]=- .. D A M A G E   T R A C K E R   R E S E T .. -=[ >|< ]=-        <088><fda>║<088>};
     #echo {<fda>$fdmg_box[bot]<088>};
 };
 

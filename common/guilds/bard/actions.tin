@@ -1,6 +1,7 @@
 #class {guild_actions} {kill}
 #class {guild_actions} {open}
 
+
 #NOP --------------------------------------- BBB: BEST BARD BOONBOX ------------------------------------------;
 #action {^%w expresses %* feelings about you rocking the mud.} {
     #format playerLower {%l} {%1};
@@ -35,6 +36,13 @@
 #ACTION {^%w grovels shamelessly before you.} {#if !$idle_flag {#format {lower} {%l} {%1};soothe $lower};} {6};
 #action {^%w acks at you.} {#if !$idle_flag {heartening laugh};} {6};
 #action {^%w brandishes %w weapon before you.} {#if !$idle_flag {identify ROOM};} {6};
+#action {^%w whispers to you: lore %*} {
+    #if !$idle_flag {
+        #format tmpItem {%p} {%2};
+        #format {lower} {%l} {%1};
+        lore $tmpItem for $lower;
+    };
+} {6};
 
 
 #NOP --- Use corpses/perform actions between songs so you're more karma efficient;
