@@ -60,6 +60,7 @@
 	#unvar my[implants];
 	#list gs_powers clear;
 	#var powers_added {Added the following powers: };
+	#var vigor_power vigor;
 	#send gs;
 	#delay 3 {
 		#foreach $psi_powers[%*] psi_power {
@@ -69,7 +70,8 @@
 				#if {"$power1" == "$power2"} {
 					#cat powers_added {$power2, };
 					addp $psi_power[key];
-					#if {"$power2" == "improved vigor"} {#var vigor_power improved vigor};
+					#NOP -- Improved vigor shares the Vg slot, so maintain it instead of vigor;
+					#if {"$power1" == "improved vigor"} {#var vigor_power {improved vigor}};
 				};
 			};	
 		};
