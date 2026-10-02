@@ -82,12 +82,17 @@
 
 #NOP -- gs wraps long tiers: the first line ends in a trailing comma and the rest;
 #NOP -- continue on "-     ..." lines, so read both and trim each name;
-#act {^- T%d: %* %s-$} {
-	#if $add_powers {_gs_add_powers {%2}};
-};
+#act {^- T%d: %*\n%a %s-$} {
+	#var pwrLine1 @cleanPowerString{%2};
+	#var pwrLine2 @cleanPowerString{%3};
+	#var pwrLine $pwrLine1 $pwrLine2;
+	#if $add_powers {_gs_add_powers {$pwrLine}};
+} {2};
 
-#act {^-     %* %s-$} {
-	#if $add_powers {_gs_add_powers {%1}};
+#function cleanPowerString {
+	#var tmpResult %0;
+	#replace tmpResult {-};
+	#format result {%p} {$tmpResult};
 };
 
 #alias {_gs_add_powers} {
@@ -98,7 +103,6 @@
 		#if {"$gs_power" != ""} {#list gs_powers add {$gs_power}};
 	};
 };
-
 
 #act {^GXP Awarded from %*: %d} {
 	#var gxp[last-fight-mob] %1;
