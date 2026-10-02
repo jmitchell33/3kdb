@@ -80,11 +80,22 @@
 	};
 };
 
+#NOP -- gs wraps long tiers: the first line ends in a trailing comma and the rest;
+#NOP -- continue on "-     ..." lines, so read both and trim each name;
 #act {^- T%d: %* %s-$} {
-	#if $add_powers {
-		#var temp %2;
-		#replace temp {, } {;};
-		#list gs_powers add {$temp};
+	#if $add_powers {_gs_add_powers {%2}};
+};
+
+#act {^-     %* %s-$} {
+	#if $add_powers {_gs_add_powers {%1}};
+};
+
+#alias {_gs_add_powers} {
+	#var temp {%1};
+	#replace temp {,} {;};
+	#foreach {$temp} gs_power {
+		#format gs_power {%p} {$gs_power};
+		#if {"$gs_power" != ""} {#list gs_powers add {$gs_power}};
 	};
 };
 
