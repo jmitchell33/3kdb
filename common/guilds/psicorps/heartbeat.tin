@@ -26,9 +26,14 @@
 #NOP -- Minimum GP1 for recall pain;
 #var my[psicorps][recall_pain_min_gp1] .5;
 
+#NOP -- Which power the Vg implant maintains. gs_powers switches this to;
+#NOP -- improved vigor when gs lists it;
+#var vigor_power vigor;
+
 #NOP -- Greater concussion (gc implant) is used every x rounds;
 #var gc_round_interval 15;
 #var gc_last_round 0;
+
 
 #NOP -- Alias to swap animal affinity;
 #var aa_used 1;
@@ -116,9 +121,8 @@
 	_check_power {IB} {improved biofeedback};
 	_check_power {IV} {improved valor};
 	_check_power {Ab} {ablating};
-
 	
-	#NOP -- Health
+	#NOP -- Health;
 	_check_power {Vg} {$vigor_power};
 	_check_power {Gv} {greater verve};
 	#if {$my[powers][IB][active]} {#NOP} {_check_power {Bf} {biofeedback}};
@@ -250,7 +254,7 @@
       #elseif {$my[powers][%1][time] < 10} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] refreshing %2<088>}};
         _use_power %2;
-		 #if {$hbp} {#var my[powers][%1][time] 99};
+        #if {$hbp} {#var my[powers][%1][time] 99};
       };
       #else {
         #NOP;
@@ -259,7 +263,7 @@
       #if {$my[implants][%1][active]} {
         #if {$_DEBUG_HB} {#echo {<dee>[debug_heartbeat] turning on %2<088>}};
         _use_power %2;
-		#if {$hbp} {#var my[powers][%1][active] 1;#var my[powers][%1][time] 99};
+        #if {$hbp} {#var my[powers][%1][active] 1;#var my[powers][%1][time] 99};
       };
       #else {
         #NOP;

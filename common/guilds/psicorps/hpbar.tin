@@ -72,10 +72,14 @@
     #list powers_keys explode { };
 
     #NOP -- Remove powers that are no longer on the powers list;
+    #NOP -- Exact code match: GV/Gv, IB/Ib, IV/Iv and ab/Ab are different powers, and stale;
+    #NOP -- entries restored from vars.tin must drop off or the heartbeat never recasts them;
     #foreach *my[powers][] tmpKey {
-        #regex $powers {%i${tmpKey}} {#NOP} {
-            #unvar my[powers][$tmpKey];
+        #var tmpFound 0;
+        #foreach $powers_keys[%*] tmpCode {
+            #if {"$tmpCode" == "$tmpKey"} {#var tmpFound 1};
         };
+        #if {!$tmpFound} {#unvar my[powers][$tmpKey]};
     };
 
     #NOP -- Add new powers or update time on existing ones;
