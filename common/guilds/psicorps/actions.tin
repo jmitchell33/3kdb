@@ -61,8 +61,10 @@
 	#list gs_powers clear;
 	#var powers_added {Added the following powers: };
 	#var vigor_power vigor;
+	#var gs_carry {};
 	#send gs;
 	#delay 3 {
+		_gs_flush_power;
 		#foreach $psi_powers[%*] psi_power {
 			#format power1 {%l} {$psi_power[power]};
 			#foreach $gs_powers power {
@@ -80,10 +82,11 @@
 	};
 };
 
-#NOP -- gs wraps long tiers: the first line ends in a trailing comma and the rest;
-#NOP -- continue on "-     ..." lines, so read both and trim each name;
+#NOP -- gs wraps long tiers onto "-     ..." lines, sometimes mid-name (Lesser / Mindlink).;
+#NOP -- A line without a trailing comma holds its last piece in gs_carry: the next line;
+#NOP -- continues it, while a blank line or the next tier means it was a whole name;
 #act {^- T%d: %* %s-$} {
-	#if $add_powers {_gs_add_powers {%2}};
+	#if $add_powers {_gs_flush_power;_gs_add_powers {%2}};
 };
 
 #act {^-     %* %s-$} {
@@ -92,11 +95,31 @@
 
 #alias {_gs_add_powers} {
 	#var temp {%1};
-	#replace temp {,} {;};
-	#foreach {$temp} gs_power {
-		#format gs_power {%p} {$gs_power};
-		#if {"$gs_power" != ""} {#list gs_powers add {$gs_power}};
+	#format temp {%p} {$temp};
+	#if {"$temp" == ""} {
+		_gs_flush_power;
+	} {
+		#if {"$gs_carry" != ""} {#var temp {$gs_carry $temp}};
+		#var gs_carry {};
+		#var gs_hold 1;
+		#regex {$temp} {,$} {#var gs_hold 0};
+		#replace temp {,} {;};
+		#list gs_line create {$temp};
+		#list gs_line size gs_size;
+		#loop 1 $gs_size gs_i {
+			#format gs_power {%p} {$gs_line[$gs_i]};
+			#if {$gs_hold && $gs_i == $gs_size} {
+				#var gs_carry {$gs_power};
+			} {
+				#if {"$gs_power" != ""} {#list gs_powers add {$gs_power}};
+			};
+		};
 	};
+};
+
+#alias {_gs_flush_power} {
+	#if {"$gs_carry" != ""} {#list gs_powers add {$gs_carry}};
+	#var gs_carry {};
 };
 
 
