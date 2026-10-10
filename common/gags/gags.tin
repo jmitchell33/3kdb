@@ -8,11 +8,14 @@
 #read common/gags/gags_area.tin;
 
 
-#NOP -- Always on Gags;
-#NOP -- Prompt and empty lines;
-#gag {^$};
+#NOP -- Always gag empty prompt;
 #gag {^>$};
 #gag {Recalculating carried weight...};
+
+#NOP -- Gag blank lines;
+#action {^$} {
+    #if $gags[blanks] {#line gag};
+} {2};
 
 #NOP -- Ewell spam;
 #var ewell_gag 1;
@@ -112,6 +115,7 @@
 #list gagList add {{{name} {combat_guild} {active} {0} {action} {_gag_combat_guild} {description} {Combat: Spammy Guild Attacks (Cyborgs, Necros, etc.)}}};
 #list gagList add {{{name} {combat_items} {active} {0} {action} {_gag_combat_items} {description} {Combat: Spammy Items (CMC, Erah Shield, etc.)}}};
 #list gagList add {{{name} {combat_numbers} {active} {0} {action} {#NOP} {description} {Combat: Vaf Numbers}}};
+#list gagList add {{{name} {blanks} {active} {0} {action} {#NOP} {description} {General: Gag Blank Lines}}};
 #list gagList indexate name;
 
 #alias .update_gags {
