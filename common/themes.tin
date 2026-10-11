@@ -2,133 +2,318 @@
 #class 3kdb_themes open;
 
 #NOP -- Use the "colors" alias to see available colors;
+#NOP -- Use the "themes" alias to list themes, "themes <name>" to preview one;
+#NOP -- Use "theme <name>" to switch themes;
 
-#NOP -- If no theme exists, just hide the room ansi variables;
 #NOP -- If no theme is set, use default;
 #if {"${theme[name]}" === ""} {
     #var theme[name] default;
 };
 
+#NOP -------------------------- Theme definitions ----------------------------;
+#NOP -- To add a theme, copy a block below and change the name, desc and colors;
+#NOP -- Everything under themes[<name>] is copied into theme[] when that theme is active;
 
-#if {"$theme[name]" == "default"} {
-    #NOP Numbers Damage Display;
-    #NOP -- The codes in the second part are how it should be formatted per the #format tintin function;
-    #var theme[dmg_display] {<128>[DMG]:<088> <178>You hit <168>%n <138>%d <178>%l for <158>%g <178>damage.<088>};
-    #var theme[idmg_display] {<fcc>[DMG INC]:<088> <168>%n <178>hit you for <138>%g <178>damage.<088>};
+#NOP ---- default ----;
+#var themes[default][desc] {Standard 3kdb colors, soft pastels};
 
-    #NOP Bard Songs;
-    #var theme[bard_song] <dec>;
+#NOP Numbers Damage Display;
+#NOP -- The codes in the second part are how it should be formatted per the #format tintin function;
+#var themes[default][dmg_display] {<128>[DMG]:<088> <178>You hit <168>%n <138>%d <178>%l for <158>%g <178>damage.<088>};
+#var themes[default][idmg_display] {<fcc>[DMG INC]:<088> <168>%n <178>hit you for <138>%g <178>damage.<088>};
 
-    #NOP Chatbox Color;
-    #var theme[chatbox] <cee>;
+#NOP Bard Songs;
+#var themes[default][bard_song] <dec>;
 
-    #NOP Generic Guildline Chat Monitor;
-    #var theme[chatcolor][gline] <dfd>;
+#NOP Chatbox Color;
+#var themes[default][chatbox] <cee>;
 
-    #NOP Chat Header Colors;
-    #var theme[chatHeader][party] <dbe>;
-    #var theme[chatHeader][tells] <dbe>;
-    #var theme[chatHeader][clan] <dbe>;
-    #var theme[chatHeader][guild] <dbe>;
-    #var theme[chatHeader][hm] <dbe>;
-    #var theme[chatcolor][party] <ffb>;
-    #var theme[chatcolor][gjugg] <cfb>;
-    #var theme[chatcolor][hm] <fad>;
-    #var theme[chatcolor][auction] <fef>;
+#NOP Generic Guildline Chat Monitor;
+#var themes[default][chatcolor][gline] <dfd>;
 
-    #NOP Room Short;
-    #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
-    
-    #NOP Room exits;
-    #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
-    
-    #NOP Mobs;
-    #SUBSTITUTE {^-M-_%1} {<fcb>%1<088>} {4};
-    #SUBSTITUTE {^-M-_%1.$} {<fcb>%1<088>} {4};
+#NOP Chat Header Colors;
+#var themes[default][chatHeader][party] <dbe>;
+#var themes[default][chatHeader][tells] <dbe>;
+#var themes[default][chatHeader][clan] <dbe>;
+#var themes[default][chatHeader][guild] <dbe>;
+#var themes[default][chatHeader][hm] <dbe>;
+#var themes[default][chatcolor][party] <ffb>;
+#var themes[default][chatcolor][gjugg] <cfb>;
+#var themes[default][chatcolor][hm] <fad>;
+#var themes[default][chatcolor][auction] <fef>;
 
-    #NOP Mage Summons;
-    #SUBSTITUTE {^-M-_%1 [summons]%2.$} {<dcd>%1 [summons]%2.<088>} {3};
-    #SUBSTITUTE {^-M-_$my[familiar].$} {<edc>$my[familiar] [familiar].<088>} {3};
-    
-    
-    #NOP Players;
-	#SUBSTITUTE {^-P-_%1} {<ffa>%1<088>};
-    
-    #NOP Weapons;
-	#SUBSTITUTE {^-w-%1} {<bff>%1<088>};
-    
-    #NOP Objects;
-	#SUBSTITUTE {^-o-%1} {};
+#NOP Room Colors, an empty value leaves the line uncolored;
+#var themes[default][room][short] <feb>;
+#var themes[default][room][exits] <dfb>;
+#var themes[default][room][mob] <fcb>;
+#var themes[default][room][summons] <dcd>;
+#var themes[default][room][familiar] <edc>;
+#var themes[default][room][player] <ffa>;
+#var themes[default][room][weapon] <bff>;
+#var themes[default][room][object] {};
+#var themes[default][room][worlddrop] <cce>;
+#var themes[default][room][armour] <beb>;
+#var themes[default][room][item] <ded>;
 
-    #NOP World Drops;
-    #SUBSTITUTE {^-!!!-%1} {<cce>%1<088>};
-    
-    #NOP Armours;
-	#SUBSTITUTE {^-a-%1} {<beb>%1<088>};
-    #NOP Items;
-	#SUBSTITUTE {^-i-%1} {<ded>%1<088>};
+#NOP ---- bright ----;
+#var themes[bright][desc] {Bolder weapon, armour and item colors};
+
+#NOP Numbers Damage Display;
+#var themes[bright][dmg_display] {<128>[DMG]:<088> <178>You hit <168>%n <138>%d <178>%l for <158>%g <178>damage.<088>};
+#var themes[bright][idmg_display] {<fcc>[DMG INC]:<088> <168>%n <178>hit you for <138>%g <178>damage.<088>};
+
+#NOP Bard Songs;
+#var themes[bright][bard_song] <aef>;
+
+#NOP Chatbox Color;
+#var themes[bright][chatbox] <cee>;
+
+#NOP Generic Guildline Chat Monitor;
+#var themes[bright][chatcolor][gline] <dfd>;
+
+#NOP Chat Header Colors;
+#var themes[bright][chatHeader][party] <dbe>;
+#var themes[bright][chatHeader][tells] <dbe>;
+#var themes[bright][chatHeader][clan] <dbe>;
+#var themes[bright][chatHeader][guild] <dbe>;
+#var themes[bright][chatHeader][hm] <dbe>;
+#var themes[bright][chatcolor][party] <ffb>;
+#var themes[bright][chatcolor][gjugg] <cfb>;
+#var themes[bright][chatcolor][hm] <fad>;
+#var themes[bright][chatcolor][auction] <cea>;
+
+#NOP Room Colors;
+#var themes[bright][room][short] <feb>;
+#var themes[bright][room][exits] <dfb>;
+#var themes[bright][room][mob] <fcb>;
+#var themes[bright][room][summons] <dcd>;
+#var themes[bright][room][familiar] <edc>;
+#var themes[bright][room][player] <ffa>;
+#var themes[bright][room][weapon] <cda>;
+#var themes[bright][room][object] {};
+#var themes[bright][room][worlddrop] <cce>;
+#var themes[bright][room][armour] <fff>;
+#var themes[bright][room][item] <fae>;
+
+#NOP ---- halloween ----;
+#var themes[halloween][desc] {Witches, Jack-o-Lanterns, and Slimes - Oh My!};
+
+#NOP Numbers Damage Display;
+#var themes[halloween][dmg_display] {<fca>[DMG]:<088> <ffd>You hit <dbf>%n <fda>%d <ffd>%l for <bfa>%g <ffd>damage.<088>};
+#var themes[halloween][idmg_display] {<faa>[DMG INC]:<088> <dbf>%n <ffd>hit you for <fbb>%g <ffd>damage.<088>};
+
+#NOP Bard Songs;
+#var themes[halloween][bard_song] <ecf>;
+
+#NOP Chatbox Color;
+#var themes[halloween][chatbox] <fca>;
+
+#NOP Generic Guildline Chat Monitor;
+#var themes[halloween][chatcolor][gline] <cfb>;
+
+#NOP Chat Header Colors;
+#var themes[halloween][chatHeader][party] <dbf>;
+#var themes[halloween][chatHeader][tells] <dbf>;
+#var themes[halloween][chatHeader][clan] <dbf>;
+#var themes[halloween][chatHeader][guild] <dbf>;
+#var themes[halloween][chatHeader][hm] <dbf>;
+#var themes[halloween][chatcolor][party] <fda>;
+#var themes[halloween][chatcolor][gjugg] <bfa>;
+#var themes[halloween][chatcolor][hm] <ecf>;
+#var themes[halloween][chatcolor][auction] <ffd>;
+
+#NOP Room Colors;
+#var themes[halloween][room][short] <fca>;
+#var themes[halloween][room][exits] <bfa>;
+#var themes[halloween][room][mob] <fbb>;
+#var themes[halloween][room][summons] <dbf>;
+#var themes[halloween][room][familiar] <ecf>;
+#var themes[halloween][room][player] <ffd>;
+#var themes[halloween][room][weapon] <dde>;
+#var themes[halloween][room][object] {};
+#var themes[halloween][room][worlddrop] <ffa>;
+#var themes[halloween][room][armour] <ddd>;
+#var themes[halloween][room][item] <fdb>;
+
+#NOP -------------------------- Apply active theme ----------------------------;
+
+#NOP -- Copies the colors of the theme named in theme[name] into theme[];
+#alias .theme_apply {
+    #var tmpThemeName {$theme[name]};
+    #if {&themes[$tmpThemeName][] == 0} {
+        #echo {<fab>Theme <efc>$tmpThemeName<fab> is not defined in common/themes.tin, using default.<088>};
+        #var theme[name] default;
+        #var tmpThemeName default;
+    };
+
+    #NOP -- Copied key by key so theme[name] and colors set elsewhere such as theme[caption] survive;
+    #foreach {*themes[$tmpThemeName][]} {tmpThemeKey} {
+        #var theme[$tmpThemeKey] {$themes[$tmpThemeName][$tmpThemeKey]};
+    };
 };
 
-#if {"$theme[name]" == "bright"} {
-    #NOP Numbers Damage Display;
-    #NOP -- The codes in the second part are how it should be formatted per the #format tintin function;
-    #var theme[dmg_display] {<128>[DMG]:<088> <178>You hit <168>%n <138>%d <178>%l for <158>%g <178>damage.<088>};
-    #var theme[idmg_display] {<fcc>[DMG INC]:<088> <168>%n <178>hit you for <138>%g <178>damage.<088>};
-    
-    #NOP Bard Songs;
-    #var theme[bard_song] <aef>;
+.theme_apply;
 
-    #NOP Chatbox Color;
-    #var theme[chatbox] <cee>;
-
-    #NOP Generic Guildline Chat Monitor;
-    #var theme[chatcolor][gline] <dfd>;
-
-    #NOP Chat Header Colors;
-    #var theme[chatHeader][party] <dbe>;
-    #var theme[chatHeader][tells] <dbe>;
-    #var theme[chatHeader][clan] <dbe>;
-    #var theme[chatHeader][guild] <dbe>;
-    #var theme[chatHeader][hm] <dbe>;
-    #var theme[chatcolor][party] <ffb>;
-    #var theme[chatcolor][gjugg] <cfb>;
-    #var theme[chatcolor][hm] <fad>;
-    #var theme[chatcolor][auction] <cea>;
-
-    #NOP Room Short;
-    #SUBSTITUTE {^-R-_%1-R-_} {<feb>%1<088>};
-    
-    #NOP Room exits;
-    #SUBSTITUTE {-X-_%1-X-_} {<dfb>%1<088>};
-    
-    
-    #NOP Mobs;
-    #SUBSTITUTE {^-M-_%1} {<fcb>%1<088>} {4};
-    #SUBSTITUTE {^-M-_%1.$} {<fcb>%1<088>} {4};
-
-    #NOP Mage Summons;
-    #SUBSTITUTE {^-M-_%1 [summons]%2.$} {<dcd>%1 [summons]%2.<088>} {3};
-    #SUBSTITUTE {^-M-_$my[familiar].$} {<edc>$my[familiar] [familiar].<088>} {3};
-    
-    #NOP Players;
-	#SUBSTITUTE {^-P-_%1} {<ffa>%1<088>};
-    
-    #NOP Weapons;
-	#SUBSTITUTE {^-w-%1} {<cda>%1<088>};
-    
-    #NOP Objects;
-	#SUBSTITUTE {^-o-%1} {%1};
-
-    #NOP World Drops;
-    #SUBSTITUTE {^-!!!-%1} {<cce>%1<088>};
-    
-    #NOP Armours;
-	#SUBSTITUTE {^-a-%1} {<fff>%1<088>};
-    
-    #NOP Items;
-	#SUBSTITUTE {^-i-%1} {<fae>%1<088>};
+#NOP -- theme <name>  switches to that theme;
+#alias {theme} {
+    #if {"%1" == ""} {
+        #echo {  <ddd>Your theme is <ffd>$theme[name]<ddd>. Type <ffd>theme <name><ddd> to change it, <ffd>themes<ddd> to view all themes.<088>};
+    };
+    #elseif {&themes[%1][] == 0} {
+        #echo {  <fab>No theme named <efc>%1<fab> found. Run <fff>themes<fab> to view all themes.<088>};
+    };
+    #else {
+        #var theme[name] {%1};
+        .theme_apply;
+        #echo {  <dfc>Your theme has been changed to <ffd>$theme[name]<dfc>.<088>};
+        #echo {  <ddd>This may require you to save your settings and reconnect using the command <ffd>ld<ddd>.<088>};
+    };
 };
 
+#NOP -- Room substitutions read the active theme each time they fire;
+#NOP Room Short;
+#SUBSTITUTE {^-R-_%1-R-_} {$theme[room][short]%1<088>};
 
+#NOP Room exits;
+#SUBSTITUTE {-X-_%1-X-_} {$theme[room][exits]%1<088>};
+
+#NOP Mobs;
+#SUBSTITUTE {^-M-_%1} {$theme[room][mob]%1<088>} {4};
+#SUBSTITUTE {^-M-_%1.$} {$theme[room][mob]%1<088>} {4};
+
+#NOP Mage Summons;
+#SUBSTITUTE {^-M-_%1 [summons]%2.$} {$theme[room][summons]%1 [summons]%2.<088>} {3};
+#SUBSTITUTE {^-M-_$my[familiar].$} {$theme[room][familiar]$my[familiar] [familiar].<088>} {3};
+
+#NOP Players;
+#SUBSTITUTE {^-P-_%1} {$theme[room][player]%1<088>};
+
+#NOP Weapons;
+#SUBSTITUTE {^-w-%1} {$theme[room][weapon]%1<088>};
+
+#NOP Objects;
+#SUBSTITUTE {^-o-%1} {$theme[room][object]%1<088>};
+
+#NOP World Drops;
+#SUBSTITUTE {^-!!!-%1} {$theme[room][worlddrop]%1<088>};
+
+#NOP Armours;
+#SUBSTITUTE {^-a-%1} {$theme[room][armour]%1<088>};
+
+#NOP Items;
+#SUBSTITUTE {^-i-%1} {$theme[room][item]%1<088>};
+
+#NOP -------------------------- Theme viewer ----------------------------;
+
+#NOP -- Sample text shown by "themes <name>" for each theme variable;
+#var themeSample[bard_song] {Singing: Rainbow of Death - 12};
+#var themeSample[chatbox] {Border of the chat window};
+#var themeSample[chatHeader][party] {PARTY};
+#var themeSample[chatHeader][tells] {TELLS};
+#var themeSample[chatHeader][clan] {CLAN};
+#var themeSample[chatHeader][guild] {GUILD};
+#var themeSample[chatHeader][hm] {HM};
+#var themeSample[chatcolor][gline] {[Guild] Badger: anyone up for a party?};
+#var themeSample[chatcolor][party] {[Party] Badger: heading to chess next};
+#var themeSample[chatcolor][gjugg] {[Gjugg] Badger: truck is fueled up};
+#var themeSample[chatcolor][hm] {[High Mortal] Badger: grats on the level};
+#var themeSample[chatcolor][auction] {[Auction] Badger: selling a chainmail +1};
+#var themeSample[room][short] {A Poorly-lit Street (n,s,e)};
+#var themeSample[room][exits] {north, south, east};
+#var themeSample[room][mob] {A grizzled orc warrior.};
+#var themeSample[room][summons] {A blood-soaked Chupacabra [summons].};
+#var themeSample[room][familiar] {A black cat [familiar].};
+#var themeSample[room][player] {Badger the Juggernaut};
+#var themeSample[room][weapon] {A rune-etched longsword.};
+#var themeSample[room][object] {A wooden bench.};
+#var themeSample[room][worlddrop] {A shimmering crystal shard.};
+#var themeSample[room][armour] {A dented steel breastplate.};
+#var themeSample[room][item] {A small leather pouch.};
+
+#alias .theme_rule {
+    #echo {<ddd>  --------------------------------------------------------------------------------<088>};
+};
+
+#NOP -- Prints tmpThemeLabel and tmpThemeSample in the color held in tmpThemeVal, followed by the color code itself;
+#alias .theme_line {
+    #if {"$tmpThemeVal" == ""} {
+        #format {tmpThemeOut} {  %-27s %-42s <aaa>(no color)<088>} {$tmpThemeLabel} {$tmpThemeSample};
+    } {
+        #NOP -- The <888> breaks up the code so it prints as text instead of coloring;
+        #var tmpThemeCode {$tmpThemeVal};
+        #replace tmpThemeCode {<} {<<888>};
+        #format {tmpThemeOut} {  $tmpThemeVal%-27s %-42s<088> %s} {$tmpThemeLabel} {$tmpThemeSample} {$tmpThemeCode};
+    };
+    #echo {$tmpThemeOut};
+};
+
+#NOP -- Prints the "themes" list row for the theme named in tmpThemeName;
+#alias .theme_list_row {
+    #if {"$tmpThemeName" == "$theme[name]"} {
+        #format {tmpThemeOut} {  <ffd>%-16s <ddd>%s <dfc>(active)<088>} {$tmpThemeName} {$themes[$tmpThemeName][desc]};
+    } {
+        #format {tmpThemeOut} {  <ffd>%-16s <ddd>%s<088>} {$tmpThemeName} {$themes[$tmpThemeName][desc]};
+    };
+    #echo {$tmpThemeOut};
+};
+
+#NOP -- themes         lists every defined theme;
+#NOP -- themes <name>  shows each variable of that theme in its own color;
+#alias {themes} {
+    #if {"%1" == ""} {
+        .theme_rule;
+        #format {tmpThemeOut} {  <dfc>%-16s %s<088>} {THEME} {Description};
+        #echo {$tmpThemeOut};
+        .theme_rule;
+        #NOP -- Tables sort by key, so default is printed first and skipped in the loop;
+        #var tmpThemeName default;
+        .theme_list_row;
+        #foreach {*themes[]} {tmpThemeName} {
+            #if {"$tmpThemeName" == "default"} {
+                #continue;
+            };
+            .theme_list_row;
+        };
+        .theme_rule;
+        #echo {  <ddd>Type <ffd>themes <name><ddd> to preview every color in a theme.<088>};
+        #echo {  <ddd>Type <ffd>theme <name><ddd> to switch to one.<088>};
+        .theme_rule;
+    } {
+        #var tmpThemeName {%1};
+        #if {&themes[$tmpThemeName][] == 0} {
+            #echo {  <fab>No theme named <efc>$tmpThemeName<fab> found. Run <fff>themes<fab> to view all themes.<088>};
+        } {
+            .theme_rule;
+            #echo {  <dfc>THEME: <ffd>$tmpThemeName<ddd> - $themes[$tmpThemeName][desc]<088>};
+            .theme_rule;
+            #foreach {*themes[$tmpThemeName][]} {tmpThemeKey} {
+                #if {"$tmpThemeKey" == "desc"} {
+                    #continue;
+                };
+                #if {&themes[$tmpThemeName][$tmpThemeKey][] > 0} {
+                    #foreach {*themes[$tmpThemeName][$tmpThemeKey][]} {tmpThemeSub} {
+                        #var tmpThemeLabel {theme[$tmpThemeKey][$tmpThemeSub]};
+                        #var tmpThemeVal {$themes[$tmpThemeName][$tmpThemeKey][$tmpThemeSub]};
+                        #var tmpThemeSample {$themeSample[$tmpThemeKey][$tmpThemeSub]};
+                        .theme_line;
+                    };
+                } {
+                    #regex {$tmpThemeKey} {_display$} {
+                        #NOP -- Format strings carry several colors, so show them filled in with sample values;
+                        #format {tmpThemeSample} {$themes[$tmpThemeName][$tmpThemeKey]} {orc} {3} {times} {1234};
+                        #format {tmpThemeOut} {  %-27s %s} {theme[$tmpThemeKey]} {$tmpThemeSample};
+                        #echo {$tmpThemeOut};
+                    } {
+                        #var tmpThemeLabel {theme[$tmpThemeKey]};
+                        #var tmpThemeVal {$themes[$tmpThemeName][$tmpThemeKey]};
+                        #var tmpThemeSample {$themeSample[$tmpThemeKey]};
+                        .theme_line;
+                    };
+                };
+            };
+            .theme_rule;
+        };
+    };
+};
 
 #class 3kdb_themes close;
