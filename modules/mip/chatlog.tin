@@ -43,11 +43,14 @@
 
 	#NOP -- Update scripts/discordPost.py to where the python file is located, this depends on the root that;
 	#NOP -- tintin is being called from;	
+	#NOP -- The post runs in the background so a big batch doesn't hang the client. Each batch gets;
+	#NOP -- its own file (the script deletes it), and errors go to logs/$sysUser/discordPost.log;
 	#delay sendPayload {
 		#line json payloadStack {#var payloadStackJson &0};
-		#script {result} {echo '{$payloadStackJson}' > logs/$sysUser/discordTmp.txt};
-		#script {result} {python3 scripts/discordPost.py logs/$sysUser/discordTmp.txt};
-		#if $debug[discord] {#echo {Discord result: $result}};
+		#format discordFile {logs/$sysUser/discordTmp-%U.txt};
+		#script {result} {echo '{$payloadStackJson}' > $discordFile};
+		#system {python3 scripts/discordPost.py $discordFile >> logs/$sysUser/discordPost.log 2>&1 &};
+		#if $debug[discord] {#echo {Discord: posting in the background, errors in logs/$sysUser/discordPost.log}};
 		#list payloadStack clear;
 	} {10};
 };
