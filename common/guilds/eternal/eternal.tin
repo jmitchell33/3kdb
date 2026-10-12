@@ -69,12 +69,32 @@
 #NOP -- reset dungeon;
 #alias {rd3} {
 	#switch {"%0"} {
+		#case {"cz"} {#send {eternal reset dungeon Celestial Zodiacs party};};
 		#case {"mj"} {#send {eternal reset dungeon Mahjongg party};};
 		#case {"sz"} {#send {eternal reset dungeon Section Z party};};
 		#case {"aegis"} {#send {eternal reset dungeon Aegis Global party};};
-		#case {""}   {#echo {<efb>========== <faa>NO DUNGEON PROVIDED <efb>==========<088>}};
+		#case {"kayos"} {#send {eternal reset dungeon The Kayos Wars party};};
+		#case {""}   {
+			#echo {<efb>  =============== <faa>NO DUNGEON PROVIDED <efb>===============<088>};
+			#echo {<dfc>        Current shortcuts include:<088>};
+			.rd3_table {<bcf>Alias} {Area Name};
+			.rd3_table {<fbb>cz} {Celestial Zodiacs};
+			.rd3_table {<fbb>mj} {Mahjongg};
+			.rd3_table {<fbb>sz} {Section Z};
+			.rd3_table {<fbb>aegis} {Aegis Global};
+			.rd3_table {<fbb>kayos} {The Kayos Wars};
+			#echo {};
+			#echo {<eee>  Provide full dungeon name, or <bcf>rd3 alias<eee> to reset};
+			#echo {<eee>  dungeon for party <ebb>(requires skill trained to level 3)<088>};
+			#echo {};
+		};
 		#default 	 {#send {eternal reset dungeon %0 party};};
 	};
+};
+
+#alias {.rd3_table} {
+	#format tmpString {       %-10s         %-20s<088>} {%1} {%2};
+	#echo $tmpString;
 };
 
 #NOP -- announce dungeon resets;

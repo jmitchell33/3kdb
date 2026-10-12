@@ -8,7 +8,11 @@
 #list strategyList add {{{guild} {bard} {name} {assault} {active} {0} {description} {Bard: Martial Assault}}};
 #list strategyList add {{{guild} {bard} {name} {cshot} {active} {0} {description} {Bard: Called Shot}}};
 #list strategyList add {{{guild} {bard} {name} {enrage} {active} {0} {description} {Bard: Enrage}}};
+#list strategyList add {{{guild} {bard} {name} {critic} {active} {0} {description} {Bard: Caustic Critic}}};
 #list strategyList indexate name;
+
+#NOP -- Timers of various spells (in seconds);
+#var criticDuration 58;
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
@@ -29,6 +33,10 @@
         };
     };
 
+    checkStrategy {critic} {#if !$mob[critic] {
+        cast caustic critic;
+        #delay criticTimer {cast caustic critic} $criticDuration;
+    };};
     checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
     checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
     checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
