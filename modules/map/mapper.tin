@@ -171,6 +171,42 @@
 	#var findpattern {$findbase{| \(.*\)}};
 };
 
+#NOP -- @findhere_sig{a;b;c}: just the standard directions in a list of exits, in a fixed order.;
+#NOP -- Map rooms often have extra command exits (e.g. nod) the game doesn't list, so exits are compared this way;
+#function {findhere_sig} {
+	#var result {};
+	#local fd {};
+	#foreach {n;ne;e;se;s;sw;w;nw;u;d} fd {
+		#if {";%0;" == "%*;$fd;%*"} {#var result {$result;$fd}};
+	};
+};
+
+#NOP -- Keep the candidates in findroom[$find_count] whose standard exits match this room's;
+#alias {.findhere_exitfilter} {
+	#if {"$findsig" == ""} {#return};
+	#local fv {};
+	#local fd {};
+	#var findkeep {};
+	#foreach *findroom[$find_count][] fv {
+		#map at $fv #map get roomexits findmapexits;
+		#var findmaplist {};
+		#foreach *findmapexits[] fd {#var findmaplist {$findmaplist;$fd}};
+		#if {"@findhere_sig{$findmaplist}" === "$findsig"} {#var findkeep[$fv] {}};
+	};
+	#var findroom[$find_count] {};
+	#foreach *findkeep[] fv {#var findroom[$find_count][$fv] {}};
+};
+
+#NOP -- After each search: remember the first rooms found, then keep those whose exits match too;
+#alias {.findhere_check} {
+	#if {&findroom[$find_count][] == 0} {#return};
+	#if {&findfirst[] == 0} {#var findfirst $findroom[$find_count]};
+	.findhere_exitfilter;
+	#if {&findroom[$find_count][] > 0} {#var finddone 1};
+};
+
+#NOP -- Search strictest first: area, name and description, then drop the area, then the description.;
+#NOP -- If no room's exits match (e.g. a hidden exit), fall back to the first rooms the name search found;
 #alias {.findhere_search} {
 	#NOP -- #map list finds nothing unless the map is in some room, so park it in one if needed;
 	#map get roomvnum findhere_vnum;
@@ -182,30 +218,34 @@
 		#showme <eaa>findhere: no room name was captured, so there's nothing to search for. Try again after moving.<088>;
 		#return;
 	};
-	#var findroom[$find_count] {};
 	#var findexits {$room[exits]};
 	#if {"$findexits" == ""} {#var findexits {@findhere_exits{$findname}}};
 	#replace findexits {,} {;};
 	#replace findexits {~} {;};
+	#var findsig {@findhere_sig{$findexits}};
+	#var finddone 0;
+	#var findfirst {};
 	#if {"$room[long]" != ""} {
-		#map list {roomarea} {$area} {roomname} {$findpattern} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
-		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$findpattern} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
-		};
-	};
-	#if {&findroom[$find_count][] == 0} {
-		#map list {roomarea} {$area} {roomname} {$findpattern} {roomexits} {$findexits} {variable} {findroom[$find_count]};
-	};
-	#if {&findroom[$find_count][] == 0} {
-		#map list {roomname} {$findpattern} {roomexits} {$findexits} {variable} {findroom[$find_count]};
-	};
-	#NOP -- Exits must match exactly, so if the map is missing an exit nothing above matches. Try without;
-	#if {&findroom[$find_count][] == 0 && "$room[long]" != ""} {
+		#var findroom[$find_count] {};
 		#map list {roomarea} {$area} {roomname} {$findpattern} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		.findhere_check;
 	};
-	#if {&findroom[$find_count][] == 0} {
+	#if {!$finddone && "$room[long]" != ""} {
+		#var findroom[$find_count] {};
+		#map list {roomname} {$findpattern} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		.findhere_check;
+	};
+	#if {!$finddone} {
+		#var findroom[$find_count] {};
 		#map list {roomarea} {$area} {roomname} {$findpattern} {variable} {findroom[$find_count]};
+		.findhere_check;
 	};
+	#if {!$finddone} {
+		#var findroom[$find_count] {};
+		#map list {roomname} {$findpattern} {variable} {findroom[$find_count]};
+		.findhere_check;
+	};
+	#if {!$finddone} {#var findroom[$find_count] $findfirst};
 	.findhere_result;
 };
 
