@@ -1,6 +1,7 @@
 import fcntl
 import json
 import os
+import re
 import sys
 import time
 
@@ -52,13 +53,21 @@ else:
 lock = open(os.path.join(os.path.dirname(path) or ".", "discordPost.lock"), "w")
 fcntl.flock(lock, fcntl.LOCK_EX)
 
+# Show chat text as typed: escape Discord formatting (*bold*, _italic_, `code`,
+# ~~strike~~, ||spoiler||) and don't let @everyone, @here or user mentions ping
+MARKDOWN = re.compile(r'([\\*_~`|])')
+NO_PINGS = {"parse": []}
+
 # Join each channel's lines into as few messages as fit, so a busy batch is a
 # handful of requests instead of one per line
 messages = {}
 for key in obj:
     try:
         url = obj[key]["channel"]
-        text = obj[key]["payload"]
+        # chatlog.tin swaps backslashes and semicolons for the look-alikes U+FF3C
+        # and U+FF1B, so swap them back
+        payload = obj[key]["payload"].replace("\uff3c", "\\").replace("\uff1b", ";")
+        text = MARKDOWN.sub(r'\\\1', payload)
     except KeyError as e:
         log(f"Error on entry {key}: Missing field {e}")
         continue
@@ -73,7 +82,7 @@ for url, chunks in messages.items():
         # Retry when Discord says to slow down, waiting as long as it asks
         for attempt in range(5):
             try:
-                res = requests.post(url, json={"content": content}, headers=headers, timeout=10)
+                res = requests.post(url, json={"content": content, "allowed_mentions": NO_PINGS}, headers=headers, timeout=10)
             except requests.exceptions.Timeout:
                 log("Error: Request timed out")
                 break
