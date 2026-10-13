@@ -5,6 +5,17 @@
 #NOP -- The first time it runs, the list is built from $player1, $player2, ... in the launcher.;
 #NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads;
 
+#NOP -- 3kdb opens common_config in this startup session and only closes it in the game session, so after a;
+#NOP -- login it's still open here. Close any open class first, or the menu and PASSWORD land in it and get;
+#NOP -- deleted when the next character loads common/config.tin;
+#alias {menu_close_classes} {
+    #info classes save;
+    #foreach *info[CLASSES][] menu_i {
+        #if {"$info[CLASSES][$menu_i][arg3]" != "0"} {#class {$info[CLASSES][$menu_i][arg1]} close};
+    };
+};
+menu_close_classes;
+
 #class startmenu kill;
 #class startmenu open;
 
@@ -381,6 +392,7 @@
 #NOP -- 3k drops anything sent before its Password: prompt, so the password waits for the prompt.;
 #NOP -- Without a saved password only the name is sent, so you can type the password yourself;
 #alias {menu_connect} {
+    menu_close_classes;
     #unvar PASSWORD;
     #script {menu_tmp} {test -f chars/$menu_char/private.tin && echo yes};
     #if {"$menu_tmp[1]" == "yes"} {#read chars/$menu_char/private.tin};
