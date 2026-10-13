@@ -19,18 +19,32 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 path = sys.argv[1]
+# chatlog.tin writes one message per line as "channel<tab>text". Older batches
+# were a JSON object of {"n": {"channel": ..., "payload": ...}}, still accepted
 try:
-    with open(path, 'r') as f:
-        obj = json.loads(f.read())
+    with open(path, 'r', encoding='utf-8', errors='replace') as f:
+        raw = f.read()
 except FileNotFoundError:
     log(f"Error: File not found: {path}")
-    sys.exit(1)
-except json.JSONDecodeError as e:
-    log(f"Error: Invalid JSON: {e}")
     sys.exit(1)
 finally:
     if os.path.exists(path):
         os.remove(path)
+
+if raw.lstrip().startswith('{'):
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError as e:
+        log(f"Error: Invalid JSON: {e}")
+        sys.exit(1)
+else:
+    obj = {}
+    for n, line in enumerate(raw.splitlines(), 1):
+        url, sep, text = line.partition('\t')
+        if not sep or not url:
+            log(f"Error on line {n}: expected channel<tab>text")
+            continue
+        obj[str(n)] = {"channel": url, "payload": text}
 
 # tintin starts each batch in the background, so wait for any earlier batch to
 # finish first. That keeps messages in order and the batches from racing each

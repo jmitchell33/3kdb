@@ -45,10 +45,16 @@
 	#NOP -- tintin is being called from;	
 	#NOP -- The post runs in the background so a big batch doesn't hang the client. Each batch gets;
 	#NOP -- its own file (the script deletes it), and errors go to logs/$sysUser/discordPost.log;
+	#NOP -- Each message is written as one line, channel <tab> text, with #line log (no shell, no JSON);
+	#NOP -- here), and the script builds the JSON, so quotes, backslashes and the like can't break a batch;
 	#delay sendPayload {
-		#line json payloadStack {#var payloadStackJson &0};
 		#format discordFile {logs/$sysUser/discordTmp-%U.txt};
-		#script {result} {echo '{$payloadStackJson}' > $discordFile};
+		#format discordTab {%a} {9};
+		#loop 1 &payloadStack[] discordIdx {
+			#var discordLine {$payloadStack[$discordIdx][payload]};
+			#replace discordLine {$discordTab} { };
+			#line log {$discordFile} {$payloadStack[$discordIdx][channel]$discordTab$discordLine};
+		};
 		#system {python3 scripts/discordPost.py $discordFile >> logs/$sysUser/discordPost.log 2>&1 &};
 		#if $debug[discord] {#echo {Discord: posting in the background, errors in logs/$sysUser/discordPost.log}};
 		#list payloadStack clear;
