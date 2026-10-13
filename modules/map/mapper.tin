@@ -197,10 +197,13 @@
 	#foreach *findkeep[] fv {#var findroom[$find_count][$fv] {}};
 };
 
-#NOP -- After each search: remember the first rooms found, then keep those whose exits match too;
+#NOP -- After each search: remember the first rooms found, then keep those whose exits match too.;
+#NOP -- Lists are copied one room at a time: a whole list (e.g. the 1049 Sewer Maze rooms in the Chaotic;
+#NOP -- Sewers) is too big for one #var and crashes TinTin;
 #alias {.findhere_check} {
 	#if {&findroom[$find_count][] == 0} {#return};
-	#if {&findfirst[] == 0} {#var findfirst $findroom[$find_count]};
+	#local fv {};
+	#if {&findfirst[] == 0} {#foreach *findroom[$find_count][] fv {#var findfirst[$fv] {}}};
 	.findhere_exitfilter;
 	#if {&findroom[$find_count][] > 0} {#var finddone 1};
 };
@@ -209,6 +212,7 @@
 #NOP -- If no room's exits match (e.g. a hidden exit), fall back to the first rooms the name search found;
 #alias {.findhere_search} {
 	#NOP -- #map list finds nothing unless the map is in some room, so park it in one if needed;
+	#var findhere_vnum 0;
 	#map get roomvnum findhere_vnum;
 	#if {"$findhere_vnum" == "" || "$findhere_vnum" == "0"} {#map goto 1};
 	.findhere_name;
@@ -245,7 +249,10 @@
 		#map list {roomname} {$findpattern} {variable} {findroom[$find_count]};
 		.findhere_check;
 	};
-	#if {!$finddone} {#var findroom[$find_count] $findfirst};
+	#if {!$finddone} {
+		#local fv {};
+		#foreach *findfirst[] fv {#var findroom[$find_count][$fv] {}};
+	};
 	.findhere_result;
 };
 
