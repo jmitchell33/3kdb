@@ -262,6 +262,9 @@
     #echo {<dfa>Please wait...<088>};
     #echo {<dfa>----------------------------------------------------<088>};
     
+    #NOP -- Remember toggles kept in their own variables, since reloading the common files resets them;
+    .toggle_map_save;
+
     #NOP -- Clear the screen and kill all drawing classes;
     #screen clear all;
     #map flag vtmap off;
@@ -301,6 +304,7 @@
     #read chars/$user/miphp.tin;
     #read chars/$user/private.tin;
     #read chars/$user/tickers.tin;
+    .toggle_map_restore;
     
     #NOP -- Initialize everything except postload;
     mipon;

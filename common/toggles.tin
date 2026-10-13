@@ -28,6 +28,61 @@
 };
 
 
+#NOP -- Toggles kept in their own variables by older on/off commands. toggle <name> flips these too,;
+#NOP -- toggle-list shows them and _variable_export saves them. Fields: var (holds 0/1), also (another;
+#NOP -- variable kept equal), on/off (run after switching), login (run when restored on), nosave (not saved);
+#var toggleMap {
+    {autocollect} {{var}{collector[items]}}
+    {beep} {{var}{beepon}}
+    {corpsetrig} {{var}{corpsetrigStatus}}
+    {corpsetrig_kb} {{var}{corpsetrigKB}}
+    {mka} {{var}{mkaStatus}{also}{mob_kill_action}}
+    {mouse} {{var}{mouseActive}{on}{#config mouse on}{off}{#config mouse off}{login}{#config mouse on}}
+    {aoe} {{var}{aoe_enabled}{on}{aoeon}{off}{aoeoff}}
+    {playercheck} {{var}{bot[playercheck]}{nosave}{1}{on}{_update_caption_data}{off}{_update_caption_data}}
+};
+
+#NOP -- .toggle_set <name> <0|1>: set a mapped toggle's variables;
+#alias {.toggle_set} {
+    #var {$toggleMap[%1][var]} {%2};
+    #if {"$toggleMap[%1][also]" != ""} {#var {$toggleMap[%1][also]} {%2}};
+};
+
+#alias {.toggle_mapped} {
+    #local toggle_new 1;
+    #if {"${$toggleMap[%1][var]}" == "1"} {#local toggle_new 0};
+    .toggle_set %1 $toggle_new;
+    #if {$toggle_new} {
+        #if {"$toggleMap[%1][on]" != ""} {$toggleMap[%1][on]};
+        #echo {<cfb>   -----  %1 has been turned on -----<088>};
+    } {
+        #if {"$toggleMap[%1][off]" != ""} {$toggleMap[%1][off]};
+        #echo {<faa>   -----  %1 has been turned off -----<088>};
+    };
+};
+
+#NOP -- Save the mapped toggles into xtoggleMap (written to vars.tin by _variable_export);
+#alias {.toggle_map_save} {
+    #local t {};
+    #local v {};
+    #unvar xtoggleMap;
+    #foreach *toggleMap[] t {
+        #local v ${$toggleMap[$t][var]};
+        #if {"$toggleMap[$t][nosave]" != "1" && ("$v" == "0" || "$v" == "1")} {#var xtoggleMap[$t] $v};
+    };
+};
+
+#NOP -- Restore them at login (_variable_import) and after .gswap reloads the common files;
+#alias {.toggle_map_restore} {
+    #local t {};
+    #foreach *xtoggleMap[] t {
+        #if {&toggleMap[$t][]} {
+            .toggle_set $t $xtoggleMap[$t];
+            #if {"$xtoggleMap[$t]" == "1" && "$toggleMap[$t][login]" != ""} {$toggleMap[$t][login]};
+        };
+    };
+};
+
 #NOP -- Fremen also have a toggle guildside, which needs to be able to bypass;
 #list {fremenToggleList} {create} {fblock} {audible} {litany} {quasibrief} {showdodge};
 
@@ -44,6 +99,9 @@
         };
     } {
         #if {!$fremen_toggle} {
+            #if {&toggleMap[$toggle_var][]} {
+                .toggle_mapped $toggle_var;
+            } {
             #if {"$toggles[$toggle_var]" == ""} {
                 #echo {<ffe>   -----  $toggle_var not found in toggles  -----<088>};
             } {
@@ -55,6 +113,7 @@
                     #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
                 };
                 #if {"$toggle_var" == "discord_post"} {#var discordPost $toggles[discord_post]};
+            };
             };
         } {
             #send {!toggle $toggle_var};
@@ -69,6 +128,15 @@
     #echo {$tmpLine};
     #foreach *toggles[] item {
         #if {$toggles[$item]} {
+            #format tmpLine {        %-25s         %+8s} {$item} {on};
+            #echo {<dfc>$tmpLine<088>};
+        } {
+            #format tmpLine {        %-25s         %+9s} {$item} { off};
+            #echo {<fbb>$tmpLine<088>};
+        };
+    };
+    #foreach *toggleMap[] item {
+        #if {"${$toggleMap[$item][var]}" == "1"} {
             #format tmpLine {        %-25s         %+8s} {$item} {on};
             #echo {<dfc>$tmpLine<088>};
         } {

@@ -161,6 +161,8 @@
     #var xdeadmanTimeoutActions $deadmanTimeoutActions;
     #var xdeadman_armed $deadman_armed;
     #var xmajor_prof $major_prof;
+    #NOP -- Toggles kept in their own variables (toggleMap in common/toggles.tin);
+    .toggle_map_save;
 
     #NOP -- These variables are at a minimum used to draw somewhere;
     #var xsplit $split;
@@ -216,6 +218,7 @@
         #if {$_dm_import_int <= 0} {#var deadmanIdleTimeout 900};
     };
     #var deadmanTimeoutActions $xdeadmanTimeoutActions;
+    .toggle_map_restore;
 
     #NOP -- Restore chat blacklist from saved xblacklist so it persists across ld;
     #list blacklist clear;
