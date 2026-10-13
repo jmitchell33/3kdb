@@ -80,7 +80,9 @@ menu_close_classes;
         #var menu_c $menu_chars[$i];
         #var menu_g $menu[guild][$menu_c];
         #if {&menu_guilds[$menu_c][] > 1} {#var menu_g {< $menu_g >}};
-        #format menu_line {  %s: %-10s %-16s} {$i} {$menu_c} {$menu_g};
+        #var menu_n $i;
+        #if {$menu[count] > 9 && $i < 10} {#var menu_n { $i}};
+        #format menu_line {  %s: %-10s %-16s} {$menu_n} {$menu_c} {$menu_g};
         #if {$i == $menu[row]} {
             #showme {<AAE><fff>$menu_line<088>};
         } {
@@ -106,13 +108,16 @@ menu_close_classes;
         #if {$menu[row] > $menu[count]} {
             #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]<088>};
         } {
-            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   1-$menu[count]: log in directly<088>};
+            #var menu_line {1-$menu[count]: log in directly};
+            #if {$menu[count] > 9} {#var menu_line {1-$menu[count] then Enter: log in}};
+            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line<088>};
         };
     };
 };
 
 #alias {menu_move} {
     #if {"$menu[prompt]" != ""} {#return};
+    menu_num_cancel;
     #var menu[msg] {};
     #NOP -- Up from the buttons goes back to the character they're for;
     #if {$menu[row] > $menu[count] && %1 < 0 && $menu[count] > 0} {
@@ -134,6 +139,7 @@ menu_close_classes;
 #NOP -- Tab jumps between the highlighted character and its Edit/Remove buttons;
 #alias {menu_tab} {
     #if {"$menu[prompt]" != ""} {#return};
+    menu_num_cancel;
     #var menu[msg] {};
     #if {$menu[row] > $menu[count]} {
         #if {$menu[count] > 0} {#var menu[row] $menu_sel};
@@ -151,6 +157,7 @@ menu_close_classes;
         #if {%1 > 0} {#cursor forward} {#cursor backward};
         #return;
     };
+    menu_num_cancel;
     #if {$menu[row] > $menu[count]} {
         #math menu[btn] {$menu[btn] + %1};
         #if {$menu[btn] < 1} {#var menu[btn] &menu[buttons][]};
@@ -169,14 +176,33 @@ menu_close_classes;
     menu_draw;
 };
 
-#NOP -- Number keys log in directly, or type the digit while answering a question;
+#NOP -- Number keys log in directly, or type the digit while answering a question.;
+#NOP -- With 10 or more characters the digits only pick, adding up (1 then 2 is 12), and Enter logs in;
+#var menu_num {};
 #alias {menu_digit} {
     #if {"$menu[prompt]" != ""} {
         #cursor set {%1};
-    } {
-        #if {%1 <= $menu[count]} {menu_login %1};
+        #return;
     };
+    #if {$menu[count] < 10} {
+        #if {%1 <= $menu[count]} {menu_login %1};
+        #return;
+    };
+    #math menu_num {${menu_num}%1};
+    #NOP -- Too big: start over from this digit;
+    #if {$menu_num > $menu[count]} {#math menu_num {%1}};
+    #if {$menu_num < 1} {
+        #var menu_num {};
+        #return;
+    };
+    #var menu_sel $menu_num;
+    #var menu[row] $menu_num;
+    #var menu[msg] {<ffa>Enter: log in to $menu_chars[$menu_num], or type the next digit<088>};
+    menu_draw;
 };
+
+#NOP -- Arrows and Tab drop a number being typed;
+#alias {menu_num_cancel} {#var menu_num {}};
 
 #alias {menu_login} {
     #if {"%1" != ""} {#var menu_sel %1};
