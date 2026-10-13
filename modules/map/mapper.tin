@@ -181,6 +181,16 @@
 	};
 };
 
+#NOP -- findsig: this room's standard exits, from the room name's (exits) or else MIP's exit list.;
+#NOP -- The name comes first because it's cleared on every move, while room[exits] can be left from the last room;
+#alias {.findhere_exitsig} {
+	#var findexits {@findhere_exits{$findname}};
+	#if {"$findexits" == ""} {#var findexits {$room[exits]}};
+	#replace findexits {,} {;};
+	#replace findexits {~} {;};
+	#var findsig {@findhere_sig{$findexits}};
+};
+
 #NOP -- Keep the candidates in findroom[$find_count] whose standard exits match this room's;
 #alias {.findhere_exitfilter} {
 	#if {"$findsig" == ""} {#return};
@@ -222,11 +232,7 @@
 		#showme <eaa>findhere: no room name was captured, so there's nothing to search for. Try again after moving.<088>;
 		#return;
 	};
-	#var findexits {$room[exits]};
-	#if {"$findexits" == ""} {#var findexits {@findhere_exits{$findname}}};
-	#replace findexits {,} {;};
-	#replace findexits {~} {;};
-	#var findsig {@findhere_sig{$findexits}};
+	.findhere_exitsig;
 	#var finddone 0;
 	#var findfirst {};
 	#if {"$room[long]" != ""} {
@@ -327,6 +333,14 @@
 	#NOP -- If no name matched (e.g. the map has an older name), fall back to where the exits lead;
 	#if {&findroom[$find_count][] == 0} {
 		#foreach $tempVnums[%*] fv {#var findroom[$find_count][$fv] {}};
+	};
+	#NOP -- Then keep the ones whose exits match the room you landed in, unless none do (e.g. a hidden exit);
+	.findhere_exitsig;
+	#var findnamed {};
+	#foreach *findroom[$find_count][] fv {#var findnamed[$fv] {}};
+	.findhere_exitfilter;
+	#if {&findroom[$find_count][] == 0} {
+		#foreach *findnamed[] fv {#var findroom[$find_count][$fv] {}};
 	};
 	.findhere_result;
 	#if {&findroom[$find_count][] > 1} {
