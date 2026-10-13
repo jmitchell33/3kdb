@@ -89,7 +89,7 @@
 
 #NOP Room Short with No Exits, Lowered Priority;
 #act {\-R\-_%1%s\-R\-_} {
-	#var room %1;
+	#NOP -- This used to #var room %1, which replaced the whole room table (name, exits, long) with a string;
 	#if {"$mapping" == "on"} {
 		#if {$roomname_len == 0} {
 			#echo {calling lower priority room name};
@@ -150,35 +150,63 @@
 	#var find_count 1;
 
 	look;
-	#delay 2 {
-		#NOP -- #map list finds nothing unless the map is in some room, so park it in one if needed;
-		#map get roomvnum findhere_vnum;
-		#if {"$findhere_vnum" == "" || "$findhere_vnum" == "0"} {#map goto 1};
-		#var findroom[$find_count] {};
-		#var findexits $room[exits];
-		#replace findexits {,} {;};
-		#replace findexits {~} {;};
-		#if {"$room[long]" != ""} {
-			#map list {roomarea} {$area} {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
-			#if {&findroom[$find_count][] == 0} {
-				#map list {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
-			};
-		};
-		#if {&findroom[$find_count][] == 0} {
-			#map list {roomarea} {$area} {roomname} {$room[name]} {roomexits} {$findexits} {variable} {findroom[$find_count]};
-		};
-		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$room[name]} {roomexits} {$findexits} {variable} {findroom[$find_count]};
-		};
-		#NOP -- Exits must match exactly, so if the map is missing an exit nothing above matches. Try without;
-		#if {&findroom[$find_count][] == 0 && "$room[long]" != ""} {
-			#map list {roomarea} {$area} {roomname} {$room[name]} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
-		};
-		#if {&findroom[$find_count][] == 0} {
-			#map list {roomarea} {$area} {roomname} {$room[name]} {variable} {findroom[$find_count]};
-		};
-		.findhere_result;
+	#delay {findhere_look} {.findhere_search} {2};
+};
+
+#NOP -- The room name and exits come from MIP, which isn't resent for a look, so fall back to the room's;
+#NOP -- title line (room_short, e.g. "North of Center (e,w,s,n)", the same form the map stores) and its exits;
+#NOP -- Room names end in their exits, e.g. "North of Center (e,w,s,n)", but the map may list them in;
+#NOP -- another order ("(n,s,w,e)"), so names are compared without that part and exits are matched separately;
+#function {findhere_base} {#var result {%0};#regex {%0} {{^(.*?) *\(([^()]*)\)$}} {#var result {&2}}};
+#function {findhere_exits} {#var result {};#regex {%0} {{^(.*?) *\(([^()]*)\)$}} {#var result {&3}}};
+
+#alias {.findhere_name} {
+	#var findname {$room[name]};
+	#if {"$findname" == ""} {#var findname {$room_short}};
+	#NOP -- room_short still has the -R-_ markers around it;
+	#replace findname {-R-_} {};
+	#format findname {%p} {$findname};
+	#var findbase {@findhere_base{$findname}};
+	#NOP -- Matches the bare name or the name followed by any (exits);
+	#var findpattern {$findbase{| \(.*\)}};
+};
+
+#alias {.findhere_search} {
+	#NOP -- #map list finds nothing unless the map is in some room, so park it in one if needed;
+	#map get roomvnum findhere_vnum;
+	#if {"$findhere_vnum" == "" || "$findhere_vnum" == "0"} {#map goto 1};
+	.findhere_name;
+	#if {"$findname" == ""} {
+		#var finding_here off;
+		#send !brief on yes;
+		#showme <eaa>findhere: no room name was captured, so there's nothing to search for. Try again after moving.<088>;
+		#return;
 	};
+	#var findroom[$find_count] {};
+	#var findexits {$room[exits]};
+	#if {"$findexits" == ""} {#var findexits {@findhere_exits{$findname}}};
+	#replace findexits {,} {;};
+	#replace findexits {~} {;};
+	#if {"$room[long]" != ""} {
+		#map list {roomarea} {$area} {roomname} {$findpattern} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		#if {&findroom[$find_count][] == 0} {
+			#map list {roomname} {$findpattern} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		};
+	};
+	#if {&findroom[$find_count][] == 0} {
+		#map list {roomarea} {$area} {roomname} {$findpattern} {roomexits} {$findexits} {variable} {findroom[$find_count]};
+	};
+	#if {&findroom[$find_count][] == 0} {
+		#map list {roomname} {$findpattern} {roomexits} {$findexits} {variable} {findroom[$find_count]};
+	};
+	#NOP -- Exits must match exactly, so if the map is missing an exit nothing above matches. Try without;
+	#if {&findroom[$find_count][] == 0 && "$room[long]" != ""} {
+		#map list {roomarea} {$area} {roomname} {$findpattern} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+	};
+	#if {&findroom[$find_count][] == 0} {
+		#map list {roomarea} {$area} {roomname} {$findpattern} {variable} {findroom[$find_count]};
+	};
+	.findhere_result;
 };
 
 #NOP -- Report the candidates in findroom[$find_count]: go there if there's one, otherwise ask for a direction;
@@ -216,6 +244,10 @@
 		#showme <eaa>----------------------------------------------------<088>;
 		#return;
 	};
+	#if {"$finding_here" != "on" || &findroom[$find_count][] < 2} {
+		#showme <eaa>Nothing to narrow down. Start with 'findhere'<088>;
+		#return;
+	};
 	#list findpath add {%1};
 	#send {%1};
 	#NOP -- Where each candidate's exit leads;
@@ -231,14 +263,19 @@
 };
 
 #alias {.findhere_narrow} {
+	.findhere_name;
 	#math find_count {$find_count + 1};
 	#unvar findroom[$find_count];
 	#var findroom[$find_count] {};
 	#local fv {};
 	#local fname {};
+	#if {&tempVnums[] == 0} {
+		.findhere_result;
+		#return;
+	};
 	#foreach $tempVnums[%*] fv {
 		#map at $fv #map get roomname fname;
-		#if {"$fname" === "$room[name]"} {#var findroom[$find_count][$fv] {}};
+		#if {"@findhere_base{$fname}" === "$findbase"} {#var findroom[$find_count][$fv] {}};
 	};
 	#NOP -- If no name matched (e.g. the map has an older name), fall back to where the exits lead;
 	#if {&findroom[$find_count][] == 0} {
