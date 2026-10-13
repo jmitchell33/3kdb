@@ -138,98 +138,120 @@
 }
 
 
+#NOP -- findhere: look, then ask the map for rooms matching this room. The description is matched with;
+#NOP -- wildcards at both ends because many map descriptions have extra leading/trailing spaces. Each step;
+#NOP -- only runs when the previous, stricter one finds nothing;
 #alias {findhere} {
 	#unvar findroom;
 	#var finding_here on;
-	
+
 	rating;
 	#send !brief off yes;
 	#var find_count 1;
 
 	look;
 	#delay 2 {
+		#NOP -- #map list finds nothing unless the map is in some room, so park it in one if needed;
+		#map get roomvnum findhere_vnum;
+		#if {"$findhere_vnum" == "" || "$findhere_vnum" == "0"} {#map goto 1};
+		#var findroom[$find_count] {};
 		#var findexits $room[exits];
 		#replace findexits {,} {;};
 		#replace findexits {~} {;};
-		#map list {roomarea} {$area} {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
+		#if {"$room[long]" != ""} {
+			#map list {roomarea} {$area} {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+			#if {&findroom[$find_count][] == 0} {
+				#map list {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+			};
+		};
 		#if {&findroom[$find_count][] == 0} {
-			#map list {roomname} {$room[name]} {roomexits} {$findexits} {roomdesc} {$room[long]} {variable} {findroom[$find_count]};
+			#map list {roomarea} {$area} {roomname} {$room[name]} {roomexits} {$findexits} {variable} {findroom[$find_count]};
 		};
 		#if {&findroom[$find_count][] == 0} {
 			#map list {roomname} {$room[name]} {roomexits} {$findexits} {variable} {findroom[$find_count]};
 		};
-		#if {&findroom[$find_count][] == 1} {
-			#map goto *findroom[$find_count][1..1];
-			#var finding_here off;
-			#send !brief on yes;
-			#showme <dfa>----------------------------------------------------<088>;
-			#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
-			#showme <dfa>----------------------------------------------------<088>;
-		} {
-			#loop 1 &findroom[$find_count][] index #map at *findroom[$find_count][+$index] #map get roomexits findroom[$find_count][+$index][exits];
-			#showme <dfa>Turn $find_count: There are &findroom[$find_count][] possible rooms.;
-			#showme <dfa>Choose an exit by typing findhere2 <exit>;
-			#showme <dfa>Example:  findhere2 e, findhere2 n;
+		#NOP -- Exits must match exactly, so if the map is missing an exit nothing above matches. Try without;
+		#if {&findroom[$find_count][] == 0 && "$room[long]" != ""} {
+			#map list {roomarea} {$area} {roomname} {$room[name]} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
 		};
+		#if {&findroom[$find_count][] == 0} {
+			#map list {roomarea} {$area} {roomname} {$room[name]} {variable} {findroom[$find_count]};
+		};
+		.findhere_result;
 	};
 };
 
+#NOP -- Report the candidates in findroom[$find_count]: go there if there's one, otherwise ask for a direction;
+#alias {.findhere_result} {
+	#if {&findroom[$find_count][] == 1} {
+		#map goto *findroom[$find_count][1..1];
+		#var finding_here off;
+		#send !brief on yes;
+		#showme <dfa>----------------------------------------------------<088>;
+		#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
+		#showme <dfa>----------------------------------------------------<088>;
+		#return;
+	};
+	#if {&findroom[$find_count][] == 0} {
+		#var finding_here off;
+		#send !brief on yes;
+		#showme <eaa>----------------------------------------------------<088>;
+		#showme <eaa>      Sorry, we were not able to find your room.<088>;
+		#showme <eaa>       Start the process again with 'findhere'<088>;
+		#showme <eaa>----------------------------------------------------<088>;
+		#return;
+	};
+	#local fv {};
+	#foreach *findroom[$find_count][] fv {#map at $fv #map get roomexits findroom[$find_count][$fv][exits]};
+	#showme <dfa>Turn $find_count: There are &findroom[$find_count][] possible rooms.<088>;
+	#showme <dfa>Walk an exit with findhere2 <exit> to narrow it down, e.g. findhere2 e<088>;
+};
+
+#NOP -- findhere2 <exit>: walk that exit, then keep the rooms that exit leads to whose name matches where you land;
 #alias {findhere2 %1} {
-	#NOP -- Reduce the list by only those with the exit you took;
-	#if {"%1" == "n" || "%1" == "w" || "%1" == "e" || "%1" == "s" || "%1" == "nw" || "%1" == "ne" || "%1" == "sw" || "%1" == "se" || "%1" == "u" || "%1" == "d"} {
-		#list findpath add {%1};
-		#send {%1};
-		#unvar tempVnums;
-		#unvar tempList;
-		
-		#loop &findroom[$find_count][] 1 index {
-			#loop &findroom[$find_count][+$index][exits][] 1 subIndex {
-				#if {"*findroom[$find_count][+$index][exits][+$subIndex]" == "%1"} {
-					#NOP -- Add the potential new rooms after taking the selected exit to a new list;
-					#list tempVnums add $findroom[$find_count][+$index][exits][+$subIndex];
-				};
-			};
-		};
-		#math find_count {$find_count + 1};
-		
-		#if {&tempVnums[] > 0} {
-			#if {&tempVnums[] == 1} {
-				#map goto $tempVnums[1];
-				#var finding_here off;
-				#send !brief on yes;
-				#showme <dfa>----------------------------------------------------<088>;
-				#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
-				#showme <dfa>----------------------------------------------------<088>;
-			} {
-				#loop &tempVnums[] 1 index {
-					#var tempIdx $tempVnums[+$index];
-					#map at $tempVnums[+$index] #map get roomexits tempList[$tempIdx][exits];
-				};
-			};
-		} {
-			#showme <eaa>----------------------------------------------------<088>;			
-			#showme <eaa>      Sorry, we were not able to find your room.<088>;
-			#showme <eaa>       Start the process again with 'findhere'<088>;
-			#showme <eaa>----------------------------------------------------<088>;
-		};
-		#var findroom[$find_count] $tempList;
-		
-		#showme <dfa>Turn $find_count:  There are &findroom[$find_count][] possible rooms.<088>;
-		#showme <dfa>Choose an exit by typing findhere2 <exit><088>;
-		#showme <dfa>Example:  findhere2 e, findhere2 n<088>;
-		#showme <dfa> Current room matches:;
-		#loop &tempVnums[] 1 index {
-			#var tempIdx $tempVnums[+$index];
-			#map at $tempVnums[+$index] #map get roomvnum displayVnum;
-			#map at $tempVnums[+$index] #map get roomname displayName;
-			#showme <dfa> Name: $displayName  Vnum: $displayVnum;
-		};
-	} {
-		#showme <eaa>----------------------------------------------------<088>;			
+	#if {"%1" != "n" && "%1" != "s" && "%1" != "e" && "%1" != "w" && "%1" != "ne" && "%1" != "nw" && "%1" != "se" && "%1" != "sw" && "%1" != "u" && "%1" != "d"} {
+		#showme <eaa>----------------------------------------------------<088>;
 		#showme <eaa>   Invalid direction input.  Please enter any of:<088>;
 		#showme <eaa>       n, e, w, s, nw, ne, se, sw, u, d<088>;
 		#showme <eaa>----------------------------------------------------<088>;
-	}
+		#return;
+	};
+	#list findpath add {%1};
+	#send {%1};
+	#NOP -- Where each candidate's exit leads;
+	#unvar tempVnums;
+	#local fv {};
+	#foreach *findroom[$find_count][] fv {
+		#if {"$findroom[$find_count][$fv][exits][%1]" != ""} {
+			#list tempVnums add {$findroom[$find_count][$fv][exits][%1]};
+		};
+	};
+	#NOP -- Wait for the new room's name to arrive before comparing;
+	#delay {findhere_wait} {.findhere_narrow} {1.5};
+};
+
+#alias {.findhere_narrow} {
+	#math find_count {$find_count + 1};
+	#unvar findroom[$find_count];
+	#var findroom[$find_count] {};
+	#local fv {};
+	#local fname {};
+	#foreach $tempVnums[%*] fv {
+		#map at $fv #map get roomname fname;
+		#if {"$fname" === "$room[name]"} {#var findroom[$find_count][$fv] {}};
+	};
+	#NOP -- If no name matched (e.g. the map has an older name), fall back to where the exits lead;
+	#if {&findroom[$find_count][] == 0} {
+		#foreach $tempVnums[%*] fv {#var findroom[$find_count][$fv] {}};
+	};
+	.findhere_result;
+	#if {&findroom[$find_count][] > 1} {
+		#showme <dfa> Current room matches:<088>;
+		#foreach *findroom[$find_count][] fv {
+			#map at $fv #map get roomname fname;
+			#showme <dfa> Name: $fname  Vnum: $fv<088>;
+		};
+	};
 };
 
 
