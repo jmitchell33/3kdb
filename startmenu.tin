@@ -227,11 +227,13 @@ menu_close_classes;
 };
 
 #NOP -- menu_ask <step> <question> <prefilled answer>;
+#NOP -- The prefill waits a tick: menu_ask runs while Enter is still being handled, and TinTin clears;
+#NOP -- the input line after that, so text set now shows on screen but Enter would send it empty;
 #alias {menu_ask} {
     #var menu[prompt] {%1};
     #var menu[msg] {<ffa>%2<088>};
     menu_draw;
-    #if {"%3" != ""} {#cursor set {%3}};
+    #if {"%3" != ""} {#delay {menu_prefill} {#cursor set {%3}} {0}};
 };
 
 #alias {menu_done} {
