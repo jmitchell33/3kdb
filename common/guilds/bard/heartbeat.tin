@@ -5,17 +5,35 @@
 #var karma_use_corpse_between_songs 650;
 #var resume_song 1;
 
+#NOP -- _bard_cast <spell>: bards get one spell a round, so only the first auto-cast each round goes out (one;
+#NOP -- every 1.5 seconds out of combat). The rest aren't queued: whatever wanted them checks again next;
+#NOP -- heartbeat, so the order below decides what goes first. bard_cast_sent says whether this one went out;
+#var bard_cast_round 0;
+#var bard_cast_time 0;
+#alias {_bard_cast} {
+	#var bard_cast_sent 0;
+	#format bard_cast_now {%U};
+	#if {$mip[round] > 0 && $mip[round] == $bard_cast_round} {#return};
+	#if {$mip[round] == 0 && $bard_cast_now - $bard_cast_time < 1500000} {#return};
+	#var bard_cast_round $mip[round];
+	#var bard_cast_time $bard_cast_now;
+	#var bard_cast_sent 1;
+	cast %0;
+};
+
 #alias {_guild_heartbeat} {
+	#NOP -- So round 1 of the next fight isn't mistaken for the last fight's round 1;
+	#if {$mip[round] == 0} {#var bard_cast_round 0};
 	#if !$idle_flag {
 		#if {$my[defs][es] > 0} {#NOP} {#if {$defs[es] && $my[gp1][current] > 400 && !$es_override} {#var es_override 1;empowered strikes;#ticker {es_toggle} {#var es_override 0;#unticker es_toggle} {6}} {#nop}};
-		#if {$my[defs][blink] > 0} {#NOP} {#if {$defs[blink]} {cast blink} {#nop}};
-		#if {$my[defs][hs] > 0} {#NOP} {#if {$defs[hs]} {cast hardened skin} {#nop}};
-		#if {$my[defs][mb] > 0} {#NOP} {#if {$defs[mb]} {cast mind blank} {#nop}};
-		#if {$my[defs][pe] > 0} {#NOP} {#if {$defs[pe]} {cast protection from evil} {#nop}};
-		#if {$my[defs][pn] > 0} {#NOP} {#if {$defs[pn]} {cast protection from neutral} {#nop}};
-		#if {$my[defs][pg] > 0} {#NOP} {#if {$defs[pg]} {cast protection from good} {#nop}};
-		#if {$my[defs][pf] > 0} {#NOP} {#if {$defs[pf]} {cast protection from frost} {#nop}};
-		#if {$my[defs][ph] > 0} {#NOP} {#if {$defs[ph]} {cast protection from heat} {#nop}};
+		#if {$my[defs][blink] > 0} {#NOP} {#if {$defs[blink]} {_bard_cast blink} {#nop}};
+		#if {$my[defs][hs] > 0} {#NOP} {#if {$defs[hs]} {_bard_cast hardened skin} {#nop}};
+		#if {$my[defs][mb] > 0} {#NOP} {#if {$defs[mb]} {_bard_cast mind blank} {#nop}};
+		#if {$my[defs][pe] > 0} {#NOP} {#if {$defs[pe]} {_bard_cast protection from evil} {#nop}};
+		#if {$my[defs][pn] > 0} {#NOP} {#if {$defs[pn]} {_bard_cast protection from neutral} {#nop}};
+		#if {$my[defs][pg] > 0} {#NOP} {#if {$defs[pg]} {_bard_cast protection from good} {#nop}};
+		#if {$my[defs][pf] > 0} {#NOP} {#if {$defs[pf]} {_bard_cast protection from frost} {#nop}};
+		#if {$my[defs][ph] > 0} {#NOP} {#if {$defs[ph]} {_bard_cast protection from heat} {#nop}};
 		
 		#if {$my[defs][ag] > 0} {#NOP} {#if {$defs[ag]} {perform amazing grace} {#nop}};
 		#if {$my[defs][o] > 0}  {#NOP} {#if {$defs[om]}  {perform o muse} {#nop}};
@@ -23,7 +41,7 @@
 		#NOP -- actions that should only be attempted once per round;
 		#if {$action_round < $mip[round] && $mip[round] > 0} {
 			#if {$my[song][rounds] > 1} {#NOP;} {#if $actions_stacked {do_action};};
-			#if {$my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {cast harmonic regeneration} {#nop}};
+			#if {$my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {_bard_cast harmonic regeneration} {#nop}};
 		} {
 			#NOP -- If you're not in combat, let er rip;
 			#if !$incombat {

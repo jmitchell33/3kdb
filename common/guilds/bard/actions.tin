@@ -67,25 +67,26 @@
 
 
 #NOP --- BARD DEFENSIVE SONGS AND SPELLS;
-#ACTION {You feel your ability to Blink receding.} {cast blink};
-#ACTION {^You are no longer blinking.$} {#if {$defs[blink] && !$idle_flag} {cast blink}} {6}
-#ACTION {^Your hardened skin is beginning to relax.$} {#if {$defs[hs] && !$idle_flag} {cast hardened skin}} {6};
-#ACTION {^Your protection from evil is beginning to fade.$} {#if {$defs[pe] && !$idle_flag} {cast protection from evil}} {6};
-#ACTION {^Your protection from neutral is beginning to fade.$} {#if {$defs[pn] && !$idle_flag} {cast protection from neutral}} {6};
-#ACTION {^Your protection from good is beginning to fade.$} {#if {$defs[pg] && !$idle_flag} {cast protection from good}} {6};
-#ACTION {^Your protection from heat is beginning to fade.$} {#if {$defs[ph] && !$idle_flag} {cast protection from heat}} {6};
-#ACTION {^Your protection from frost is beginning to fade.$} {#if {$defs[pf] && !$idle_flag} {cast protection from frost}} {6};
+#ACTION {You feel your ability to Blink receding.} {_bard_cast blink};
+#ACTION {^You are no longer blinking.$} {#if {$defs[blink] && !$idle_flag} {_bard_cast blink}} {6}
+#ACTION {^Your hardened skin is beginning to relax.$} {#if {$defs[hs] && !$idle_flag} {_bard_cast hardened skin}} {6};
+#ACTION {^Your protection from evil is beginning to fade.$} {#if {$defs[pe] && !$idle_flag} {_bard_cast protection from evil}} {6};
+#ACTION {^Your protection from neutral is beginning to fade.$} {#if {$defs[pn] && !$idle_flag} {_bard_cast protection from neutral}} {6};
+#ACTION {^Your protection from good is beginning to fade.$} {#if {$defs[pg] && !$idle_flag} {_bard_cast protection from good}} {6};
+#ACTION {^Your protection from heat is beginning to fade.$} {#if {$defs[ph] && !$idle_flag} {_bard_cast protection from heat}} {6};
+#ACTION {^Your protection from frost is beginning to fade.$} {#if {$defs[pf] && !$idle_flag} {_bard_cast protection from frost}} {6};
 #ACTION {^The magic of your song, 'Amazing Grace', is fading.$} {#if {$defs[ag] && !$idle_flag} {ag}} {6};
 #ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {$defs[om] && !$idle_flag} {perform o muse}} {6};
 
 #NOP -- MOB STATUS TRACKERS;
 #action {You wave your hands around, make swooshing and farting sounds,} {#var mob[noxious-cloud] 1;} {6};
 #action {You clasp your hands together, speak forth magical energies, and draw upon} {#var mob[lightning-vortex] 1;} {6};
-#action {^The noxious cloud fades away.$} {#if !$idle_flag {cast noxious cloud}};
-#action {The acid clings to %*} {
+#action {^The noxious cloud fades away.$} {#if !$idle_flag {_bard_cast noxious cloud}};
+#NOP -- Only the start of the line, so it still matches when a long mob name wraps the rest;
+#action {^The acid clings to %*} {
     #var mob[critic] 1;
 } {2};
-#action {You drench %* in more acid} {
+#action {^You drench %* in more acid} {
     #var mob[critic] 1;
 } {2};
 #action {Your acid wash on %* has run dry.} {

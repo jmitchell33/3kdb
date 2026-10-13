@@ -14,6 +14,18 @@
 #NOP -- Timers of various spells (in seconds);
 #var criticDuration 58;
 
+#NOP -- Critic counts as on once it's cast, until the acid runs dry or criticDuration passes. Waiting for the;
+#NOP -- "acid clings" message instead recast it every heartbeat whenever that message didn't match.;
+#NOP -- It's its own alias because checkStrategy fills in variables before running, so bard_cast_sent would be stale;
+#alias {_bard_critic} {
+    #if $mob[critic] {#return};
+    _bard_cast caustic critic;
+    #if $bard_cast_sent {
+        #var mob[critic] 1;
+        #delay criticTimer {#var mob[critic] 0} $criticDuration;
+    };
+};
+
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
     checkStrategy {assault} {
@@ -33,13 +45,10 @@
         };
     };
 
-    checkStrategy {critic} {#if !$mob[critic] {
-        cast caustic critic;
-        #delay criticTimer {cast caustic critic} $criticDuration;
-    };};
+    checkStrategy {critic} {_bard_critic};
     checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
-    checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
-    checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
+    checkStrategy {cloud} {#if !$mob[noxious-cloud] {_bard_cast noxious cloud};};
+    checkStrategy {vortex} {#if !$mob[lightning-vortex] {_bard_cast lightning vortex};};
 
     #NOP -- Bard Song-Bot Strategies;
     #if {$mip[round] > 1} {
@@ -62,7 +71,7 @@
                         do_action;
                     };
                 };
-                #if !$my[defs][fr] {cast focus the rainbow};
+                #if !$my[defs][fr] {_bard_cast focus the rainbow};
             };
         };
 
@@ -84,7 +93,7 @@
                             };
                             
                         } {
-                            #if !$my[defs][fr] {cast focus the rainbow};
+                            #if !$my[defs][fr] {_bard_cast focus the rainbow};
                             #if {!$actions_stacked} {
                                 #if {$resume_song} {
                                     perform rainbow of death;
@@ -94,7 +103,7 @@
                             };
                         };
                     } {
-                        #if !$my[defs][fr] {cast focus the rainbow};
+                        #if !$my[defs][fr] {_bard_cast focus the rainbow};
                         #if {!$actions_stacked} {
                             #if {$resume_song} {
                                 perform rainbow of death;
