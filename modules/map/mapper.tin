@@ -144,6 +144,7 @@
 #alias {findhere} {
 	#unvar findroom;
 	#var finding_here on;
+	#var findauto off;
 
 	rating;
 	#send !brief off yes;
@@ -267,6 +268,7 @@
 	#if {&findroom[$find_count][] == 1} {
 		#map goto *findroom[$find_count][1..1];
 		#var finding_here off;
+		#var findauto off;
 		#send !brief on yes;
 		#showme <dfa>----------------------------------------------------<088>;
 		#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
@@ -275,6 +277,7 @@
 	};
 	#if {&findroom[$find_count][] == 0} {
 		#var finding_here off;
+		#var findauto off;
 		#send !brief on yes;
 		#showme <eaa>----------------------------------------------------<088>;
 		#showme <eaa>      Sorry, we were not able to find your room.<088>;
@@ -285,7 +288,11 @@
 	#local fv {};
 	#foreach *findroom[$find_count][] fv {#map at $fv #map get roomexits findroom[$find_count][$fv][exits]};
 	#showme <dfa>Turn $find_count: There are &findroom[$find_count][] possible rooms.<088>;
-	#showme <dfa>Walk an exit with findhere2 <exit> to narrow it down, e.g. findhere2 e<088>;
+	#if {"$findauto" == "on"} {
+		#delay {findhere_auto} {.findhere_auto_step} {0.5};
+	} {
+		#showme <dfa>Walk an exit with findhere2 <exit> to narrow it down, e.g. findhere2 e<088>;
+	};
 };
 
 #NOP -- findhere2 <exit>: walk that exit, then keep the rooms that exit leads to whose name matches where you land;
@@ -316,6 +323,11 @@
 };
 
 #alias {.findhere_narrow} {
+	#NOP -- findhere-auto clears the room name before each step, so still empty means the move didn't happen;
+	#if {"$findauto" == "on" && "$room[name]" == "" && "$room_short" == ""} {
+		.findhere_auto_stop {the step $findpath[-1] didn't reach a new room};
+		#return;
+	};
 	.findhere_name;
 	#math find_count {$find_count + 1};
 	#unvar findroom[$find_count];
@@ -350,6 +362,88 @@
 			#showme <dfa> Name: $fname  Vnum: $fv<088>;
 		};
 	};
+};
+
+#NOP -- findhere-auto [steps]: findhere, then keep walking whichever exit best narrows the rooms down, until;
+#NOP -- one is left, none match, a step fails, a fight starts, or it has walked [steps] steps (default 8).;
+#NOP -- Run it again to carry on from where it stopped, or findhere-auto stop to stop it;
+#var findauto off;
+#var findauto_rev {{n}{s}{s}{n}{e}{w}{w}{e}{ne}{sw}{sw}{ne}{nw}{se}{se}{nw}{u}{d}{d}{u}};
+#alias {findhere-auto} {
+	#if {"%1" == "stop"} {
+		.findhere_auto_stop {stopped};
+		#return;
+	};
+	#var findauto_left {%1};
+	#if {"$findauto_left" == ""} {#var findauto_left 8};
+	#if {"$finding_here" == "on" && &findroom[$find_count][] > 1} {
+		#var findauto on;
+		.findhere_auto_step;
+	} {
+		#var findauto_back {};
+		findhere;
+		#var findauto on;
+	};
+};
+
+#alias {.findhere_auto_stop} {
+	#undelay findhere_auto;
+	#var findauto off;
+	#showme <eaa>findhere-auto: %1. Narrow it down with findhere2 <exit>, or run findhere-auto again.<088>;
+};
+
+#NOP -- Score each exit by the biggest group of rooms that would still look alike after walking it (same name;
+#NOP -- and exits where it leads), smallest wins. Going straight back only wins if nothing else is as good;
+#alias {.findhere_auto_step} {
+	#if {"$findauto" != "on" || &findroom[$find_count][] < 2} {#return};
+	#if {"$incombat" == "1"} {
+		.findhere_auto_stop {a fight started};
+		#return;
+	};
+	#if {$findauto_left < 1} {
+		.findhere_auto_stop {out of steps with &findroom[$find_count][] rooms left};
+		#return;
+	};
+	#local fd {};
+	#local fv {};
+	#local fx {};
+	#var findauto_best {};
+	#var findauto_bestscore 0;
+	#foreach {$findsig} fd {
+		#if {"$fd" == ""} {#continue};
+		#var findauto_groups {};
+		#var findauto_max 0;
+		#foreach *findroom[$find_count][] fv {
+			#var findauto_dest {$findroom[$find_count][$fv][exits][$fd]};
+			#if {"$findauto_dest" == ""} {
+				#var findauto_key none;
+			} {
+				#map at {$findauto_dest} {#map get roomname findauto_name;#map get roomexits findauto_ex};
+				#var findauto_list {};
+				#foreach *findauto_ex[] fx {#var findauto_list {$findauto_list;$fx}};
+				#format findauto_key {%H} {@findhere_base{$findauto_name}@findhere_sig{$findauto_list}};
+			};
+			#if {&findauto_groups[$findauto_key] == 0} {#var findauto_groups[$findauto_key] 0};
+			#math findauto_groups[$findauto_key] {$findauto_groups[$findauto_key] + 1};
+			#if {$findauto_groups[$findauto_key] > $findauto_max} {#var findauto_max $findauto_groups[$findauto_key]};
+		};
+		#math findauto_score {$findauto_max * 2};
+		#if {"$fd" == "$findauto_back"} {#math findauto_score {$findauto_score + 1}};
+		#if {"$findauto_best" == "" || $findauto_score < $findauto_bestscore} {
+			#var findauto_best $fd;
+			#var findauto_bestscore $findauto_score;
+		};
+	};
+	#if {"$findauto_best" == ""} {
+		.findhere_auto_stop {this room has no standard exits to walk};
+		#return;
+	};
+	#math findauto_left {$findauto_left - 1};
+	#var findauto_back {$findauto_rev[$findauto_best]};
+	#showme <dfa>findhere-auto: walking $findauto_best<088>;
+	#var room[name] {};
+	#var room_short {};
+	findhere2 $findauto_best;
 };
 
 
