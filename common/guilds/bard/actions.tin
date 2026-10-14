@@ -47,6 +47,7 @@
 
 #NOP --- Use corpses/perform actions between songs so you're more karma efficient;
 #action {{^You finish your performance with a bow.$|^You cease your performance of %*.$}} {
+    #var bard_sing_until 0;
     #var song_selected 0;
     #var my[song][rounds] 0;
     #if {$actions_stacked && $mip[round] > 0} {
@@ -54,8 +55,16 @@
     };
 } {2};
 
+#NOP --- Singing blocks spells (_bard_cast in heartbeat.tin). The start message also shows when the game;
+#NOP --- then refuses the song, so "must wait" clears it again;
+#action {^You take a deep breath and begin to stretch your vocal cords.$} {_bard_sing_start} {2};
+#action {^You can't cast a spell while singing!$} {_bard_sing_start} {2};
+#action {^You're in mid performance, remember?$} {_bard_sing_start} {2};
+#action {^You must wait for the first effect to near completion.$} {#var bard_sing_until 0} {2};
+
 #NOP --- Bard combat status tracking;
 #action {You lose your song.} {
+    #var bard_sing_until 0;
     #math cmbt[songs][lost][fight] {$cmbt[songs][lost][fight] + 1};
     #math cmbt[songs][lost][total] {$cmbt[songs][lost][total] + 1};
     #var song_selected 0;
@@ -76,7 +85,7 @@
 #ACTION {^Your protection from heat is beginning to fade.$} {#if {$defs[ph] && !$idle_flag} {_bard_cast protection from heat}} {6};
 #ACTION {^Your protection from frost is beginning to fade.$} {#if {$defs[pf] && !$idle_flag} {_bard_cast protection from frost}} {6};
 #ACTION {^The magic of your song, 'Amazing Grace', is fading.$} {#if {$defs[ag] && !$idle_flag} {ag}} {6};
-#ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {$defs[om] && !$idle_flag} {perform o muse}} {6};
+#ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {$defs[om] && !$idle_flag && !@bard_singing{}} {perform o muse}} {6};
 
 #NOP -- MOB STATUS TRACKERS;
 #action {You wave your hands around, make swooshing and farting sounds,} {#var mob[noxious-cloud] 1;} {6};
