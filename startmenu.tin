@@ -1,0 +1,472 @@
+#NOP -- Arrow-key character menu, read at the end of 3k.tin (or your own launcher).;
+#NOP -- Up/down picks a character, left/right picks its guild, Enter logs in. Number keys still log in directly.;
+#NOP -- The button row under the list adds, edits or removes characters.;
+#NOP -- The character list, guild lists and last highlighted character are saved in chars/startmenu_data.tin.;
+#NOP -- The first time it runs, the list is built from $player1, $player2, ... in the launcher.;
+#NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads;
+
+#NOP -- 3kdb opens common_config in this startup session and only closes it in the game session, so after a;
+#NOP -- login it's still open here. Close any open class first, or the menu and PASSWORD land in it and get;
+#NOP -- deleted when the next character loads common/config.tin;
+#alias {menu_close_classes} {
+    #info classes save;
+    #foreach *info[CLASSES][] menu_i {
+        #if {"$info[CLASSES][$menu_i][arg3]" != "0"} {#class {$info[CLASSES][$menu_i][arg1]} close};
+    };
+};
+menu_close_classes;
+
+#class startmenu kill;
+#class startmenu open;
+
+#var menu[file] {chars/startmenu_data.tin};
+
+#NOP -- Load the saved list, or build it from startup.tin the first time;
+#alias {menu_load} {
+    #script {menu_tmp} {test -f $menu[file] && echo yes};
+    #if {"$menu_tmp[1]" == "yes"} {
+        #read $menu[file];
+    } {
+        #class startmenu_data kill;
+        #class startmenu_data open;
+        #var menu_chars {};
+        #var menu_guilds {};
+        #var menu_sel 1;
+        #class startmenu_data close;
+        #loop 1 99 i {
+            #if {"${player$i}" == ""} {#break};
+            #list menu_chars add {${player$i}};
+            menu_read_guild ${player$i};
+            #var menu_guilds[${player$i}] {{1}{$menu[guild][${player$i}]}};
+        };
+        menu_save;
+    };
+    #var menu[count] &menu_chars[];
+    #NOP -- #loop 1 0 would count down, so skip the loops when the list is empty;
+    #if {$menu[count] > 0} {#loop 1 $menu[count] i {menu_read_guild $menu_chars[$i]}};
+    #if {$menu_sel < 1 || $menu_sel > $menu[count]} {#var menu_sel 1};
+    #var menu[row] $menu_sel;
+    #if {$menu[count] == 0} {#var menu[row] 1};
+    #var menu[btn] 1;
+    #var menu[prompt] {};
+    #var menu[msg] {};
+};
+
+#NOP -- menu_read_guild <name>: the saved guild, or the character file's default;
+#alias {menu_read_guild} {
+    #script {menu_tmp} {cat chars/%1/guild.tin 2>/dev/null || grep -h '^#var guild' chars/%1/%1.tin 2>/dev/null};
+    #regex {$menu_tmp[1]} {guild %w} {#var menu[guild][%1] &1} {#var menu[guild][%1] ?};
+};
+
+#alias {menu_save} {#class startmenu_data write $menu[file]};
+#alias {menu_save_guild} {#script {menu_tmp} {printf '#var guild %s;\n' '$menu[guild][%1]' > chars/%1/guild.tin}};
+
+#NOP -- The buttons shown on the button row (row count+1);
+#alias {menu_buttons} {
+    #var menu[buttons] {{1}{Add}};
+    #if {$menu[count] > 0} {
+        #list menu[buttons] add {{Edit $menu_chars[$menu_sel]}};
+        #list menu[buttons] add {{Remove $menu_chars[$menu_sel]}};
+    };
+};
+
+#alias {menu_draw} {
+    menu_buttons;
+    #screen clear all;
+    #showme {};
+    #showme {<ffa>  Choose a character<088>};
+    #showme {};
+    #if {$menu[count] > 0} {#loop 1 $menu[count] i {
+        #var menu_c $menu_chars[$i];
+        #var menu_g $menu[guild][$menu_c];
+        #if {&menu_guilds[$menu_c][] > 1} {#var menu_g {< $menu_g >}};
+        #var menu_n $i;
+        #if {$menu[count] > 9 && $i < 10} {#var menu_n { $i}};
+        #format menu_line {  %s: %-10s %-16s} {$menu_n} {$menu_c} {$menu_g};
+        #if {$i == $menu[row]} {
+            #showme {<AAE><fff>$menu_line<088>};
+        } {
+            #showme {<ddd>$menu_line<088>};
+        };
+    }};
+    #if {$menu[count] == 0} {#showme {<ddd>  No characters yet<088>}};
+    #showme {};
+    #var menu_line {  };
+    #loop 1 &menu[buttons][] i {
+        #if {$menu[row] == $menu[count] + 1 && $i == $menu[btn]} {
+            #cat menu_line {<AAE><fff>[ $menu[buttons][$i] ]<088>  };
+        } {
+            #cat menu_line {<ddd>[ $menu[buttons][$i] ]<088>  };
+        };
+    };
+    #showme {$menu_line};
+    #showme {};
+    #if {"$menu[msg]" != ""} {#showme {  $menu[msg]}};
+    #if {"$menu[prompt]" != ""} {
+        #showme {<ddd>  Type your answer and press Enter. An empty Enter cancels.<088>};
+    } {
+        #if {$menu[row] > $menu[count]} {
+            #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]<088>};
+        } {
+            #var menu_line {1-$menu[count]: log in directly};
+            #if {$menu[count] > 9} {#var menu_line {1-$menu[count] then Enter: log in}};
+            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line<088>};
+        };
+    };
+};
+
+#alias {menu_move} {
+    #if {"$menu[prompt]" != ""} {#return};
+    menu_num_cancel;
+    #var menu[msg] {};
+    #NOP -- Up from the buttons goes back to the character they're for;
+    #if {$menu[row] > $menu[count] && %1 < 0 && $menu[count] > 0} {
+        #var menu[row] $menu_sel;
+        menu_draw;
+        #return;
+    };
+    #math menu[row] {$menu[row] + %1};
+    #if {$menu[row] < 1} {#var menu[row] {$menu[count] + 1}};
+    #if {$menu[row] > $menu[count] + 1} {#var menu[row] 1};
+    #math menu[row] {$menu[row]};
+    #if {$menu[row] <= $menu[count]} {
+        #var menu_sel $menu[row];
+        menu_save;
+    };
+    menu_draw;
+};
+
+#NOP -- Tab jumps between the highlighted character and its Edit/Remove buttons;
+#alias {menu_tab} {
+    #if {"$menu[prompt]" != ""} {#return};
+    menu_num_cancel;
+    #var menu[msg] {};
+    #if {$menu[row] > $menu[count]} {
+        #if {$menu[count] > 0} {#var menu[row] $menu_sel};
+    } {
+        #var menu[row] {$menu[count] + 1};
+        #math menu[row] {$menu[row]};
+        #var menu[btn] 2;
+    };
+    menu_draw;
+};
+
+#NOP -- Left/right: change the guild on a character row, the button on the button row, or move the cursor while typing;
+#alias {menu_side} {
+    #if {"$menu[prompt]" != ""} {
+        #if {%1 > 0} {#cursor forward} {#cursor backward};
+        #return;
+    };
+    menu_num_cancel;
+    #if {$menu[row] > $menu[count]} {
+        #math menu[btn] {$menu[btn] + %1};
+        #if {$menu[btn] < 1} {#var menu[btn] &menu[buttons][]};
+        #if {$menu[btn] > &menu[buttons][]} {#var menu[btn] 1};
+        menu_draw;
+        #return;
+    };
+    #var menu_c $menu_chars[$menu[row]];
+    #if {&menu_guilds[$menu_c][] < 2} {#return};
+    #list menu_guilds[$menu_c] find {$menu[guild][$menu_c]} menu_i;
+    #math menu_i {$menu_i + %1};
+    #if {$menu_i < 1} {#var menu_i &menu_guilds[$menu_c][]};
+    #if {$menu_i > &menu_guilds[$menu_c][]} {#var menu_i 1};
+    #var menu[guild][$menu_c] $menu_guilds[$menu_c][$menu_i];
+    menu_save_guild $menu_c;
+    menu_draw;
+};
+
+#NOP -- Number keys log in directly, or type the digit while answering a question.;
+#NOP -- With 10 or more characters the digits only pick, adding up (1 then 2 is 12), and Enter logs in;
+#var menu_num {};
+#alias {menu_digit} {
+    #if {"$menu[prompt]" != ""} {
+        #cursor set {%1};
+        #return;
+    };
+    #if {$menu[count] < 10} {
+        #if {%1 <= $menu[count]} {menu_login %1};
+        #return;
+    };
+    #math menu_num {${menu_num}%1};
+    #NOP -- Too big: start over from this digit;
+    #if {$menu_num > $menu[count]} {#math menu_num {%1}};
+    #if {$menu_num < 1} {
+        #var menu_num {};
+        #return;
+    };
+    #var menu_sel $menu_num;
+    #var menu[row] $menu_num;
+    #var menu[msg] {<ffa>Enter: log in to $menu_chars[$menu_num], or type the next digit<088>};
+    menu_draw;
+};
+
+#NOP -- Arrows and Tab drop a number being typed;
+#alias {menu_num_cancel} {#var menu_num {}};
+
+#alias {menu_login} {
+    #if {"%1" != ""} {#var menu_sel %1};
+    #var menu_char $menu_chars[$menu_sel];
+    #if {"$menu_char" == ""} {#return};
+    menu_save;
+    menu_save_guild $menu_char;
+    #var menu_guild_pick $menu[guild][$menu_char];
+    #NOP -- Remove the menu keys before connecting so they aren't copied into the game session;
+    #delay {0} {#class startmenu kill;menu_connect};
+};
+
+#NOP -- Every line typed while the menu is up comes here first;
+#alias {menu_input} {
+    #if {"$menu[prompt]" != ""} {
+        menu_answer {%1};
+        #return;
+    };
+    #if {"%1" == ""} {
+        #if {$menu[row] <= $menu[count]} {
+            menu_login;
+        } {
+            menu_button;
+        };
+        #return;
+    };
+    #NOP -- Anything else typed is run as a normal command;
+    %1;
+};
+
+#alias {menu_button} {
+    #var menu_b $menu[buttons][$menu[btn]];
+    #var menu_c $menu_chars[$menu_sel];
+    #if {"$menu_b" == "Add"} {
+        menu_ask add_name {New character name:} {};
+    };
+    #if {"$menu_b" == "Edit $menu_c"} {
+        #var menu[edit] $menu_c;
+        #var menu_tmp {};
+        #foreach {$menu_guilds[$menu_c][%*]} menu_g {#var menu_tmp {$menu_tmp $menu_g}};
+        #format menu_tmp {%p} {$menu_tmp};
+        menu_ask edit_guilds {Guilds for $menu_c, separated by spaces (the first is the default):} {$menu_tmp};
+    };
+    #if {"$menu_b" == "Remove $menu_c"} {
+        #var menu[edit] $menu_c;
+        menu_ask remove {Type yes to remove $menu_c from the menu (its files are kept):} {};
+    };
+};
+
+#NOP -- menu_ask <step> <question> <prefilled answer>;
+#NOP -- The prefill waits a tick: menu_ask runs while Enter is still being handled, and TinTin clears;
+#NOP -- the input line after that, so text set now shows on screen but Enter would send it empty;
+#alias {menu_ask} {
+    #var menu[prompt] {%1};
+    #var menu[msg] {<ffa>%2<088>};
+    menu_draw;
+    #if {"%3" != ""} {#delay {menu_prefill} {#cursor set {%3}} {0}};
+};
+
+#alias {menu_done} {
+    #var menu[prompt] {};
+    #var menu[msg] {%1};
+    menu_draw;
+};
+
+#NOP -- menu_check_guilds <answer>: sets menu_ok and menu_new (the guild list) or menu_bad;
+#alias {menu_check_guilds} {
+    #var menu_ok 0;
+    #var menu_new {};
+    #var menu_bad {};
+    #regex {%1} {^{[a-z ]+}$} {#NOP} {#var menu_bad { %1}; #return};
+    #NOP -- Guilds with a common/guilds/<guild> folder, in order without repeats, then the ones without;
+    #script {menu_tmp} {for _mg in %1; do [ -f common/guilds/$_mg/index.tin ] && echo $_mg; done | awk '!s[$0]++'};
+    #if {"$menu_tmp[1]" != ""} {#var menu_new $menu_tmp};
+    #script {menu_tmp} {for _mg in %1; do [ -f common/guilds/$_mg/index.tin ] || printf ' %s' $_mg; done};
+    #var menu_bad {$menu_tmp[1]};
+    #if {"$menu_bad" == "" && &menu_new[] > 0} {#var menu_ok 1};
+};
+
+#alias {menu_answer} {
+    #format menu_in {%l} {%1};
+    #format menu_in {%p} {$menu_in};
+    #if {"$menu_in" == "" && "$menu[prompt]" != "add_password"} {
+        menu_done {<ddd>Cancelled<088>};
+        #return;
+    };
+    #switch {"$menu[prompt]"} {
+        #case {"add_name"} {
+            #regex {$menu_in} {^{[a-z]+}$} {
+                #list menu_chars find {$menu_in} menu_i;
+                #if {$menu_i > 0} {
+                    menu_ask add_name {<faa>$menu_in is already in the menu.<ffa> New character name:} {};
+                } {
+                    #var menu[edit] $menu_in;
+                    menu_read_guild $menu_in;
+                    #if {"$menu[guild][$menu_in]" == "?"} {#var menu_tmp {}} {#var menu_tmp $menu[guild][$menu_in]};
+                    menu_ask add_guilds {Guilds for $menu_in, separated by spaces (the first is the default):} {$menu_tmp};
+                };
+            } {
+                menu_ask add_name {<faa>Names are letters only.<ffa> New character name:} {};
+            };
+        };
+        #case {"add_guilds"} {
+            menu_check_guilds {$menu_in};
+            #if {!$menu_ok} {
+                menu_ask add_guilds {<faa>3kdb has no scripts for:$menu_bad.<ffa> Guilds for $menu[edit]:} {$menu_in};
+                #return;
+            };
+            #var menu[newguilds] $menu_new;
+            #script {menu_tmp} {test -f chars/$menu[edit]/$menu[edit].tin && echo yes};
+            #if {"$menu_tmp[1]" == "yes"} {
+                menu_add_finish;
+            } {
+                menu_ask add_password {Password for $menu[edit], saved in chars/$menu[edit]/private.tin. It shows while you type. Leave it empty to type it at each login:} {};
+            };
+        };
+        #case {"add_password"} {
+            menu_create_files $menu[edit] {$menu_new[1]};
+            #if {"%1" != ""} {#line log {chars/$menu[edit]/private.tin} {#var PASSWORD {%1};}};
+            menu_add_finish;
+        };
+        #case {"edit_guilds"} {
+            menu_check_guilds {$menu_in};
+            #if {!$menu_ok} {
+                menu_ask edit_guilds {<faa>3kdb has no scripts for:$menu_bad.<ffa> Guilds for $menu[edit]:} {$menu_in};
+                #return;
+            };
+            #var menu_guilds[$menu[edit]] $menu_new;
+            #list menu_new find {$menu[guild][$menu[edit]]} menu_i;
+            #if {$menu_i == 0} {
+                #var menu[guild][$menu[edit]] $menu_new[1];
+                menu_save_guild $menu[edit];
+            };
+            menu_save;
+            menu_done {<afa>Saved guilds for $menu[edit]<088>};
+        };
+        #case {"remove"} {
+            #if {"$menu_in" == "yes"} {
+                #list menu_chars find {$menu[edit]} menu_i;
+                #if {$menu_i > 0} {#list menu_chars delete $menu_i};
+                #unvar menu_guilds[$menu[edit]];
+                #var menu[count] &menu_chars[];
+                #if {$menu_sel > $menu[count]} {#var menu_sel $menu[count]};
+                #if {$menu_sel < 1} {#var menu_sel 1};
+                #var menu[btn] 1;
+                menu_save;
+                menu_done {<afa>Removed $menu[edit] from the menu<088>};
+            } {
+                menu_done {<ddd>Cancelled<088>};
+            };
+        };
+    };
+};
+
+#NOP -- New character: copy chars/template and write a character file that reads private.tin and guild.tin;
+#alias {menu_create_files} {
+    #script {menu_tmp} {mkdir -p chars/%1 && cp -n chars/template/*.tin chars/%1/ && rm -f chars/%1/playername.tin && printf 'private.tin\n' > chars/%1/.gitignore && echo ok};
+    #line log {chars/%1/%1.tin} {#NOP -- Set Player specific variables;};
+    #line log {chars/%1/%1.tin} {#var user %1;};
+    #line log {chars/%1/%1.tin} {#read chars/\$user/private.tin;};
+    #line log {chars/%1/%1.tin} {#NOP -- Clear the last character's saved variables so they don't carry over to this one;};
+    #line log {chars/%1/%1.tin} {#class global kill;};
+    #line log {chars/%1/%1.tin} {#read chars/\$user/vars.tin;};
+    #line log {chars/%1/%1.tin} {#var guild %2;};
+    #line log {chars/%1/%1.tin} {#NOP -- The startup menu and gswap save the current guild here;};
+    #line log {chars/%1/%1.tin} {#read chars/\$user/guild.tin;};
+    #line log {chars/%1/%1.tin} {};
+    #line log {chars/%1/%1.tin} {#NOP -- Load Common files;};
+    #line log {chars/%1/%1.tin} {#NOP -- _load_3kdb_common is located in common/config.tin;};
+    #line log {chars/%1/%1.tin} {#read common/index.tin;};
+};
+
+#alias {menu_add_finish} {
+    #var menu_c $menu[edit];
+    #list menu_chars add {$menu_c};
+    #var menu_guilds[$menu_c] $menu[newguilds];
+    #var menu[count] &menu_chars[];
+    #NOP -- Existing character files from before the menu need to read guild.tin;
+    #script {menu_tmp} {grep -q 'guild.tin' chars/$menu_c/$menu_c.tin || sed -i '/^#var guild /a #read chars/\$user/guild.tin;' chars/$menu_c/$menu_c.tin};
+    #list menu_guilds[$menu_c] find {$menu[guild][$menu_c]} menu_i;
+    #if {$menu_i == 0} {#var menu[guild][$menu_c] $menu_guilds[$menu_c][1]};
+    menu_save_guild $menu_c;
+    #var menu_sel $menu[count];
+    #var menu[row] $menu[count];
+    menu_save;
+    menu_done {<afa>Added $menu_c<088>};
+};
+
+#macro {\e[A} {menu_move -1};
+#macro {\e[B} {menu_move 1};
+#macro {\e[C} {menu_side 1};
+#macro {\e[D} {menu_side -1};
+#macro {\eOA} {menu_move -1};
+#macro {\eOB} {menu_move 1};
+#macro {\eOC} {menu_side 1};
+#macro {\eOD} {menu_side -1};
+#macro {1} {menu_digit 1};
+#macro {2} {menu_digit 2};
+#macro {3} {menu_digit 3};
+#macro {4} {menu_digit 4};
+#macro {5} {menu_digit 5};
+#macro {6} {menu_digit 6};
+#macro {7} {menu_digit 7};
+#macro {8} {menu_digit 8};
+#macro {9} {menu_digit 9};
+#macro {0} {menu_digit 0};
+#macro {\t} {menu_tab};
+#event {CATCH RECEIVED INPUT} {menu_input {%0}};
+
+#class startmenu close;
+
+#NOP -- Everything below stays loaded after login, so it's copied into the game sessions;
+
+#NOP -- Read the password, load the character (which connects), then send the name.;
+#NOP -- 3k drops anything sent before its Password: prompt, so the password waits for the prompt.;
+#NOP -- Without a saved password only the name is sent, so you can type the password yourself;
+#alias {menu_connect} {
+    menu_close_classes;
+    #unvar PASSWORD;
+    #script {menu_tmp} {test -f chars/$menu_char/private.tin && echo yes};
+    #if {"$menu_tmp[1]" == "yes"} {#read chars/$menu_char/private.tin};
+    #read chars/$menu_char/$menu_char.tin;
+    #NOP -- The guild scripts load when the game welcomes you, so the menu's pick can still replace the file's default;
+    #if {"$menu_guild_pick" != "" && "$menu_guild_pick" != "?"} {#var guild $menu_guild_pick};
+    #if {"$PASSWORD" != "" && "$PASSWORD" != "\$PASSWORD"} {
+        #NOP -- Not anchored: the prompt can share a line with the name prompt before it;
+        #line oneshot #action {Password:} {#send {$PASSWORD}};
+    };
+    $menu_char;
+};
+
+#NOP -- In game: gswap <guild> swaps guilds. Once the game confirms with "You feel... different.",;
+#NOP -- it reloads 3kdb's scripts for the new guild and saves it for next login;
+#alias {gswap %1} {
+    #send {gswap %1};
+    #script {menu_tmp} {test -f common/guilds/%1/index.tin && echo ok};
+    #if {"$menu_tmp[1]" != "ok"} {
+        #echo {<eaa>3kdb has no scripts for guild %1, so only the game guild will swap<088>};
+        #return;
+    };
+    #var gswap_pending %1;
+    #unaction {^You feel... different.$};
+    #line oneshot #action {^You feel... different.$} {
+        #undelay gswap_wait;
+        #script {menu_tmp} {printf '#var guild %s;\n' '$gswap_pending' > chars/$user/guild.tin};
+        #NOP -- Give the game a moment to finish logging you back in before reloading;
+        #delay {gswap_reload} {.gswap $gswap_pending} {2};
+    };
+    #delay {gswap_wait} {
+        #unaction {^You feel... different.$};
+        #echo {<eaa>No swap confirmation from the game, so 3kdb is still set up for $guild<088>};
+    } {20};
+};
+
+#NOP -- Bring the menu back once every game session has closed (the startup session itself counts as one).;
+#NOP -- The event runs in the closing session, so the check is scheduled in the startup session;
+#event {SESSION DEACTIVATED} {
+    #gts {
+        #delay {menu_back} {
+            #info sessions save;
+            #if {&info[SESSIONS][] <= 1} {#read startmenu.tin};
+        } {0.5};
+    };
+};
+
+menu_load;
+menu_draw;
