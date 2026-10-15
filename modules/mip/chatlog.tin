@@ -414,6 +414,100 @@
 	#delay 10 {#unvar chat[act_tell][from]};
 } {2};
 
+#nop -- These are for capturing tells and linktells that are being sent to your alts and then to your current online character;
+#nop -- These tells wont show up in tellhist either so youl have to see it via chat window, discord, and logs;
+
+#NOP -- Number of characters per line before the game wraps a long tell or LT onto the next line, used to tell when a message continues;
+#var chat[altWrap] 77;
+
+#NOP -- Alt tell header: arms a one-shot catch for the very next tell line so spam tells and normal MIP tells are never captured;
+#action {^Tell coming in via %w:} {
+	#unvar chat[alt];
+	#var chat[alt][type] {Tell};
+	#var chat[alt][via] {%1};
+	#line oneshot {#action {^%w tells you: %+} {
+		#var chat[alt][from] {%%1};
+		#var chat[alt][data] {%%2};
+		#var chat[alt][line] {%%0};
+		.altTellNext;
+	} {1}};
+	#delay {altTellExpire} {#unaction {^%w tells you: %+};#unvar chat[alt]} {3};
+} {2};
+
+#NOP -- Alt LT header: arms one-shot catches for the LT sender line and the LT text line so only the linktell that follows is captured;
+#action {^LT coming in via %w:} {
+	#unvar chat[alt];
+	#var chat[alt][type] {LT};
+	#var chat[alt][via] {%1};
+	#line oneshot {#action {^%w LTs \(%+\)} {
+		#var chat[alt][from] {%%1};
+	} {1}};
+	#line oneshot {#action {^%+LT: %+} {
+		#var chat[alt][data] {%%2};
+		#var chat[alt][line] {%%0};
+		.altTellNext;
+	} {1}};
+	#delay {altTellExpire} {#unaction {^%w LTs \(%+\)};#unaction {^%+LT: %+};#unvar chat[alt]} {3};
+} {2};
+
+#NOP -- Wrap check: a line near the wrap width may carry on, so catch the next line if it does, otherwise send the finished tell;
+#alias {.altTellNext} {
+	#format chat[alt][len] {%L} {$chat[alt][line]};
+	#math chat[alt][room] {$chat[altWrap] - $chat[alt][len]};
+	#if {$chat[alt][room] <= 20} {
+		#line oneshot {#action {^%+$} {
+			#if {&chat[alt][type]} {
+				#var chat[alt][line] {%%0};
+				.altTellMore;
+			};
+		} {9}};
+		#delay {altTellFlush} {.processAltTell} {0.4};
+	} {
+		.processAltTell;
+	};
+};
+
+#NOP -- Wrap join: if the next line starts with a word that could not fit on the last one, it is a continuation, so add it and check again;
+#alias {.altTellMore} {
+	#format chat[alt][more] {%p} {$chat[alt][line]};
+	#regex {$chat[alt][more]} {^%S} {#var chat[alt][first] {&0}};
+	#format chat[alt][firstlen] {%L} {$chat[alt][first]};
+	#math chat[alt][need] {$chat[alt][len] + 1 + $chat[alt][firstlen]};
+	#if {$chat[alt][need] > $chat[altWrap]} {
+		#var chat[alt][data] {$chat[alt][data] $chat[alt][more]};
+		.altTellNext;
+	} {
+		.processAltTell;
+	};
+};
+
+#NOP -- Shared alt tell handler: runs the blacklist check, then sends to the chat window, tells discord and the log;
+#alias {.processAltTell} {
+	#undelay {altTellFlush};
+	#var mipgag 0;
+	#var discordChannel $webhook[url][tells];
+	#var chatCategory tells;
+	#var mip[comm][twoway] {from};
+	#var mip[comm][source] {$chat[alt][from]};
+	#var mip[comm][data] {$chat[alt][data]};
+	_mip_chat_sender_blacklisted;
+	#var altLabel {$chat[alt][type] via $chat[alt][via]};
+	#format {timestamp_save} {%t} {[%H:%M] };
+	#format {datestamp} {%t} {%Y-%m-%d.log};
+	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+	#line log {logs/$sysUser/$datestamp} {<ead>$chat[alt][from] [$altLabel]<088>: $mip[comm][data]};
+	#var mip[comm][source] {$chat[alt][from] [$altLabel]};
+	#if {$_mip_blacklist_hit == 1} {
+		#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+		#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+		#if {"$chatCategory" != "general"} {postChatCategory};
+	} {
+		update_chat <178>$chat[alt][from] <dab>[<fcc>$altLabel<dab>]<088>: $mip[comm][data];
+		#bell;
+	};
+	#unvar chat[alt];
+	#undelay {altTellExpire};
+};
 
 #NOP -- Capture says;
 #var captureSays 1;

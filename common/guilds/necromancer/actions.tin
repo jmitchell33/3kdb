@@ -215,30 +215,35 @@
 } {2}
 
 #NOP -- Tracking Lich abilities (bloodarc/conjure undead);
+#NOP -- Seconds before a bloodarc is assumed over if its end message is missed, so the bot never holds in a room forever;
+#var bloodarc_timeout 60;
+
+#NOP -- Bloodarc over: clears the flag and restarts the bot if it was holding, unless it is in combat or you paused it;
+#alias {.bloodarcEnd} {
+    #undelay {bloodarc_failsafe};
+    #if {$bloodarc_active} {
+        #var bloodarc_active 0;
+        #if {$bot[active] && !$bot[paused] && !$incombat} {.bot};
+    };
+};
+
+#NOP -- Bloodarc cast: flags it active so .botStep holds in the room (the bot can still fight) and starts the failsafe timer;
 #action {^Your eyes burn with an unholy crimson flame.$} {
-    #if {$bot[active]} {.pause;#delay 12 {#var bot[paused] 0}};
     #var mob[bloodarc] 0;
     #var bloodarc_active 1;
     #math my[necromancer][bloodarc] {$my[necromancer][bloodarc] - 1};
+    #delay {bloodarc_failsafe} {.bloodarcEnd} {$bloodarc_timeout};
 } {2};
 
 #action {^The lights in the room waver and swoon.$} {
     #math my[necromancer][conjure_undead] {$my[necromancer][conjure_undead] - 1};
 } {2}
 
-#action {The bloodarc crackles quietly as it dissipates into the ground.} {
-    #var bloodarc_active 0;
-    #if $bot[active] {#var bot[paused] 0};
-} {2};
+#action {The bloodarc crackles quietly as it dissipates into the ground.} {.bloodarcEnd} {2};
 
-#action {The energies of the bloodarc crackle quietly as they dissipate into the air.} {
-    #var bloodarc_active 0;
-    #if $bot[active] {#var bot[paused] 0};
-} {2};
+#action {The energies of the bloodarc crackle quietly as they dissipate into the air.} {.bloodarcEnd} {2};
 
-#action {You left the room master!  The bloodarc is broken!} {
-    #var bloodarc_active 0;
-} {2};
+#action {You left the room master!  The bloodarc is broken!} {.bloodarcEnd} {2};
 
 #NOP -- Tracking Vampire abilities (bloodlet/bloodfuse potions);
 #action {A small, very valuable crystal decanter} {

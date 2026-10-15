@@ -1,30 +1,11 @@
-#NOP - 3k Session
-
-#SESSION {3k - Fail} {3k.org} {3000}
-
-#NOP -- Set player specific variables;
-#var guild juggernaut;
+#NOP -- Set Player specific variables;
 #var user fail;
-#var theme[name] bright;
+#var guild juggernaut;
+#read chars/$user/guild.tin;
 #read chars/$user/vars.tin;
+#var theme[name] bright;
 
-#NOP -- load common;
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
 #read common/index.tin;
-#read common/bot/bots.tin;
-
-#NOP -- load specific modules for this character;
-#read modules/corpsemanager/corpsemanager.tin;
-#read modules/professions/reforger.tin;
-#read modules/helpers/helpers.tin;
-
-#NOP -- load guild;
-#read common/guilds/$guild/index.tin;
-#read common/guilds/eternal/eternal.tin;
-
-#NOP -- load character-specific;
-#read chars/$user/actions.tin;
-#read chars/$user/aliases.tin;
-#read chars/$user/config.tin;
-#read chars/$user/heartbeat.tin;
-
-reset_tracking;
+#read chars/$user/password.tin;
