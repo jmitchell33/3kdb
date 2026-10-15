@@ -1,27 +1,31 @@
-#class {player_heartbeat} {kill}
-#class {player_heartbeat} {open}
+#class {player_heartbeat} {kill};
+#class {player_heartbeat} {open};
 
 #var corpse_delay 1;
 #var corpse_use 200;
-#var pausedtoregen 1;
+
+#NOP -- These actions are called every round (every 2 seconds);
+#NOP -- Make sure all actions are INSIDE the !$idle_flag {} section or the deadman will not apply to those actions;
+#NOP -- An example of how to use this to drink a potion when your health is below 500;
+#NOP --   #if {$my[hp][current] < 500} {drink potion};
+#NOP -- Conditions can be combined like so - to cast heal if you have a certain amount of spell points.;
+#NOP --   #if {$my[hp][current] < 500 && $my[sp][current] > 1000} {cast heal};
 
 #alias {_player_heartbeat} {
     #if !$idle_flag {
-        #if {$my[super][current] > 0 && $my[super][reset] > 95 && "$incombat" == "1"} {
-            cast explosive release;
+        #NOP -- Actions that timing does not matter;
+
+
+        #NOP -- Actions to only attempt once/round go in this section;
+        #if {$action_round < $mip[round]} {
+            #NOP;
         };
-        #if {$bot[active] && $my[mental_cognition] < 85 && $pausedtoregen} {
-            .pause;
-            #var pausedtoregen 0;
-        };
-        #if {$bot[paused] && $my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-            .unpause;
-            ..;
-            #var pausedtoregen 1;
-        };
-    };
+
+    
+    #NOP -- All actions above this line;
+    } {#NOP};
 };
 
 
 
-#class {player_heartbeat} {close}
+#class {player_heartbeat} {close};

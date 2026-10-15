@@ -1,0 +1,46 @@
+#class {player_actions} {kill};
+#class {player_actions} {open};
+
+#NOP -- tacos;
+#action {The melting cheese finally evaporates from Pete.} {
+    #if {!$idle_flag} {
+        wield rod;
+        wield shard;
+    };
+} {1};
+
+#nop slippery that none of your armor seems to want to stay on!;
+#action {The guacamole coating Pete finally oozes off.} {
+    #if {!$idle_flag} {
+        wear all;
+    };
+} {1};
+
+#NOP -- hurinteons tome;
+#action {Hurinteon's tome vibrates and flashes brightly for a moment.} {
+    #if {!$idle_flag} {
+        ptell Hurinteon's tome has reset;
+    };
+} {1};
+
+#NOP - beloch bot;
+#action {^Beloch storms out to do battle!$} {
+	#if {$auto_beloch} {
+		challenge_all;
+        kill beloch;
+        arena_kill_all;
+	};
+} {1};
+
+#NOP -- hobbit pipe;
+#action {%*A small, intricately carved hobbit pipe} {#var pipe 1;};
+#action {You think so hard that smoke pours out of your ears.} {#var pipe 0;};
+
+#ticker pipe {#if {$pipe && !$idle_flag} {smoke pipe}} 63;
+#ticker pipe2 {#if {$pipe && !$idle_flag} {smoke pipe}} 75;
+
+#NOP -- Touch aegis rune immediately on seeing inductor;
+#act {^-M-_A Colossal Inductor} {touch aegis rune} {1};
+
+
+#class {player_actions} {close};

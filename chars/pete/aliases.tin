@@ -1,0 +1,595 @@
+#class {player_aliases} {kill};
+#class {player_aliases} {open};
+
+#NOP Prevents accidental quitting by overriding the mud's "quit" command. This in turn can be overriden;
+#NOP by typing "quit REALLY";
+#alias {quit} {
+    #if { "%1" == "REALLY"} {
+        #SEND quit;
+    } {
+        #SEND shakeno;
+        #SEND {emote pulls out a mirror and looks at himself.};
+        #SEND {say YOU are GOOD ENOUGH!};
+        #SEND {noob pete};
+    };
+};
+
+#nop -- speedrun using roomvnums;
+#alias {wa} {
+    #map run %0;
+};
+
+#NOP -- heartening laugh;
+#alias {hl} {
+    heartening laugh;
+};
+
+#NOP -- defensive harmony;
+#alias {dh} {
+    defensive harmony;
+};
+
+#NOP -- configure 3kReport;
+#alias {set3kreport} {
+    3kReport-clear;
+    3kReport+ killer;
+    3kReport+ rounds;
+    3kReport+ class;
+    3kReport+ xp;
+    3kReport+ xp_ratio;
+    3kReport+ coins;
+};
+
+
+#alias {3kr} {
+    3kReport;
+};
+
+#NOP -- evaluate mobs to check vital imformation about their strengths and weakness's;
+#alias {eva} {
+    cast thought wave on %0;
+};
+
+#NOP -- set variable for how many bags to cycle thru;
+#alias {bagset} {
+    #if {"%0" != ""} {
+        #var bagcount %0;
+        #echo {<ffa>BAG COUNT SET TO %0<088>};
+    } {
+        #echo {<faa>NO USER INPUT!<088>};
+    };
+};
+
+#NOP -- cycle bags;
+#alias {bag1} {
+    #var bagsFull 1;
+    #var bag1_active 1;
+    #format tmpBagCount {%d} $bagcount;
+    #loop $tmpBagCount 1 tmpBag {
+        put all in bag $tmpBag;
+    };
+    #line oneshot #action {You put %* in %*.} {#var bagsFull 0;#var bag1_active 0};
+};
+
+#alias {bag2} {
+    #format tmpBagCount {%d} $bagcount;
+    drop all;
+    #loop 1 $tmpBagCount tmpBag {
+        get all from bag $tmpBag;drop all;
+    };
+    #var bagsFull 0;
+    #var bag1_active 0;
+};
+
+#NOP -- forest of charms;
+#alias {charm} {
+    #switch {"%0"} {
+        #case {"help"} {
+            #echo {<fff>Charm Bracelet Steps<088>};
+            #echo {<fff>Arguments:<088>};
+            #echo {<ada>1 <adb>(search trees)<088>};
+            #echo {<ada>2 <adb>(2x search rocks)<088>};
+            #echo {<ada>3 <adb>(search tree)<088>};
+            #echo {<ada>4 <adb>(search rock)<088>};
+            #echo {<ada>5 <adb>(kill guardian)<088>};
+            #echo {<ada>6 <adb>(search trees and get charm)<088>};
+            #echo {<ada>7 <adb>(kill squirrel)<088>};
+            #echo {<ada>8 <adb>(snatch moon)<088>};
+            #echo {<ada>key <adb>(search river)<088>};
+        };
+        #case {"1"} {search trees};
+        #case {"2"} {#2 search rocks};
+        #case {"3"} {search tree};
+        #case {"4"} {search rock};
+        #case {"5"} {kill guardian};
+        #case {"6"} {search trees;get charm};
+        #case {"7"} {kill squirrel};
+        #case {"8"} {snatch moon};
+        #case {"key"} {search river};
+        #case {""} {
+            #echo {<faa>No Argument Provided!!<088>};
+        };
+        #default {
+            #echo {<fff>Unknown Argument '%0'. Please use 'charm help' for available options.<088>};
+        };
+    };
+};
+
+#NOP -- clear defense;
+#alias {clear_defense} {
+    clear_prots;
+};
+
+#NOP -- setup defense;
+#alias {setup_defense} {
+    #NOP spells;
+    prots_hs;
+    prots_pfe;
+    prots_pfg;
+    prots_pfn;
+    prots_mb;
+    prots_pfc;
+    prots_pfh;
+    prots_blink;
+    #NOP prots_hr;
+    #NOP songs;
+    prots_muse;
+    prots_grace;
+    #NOP powers;
+    es;
+};
+
+#NOP -- cycle through coffin/freezer/cooler for a corpse;
+#alias {.cycle_corpses} {
+	#if {$corpses[coffin] > 0} {
+		#send !unwrap 1;
+	}; #elseif {$corpses[freezer] > 0} {
+		#send !deslab;
+	}; #elseif {$corpses[cooler] > 0} {
+		#send !uncooler corpse;
+	}; #else {
+		#echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
+	};
+    #send {!cease;perform dirge};
+};
+
+#NOP -- heal stim with corpse;
+#alias {b} {
+    cease;
+    perform dirge;
+};
+
+#alias {setup_reflex} {
+    reflex clear;
+    reflex add hp <50% cast healing hands;
+    reflex add hp <10% hmheal;
+    #nop reflex add sp >200 cast blade dance;
+    #nop reflex add sp >150 cast caustic critic;
+    reflex combat on;
+    reflex start;
+};
+
+#NOP -- turn gags on;
+#alias {gagson} {
+    gag+ hpbar;
+};
+
+#NOP -- turn gags off;
+#alias {gagsoff} {
+    gag-clear;
+};
+
+#NOP -- manually defend a player;
+#alias {def} {
+    defend %0;
+};
+
+#NOP -- numpad off & on;
+#alias {numoff} {
+    #class numpad kill;
+};
+
+#alias {numon} {
+    #read chars/$user/numpad.tin;
+};
+
+#NOP -- aliases to setup strategies;
+#alias {mystrategy} {
+    strategy-clear;
+    #NOP strategy rolm;
+    strategy cloud;
+    strategy vortex;
+    strategy enrage;
+    strategy cshot;
+    strategy assault;
+    strategy critic;
+    strategy rolm;
+};
+
+#alias {stclear} {
+    strategy-clear;
+};
+
+#NOP -- alias to setup corpsetrigs;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ songcease;
+    corpsetrig+ wrap;
+    corpsetrig+ dirge2;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig-on;
+};
+
+#alias {mycorpsetrig-sz} {
+    corpsetrig-clear;
+    corpsetrig+ songcease;
+    corpsetrig+ wrap;
+    corpsetrig+ dirge2;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ szCaps;
+    corpsetrig+ szGreenCap;
+    corpsetrig-on;
+};
+
+#alias {mycorpsetrig-donates} {
+    corpsetrig-clear;
+    corpsetrig+ songcease;
+    corpsetrig+ wrap;
+    corpsetrig+ dirge2;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ disc;
+    corpsetrig+ bag1;
+    corpsetrig+ bag1;
+    corpsetrig-on;
+};
+
+#alias {mycorpsetrig-party} {
+    corpsetrig-clear;
+    corpsetrig-off;
+};
+
+#nop -- corpsetrig for sewers;
+#alias {mycorpsetrig-sewers} {
+    corpsetrig-clear;
+    corpsetrig+ songcease;
+    corpsetrig+ wrap;
+    corpsetrig+ dirge2;
+    corpsetrig+ divvy;
+    corpsetrig+ badgers_corpsegrab;
+    corpsetrig+ badgers_corpsegrab;
+    corpsetrig+ crafting;
+    corpsetrig+ disc;
+    corpsetrig+ bag1;
+    corpsetrig+ bag1;
+    corpsetrig-on;
+};
+
+#alias {corpseoff} {
+    corpsetrig-off;
+};
+
+#alias {corpseon} {
+    corpsetrig-on;
+};
+
+#alias {corpseclear} {
+    corpsetrig-clear;
+};
+
+#NOP -- einsteins brain (+3 int);
+#alias {ein_brain} {
+    n;w;n;n;e;n;
+    enter;
+    e;e;e;s;s;e;e;n;n;n;
+    trail;ne;climb gate;
+    w;search tree;
+    e;e;n;n;enter;
+    unlock paperholder;
+    turn paperholder;
+    climb bench;stagedive;
+    climb down;out;
+    s;s;w;unlock door;open door;n;
+};
+
+#NOP -- reset my brief settings after using inductor and crack stepper;
+#alias {mybrief} {
+    #send !brief off yes;
+};
+
+#NOP -- vigilant boosts;
+#alias {vigiboost} {
+    #switch {"%0"} {
+        #case {"str"} {buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;#7 {imprint strength;quaff flask}};
+        #case {"con"} {buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;#7 {imprint constitution;quaff flask}};
+        #case {"int"} {buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;#7 {imprint intelligence;quaff flask}};
+        #case {"wis"} {buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;#7 {imprint wisdom;quaff flask}};
+        #case {"dex"} {buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;#7 {imprint dexterity;quaff flask}};
+        #case {"cha"} {buy 1;buy 2;buy 3;buy 4;buy 5;buy 6;buy 7;#7 {imprint charisma;quaff flask}};
+        #default {#echo {<fff>buy vigilante boost flasks. Usage: <ccd>vigiboost <str/con/int/wis/dex/cha><088>}};
+    };
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa %0;
+};
+
+#NOP -- gathers all the pedes;
+#alias {pede_run} {w;w;w;w;w;sw;s;n;ne;e;e;e;se;s;s;nw;nw;e;w;se;se;n;n;nw;e;e;n;n;n;n;n;ne;sw;s;s;s;sw;w;w;ne;ne;s;n;sw;sw;e;e;ne;s;s;e;e;e;e;e;w;w;w;nw;n;n;se;se;w;e;nw;nw;s;s;se;w;w;s;s;s;s;s;n;n;n;ne;e;e;sw;sw;n;s;ne;ne;w;w;sw;n;n};
+
+#NOP -- gathers all the hunting kayos mobs;
+#alias {kayos_run} {#4 {#7 {kill mob;e};n;#7 {kill mob;w};n}};
+
+#NOP -- rolm room;
+#alias {pryout} {prys_exit};
+
+#NOP -- challenge all mobs in arena;
+#alias {challenge_all} {
+    challenge grundar;
+    challenge sholan;
+    challenge crae;
+    challenge beloch;
+    challenge aranow;
+    challenge heorki;
+    challenge noeque;
+    challenge yoeln;
+    challenge ghoti;
+    challenge delundar;
+};
+
+#alias {arena_kill_all} {
+    kill grundar;
+    kill sholan;
+    kill crae;
+    kill aranow;
+    kill heorki;
+    kill noeque;
+    kill yoeln;
+    kill ghoti;
+    kill delundar;
+    kill beloch;
+};
+
+#alias {arena_kill_all2} {
+    kill grundar;
+    kill sholan;
+    kill crae;
+    kill aranow;
+    kill heorki;
+    kill noeque;
+    kill yoeln;
+    kill ghoti;
+    kill delundar;
+};
+
+#NOP -- beloch bot;
+#alias {belochboton} {
+    #var {$auto_beloch} {1};
+};
+
+#alias {belochbotoff} {
+    #var {$auto_beloch} {0};
+};
+
+#alias {knight6} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2};
+};
+
+#alias {knight8} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2};
+};
+
+#NOP -- amy;
+#alias {amy1} {s;e;ne;n;n;n};
+#alias {amy2} {u;e;n;nw;ne;n;d;d;s};
+#alias {amy3} {n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
+
+#alias {amy4} {
+    examine walls;
+    examine grate;
+    smash grate;
+    squeeze through grate;
+    examine walls;
+    examine crack;
+    pry crack;
+    crack;
+};
+
+#alias {amy5} {crack;u;n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
+
+#NOP -- debug stuff;
+#alias {.startlog} {
+    #switch {"%0"} {
+        #case {"on"} {#event {SENT OUTPUT} {#var _sent_output_dbg %0;#echo {<cfa>out ($_sent_output_dbg)<088>}};#var debug[bot] 1;#debug {actions} {log};#config {log_mode} {plain};#log append botlog};
+        #case {"off"} {#UNEVENT {SENT OUTPUT};#unvar debug[bot];#log off};
+        #case {"del"} {#log remove botlog};
+        #case {""} {#echo {<fff>No user input<088>}};
+    };
+};
+
+#alias {writelog} {
+    #system {echo ROUND COUNT: $total_rounds >> chars/pete/peteslog.log};
+};
+
+#NOP -- badgers priority ground loot table and grab alias after corpsetrig shows room;
+#list badgers_lootgrab_list clear;
+#list badgers_lootgrab_list add {{{long} {A hard iron lockbox} {target} {lockbox}}};
+#list badgers_lootgrab_list add {{{long} {A worn lockbox} {target} {lockbox}}};
+#list badgers_lootgrab_list add {{{long} {A shining trident} {target} {trident}}};
+#list badgers_lootgrab_list add {{{long} {A%* machete%*} {target} {machete}}};
+#list badgers_lootgrab_list add {{{long} {A%* mattock%*} {target} {mattock}}};
+#list badgers_lootgrab_list add {{{long} {A%* axe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* pickaxe%*} {target} {pickaxe}}};
+#list badgers_lootgrab_list add {{{long} {A%* morningstar%*} {target} {morningstar}}};
+#list badgers_lootgrab_list add {{{long} {A%* club%*} {target} {club}}};
+#list badgers_lootgrab_list add {{{long} {A%* shortsword%*} {target} {shortsword}}};
+#list badgers_lootgrab_list add {{{long} {A%* knife%*} {target} {knife}}};
+#list badgers_lootgrab_list add {{{long} {A%* rapier%*} {target} {rapier}}};
+#list badgers_lootgrab_list add {{{long} {A%* no-dachi%*} {target} {no-dachi}}};
+#list badgers_lootgrab_list add {{{long} {A%* katana%*} {target} {katana}}};
+#list badgers_lootgrab_list add {{{long} {A%* claymore%*} {target} {claymore}}};
+#list badgers_lootgrab_list add {{{long} {A%* cutlass%*} {target} {cutlass}}};
+#list badgers_lootgrab_list add {{{long} {A%* sai%*} {target} {sai}}};
+#list badgers_lootgrab_list add {{{long} {A%* dagger%*} {target} {dagger}}};
+#list badgers_lootgrab_list add {{{long} {A%* falchion%*} {target} {falchion}}};
+#list badgers_lootgrab_list add {{{long} {A%* sledgehammer%*} {target} {hammer}}};
+#list badgers_lootgrab_list add {{{long} {A%* dirk%*} {target} {dirk}}};
+#list badgers_lootgrab_list add {{{long} {A%* handaxe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* warhammer%*} {target} {hammer}}};
+#list badgers_lootgrab_list add {{{long} {A%* battleaxe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* sabre%*} {target} {sabre}}};
+#list badgers_lootgrab_list add {{{long} {A%* war-axe%*} {target} {axe}}};
+#list badgers_lootgrab_list add {{{long} {A%* khopesh%*} {target} {khopesh}}};
+#list badgers_lootgrab_list add {{{long} {A%* mace%*} {target} {mace}}};
+#list badgers_lootgrab_list add {{{long} {A%* nunchaku%*} {target} {nunchaku}}};
+#list badgers_lootgrab_list add {{{long} {A%* flail%*} {target} {flail}}};
+#list badgers_lootgrab_list add {{{long} {A%* kynac%*} {target} {kynac}}};
+#list badgers_lootgrab_list add {{{long} {A%* blade%*} {target} {blade}}};
+#list badgers_lootgrab_list add {{{long} {A%* stiletto%*} {target} {stiletto}}};
+#list badgers_lootgrab_list add {{{long} {A%* sword%*} {target} {sword}}};
+#list badgers_lootgrab_list add {{{long} {A%* foil%*} {target} {foil}}};
+#list badgers_lootgrab_list add {{{long} {A%* hatchet%*} {target} {hatchet}}};
+#list badgers_lootgrab_list add {{{long} {A%* main gauche%*} {target} {gauche}}};
+#list badgers_lootgrab_list add {{{long} {A%* trident%*} {target} {trident}}};
+#list badgers_lootgrab_list add {{{long} {A blue stone necklace} {target} {necklace}}};
+#list badgers_lootgrab_list add {{{long} {Leather girdle} {target} {girdle}}};
+#list badgers_lootgrab_list add {{{long} {A magic scroll} {target} {scroll}}};
+#list badgers_lootgrab_list add {{{long} {Crystal ball} {target} {ball}}};
+#list badgers_lootgrab_list add {{{long} {%*Shield} {target} {shield}}};
+#list badgers_lootgrab_list add {{{long} {%*shield} {target} {shield}}};
+#list badgers_lootgrab_list add {{{long} {%*amulet%*} {target} {amulet}}};
+#list badgers_lootgrab_list add {{{long} {%*Amulet%*} {target} {amulet}}};
+#list badgers_lootgrab_list add {{{long} {%*bracers} {target} {bracers}}};
+#list badgers_lootgrab_list add {{{long} {%*ring} {target} {ring}}};
+#list badgers_lootgrab_list add {{{long} {%*Girdle} {target} {girdle}}};
+#list badgers_lootgrab_list add {{{long} {%*Cloak%*} {target} {cloak}}};
+#list badgers_lootgrab_list add {{{long} {%*cloak%*} {target} {cloak}}};
+#list badgers_lootgrab_list add {{{long} {%*Boots} {target} {boots}}};
+#list badgers_lootgrab_list add {{{long} {%*boots} {target} {boots}}};
+#list badgers_lootgrab_list add {{{long} {%*gloves} {target} {gloves}}};
+#list badgers_lootgrab_list add {{{long} {%*Gloves} {target} {gloves}}};
+#list badgers_lootgrab_list add {{{long} {%*Gauntlets} {target} {gauntlets}}};
+#list badgers_lootgrab_list add {{{long} {%*Armour} {target} {armour}}};
+#list badgers_lootgrab_list add {{{long} {%*Helmet} {target} {helmet}}};
+#list badgers_lootgrab_list add {{{long} {%*flask%*} {target} {flask}}};
+#list badgers_lootgrab_list add {{{long} {%*necklace} {target} {necklace}}};
+#list badgers_lootgrab_list add {{{long} {%*wand} {target} {wand}}};
+#list badgers_lootgrab_list add {{{long} {%*staff%*} {target} {staff}}};
+#list badgers_lootgrab_list add {{{long} {%*sword} {target} {sword}}};
+#list badgers_lootgrab_list add {{{long} {%*Codpiece} {target} {codpiece}}};
+#list badgers_lootgrab_list add {{{long} {%* gemstone} {target} {gemstone}}};
+#list badgers_lootgrab_list add {{{long} {%* gold coins} {target} {coins}}};
+#list badgers_lootgrab_list add {{{long} {Candle} {target} {candle}}};
+#list badgers_lootgrab_list add {{{long} {%*Chainmail%*} {target} {chainmail}}};
+#list badgers_lootgrab_list add {{{long} {A suit of armor} {target} {armor}}};
+#list badgers_lootgrab_list add {{{long} {%* fragment of %*} {target} {fragment}}};
+#list badgers_lootgrab_list add {{{long} {%* essence of %*} {target} {essence}}};
+#list badgers_lootgrab_list add {{{long} {%* heart of %*} {target} {heart}}};
+#alias {badgers_corpsegrab} {
+    #loop 1 &badgers_lootgrab_list[] _badger_cl_i {
+        #var _badger_lpat {$badgers_lootgrab_list[$_badger_cl_i][long]};
+        #replace {_badger_lpat} {%*} {.*};
+        #list _badger_cg_hits create;
+        #grep {$_badger_lpat} {_badger_cg_hits} {_badger_cg_cnt};
+        #if {&_badger_cg_hits[] > 0} {
+            #send {get $badgers_lootgrab_list[$_badger_cl_i][target]};
+        };
+    };
+};
+
+#NOP -- pete's 3kdb aliases;
+
+#alias {format_petesaliases} {
+    #format {petealias_name} {%-25s} {<cff>%1<088>};
+    #format {petealias_desc} {%-30s} {<deb>%2<088>};
+    #showme $petealias_name $petealias_desc;
+};
+
+#alias {pete3kdb} {
+    #var tempflag 0;
+    #var number &pete3kdb[];
+	#echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
+    #echo {<ccf>  -------    <ffa>PETE'S ALIASES <fff>($number)  <ccf>-------    <088>  };
+    #echo {    Filters:  <eaf>corpses boosts combat misc<088>       };
+    #echo {                  <eaf>guild spells<088>                 };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<ccf>     Name                 Usage              <088>  };
+    #list pete3kdb index name;
+    #list pete3kdb sort;
+    #foreach $pete3kdb[%*] index {
+        #regexp {"%1"} {"$index[type]"} {
+            #var tempflag 1;
+            format_petesaliases {     $index[name]} {$index[desc]};
+        };
+    };
+    #if !$tempflag {
+        #foreach $pete3kdb[%*] index {
+            format_petesaliases {     $index[name]} {$index[desc]};
+        };
+    };
+};
+
+#list pete3kdb clear;
+
+#NOP -- corpses;
+#list pete3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default Corpetrig}}};
+#list pete3kdb add {{{name} {mycorpsetrig-sz} {type} {corpses} {desc} {Corpsetrig for section Z cap eating}}};
+#list pete3kdb add {{{name} {mycorpsetrig-donates} {type} {corpses} {desc} {Corpsetrig for donates}}};
+#list pete3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list pete3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
+#list pete3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
+#list pete3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
+#list pete3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list pete3kdb add {{{name} {b} {type} {corpse} {desc} {Use a corpse}}};
+
+#NOP -- boosts;
+#list pete3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
+#list pete3kdb add {{{name} {vigiboost} {type} {boosts} {desc} {Vigilant flask boost: +15 cha etc}}};
+
+#NOP -- combat;
+#list pete3kdb add {{{name} {clear_defense} {type} {combat} {desc} {Clear defenses}}};
+#list pete3kdb add {{{name} {setup_defense} {type} {combat} {desc} {Setup defenses}}};
+#list pete3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
+#list pete3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+
+#NOP -- misc;
+#list pete3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list pete3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list pete3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
+#list pete3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
+#list pete3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
+#list pete3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
+#list pete3kdb add {{{name} {wa} {type} {misc} {desc} {map run to vnum or name}}};
+#list pete3kdb add {{{name} {gagson} {type} {misc} {desc} {turn gags on}}};
+#list pete3kdb add {{{name} {gagsoff} {type} {misc} {desc} {turn gags off}}};
+#list pete3kdb add {{{name} {pryout} {type} {misc} {desc} {attempt to get out of prysmia room}}};
+#list pete3kdb add {{{name} {p6bar} {type} {misc} {desc} {go to barrakeith}}};
+#list pete3kdb add {{{name} {barhel} {type} {misc} {desc} {return from barrakeith}}};
+#list pete3kdb add {{{name} {challenge_all} {type} {misc} {desc} {challenge all mobs in arena}}};
+#list pete3kdb add {{{name} {belochboton} {type} {misc} {desc} {beloch bot ON}}};
+#list pete3kdb add {{{name} {belochbotoff} {type} {misc} {desc} {beloch bot OFF}}};
+#list pete3kdb add {{{name} {arena_kill_all} {type} {misc} {desc} {kill all arena mobs}}};
+#list pete3kdb add {{{name} {arena_kill_all2} {type} {misc} {desc} {kill all arena mobs except beloch}}};
+#list pete3kdb add {{{name} {pede_run} {type} {misc} {desc} {gather all pedes}}};
+#list pete3kdb add {{{name} {kayos_run} {type} {misc} {desc} {gathers all the hunting kayos mobs}}};
+#list pete3kdb add {{{name} {bagset} {type} {misc} {desc} {set # of bags to cycle thru}}};
+#list pete3kdb add {{{name} {bag1} {type} {misc} {desc} {put all into bags 1 through bagcount}}};
+#list pete3kdb add {{{name} {bag2} {type} {misc} {desc} {empty bags back to inventory}}};
+#list pete3kdb add {{{name} {bag3} {type} {misc} {desc} {donate all from each bag high index to 1}}};
+
+#nop -- guild;
+#list pete3kdb add {{{name} {dh} {type} {guild} {desc} {Defensive Harmony: increase resistances for yourself or others}}};
+#list pete3kdb add {{{name} {hl} {type} {guild} {desc} {Heartening Laugh: +CON}}};
+
+
+#class {player_aliases} {close};

@@ -1,26 +1,95 @@
-#class {player_heartbeat} {kill}
-#class {player_heartbeat} {open}
+#class {player_heartbeat} {kill};
+#class {player_heartbeat} {open};
 
 #var corpse_delay 1;
 #var corpse_use 200;
 #var pausedtoregen 1;
+#var shelter_pause 1;
+#var tmp_shelter_return 0;
+#var secure_shelter_switch 0;
+#var tmp_shelter_vnum 0;
+#var tmp_shelter_exit 0;
+#var tmp_shelter_command 0;
+#var zodiac_riftVnum 0;
+#var zodiac_portalVnum 0;
+
+#nop -- secure shelter;
+#alias {shelter} {
+    #switch {"%0"} {
+        #case {"off"} {#var secure_shelter_switch 0;#echo {SECURE SHELTER OFF!!}};
+        #case {"on"} {#var secure_shelter_switch 1;#echo {SECURE SHELTER ON!!}};
+        #default {cast secure shelter};
+    };
+};
 
 #alias {_player_heartbeat} {
     #if !$idle_flag {
-        #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0 } {
+        #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0} {
             cast explosive release;
         };
-        #if {$bot[active] && $my[mental_cognition] < 85 && $pausedtoregen} {
-            .pause;
-            #var pausedtoregen 0;
+        #if {"$secure_shelter_switch" == "1"} {
+            #if {$my[gp1][current] > 78 && "$my[super][current]" == "0" && "$shelter_pause" == "1"} {
+                #if {$bot[active]} {.pause};
+                #map get roomvnum tmp_shelter_vnum;
+                #var shelter_pause 0;
+                #if {"$tmp_shelter_vnum" == "53914"} {
+                    #var tmp_shelter_exit 1;
+                    #var tmp_shelter_command {portal};
+                } {
+                    #if {"$tmp_shelter_vnum" == "54572"} {
+                        #var tmp_shelter_exit 1;
+                        #var tmp_shelter_command {rift;fracture};
+                    } {
+                        #var tmp_shelter_exit 0;
+                    };
+                };
+                #if {"$tmp_shelter_exit" == "1"} {
+                    #var tmp_shelter_exit 0;
+                    #var tmp_shelter_return 1;
+                    $tmp_shelter_command;
+                    #map get roomvnum tmp_shelter_vnum;
+                    cast secure shelter;
+                } {
+                    cast secure shelter;
+                };
+            };
         };
-        #if {$bot[paused] && $my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-            .unpause;
-            ..;
-            #var pausedtoregen 1;
+        #if {"$secure_shelter_switch" == "1"} {
+            #if {"$my[gp1][current]" == "0" && "$shelter_pause" == "0"} {
+                #if {"$tmp_shelter_return" == "1"} {
+                    #var shelter_pause 1;
+                    #var tmp_shelter_return 0;
+                    out;
+                    $tmp_shelter_command;
+                    #if {$bot[active]} {.unpause};
+                    #var tmp_shelter_vnum 0;
+                    glance;
+                    kill mimic;
+                } {
+                    #var shelter_pause 1;
+                    out;
+                    #if {$bot[active]} {.unpause};
+                    #var tmp_shelter_vnum 0;
+                    glance;
+                };
+            };
+        };
+        #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
+            #if {"$roomvnum" != "54572" || "$zodiac_riftVnum" || "$zodiac_portalVnum"} {
+                .pause;
+                #var pausedtoregen 0;
+            };
+        };
+        #if {$my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
+            #if {"$shelter_pause" == "1"} {
+                #var pausedtoregen 1;
+                #if {$bot[active]} {.unpause;glance};
+            } {
+                #var pausedtoregen 1;
+            };
         };
     };
 };
 
 
-#class {player_heartbeat} {close}
+#class {player_heartbeat} {close};
