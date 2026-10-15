@@ -204,7 +204,9 @@
     #var chat[log][emotes] $xchat[log][emotes];
     #var dReportList $xdReportList;
     #var toggles $xtoggles;
-    #if {"$xdeadman_armed" == "" || "$xdeadman_armed" == "xdeadman_armed"} {#var deadman_armed 1} {#var deadman_armed $xdeadman_armed};
+    #NOP -- A setting missing from vars.tin comes through as its own name, e.g. the text $xdeadman_armed, and;
+    #NOP -- then got saved back like that, so only 0 and 1 count as saved;
+    #if {"$xdeadman_armed" == "0"} {#var deadman_armed 0} {#var deadman_armed 1};
     #var deadmanIdleTimeout $xdeadmanIdleTimeout;
     #format {_dm_import_int} {%d} {$deadmanIdleTimeout};
     #if {"$deadmanIdleTimeout" == "" || "$deadmanIdleTimeout" == "xdeadmanIdleTimeout"} {
@@ -239,7 +241,13 @@
     #if {"$whitelist" == "$xwhitelist"} {#var whitelist {}};
     #if {"$dReportList" == "$xdReportList"} {#read common/3kReport.tin};
     #if {"$toggles" == "$xtoggles"} {#var toggles {}};
-    #if {"$xdiscordPost" == "" || "$xdiscordPost" == "xdiscordPost"} {#var discordPost 0} {#var discordPost $xdiscordPost};
+    #NOP -- Same for discordPost (it was stuck at the text $xdiscordPost, so nothing posted). If it isn't;
+    #NOP -- saved, post when a Discord webhook is set up;
+    #if {"$xdiscordPost" == "0" || "$xdiscordPost" == "1"} {
+        #var discordPost $xdiscordPost;
+    } {
+        #if {"&webhook[url][general]" == "1"} {#var discordPost 1} {#var discordPost 0};
+    };
     #var toggles[discord_post] $discordPost;
     #if {"$deadmanTimeoutActions" == "$xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};
     #if {"$major_prof" == "$xmajor_prof"} {#var major_prof {}};
