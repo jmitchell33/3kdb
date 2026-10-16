@@ -13,6 +13,7 @@
 #list strategyList add {{{guild} {bard} {name} {heartening} {active} {0} {description} {Bard: Heartening Laugh}}};
 #list strategyList add {{{guild} {bard} {name} {dharm} {active} {0} {description} {Bard: Defensive Harmony when HP is low}}};
 #list strategyList add {{{guild} {bard} {name} {fi} {active} {0} {description} {Bard: First Impression once a boot (checks stats at login)}}};
+#list strategyList add {{{guild} {bard} {name} {ks} {active} {0} {description} {Bard: Karmic Shield}}};
 #NOP -- Defenses, kept up by the heartbeat in and out of combat (see bard_prot in heartbeat.tin);
 #list strategyList add {{{guild} {bard} {name} {spells} {active} {0} {description} {Bard: Defense spells (blink, prots, mind blank, hardened skin)}}};
 #list strategyList add {{{guild} {bard} {name} {songs} {active} {0} {description} {Bard: Defense songs (amazing grace, o muse)}}};
@@ -48,6 +49,20 @@
     #var hl_override 1;
     heartening laugh;
     #delay {hl_toggle} {#var hl_override 0} {6};
+};
+
+#NOP -- karmic shield is a toggle: sending it while it's up turns it off. So it's only sent when the guild line;
+#NOP -- shows no KS, and not again for 6 seconds (restarted when it comes up) so a late MIP update can't toggle it off;
+#var ks_override 0;
+#alias {_bard_ks} {
+    #if {$my[defs][ks] > 0 || $ks_override} {#return};
+    #var ks_override 1;
+    karmic shield;
+    #delay {ks_toggle} {#var ks_override 0} {6};
+};
+#action {^You have aligned your conciousness with the will of nature.$} {
+    #var ks_override 1;
+    #delay {ks_toggle} {#var ks_override 0} {6};
 };
 
 #alias {_bard_dharm} {
