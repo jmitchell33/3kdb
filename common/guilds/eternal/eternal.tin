@@ -434,8 +434,12 @@
 } {2};
 
 #action {^You notice that %1 has come into view.} {
-	#if {!$idle_flag} {ctell %1 has reset.}
-	update_eternal_status;
+	#if {!$idle_flag} {
+		.notify {%1 has reset.};
+		#if $toggles[farsight_notify] {
+			ctell %1 has reset.
+		};
+	};
 };
 
 #action {^Encircling %* in a yellowy haze of mystic adrenaline} {
