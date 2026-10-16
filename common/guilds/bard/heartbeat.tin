@@ -35,27 +35,54 @@
 	#if {$result < $bard_sing_until} {#return 1} {#return 0};
 };
 
+#NOP -- Keep empowered strikes up (175 karma), for the es defense and the es strategy. es_override waits;
+#NOP -- 6 seconds after sending so it isn't resent before the prompt shows ES;
+#alias {_bard_es} {
+	#if {$my[defs][es] > 0} {#return};
+	#if {$my[gp1][current] > 400 && !$es_override} {
+		#var es_override 1;
+		empowered strikes;
+		#ticker {es_toggle} {#var es_override 0;#unticker es_toggle} {6};
+	};
+};
+
+#NOP -- Defenses can be turned on three ways: the old $defs flag, their own strategy (pe, blink, ag...), or;
+#NOP -- their group strategy (spells or songs). Strategies are saved between logins, $defs flags aren't;
+#function {bard_strategy} {
+	#var result 0;
+	#if {"%1" == ""} {#return 0};
+	#foreach {$strategyActive[%*]} {bard_strategy_item} {
+		#if {"$bard_strategy_item[name]" == "%1"} {#var result 1};
+	};
+};
+#function {bard_prot} {
+	#if {"$defs[%1]" == "1" || @bard_strategy{%1} || @bard_strategy{%2}} {#return 1} {#return 0};
+};
+#alias {_bard_strategy_on} {#if {!@bard_strategy{%1}} {strategy %1}};
+#alias {_bard_strategy_off} {#if {@bard_strategy{%1}} {strategy %1}};
+
 #alias {_guild_heartbeat} {
 	#NOP -- So round 1 of the next fight isn't mistaken for the last fight's round 1;
 	#if {$mip[round] == 0} {#var bard_cast_round 0};
 	#if !$idle_flag {
-		#if {$my[defs][es] > 0} {#NOP} {#if {$defs[es] && $my[gp1][current] > 400 && !$es_override} {#var es_override 1;empowered strikes;#ticker {es_toggle} {#var es_override 0;#unticker es_toggle} {6}} {#nop}};
-		#if {$my[defs][blink] > 0} {#NOP} {#if {$defs[blink]} {_bard_cast blink} {#nop}};
-		#if {$my[defs][hs] > 0} {#NOP} {#if {$defs[hs]} {_bard_cast hardened skin} {#nop}};
-		#if {$my[defs][mb] > 0} {#NOP} {#if {$defs[mb]} {_bard_cast mind blank} {#nop}};
-		#if {$my[defs][pe] > 0} {#NOP} {#if {$defs[pe]} {_bard_cast protection from evil} {#nop}};
-		#if {$my[defs][pn] > 0} {#NOP} {#if {$defs[pn]} {_bard_cast protection from neutral} {#nop}};
-		#if {$my[defs][pg] > 0} {#NOP} {#if {$defs[pg]} {_bard_cast protection from good} {#nop}};
-		#if {$my[defs][pf] > 0} {#NOP} {#if {$defs[pf]} {_bard_cast protection from frost} {#nop}};
-		#if {$my[defs][ph] > 0} {#NOP} {#if {$defs[ph]} {_bard_cast protection from heat} {#nop}};
+		#if {$defs[es]} {_bard_es};
+		checkStrategy {fi} {_bard_fi};
+		#if {$my[defs][blink] > 0} {#NOP} {#if {@bard_prot{blink;spells}} {_bard_cast blink} {#nop}};
+		#if {$my[defs][hs] > 0} {#NOP} {#if {@bard_prot{hs;spells}} {_bard_cast hardened skin} {#nop}};
+		#if {$my[defs][mb] > 0} {#NOP} {#if {@bard_prot{mb;spells}} {_bard_cast mind blank} {#nop}};
+		#if {$my[defs][pe] > 0} {#NOP} {#if {@bard_prot{pe;spells}} {_bard_cast protection from evil} {#nop}};
+		#if {$my[defs][pn] > 0} {#NOP} {#if {@bard_prot{pn;spells}} {_bard_cast protection from neutral} {#nop}};
+		#if {$my[defs][pg] > 0} {#NOP} {#if {@bard_prot{pg;spells}} {_bard_cast protection from good} {#nop}};
+		#if {$my[defs][pf] > 0} {#NOP} {#if {@bard_prot{pf;spells}} {_bard_cast protection from frost} {#nop}};
+		#if {$my[defs][ph] > 0} {#NOP} {#if {@bard_prot{ph;spells}} {_bard_cast protection from heat} {#nop}};
 		
-		#if {$my[defs][ag] > 0} {#NOP} {#if {$defs[ag] && !@bard_singing{}} {perform amazing grace} {#nop}};
-		#if {$my[defs][o] > 0}  {#NOP} {#if {$defs[om] && !@bard_singing{}} {perform o muse} {#nop}};
+		#if {$my[defs][ag] > 0} {#NOP} {#if {@bard_prot{ag;songs} && !@bard_singing{}} {perform amazing grace} {#nop}};
+		#if {$my[defs][o] > 0}  {#NOP} {#if {@bard_prot{om;songs} && !@bard_singing{}} {perform o muse} {#nop}};
 
 		#NOP -- actions that should only be attempted once per round;
 		#if {$action_round < $mip[round] && $mip[round] > 0} {
 			#if {$my[song][rounds] > 1} {#NOP;} {#if $actions_stacked {do_action};};
-			#if {$my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {_bard_cast harmonic regeneration} {#nop}};
+			#if {$my[defs][hr] > 0} {#NOP} {#if {@bard_prot{hr;} && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {_bard_cast harmonic regeneration} {#nop}};
 		} {
 			#NOP -- If you're not in combat, let er rip;
 			#if !$incombat {

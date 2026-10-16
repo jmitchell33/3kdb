@@ -9,10 +9,65 @@
 #list strategyList add {{{guild} {bard} {name} {cshot} {active} {0} {description} {Bard: Called Shot}}};
 #list strategyList add {{{guild} {bard} {name} {enrage} {active} {0} {description} {Bard: Enrage}}};
 #list strategyList add {{{guild} {bard} {name} {critic} {active} {0} {description} {Bard: Caustic Critic}}};
+#list strategyList add {{{guild} {bard} {name} {es} {active} {0} {description} {Bard: Empowered Strikes}}};
+#list strategyList add {{{guild} {bard} {name} {heartening} {active} {0} {description} {Bard: Heartening Laugh}}};
+#list strategyList add {{{guild} {bard} {name} {dharm} {active} {0} {description} {Bard: Defensive Harmony when HP is low}}};
+#list strategyList add {{{guild} {bard} {name} {fi} {active} {0} {description} {Bard: First Impression once a boot (checks stats at login)}}};
+#NOP -- Defenses, kept up by the heartbeat in and out of combat (see bard_prot in heartbeat.tin);
+#list strategyList add {{{guild} {bard} {name} {spells} {active} {0} {description} {Bard: Defense spells (blink, prots, mind blank, hardened skin)}}};
+#list strategyList add {{{guild} {bard} {name} {songs} {active} {0} {description} {Bard: Defense songs (amazing grace, o muse)}}};
+#list strategyList add {{{guild} {bard} {name} {blink} {active} {0} {description} {Bard: Blink}}};
+#list strategyList add {{{guild} {bard} {name} {pe} {active} {0} {description} {Bard: Protection from Evil}}};
+#list strategyList add {{{guild} {bard} {name} {pg} {active} {0} {description} {Bard: Protection from Good}}};
+#list strategyList add {{{guild} {bard} {name} {pn} {active} {0} {description} {Bard: Protection from Neutral}}};
+#list strategyList add {{{guild} {bard} {name} {pf} {active} {0} {description} {Bard: Protection from Frost}}};
+#list strategyList add {{{guild} {bard} {name} {ph} {active} {0} {description} {Bard: Protection from Heat}}};
+#list strategyList add {{{guild} {bard} {name} {mb} {active} {0} {description} {Bard: Mind Blank}}};
+#list strategyList add {{{guild} {bard} {name} {hs} {active} {0} {description} {Bard: Hardened Skin}}};
+#list strategyList add {{{guild} {bard} {name} {hr} {active} {0} {description} {Bard: Harmonic Regeneration}}};
+#list strategyList add {{{guild} {bard} {name} {ag} {active} {0} {description} {Bard: Amazing Grace}}};
+#list strategyList add {{{guild} {bard} {name} {om} {active} {0} {description} {Bard: O Muse}}};
 #list strategyList indexate name;
 
 #NOP -- Timers of various spells (in seconds);
 #var criticDuration 58;
+
+#NOP -- dharm: cast defensive harmony below this HP percent, if karma is at least dharmKarma;
+#if {"${dharmHpPerc}" === ""} {#var dharmHpPerc 40};
+#if {"${dharmKarma}" === ""} {#var dharmKarma 300};
+#NOP -- Whether heartening laugh / defensive harmony are up (actions.tin). Kept through .reload;
+#if {"${bard_hl}" === ""} {#var bard_hl 0};
+#if {"${bard_dharm}" === ""} {#var bard_dharm 0};
+#var hl_override 0;
+#var dharm_override 0;
+
+#NOP -- Powers are sent straight (not _bard_cast), with a 6 second wait so they aren't resent before the;
+#NOP -- game's message comes back;
+#alias {_bard_heartening} {
+    #if {$bard_hl || $hl_override || $my[gp1][current] < 400} {#return};
+    #var hl_override 1;
+    heartening laugh;
+    #delay {hl_toggle} {#var hl_override 0} {6};
+};
+
+#alias {_bard_dharm} {
+    #if {$bard_dharm || $dharm_override || $my[hp][max] <= 0} {#return};
+    #math _dharm_perc {100 * $my[hp][current] / $my[hp][max]};
+    #if {$_dharm_perc >= $dharmHpPerc || $my[gp1][current] < $dharmKarma} {#return};
+    #var dharm_override 1;
+    defensive harmony;
+    #delay {dharm_toggle} {#var dharm_override 0} {6};
+};
+
+#NOP -- First impression lasts until the next reboot. Once a login, check stats for it and cast it if it's;
+#NOP -- missing. bard_fi_checked isn't in a class, so .reload and gswap don't repeat the check;
+#alias {_bard_fi} {
+    #if {"$bard_fi_checked" == "1"} {#return};
+    #var bard_fi_checked 1;
+    #var bard_fi 0;
+    stats;
+    #delay {bard_fi_check} {#if {!$bard_fi} {first impression}} {5};
+};
 
 #NOP -- Critic counts as on once it's cast, until the acid runs dry or criticDuration passes. Waiting for the;
 #NOP -- "acid clings" message instead recast it every heartbeat whenever that message didn't match.;
@@ -46,6 +101,9 @@
     };
 
     checkStrategy {critic} {_bard_critic};
+    checkStrategy {es} {_bard_es};
+    checkStrategy {heartening} {_bard_heartening};
+    checkStrategy {dharm} {_bard_dharm};
     checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
     checkStrategy {cloud} {#if !$mob[noxious-cloud] {_bard_cast noxious cloud};};
     checkStrategy {vortex} {#if !$mob[lightning-vortex] {_bard_cast lightning vortex};};

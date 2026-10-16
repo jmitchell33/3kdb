@@ -23,7 +23,10 @@
 };
 
 #NOP ---THIS SECTION IS FOR SONG ALIASES;
-#alias {clear_prots} {#var defs 0};
+#alias {clear_prots} {
+	#var defs 0;
+	#foreach {spells;songs;blink;pe;pg;pn;pf;ph;mb;hs;hr;ag;om} {bard_i} {_bard_strategy_off $bard_i};
+};
 #alias {vamp} {perform vampire};
 #alias {black} {cease;perform black for %0};
 #alias {it %1} {perform invigorating tune for %1};
@@ -69,28 +72,31 @@
 #alias {rod} {perform rainbow of death;cast focus the rainbow};
 
 #NOP -- QUICK ALIASES FOR SETTING UP DEFENSES;
-#alias {prots_spells} {prots_blink;prots_pfe;prots_pfg;prots_pfn;prots_pfc;prots_pfh;prots_mb;prots_hs;};
+#NOP -- These turn on strategies (saved between logins), which the heartbeat keeps up one spell a round.;
+#NOP -- prots_spells turns on the spells group, prots_songs toggles the songs group;
+#alias {prots_spells} {_bard_strategy_on spells};
 #alias {prots_songs} {
-	#if {$defs[ag] || $defs[om]} {
+	#if {@bard_prot{ag;songs} || @bard_prot{om;songs}} {
 		#echo {<edb>---  DEFENSIVE SONGS OFF  ---<088>};
 		#var defs[ag] 0;#var defs[om] 0;
+		_bard_strategy_off songs;_bard_strategy_off ag;_bard_strategy_off om;
 	} {
 		#echo {<dea>---  DEFENSIVE SONGS ON  ---<088>};
-		#var defs[ag] 1;#var defs[om] 1;
+		_bard_strategy_on songs;
 	};
 };
 
-#alias {prots_pfe} {cast protection from evil;#var defs[pe] 1;echo_prots_pfe};
-#alias {prots_pfg} {cast protection from good;#var defs[pg] 1;echo_prots_pfg};
-#alias {prots_pfn} {cast protection from neutral;#var defs[pn] 1;echo_prots_pfn};
-#alias {prots_pfc} {cast protection from frost;#var defs[pf] 1;echo_prots_pfc};
-#alias {prots_pfh} {cast protection from heat;#var defs[ph] 1;echo_prots_pfh};
-#alias {prots_mb} {cast mind blank;#var defs[mb] 1;echo_prots_mb};
-#alias {prots_hs} {cast hardened skin;#var defs[hs] 1;echo_prots_hs};
-#alias {prots_blink} {cast blink;#var defs[blink] 1;echo_prots_blink};
-#alias {prots_hr} {#var defs[hr] 1;echo_prots_hr};
-#alias {prots_grace} {perform amazing grace;#var defs[ag] 1;echo_prots_grace};
-#alias {prots_muse} {perform o muse;#var defs[om] 1;echo_prots_muse};
+#alias {prots_pfe} {cast protection from evil;_bard_strategy_on pe;echo_prots_pfe};
+#alias {prots_pfg} {cast protection from good;_bard_strategy_on pg;echo_prots_pfg};
+#alias {prots_pfn} {cast protection from neutral;_bard_strategy_on pn;echo_prots_pfn};
+#alias {prots_pfc} {cast protection from frost;_bard_strategy_on pf;echo_prots_pfc};
+#alias {prots_pfh} {cast protection from heat;_bard_strategy_on ph;echo_prots_pfh};
+#alias {prots_mb} {cast mind blank;_bard_strategy_on mb;echo_prots_mb};
+#alias {prots_hs} {cast hardened skin;_bard_strategy_on hs;echo_prots_hs};
+#alias {prots_blink} {cast blink;_bard_strategy_on blink;echo_prots_blink};
+#alias {prots_hr} {_bard_strategy_on hr;echo_prots_hr};
+#alias {prots_grace} {perform amazing grace;_bard_strategy_on ag;echo_prots_grace};
+#alias {prots_muse} {perform o muse;_bard_strategy_on om;echo_prots_muse};
 
 #alias {reflex_clear} {reflex clear;echo_reflex_clear};
 #alias {reflex_critic %1} {reflex add sp >%1 cast caustic critic;echo_reflex_critic %1};

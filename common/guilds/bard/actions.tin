@@ -35,6 +35,13 @@
 #ACTION {^%w eeps at you.} {#if !$idle_flag {#format {lower} {%l} {%1};defend $lower};} {6};
 #ACTION {^%w grovels shamelessly before you.} {#if !$idle_flag {#format {lower} {%l} {%1};soothe $lower};} {6};
 #action {^%w acks at you.} {#if !$idle_flag {heartening laugh};} {6};
+
+#NOP -- Track heartening laugh, defensive harmony and first impression for their strategies;
+#action {^As the energies swirl around you, you feel heartier and more robust.$} {#var bard_hl 1};
+#action {^Heartening Laugh fades from you.$} {#var bard_hl 0};
+#action {^Weaving Magic and Song together, you reinforce the strength of your armor,$} {#var bard_dharm 1};
+#action {^The mystic harmony woven around you shimmers and fades.$} {#var bard_dharm 0};
+#action {^Charisma +%d%sIndefinite%sFirst Impression$} {#var bard_fi 1};
 #action {^%w brandishes %w weapon before you.} {#if !$idle_flag {identify ROOM};} {6};
 #action {^%w whispers to you: lore %*} {
     #if !$idle_flag {
@@ -77,15 +84,15 @@
 
 #NOP --- BARD DEFENSIVE SONGS AND SPELLS;
 #ACTION {You feel your ability to Blink receding.} {_bard_cast blink};
-#ACTION {^You are no longer blinking.$} {#if {$defs[blink] && !$idle_flag} {_bard_cast blink}} {6}
-#ACTION {^Your hardened skin is beginning to relax.$} {#if {$defs[hs] && !$idle_flag} {_bard_cast hardened skin}} {6};
-#ACTION {^Your protection from evil is beginning to fade.$} {#if {$defs[pe] && !$idle_flag} {_bard_cast protection from evil}} {6};
-#ACTION {^Your protection from neutral is beginning to fade.$} {#if {$defs[pn] && !$idle_flag} {_bard_cast protection from neutral}} {6};
-#ACTION {^Your protection from good is beginning to fade.$} {#if {$defs[pg] && !$idle_flag} {_bard_cast protection from good}} {6};
-#ACTION {^Your protection from heat is beginning to fade.$} {#if {$defs[ph] && !$idle_flag} {_bard_cast protection from heat}} {6};
-#ACTION {^Your protection from frost is beginning to fade.$} {#if {$defs[pf] && !$idle_flag} {_bard_cast protection from frost}} {6};
-#ACTION {^The magic of your song, 'Amazing Grace', is fading.$} {#if {$defs[ag] && !$idle_flag} {ag}} {6};
-#ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {$defs[om] && !$idle_flag && !@bard_singing{}} {perform o muse}} {6};
+#ACTION {^You are no longer blinking.$} {#if {@bard_prot{blink;spells} && !$idle_flag} {_bard_cast blink}} {6}
+#ACTION {^Your hardened skin is beginning to relax.$} {#if {@bard_prot{hs;spells} && !$idle_flag} {_bard_cast hardened skin}} {6};
+#ACTION {^Your protection from evil is beginning to fade.$} {#if {@bard_prot{pe;spells} && !$idle_flag} {_bard_cast protection from evil}} {6};
+#ACTION {^Your protection from neutral is beginning to fade.$} {#if {@bard_prot{pn;spells} && !$idle_flag} {_bard_cast protection from neutral}} {6};
+#ACTION {^Your protection from good is beginning to fade.$} {#if {@bard_prot{pg;spells} && !$idle_flag} {_bard_cast protection from good}} {6};
+#ACTION {^Your protection from heat is beginning to fade.$} {#if {@bard_prot{ph;spells} && !$idle_flag} {_bard_cast protection from heat}} {6};
+#ACTION {^Your protection from frost is beginning to fade.$} {#if {@bard_prot{pf;spells} && !$idle_flag} {_bard_cast protection from frost}} {6};
+#ACTION {^The magic of your song, 'Amazing Grace', is fading.$} {#if {@bard_prot{ag;songs} && !$idle_flag} {ag}} {6};
+#ACTION {^The magic of your song, 'O Muse', is fading.$} {#if {@bard_prot{om;songs} && !$idle_flag && !@bard_singing{}} {perform o muse}} {6};
 
 #NOP -- MOB STATUS TRACKERS;
 #action {You wave your hands around, make swooshing and farting sounds,} {#var mob[noxious-cloud] 1;} {6};
