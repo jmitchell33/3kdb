@@ -1,10 +1,11 @@
 #NOP -- Arrow-key character menu, read at the end of 3k.tin (or your own launcher).;
 #NOP -- Up/down picks a character, left/right picks its guild, Enter logs in. Number keys still log in directly.;
-#NOP -- The button row under the list adds, edits or removes characters.;
+#NOP -- The button row under the list adds, edits or removes characters. Names, guild arrows and buttons can be clicked.;
 #NOP -- The character list, guild lists and last highlighted character are saved in chars/startmenu_data.tin.;
 #NOP -- The first time it runs, the list is built from $player1, $player2, ... in the launcher.;
 #NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads.;
-#NOP -- Characters left linkdead show how long until the game boots them (see menu_ld_hours below). q quits;
+#NOP -- Characters left linkdead show how long until the game boots them (see menu_ld_hours below), and the next;
+#NOP -- reboot is shown once a character has logged in. q quits;
 
 #NOP -- 3kdb opens common_config in this startup session and only closes it in the game session, so after a;
 #NOP -- login it's still open here. Close any open class first, or the menu and PASSWORD land in it and get;
@@ -55,15 +56,31 @@ menu_close_classes;
 };
 
 #NOP -- menu_ld_at[<name>]: when each character went linkdead, from chars/<name>/linkdead.tin.;
-#NOP -- Files older than the limit are deleted, since the game has booted that character by now;
+#NOP -- menu_linkd[<name>]: characters whose file sets vaf[linkd], so only a reboot boots them.;
+#NOP -- menu_boot: when this boot started and the next is due, saved from uptime at each login.;
+#NOP -- A timer from before the last reboot or past the limit is deleted, since the game has booted that character;
 #alias {menu_ld_load} {
     #var menu_ld_at {};
+    #var menu_linkd {};
+    #var menu_boot {};
     #format menu_ld_now {%T};
+    #script {menu_tmp} {test -f chars/reboot.tin && echo yes};
+    #if {"$menu_tmp[1]" == "yes"} {#read chars/reboot.tin};
+    #var menu_reboot 0;
+    #if {"$menu_boot[start]" != ""} {#var menu_reboot $menu_boot[start]};
+    #NOP -- Once the next reboot is due, count it as done. A character still on at the reboot is cut off a;
+    #NOP -- little after the planned time, so allow 10 minutes;
+    #if {"$menu_boot[next]" != "" && $menu_boot[next] <= $menu_ld_now} {#math menu_reboot {$menu_boot[next] + 600}};
+    #script {menu_tmp} {grep -lF '#var vaf[linkd] 1' chars/*/*.tin 2>/dev/null};
+    #foreach {$menu_tmp[%*]} menu_l {
+        #regex {$menu_l} {^chars/{[a-z]+}/} {#var menu_linkd[&1] 1};
+    };
     #script {menu_tmp} {grep -H . chars/*/linkdead.tin 2>/dev/null};
     #foreach {$menu_tmp[%*]} menu_l {
         #regex {$menu_l} {^chars/{[a-z]+}/linkdead.tin:{[0-9]+}$} {
             #math menu_left {&2 + $menu_ld_hours * 3600 - $menu_ld_now};
-            #if {$menu_left > 0} {
+            #if {"$menu_linkd[&1]" == "1"} {#var menu_left 1};
+            #if {$menu_left > 0 && &2 > $menu_reboot} {
                 #var menu_ld_at[&1] &2;
             } {
                 #script {menu_tmp2} {rm -f chars/&1/linkdead.tin};
@@ -72,23 +89,66 @@ menu_close_classes;
     };
 };
 
-#NOP -- menu_ld_text <name>: menu_ld set to e.g. "linkdead, 23h05m left", or empty;
+#NOP -- menu_dur <seconds>: menu_dur set to e.g. "3d13h" or "23h05m";
+#alias {menu_dur} {
+    #math menu_h {%1 / 3600};
+    #math menu_m {(%1 % 3600) / 60};
+    #if {$menu_h >= 24} {
+        #math menu_d {$menu_h / 24};
+        #math menu_h {$menu_h % 24};
+        #var menu_dur {${menu_d}d${menu_h}h};
+        #return;
+    };
+    #NOP -- TinTin's #format has no %02d, so pad the minutes by hand;
+    #if {$menu_m < 10} {#var menu_m {0$menu_m}};
+    #var menu_dur {${menu_h}h${menu_m}m};
+};
+
+#NOP -- menu_ld_text <name>: menu_ld set to e.g. "linkdead, 23h05m left", or empty.;
+#NOP -- Whichever comes first, the limit or the next reboot;
 #alias {menu_ld_text} {
     #var menu_ld {};
     #if {"$menu_ld_at[%1]" == ""} {#return};
     #format menu_ld_now {%T};
+    #var menu_next 0;
+    #if {"$menu_boot[next]" != "" && $menu_boot[next] > $menu_ld_now} {#math menu_next {$menu_boot[next] - $menu_ld_now}};
+    #if {"$menu_linkd[%1]" == "1"} {
+        #var menu_ld {linkdead until reboot};
+        #if {$menu_next > 0} {
+            menu_dur $menu_next;
+            #var menu_ld {linkdead until reboot, $menu_dur left};
+        };
+        #return;
+    };
     #math menu_left {$menu_ld_at[%1] + $menu_ld_hours * 3600 - $menu_ld_now};
     #if {$menu_left <= 0} {#return};
-    #math menu_h {$menu_left / 3600};
-    #math menu_m {($menu_left % 3600) / 60};
-    #NOP -- TinTin's #format has no %02d, so pad the minutes by hand;
-    #if {$menu_m < 10} {#var menu_m {0$menu_m}};
-    #var menu_ld {linkdead, ${menu_h}h${menu_m}m left};
+    #if {$menu_next > 0 && $menu_next < $menu_left} {
+        menu_dur $menu_next;
+        #var menu_ld {linkdead, $menu_dur left (reboot)};
+        #return;
+    };
+    menu_dur $menu_left;
+    #var menu_ld {linkdead, $menu_dur left};
+};
+
+#NOP -- menu_boot_text: menu_boot_line set to when the next reboot is, or empty if no login has saved it;
+#alias {menu_boot_text} {
+    #var menu_boot_line {};
+    #if {"$menu_boot[next]" == ""} {#return};
+    #format menu_ld_now {%T};
+    #if {$menu_boot[next] <= $menu_ld_now} {
+        #var menu_boot_line {Next reboot: unknown until a character logs in};
+        #return;
+    };
+    #math menu_l {$menu_boot[next] - $menu_ld_now};
+    menu_dur $menu_l;
+    #format menu_l {%t} {{%a %b %d %I:%M %p}{$menu_boot[next]}};
+    #var menu_boot_line {Next reboot in $menu_dur ($menu_l)};
 };
 
 #NOP -- Keep the countdowns current while the menu is up, but not while a question is being answered;
 #ticker {menu_ld_tick} {
-    #if {&menu_ld_at[] > 0 && "$menu[prompt]" == ""} {
+    #if {(&menu_ld_at[] > 0 || "$menu_boot[next]" != "") && "$menu[prompt]" == ""} {
         menu_ld_load;
         menu_draw;
     };
@@ -102,6 +162,44 @@ menu_close_classes;
 
 #alias {menu_save} {#class startmenu_data write $menu[file]};
 #alias {menu_save_guild} {#script {menu_tmp} {printf '#var guild %s;\n' '$menu[guild][%1]' > chars/%1/guild.tin}};
+
+#NOP -- menu_link <command> <text>: menu_link set to the text, made to run the command when clicked.;
+#NOP -- Secure links (68;2) can't be faked by text from the game;
+#alias {menu_link} {#var menu_link {\e]68;2;MENU;%1\a\e[4;24m%2\e[24m}};
+
+#event {PRESSED SECURE LINK MENU MOUSE BUTTON ONE} {
+    #if {"$menu[prompt]" != ""} {#return};
+    menu_num_cancel;
+    #var menu[msg] {};
+    %4;
+};
+
+#NOP -- Clicking a character highlights it, and clicking it again logs in;
+#alias {menu_click_char} {
+    #if {$menu[row] == %1} {
+        menu_login %1;
+        #return;
+    };
+    #var menu[row] %1;
+    #var menu_sel %1;
+    menu_save;
+    menu_draw;
+};
+
+#NOP -- menu_click_guild <row> <-1 or 1>: the arrows around a guild;
+#alias {menu_click_guild} {
+    #var menu[row] %1;
+    #var menu_sel %1;
+    menu_save;
+    menu_side %2;
+};
+
+#alias {menu_click_button} {
+    #var menu[row] {$menu[count] + 1};
+    #math menu[row] {$menu[row]};
+    #var menu[btn] %1;
+    menu_button;
+};
 
 #NOP -- The buttons shown on the button row (row count+1);
 #alias {menu_buttons} {
@@ -118,6 +216,8 @@ menu_close_classes;
     #screen clear all;
     #showme {};
     #showme {<ffa>  Choose a character<088>};
+    menu_boot_text;
+    #if {"$menu_boot_line" != ""} {#showme {<ddd>  $menu_boot_line<088>}};
     #showme {};
     #if {$menu[count] > 0} {#loop 1 $menu[count] i {
         #var menu_c $menu_chars[$i];
@@ -126,7 +226,18 @@ menu_close_classes;
         #var menu_n $i;
         #if {$menu[count] > 9 && $i < 10} {#var menu_n { $i}};
         menu_ld_text $menu_c;
-        #format menu_line {  %s: %-10s %-16s %s} {$menu_n} {$menu_c} {$menu_g} {$menu_ld};
+        #format menu_line {  %s: %-10s} {$menu_n} {$menu_c};
+        menu_link {menu_click_char $i} {$menu_line};
+        #var menu_line $menu_link;
+        #NOP -- Pad the guild before adding the links, which would count toward the width;
+        #format menu_g {%-16s} {$menu_g};
+        #if {&menu_guilds[$menu_c][] > 1} {
+            menu_link {menu_click_guild $i -1} {<};
+            #replace menu_g {<} {$menu_link};
+            menu_link {menu_click_guild $i 1} {>};
+            #replace menu_g {>} {$menu_link};
+        };
+        #var menu_line {$menu_line $menu_g $menu_ld};
         #if {$i == $menu[row]} {
             #showme {<AAE><fff>$menu_line<088>};
         } {
@@ -137,10 +248,11 @@ menu_close_classes;
     #showme {};
     #var menu_line {  };
     #loop 1 &menu[buttons][] i {
+        menu_link {menu_click_button $i} {[ $menu[buttons][$i] ]};
         #if {$menu[row] == $menu[count] + 1 && $i == $menu[btn]} {
-            #cat menu_line {<AAE><fff>[ $menu[buttons][$i] ]<088>  };
+            #cat menu_line {<AAE><fff>$menu_link<088>  };
         } {
-            #cat menu_line {<ddd>[ $menu[buttons][$i] ]<088>  };
+            #cat menu_line {<ddd>$menu_link<088>  };
         };
     };
     #showme {$menu_line};
@@ -150,11 +262,11 @@ menu_close_classes;
         #showme {<ddd>  Type your answer and press Enter. An empty Enter cancels.<088>};
     } {
         #if {$menu[row] > $menu[count]} {
-            #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]   q: quit<088>};
+            #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]   q: quit   or click<088>};
         } {
             #var menu_line {1-$menu[count]: log in directly};
             #if {$menu[count] > 9} {#var menu_line {1-$menu[count] then Enter: log in}};
-            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line   q: quit<088>};
+            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line   q: quit   or click<088>};
         };
     };
 };
@@ -255,8 +367,9 @@ menu_close_classes;
     menu_save;
     menu_save_guild $menu_char;
     #var menu_guild_pick $menu[guild][$menu_char];
-    #NOP -- Remove the menu keys before connecting so they aren't copied into the game session;
-    #delay {0} {#class startmenu kill;menu_connect};
+    #NOP -- Remove the menu keys before connecting so they aren't copied into the game session.;
+    #NOP -- The mouse goes back off, as 3kdb has it in game until you turn it on with qq;
+    #delay {0} {#class startmenu kill;#config mouse off;menu_connect};
 };
 
 #NOP -- Every line typed while the menu is up comes here first;
@@ -523,8 +636,34 @@ menu_close_classes;
     } {20};
 };
 
-#NOP -- Linkdeath timers. Without the linkd VAF the game boots a linkdead character after this many hours;
+#NOP -- Linkdeath timers. Without the linkd VAF the game boots a linkdead character after this many hours.;
+#NOP -- With it (#var vaf[linkd] 1 in the character file) only a reboot does;
 #var menu_ld_hours 24;
+
+#NOP -- 3kdb sends uptime at login. Save when this boot started and when the next is due for the menu;
+#action {^ |  Current Uptime : %* (} {
+    menu_secs {%1};
+    #format menu_ld_now {%T};
+    #math menu_boot[start] {$menu_ld_now - $menu_secs};
+};
+#action {^ |  Next Reboot in : %*|} {
+    menu_secs {%1};
+    #format menu_ld_now {%T};
+    #math menu_boot[next] {$menu_ld_now + $menu_secs};
+    #if {"$menu_boot[start]" != ""} {
+        #script {menu_tmp} {printf '#var menu_boot {{start}{%s}{next}{%s}};\n' '$menu_boot[start]' '$menu_boot[next]' > chars/reboot.tin};
+    };
+};
+
+#NOP -- menu_secs <time>: menu_secs set to the seconds in e.g. "1 week 1 day 21 hours 23 minutes 55 seconds";
+#alias {menu_secs} {
+    #var menu_secs 0;
+    #regex {%1} {{[0-9]+} week} {#math menu_secs {$menu_secs + &1 * 604800}};
+    #regex {%1} {{[0-9]+} day} {#math menu_secs {$menu_secs + &1 * 86400}};
+    #regex {%1} {{[0-9]+} hour} {#math menu_secs {$menu_secs + &1 * 3600}};
+    #regex {%1} {{[0-9]+} minute} {#math menu_secs {$menu_secs + &1 * 60}};
+    #regex {%1} {{[0-9]+} second} {#math menu_secs {$menu_secs + &1}};
+};
 
 #NOP -- 3kdb's welcome actions set sessionActive when the game has logged you in, linkdead or not, so the old;
 #NOP -- timer no longer applies. Only the first time per session, so a repeated welcome line can't undo a quit;
@@ -567,5 +706,7 @@ menu_close_classes;
     };
 };
 
+#NOP -- The mouse makes the menu clickable. Hold shift to select text while it's on;
+#config mouse on;
 menu_load;
 menu_draw;
