@@ -14,6 +14,7 @@
 #list strategyList add {{{guild} {bard} {name} {dharm} {active} {0} {description} {Bard: Defensive Harmony when HP is low}}};
 #list strategyList add {{{guild} {bard} {name} {fi} {active} {0} {description} {Bard: First Impression once a boot (checks stats at login)}}};
 #list strategyList add {{{guild} {bard} {name} {ks} {active} {0} {description} {Bard: Karmic Shield}}};
+#list strategyList add {{{guild} {bard} {name} {vampire} {active} {0} {description} {Bard: Vampire song in combat}}};
 #NOP -- Defenses, kept up by the heartbeat in and out of combat (see bard_prot in heartbeat.tin);
 #list strategyList add {{{guild} {bard} {name} {spells} {active} {0} {description} {Bard: Defense spells (blink, prots, mind blank, hardened skin)}}};
 #list strategyList add {{{guild} {bard} {name} {songs} {active} {0} {description} {Bard: Defense songs (amazing grace, o muse)}}};
@@ -63,6 +64,19 @@
 #action {^You have aligned your conciousness with the will of nature.$} {
     #var ks_override 1;
     #delay {ks_toggle} {#var ks_override 0} {6};
+};
+
+#NOP -- vampire: sing it in combat when V is missing from the guild line, or renew it when it starts fading;
+#NOP -- (_bard_vampire 1, from actions.tin). Not over another song, and needs vampireKarma (the song costs 135);
+#if {"${vampireKarma}" === ""} {#var vampireKarma 400};
+#var vampire_override 0;
+#alias {_bard_vampire} {
+    #if {"%1" != "1" && $my[defs][v] > 0} {#return};
+    #if {$vampire_override || @bard_singing{} || $my[gp1][current] < $vampireKarma} {#return};
+    #if {&my[song][rounds]} {#if {$my[song][rounds] > 0} {#return}};
+    #var vampire_override 1;
+    perform vampire;
+    #delay {vampire_toggle} {#var vampire_override 0} {6};
 };
 
 #alias {_bard_dharm} {
@@ -119,6 +133,7 @@
     checkStrategy {es} {_bard_es};
     checkStrategy {heartening} {_bard_heartening};
     checkStrategy {dharm} {_bard_dharm};
+    checkStrategy {vampire} {_bard_vampire};
     checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
     checkStrategy {cloud} {#if !$mob[noxious-cloud] {_bard_cast noxious cloud};};
     checkStrategy {vortex} {#if !$mob[lightning-vortex] {_bard_cast lightning vortex};};
