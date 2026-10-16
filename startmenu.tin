@@ -3,7 +3,8 @@
 #NOP -- The button row under the list adds, edits or removes characters.;
 #NOP -- The character list, guild lists and last highlighted character are saved in chars/startmenu_data.tin.;
 #NOP -- The first time it runs, the list is built from $player1, $player2, ... in the launcher.;
-#NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads;
+#NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads.;
+#NOP -- Characters left linkdead show how long until the game boots them (see menu_ld_hours below). q quits;
 
 #NOP -- 3kdb opens common_config in this startup session and only closes it in the game session, so after a;
 #NOP -- login it's still open here. Close any open class first, or the menu and PASSWORD land in it and get;
@@ -50,7 +51,48 @@ menu_close_classes;
     #var menu[btn] 1;
     #var menu[prompt] {};
     #var menu[msg] {};
+    menu_ld_load;
 };
+
+#NOP -- menu_ld_at[<name>]: when each character went linkdead, from chars/<name>/linkdead.tin.;
+#NOP -- Files older than the limit are deleted, since the game has booted that character by now;
+#alias {menu_ld_load} {
+    #var menu_ld_at {};
+    #format menu_ld_now {%T};
+    #script {menu_tmp} {grep -H . chars/*/linkdead.tin 2>/dev/null};
+    #foreach {$menu_tmp[%*]} menu_l {
+        #regex {$menu_l} {^chars/{[a-z]+}/linkdead.tin:{[0-9]+}$} {
+            #math menu_left {&2 + $menu_ld_hours * 3600 - $menu_ld_now};
+            #if {$menu_left > 0} {
+                #var menu_ld_at[&1] &2;
+            } {
+                #script {menu_tmp2} {rm -f chars/&1/linkdead.tin};
+            };
+        };
+    };
+};
+
+#NOP -- menu_ld_text <name>: menu_ld set to e.g. "linkdead, 23h05m left", or empty;
+#alias {menu_ld_text} {
+    #var menu_ld {};
+    #if {"$menu_ld_at[%1]" == ""} {#return};
+    #format menu_ld_now {%T};
+    #math menu_left {$menu_ld_at[%1] + $menu_ld_hours * 3600 - $menu_ld_now};
+    #if {$menu_left <= 0} {#return};
+    #math menu_h {$menu_left / 3600};
+    #math menu_m {($menu_left % 3600) / 60};
+    #NOP -- TinTin's #format has no %02d, so pad the minutes by hand;
+    #if {$menu_m < 10} {#var menu_m {0$menu_m}};
+    #var menu_ld {linkdead, ${menu_h}h${menu_m}m left};
+};
+
+#NOP -- Keep the countdowns current while the menu is up, but not while a question is being answered;
+#ticker {menu_ld_tick} {
+    #if {&menu_ld_at[] > 0 && "$menu[prompt]" == ""} {
+        menu_ld_load;
+        menu_draw;
+    };
+} {60};
 
 #NOP -- menu_read_guild <name>: the saved guild, or the character file's default;
 #alias {menu_read_guild} {
@@ -68,6 +110,7 @@ menu_close_classes;
         #list menu[buttons] add {{Edit $menu_chars[$menu_sel]}};
         #list menu[buttons] add {{Remove $menu_chars[$menu_sel]}};
     };
+    #list menu[buttons] add {Quit};
 };
 
 #alias {menu_draw} {
@@ -82,7 +125,8 @@ menu_close_classes;
         #if {&menu_guilds[$menu_c][] > 1} {#var menu_g {< $menu_g >}};
         #var menu_n $i;
         #if {$menu[count] > 9 && $i < 10} {#var menu_n { $i}};
-        #format menu_line {  %s: %-10s %-16s} {$menu_n} {$menu_c} {$menu_g};
+        menu_ld_text $menu_c;
+        #format menu_line {  %s: %-10s %-16s %s} {$menu_n} {$menu_c} {$menu_g} {$menu_ld};
         #if {$i == $menu[row]} {
             #showme {<AAE><fff>$menu_line<088>};
         } {
@@ -106,11 +150,11 @@ menu_close_classes;
         #showme {<ddd>  Type your answer and press Enter. An empty Enter cancels.<088>};
     } {
         #if {$menu[row] > $menu[count]} {
-            #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]<088>};
+            #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]   q: quit<088>};
         } {
             #var menu_line {1-$menu[count]: log in directly};
             #if {$menu[count] > 9} {#var menu_line {1-$menu[count] then Enter: log in}};
-            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line<088>};
+            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line   q: quit<088>};
         };
     };
 };
@@ -246,6 +290,7 @@ menu_close_classes;
         #format menu_tmp {%p} {$menu_tmp};
         menu_ask edit_guilds {Guilds for $menu_c, separated by spaces (the first is the default):} {$menu_tmp};
     };
+    #if {"$menu_b" == "Quit"} {menu_quit};
     #if {"$menu_b" == "Remove $menu_c"} {
         #var menu[edit] $menu_c;
         menu_ask remove {Type yes to remove $menu_c from the menu (its files are kept):} {};
@@ -391,6 +436,26 @@ menu_close_classes;
     menu_done {<afa>Added $menu_c<088>};
 };
 
+#NOP -- q quits TinTin, unless it's being typed into a question or a command;
+#alias {menu_q} {
+    #cursor get {menu_cur};
+    #if {"$menu[prompt]" != "" || "$menu_cur" != ""} {
+        #cursor set {q};
+        #return;
+    };
+    menu_quit;
+};
+
+#alias {menu_quit} {
+    #showme {};
+    #if {&menu_ld_at[] > 0} {
+        #var menu_l {};
+        #foreach *menu_ld_at[] menu_c {#var menu_l {$menu_l $menu_c}};
+        #showme {<ffa>  Still linkdead:$menu_l<088>};
+    };
+    #end;
+};
+
 #macro {\e[A} {menu_move -1};
 #macro {\e[B} {menu_move 1};
 #macro {\e[C} {menu_side 1};
@@ -410,6 +475,7 @@ menu_close_classes;
 #macro {9} {menu_digit 9};
 #macro {0} {menu_digit 0};
 #macro {\t} {menu_tab};
+#macro {q} {menu_q};
 #event {CATCH RECEIVED INPUT} {menu_input {%0}};
 
 #class startmenu close;
@@ -455,6 +521,39 @@ menu_close_classes;
         #unaction {^You feel... different.$};
         #echo {<eaa>No swap confirmation from the game, so 3kdb is still set up for $guild<088>};
     } {20};
+};
+
+#NOP -- Linkdeath timers. Without the linkd VAF the game boots a linkdead character after this many hours;
+#var menu_ld_hours 24;
+
+#NOP -- 3kdb's welcome actions set sessionActive when the game has logged you in, linkdead or not, so the old;
+#NOP -- timer no longer applies. Only the first time per session, so a repeated welcome line can't undo a quit;
+#event {VARIABLE UPDATED sessionActive} {
+    #if {"$sessionActive" == "1" && "$user" != "" && "$menu_ld_in" != "1"} {
+        #var menu_ld_in 1;
+        #var menu_ld_skip 0;
+        #script {menu_tmp} {rm -f chars/$user/linkdead.tin};
+    };
+};
+
+#NOP -- Quitting, or someone logging in to the character from elsewhere (which takes it over), doesn't leave;
+#NOP -- it linkdead. The takeover flag wears off in case that login failed;
+#event {SENT OUTPUT} {
+    #NOP -- The text sent ends in a line break;
+    #regex {%0} {{^quit\s*$}} {#var menu_ld_skip 1};
+};
+#action {^Game Driver tells you: Someone is attempting to login to your character.} {
+    #var menu_ld_skip 1;
+    #delay {menu_ld_skip} {#var menu_ld_skip 0} {60};
+} {1};
+
+#NOP -- Any other disconnect of a logged-in character (#zap, #end, idling out, a dropped connection) leaves it;
+#NOP -- linkdead, so save the time for the menu;
+#event {SESSION DISCONNECTED} {
+    #if {"$user" != "" && "$sessionActive" == "1" && "$menu_ld_skip" != "1"} {
+        #format menu_ld_now {%T};
+        #script {menu_tmp} {printf '%s\n' '$menu_ld_now' > chars/$user/linkdead.tin};
+    };
 };
 
 #NOP -- Bring the menu back once every game session has closed (the startup session itself counts as one).;
