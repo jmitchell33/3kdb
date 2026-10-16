@@ -91,13 +91,16 @@
     #NOP -- Mobile goal: readable play and gauges on phones, targeting iPhone 17 Pro;
     #NOP -- in portrait/landscape terminals over SSH/tmux. Detect terminal cells,;
     #NOP -- not device identity or pixel size: font, keyboard and tmux affect these.;
-    #NOP -- Width <= 75 selects portrait first, otherwise height <= 20 selects;
-    #NOP -- landscape, otherwise desktop. Landscape currently uses standard panes.;
+    #NOP -- Width <= $mobile_portrait_cols (default 75) selects portrait first, otherwise;
+    #NOP -- height <= 20 selects landscape, otherwise desktop. Landscape currently uses standard panes.;
+    #NOP -- Set mobile_portrait_cols outside the draw class (e.g. in your launcher) so a reload keeps it;
+    #NOP -- and 0 never drops the sidebar.;
     #NOP -- Human/AI maintainers: keep detection here and reset both values on resize.;
-    #NOP -- Extend using measured rows/cols and check 75/76 cols and 20/21 rows,;
+    #NOP -- Extend using measured rows/cols and check cutoff/cutoff+1 cols and 20/21 rows,;
     #NOP -- rotation, desktop reattach, pane toggles and mapFull entry/exit.;
+    #if {"${mobile_portrait_cols}" === ""} {#local _portrait_cols 75} {#local _portrait_cols $mobile_portrait_cols};
 
-#if {$screen[width] <= 75} {
+#if {$screen[width] <= $_portrait_cols} {
     #var draw[mobile][active] 1;
     #var draw[mobile][mode] portrait;
 } {
