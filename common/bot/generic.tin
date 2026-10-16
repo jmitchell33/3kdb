@@ -1,8 +1,12 @@
-#class {bot} {open}
+#class {bot} {open};
 
 #var bot[active] 1;
 #var bot[paused] 0;
 #var bot[walk] 1;
+#NOP -- Bloodarc hold flag used by .botStep, reset to 0 each time the bot class loads;
+#var bot[holding] 0;
+#NOP -- Makes sure the bloodarc flag exists without resetting it if a bloodarc is already up;
+#if {&{bloodarc_active} == 0} {#var bloodarc_active 0};
 
 #var bot[foundmob] 0;
 #var bot[foundobject] 0;
@@ -26,7 +30,7 @@
 #NOP -- pre_bot check is loaded via the char/user/config.tin;
 .pre_bot_check;
 
-#NOP -- If we're not resuming a bot, then set the step to 1, expand the botpath, and set the botmobs
+#NOP -- If we're not resuming a bot, then set the step to 1, expand the botpath, and set the botmobs;
 #if {$botResume} {
     #NOP;
 } {
@@ -106,7 +110,7 @@
     };
 };
 
-/* kill the bot */
+#nop kill the bot;
 #alias {.stop} {
     .backupBot;
     #unvar bot;
@@ -130,13 +134,22 @@
 
 #alias .botStep {
     #if !$bot[paused] {
-        #var bot_first_in_room_check 1;
-        #if {$bot[step] >= &bot[steps][]} {
-            ${bot[steps][${bot[step]}]};
-            .botComplete;
+        #if {$bloodarc_active} {
+            #NOP -- Bloodarc is up so hold in this room, .bloodarcEnd in common/guilds/necromancer/actions.tin restarts the bot when it is over;
+            #if !$bot[holding] {
+                #var bot[holding] 1;
+                #echo {<cfb>   BOT HOLDING: BLOODARC IS ACTIVE   <088>};
+            };
         } {
-            ${bot[steps][${bot[step]}]};
-            #math bot[step] {$bot[step] + 1};
+            #var bot[holding] 0;
+            #var bot_first_in_room_check 1;
+            #if {$bot[step] >= &bot[steps][]} {
+                ${bot[steps][${bot[step]}]};
+                .botComplete;
+            } {
+                ${bot[steps][${bot[step]}]};
+                #math bot[step] {$bot[step] + 1};
+            };
         };
     };
 };
@@ -149,13 +162,6 @@
 
 #alias {.determineBotAction} {
     #if !$bot[paused] {
-        #if {"$bot[alias]" == "zodiacs-easy"} {
-            #if {"$bot[zodiac_bt]" != "1" && "$bot[zodiac_aeonos_seen]" != "1"} {
-                #if {"$mob[target]" == "soul" || "$mob[target]" == "colossus"} {
-                    #var bot[foundmob] 0;
-                };
-            };
-        };
         .botStopWalking;
         #if {$bot[foundplayer]} {
             #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Found player - calling .botStep<088>}};
@@ -238,26 +244,17 @@
             };
         };
         
-        #if {"$bot[zodiac_purge_kill]" == "1"} {
-            #var bot[zodiac_purge_kill] 0;
-            #var bot[foundmob] 0;
-            #var bot[aggro-mob] 0;
-            #if !$idle_flag {
-                #delay .5 {.zodiac_resume_backtrack};
-            };
-        } {
-            #var bot[foundmob] 0;
-            #var bot[aggro-mob] 0;
-            #if !$idle_flag {
-                #if {"$bot[alias]" == "knights"} {#NOP} {
-                    #if $actions_stacked {
-                        do_action;
-                        #delay 2 {
-                            .bot;
-                        };
-                    } {
-                        #delay .5 {.bot};
+        #var bot[foundmob] 0;
+        #var bot[aggro-mob] 0;
+        #if !$idle_flag {
+            #if {"$bot[alias]" == "knights"} {#NOP} {
+                #if $actions_stacked {
+                    do_action;
+                    #delay 2 {
+                        .bot;
                     };
+                } {
+                    #delay .5 {.bot};
                 };
             };
         };
@@ -268,7 +265,7 @@
 #NOP -- If you're not in combat and not walking, then begin walking;
 #ticker {bot_ticker} {
     #if !$bot[paused] {
-        #if {$bot[active] && !$idle_flag && !$bot[walk] && !$incombat} {
+        #if {$bot[active] && !$idle_flag && !$bot[walk] && !$incombat && !$bloodarc_active && !$bot[holding]} {
             #delay {bot_kick} {
                 #if {!$bot[walk] && !$incombat} {
                     #echo {<dfa>BOT STUCK RESUMING IN 3 SECONDS<088>};
@@ -391,4 +388,4 @@
 } {2};
 
 
-#class {bot} {close}
+#class {bot} {close};

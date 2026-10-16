@@ -43,11 +43,20 @@
 
 	#NOP -- Update scripts/discordPost.py to where the python file is located, this depends on the root that;
 	#NOP -- tintin is being called from;	
+	#NOP -- The post runs in the background so a big batch doesn't hang the client. Each batch gets;
+	#NOP -- its own file (the script deletes it), and errors go to logs/$sysUser/discordPost.log;
+	#NOP -- Each message is written as one line, channel <tab> text, with #line log (no shell, no JSON);
+	#NOP -- here), and the script builds the JSON, so quotes, backslashes and the like can't break a batch;
 	#delay sendPayload {
-		#line json payloadStack {#var payloadStackJson &0};
-		#script {result} {echo '{$payloadStackJson}' > logs/$sysUser/discordTmp.txt};
-		#script {result} {python3 scripts/discordPost.py logs/$sysUser/discordTmp.txt};
-		#if $debug[discord] {#echo {Discord result: $result}};
+		#format discordFile {logs/$sysUser/discordTmp-%U.txt};
+		#format discordTab {%a} {9};
+		#loop 1 &payloadStack[] discordIdx {
+			#var discordLine {$payloadStack[$discordIdx][payload]};
+			#replace discordLine {$discordTab} { };
+			#line log {$discordFile} {$payloadStack[$discordIdx][channel]$discordTab$discordLine};
+		};
+		#system {python3 scripts/discordPost.py $discordFile >> logs/$sysUser/discordPost.log 2>&1 &};
+		#if $debug[discord] {#echo {Discord: posting in the background, errors in logs/$sysUser/discordPost.log}};
 		#list payloadStack clear;
 	} {10};
 };
@@ -58,37 +67,25 @@
 #VAR ignoreEmotes {small %* sighs;pauses for a moment;finishes his performance with a bow.;cracks his knuckles and gets ready to play for;performs a rather incomprehensible action on the corpse.;wounds close rapidly.;whinnies as;rubs its head on;face as he pats him on the neck.;That hurt!;cries 'OW;takes a deep breath;takes a breath;ceases his performance;briefly closes his eyes;wraps his arms around;bows and bids you;reaches into a small pouch and draws forth a small pearl, black as the darkest night.; appears slightly drained.; spirit of the beast leaves your body, slightly weakening you.;is afk:;malicious attacks fade.;fills his glass with water from his pitcher.;drinks from his glass of water.;fills her glass with water from her pitcher.;drinks from her glass of water.;grovels shamelessly;collects %* coins, then hands you %*.;shell of energy flickers slighty around %*};
 #VAR ignoreMisc {Gen-Notify;All gold divvied;GOLD divvy called by;Path to find me is:};
 
+#NOP -- A stored backslash pair (one backslash from the game), see .mipProcessCAA;
+#format _mipBackslash {%a} {92};
+#var mipBackslashPair {$_mipBackslash$_mipBackslash$_mipBackslash$_mipBackslash};
+
 #NOP -- Get system user name to log to;
 #script {sysUser} {whoami};#var sysUser $sysUser[1];
 
 #function sanitizePayload {
-	#NOP -- Function to remove potentially problematic characters from the payload;
-	#NOP -- Maybe we can replace these with char or ascii representations to pass the desired character;
-	#var tempString {%0};
-	#replace tempString {#} {};
-	#replace tempString {$} {};
-	#replace tempString {*} {};
-	#replace tempString {;} {};
-	#replace tempString {"} {};
-	#replace tempString {`} {};
-	#replace tempString {'} {};
-	#replace tempString {"} {};
-	#replace tempString {\} {};
-	#replace tempString {/} {};
-	#replace tempString {(} {[};
-	#replace tempString {)} {]};
-	#replace tempString {-} {_};
-	#replace tempString {<} {[};
-	#replace tempString {>} {]};
-	#replace tempString {&} { and };
-	#replace tempString {|} { or };
-    #line strip #var {_santized_payload} {$tempString};
-    #return $_santized_payload;
+	#NOP -- Discord posts no longer go through JSON or a shell here (see sendPayload), so the text is;
+	#NOP -- kept as is apart from color codes. discordPost.py escapes Discord formatting and blocks pings;
+	#line strip #var {_santized_payload} {%0};
+	#return $_santized_payload;
 };
 
 #function ansiStrip {
     #line strip #var tempString {%0};
-    #replace {tempString} {\;} {};
+    #NOP -- A semicolon in chat text would split it into commands (text after it could be sent to the game),;
+    #NOP -- so swap it for the look-alike U+FF1B. discordPost.py turns it back into a semicolon;
+    #replace {tempString} {\;} {\uFF1B};
     #return {$tempString};
 };
 
@@ -301,7 +298,11 @@
 		#var {mip[comm][command]}	{&2};
 		#var {mip[comm][line]}		{&3};
 		#var {mip[comm][source]}	{&4};
-		#var {mip[comm][data]}		{@ansiStrip{&5}};
+		#NOP -- TinTin stores each backslash as two and later steps drop it, so swap each for the;
+		#NOP -- look-alike U+FF3C before cleaning up (discordPost.py turns it back into a backslash);
+		#var {mip[comm][data]}		{&5};
+		#replace {mip[comm][data]} {$mipBackslashPair} {\uFF3C};
+		#var {mip[comm][data]}		{@ansiStrip{$mip[comm][data]}};
 
 		#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
 		#format {datestamp} {%t} {%Y-%m-%d.log};
@@ -413,6 +414,100 @@
 	#delay 10 {#unvar chat[act_tell][from]};
 } {2};
 
+#nop -- These are for capturing tells and linktells that are being sent to your alts and then to your current online character;
+#nop -- These tells wont show up in tellhist either so youl have to see it via chat window, discord, and logs;
+
+#NOP -- Number of characters per line before the game wraps a long tell or LT onto the next line, used to tell when a message continues;
+#var chat[altWrap] 77;
+
+#NOP -- Alt tell header: arms a one-shot catch for the very next tell line so spam tells and normal MIP tells are never captured;
+#action {^Tell coming in via %w:} {
+	#unvar chat[alt];
+	#var chat[alt][type] {Tell};
+	#var chat[alt][via] {%1};
+	#line oneshot {#action {^%w tells you: %+} {
+		#var chat[alt][from] {%%1};
+		#var chat[alt][data] {%%2};
+		#var chat[alt][line] {%%0};
+		.altTellNext;
+	} {1}};
+	#delay {altTellExpire} {#unaction {^%w tells you: %+};#unvar chat[alt]} {3};
+} {2};
+
+#NOP -- Alt LT header: arms one-shot catches for the LT sender line and the LT text line so only the linktell that follows is captured;
+#action {^LT coming in via %w:} {
+	#unvar chat[alt];
+	#var chat[alt][type] {LT};
+	#var chat[alt][via] {%1};
+	#line oneshot {#action {^%w LTs \(%+\)} {
+		#var chat[alt][from] {%%1};
+	} {1}};
+	#line oneshot {#action {^%+LT: %+} {
+		#var chat[alt][data] {%%2};
+		#var chat[alt][line] {%%0};
+		.altTellNext;
+	} {1}};
+	#delay {altTellExpire} {#unaction {^%w LTs \(%+\)};#unaction {^%+LT: %+};#unvar chat[alt]} {3};
+} {2};
+
+#NOP -- Wrap check: a line near the wrap width may carry on, so catch the next line if it does, otherwise send the finished tell;
+#alias {.altTellNext} {
+	#format chat[alt][len] {%L} {$chat[alt][line]};
+	#math chat[alt][room] {$chat[altWrap] - $chat[alt][len]};
+	#if {$chat[alt][room] <= 20} {
+		#line oneshot {#action {^%+$} {
+			#if {&chat[alt][type]} {
+				#var chat[alt][line] {%%0};
+				.altTellMore;
+			};
+		} {9}};
+		#delay {altTellFlush} {.processAltTell} {0.4};
+	} {
+		.processAltTell;
+	};
+};
+
+#NOP -- Wrap join: if the next line starts with a word that could not fit on the last one, it is a continuation, so add it and check again;
+#alias {.altTellMore} {
+	#format chat[alt][more] {%p} {$chat[alt][line]};
+	#regex {$chat[alt][more]} {^%S} {#var chat[alt][first] {&0}};
+	#format chat[alt][firstlen] {%L} {$chat[alt][first]};
+	#math chat[alt][need] {$chat[alt][len] + 1 + $chat[alt][firstlen]};
+	#if {$chat[alt][need] > $chat[altWrap]} {
+		#var chat[alt][data] {$chat[alt][data] $chat[alt][more]};
+		.altTellNext;
+	} {
+		.processAltTell;
+	};
+};
+
+#NOP -- Shared alt tell handler: runs the blacklist check, then sends to the chat window, tells discord and the log;
+#alias {.processAltTell} {
+	#undelay {altTellFlush};
+	#var mipgag 0;
+	#var discordChannel $webhook[url][tells];
+	#var chatCategory tells;
+	#var mip[comm][twoway] {from};
+	#var mip[comm][source] {$chat[alt][from]};
+	#var mip[comm][data] {$chat[alt][data]};
+	_mip_chat_sender_blacklisted;
+	#var altLabel {$chat[alt][type] via $chat[alt][via]};
+	#format {timestamp_save} {%t} {[%H:%M] };
+	#format {datestamp} {%t} {%Y-%m-%d.log};
+	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+	#line log {logs/$sysUser/$datestamp} {<ead>$chat[alt][from] [$altLabel]<088>: $mip[comm][data]};
+	#var mip[comm][source] {$chat[alt][from] [$altLabel]};
+	#if {$_mip_blacklist_hit == 1} {
+		#var discordText ${mip[comm][source]}: ${mip[comm][data]};
+		#if {$discordPost && !$mipgag} {postDiscord ${discordText}};
+		#if {"$chatCategory" != "general"} {postChatCategory};
+	} {
+		update_chat <178>$chat[alt][from] <dab>[<fcc>$altLabel<dab>]<088>: $mip[comm][data];
+		#bell;
+	};
+	#unvar chat[alt];
+	#undelay {altTellExpire};
+};
 
 #NOP -- Capture says;
 #var captureSays 1;
@@ -658,7 +753,10 @@
 			#var lastData $mip[comm][data];
 			#var discordChannel $webhook[url][tells];
 			#var chatCategory tells;
-			#var mip[comm][data]	{@ansiStrip{&4}};
+			#NOP -- Keep backslashes as the look-alike U+FF3C, see .mipProcessCAA;
+			#var mip[comm][data]	{&4};
+			#replace {mip[comm][data]} {$mipBackslashPair} {\uFF3C};
+			#var mip[comm][data]	{@ansiStrip{$mip[comm][data]}};
 			#var mip[comm][source]	{&3};
 			#var mip[comm][line]	{Tell};
 

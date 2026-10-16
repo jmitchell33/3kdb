@@ -1,35 +1,114 @@
-#class {player_actions} {kill}
-#class {player_actions} {open}
+#class {player_actions} {kill};
+#class {player_actions} {open};
 
-#NOP -- reflexes;
-#action {You have no pants.} {
+#nop -- xeno gate;
+#action {You can not enter with the gate closed.} {clear branches;pull lever} {1};
+
+#nop -- until tier 3 i need to study powers so i will use envision vaf perk until then;
+#nop -- protection;
+#action {You call forth upon the necromancers of the past to protect you.} {
     #if {!$idle_flag} {
-        unwrap;
-        cast corpse blast
+        envision protection;
     };
-};
+} {1};
+
+#nop -- dream;
+#action {Your maximum dream factor is %* master, invoking that now.} {
+    #if {!$idle_flag} {
+        envision dream;
+    };
+} {1};
+
+#nop -- dispell;
+#action {pearl to the ground and dispell a magical spell from the room.} {
+    #if {!$idle_flag} {
+        envision dispell;
+    };
+} {1};
+
+#nop -- turn undead;
+#action {%* cowers away from you in abject fear!} {
+    #if {!$idle_flag} {
+        envision turn undead;
+    };
+} {1};
+
+#nop -- soulbind;
+#action {Raising your hands to the sky, you call forth the spirits of the underworld} {
+    #if {!$idle_flag} {
+        envision soulbind;
+    };
+} {1};
+
+#nop -- unholy ground;
+#action {You scream with the power of the netherworld and thrust your hands toward} {
+    #if {!$idle_flag} {
+        envision unholy ground;
+    };
+} {1};
+
+#nop -- bloodarc;
+#action {You reach towards the dark clouds in the heavens and call forth} {
+    #if {!$idle_flag} {
+        envision bloodarc;
+    };
+} {1};
+
+#nop -- mask drop;
+#action {The mask clatters to the ground.} {
+    #if {!$idle_flag} {
+        ptell mask dropped!;
+    };
+} {1};
+
+#NOP -- Kwik-E-Mart Pride (+5 wis);
+#action {The last of the oil leaks from your body.} {
+    #if {!$idle_flag} {
+        #send {get pride from satchel};
+        #send {eat pride};
+    };
+} {1};
+
+#NOP -- tacos;
+#action {The melting cheese finally evaporates from Jesse.} {
+    #if {!$idle_flag} {
+        wield rod;
+        wield shard;
+    };
+} {1};
+
+#nop slippery that none of your armor seems to want to stay on!;
+#action {The guacamole coating Jesse finally oozes off.} {
+    #if {!$idle_flag} {
+        wear all;
+    };
+} {1};
+
+#NOP -- hurinteons tome;
+#action {Hurinteon's tome vibrates and flashes brightly for a moment.} {
+    #if {!$idle_flag} {
+        ptell Hurinteon's tome has reset;
+    };
+} {1};
+
+#NOP - beloch bot;
+#action {^Beloch storms out to do battle!$} {
+	#if {$auto_beloch} {
+		challenge_all;
+        kill beloch;
+        arena_kill_all;
+	};
+} {1};
+
+#NOP -- hobbit pipe;
+#action {%*A small, intricately carved hobbit pipe} {#var pipe 1;};
+#action {You think so hard that smoke pours out of your ears.} {#var pipe 0;};
+
+#ticker pipe {#if {$pipe && !$idle_flag} {smoke pipe}} 63;
+#ticker pipe2 {#if {$pipe && !$idle_flag} {smoke pipe}} 75;
 
 #NOP -- Touch aegis rune immediately on seeing inductor;
 #act {^-M-_A Colossal Inductor} {touch aegis rune} {1};
 
-#NOP -- auto update linktell list;
-#action {[%w enters the game]} {
-    #if {!$idle_flag} {
-        mywhosync
-    };
-} {1};
 
-#action {[%w reconnects]} {
-    #if {!$idle_flag} {
-        mywhosync
-    };
-} {1};
-
-#action {[%w disconnects]} {
-    #if {!$idle_flag} {
-        mywhosync
-    };
-} {1};
-
-
-#class {player_actions} {close}
+#class {player_actions} {close};

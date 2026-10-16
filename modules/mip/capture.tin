@@ -14,6 +14,7 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 	#VAR {mip[id]} {$mip[id]$temp[digit]};
 };
 #UNVAR {temp[digit]};
+#FORMAT {mip[backslash]} {%a} {92};
 
 #NOP ***** Tell MUD to send MIP *************;
 #DELAY {2} {
@@ -42,14 +43,21 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 		#PARSE {$mip[%3][data]} {i} {
 			#MATH {mip[charcount]} {$mip[charcount] + 1};
 			#VAR {mip[delta]} {$mip[%3][length]};
-			#IF {"${mip[char2]}${mip[char1]}${i}" == "x7B"} {#MATH {mip[delta]} {$mip[delta] + 3}};
-			#IF {"${mip[char2]}${mip[char1]}${i}" == "x7D"} {#MATH {mip[delta]} {$mip[delta] + 3}};
-			#IF {"$i" == ";"} {#MATH {mip[delta]} {$mip[delta] + 1}};
+			#NOP -- TinTin stores a game backslash as two backslashes, a semicolon with a backslash before it,;
+			#NOP -- and braces as backslash-x7B/x7D, none of which the game's length counts. Each stored;
+			#NOP -- backslash counts as half an extra character, so a game backslash or a semicolon adds 1;
+			#NOP -- and a brace adds 3 in all;
+			#IF {"$i" === "$mip[backslash]"} {#MATH {mip[delta]} {$mip[delta] + 0.5}};
+			#IF {"${mip[char2]}${mip[char1]}${i}" == "x7B"} {#MATH {mip[delta]} {$mip[delta] + 2.5}};
+			#IF {"${mip[char2]}${mip[char1]}${i}" == "x7D"} {#MATH {mip[delta]} {$mip[delta] + 2.5}};
+			#IF {"$i" == ";"} {#MATH {mip[delta]} {$mip[delta] + 0.5}};
 			#IF {$mip[charcount] <= $mip[delta]} {
 				#VAR {mip[%3][length]} {$mip[delta]};
 				#VAR {mip[out]} {${mip[out]}${i}};
 			} {
-				#REGEXP {$mip[%3][data]} {^{.{$mip[delta]}}{.*}} {#VAR {mip[overflow]} &2} {};
+				#NOP -- delta can be a decimal from the half steps, and the regex needs a whole number;
+				#FORMAT {mip[deltaint]} {%d} {$mip[delta]};
+				#REGEXP {$mip[%3][data]} {^{.{$mip[deltaint]}}{.*}} {#VAR {mip[overflow]} &2} {};
 				#BREAK;
 			};
 			#VAR {mip[char2]} {$mip[char1]};

@@ -5,8 +5,6 @@
 #var check_room 0;
 #var toggle_rift_room 1;
 #var toggle_rift_room_empty 1;
-#var bot[zodiac_bt] 0;
-#var bot[zodiac_purge_kill] 0;
 
 #NOP -- mobs are evil, set rolm to angel;
 touch angel rune;
@@ -213,123 +211,9 @@ touch angel rune;
     wield rod;
 } {1};
 
-#alias .chest_action {
-    .pause;
-    examine chest;
-    search chest;
-    #echo {chest found}
-};
-
 #action {You find some gold coins in the chest!} {get coins;exa chest} {1};
 
 #action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;glance} {1};
-
-
-#alias {.zodiac_resume_normal} {
-    #var bot[zodiac_bt] 0;
-    #var bot[zodiac_purge_kill] 0;
-    .unpause;
-    glance;
-};
-
-#alias {.zodiac_resume_backtrack} {
-    .pause;
-    glance;
-    #delay 2 {.zodiac_after_glance};
-};
-
-#alias {.zodiac_find_level_bounds} {
-    #var {zodiac_d_index} {0};
-    #var {zodiac_prev_d_index} {0};
-    #loop {1} {$bot[step]} {_zbi} {
-        #if {"${bot[steps][$_zbi]}" == "d"} {
-            #var {zodiac_prev_d_index} {$zodiac_d_index};
-            #var {zodiac_d_index} {$_zbi};
-        };
-    };
-    #if {$zodiac_d_index == 0} {
-        #var {zodiac_d_index} {$bot[step]};
-    };
-    #if {$zodiac_prev_d_index == 0} {
-        #var {zodiac_level_start} {1};
-    } {
-        #math {zodiac_level_start} {$zodiac_prev_d_index + 1};
-    };
-};
-
-#alias {.zodiac_physical_backstep} {
-    #if {"$bot[zodiac_bt]" != "1"} {#return};
-    #if {$bot[step] <= $zodiac_level_start} {#return};
-    #math {_zidx} {$bot[step] - 1};
-    #if {$_zidx < $zodiac_level_start} {#return};
-    #list {bot[steps]} {get} {$_zidx} {zodiac_tok};
-    #format {zodiac_tok} {%p} $zodiac_tok;
-    #switch {"$zodiac_tok"} {
-        #case {"n"} {#send s};
-        #case {"s"} {#send n};
-        #case {"e"} {#send w};
-        #case {"w"} {#send e};
-        #case {"ne"} {#send sw};
-        #case {"nw"} {#send se};
-        #case {"se"} {#send nw};
-        #case {"sw"} {#send ne};
-        #case {"u"} {#send d};
-        #case {"d"} {#send u};
-        #case {"enter"} {#send out};
-        #case {"out"} {#send enter};
-        #case {"portal"} {#send portal};
-        #case {"fall"} {#send fall};
-        #case {"shadows"} {#nop};
-        #default {
-            #var bot[zodiac_bt] 0;
-            .unpause;
-            #showme {Zodiac backstep unknown token $zodiac_tok};
-            glance;
-        };
-    };
-    #if {"$bot[zodiac_bt]" == "1"} {
-        #math {bot[step]} {$bot[step] - 1};
-        #var {bot[walk]} {0};
-    };
-};
-
-#alias {.zodiac_after_glance} {
-    #if {"$bot[zodiac_bt]" != "1"} {#return};
-    #if {$bot[step] <= $zodiac_level_start} {
-        .zodiac_resume_normal;
-        #return;
-    };
-    #if {$bot[foundmob]} {
-        #if {"$mob[target]" == "soul" || "$mob[target]" == "colossus" || "$mob[target]" == "mimic"} {
-            #var bot[zodiac_purge_kill] 1;
-            .unpause;
-            .determineBotAction;
-        } {
-            #var bot[zodiac_bt] 0;
-            .unpause;
-            .determineBotAction;
-        };
-    } {
-        .pause;
-        .zodiac_physical_backstep;
-        #delay .3 {glance};
-        #delay 2 {.zodiac_after_glance};
-    };
-};
-
-#action {^You cannot leave while dark celestials still roam this level.$} {
-    #var bot[zodiac_bt] 1;
-    .pause;
-    .zodiac_find_level_bounds;
-    #math {zodiac_undo_count} {$bot[step] - $zodiac_d_index};
-    #if {$zodiac_undo_count < 1} {#var zodiac_undo_count 1};
-    #loop {1} {$zodiac_undo_count} {_zu} {#map undo};
-    #var bot[step] $zodiac_d_index;
-    #var bot[walk] 0;
-    #delay .3 {glance};
-    #delay 2 {.zodiac_after_glance};
-} {1};
-
 
 #class {bot} {close};
 #read common/bot/generic.tin;

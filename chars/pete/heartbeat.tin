@@ -1,0 +1,27 @@
+#class {player_heartbeat} {kill}
+#class {player_heartbeat} {open}
+
+#NOP -- These actions are called every round (every 2 seconds);
+#NOP -- Make sure all actions are INSIDE the !$idle_flag {} section or the deadman will not apply to those actions;
+#NOP -- An example of how to use this to drink a potion when your health is below 500;
+#NOP --   #if {$my[hp][current] < 500} {drink potion};
+#NOP -- Conditions can be combined like so - to cast heal if you have a certain amount of spell points.
+#NOP --   #if {$my[hp][current] < 500 && $my[sp][current] > 1000} {cast heal};
+
+#alias {_player_heartbeat} {
+    #if !$idle_flag {
+        #NOP -- Actions that timing does not matter;
+
+
+        #NOP -- Actions to only attempt once/round go in this section;
+        #if {$action_round < $mip[round]} {
+            #NOP
+        };
+
+    
+    #NOP -- All actions above this line;
+    } {#NOP};
+};
+
+
+#class {player_heartbeat} {close}
