@@ -65,6 +65,7 @@
 
 #alias {maphelp} {
 	#echo {mapsave / mapload - save or load common/map/3k_shared.map};
+	#echo {mapexplore [area] / mapexplore stop - walk and map every unvisited room in the area};
 	#echo {map <roomname> - set map at roomname};
 	#echo {infoPane - get current room info};
 	#echo {mapexit <exit> <command> - exit direction runs that command};
@@ -206,6 +207,10 @@
 #NOP Turks Turkey Farm
 #action {The turkey farmer stomps his feet three times.} {#map goto 27716};
 
+#NOP Amazon Research Center;
+#action {^Stretching your somewhat stiff legs you head out of the plane.} {#map goto 32571};
+#action {-R-_A Small Airfield (leave)} {#map goto 32570} {1};
+
 #NOP Android
 #action {BING! The button light goes off and the elevator doors open.} {enter elevator}
 #action {The elevator jerks to a halt and the doors open.} {out}
@@ -229,6 +234,9 @@
 #NOP Banshees Lair;
 #action {The elven guardian stands firmly in your way.} {mapUndo} {2};
 #action {The elven shade pushes you away from the passage downward.} {mapUndo} {2};
+
+#NOP Battlestar Galactica;
+#action {^The simulation screens fade to black.} {#map goto 29532};
 
 #NOP Calvin and Hobbes
 #action {^on the snow calls to you, and you dread another day at school.} {#map goto 23824}
@@ -290,6 +298,10 @@
 
 #NOP Dragon Realms
 #action {^You have to retreat against the onslaught of fire!} {#map move vortex}
+
+#NOP Dragonball Z;
+#action {-R-_Capsule Corp Lobby (nw)} {#map goto 28835} {1};
+#action {^S P L A S H!} {#map goto 29792};
 
 #NOP Einstein
 #action {^Standing on the bench, you relax and the stagedive through the rift} {#map goto 7039}
@@ -436,6 +448,7 @@
 
 #NOP Ravenloft;
 #action {^Something shimmers into view.} {#delay {rloftGoIn} {in} {6}};
+#action {^You find yourself complete once more.$} {#map goto 4315};
 
 #NOP Ravenloft Castle
 #action {^You warily step out onto the cold, damp ground.} {#map goto 20756}
@@ -461,6 +474,15 @@
 
 #NOP Wayhaven Ferry;
 #action {^The ferryman says: Well, here you are.} {#map goto 7354};
+
+#NOP Worm's Talon Airship;
+#action {^Here we are folks. Welcome to the City of Westersea!} {#map goto 4756};
+#action {^You hop out onto the deck.} {#map goto 15875};
+
+#NOP -- Wimpy moves you without a command, so move the map the same way. Only one action fires per line, so;
+#NOP -- this one has the lowest priority and other wimpy actions (abyss bot, knights-zorb, char files) call;
+#NOP -- .followMapMove themselves;
+#action {^Your legs run away with you %w.} {.followMapMove %1} {9};
 
 #NOP -- function to also take a step back on the mapper if we undo a map;
 #alias mapUndo {

@@ -60,12 +60,14 @@
 		};
 	};
 	#NOP -- This comes from MIP, so set a check that the MIP room name has updated;
+	#NOP -- The flag is cleared even if the room already has a name, or it stays set and the next new room;
+	#NOP -- entered gets this room's name;
 	#ticker update_room_name {
 		#if $mip_room_name {
 			#if {$roomname_len == 0} {
 				#map set roomname {$room[name]};
-				#var mip_room_name 0;
 			};
+			#var mip_room_name 0;
 		};
 	} {.5};
 	#if {$roomarea_len == 0} {
@@ -444,6 +446,186 @@
 	#var room[name] {};
 	#var room_short {};
 	findhere2 $findauto_best;
+};
+
+#NOP -- mapexplore [area]: map an area by itself. It walks to the nearest unvisited room of the area, lets;
+#NOP -- mapon fill it in, and repeats until none are left, then saves the map. Unvisited rooms are the ones;
+#NOP -- mapon dug from an exit that nobody has entered yet (no area set). Only n/e/s/w/ne/nw/se/sw/u/d exits;
+#NOP -- are explored, other exits (portals, climb, enter...) are listed at the end to do by hand.;
+#NOP -- It stops when a fight starts, after 3 steps in a row that don't arrive, after $mapexp[max] steps,;
+#NOP -- or with mapexplore stop. Run it again to carry on;
+#var mapexp[on] 0;
+#var mapexp[max] 300;
+#alias {mapexplore} {
+	#if {"%1" == "stop"} {
+		#if {$mapexp[on]} {.mapexp_stop {stopped}} {#showme <eaa>mapexplore isn't running.<088>};
+		#return;
+	};
+	#if {$mapexp[on]} {
+		#showme <eaa>mapexplore is already running. mapexplore stop to stop it.<088>;
+		#return;
+	};
+	#NOP -- Walking overwrites #path, which some bots walk with, so not even a paused bot;
+	#if {$bot[active]} {
+		#showme <eaa>mapexplore: stop the bot first.<088>;
+		#return;
+	};
+	#NOP -- An area given here is also what new rooms get tagged with, like the old mapon <area>;
+	#if {"%0" != ""} {#var area {%0}};
+	#if {"$area" == ""} {#map get roomarea area};
+	#if {"$area" == ""} {
+		#showme <eaa>mapexplore: no area known yet. Use mapexplore <area name>.<088>;
+		#return;
+	};
+	#var mapexp[area] {$area};
+	#var mapexp[startedmapping] 0;
+	#if {"$mapping" != "on"} {
+		mapon;
+		#var mapexp[startedmapping] 1;
+	};
+	#var mapexp[on] 1;
+	#var mapexp[steps] 0;
+	#var mapexp[found] 0;
+	#var mapexp[fails] 0;
+	#var mapexp[skip] {};
+	#var mapexp[special] {};
+	#showme <dfa>mapexplore: mapping $mapexp[area]. New rooms are tagged with this area.<088>;
+	.mapexp_step;
+};
+
+#NOP -- Collect the unvisited rooms next to rooms of the area into mapexp[todo];
+#alias {.mapexp_scan} {
+	#local mv {};
+	#local me {};
+	#var mapexp[todo] {};
+	#var mapexp[arearooms] {};
+	#map list {roomarea} {$mapexp[area]} {variable} {mapexp[arearooms]};
+	#foreach *mapexp[arearooms][] mv {
+		#map get roomexits mapexp_exits $mv;
+		#foreach *mapexp_exits[] me {
+			#var mapexp_dest {$mapexp_exits[$me]};
+			#if {"$mapexp[skip][$mapexp_dest]" != ""} {#continue};
+			#map get roomarea mapexp_destarea $mapexp_dest;
+			#if {"$mapexp_destarea" != ""} {#continue};
+			#NOP -- Void rooms (flag 8) are spacers from voidlink, never real rooms;
+			#map get roomflags mapexp_flags $mapexp_dest;
+			#if {"$mapexp_flags" == ""} {#var mapexp_flags 0};
+			#math mapexp_void {$mapexp_flags & 8};
+			#if {$mapexp_void} {#continue};
+			#if {"@findhere_sig{$me}" == ";$me"} {
+				#var mapexp[todo][$mapexp_dest] {};
+			} {
+				#var mapexp[special][$mv $me] {};
+			};
+		};
+	};
+};
+
+#NOP -- Pick the closest unvisited room (a neighbour if there is one) and take one step towards it;
+#alias {.mapexp_step} {
+	#if {!$mapexp[on]} {#return};
+	#if {"$incombat" == "1"} {
+		.mapexp_stop {a fight started};
+		#return;
+	};
+	#if {$mapexp[steps] >= $mapexp[max]} {
+		.mapexp_stop {walked $mapexp[max] steps};
+		#return;
+	};
+	.mapexp_scan;
+	#if {&mapexp[todo][] == 0} {
+		.mapexp_stop {nothing left to explore};
+		#return;
+	};
+	#local mv {};
+	#map get roomvnum mapexp[from];
+	#map get roomexits mapexp_exits;
+	#var mapexp[target] {};
+	#foreach *mapexp_exits[] mv {
+		#if {"$mapexp[target]" == "" && "$mapexp[todo][$mapexp_exits[$mv]]" != ""} {
+			#var mapexp[target] {$mapexp_exits[$mv]};
+		};
+	};
+	#if {"$mapexp[target]" == ""} {
+		#var mapexp_best 0;
+		#foreach *mapexp[todo][] mv {
+			#NOP -- A failed find leaves the old path, so clear it first;
+			#path destroy;
+			#map find {$mv};
+			#path get length mapexp_len;
+			#if {$mapexp_len > 0 && ($mapexp_best == 0 || $mapexp_len < $mapexp_best)} {
+				#var mapexp_best $mapexp_len;
+				#var mapexp[target] $mv;
+			};
+		};
+	};
+	#if {"$mapexp[target]" == ""} {
+		.mapexp_stop {there's no known path to the &mapexp[todo][] unvisited rooms left};
+		#return;
+	};
+	#NOP -- One step at a time, so each room's exits are dug from the right room;
+	#path destroy;
+	#map find {$mapexp[target]};
+	#path save forward mapexp_path;
+	#list mapexp_path explode {;};
+	#var mapexp[next] {$mapexp_exits[$mapexp_path[1]]};
+	#if {"$mapexp[next]" == ""} {
+		#var mapexp[skip][$mapexp[target]] 1;
+		#delay {mapexp_step} {.mapexp_step} {0.1};
+		#return;
+	};
+	#math mapexp[steps] {$mapexp[steps] + 1};
+	#var mapexp[tries] 0;
+	#var room[updated] 0;
+	#map run {$mapexp[next]};
+	#delay {mapexp_wait} {.mapexp_wait} {0.25};
+};
+
+#NOP -- room[updated] is set at the prompt after a new room, right after mapon has dug its exits;
+#alias {.mapexp_wait} {
+	#if {!$mapexp[on]} {#return};
+	#if {$room[updated]} {
+		#var mapexp[fails] 0;
+		#if {"$mapexp[next]" == "$mapexp[target]"} {#math mapexp[found] {$mapexp[found] + 1}};
+		#NOP -- Give mapon's room name ticker (every 0.5s) time to name this room before moving on;
+		#delay {mapexp_step} {.mapexp_step} {0.7};
+		#return;
+	};
+	#math mapexp[tries] {$mapexp[tries] + 1};
+	#if {$mapexp[tries] < 20} {
+		#delay {mapexp_wait} {.mapexp_wait} {0.25};
+		#return;
+	};
+	#NOP -- No new room after 5 seconds, so the way is blocked. Put the map back if it moved, skip that room;
+	#map get roomvnum mapexp_at;
+	#if {"$mapexp_at" != "$mapexp[from]"} {#map goto $mapexp[from]};
+	#var mapexp[skip][$mapexp[target]] 1;
+	#math mapexp[fails] {$mapexp[fails] + 1};
+	#showme <eaa>mapexplore: couldn't get to room $mapexp[target], skipping it.<088>;
+	#if {$mapexp[fails] >= 3} {
+		.mapexp_stop {3 steps in a row didn't arrive};
+		#return;
+	};
+	#delay {mapexp_step} {.mapexp_step} {0.1};
+};
+
+#alias {.mapexp_stop} {
+	#undelay {mapexp_wait};
+	#undelay {mapexp_step};
+	#var mapexp[on] 0;
+	#showme <dfa>mapexplore: %1. Mapped $mapexp[found] new rooms in $mapexp[steps] steps.<088>;
+	#local mv {};
+	#if {&mapexp[skip][] > 0} {
+		#var mapexp_list {};
+		#foreach *mapexp[skip][] mv {#var mapexp_list {$mapexp_list $mv}};
+		#showme <dfa>  Skipped rooms that couldn't be reached:$mapexp_list<088>;
+	};
+	#if {&mapexp[special][] > 0} {
+		#showme <dfa>  Exits to explore by hand (room exit):<088>;
+		#foreach *mapexp[special][] mv {#showme <dfa>    $mv<088>};
+	};
+	#if {$mapexp[found] > 0} {mapsave};
+	#if {$mapexp[startedmapping]} {mapoff};
 };
 
 
