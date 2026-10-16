@@ -8,18 +8,29 @@
 #NOP -- _bard_cast <spell>: bards get one spell a round, so only the first auto-cast each round goes out (one;
 #NOP -- every 1.5 seconds out of combat). The rest aren't queued: whatever wanted them checks again next;
 #NOP -- heartbeat, so the order below decides what goes first. bard_cast_sent says whether this one went out;
+#NOP -- The same spell isn't resent for 6 seconds: the MIP guild line that says a prot is up arrives a beat;
+#NOP -- after the spell lands, so the next heartbeat would otherwise cast it again. A refused cast (already;
+#NOP -- cast this round, or singing) clears the wait, see _bard_cast_refused;
 #var bard_cast_round 0;
 #var bard_cast_time 0;
+#var bard_cast_last {};
 #alias {_bard_cast} {
 	#var bard_cast_sent 0;
 	#if {@bard_singing{}} {#return};
 	#format bard_cast_now {%U};
+	#if {&bard_cast_wait[%0]} {#if {$bard_cast_now < $bard_cast_wait[%0]} {#return}};
 	#if {$mip[round] > 0 && $mip[round] == $bard_cast_round} {#return};
 	#if {$mip[round] == 0 && $bard_cast_now - $bard_cast_time < 1500000} {#return};
 	#var bard_cast_round $mip[round];
 	#var bard_cast_time $bard_cast_now;
 	#var bard_cast_sent 1;
+	#var bard_cast_last {%0};
+	#math {bard_cast_wait[%0]} {$bard_cast_now + 6000000};
 	cast %0;
+};
+#alias {_bard_cast_refused} {
+	#if {"$bard_cast_last" != ""} {#unvar {bard_cast_wait[$bard_cast_last]}};
+	#var bard_cast_last {};
 };
 
 #NOP -- Bards can't cast while singing. bard_sing_until (microseconds) is set when a song starts or the game;

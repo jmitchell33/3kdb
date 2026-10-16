@@ -65,7 +65,8 @@
 #NOP --- Singing blocks spells (_bard_cast in heartbeat.tin). The start message also shows when the game;
 #NOP --- then refuses the song, so "must wait" clears it again;
 #action {^You take a deep breath and begin to stretch your vocal cords.$} {_bard_sing_start} {2};
-#action {^You can't cast a spell while singing!$} {_bard_sing_start} {2};
+#action {^You can't cast a spell while singing!$} {_bard_sing_start;_bard_cast_refused} {2};
+#action {^You've already cast a spell this round!$} {_bard_cast_refused} {2};
 #action {^You're in mid performance, remember?$} {_bard_sing_start} {2};
 #action {^You must wait for the first effect to near completion.$} {#var bard_sing_until 0} {2};
 
