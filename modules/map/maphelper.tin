@@ -11,12 +11,11 @@
 	#format tmpNumber {%p} {%1};
 	#if {"$tmpNumber" == ""} {
 		#echo {     <efd>Please provide a house #.  Enter <cfc>showkeys<efd> to see your house numbers.};
-	} {
-		
+	} {	
 		#var my[home_id] $tmpNumber;
+		#map get roomvnum my[home_vnum];
+		#echo {   <cee> Home <bfc>$tmpNumber <cee>has been updated to vnum <bfc>$my[home_vnum]<cee>.  When exiting, use the alias <bfc>ld<cee> to save this for the future.<088>};
 	};
-	#map get roomvnum my[home_vnum];
-	#echo {   <cee> Home <bfc>$tmpNumber <cee>has been updated to vnum <bfc>$my[home_vnum]<cee>.  When exiting, use the alias <bfc>ld<cee> to save this for the future.<088>};
 };
 
 #NOP -- Enter the mapped exit (shop, magic, etc.) first, then the house flavor exit;
