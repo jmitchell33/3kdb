@@ -16,6 +16,9 @@
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
+    #NOP -- Nothing goes out while deadman has you marked idle;
+    #if {$idle_flag} {#return};
+
     checkStrategy {assault} {
         #if {$corpses[total] > 20 && $my[gp1][current] > $karma_heal} {
             martial assault;
