@@ -147,6 +147,8 @@
 	#unvar findroom;
 	#var finding_here on;
 	#var findauto off;
+	#var findstep {};
+	#var findblocked {};
 
 	rating;
 	#send !brief off yes;
@@ -184,6 +186,69 @@
 	};
 };
 
+#NOP -- @findhere_canon{a;b;c}: a list of exits in a fixed order, standard directions first, then the rest sorted;
+#function {findhere_canon} {
+	#local fc {};
+	#var findcanon_list {@findhere_sig{%0}};
+	#var findcanon_other {};
+	#foreach {%0} fc {
+		#if {"$fc" != "" && ";n;ne;e;se;s;sw;w;nw;u;d;" != "%*;$fc;%*"} {#list findcanon_other add {$fc}};
+	};
+	#list findcanon_other sort;
+	#foreach $findcanon_other[%*] fc {#var findcanon_list {$findcanon_list;$fc}};
+	#var result {$findcanon_list};
+};
+
+#NOP -- @findhere_fits{vnum}: 1 if that map room could be the room you're in (findexits).;
+#NOP -- A room whose map name ends in (exits) has to list the same exits, portal and enter included.;
+#NOP -- Many rooms are named without them (the roads by Fantasy's road portal), and open areas link rooms;
+#NOP -- to neighbours the game doesn't list (n and s off a road), so for those every listed exit only has to;
+#NOP -- exist on the map. With findfit_std 1 only the standard directions are compared;
+#function {findhere_fits} {
+	#local fd {};
+	#map get roomname findfit_name %0;
+	#var findfit_list {@findhere_exits{$findfit_name}};
+	#replace findfit_list {,} {;};
+	#var findfit_ok 1;
+	#if {"$findfit_list" != ""} {
+		#if {$findfit_std} {
+			#var findfit_have {@findhere_sig{$findfit_list}};
+			#if {"$findfit_have" !== "$findsig"} {#var findfit_ok 0};
+		} {
+			#var findfit_have {@findhere_canon{$findfit_list}};
+			#if {"$findfit_have" !== "$findfull"} {#var findfit_ok 0};
+		};
+	} {
+		#map get roomexits findfit_exits %0;
+		#foreach {$findexits} fd {
+			#if {"$fd" == ""} {#continue};
+			#if {$findfit_std && "@findhere_sig{$fd}" == ""} {#continue};
+			#if {!&findfit_exits[$fd]} {#var findfit_ok 0};
+		};
+	};
+	#var result $findfit_ok;
+};
+
+#NOP -- @findhere_roomkey{vnum}: what the game will show for that room's exits. When the map name doesn't say,;
+#NOP -- the standard directions are unknown (?) but command exits like portal or enter are still a good guess;
+#function {findhere_roomkey} {
+	#local fd {};
+	#map get roomname findrk_name %0;
+	#var findrk_list {@findhere_exits{$findrk_name}};
+	#replace findrk_list {,} {;};
+	#if {"$findrk_list" == ""} {
+		#map get roomexits findrk_exits %0;
+		#var findrk_other {};
+		#foreach *findrk_exits[] fd {
+			#if {";n;ne;e;se;s;sw;w;nw;u;d;" != "%*;$fd;%*"} {#var findrk_other {$findrk_other;$fd}};
+		};
+		#var findrk_key {?@findhere_canon{$findrk_other}};
+	} {
+		#var findrk_key {@findhere_canon{$findrk_list}};
+	};
+	#var result {$findrk_key};
+};
+
 #NOP -- findsig: this room's standard exits, from the room name's (exits) or else MIP's exit list.;
 #NOP -- The name comes first because it's cleared on every move, while room[exits] can be left from the last room;
 #alias {.findhere_exitsig} {
@@ -192,19 +257,25 @@
 	#replace findexits {,} {;};
 	#replace findexits {~} {;};
 	#var findsig {@findhere_sig{$findexits}};
+	#var findfull {@findhere_canon{$findexits}};
 };
 
 #NOP -- Keep the candidates in findroom[$find_count] whose standard exits match this room's;
 #alias {.findhere_exitfilter} {
 	#if {"$findsig" == ""} {#return};
 	#local fv {};
-	#local fd {};
 	#var findkeep {};
+	#var findfit_std 0;
 	#foreach *findroom[$find_count][] fv {
-		#map at $fv #map get roomexits findmapexits;
-		#var findmaplist {};
-		#foreach *findmapexits[] fd {#var findmaplist {$findmaplist;$fd}};
-		#if {"@findhere_sig{$findmaplist}" === "$findsig"} {#var findkeep[$fv] {}};
+		#if {@findhere_fits{$fv}} {#var findkeep[$fv] {}};
+	};
+	#NOP -- None fit, so try again on the standard directions only (an exit like enter may have changed);
+	#if {&findkeep[] == 0} {
+		#var findfit_std 1;
+		#foreach *findroom[$find_count][] fv {
+			#if {@findhere_fits{$fv}} {#var findkeep[$fv] {}};
+		};
+		#var findfit_std 0;
 	};
 	#var findroom[$find_count] {};
 	#foreach *findkeep[] fv {#var findroom[$find_count][$fv] {}};
@@ -311,7 +382,12 @@
 		#return;
 	};
 	#list findpath add {%1};
+	#var findstep {%1};
+	#NOP -- The map is still in some old room, and with follow on TinTin sends that room's exit command;
+	#NOP -- instead (a w exit made with mapexit sends enter), so send the plain direction;
+	#map flag nofollow on;
 	#send {%1};
+	#map flag nofollow off;
 	#NOP -- Where each candidate's exit leads;
 	#unvar tempVnums;
 	#local fv {};
@@ -324,7 +400,38 @@
 	#delay {findhere_wait} {.findhere_narrow} {1.5};
 };
 
+#NOP -- Desert dunes: the room lists the exit but you don't move. That tells nothing about which room this is,;
+#NOP -- so findhere-auto tries another exit from the same room;
+#action {^The sand dunes are too steep in that direction.} {.findhere_blocked} {4};
+#action {^You begin to climb up the dune but slip back down.} {.findhere_blocked} {4};
+
+#alias {.findhere_blocked} {
+	#if {"$finding_here" != "on" || "$findstep" == ""} {#return};
+	#undelay findhere_wait;
+	#var findblocked[$findstep] 1;
+	#list findpath delete -1;
+	#showme <dfa>findhere: a dune blocks $findstep.<088>;
+	#NOP -- The map records some dunes as an exit back into the same room, so keep the rooms where it does;
+	#NOP -- (or that have no such exit), unless that would leave none;
+	#local fv {};
+	#var findkeep {};
+	#foreach *findroom[$find_count][] fv {
+		#var findblk_dest {$findroom[$find_count][$fv][exits][$findstep]};
+		#if {"$findblk_dest" == "" || "$findblk_dest" == "$fv"} {#var findkeep[$fv] {}};
+	};
+	#if {&findkeep[] > 0} {
+		#foreach *findroom[$find_count][] fv {
+			#if {!&findkeep[$fv]} {#unvar findroom[$find_count][$fv]};
+		};
+	};
+	#var findstep {};
+	#if {"$findauto" == "on"} {#math findauto_left {$findauto_left + 1}};
+	.findhere_result;
+};
+
 #alias {.findhere_narrow} {
+	#var findstep {};
+	#var findblocked {};
 	#NOP -- findhere-auto clears the room name before each step, so still empty means the move didn't happen;
 	#if {"$findauto" == "on" && "$room[name]" == "" && "$room_short" == ""} {
 		.findhere_auto_stop {the step $findpath[-1] didn't reach a new room};
@@ -367,7 +474,7 @@
 };
 
 #NOP -- findhere-auto [steps]: findhere, then keep walking whichever exit best narrows the rooms down, until;
-#NOP -- one is left, none match, a step fails, a fight starts, or it has walked [steps] steps (default 8).;
+#NOP -- one is left, none match, a step fails, a fight starts, or it has walked [steps] steps (default 12).;
 #NOP -- Run it again to carry on from where it stopped, or findhere-auto stop to stop it;
 #var findauto off;
 #var findauto_rev {{n}{s}{s}{n}{e}{w}{w}{e}{ne}{sw}{sw}{ne}{nw}{se}{se}{nw}{u}{d}{d}{u}};
@@ -377,7 +484,7 @@
 		#return;
 	};
 	#var findauto_left {%1};
-	#if {"$findauto_left" == ""} {#var findauto_left 8};
+	#if {"$findauto_left" == ""} {#var findauto_left 12};
 	#if {"$finding_here" == "on" && &findroom[$find_count][] > 1} {
 		#var findauto on;
 		.findhere_auto_step;
@@ -408,11 +515,11 @@
 	};
 	#local fd {};
 	#local fv {};
-	#local fx {};
 	#var findauto_best {};
 	#var findauto_bestscore 0;
 	#foreach {$findsig} fd {
 		#if {"$fd" == ""} {#continue};
+		#if {&findblocked[$fd]} {#continue};
 		#var findauto_groups {};
 		#var findauto_max 0;
 		#foreach *findroom[$find_count][] fv {
@@ -420,10 +527,8 @@
 			#if {"$findauto_dest" == ""} {
 				#var findauto_key none;
 			} {
-				#map at {$findauto_dest} {#map get roomname findauto_name;#map get roomexits findauto_ex};
-				#var findauto_list {};
-				#foreach *findauto_ex[] fx {#var findauto_list {$findauto_list;$fx}};
-				#format findauto_key {%H} {@findhere_base{$findauto_name}@findhere_sig{$findauto_list}};
+				#map get roomname findauto_name $findauto_dest;
+				#format findauto_key {%H} {@findhere_base{$findauto_name}@findhere_roomkey{$findauto_dest}};
 			};
 			#if {&findauto_groups[$findauto_key] == 0} {#var findauto_groups[$findauto_key] 0};
 			#math findauto_groups[$findauto_key] {$findauto_groups[$findauto_key] + 1};
