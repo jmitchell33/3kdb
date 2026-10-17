@@ -94,7 +94,9 @@
                 #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler is now $dgSet$tmpScaler<088>};
                 #var dungeon[scalers][$tmpIx][scaler] $tmpScaler;
             } {
-                #echo {  <fab>Scaler must be greater than 0.<088>};
+                #NOP -- 0 is no preference, so the dungeon is left at whatever scaler it has;
+                #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler cleared<088>};
+                #var dungeon[scalers][$tmpIx][scaler] 0;
             };
         } {
             #echo {  <fab>Maximum possible scaler is 150.<088>};
