@@ -9,10 +9,36 @@
 #list strategyList add {{{guild} {bard} {name} {cshot} {active} {0} {description} {Bard: Called Shot}}};
 #list strategyList add {{{guild} {bard} {name} {enrage} {active} {0} {description} {Bard: Enrage}}};
 #list strategyList add {{{guild} {bard} {name} {critic} {active} {0} {description} {Bard: Caustic Critic}}};
+#list strategyList add {{{guild} {bard} {name} {heartening} {active} {0} {description} {Bard: Heartening Laugh}}};
+#list strategyList add {{{guild} {bard} {name} {dharm} {active} {0} {description} {Bard: Defensive Harmony when HP is low}}};
 #list strategyList indexate name;
 
 #NOP -- Timers of various spells (in seconds);
 #var criticDuration 58;
+
+#NOP -- dharm: cast defensive harmony below this HP percent, if karma is at least dharmKarma;
+#var dharmHpPerc 40;
+#var dharmKarma 300;
+#var hl_override 0;
+#var dharm_override 0;
+
+#NOP -- Heartening laugh is tracked in my[status][laugh] (common/status.tin), defensive harmony in;
+#NOP -- my[bard][dharm] (actions.tin). Each waits 6 seconds after sending so it isn't resent before the;
+#NOP -- game's message comes back;
+#alias {_bard_heartening} {
+    #if {$my[status][laugh] || $hl_override || $my[gp1][current] < 400} {#return};
+    #var hl_override 1;
+    heartening laugh;
+    #delay {hl_toggle} {#var hl_override 0} {6};
+};
+#alias {_bard_dharm} {
+    #if {$my[bard][dharm] || $dharm_override || $my[hp][max] <= 0} {#return};
+    #math _dharm_perc {100 * $my[hp][current] / $my[hp][max]};
+    #if {$_dharm_perc >= $dharmHpPerc || $my[gp1][current] < $dharmKarma} {#return};
+    #var dharm_override 1;
+    defensive harmony;
+    #delay {dharm_toggle} {#var dharm_override 0} {6};
+};
 
 #NOP -- Actions to perform at any time in the fight;
 #alias {_strategy_guild} {
@@ -37,6 +63,8 @@
         cast caustic critic;
         #delay criticTimer {cast caustic critic} $criticDuration;
     };};
+    checkStrategy {heartening} {_bard_heartening};
+    checkStrategy {dharm} {_bard_dharm};
     checkStrategy {enrage} {#if !$mob[enrage] {enrage};};
     checkStrategy {cloud} {#if !$mob[noxious-cloud] {cast noxious cloud};};
     checkStrategy {vortex} {#if !$mob[lightning-vortex] {cast lightning vortex};};
