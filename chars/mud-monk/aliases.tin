@@ -1,0 +1,91 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- Player specific aliases;
+
+#alias {ee}{enervate 50};
+#alias {en}{enervate};
+#alias {ff}{focus 10};
+#alias {gwho}{monks};
+#alias {h}{hands};
+#alias {ls}{pstats};
+#alias {m}{meditate};
+#alias {mm}{stopmed};
+#alias {p}{palm};
+#alias {sk}{train};
+#alias {sm}{stopmed};
+#alias {j}{akill};
+
+
+#alias {setup_reflex} {
+    #if {"$guild" == "juggernaut"} {
+        reflex clear;
+        #NOP reflex add sp <50% airdrop;
+        reflex add sp <10% eternal heal badger;
+        reflex add gp1 <90% transpose max;
+        reflex add gp1 <5% drop pants;
+        reflex combat on;
+        reflex start;
+    };
+    #elseif {"$guild" == "mage"} {
+        reflex clear;
+        reflex add sp <10% eternal heal badger;
+        reflex add sp <20% cast mystic immersion;
+        reflex add gp1 >84% drop pants;
+        reflex add gp2 >40% cast focus mind;
+        reflex add gp2 >90% shoo summons;
+        reflex combat on;
+        reflex combat;
+        reflex start;
+    };
+    #elseif {"$guild" == "elemental"} {
+        reflex clear;
+        reflex add hp <75% evoke rebuild;
+        reflex add sp <20% evoke mental depletion;
+        reflex add sp <10% evoke natural convergence;
+        reflex add sp <40% eternal heal badger;
+        #NOP reflex add gp1 <25% evoke energy drain;
+        reflex combat on;
+        reflex start;
+    };
+    #elseif {"$guild" == "bard"} {
+        reflex clear;
+        reflex add hp <10% hmheal;
+        reflex add hp <20% eternal heal badger;
+        #nop reflex add sp >200 cast blade dance;
+        reflex add sp >150 cast caustic critic;
+        reflex combat on;
+        reflex start;
+    };
+    #elseif {"$guild" == "fremen"} {
+        reflex clear;
+        reflex add hp <40% eternal heal badger;
+        reflex add hp <40% hmheal;
+        #NOP reflex add hp <80% prana;
+        #NOP reflex add hp >98% bindu some;
+        reflex add gp1 <25% drop pants;
+        reflex combat on;
+        reflex start;
+    };
+    #elseif {"$guild" == "monk"} {
+        reflex clear;
+        reflex add hp <70% hands;
+        reflex add gp1 <25% enervate 300;
+        reflex add gp2 <25% focus 30;
+        reflex combat on;
+        reflex start;
+    };
+    #elseif {"$guild" == "necromancer"} {
+        reflex clear;
+        #nop reflex_dream z;
+        reflex_absorb 5;
+        reflex add gp2 <120 con;
+        reflex combat on;
+        reflex start;
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reflex settings in this alias!!<088>};
+    };
+};
+
+#class {player_aliases} {close}

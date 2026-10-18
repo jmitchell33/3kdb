@@ -1,0 +1,175 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+
+#NOP -- use a corpse to heal nrg;
+#alias {b} {
+    evoke corpse drain
+};
+
+#NOP -- strengthens your form to withstand more damage;
+#alias {buff} {
+    evoke solidify
+};
+
+#NOP -- drain nrg from enemies to replenish your own nrg;
+#alias {ed} {
+    evoke energy drain
+};
+
+#NOP -- check elemental skills OR raise an elemental skill;
+#alias {en} {
+    enhance %1
+};
+
+#NOP -- evaluate mobs to check vital imformation about their power;
+#alias {eval} {
+    evoke evaluate at %1
+};
+
+#NOP -- get all from vortex;
+#alias {gv} {
+    get all from vortex
+};
+
+#NOP -- put all in vortex;
+#alias {pv} {
+    put all in vortex
+};
+
+#NOP -- heal hps using sps;
+#alias {h} {
+    evoke rebuild
+};
+
+#NOP -- toggle room damage;
+#alias {kall} {
+    evoke equipollent
+};
+
+#NOP -- guild light;
+#alias {ll} {
+    evoke self illumination as %1
+};
+
+#NOP -- heal your sps to full (once per mental reset);
+#alias {nc} {
+    evoke natural convergence
+};
+
+#NOP -- login stats of exp & gxp gained;
+#alias {p} {
+    pstats
+};
+
+#NOP -- another login stats check;
+#alias {p2} {
+    pstats2
+};
+
+#NOP -- sp regen;
+#alias {soulwave} {
+    evoke soul wave
+};
+
+#NOP -- regen energy;
+#alias {si} {
+    evoke siphon
+};
+
+#NOP -- check whats in vortex;
+#alias {vl} {
+    vlist
+};
+
+#NOP -- fly;
+#alias {fly} {
+    evoke fly
+};
+
+
+
+#NOP -- aliases to setup corpsetrigs;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ mDepletion;
+    corpsetrig+ cdrain;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ szCaps
+};
+
+#alias {corpseoff} {
+    corpsetrig-off
+};
+
+#alias {corpseon} {
+    corpsetrig-on
+};
+
+#alias {corpseclear} {
+    corpestrig-clear
+};
+
+#NOP -- aliases to setup strategies;
+#alias {mystrategy} {
+    strategy-clear;
+    strategy epowers
+};
+
+#alias {stclear} {
+    strategy-clear
+};
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa
+};
+
+#NOP -- vigilant boosts;
+#alias {vigiboost-wis} {
+    buy 1;buy 2;buy 3;buy 4;buy 5;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask;
+    imprint wisdom;quaff flask
+};
+
+#NOP -- Elemental guild shop & temple apex (since elemental guild isnt mapped yet);
+#alias {cot-elshop} {s;w;s;s;w;portal;n;n;n;n;n;e;e};
+#alias {elshop-cot} {w;w;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot};
+#alias {cot-apex} {s;w;s;s;w;portal;n;n;n;n;n;n;e;ne;u};
+#alias {apex-cot} {d;sw;w;s;s;s;s;s;s;portal;e;n;n;e;n;#delay {1} mapgo cot};
+
+
+#NOP -- TO AND FROM BIGPIG (DUKE NUKEM);
+#alias {pig1} {n;e;e;s;e;e;enter;up;n;n;n;w;place head;kick fan;fan;w;n;w;s;w;s;sw;se;up};
+#alias {pig2} {down;nw;ne;n;e;n;e;s;e;wimp;e;s;s;s;down;out;w;w;n;w;w;s;mapgo cot};
+
+#NOP -- knight tour games;
+#alias {knight6} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
+};
+
+#alias {knight8} {
+    play;
+    start;
+    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
+};
+
+#alias {winaxe} {
+    play;
+    start;
+    #5 throw axe
+};
+
+
+.add_speedrun {home} {area} {54239} {Mud's House};
+
+
+#class {player_aliases} {close}
