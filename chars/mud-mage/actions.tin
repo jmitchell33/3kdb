@@ -1,0 +1,62 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#NOP #act {^-M-_A Colossal Inductor} {(immortality} {1};
+
+
+#act {It is too dark.}{cast light}
+
+
+#action {You have no pants.} {
+    #if {!$idle_flag} {
+        #if {"$guild" == "juggernaut"} {
+            stimheal1;
+            fdeener
+        };
+        #if {"$guild" == "mage"} {
+            #if {$my[super][current] == 0} {
+                #if {$tmp_unwrap == 0} {
+                    #var tmp_unwrap 1;
+                    unwrap 1;
+                    #delay {2} {#var tmp_unwrap 0}
+                };
+                cast corpse blast
+            };
+            #else {
+                #if {$tmp_explosive_release == 0} {
+                    #var tmp_explosive_release 1;
+                    cast explosive release;
+                    #delay {5} {#var tmp_explosive_release 0}
+                }
+            }
+        };
+        #if {"$guild" == "elemental"} {
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                unwrap 1;
+                #delay {2} {#var tmp_unwrap 0}
+            };
+            evoke mental depletion on corpse
+        };
+        #if {"$guild" == "bard"} {
+            cease;
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                unwrap 1;
+                #delay {2} {#var tmp_unwrap 0}
+            };
+            perform dirge
+        };
+        #if {"$guild" == "fremen"} {
+            #if {$tmp_unwrap == 0} {
+                #var tmp_unwrap 1;
+                unwrap 1;
+                #delay {2} {#var tmp_unwrap 0}
+            };
+            reclaim
+        }
+    }
+};
+
+
+#class {player_actions} {close}
