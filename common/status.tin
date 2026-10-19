@@ -132,6 +132,9 @@
     #unvar xdoorcombos;
     #unvar xboot;
     #if {"$boot_number" == ""} {#NOP} {#var xboot_number $boot_number};
+    #NOP -- Only once this session has read them (_get_boot), so a save before that keeps the saved times;
+    #if {&boot_start} {#var xboot_start $boot_start};
+    #if {&boot_next} {#var xboot_next $boot_next};
     #if {"$rolm" == ""} {#NOP} {#var xrolm $rolm};
     #if {"$doorcombos" == ""} {#NOP} {#var xdoorcombos $doorcombos};
     #class bootVars close;
@@ -385,9 +388,32 @@
     #delay 10 {reset_gxp};
 };
 
+#NOP -- Also save when this boot started and when the next is due (boot_start, boot_next, epoch seconds) in;
+#NOP -- vars/boot.tin, for the startup menu's reboot and linkdeath timers;
 #alias _get_boot {
     #send {!uptime};
     #line oneshot #action {|  Current Reboot : \#%d %*} {#var boot_number %%1} {1};
+    #line oneshot #action {^ |  Current Uptime : %* (} {
+        _boot_secs {%%1};
+        #format boot_now {%T};
+        #math boot_start {$boot_now - $boot_secs};
+    } {1};
+    #line oneshot #action {^ |  Next Reboot in : %*|} {
+        _boot_secs {%%1};
+        #format boot_now {%T};
+        #math boot_next {$boot_now + $boot_secs};
+        _bootVar_export;
+    } {1};
+};
+
+#NOP -- _boot_secs <time>: boot_secs set to the seconds in e.g. "1 week 1 day 21 hours 23 minutes 55 seconds";
+#alias _boot_secs {
+    #var boot_secs 0;
+    #regex {%1} {{[0-9]+} week} {#math boot_secs {$boot_secs + &1 * 604800}};
+    #regex {%1} {{[0-9]+} day} {#math boot_secs {$boot_secs + &1 * 86400}};
+    #regex {%1} {{[0-9]+} hour} {#math boot_secs {$boot_secs + &1 * 3600}};
+    #regex {%1} {{[0-9]+} minute} {#math boot_secs {$boot_secs + &1 * 60}};
+    #regex {%1} {{[0-9]+} second} {#math boot_secs {$boot_secs + &1}};
 };
 
 #class player_status close
