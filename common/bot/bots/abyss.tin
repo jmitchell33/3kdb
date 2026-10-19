@@ -171,6 +171,7 @@ mapgo ahouse;
 } {2};
 
 #action {Your legs run away with you %w.} {
+    .followMapMove %1;
     #if $debug[abyss] {#echo {abyss debug 11: YOUR LEGS RUN AWAY WITH YOU: %1}};
     #if {"$abyss[legs_run_away]" == "1"} { 
 	    #regex {%1} {east} {west;#math bot[step] {$bot[step] - 1};#var check_room 1;#var abyss[legs_run_away] 0;#delay 3 {..}};

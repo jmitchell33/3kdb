@@ -200,6 +200,9 @@
     #var theme $xtheme;
     #var gags $xgags;
     #var my $xmy;
+    #NOP -- Effects the guild line doesn't show can wear off while you're away, so they start off;
+    #var my[status][laugh] 0;
+    #var my[bard][dharm] 0;
     #var whitelist $xwhitelist;
     #var chat[log][emotes] $xchat[log][emotes];
     #var dReportList $xdReportList;
@@ -271,6 +274,9 @@
 
 #action {As the energies swirl around you, you feel heartier and more robust.} {
     #var my[status][laugh] 1;
+} {1};
+#action {^Heartening Laugh fades from you.$} {
+    #var my[status][laugh] 0;
 } {1};
 
 

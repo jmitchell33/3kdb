@@ -1,0 +1,20 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#var corpse_delay 0;
+
+#ACTION {^Owie. That hurt!} {
+	#if !$corpse_delay {
+		#var corpse_delay 1;
+		corpse_select;
+		#delay {4} {cease;pd;pd;wrap};
+		#delay {4} {#var corpse_delay 0};
+	}
+} {1};
+
+
+#NOP -- Immort immediately on seeing inductor;
+#act {^-M-_A Colossal Inductor} {(immortality} {1};
+
+
+#class {player_actions} {close}

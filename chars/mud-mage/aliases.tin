@@ -1,0 +1,198 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+
+.add_speedrun {home} {area} {54239} {Mud's House};
+
+#NOP - GAGS;
+#gag {Laser follows Mud into the room.};
+
+
+#NOP -- examining & searching;
+#alias {x} {
+    exa
+};
+
+#alias {sp}{step into pentagram};
+#alias {paip}{put all in pocket};
+#alias {gafp}{get all from pocket};
+#alias {sca}{cast summon config activate};
+#alias {scd}{cast summon config deactivate};
+#alias {rsc}{cast remove summon config};
+
+#alias {sass}{cast summon config as monster summoning 3##4#1500#70#assist#summons#always};
+#alias {sdef}{cast summon config as monster summoning 3##4#1500#70#defend#summons#always};
+
+
+#list {temp} create {};
+
+#ACTION {^%d:You will cast %w should your %w ever} {
+     #list temp set %1 {%2};
+};
+
+#alias {rcost}{cast rcost}
+#alias {gwho}{mages}
+
+
+#alias {useHeal} {
+     #if {!$my[eternal][heal] && $my[hmheal][self] && !$my[immersion][active]} {
+          hmheal;
+     };
+     #if {$my[eternal][heal] && !$my[immersion][active]} {
+          (heal oscar;
+     };
+};
+
+#NOP -- Default corpse_trig;
+#alias corpsetrig1 {
+     corpsetrig-clear;
+     corpsetrig+ spelltap;
+     corpsetrig+ slab;
+     corpsetrig+ wrap;
+     corpsetrig+ cBlast;
+     corpsetrig+ getAll;
+     corpsetrig+ crafting;
+     corpsetrig+ cocoon;
+     corpsetrig+ spellbook;
+};
+
+#alias {_player_deadmanActions} {
+    #if $bot[active] {.pause;#echo {paused from deadman}};
+};
+
+
+
+#NOP -- clear defense;
+#alias {clear_defense} {
+    #if {"$guild" == "mage"} {
+        clear_def;
+        deplete prismatic aura;
+        deplete prismatic sphere;
+        deplete major globe;
+        deplete minor globe;
+        deplete magnificent shield;
+        deplete shield;
+        deplete armor;
+        deplete protection from evil;
+        deplete protection from good;
+        deplete rhino skin;
+        deplete stoneskin;
+        deplete blink;
+        deplete mantle;
+    };
+    #elseif {"$guild" == "bard"} {
+        clear_prots;
+    };
+};
+
+
+
+
+#alias {setup_defense} {
+     clear_c;
+     clear_gc;
+     setup_c;
+     setup_gc;
+     #delay 2 {prots_ss};
+     #delay 4 {prots_MG};
+     #delay 6 {prots_ms};
+     #delay 8 {prots_armor};
+     #delay 10 {prots_ps};
+     #delay 12 {cast mantle};
+     #delay 14 {prots_pfe};
+};
+
+#alias {setup_c} {
+     cast contingency as prot_evil#cast protection from evil;
+};
+
+
+#alias {setup_gc} {
+     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+     cast greater contingency as major globe#cast major globe;
+     cast greater contingency as stoneskin#cast stoneskin;
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as armor#cast armor;
+};
+
+#alias {clear_c} {
+     #10 {cast remove contingency as 1};
+};
+
+#alias {clear_gc} {
+     #10 {cast remove greater contingency as 1};
+}
+
+#alias {check_beads} {
+     #math hp_overmax_max {$my[hp][max] * 5};
+     #math hp_overmax_shortfall {$hp_overmax_max - $my[hp][current]};
+     #math grasps_needed {$hp_overmax_shortfall / 33};
+
+     #math sp_threshold {$my[sp][max] * .20};
+     #math sp_extra {$my[sp][current] - $sp_threshold};
+     #math grasps_possible {$sp_extra / 100};
+
+     #if {$grasps_needed < $grasps_possible} {
+          #var grasp_beads $grasps_needed;
+     } {
+          #var grasp_beads $grasps_possible;
+     };
+
+     #$grasp_beads {grasp beads};
+};
+
+#alias pmo {cast polymorph other on %0;};
+
+
+
+#NOP -- reflexes;
+#alias {setup_reflex} {
+    #if {"$guild" == "juggernaut"} {
+        reflex clear;
+        #NOP reflex add sp <50% airdrop;
+        reflex add sp <10% eternal heal mud;
+        reflex add gp1 <90% transpose max;
+        reflex add gp1 <5% drop pants;
+        reflex combat on;
+        reflex start
+    };
+    #elseif {"$guild" == "mage"} {
+        reflex clear;
+        reflex add sp <10% eternal heal mud;
+        reflex add sp <20% cast mystic immersion;
+        reflex add gp1 >84% drop pants;
+        reflex add gp2 >40% cast focus mind;
+        reflex add gp2 >90% shoo summons;
+        reflex combat on;
+        reflex combat;
+        reflex start;
+    };
+    #elseif {"$guild" == "elemental"} {
+        reflex clear;
+        reflex add hp <75% evoke rebuild;
+        reflex add sp <20% evoke mental depletion;
+        reflex add sp <10% evoke natural convergence;
+        reflex add sp <40% eternal heal mud;
+        #NOP reflex add gp1 <25% evoke energy drain;
+        reflex combat on;
+        reflex start
+    };
+    #elseif {"$guild" == "fremen"} {
+        reflex clear;
+        reflex add hp <40% eternal heal mud;
+        reflex add hp <40% hmheal;
+        #NOP reflex add hp <80% prana;
+        #NOP reflex add hp >98% bindu some;
+        reflex add gp1 <25% drop pants;
+        reflex combat on;
+        reflex start
+    };
+    #else {
+        #echo {<ffa>Current guild: <fff>$guild <ffa>does NOT have any reflex settings in this alias!!<088>}
+    };
+};
+
+
+
+#class {player_aliases} {close}
