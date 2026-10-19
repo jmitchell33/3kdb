@@ -72,7 +72,8 @@
 
 #alias {reset_trackers} {
     istats_reset;
-    #if $vaf[numbers] {dreset};
+    #NOP -- Only while the damage tracker is loaded (it sets dmgtracker in its class), or dreset goes to the game;
+    #if {&dmgtracker} {dreset};
     #if {"$guild" == "juggernaut"} {
         mountDmg-clear;
         truckDmg-clear;
