@@ -1,9 +1,12 @@
 #class {player_heartbeat} {kill}
 #class {player_heartbeat} {open}
 
+#NOP -- Set to 0 to stop grasping beads automatically;
+#var beads 1;
+
 #alias {_player_heartbeat} {
     #if !$idle_flag {
-        #if {$beads && $hp_percent < 450 && sp_percent > 90} {
+        #if {$beads && $hp_percent < 450 && $sp_percent > 90} {
             check_beads;
         };
     };
