@@ -55,17 +55,21 @@ menu_close_classes;
     menu_ld_load;
 };
 
-#NOP -- menu_ld_at[<name>]: when each character went linkdead, from chars/<name>/linkdead.tin.;
+#NOP -- menu_ld_at[<name>]: when each character went linkdead, xlinkdead_at in chars/<name>/vars.tin.;
 #NOP -- menu_linkd[<name>]: characters whose file sets vaf[linkd], so only a reboot boots them.;
-#NOP -- menu_boot: when this boot started and the next is due, saved from uptime at each login.;
-#NOP -- A timer from before the last reboot or past the limit is deleted, since the game has booted that character;
+#NOP -- menu_boot: when this boot started and the next is due, xboot_start and xboot_next in vars/boot.tin;
+#NOP -- (common/status.tin saves them from uptime at each login).;
+#NOP -- A timer from before the last reboot or past the limit is left out, since the game has booted that character;
 #alias {menu_ld_load} {
     #var menu_ld_at {};
     #var menu_linkd {};
     #var menu_boot {};
     #format menu_ld_now {%T};
-    #script {menu_tmp} {test -f chars/reboot.tin && echo yes};
-    #if {"$menu_tmp[1]" == "yes"} {#read chars/reboot.tin};
+    #NOP -- tr drops the braces of the #VARIABLE lines, which TinTin would turn into \x7B text;
+    #script {menu_tmp} {grep -E 'xboot_(start|next)' vars/boot.tin 2>/dev/null | tr -d '\173\175'};
+    #foreach {$menu_tmp[%*]} menu_l {
+        #regex {$menu_l} {xboot_{start|next} {[0-9]+}} {#var menu_boot[&1] &2};
+    };
     #var menu_reboot 0;
     #if {"$menu_boot[start]" != ""} {#var menu_reboot $menu_boot[start]};
     #NOP -- Once the next reboot is due, count it as done. A character still on at the reboot is cut off a;
@@ -75,16 +79,12 @@ menu_close_classes;
     #foreach {$menu_tmp[%*]} menu_l {
         #regex {$menu_l} {^chars/{[a-z]+}/} {#var menu_linkd[&1] 1};
     };
-    #script {menu_tmp} {grep -H . chars/*/linkdead.tin 2>/dev/null};
+    #script {menu_tmp} {grep -H xlinkdead_at chars/*/vars.tin 2>/dev/null | tr -d '\173\175'};
     #foreach {$menu_tmp[%*]} menu_l {
-        #regex {$menu_l} {^chars/{[a-z]+}/linkdead.tin:{[0-9]+}$} {
+        #regex {$menu_l} {^chars/{[a-z]+}/vars.tin:#VARIABLE xlinkdead_at {[0-9]+}} {
             #math menu_left {&2 + $menu_ld_hours * 3600 - $menu_ld_now};
             #if {"$menu_linkd[&1]" == "1"} {#var menu_left 1};
-            #if {$menu_left > 0 && &2 > $menu_reboot} {
-                #var menu_ld_at[&1] &2;
-            } {
-                #script {menu_tmp2} {rm -f chars/&1/linkdead.tin};
-            };
+            #if {$menu_left > 0 && &2 > $menu_reboot} {#var menu_ld_at[&1] &2};
         };
     };
 };
@@ -640,59 +640,34 @@ menu_close_classes;
 #NOP -- With it (#var vaf[linkd] 1 in the character file) only a reboot does;
 #var menu_ld_hours 24;
 
-#NOP -- 3kdb sends uptime at login (_get_boot). Catch that one reply to save when this boot started and when;
-#NOP -- the next is due for the menu;
-#alias {menu_boot_watch} {
-    #line oneshot #action {^ |  Current Uptime : %* (} {
-        menu_secs {%%1};
-        #format menu_ld_now {%T};
-        #math menu_boot[start] {$menu_ld_now - $menu_secs};
-    };
-    #line oneshot #action {^ |  Next Reboot in : %*|} {
-        menu_secs {%%1};
-        #format menu_ld_now {%T};
-        #math menu_boot[next] {$menu_ld_now + $menu_secs};
-        #if {"$menu_boot[start]" != ""} {
-            #script {menu_tmp} {printf '#var menu_boot {{start}{%s}{next}{%s}};\n' '$menu_boot[start]' '$menu_boot[next]' > chars/reboot.tin};
-        };
-    };
-};
-
-#NOP -- menu_secs <time>: menu_secs set to the seconds in e.g. "1 week 1 day 21 hours 23 minutes 55 seconds";
-#alias {menu_secs} {
-    #var menu_secs 0;
-    #regex {%1} {{[0-9]+} week} {#math menu_secs {$menu_secs + &1 * 604800}};
-    #regex {%1} {{[0-9]+} day} {#math menu_secs {$menu_secs + &1 * 86400}};
-    #regex {%1} {{[0-9]+} hour} {#math menu_secs {$menu_secs + &1 * 3600}};
-    #regex {%1} {{[0-9]+} minute} {#math menu_secs {$menu_secs + &1 * 60}};
-    #regex {%1} {{[0-9]+} second} {#math menu_secs {$menu_secs + &1}};
-};
-
 #NOP -- 3kdb's welcome actions set sessionActive when the game has logged you in, linkdead or not, so the old;
 #NOP -- timer no longer applies. Only the first time per session, so a repeated welcome line can't undo a takeover;
 #event {VARIABLE UPDATED sessionActive} {
     #if {"$sessionActive" == "1" && "$user" != "" && "$menu_ld_in" != "1"} {
         #var menu_ld_in 1;
         #var menu_ld_skip 0;
-        #script {menu_tmp} {rm -f chars/$user/linkdead.tin};
-        menu_boot_watch;
+        #unvar xlinkdead_at;
     };
 };
 
+#NOP -- Quitting isn't going linkdead. A quit alias in a character's own files replaces this one;
+#alias {quit} {#var menu_ld_skip 1;#send quit};
+
 #NOP -- Someone logging in to the character from elsewhere takes it over, so it isn't left linkdead.;
-#NOP -- The takeover flag wears off in case that login failed. A quit isn't detected, so the menu shows;
-#NOP -- a character that quit as linkdead until it next logs in;
+#NOP -- The takeover flag wears off in case that login failed;
 #action {^Game Driver tells you: Someone is attempting to login to your character.} {
     #var menu_ld_skip 1;
     #delay {menu_ld_skip} {#var menu_ld_skip 0} {60};
 } {1};
 
 #NOP -- Any other disconnect of a logged-in character (#zap, #end, idling out, a dropped connection) leaves it;
-#NOP -- linkdead, so save the time for the menu;
+#NOP -- linkdead, so save the time in its vars.tin (xlinkdead_at) for the menu. A quit or takeover clears it;
 #event {SESSION DISCONNECTED} {
-    #if {"$user" != "" && "$sessionActive" == "1" && "$menu_ld_skip" != "1"} {
-        #format menu_ld_now {%T};
-        #script {menu_tmp} {printf '%s\n' '$menu_ld_now' > chars/$user/linkdead.tin};
+    #if {"$user" != "" && "$sessionActive" == "1"} {
+        #class global open;
+        #if {"$menu_ld_skip" == "1"} {#unvar xlinkdead_at} {#format xlinkdead_at {%T}};
+        #class global close;
+        _variable_export;
     };
 };
 
