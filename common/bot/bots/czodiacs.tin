@@ -261,5 +261,14 @@ touch demon rune;
 #nop #action {Chamber of the chest \(e,sw\)} {.pause;#delay .3 {.zodiac_check_chest_room {Chamber of the chest \(e,sw\)}}} {1};
 #nop #action {Explorer's Lounge \(e,sw\)} {.pause;#delay .3 {.zodiac_check_chest_room {Explorer's Lounge \(e,sw\)}}} {1};
 
+#NOP -- A celestial left alive on this level blocks the way out. The map already moved, so undo it, back up to that;
+#NOP -- step and pause. Once the celestial is dead, .. sends the same step again;
+#action {^You cannot leave while there are still celestials present on this level.$} {
+    #map undo;
+    #math bot[step] {$bot[step] - 1};
+    .pause;
+    #echo {<fff>A celestial is still alive on this level. Kill it, then .. to carry on.<088>};
+} {1};
+
 #class {bot} {close};
 #read common/bot/generic.tin;

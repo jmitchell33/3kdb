@@ -185,7 +185,9 @@ touch angel rune;
 #action {This chest has already been opened.} {
     #if {"$toggle_rift_room_empty" == "1"} {
         #var toggle_rift_room_empty 0;
+        #NOP -- The way out is fracture in some instances, rift in others;
         rift;
+        fracture;
         #map goto $zodiac_riftVnum;
         #delay 3 {.unpause;glance};
     };
@@ -214,6 +216,15 @@ touch angel rune;
 #action {You find some gold coins in the chest!} {get coins;exa chest} {1};
 
 #action {^Your vision becomes blurry. While your surroundings are intriguing, your$} {.unpause;glance} {1};
+
+#NOP -- A celestial left alive on this level blocks the way out. The map already moved, so undo it, back up to that;
+#NOP -- step and pause. Once the celestial is dead, .. sends the same step again;
+#action {^You cannot leave while dark celestials still roam this level.$} {
+    #map undo;
+    #math bot[step] {$bot[step] - 1};
+    .pause;
+    #echo {<fff>A celestial is still alive on this level. Kill it, then .. to carry on.<088>};
+} {1};
 
 #class {bot} {close};
 #read common/bot/generic.tin;
