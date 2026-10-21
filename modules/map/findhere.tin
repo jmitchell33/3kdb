@@ -155,7 +155,8 @@
 	#if {&findroom[$find_count][] > 0} {#var finddone 1};
 };
 
-#NOP -- Search strictest first: area, name and description, then drop the area, then the description.;
+#NOP -- Search strictest first: area, name and description, then drop the area, then the description alone,;
+#NOP -- then the name without the description.;
 #NOP -- If no room's exits match (e.g. a hidden exit), fall back to the first rooms the name search found;
 #alias {.findhere_search} {
 	#NOP -- #map list finds nothing unless the map is in some room, so park it in one if needed;
@@ -180,6 +181,14 @@
 	#if {!$finddone && "$room[long]" != ""} {
 		#var findroom[$find_count] {};
 		#map list {roomname} {$findpattern} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		.findhere_check;
+	};
+	#NOP -- The description alone, before the name alone: some areas are mapped with no room names (the Celestial;
+	#NOP -- Zodiacs shadows side, e.g. Chamber of sickness), and a name-only match there finds the light side's;
+	#NOP -- room of the same name (Wedding hall 53729 instead of the unnamed 54371);
+	#if {!$finddone && "$room[long]" != ""} {
+		#var findroom[$find_count] {};
+		#map list {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
 		.findhere_check;
 	};
 	#if {!$finddone} {
