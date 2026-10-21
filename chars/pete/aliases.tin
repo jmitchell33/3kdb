@@ -14,6 +14,13 @@
     };
 };
 
+#nop reforge 12 daggers for pxp;
+#alias {refd} {
+    unkeep forge;drop forge;
+    #12 {reforge dagger with little from edged to penetrate;dispose dagger};
+    #delay 5 {get forge;keep forge};
+};
+
 #nop -- speedrun using roomvnums;
 #alias {wa} {
     #map run %0;
@@ -150,7 +157,8 @@
 	}; #else {
 		#echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
 	};
-    #send {!cease;perform dirge};
+    cease;
+    perform dirge;
 };
 
 #NOP -- heal stim with corpse;
@@ -159,15 +167,22 @@
     perform dirge;
 };
 
+#nop -- reflexes;
 #alias {setup_reflex} {
     reflex clear;
-    reflex add hp <50% cast healing hands;
-    reflex add hp <10% hmheal;
-    #nop reflex add sp >200 cast blade dance;
-    #nop reflex add sp >150 cast caustic critic;
+    reflex add hp <60% cast healing hands;
+    reflex add sp >200 cast blade dance;
+    reflex add gp1 >50% martial assault;
+    reflex add gp1 <200 drop pants;
     reflex combat on;
     reflex start;
 };
+
+#action {You have no pants.} {
+    #if {!$idle_flag} {
+        .cycle_corpses;
+    };
+} {1};
 
 #NOP -- turn gags on;
 #alias {gagson} {
@@ -200,8 +215,6 @@
     strategy cloud;
     strategy vortex;
     strategy enrage;
-    strategy cshot;
-    strategy assault;
     strategy critic;
     strategy rolm;
 };
@@ -586,6 +599,7 @@
 #list pete3kdb add {{{name} {bag1} {type} {misc} {desc} {put all into bags 1 through bagcount}}};
 #list pete3kdb add {{{name} {bag2} {type} {misc} {desc} {empty bags back to inventory}}};
 #list pete3kdb add {{{name} {bag3} {type} {misc} {desc} {donate all from each bag high index to 1}}};
+#list pete3kdb add {{{name} {refd} {type} {misc} {desc} {drop forge and reforge 12 daggers}}};
 
 #nop -- guild;
 #list pete3kdb add {{{name} {dh} {type} {guild} {desc} {Defensive Harmony: increase resistances for yourself or others}}};
