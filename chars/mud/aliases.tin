@@ -7,7 +7,8 @@
 
 .add_speedrun {home} {area} {54239} {Mud's House};
 
-#alias {quit}{tell mud NO!!!};
+#NOP -- quit REALLY quits, .quit tells the startup menu it wasn't a linkdeath;
+#alias {quit} {#if {"%1" == "REALLY"} {.quit} {tell mud NO!!!}};
 
 #NOP #alias ls {pstats};
 #NOP #alias ls2 {pstats2};
