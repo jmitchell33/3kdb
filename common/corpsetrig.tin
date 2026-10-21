@@ -32,7 +32,10 @@
 #NOP -- We don't want to track a KB on certain killers, like the mob we're fighting;
 #alias _killerCheckIgnore {
     #format tmpName {%l} $deathReport[mob_killer];
-    #regex {$tmpName} {$enemy[target]} {#var fakeKill 1};
+    #NOP -- The target is often cleared by the time the killing blow line arrives, and an empty pattern matches everything;
+    #if {"$enemy[target]" != ""} {
+        #regex {$tmpName} {$enemy[target]} {#var fakeKill 1};
+    };
 };
 
 #NOP -- Sometimes the mob name has artifacts from gobj, etc. in it.  Common with necros;
