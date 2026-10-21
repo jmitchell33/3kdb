@@ -61,8 +61,17 @@
 	#list gs_powers clear;
 	#var powers_added {Added the following powers: };
 	#var vigor_power vigor;
+	#NOP -- Collect every line gs prints (lowest priority, so other actions still get theirs);
+	#var gs_lines {};
+	#class {gs_read} {kill};
+	#class {gs_read} {open};
+	#action {^%*$} {#list gs_lines add {%%1}} {9};
+	#class {gs_read} {close};
 	#send gs;
 	#delay 3 {
+		#class {gs_read} {kill};
+		_gs_read_tiers;
+		_gs_add_powers {$gs_tiers};
 		#foreach $psi_powers[%*] psi_power {
 			#format power1 {%l} {$psi_power[power]};
 			#foreach $gs_powers power {
@@ -80,14 +89,32 @@
 	};
 };
 
-#NOP -- gs wraps long tiers: the first line ends in a trailing comma and the rest;
-#NOP -- continue on "-     ..." lines, so read both and trim each name;
-#act {^- T%d: %*\n%a %s-$} {
-	#var pwrLine1 @cleanPowerString{%2};
-	#var pwrLine2 @cleanPowerString{%3};
-	#var pwrLine $pwrLine1 $pwrLine2;
-	#if $add_powers {_gs_add_powers {$pwrLine}};
-} {2};
+#NOP -- gs wraps long tiers onto "-     ..." lines, sometimes mid-name (Lesser / Mindlink), so the tiers are;
+#NOP -- joined into gs_tiers (a comma between tiers) before splitting on commas. A row cut between packets;
+#NOP -- comes in as two lines (- T7 / : Astral Construct 6, ...), and every row of the list ends in -, so;
+#NOP -- lines are joined until one does. A two-line action used to miss the tier whenever that happened;
+#alias {_gs_read_tiers} {
+	#local {_in} {0};
+	#local {_l} {};
+	#local {_pend} {};
+	#var gs_tiers {};
+	#foreach {$gs_lines[%*]} {_l} {
+		#var _l {$_pend$_l};
+		#var _pend {};
+		#if {"$_l" == "--=%*"} {#var _in 0};
+		#if {$_in} {
+			#if {"$_l" != "%*-"} {#var _pend {$_l}} {
+				#if {"$_l" == "- T%d: %*"} {
+					#replace _l {^- T%d: } {};
+					#var gs_tiers {$gs_tiers, @cleanPowerString{$_l}};
+				} {
+					#if {"$_l" == "-     %*"} {#var gs_tiers {$gs_tiers @cleanPowerString{$_l}}};
+				};
+			};
+		};
+		#if {"$_l" == "- Power Modules Installed:%*"} {#var _in 1};
+	};
+};
 
 #function cleanPowerString {
 	#var tmpResult %0;
