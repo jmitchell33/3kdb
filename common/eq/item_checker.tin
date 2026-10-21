@@ -13,7 +13,8 @@
 
 
 #NOP -- World drops: the game puts world_drop_pref (setup_3kdb sets it to -!!!-) in front of "You have found <item>!".;
-#NOP -- The item lands on the floor and binds on pickup, so the corpse get all skips it and it needs its own get;
+#NOP -- The item is in the corpse and binds on pickup, so the corpse get all skips it and it needs its own get. It only;
+#NOP -- reaches the floor once the corpse is gone (dirge, decay), so the get tries the corpse first, then the floor;
 #action {^-!!!-You have found %*!$} {.notifyWorldDrop {%1}} {2};
 
 #NOP -- The get keyword: the first word below that is in the name (longer words first), else its last word (some drops, like Robe of;
@@ -34,7 +35,7 @@
         #list words explode { };
         #var worldDropKey {$words[-1]};
     };
-    #if !$idle_flag {get $worldDropKey};
+    #if !$idle_flag {get $worldDropKey from corpse;get $worldDropKey};
     .notify {<fcb>WORLD DROP<ddd> $name at $roomvnum};
     #echo {<cfb>===========> <ccd>WORLD DROP $name<088>};
     #if {"&webhook[url][worlddrops]" == "1"} {
