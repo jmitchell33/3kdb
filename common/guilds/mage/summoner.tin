@@ -287,14 +287,12 @@
 	look;
 	#delay 2 {
 		#var summonTankCheck 0;
-		#NOP -- No summons seen in the look: nothing to cull;
-		#if {&summonTankList[]} {
-			#list summonTankList indexate health;
-			#list summonTankList refine {&0 < 50};
-			#foreach $summonTankList[%*] item {
-				.summonLookupName $item[name];
-				say $summonTmpName $item[index], begone;
-			};
+		#if {!&summonTankList[]} {#return};
+		#list summonTankList indexate health;
+		#list summonTankList refine {&0 < 50};
+		#foreach $summonTankList[%*] item {
+			.summonLookupName $item[name];
+			say $summonTmpName $item[index], begone;
 		};
 	};
 };
