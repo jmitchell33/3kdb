@@ -65,7 +65,16 @@
     };
 };
 
+#NOP -- A name that's already there is updated, so re-reading a file doesn't add it twice (go runs every match);
 #alias .add_speedrun {
+    #local idx 0;
+    #list speedruns_name find {%1} idx;
+    #if {$idx} {
+        #var speedruns_type[$idx] {%2};
+        #var speedruns_vnum[$idx] {%3};
+        #var speedruns_desc[$idx] {%4};
+        #return;
+    };
     #list speedruns_name add {%1};
     #list speedruns_type add {%2};
     #list speedruns_vnum add {%3};
