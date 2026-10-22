@@ -650,8 +650,10 @@ menu_close_classes;
     };
 };
 
-#NOP -- Quitting isn't going linkdead. A quit alias in a character's own files replaces this one;
-#alias {quit} {#var menu_ld_skip 1;#send quit};
+#NOP -- Quitting isn't going linkdead. .quit tells the menu it was a quit, #send quit skips it and shows linkdead.;
+#NOP -- A quit alias in a character's own files replaces this one, so it should quit with .quit;
+#alias {.quit} {#var menu_ld_skip 1;#send quit};
+#alias {quit} {.quit};
 
 #NOP -- Someone logging in to the character from elsewhere takes it over, so it isn't left linkdead.;
 #NOP -- The takeover flag wears off in case that login failed;
