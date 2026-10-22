@@ -54,6 +54,8 @@
 #ACTION {^You reinforce the magic within your deeppocket.$} {#var deeppocket 1} {1};
 #ACTION {^You already have a deeppockets spell functioning.$} {#var deeppocket 1} {1};
 #ACTION {^You feel slower as the haste wears off.$} {#var self_haste 0} {1};
+#NOP -- Remember summons that can't be hasted so summon_haste stops recasting haste on summons every round;
+#ACTION {^You cannot haste %*.$} {#format tmpString {%l} {%1};#var my[mage][nohaste][$tmpString] 1} {1};
 #ACTION {^Your immersion has expired.$} {#var my[immersion][active] 0;} {2};
 #action {^There is darkness as a Orb of Light goes dark.$} {#if !$idle_flag {cast light}} {2};
 
