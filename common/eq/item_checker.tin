@@ -35,7 +35,10 @@
         #list words explode { };
         #var worldDropKey {$words[-1]};
     };
-    #if !$idle_flag {get $worldDropKey from corpse;get $worldDropKey};
+    #NOP -- A second copy of some drops explodes as soon as you hold it ("... shudders and trembles in the presence of;
+    #NOP -- another of its kind and explodes!", karvec's second Buckler of Eternia on 2026-10-22), so check the inventory;
+    #NOP -- first and leave the drop for another character if you already have one;
+    #if !$idle_flag {.worldDropGet {$name}};
     .notify {<fcb>WORLD DROP<ddd> $name at $roomvnum};
     #echo {<cfb>===========> <ccd>WORLD DROP $name<088>};
     #if {"&webhook[url][worlddrops]" == "1"} {
@@ -46,6 +49,30 @@
         #echo {<cfb>===========> <ccd>BOT PAUSED, 'toggle worlddrops' turns this off<088>};
         .pause;
     };
+};
+
+#NOP -- .worldDropGet <name>: send i and watch for an inventory row with the drop's name (without its <..> and (..) tags). The;
+#NOP -- action only matches rows with that name, so other inventory actions still get their lines. No row: get it;
+#alias .worldDropGet {
+    #var worldDropBase {%1};
+    #replace worldDropBase {%s<%*>} {};
+    #replace worldDropBase {%s(%*)} {};
+    #var worldDropHave 0;
+    #class {worlddrop_inv} {kill};
+    #class {worlddrop_inv} {open};
+    #action {^%s%d %*$worldDropBase%*$} {#var worldDropHave 1} {1};
+    #class {worlddrop_inv} {close};
+    #send {i};
+    #delay {worlddrop_inv} {
+        #class {worlddrop_inv} {kill};
+        #if {$worldDropHave} {
+            .notify {<fcb>WORLD DROP<ddd> you already have $worldDropBase, left it at $roomvnum for another character};
+            #echo {<cfb>===========> <ccd>ALREADY HAVE $worldDropBase, NOT PICKED UP (a second one can explode)<088>};
+        } {
+            get $worldDropKey from corpse;
+            get $worldDropKey;
+        };
+    } {1.5};
 };
 
 #class {item_checker} {close};
