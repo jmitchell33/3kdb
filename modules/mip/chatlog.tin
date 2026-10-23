@@ -300,8 +300,12 @@
 		#var {mip[comm][source]}	{&4};
 		#NOP -- TinTin stores each backslash as two and later steps drop it, so swap each for the;
 		#NOP -- look-alike U+FF3C before cleaning up (discordPost.py turns it back into a backslash);
+		#NOP -- Braces are stored as backslash-x7B/x7D and turn back into real ones in ansiStrip, where one;
+		#NOP -- without its pair moved to the end of the line or broke it, so they become U+FF5B/U+FF5D too;
 		#var {mip[comm][data]}		{&5};
 		#replace {mip[comm][data]} {$mipBackslashPair} {\uFF3C};
+		#replace {mip[comm][data]} {\\x7B} {\uFF5B};
+		#replace {mip[comm][data]} {\\x7D} {\uFF5D};
 		#var {mip[comm][data]}		{@ansiStrip{$mip[comm][data]}};
 
 		#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
@@ -753,9 +757,11 @@
 			#var lastData $mip[comm][data];
 			#var discordChannel $webhook[url][tells];
 			#var chatCategory tells;
-			#NOP -- Keep backslashes as the look-alike U+FF3C, see .mipProcessCAA;
+			#NOP -- Keep backslashes and braces as look-alikes, see .mipProcessCAA;
 			#var mip[comm][data]	{&4};
 			#replace {mip[comm][data]} {$mipBackslashPair} {\uFF3C};
+			#replace {mip[comm][data]} {\\x7B} {\uFF5B};
+			#replace {mip[comm][data]} {\\x7D} {\uFF5D};
 			#var mip[comm][data]	{@ansiStrip{$mip[comm][data]}};
 			#var mip[comm][source]	{&3};
 			#var mip[comm][line]	{Tell};
