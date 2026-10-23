@@ -1,0 +1,107 @@
+#class {guild_skilltracker} {kill}
+#class {guild_skilltracker} {open}
+
+
+#NOP --------------------------------------- BARD SKILL TRACKER ------------------------------------------;
+#NOP -- Counts attempts, misses and landings per skill in skilltrack[<skill>];
+#NOP -- Counters are created by the actions (not at load) so reloading this file keeps them;
+#NOP -- .skills shows the summary, .skills reset clears every counter;
+
+#alias {_skilltrack_hit} {
+    #if {&skilltrack[%1][attempts] == 0} {
+        #var skilltrack[%1] {{attempts} {0} {landed} {0} {missed} {0}};
+    };
+    #math skilltrack[%1][attempts] {$skilltrack[%1][attempts] + 1};
+    #math skilltrack[%1][%2] {$skilltrack[%1][%2] + 1};
+};
+
+
+#NOP --- Called Shot;
+#action {^You target a weak spot on %* but miss your mark!} {_skilltrack_hit {called shot} missed} {5};
+#action {^With remarkable skill and aim you drive your weapon into a poorly defended} {_skilltrack_hit {called shot} landed} {5};
+
+
+#NOP --- Summary;
+#NOP -- Format strings live in vars because %10 and %8 inside an alias body get eaten as alias args;
+#NOP -- The box is 57 characters wide inside the borders, every line below must add up to that;
+#var skilltrack_border {<dca>+---------------------------------------------------------+<088>};
+#var skilltrack_blank  {<dca>|                                                         |<088>};
+#var skilltrack_title  {<dca>|        <fda>~  B A R D   S K I L L   T R A C K E R  ~        <dca>|<088>};
+#var skilltrack_msg    {<dca>|  %s%-53s  <dca>|<088>};
+#var skilltrack_head   {<dca>|  <efa>%-14s%10s%10s%10s%9s  <dca>|<088>};
+#var skilltrack_row    {<dca>|  <fff>%-14s<aef>%10s<afa>%10s<faa>%10s%s%9s  <dca>|<088>};
+#var skilltrack_verse  {<dca>|%s%s%s%s<dca>|<088>};
+
+
+#alias {_skilltrack_box_top} {
+    #echo {$skilltrack_border};
+    #echo {$skilltrack_title};
+    #echo {$skilltrack_border};
+};
+
+#alias {_skilltrack_box_bottom} {
+    #echo {$skilltrack_border};
+    #math tmpVerse {1d&bard_haiku[]};
+    #echo {$skilltrack_blank};
+    #foreach {*bard_haiku[$tmpVerse][]} {tmpLine} {
+        #var tmpColor {<ccf>};
+        
+        #NOP -- Center the line inside the column box interior;
+        #format tmpLen {%L} {$bard_haiku[$tmpVerse][$tmpLine]};
+        #math tmpSpace {57 - $tmpLen};
+        #math tmpLeft {($tmpSpace - $tmpSpace % 2) / 2};
+        #math tmpRight {$tmpSpace - $tmpLeft};
+        #format tmpPadLeft {%${tmpLeft}s} {};
+        #format tmpPadRight {%${tmpRight}s} {};
+        #echo {$skilltrack_verse} {$tmpPadLeft} {$tmpColor} {$bard_haiku[$tmpVerse][$tmpLine]} {$tmpPadRight};
+    };
+    #echo {$skilltrack_blank};
+    #echo {$skilltrack_border};
+};
+
+#alias {.skills} {
+    _skilltrack_box_top;
+    #if {"%1" == "reset"} {
+        #unvar skilltrack;
+        #echo {$skilltrack_blank};
+        #echo {$skilltrack_msg} {<dea>} {All counters cleared, the song begins anew.};
+        #echo {$skilltrack_blank};
+    };
+    #elseif {&skilltrack[] == 0} {
+        #echo {$skilltrack_blank};
+        #echo {$skilltrack_msg} {<efa>} {No skill attempts tracked yet.};
+        #echo {$skilltrack_blank};
+    };
+    #else {
+        #echo {$skilltrack_blank};
+        #echo {$skilltrack_head} {Skill} {Attempts} {Landed} {Missed} {Land %};
+        #foreach {*skilltrack[]} {tmpSkill} {
+            #math tmpPct {$skilltrack[$tmpSkill][landed] * 100.0 / $skilltrack[$tmpSkill][attempts]};
+            #format tmpPct {%d} $tmpPct;
+            #if {$tmpPct >= 50} {#var tmpPctColor {<afa>}};
+            #elseif {$tmpPct >= 25} {#var tmpPctColor {<ffa>}};
+            #else {#var tmpPctColor {<faa>}};
+            #var tmpPct ${tmpPct}%;
+            #NOP -- Title case the skill name one word at a time;
+            #var tmpWords {$tmpSkill};
+            #replace tmpWords { } {;};
+            #var tmpName {};
+            #foreach {$tmpWords} {tmpWord} {
+                #format tmpWord {%n} {$tmpWord};
+                #if {"$tmpName" == ""} {#var tmpName {$tmpWord}};
+                #else {#var tmpName {$tmpName $tmpWord}};
+            };
+
+            #format tmpAttempts {%g} {$skilltrack[$tmpSkill][attempts]};
+            #format tmpLanded {%g} {$skilltrack[$tmpSkill][landed]};
+            #format tmpMissed {%g} {$skilltrack[$tmpSkill][missed]};
+
+            #echo {$skilltrack_row} {$tmpName} {$tmpAttempts} {$tmpLanded} {$tmpMissed} {$tmpPctColor} {$tmpPct};
+        };
+        #echo {$skilltrack_blank};
+    };
+    _skilltrack_box_bottom;
+};
+
+
+#class {guild_skilltracker} {close}
