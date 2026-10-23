@@ -650,8 +650,9 @@ menu_close_classes;
     };
 };
 
-#NOP -- Quitting isn't going linkdead. A quit alias in a character's own files replaces this one;
-#alias {quit} {#var menu_ld_skip 1;#send quit};
+#NOP -- Quitting isn't going linkdead. The game prints this on every quit, before "Saving <name>." and the;
+#NOP -- disconnect, whatever alias sent the quit (again, anecdote and ser in our logs). A quit that fails prints nothing;
+#action {^There was this one time, at band camp...$} {#var menu_ld_skip 1} {2};
 
 #NOP -- Someone logging in to the character from elsewhere takes it over, so it isn't left linkdead.;
 #NOP -- The takeover flag wears off in case that login failed;
