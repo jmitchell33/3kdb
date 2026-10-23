@@ -306,6 +306,10 @@
 		#replace {mip[comm][data]} {$mipBackslashPair} {\uFF3C};
 		#replace {mip[comm][data]} {\\x7B} {\uFF5B};
 		#replace {mip[comm][data]} {\\x7D} {\uFF5D};
+		#NOP -- ansiStrip would also expand variables named in the text (a dollar sign and PASSWORD became your;
+		#NOP -- password), so dollars become U+FF04: first the escaped one TinTin stores before a name, then any other;
+		#replace {mip[comm][data]} {$_mipBackslash$_mipBackslash$_mipBackslash$} {\uFF04};
+		#replace {mip[comm][data]} {$_mipBackslash$} {\uFF04};
 		#var {mip[comm][data]}		{@ansiStrip{$mip[comm][data]}};
 
 		#format {timestamp} {%t} {<108>[<268>%H<108>:<268>%M<108>]<088> };
@@ -757,11 +761,13 @@
 			#var lastData $mip[comm][data];
 			#var discordChannel $webhook[url][tells];
 			#var chatCategory tells;
-			#NOP -- Keep backslashes and braces as look-alikes, see .mipProcessCAA;
+			#NOP -- Keep backslashes, braces and dollars as look-alikes, see .mipProcessCAA;
 			#var mip[comm][data]	{&4};
 			#replace {mip[comm][data]} {$mipBackslashPair} {\uFF3C};
 			#replace {mip[comm][data]} {\\x7B} {\uFF5B};
 			#replace {mip[comm][data]} {\\x7D} {\uFF5D};
+			#replace {mip[comm][data]} {$_mipBackslash$_mipBackslash$_mipBackslash$} {\uFF04};
+			#replace {mip[comm][data]} {$_mipBackslash$} {\uFF04};
 			#var mip[comm][data]	{@ansiStrip{$mip[comm][data]}};
 			#var mip[comm][source]	{&3};
 			#var mip[comm][line]	{Tell};
