@@ -8,23 +8,39 @@
 
 #action {^You wield %*.} {#var wielded %1} {2};
 #action {^Wielded: %*} {#format wielded {%p} {%1}} {2};
-#action {^You unwield %*.} {#var wielded  ;} {2};
+#NOP -- A disarm prints "You unwield Soul Drinker." just before "... disarms you!", so the weapon is kept in;
+#NOP -- wielded_last for .rewield;
+#action {^You unwield %*.} {#var wielded_last {%1};#var wielded {}} {2};
 
-#NOP -- Disarmed: wield the same weapon again. A disarm prints no unwield, so $wielded still has it (rolm.tin sets rod;
-#NOP -- for the Rod of Lordly Might, whose forms show their own names). Nothing known yet: try rod, like the bots did;
+#NOP -- wield remembers the word you wielded with in my[wielded] (saved with the character), so .rewield sends the;
+#NOP -- same word. #send so it doesn't call itself. A word the game doesn't know ("Wield which weapon?") is forgotten;
+#alias {wield} {
+    #if {"%0" != ""} {#var my[wielded] {%0}};
+    #send {wield %0};
+};
+#action {^Wield which weapon?$} {#unvar my[wielded]} {2};
+
+#NOP -- Disarmed: wield the same weapon again with that word. Without one (nothing wielded through the alias yet),;
+#NOP -- eq_data (data.tin) gives the word for $wielded: "You wield" shows a short name (Soul Drinker) and eq the long;
+#NOP -- one (The Soul Drinker Blade), so a row matches if its long name contains it. rolm.tin sets rod for the Rod of;
+#NOP -- Lordly Might's forms. Nothing known: try rod, like the bots did;
 #alias {.rewield} {
     #if {$idle_flag} {#return};
-    #if {&wielded} {
-        #if {"$wielded" != ""} {
-            #list eq_data indexate long;
-            #list eq_data find {$wielded} tmpIx;
-            #if {$tmpIx > 0} {
-                wield $eq_data[$tmpIx][alias];
-                #return
-            };
-        };
+    #var rewieldCmd {rod};
+    #var rewieldName {};
+    #if {&wielded} {#var rewieldName {$wielded}};
+    #if {"$rewieldName" == "" || "$rewieldName" == "none"} {
+        #if {&wielded_last} {#var rewieldName {$wielded_last}};
     };
-    wield rod;
+    #if {"$rewieldName" != "" && "$rewieldName" != "none"} {
+        #list eq_data indexate long;
+        #list eq_data find {%*$rewieldName%*} tmpIx;
+        #if {$tmpIx > 0} {#var rewieldCmd {$eq_data[$tmpIx][alias]}};
+    };
+    #if {&my[wielded]} {
+        #if {"$my[wielded]" != ""} {#var rewieldCmd {$my[wielded]}};
+    };
+    wield $rewieldCmd;
 };
 #action {^%* disarms you!$} {.rewield} {2};
 
