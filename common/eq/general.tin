@@ -12,13 +12,14 @@
 #NOP -- wielded_last for .rewield;
 #action {^You unwield %*.} {#var wielded_last {%1};#var wielded {}} {2};
 
-#NOP -- wield remembers the word you wielded with in my[wielded] (saved with the character), so .rewield sends the;
-#NOP -- same word. #send so it doesn't call itself. A word the game doesn't know ("Wield which weapon?") is forgotten;
+#NOP -- wield remembers the word you wielded with in my[rewield], saved with the character (knights-zorb uses;
+#NOP -- my[wielded] for its own weapon swap), so .rewield sends the same word. #send so it doesn't call itself. A;
+#NOP -- word the game doesn't know ("Wield which weapon?") is forgotten;
 #alias {wield} {
-    #if {"%0" != ""} {#var my[wielded] {%0}};
+    #if {"%0" != ""} {#var my[rewield] {%0}};
     #send {wield %0};
 };
-#action {^Wield which weapon?$} {#unvar my[wielded]} {2};
+#action {^Wield which weapon?$} {#unvar my[rewield]} {2};
 
 #NOP -- Disarmed: wield the same weapon again with that word. Without one (nothing wielded through the alias yet),;
 #NOP -- eq_data (data.tin) gives the word for $wielded: "You wield" shows a short name (Soul Drinker) and eq the long;
@@ -37,8 +38,8 @@
         #list eq_data find {%*$rewieldName%*} tmpIx;
         #if {$tmpIx > 0} {#var rewieldCmd {$eq_data[$tmpIx][alias]}};
     };
-    #if {&my[wielded]} {
-        #if {"$my[wielded]" != ""} {#var rewieldCmd {$my[wielded]}};
+    #if {&my[rewield]} {
+        #if {"$my[rewield]" != ""} {#var rewieldCmd {$my[rewield]}};
     };
     wield $rewieldCmd;
 };
