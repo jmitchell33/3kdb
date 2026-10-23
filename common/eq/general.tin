@@ -10,6 +10,17 @@
 #action {^Wielded: %*} {#format wielded {%p} {%1}} {2};
 #action {^You unwield %*.} {#var wielded  ;} {2};
 
+#NOP -- Disarmed: wield the same weapon again. A disarm prints no unwield, so $wielded still has it (rolm.tin sets rod;
+#NOP -- for the Rod of Lordly Might, whose forms show their own names). Nothing known yet: try rod, like the bots did;
+#alias {.rewield} {
+    #if {$idle_flag} {#return};
+    #if {&wielded} {
+        #if {"$wielded" != ""} {wield $wielded;#return};
+    };
+    wield rod;
+};
+#action {^%* disarms you!$} {.rewield} {2};
+
 
 #NOP -- Pol holy torch;
 #action {Wisewoman says: You may need this torch. It is said to be very bright.} {light torch;keep torch} {2};

@@ -21,18 +21,7 @@
         #cat rolm_string {<faa>C<088>}
     };
 
-#NOP    #if {$draw[index][rolm]} {     ;
-#NOP        #NOP -- If the stored index is greater than those existing, reset it;     ;
-#NOP        #if {$draw[index][rolm] > &caption_data[]} {     ;
-#NOP            #math draw[index][rolm] {&caption_data[] + 1};     ;
-#NOP            #list caption_data insert $draw[index][rolm] {};     ;
-#NOP        };     ;
-#NOP    } {     ;
-#NOP        #math draw[index][rolm] {&caption_data[] + 1};     ;
-#NOP        #list caption_data insert $draw[index][rolm] {};     ;
-#NOP    };     ;
-#NOP     ;
-#NOP    #list caption_data set $draw[index][rolm] $rolm_string;     ;
+    #NOP -- A commented-out caption_data block was here. Its leftover semicolons sent two blank lines per rod wield;
 };
 
 #NOP -- Rolm shortcuts;
@@ -137,16 +126,17 @@
     #regex {$tmpWord} {gremlin} {#var rolm[gremlin] 1;#undelay rolm_gremlin};
 } {2};
 
-#action {You wield DragonBlade.} {#var rolm[type] Sword/Fire;update_rolm_string} {2};
-#action {You wield PsiMace.} {#var rolm[type] Mace/Mind;update_rolm_string} {2};
-#action {You wield AcidSlinger.} {#var rolm[type] Gun/Acid;update_rolm_string} {2};
-#action {You wield VenomClaw.} {#var rolm[type] Dagger/Poison;update_rolm_string} {2};
-#action {You wield PhotonSphere.} {#var rolm[type] Exotic/Radiation;update_rolm_string} {2};
-#action {You wield HolyScythe.} {#var rolm[type] Polearm/Edged;update_rolm_string} {2};
-#action {You wield Rod of Lordly Might.} {#var rolm[type] Mace/Blunt;update_rolm_string} {2};
-#action {You wield GlacialAxe.} {#var rolm[type] Axe/Ice;update_rolm_string} {2};
-#action {You wield ArcLance.} {#var rolm[type] Lance/Electric;update_rolm_string} {2};
-#action {You wield SolarFlail.} {#var rolm[type] Mace/Energy;update_rolm_string} {2};
+#NOP -- These win over general.tin's You wield action (one action per line), so they set wielded too;
+#action {You wield DragonBlade.} {#var rolm[type] Sword/Fire;#var wielded rod;update_rolm_string} {2};
+#action {You wield PsiMace.} {#var rolm[type] Mace/Mind;#var wielded rod;update_rolm_string} {2};
+#action {You wield AcidSlinger.} {#var rolm[type] Gun/Acid;#var wielded rod;update_rolm_string} {2};
+#action {You wield VenomClaw.} {#var rolm[type] Dagger/Poison;#var wielded rod;update_rolm_string} {2};
+#action {You wield PhotonSphere.} {#var rolm[type] Exotic/Radiation;#var wielded rod;update_rolm_string} {2};
+#action {You wield HolyScythe.} {#var rolm[type] Polearm/Edged;#var wielded rod;update_rolm_string} {2};
+#action {You wield Rod of Lordly Might.} {#var rolm[type] Mace/Blunt;#var wielded rod;update_rolm_string} {2};
+#action {You wield GlacialAxe.} {#var rolm[type] Axe/Ice;#var wielded rod;update_rolm_string} {2};
+#action {You wield ArcLance.} {#var rolm[type] Lance/Electric;#var wielded rod;update_rolm_string} {2};
+#action {You wield SolarFlail.} {#var rolm[type] Mace/Energy;#var wielded rod;update_rolm_string} {2};
 
 #NOP -- Update charges on use and set tickers in case the "glows brightly" pattern doesn't match;
 #NOP -- Tickers are padded with about 10 seconds;

@@ -39,4 +39,152 @@
     #echo {<bea>Abomination:<cdd>   0,   1,  12,  13<088>};
 };
 
+#nop - zodiac_balance sells the Blackened and Glowing Souls and Orbs of Energy in the satchel,;
+#nop - split between the two shrines so Zodiacs of Aeonos and Zodiacs of Zephyrak end up even.;
+#nop - Grace (east of the Threshold) raises Aeonos, Eclipse (west) raises Zephyrak.;
+#nop - Rep per sale - a soul at its own shrine 7, a soul at the other shrine 5, an orb 3.;
+#nop - Only the 7 was seen on its own, the 5 and 3 come from one mixed sell all at Grace.;
+#var zbal[own] 7;
+#var zbal[cross] 5;
+#var zbal[orb] 3;
+#var zbal[bag] {satchel};
+#var zbal[threshold] 53582;
+#var zbal[shrine] {
+    {grace} {{vnum} {53583} {in} {e} {out} {w}}
+    {eclipse} {{vnum} {53584} {in} {w} {out} {e}}
+};
+#var zbal[item] {{glowing} {glowing soul} {blackened} {blackened soul} {orb} {orb of energy}};
+
+#nop - zodiac_balance plan only prints what it would sell;
+#alias {zodiac_balance} {
+    #map get roomvnum zbal[room];
+    #if {$zbal[room] != $zbal[threshold] && $zbal[room] != $zbal[shrine][grace][vnum] && $zbal[room] != $zbal[shrine][eclipse][vnum]} {
+        #echo {<faa>zodiac_balance - start at the Threshold of Destiny or one of its shrines<088>};
+        #return;
+    };
+    #var zbal[mode] {%1};
+    #var zbal[count] {{Glowing Soul of the Zodiac} {0} {Blackened Soul of the Zodiac} {0} {Orb of Energy} {0}};
+    #nop - Satchel rows come as -i-Orb of Energy {76}. for a stack and -i-Orb of Energy. for one.;
+    #nop - They only exist while the satchel answers, at priority 1 so they take those rows from room.tin's;
+    #nop - item action (they are not room items). exa ends with search, whose answer ends the scan.;
+    #class {zbal_scan} {kill};
+    #class {zbal_scan} {open};
+    #action {^-i-{Glowing Soul of the Zodiac|Blackened Soul of the Zodiac|Orb of Energy}%s\x7B%d\x7D.$} {#var zbal[count][%%1] %%3} {1};
+    #action {^-i-{Glowing Soul of the Zodiac|Blackened Soul of the Zodiac|Orb of Energy}.$} {#var zbal[count][%%1] 1} {1};
+    #action {^You find nothing of interest.$} {.zodiac_balance_scanned} {1};
+    #class {zbal_scan} {close};
+    #nop - reps.tin reads the faction list into repData, the satchel answers after it;
+    .check_reps;
+    exa $zbal[bag];
+    #delay {zbal_timeout} {.zodiac_balance_scanned} {5};
+};
+
+#alias {.zodiac_balance_scanned} {
+    #class {zbal_scan} {kill};
+    #undelay {zbal_timeout};
+    .zodiac_balance_plan;
+};
+
+#alias {.zodiac_balance_plan} {
+    #list repData indexate rep_key;
+    #var zbal_ix 0;
+    #list repData find {Zodiacs of Aeonos} {zbal_ix};
+    #var zbal[a] {$repData[$zbal_ix][current_value]};
+    #var zbal_ix 0;
+    #list repData find {Zodiacs of Zephyrak} {zbal_ix};
+    #var zbal[z] {$repData[$zbal_ix][current_value]};
+    #if {"$zbal[a]" == "" || "$zbal[z]" == ""} {
+        #echo {<faa>zodiac_balance - could not read the Zodiacs reps, nothing sold<088>};
+        #return;
+    };
+    #var zbal[g] $zbal[count][Glowing Soul of the Zodiac];
+    #var zbal[b] $zbal[count][Blackened Soul of the Zodiac];
+    #var zbal[o] $zbal[count][Orb of Energy];
+    #if {$zbal[g] + $zbal[b] + $zbal[o] == 0} {
+        #echo {<faa>zodiac_balance - no souls or orbs in the satchel<088>};
+        #return;
+    };
+
+    #nop - Zephyrak lead with every soul sold at its own shrine and every orb at Eclipse.;
+    #nop - Each soul sent across cuts it by own + cross, each orb sent to Grace by 2 x orb.;
+    #nop - k above 0 sends k blackened souls to Grace, below 0 sends -k glowing souls to Eclipse.;
+    #nop - Keeps the smallest gap, and on a tie the fewest souls sent across.;
+    #math zbal[base] {$zbal[z] - $zbal[a] + $zbal[own] * ($zbal[b] - $zbal[g]) + $zbal[orb] * $zbal[o]};
+    #math zbal[swap] {$zbal[own] + $zbal[cross]};
+    #math zbal[step] {2 * $zbal[orb]};
+    #var zbal[gap] -1;
+    #var zbal[cost] 0;
+    #loop {0 - $zbal[g]} {$zbal[b]} zbal_k {
+        #math zbal_left {$zbal[base] - $zbal[swap] * $zbal_k};
+        #math zbal_q {$zbal_left / $zbal[step]};
+        #loop {$zbal_q - 1} {$zbal_q + 1} zbal_x {
+            #if {$zbal_x < 0} {#var zbal_x 0};
+            #if {$zbal_x > $zbal[o]} {#var zbal_x $zbal[o]};
+            #math zbal_gap {$zbal_left - $zbal[step] * $zbal_x};
+            #if {$zbal_gap < 0} {#math zbal_gap {0 - $zbal_gap}};
+            #var zbal_cost $zbal_k;
+            #if {$zbal_cost < 0} {#math zbal_cost {0 - $zbal_cost}};
+            #if {$zbal[gap] < 0 || $zbal_gap < $zbal[gap] || ($zbal_gap == $zbal[gap] && $zbal_cost < $zbal[cost])} {
+                #var zbal[gap] $zbal_gap;
+                #var zbal[cost] $zbal_cost;
+                #var zbal[k] $zbal_k;
+                #var zbal[x] $zbal_x;
+            };
+        };
+    };
+
+    #if {$zbal[k] > 0} {
+        #var zbal[sell][grace][blackened] $zbal[k];
+        #var zbal[sell][eclipse][glowing] 0;
+    } {
+        #var zbal[sell][grace][blackened] 0;
+        #math zbal[sell][eclipse][glowing] {0 - $zbal[k]};
+    };
+    #math zbal[sell][grace][glowing] {$zbal[g] - $zbal[sell][eclipse][glowing]};
+    #var zbal[sell][grace][orb] $zbal[x];
+    #math zbal[sell][eclipse][blackened] {$zbal[b] - $zbal[sell][grace][blackened]};
+    #math zbal[sell][eclipse][orb] {$zbal[o] - $zbal[x]};
+    #math zbal[a2] {$zbal[a] + $zbal[own] * $zbal[sell][grace][glowing] + $zbal[cross] * $zbal[sell][grace][blackened] + $zbal[orb] * $zbal[sell][grace][orb]};
+    #math zbal[z2] {$zbal[z] + $zbal[own] * $zbal[sell][eclipse][blackened] + $zbal[cross] * $zbal[sell][eclipse][glowing] + $zbal[orb] * $zbal[sell][eclipse][orb]};
+
+    #echo {<fff>Zodiac rep balance<088>};
+    #echo {<bea>  Aeonos   <cdd>$zbal[a] -> $zbal[a2]<088>};
+    #echo {<bea>  Zephyrak <cdd>$zbal[z] -> $zbal[z2]<088>};
+    #echo {<bea>  Grace   <cdd>$zbal[sell][grace][glowing] glowing, $zbal[sell][grace][blackened] blackened, $zbal[sell][grace][orb] orbs<088>};
+    #echo {<bea>  Eclipse <cdd>$zbal[sell][eclipse][glowing] glowing, $zbal[sell][eclipse][blackened] blackened, $zbal[sell][eclipse][orb] orbs<088>};
+    #if {"$zbal[mode]" == "plan"} {
+        #echo {<ffa>Plan only, type zodiac_balance to sell<088>};
+        #return;
+    };
+    .zodiac_balance_go;
+};
+
+#alias {.zodiac_balance_go} {
+    #var zbal[pos] $zbal[room];
+    #if {$zbal[room] == $zbal[shrine][grace][vnum]} {#var zbal[order] {grace;eclipse}} {#var zbal[order] {eclipse;grace}};
+    #foreach {$zbal[order]} {zbal_shrine} {
+        #if {$zbal[sell][$zbal_shrine][glowing] + $zbal[sell][$zbal_shrine][blackened] + $zbal[sell][$zbal_shrine][orb] > 0} {
+            .zodiac_balance_walk $zbal_shrine;
+            .zodiac_balance_sell $zbal_shrine;
+        };
+    };
+};
+
+#nop - Both shrines hang off the Threshold, so every walk goes through it;
+#alias {.zodiac_balance_walk} {
+    #if {$zbal[pos] == $zbal[shrine][%1][vnum]} {#return};
+    #if {$zbal[pos] == $zbal[shrine][grace][vnum]} {$zbal[shrine][grace][out]};
+    #if {$zbal[pos] == $zbal[shrine][eclipse][vnum]} {$zbal[shrine][eclipse][out]};
+    $zbal[shrine][%1][in];
+    #var zbal[pos] $zbal[shrine][%1][vnum];
+};
+
+#alias {.zodiac_balance_sell} {
+    #foreach {glowing;blackened;orb} {zbal_item} {
+        #if {$zbal[sell][%1][$zbal_item] > 0} {
+            #loop 1 $zbal[sell][%1][$zbal_item] zbal_i {sell $zbal[item][$zbal_item]};
+        };
+    };
+};
+
 #class {area_celestial_zodiacs} {close};
