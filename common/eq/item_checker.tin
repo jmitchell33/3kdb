@@ -41,7 +41,8 @@
     #if !$idle_flag {.worldDropGet {$name}};
     .notify {<fcb>WORLD DROP<ddd> $name at $roomvnum};
     #echo {<cfb>===========> <ccd>WORLD DROP $name<088>};
-    #if {"&webhook[url][worlddrops]" == "1"} {
+    #NOP -- &x[key] is the key's position in the table (0 when missing), so test it as is, not == 1;
+    #if {&webhook[url][worlddrops]} {
         #var discordChannel $webhook[url][worlddrops];
         postDiscord {WORLD DROP: $user_cap found $name in $room[name] ($area)};
     };
