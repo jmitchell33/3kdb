@@ -1,0 +1,81 @@
+#class {sessionlog} {kill};
+#class {sessionlog} {open};
+
+#NOP -- Logs everything in the game session to logs/<system user>/sessions/<character>_YYYY-MM-DD.log,;
+#NOP -- a new file each day, with colors (raw, like the chat logs). Finished days, these and the daily;
+#NOP -- chat logs, are compressed with zstd (about 15x smaller) by scripts/compress_logs.sh. Nothing is;
+#NOP -- deleted unless sessionlog[cap_mb] is set: then the oldest go once logs/<system user> is over that many MB.;
+#NOP -- Read them with zstdless or zstdgrep. sessionlog off / sessionlog on stops or restarts it here.;
+#NOP -- To set a cap, put #var sessionlog[cap_mb] <MB> in common/private.tin;
+#NOP -- Off by default. toggle sessionlog turns it on or off for this character and is saved with the;
+#NOP -- other toggles. #var sessionlog[enabled] 1 in common/private.tin turns it on for every character;
+#NOP -- that hasn't toggled it yet;
+
+#script {sessionlog_tmp} {whoami};
+#var sessionlog[dir] {logs/$sessionlog_tmp[1]};
+#if {&sessionlog[cap_mb] == 0} {#var sessionlog[cap_mb] 0};
+#var sessionlog[on] 0;
+#var sessionlog[enabled] 0;
+
+#alias {.sessionlog_start} {
+	#if {"$toggles[sessionlog]" == "1" && !$sessionlog[on]} {
+		.sessionlog_open;
+		#showme <ffa>Session log on: $sessionlog[file]<088>;
+	};
+};
+
+#alias {.sessionlog_open} {
+	#format sessionlog[date] {%t} {%Y-%m-%d};
+	#var sessionlog[file] {$sessionlog[dir]/sessions/${user}_$sessionlog[date].log};
+	#script {sessionlog_tmp} {mkdir -p $sessionlog[dir]/sessions};
+	#log append {$sessionlog[file]};
+	#var sessionlog[on] 1;
+};
+
+#alias {.sessionlog_compress} {
+	#system {sh scripts/compress_logs.sh $sessionlog[dir] $sessionlog[cap_mb] >/dev/null 2>&1 &};
+};
+
+#alias {sessionlog} {
+	#if {"%1" == "off"} {
+		#if $sessionlog[on] {#log off};
+		#var sessionlog[on] 0;
+		#showme <ffa>Session log off<088>;
+	};
+	#elseif {"%1" == "on"} {
+		#if $sessionlog[on] {#log off};
+		.sessionlog_open;
+		#showme <ffa>Session log on: $sessionlog[file]<088>;
+	};
+	#else {
+		#if $sessionlog[on] {#showme <ffa>Session log on: $sessionlog[file]<088>} {#showme <ffa>Session log off<088>};
+		#if {$sessionlog[cap_mb] > 0} {#showme <ffa>sessionlog on|off. Cap for logs/: $sessionlog[cap_mb] MB<088>} {#showme <ffa>sessionlog on|off. Old logs are kept forever<088>};
+		#showme <ffa>sessionlog on|off is for this session. toggle sessionlog sets it for this character.<088>;
+	};
+};
+
+#NOP -- New file when the day changes. The script skips logs written to in the last 10 minutes, so;
+#NOP -- yesterday's is compressed 11 minutes later;
+#ticker {sessionlog_day} {
+	#format sessionlog_today {%t} {%Y-%m-%d};
+	#if {$sessionlog[on] && "$sessionlog_today" != "$sessionlog[date]"} {
+		#log off;
+		.sessionlog_open;
+		#delay {sessionlog_compress} {.sessionlog_compress} {660};
+	};
+} {60};
+
+#NOP -- common/index.tin is read in the game session at login, never the startup one. Starting waits until;
+#NOP -- index.tin has read common/private.tin and defaults_on has put back the saved toggles, and a character;
+#NOP -- that has never toggled sessionlog gets sessionlog[enabled].;
+#NOP -- The first compress waits so common/private.tin can change the cap first;
+#info session save;
+#if {"$info[SESSION][NAME]" != "gts"} {
+	#delay {sessionlog_start} {
+		#if {"${toggles[sessionlog]}" == ""} {#var toggles[sessionlog] $sessionlog[enabled]};
+		.sessionlog_start;
+	} {0};
+	#delay {sessionlog_compress} {.sessionlog_compress} {30};
+};
+
+#class {sessionlog} {close};
