@@ -252,7 +252,7 @@
     #if {"$xdiscordPost" == "0" || "$xdiscordPost" == "1"} {
         #var discordPost $xdiscordPost;
     } {
-        #if {"&webhook[url][general]" == "1"} {#var discordPost 1} {#var discordPost 0};
+        #if {&webhook[url][general]} {#var discordPost 1} {#var discordPost 0};
     };
     #var toggles[discord_post] $discordPost;
     #if {"$deadmanTimeoutActions" == "$xdeadmanTimeoutActions"} {#list deadmanTimeoutActions clear};

@@ -539,7 +539,26 @@
 	#regex $tmpText {Very well... Let me get you over to a trainer} {#var logSay 0};
 };
 
+#NOP -- Logs the say held in tmpText1/tmpText2 (wrapped lines) for saySpeaker;
+#var saySpeaker {};
+#alias _sayLog {
+	#if {"${tmpText2}" !== ""} {
+		#var tmpText {$tmpText1 $tmpText2};
+	} {
+		#var tmpText $tmpText1;
+	};
+	#format tmpText {%p} {$tmpText};
+	#replace tmpText {  } { };
+	_testSayPattern;
+	#var tmpText @sanitizePayload{$tmpText};		
+	#if $logSay {update_chat <178>$saySpeaker says<088>: $tmpText};
+	#unaction {         %*};
+	#var saySpeaker {};
+};
+
 #action {~\e[0m\e[36;1mYou say:\e[0m %*\e[0m} {
+	#NOP -- A say still waiting for its wrapped lines is logged now, before this one clears its text;
+	#if {"$saySpeaker" != ""} {#undelay {sayLog};_sayLog};
 	#unvar tmpTextHolder;
 	#unvar tmpText;
 	#unvar tmpText1;
@@ -552,24 +571,15 @@
 				#cat tmpText2 { $tmpTextHolder};
 			} {1};
 			#replace tmpText1 {\n} { };
-			#delay .1 {
-				#if {"${tmpText2}" !== ""} {
-					#var tmpText {$tmpText1 $tmpText2};
-				} {
-					#var tmpText $tmpText1;
-				};
-				#format tmpText {%p} {$tmpText};
-				#replace tmpText {  } { };
-				_testSayPattern;
-				#var tmpText @sanitizePayload{$tmpText};		
-				#if $logSay {update_chat <178>$user_cap says<088>: $tmpText};
-				#unaction {         %*};
-			};
+			#var saySpeaker $user_cap;
+			#delay {sayLog} {_sayLog} {.1};
 		};
 	};
 } {2};
          
 #action {~\e[0m\e[36;1m%w says:\e[0m %*\e[0m} {
+	#NOP -- A say still waiting for its wrapped lines is logged now, before this one clears its text;
+	#if {"$saySpeaker" != ""} {#undelay {sayLog};_sayLog};
 	#unvar tmpTextHolder;
 	#unvar tmpText;
 	#unvar tmpText1;
@@ -586,19 +596,8 @@
 					#cat tmpText2 { $tmpTextHolder};
 				} {1};
 				#replace tmpText1 {\n} { };
-				#delay .1 {
-					#if {"${tmpText2}" !== ""} {
-						#var tmpText {$tmpText1 $tmpText2};
-					} {
-						#var tmpText $tmpText1;
-					};
-					#format tmpText {%p} {$tmpText};
-					#replace tmpText {  } { };
-					_testSayPattern;
-					#var tmpText @sanitizePayload{$tmpText};		
-					#if $logSay {update_chat <178>$tmpPlayer says<088>: $tmpText};
-					#unaction {         %*};
-				};
+				#var saySpeaker $tmpPlayer;
+				#delay {sayLog} {_sayLog} {.1};
 			};
 		};
 	};

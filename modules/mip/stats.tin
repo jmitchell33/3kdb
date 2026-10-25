@@ -27,6 +27,14 @@
 		.mipProcessFFFSub {$mip[FFF][flag]} {$mip[FFF][${mip[FFF][flag]}][data]};
 	};
     _update_status;
+    #NOP -- Rebuild and draw the hpbar now instead of waiting for the 2 s heartbeat;
+    #if !$idle_flag {
+        _player_miphp;
+        #if {$guild_miphp} {_guild_miphp};
+    };
+    #if $draw[initiated] {
+        #if {"$draw[hpbar][active]" == "on"} {draw_hpbar};
+    };
 };
 
 #NOP ***** Separated Stats Data *****;
