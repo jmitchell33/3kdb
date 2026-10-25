@@ -76,6 +76,22 @@
 
 #action {You have no {corpse|remains}.} {check_corpses;} {1};
 
+#NOP -- Sell your corpses to the morgue and then go back/resuming botting;
+#alias scoffin {
+	#if $bot[active] {.pause};
+    #map get roomvnum donate_go_back;
+	go morgue;
+    sell coffin;sell all;
+    #map run $donate_go_back;
+    #if $bot[active] {
+		#delay 10 {
+			i;
+			#var bot[paused] 0;
+			.bot
+		};
+	};
+};
+
 #NOP -- Donate your corpses to the morgue and then go back/resuming botting;
 #alias dcoffin {
 	#if $bot[active] {.pause};
@@ -371,10 +387,16 @@
 #action {^Your coffin flashes as its capacity expands!$} {#var corpses[coffin_max] 99} {2};
 #action {^The coffin is full!$} {
 	#var corpses[coffin_max] $corpses[coffin];
-	checkStrategy {coffinRun} {
+	checkStrategy {coffinDonate} {
 		.pause;
 		#NOP -- Once out of combat, donate coffin;
-		#ticker coffinRun {#if !$$incombat {dcoffin;#unticker coffinRun}} {2};
+		#ticker coffinDonate {#if !$$incombat {dcoffin;#unticker coffinDonate}} {2};
+	};
+
+	checkStrategy {coffinSell} {
+		.pause;
+		#NOP -- Once out of combat, donate coffin;
+		#ticker coffinSell {#if !$$incombat {scoffin;#unticker coffinSell}} {2};
 	};
 
 	checkStrategy {donate_water1} {
@@ -393,10 +415,15 @@
 
 #action {^All your corpses are already bigger than what is here.$} {
 	#var corpses[coffin_max] $corpses[coffin];
-	checkStrategy {coffinRun} {
+	checkStrategy {coffinDonate} {
 		.pause;
 		#NOP -- Once out of combat, donate coffin;
-		#ticker coffinRun {#if !$$incombat {dcoffin;#unticker coffinRun}} {2};
+		#ticker coffinDonate {#if !$$incombat {dcoffin;#unticker coffinDonate}} {2};
+	};
+	checkStrategy {coffinSell} {
+		.pause;
+		#NOP -- Once out of combat, donate coffin;
+		#ticker coffinSell {#if !$$incombat {scoffin;#unticker coffinSell}} {2};
 	};
 } {2};
       
