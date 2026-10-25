@@ -17,6 +17,7 @@
     #if {"${toggles[emote_dungeon_clear]}" == ""} {#var toggles[emote_dungeon_clear] 1};
     #if {"${toggles[farsight_notify]}" == ""} {#var toggles[farsight_notify] 0};
     #if {"${toggles[teleport]}" == ""} {#var toggles[teleport] 1};
+    #if {"${toggles[auto_portrait]}" == ""} {#var toggles[auto_portrait] 1};
 
     #if {"$guild" == "necromancer"} {
         #if {"${toggles[emote_aid]}" == ""} {#var toggles[emote_aid] 1};
@@ -55,6 +56,7 @@
                     #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
                 };
                 #if {"$toggle_var" == "discord_post"} {#var discordPost $toggles[discord_post]};
+                #if {"$toggle_var" == "auto_portrait"} {init_screen;draw_all};
             };
         } {
             #send {!toggle $toggle_var};

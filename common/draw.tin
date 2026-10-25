@@ -94,11 +94,12 @@
     #NOP -- Width <= $mobile_portrait_cols (default 75) selects portrait first, otherwise;
     #NOP -- height <= 20 selects landscape, otherwise desktop. Landscape currently uses standard panes.;
     #NOP -- Set mobile_portrait_cols outside the draw class (e.g. in your launcher) so a reload keeps it;
-    #NOP -- and 0 never drops the sidebar.;
+    #NOP -- and 0 never drops the sidebar. toggle auto_portrait off keeps this layout at any width too.;
     #NOP -- Human/AI maintainers: keep detection here and reset both values on resize.;
     #NOP -- Extend using measured rows/cols and check cutoff/cutoff+1 cols and 20/21 rows,;
     #NOP -- rotation, desktop reattach, pane toggles and mapFull entry/exit.;
     #if {"${mobile_portrait_cols}" === ""} {#local _portrait_cols 75} {#local _portrait_cols $mobile_portrait_cols};
+    #if {"${toggles[auto_portrait]}" == "0"} {#local _portrait_cols 0};
 
 #if {$screen[width] <= $_portrait_cols} {
     #var draw[mobile][active] 1;
