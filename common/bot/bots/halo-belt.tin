@@ -1,0 +1,301 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var check_room 0;
+
+#echo {<afb>----      Halo: shield belt quest      ----<088>};
+
+#NOP -- The Halo belt miniquest, in this order: walk to the observation chamber (21509) killing grunts and;
+#NOP -- elites for a plasma pistol or rifle, throw it through the west window into the lab (21483) and search;
+#NOP -- the tray for the scalpel. Then ktrig OFF and corpsetrig off, walk the Halo loop killing only elites,;
+#NOP -- dissect the first elite corpse, ktrig ON and corpsetrig back. Then fetch Sandino (21521), lead him to;
+#NOP -- the lab, remove other and say install. A minute later go to Captain Keyes (21495) and say cortana;
+#NOP -- The shiny force-shield assembly belt is the good one: you get it when Sandino is carrying it,;
+#NOP -- otherwise the jury rigged one;
+#NOP -- Start it with +halo-belt, .stop ends it (and turns ktrig and corpsetrig back on if it was hunting);
+#NOP -- No gun on the way? Bring anything heavy enough (a tower shield from the smithy) and set;
+#NOP -- #var haloq_throw shield before starting. It is thrown first, then gun and rifle;
+#var haloq[stage] scalpel;
+#var haloq[loops] 0;
+#var haloq[shiny] 0;
+#var haloq[retried] 0;
+#var haloq[corpsetrig] $corpsetrigStatus;
+
+#NOP -- A scalpel already carried (from an earlier run) skips the window: the hunt starts at 21509;
+#var haloq[scalpel] 0;
+#action {^%s%d A razor sharp scalpel} {#var haloq[scalpel] 1} {1};
+i;
+
+#NOP -- Cryo chamber to the observation chamber, then the window step;
+#var {bot[path]} {w;n;w;n;w;s;w;s;s;s;e;e;s;e;u;n;e;n;.haloqWindow};
+
+#NOP -- Grunts drop the pistol thrown at the window. Elites are left for the hunt (an aggro one still gets;
+#NOP -- fought, and its corpse is lost while ktrig is on);
+#list botmobs clear;
+#list botmobs add {{{long} {A short yellow-armoured creature} {target} {creature}}};
+
+#alias {.haloqWindow} {
+    .pause;
+    #if {$haloq[scalpel]} {
+        #echo {<afa>HALO BELT: you already have a scalpel, hunting from here.<088>};
+        #NOP -- Delayed, so .botStep's .botComplete right after this step still sees the scalpel stage;
+        #class {bot} {open};
+        #delay {haloqStart} {.haloqElite here} {0.5};
+        #class {bot} {close};
+    } {
+        .haloqThrow;
+    };
+};
+
+#alias {.haloqThrow} {
+    #if {&{haloq_throw}} {throw $haloq_throw through west window};
+    throw gun through west window;
+    throw rifle through west window;
+    w;
+    #NOP -- gun matches the pistol and the rifle, rifle alone found nothing once gun took the rifle;
+    get gun;
+    get gun;
+    #if {&{haloq_throw}} {get $haloq_throw};
+    search tray;
+    #class {bot} {open};
+    #delay {haloqWait} {
+        #echo {<fab>HALO BELT: no scalpel. Nothing to break the window with? Bring something heavy (a tower shield from the smithy), #var haloq_throw shield, and +halo-belt again. Stopping.<088>};
+        .stop;
+    } {15};
+    #class {bot} {close};
+};
+
+#NOP -- Out of the lab, first back round to 21511 (n,w of the observation chamber, a grunt and an elite are;
+#NOP -- usually there), on to the cryo chamber, then the Halo loop, only elites as targets. The loop skips;
+#NOP -- the Engineering Console and the Bridge: Keyes greets you there and "It would be rude to leave while;
+#NOP -- someone was talking" stops the walk, which puts the bot out of step;
+#NOP -- .haloqElite lab walks out of the lab, so its arrival starts step 1. .haloqElite here starts in 21509;
+#NOP -- with a glance. A move and a glance together start two step chains and the bot runs a room ahead;
+#alias {.haloqElite} {
+    #undelay {haloqWait};
+    #var haloq[stage] elite;
+    #var deathReport[mob_killed] {};
+    ktrig OFF;
+    corpsetrig-off;
+    #list bot[mobs] clear;
+    #list bot[mobs] add {{{long} {A blue-armoured elite} {target} {elite}}};
+    #var haloq[loop] {w;n;w;n;w;s;w;s;s;s;e;n;s;e;n;s;e;w;s;w;e;e;u;n;w;e;e;n;n;e;e;e;w;n;w;n;w;w;s;s;e;s;s;w;s;d;w;n;w;w;n;n;n;e;n;e;s;e;s;e};
+    #var bot[path] {n;w;e;s;s;w;s;d;w;n;w;n;w;n;n;e;n;e;s;e;s;e};
+    #if {"%1" == "lab"} {#var bot[path] {n;w;n;w;s;w;s;s;s;e;e;s;e;u;n;e;n;$bot[path]}};
+    #list bot[steps] create {$bot[path]};
+    #var bot[step] 1;
+    #if {"%1" == "lab"} {.unpause;n} {..};
+};
+
+#NOP -- A grunt's corpse only gives "You tear open the corpse", so no wires in 10 seconds means hunt on;
+#alias {.haloqDissect} {
+    #var haloq[stage] dissect;
+    .pause;
+    dissect corpse;
+    #class {bot} {open};
+    #delay {haloqWait} {
+        #echo {<fab>HALO BELT: no wires from that corpse, hunting on.<088>};
+        #var haloq[stage] elite;
+        #var deathReport[mob_killed] {};
+        ..;
+    } {10};
+    #class {bot} {close};
+};
+
+#alias {.haloqRestore} {
+    ktrig ON;
+    #if {$haloq[corpsetrig]} {corpsetrig-on};
+};
+
+#alias {.haloqSandino} {
+    #undelay {haloqWait};
+    .haloqRestore;
+    #var haloq[stage] sandino;
+    #map run 21521;
+    look at sandino;
+    say follow;
+    #class {bot} {open};
+    #delay {haloqWait} {
+        #echo {<fab>HALO BELT: Sandino isn't following (dead, or not in 21521?). Stopping, you have the wires.<088>};
+        .stop;
+    } {30};
+    #class {bot} {close};
+};
+
+#NOP -- Sandino talks for about three heartbeats after say follow, and leaving before he is done gives;
+#NOP -- "It would be rude to leave while someone was talking". Walk 5 seconds after his last line, or 15;
+#NOP -- seconds after the first if the last one never shows;
+#alias {.haloqFollow} {
+    #undelay {haloqWait};
+    #var haloq[stage] follow;
+    #if {$haloq[shiny]} {
+        #echo {<afa>HALO BELT: Sandino has the shiny belt.<088>};
+    } {
+        #echo {<fab>HALO BELT: Sandino has no shiny belt, so this gives the jury rigged one.<088>};
+    };
+    #class {bot} {open};
+    #delay {haloqGo} {.haloqInstall} {15};
+    #class {bot} {close};
+};
+
+#alias {.haloqInstall} {
+    #undelay {haloqGo};
+    #var haloq[stage] install;
+    #map run 21509;
+    w;
+    remove other;
+    say install;
+    #class {bot} {open};
+    #delay {haloqKeyes} {.haloqKeyes} {60};
+    #class {bot} {close};
+};
+
+#NOP -- Keyes greets you with a speech that can't be interrupted ("You politely refuse to interrupt Captain;
+#NOP -- Keyes"). Say cortana 3 seconds after its last line, or 30 seconds on if no speech comes;
+#alias {.haloqKeyes} {
+    #var haloq[stage] keyes;
+    #var haloq[asks] 0;
+    #map run 21495;
+    #class {bot} {open};
+    #delay {haloqAsk} {.haloqAsk} {30};
+    #delay {haloqWait} {
+        #echo {<fab>HALO BELT: Keyes didn't answer (dead?). Stopping.<088>};
+        .stop;
+    } {90};
+    #class {bot} {close};
+};
+
+#alias {.haloqAsk} {
+    #math haloq[asks] {$haloq[asks] + 1};
+    say cortana;
+};
+
+#NOP -- Keyes's answer ends with "Thats an order old friend", then walk back to the cryo chamber entrance;
+#alias {.haloqDone} {
+    #undelay {haloqWait};
+    #undelay {haloqLeave};
+    #echo {<afa>HALO BELT: done, back to the entrance.<088>};
+    #map run 21481;
+    .stop;
+};
+
+#action {^You look through the pile of instruments but the only recognisable} {.haloqElite lab} {1};
+#action {^You carefully remove them and wipe them off.} {.haloqSandino} {1};
+#action {^%*A shiny force-shield assembly belt.$} {
+    #if {"$haloq[stage]" == "sandino"} {#var haloq[shiny] 1};
+} {1};
+#action {^Sandino says: Lets try and get to my lab.} {.haloqFollow} {1};
+#action {^Sandino says: We can install those implants when we get there.} {
+    #if {"$haloq[stage]" == "follow"} {
+        #class {bot} {open};
+        #delay {haloqGo} {.haloqInstall} {5};
+        #class {bot} {close};
+    };
+} {1};
+#NOP -- Still talking: every move of the walk fails, so you are still in 21521. Try once more 8 seconds on;
+#action {^It would be rude to leave while someone was talking.} {
+    #if {"$haloq[stage]" == "install" && !$haloq[retried]} {
+        #var haloq[retried] 1;
+        #undelay {haloqKeyes};
+        #echo {<fab>HALO BELT: Sandino is still talking, walking to the lab again in 8 seconds.<088>};
+        #class {bot} {open};
+        #delay {haloqGo} {#map goto 21521;.haloqInstall} {8};
+        #class {bot} {close};
+    };
+} {1};
+#action {^Sandino says: I found this production model, it is better than the one you have.} {
+    #echo {<afa>HALO BELT: got the shiny force-shield assembly belt.<088>};
+} {1};
+#NOP -- His last line of the install: go to Keyes 3 seconds on instead of waiting out the 60;
+#action {^Sandino says: It works!} {
+    #echo {<fab>HALO BELT: got the jury rigged belt.<088>};
+    #if {"$haloq[stage]" == "install"} {
+        #class {bot} {open};
+        #delay {haloqKeyes} {.haloqKeyes} {3};
+        #class {bot} {close};
+    };
+} {1};
+#action {^Sandino says: Here you go! Show those bastards what we're made of!} {
+    #if {"$haloq[stage]" == "install"} {
+        #class {bot} {open};
+        #delay {haloqKeyes} {.haloqKeyes} {3};
+        #class {bot} {close};
+    };
+} {1};
+#action {%*the Covenant really have us up against the wall.} {
+    #if {"$haloq[stage]" == "keyes"} {
+        #class {bot} {open};
+        #delay {haloqAsk} {.haloqAsk} {3};
+        #class {bot} {close};
+    };
+} {1};
+#action {^You politely refuse to interrupt Captain Keyes.} {
+    #if {"$haloq[stage]" == "keyes" && $haloq[asks] > 0 && $haloq[asks] < 5} {
+        #class {bot} {open};
+        #delay {haloqAsk} {.haloqAsk} {5};
+        #class {bot} {close};
+    };
+} {1};
+#action {^Captain Keyes inserts something in your datajack.} {
+    #if {"$haloq[stage]" == "keyes"} {
+        #undelay {haloqAsk};
+        #var haloq[stage] cortana;
+        #echo {<afa>HALO BELT: Cortana is in your datajack.<088>};
+        #class {bot} {open};
+        #delay {haloqLeave} {.haloqDone} {30};
+        #class {bot} {close};
+    };
+} {1};
+#action {^Captain Keyes says: Thats an order old friend.} {
+    #if {"$haloq[stage]" == "cortana"} {
+        #class {bot} {open};
+        #delay {haloqLeave} {.haloqDone} {2};
+        #class {bot} {close};
+    };
+} {1};
+
+
+#class {bot} {close}
+#read common/bot/generic.tin;
+
+#class {bot} {open};
+
+#NOP -- After a registered kill: on the way to the lab pick up the dropped gun, while hunting an Elite's;
+#NOP -- corpse is dissected instead of walking on;
+#alias {.bot} {
+    #var haloq[elite_dead] 0;
+    #regex {$deathReport[mob_killed]} {%ielite} {#var haloq[elite_dead] 1};
+    #if {"$haloq[stage]" == "scalpel"} {get gun;get gun};
+    #if {"$haloq[stage]" == "elite" && $haloq[elite_dead]} {.haloqDissect} {#if {$bot[paused] == 0} {..}};
+};
+
+#NOP -- The walk to the lab ends in .haloqWindow, so only an elite hunt loops (3 times, then it gives up);
+#NOP -- This runs right after the last move is sent, and that move's arrival starts step 1 (no .bot here,;
+#NOP -- it would start a second step chain);
+#alias {.botComplete} {
+    #if {"$haloq[stage]" == "elite"} {
+        #math haloq[loops] {$haloq[loops] + 1};
+        #if {$haloq[loops] >= 3} {
+            #echo {<fab>HALO BELT: no elite in 3 loops. ktrig and corpsetrig are back on, stopping.<088>};
+            .stop;
+        } {
+            #echo {<dfa>HALO BELT: no elite this loop, looping again.<088>};
+            #var bot[path] $haloq[loop];
+            #list bot[steps] create {$bot[path]};
+            #var bot[step] 1;
+        };
+    };
+};
+
+#NOP -- generic.tin's .stop, plus ktrig and corpsetrig back on when stopped during the hunt;
+#alias {.stop} {
+    #if {"$haloq[stage]" == "elite" || "$haloq[stage]" == "dissect"} {.haloqRestore};
+    .backupBot;
+    #unvar bot;
+    #unalias {..};
+    #class {bot} {kill};
+    #echo {Bot killed.};
+    #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
+};
+
+#class {bot} {close};
