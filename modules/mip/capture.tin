@@ -40,7 +40,12 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 		#MATH {mip[%3][length]} {%2 - 3};
 		#VAR {mip[%3][data]} {%4};
 		#REPLACE {mip[%3][data]} {"} {'};
-		#PARSE {$mip[%3][data]} {i} {
+		#NOP -- Stored length equal to the game's length: no escapes and no overflow, so skip the character walk;
+		#FORMAT {mip[storedlen]} {%L} {$mip[%3][data]};
+		#IF {$mip[storedlen] == $mip[%3][length]} {
+			#VAR {mip[out]} {$mip[%3][data]};
+		};
+		#ELSE {#PARSE {$mip[%3][data]} {i} {
 			#MATH {mip[charcount]} {$mip[charcount] + 1};
 			#VAR {mip[delta]} {$mip[%3][length]};
 			#NOP -- TinTin stores a game backslash as two backslashes, a semicolon with a backslash before it,;
@@ -62,7 +67,7 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 			};
 			#VAR {mip[char2]} {$mip[char1]};
 			#VAR {mip[char1]} {$i}
-		};
+		}};
 		#VAR {mip[%3][data]} {$mip[out]};
 		.mipProcessFlag {%3} {$mip[out]};
 		#IF {"${mip[overflow]}" != ""} {#REPLACE {mip[overflow]} {%} {%%};#SHOWME {${mip[overflow]}}};
