@@ -64,9 +64,10 @@ messages = {}
 for key in obj:
     try:
         url = obj[key]["channel"]
-        # chatlog.tin swaps backslashes and semicolons for the look-alikes U+FF3C
-        # and U+FF1B, so swap them back
-        payload = obj[key]["payload"].replace("\uff3c", "\\").replace("\uff1b", ";")
+        # chatlog.tin swaps backslashes, semicolons, braces and dollars for the
+        # look-alikes U+FF3C, U+FF1B, U+FF5B/U+FF5D and U+FF04, so swap them back
+        payload = (obj[key]["payload"].replace("\uff3c", "\\").replace("\uff1b", ";")
+                   .replace("\uff5b", "{").replace("\uff5d", "}").replace("\uff04", "$"))
         text = MARKDOWN.sub(r'\\\1', payload)
     except KeyError as e:
         log(f"Error on entry {key}: Missing field {e}")

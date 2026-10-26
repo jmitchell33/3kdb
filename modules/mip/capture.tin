@@ -40,7 +40,13 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 		#MATH {mip[%3][length]} {%2 - 3};
 		#VAR {mip[%3][data]} {%4};
 		#REPLACE {mip[%3][data]} {"} {'};
-		#PARSE {$mip[%3][data]} {i} {
+		#NOP -- Stored length equal to the game's length: no escapes and no overflow, so skip the character walk.;
+		#NOP -- %L doesn't count colour codes, so data ending in one (some clients get a reset after the MIP) takes the walk;
+		#FORMAT {mip[storedlen]} {%L} {$mip[%3][data]};
+		#IF {$mip[storedlen] == $mip[%3][length] && "$mip[%3][data]" != "%*\e%*"} {
+			#VAR {mip[out]} {$mip[%3][data]};
+		};
+		#ELSE {#PARSE {$mip[%3][data]} {i} {
 			#MATH {mip[charcount]} {$mip[charcount] + 1};
 			#VAR {mip[delta]} {$mip[%3][length]};
 			#NOP -- TinTin stores a game backslash as two backslashes, a semicolon with a backslash before it,;
@@ -57,20 +63,21 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 			} {
 				#NOP -- delta can be a decimal from the half steps, and the regex needs a whole number;
 				#FORMAT {mip[deltaint]} {%d} {$mip[delta]};
-				#REGEXP {$mip[%3][data]} {^{.{$mip[deltaint]}}{.*}} {#VAR {mip[overflow]} &2} {};
+				#REGEXP {$mip[%3][data]} {^{.{$mip[deltaint]}}{.*}} {#VAR {mip[overflow]} &&2} {};
 				#BREAK;
 			};
 			#VAR {mip[char2]} {$mip[char1]};
 			#VAR {mip[char1]} {$i}
-		};
+		}};
 		#VAR {mip[%3][data]} {$mip[out]};
 		.mipProcessFlag {%3} {$mip[out]};
-		#IF {"${mip[overflow]}" != ""} {#REPLACE {mip[overflow]} {%} {%%};#SHOWME {${mip[overflow]}}};
+		#NOP -- Only text you can see: a colour code left after the MIP data is not game text;
+		#FORMAT {mip[overflowlen]} {%L} {${mip[overflow]}};
+		#IF {$mip[overflowlen] > 0} {#REPLACE {mip[overflow]} {%} {%%};#SHOWME {${mip[overflow]}}};
 
 		#IF {"$mip[echo]" != "on"} {
 			#LINE GAG
 		};
-		#if {"$draw[hpbar][active]" == "on"} {draw_hpbar};
 	};
 } {1};
 

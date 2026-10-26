@@ -15,7 +15,14 @@
 #alias {.rewield} {
     #if {$idle_flag} {#return};
     #if {&wielded} {
-        #if {"$wielded" != ""} {wield $wielded;#return};
+        #if {"$wielded" != ""} {
+            #list eq_data indexate long;
+            #list eq_data find {$wielded} tmpIx;
+            #if {$tmpIx > 0} {
+                wield $eq_data[$tmpIx][alias];
+                #return
+            };
+        };
     };
     wield rod;
 };
