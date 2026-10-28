@@ -914,7 +914,12 @@
 		#list chat[general] del 1;
 	};
 	#var chat[text]  <edc>NOTE: <ddd>%0<088>;
-	
+	#format {timestamp_save} {%t} {[%H:%M] };
+	#format {datestamp} {%t} {%Y-%m-%d.log};
+	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+	#if {"%2" == ""} {#var notifyLine {%1}} {#var notifyLine {%0}};
+	#line log {logs/$sysUser/$datestamp} {<edc>NOTE ($user_cap): <ddd>$notifyLine<088>};
+
 	#var chat[entry] ${timestamp}${chat[text]};
 	#list chat[general] ins -1 $chat[entry];
 	#if {"$chatCategory" != "general"} {postChatCategory};
