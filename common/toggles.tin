@@ -6,6 +6,8 @@
     #if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
     #if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 1};
     #if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
+    #if {"${toggles[worlddrops2]}" == ""} {#var toggles[worlddrops2] 0};
+    #if {"${toggles[worlddrops_notify]}" == ""} {#var toggles[worlddrops_notify] 1};
     #if {"${toggles[chatlog_says]}" == ""} {#var toggles[chatlog_says] 1};
     #if {"${toggles[cult]}" == ""} {#var toggles[cult] 0};
     #if {"${toggles[corpse_echo]}" == ""} {#var toggles[corpse_echo] 0};
@@ -16,7 +18,15 @@
     #if {"${toggles[emote_corpse]}" == ""} {#var toggles[emote_corpse] 1};
     #if {"${toggles[emote_dungeon_clear]}" == ""} {#var toggles[emote_dungeon_clear] 1};
     #if {"${toggles[farsight_notify]}" == ""} {#var toggles[farsight_notify] 0};
+    #if {"${toggles[farsight_ctell]}" == ""} {#var toggles[farsight_ctell] 0};
     #if {"${toggles[teleport]}" == ""} {#var toggles[teleport] 1};
+    #if {"${toggles[portal_notify]}" == ""} {#var toggles[portal_notify] 0};
+    #if {"${toggles[fracture_notify]}" == ""} {#var toggles[fracture_notify] 0};
+    #if {"${toggles[portal_ctell]}" == ""} {#var toggles[portal_ctell] 0};
+    #if {"${toggles[fracture_ctell]}" == ""} {#var toggles[fracture_ctell] 0};
+    #NOP -- bothportals_notify/bothportals_ctell were removed, drop them from saved toggles;
+    #unvar toggles[bothportals_notify];
+    #unvar toggles[bothportals_ctell];
 
     #if {"$guild" == "necromancer"} {
         #if {"${toggles[emote_aid]}" == ""} {#var toggles[emote_aid] 1};
@@ -27,6 +37,36 @@
     #var discordPost $toggles[discord_post];
 };
 
+
+#NOP -- What each toggle does, shown in toggle-list;
+#var toggleDesc {
+    {3kreport} {Eternals: checks (cstats after a kill for the kill report}
+    {chatlog_says} {Puts people's says in your chat log}
+    {corpse_echo} {Tells you when a corpse comes out of your bag, coffin or freezer}
+    {cult} {Jumps into the next cult game by itself}
+    {discord_post} {Sends your chat over to Discord}
+    {emote_aid} {Necros: someone clubs you like a baby seal, you aid them}
+    {emote_corpse} {Someone says 'Greetings, Comrade!' to you, you hand them corpses}
+    {emote_dungeon_clear} {Someone does the alien emote at you, you run dungeons clear all}
+    {emote_eheal} {Someone gives you the Anti-Christ pose, you (heal them}
+    {emote_follow} {Someone taps your shoulder, you follow and assist them}
+    {emote_heal} {Someone gives you the Jesus Christ pose, you hmheal them}
+    {emote_rally} {Someone offers you a toke, you rally them}
+    {farsight_ctell} {Eternals: farsight_notify, and ctells your clan too}
+    {farsight_notify} {Eternals: NOTE in your chat window (and Discord) when a mob you can see resets}
+    {fremen} {Fremen hold/stun/enfeeble flags, the bot flips these itself}
+    {fracture_ctell} {Zodiacs: fracture_notify, and ctells your clan too}
+    {fracture_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a fracture (grimoire) hour}
+    {go_echo} {Says 'here we go!' when go finds the room}
+    {mission} {Asks for a mission when you find a mission giver}
+    {portal_ctell} {Zodiacs: portal_notify, and ctells your clan too}
+    {portal_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a portal (tome) hour}
+    {sessionlog} {Saves everything you see to a log file, one per day}
+    {teleport} {Pulls the rope when someone offers you a teleport}
+    {worlddrops} {Pauses the bot when a world drop shows up}
+    {worlddrops2} {Grabs world drops right away, even off the floor. Doesn't check your bags or pause the bot}
+    {worlddrops_notify} {Puts a NOTE in your chat window when you find a world drop}
+};
 
 #NOP -- Fremen also have a toggle guildside, which needs to be able to bypass;
 #list {fremenToggleList} {create} {fblock} {audible} {litany} {quasibrief} {showdodge};
@@ -66,18 +106,50 @@
 #alias {toggle-list} {
     #echo {<cfb>   ---++---       3kdb Current Toggle Status      ---++---<088>};
     #echo {<fff>       Usage: toggle <toggle alias> <088>};
-    #format tmpLine {       %-25s          %+10s} {<fdc>Toggle Alias<088>} {<fdc>Status<088>};
-    #echo {$tmpLine};
+    #format tmpLine {        %-21s%-8s%s} {Toggle Alias} {Status} {What it does};
+    #echo {<fdc>$tmpLine<088>};
+    #NOP -- Descriptions start at column 37 and wrap at the edge of the output area (not under the map), so a long one stays in its column;
+    #screen get cols tmpCols;
+    #if {&screen[width] && &split[right]} {
+        #math tmpCols {$screen[width] - $split[left] - $split[right]};
+    };
+    #if {"$tmpCols" == ""} {#var tmpCols 80};
+    #math tmpDescWidth {$tmpCols - 38};
+    #if {$tmpDescWidth < 20} {#var tmpDescWidth 20};
+    #format tmpDescPad {%+37s} {};
     #foreach *toggles[] item {
         #if {$toggles[$item]} {
-            #format tmpLine {        %-25s         %+8s} {$item} {on};
-            #echo {<dfc>$tmpLine<088>};
+            #format tmpLine {        %-21s%-8s} {$item} {on};
+            #var tmpLine {<dfc>$tmpLine};
         } {
-            #format tmpLine {        %-25s         %+9s} {$item} { off};
-            #echo {<fbb>$tmpLine<088>};
+            #format tmpLine {        %-21s%-8s} {$item} {off};
+            #var tmpLine {<fbb>$tmpLine};
         };
+        .toggleListDesc {$toggleDesc[$item]};
     };
     #echo {<cfb>   ---++---        ---++---        ---++---       ---++---<088>};
+};
+
+#NOP -- .toggleListDesc <text>: echo tmpLine with the text after it, word-wrapped to tmpDescWidth. Wrapped lines start with tmpDescPad;
+#alias {.toggleListDesc} {
+    #var tmpDescWords {%1};
+    #replace tmpDescWords { } {;};
+    #var tmpDescOut {};
+    #foreach {$tmpDescWords} {tmpWord} {
+        #if {"$tmpDescOut" == ""} {
+            #var tmpDescOut {$tmpWord};
+        } {
+            #format tmpDescLen {%L} {$tmpDescOut $tmpWord};
+            #if {$tmpDescLen > $tmpDescWidth} {
+                #echo {$tmpLine<ddd>$tmpDescOut<088>};
+                #var tmpLine {$tmpDescPad};
+                #var tmpDescOut {$tmpWord};
+            } {
+                #var tmpDescOut {$tmpDescOut $tmpWord};
+            };
+        };
+    };
+    #echo {$tmpLine<ddd>$tmpDescOut<088>};
 };
 
 #class {common_toggles} {close};

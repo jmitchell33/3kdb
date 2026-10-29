@@ -12,6 +12,14 @@
 #var monitors[saturation-corpse] 89;
 #var monitors[saturation-stop] 85;
 
+#var _mcast 0;
+#var _mlastcast 0;
+#alias {_mage_defcast} {
+    cast %0;
+    #var _mcast 1;
+    #format _mlastcast {%T};
+};
+
 #alias {_guild_heartbeat} {
 	#var mc_threshold 90;
     #var mc_danger 60;
@@ -21,20 +29,24 @@
     #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
 
 	#if !$idle_flag {
-		#if $defs[MB] {#if !$my[prots][MB] {cast mindblank} {#nop}};
-		#if $defs[PA] {#if !$my[prots][PA] {cast prismatic aura} {#nop}};
-		#if $defs[PS] {#if !$my[prots][PS] {cast prismatic sphere} {#nop}};
-		#if $defs[A]  {#if !$my[prots][A]  {cast armor} {#nop}};
-		#if $defs[MG] {#if !$my[prots][MG] {cast major globe} {#nop}};
-		#if $defs[M]  {#if !$my[prots][M]  {cast mantle} {#nop}};
-		#if $defs[mg] {#if !$my[prots][mg] {cast minor globe} {#nop}};
-		#if $defs[ms] {#if !$my[prots][MS] {cast magnificent shield} {#nop}};
-		#if $defs[SS] {#if !$my[prots][SS] {cast stoneskin} {#nop}};
-		#if $defs[rs] {#if !$my[prots][RS] {cast rhino skin} {#nop}};
-		#if $defs[pe] {#if !$my[prots][PE] {cast protection from evil} {#nop}};
-		#if $defs[pg] {#if !$my[prots][PG] {cast protection from good} {#nop}};
-		#if $defs[shield] {#if !$my[prots][S] {cast shield} {#nop}};
-		#if $defs[blink] {#if !$my[prots][B] {cast blink} {#nop}};
+		#NOP -- One defensive spell per beat, at least 2s apart, or the MUD says You may not cast another;
+		#NOP -- defensive spell so quickly. The next missing one goes on a later beat.;
+		#format _mnow {%T};
+		#if {$_mnow - $_mlastcast < 2} {#var _mcast 1} {#var _mcast 0};
+		#if !$_mcast {#if $defs[MB] {#if !$my[prots][MB] {_mage_defcast mindblank} {#nop}}};
+		#if !$_mcast {#if $defs[PA] {#if !$my[prots][PA] {_mage_defcast prismatic aura} {#nop}}};
+		#if !$_mcast {#if $defs[PS] {#if !$my[prots][PS] {_mage_defcast prismatic sphere} {#nop}}};
+		#if !$_mcast {#if $defs[A]  {#if !$my[prots][A]  {_mage_defcast armor} {#nop}}};
+		#if !$_mcast {#if $defs[MG] {#if !$my[prots][MG] {_mage_defcast major globe} {#nop}}};
+		#if !$_mcast {#if $defs[M]  {#if !$my[prots][M]  {_mage_defcast mantle} {#nop}}};
+		#if !$_mcast {#if $defs[mg] {#if !$my[prots][mg] {_mage_defcast minor globe} {#nop}}};
+		#if !$_mcast {#if $defs[ms] {#if !$my[prots][MS] {_mage_defcast magnificent shield} {#nop}}};
+		#if !$_mcast {#if $defs[SS] {#if !$my[prots][SS] {_mage_defcast stoneskin} {#nop}}};
+		#if !$_mcast {#if $defs[rs] {#if !$my[prots][RS] {_mage_defcast rhino skin} {#nop}}};
+		#if !$_mcast {#if $defs[pe] {#if !$my[prots][PE] {_mage_defcast protection from evil} {#nop}}};
+		#if !$_mcast {#if $defs[pg] {#if !$my[prots][PG] {_mage_defcast protection from good} {#nop}}};
+		#if !$_mcast {#if $defs[shield] {#if !$my[prots][S] {_mage_defcast shield} {#nop}}};
+		#if !$_mcast {#if $defs[blink] {#if !$my[prots][B] {_mage_defcast blink} {#nop}}};
 
 		#if !$deeppocket {#if {$my[sp][current] > 500} {cast extension 3;cast deeppockets}};
 	} {#NOP;};

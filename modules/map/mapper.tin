@@ -26,7 +26,9 @@
 #event {MAP ENTER ROOM} {
 	#if {"$mapping" == "on"} {
 		mapupdate;
-	}
+	};
+	#NOP -- The Rejected Game counts moves the map made ahead of the game, see common/map/rej_rotate.tin;
+	#if {&{rej_area_name}} {.rej_map_entered %0}
 };
 
 #event {MAP EXIT ROOM} {

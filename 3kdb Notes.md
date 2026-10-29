@@ -33,6 +33,10 @@ Updating mip.tin
             #var webhook[url][guild] https://discord.com/api/webhooks/long_token;
             #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
             #var webhook[url][party] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][worlddrops] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][zodiac] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][farsight] https://discord.com/api/webhooks/long_token;
+            #NOP -- Every post goes to general, and also to its own channel when that webhook is set;
 
 
         B) Inix3k Users - Add the following alias, function and same webhook URLs to the top of 3k/mip.tin (or a preferred variable location)
@@ -69,6 +73,10 @@ Updating mip.tin
             #var webhook[url][guild] https://discord.com/api/webhooks/long_token;
             #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
             #var webhook[url][party] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][worlddrops] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][zodiac] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][farsight] https://discord.com/api/webhooks/long_token;
+            #NOP -- Every post goes to general, and also to its own channel when that webhook is set;
 
             #alias postDiscord {
                 #NOP -- first paramater is webook destination, second is payload;

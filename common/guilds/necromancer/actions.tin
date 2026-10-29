@@ -219,11 +219,17 @@
 #var bloodarc_timeout 60;
 
 #NOP -- Bloodarc over: clears the flag and restarts the bot if it was holding, unless it is in combat or you paused it;
+#NOP -- A hold leaves bot[walk] at 1, which bot_ticker skips. $incombat lags a kill by up to 4s, so on a fast kill the arc can end while it still reads 1 and nothing restarts the bot. Release the hold so bot_ticker resumes it once combat really clears;
 #alias {.bloodarcEnd} {
     #undelay {bloodarc_failsafe};
     #if {$bloodarc_active} {
         #var bloodarc_active 0;
-        #if {$bot[active] && !$bot[paused] && !$incombat} {.bot};
+        #if {"$bot[holding]" == "1"} {
+            #var bot[holding] 0;
+            #var bot[walk] 0;
+        };
+        #NOP -- A pending .skip walks on even mid-fight: it is leaving that mob;
+        #if {$bot[active] && !$bot[paused] && (!$incombat || "$bot[skip]" == "1")} {.bot};
     };
 };
 

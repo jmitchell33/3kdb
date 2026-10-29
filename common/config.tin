@@ -17,10 +17,16 @@
 
 #NOP -- Ticker to set incombat variable;
 #ticker check_combat {
-    #if {$mip[round] == $incombat_last_round || $mip[round] == 0} {
-        #var incombat 0
+    #NOP -- No combat round from MIP yet (just logged in, no fight so far) means not in combat;
+    #if {&mip[round]} {
+        #if {$mip[round] == $incombat_last_round || $mip[round] == 0} {
+            #var incombat 0
+        } {
+            #var incombat 1;
+            #var bot[walk] 0;
+        };
     } {
-        #var incombat 1;
+        #var incombat 0;
     };
     #var incombat_last_round $mip[round];
 } {4};
@@ -33,6 +39,7 @@
 #alias {defaults_on} {
     #echo {<fff> CONNECTED TO 3KDB -- UPDATING SCREEN IN 3 seconds...};
     _variable_import;
+    .sessionlog_login;
     _init_deadman;
 	mipon;
     #read common/draw.tin;
@@ -72,6 +79,7 @@
 
 #alias {reset_trackers} {
     istats_reset;
+    reset_xp;
     #NOP -- Only while the damage tracker is loaded (it sets dmgtracker in its class), or dreset goes to the game;
     #if {&dmgtracker} {dreset};
     #if {"$guild" == "juggernaut"} {
@@ -95,6 +103,8 @@
      #delay {1} {hp};
      #delay {6} {_area_speedruns;_area_bots;3kdb_banner};
      #delay {10} {_update_players};
+     #NOP -- Necromancer: repower a couple of seconds after who2 so the hpbar picks up repower status;
+     #delay {12} {#if {"$guild" == "necromancer"} {#send {repower}}};
 };
 
 #alias {load_guild} {
@@ -142,7 +152,7 @@
     #unvar db3k[banner];
     #list db3k[banner] add {<dfc>   ---------   WELCOME TO 3kdb   ---------<088>  };
     #list db3k[banner] add {<ddd>      If this is your first time, type <ffd>setup_3kdb<088>};
-    #list db3k[banner] add {<ddd>      <ffd>library3kdb<088> to see a list of aliases <088>};
+    #list db3k[banner] add {<ddd>      <ffd>dblib<088> to see a list of aliases <088>};
     #list db3k[banner] add {<ddd>      <ffd>mapgo cot<088> to set your position to Center of Town (cot) <088>};
     #list db3k[banner] add {<ddd>       Be sure to check out <ffd>botlist<ddd>, <ffd>speedruns<ddd>, and <ffd>strategies<088>};
     #draw $theme[chatbox] lalign ralign left right side 2 1 $chat[height]-1 $chat[right] $db3k[banner][1..5];
@@ -271,12 +281,15 @@
 #var sessionActive 0;
 #action {^3Kingdoms welcomes you!} {
     #var sessionActive 1;
+    #var login_linkdeath 0;
     _load_3kdb_common;
     defaults_on;
     #delay 1 {#map goto 6220};
 } {1};
+#NOP -- login_linkdeath tells guild files (e.g. maint) this is a return from linkdeath, spells still up;
 #action {^3Kingdoms welcomes you back from linkdeath.} {
     #var sessionActive 1;
+    #var login_linkdeath 1;
     _load_3kdb_common;
     defaults_on;
     look;

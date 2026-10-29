@@ -10,6 +10,10 @@
 #NOP -- #var webhook[url][guild] https://discord.com/api/webhooks/long_token;
 #NOP -- #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
 #NOP -- #var webhook[url][party] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][worlddrops] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][zodiac] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][farsight] https://discord.com/api/webhooks/long_token;
+#NOP -- Every post goes to general, and also to its own channel when that webhook is set;
 
 
 #NOP -- Variables for the chat categories;
@@ -914,7 +918,12 @@
 		#list chat[general] del 1;
 	};
 	#var chat[text]  <edc>NOTE: <ddd>%0<088>;
-	
+	#format {timestamp_save} {%t} {[%H:%M] };
+	#format {datestamp} {%t} {%Y-%m-%d.log};
+	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+	#if {"%2" == ""} {#var notifyLine {%1}} {#var notifyLine {%0}};
+	#line log {logs/$sysUser/$datestamp} {<edc>NOTE ($user_cap): <ddd>$notifyLine<088>};
+
 	#var chat[entry] ${timestamp}${chat[text]};
 	#list chat[general] ins -1 $chat[entry];
 	#if {"$chatCategory" != "general"} {postChatCategory};

@@ -10,11 +10,17 @@
     #math itemTracker[%1][%2] {$itemTracker[%1][%2] + 1};
 };
 
-#var itemTracker[start_round] $total_rounds;
+#NOP -- defaults_on resets this at login, before mip has counted a round and set total_rounds, so start from 0 then;
+#NOP -- (an unset total_rounds would be saved as its own name and istats would show 0 rounds);
+#alias .istats_start {
+    #if {&total_rounds} {#var itemTracker[start_round] $total_rounds} {#var itemTracker[start_round] 0};
+};
+
+.istats_start;
 
 #alias istats_reset {
     #unvar itemTracker;
-    #var itemTracker[start_round] $total_rounds;
+    .istats_start;
 };
 
 #alias istats {

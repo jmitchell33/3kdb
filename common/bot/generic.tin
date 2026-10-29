@@ -11,6 +11,8 @@
 #var bot[foundmob] 0;
 #var bot[foundobject] 0;
 #var bot[foundplayer] 0;
+#NOP -- .skip waiting to leave the room, cleared when .botStep takes the step;
+#var bot[skip] 0;
 
 #var bot[stats][mobs] 0;
 #var bot[stats][xp] 0;
@@ -142,6 +144,7 @@
             };
         } {
             #var bot[holding] 0;
+            #var bot[skip] 0;
             #var bot_first_in_room_check 1;
             #if {$bot[step] >= &bot[steps][]} {
                 ${bot[steps][${bot[step]}]};
@@ -175,6 +178,8 @@
                 #if $room_tome {get tome};
             };
             
+            #if {$bot[skip]} {#var bot[foundmob] 0};
+
             #if {$bot[foundmob]} {
                 #if $debug[bot] {#echo {<cfa>BOT DEBUG:  Mob in the list has been found<088>}};
                 .pre_fight_check;
@@ -204,6 +209,24 @@
                 };
             };
         };
+    };
+};
+
+#NOP -- Skip the mob in this room and take the next step, the next mob found is fought as usual;
+#NOP -- A necromancer with a bloodarc up stays until it ends: .bloodarcEnd restarts the bot and the pending skip walks on;
+#alias {.skip} {
+    #undelay {bot_kick};
+    #undelay {bot_restart};
+    #var bot[foundmob] 0;
+    #var bot[aggro-mob] 0;
+    #var bot[foundobject] 0;
+    #var bot[skip] 1;
+    .unpause;
+    #if {"$guild" == "necromancer" && $bloodarc_active} {
+        #echo {<cfb>   SKIP WAITING: BLOODARC IS ACTIVE, MOVING ON WHEN IT ENDS   <088>};
+    } {
+        #var bot[walk] 1;
+        .botStep;
     };
 };
 
@@ -332,17 +355,8 @@
     #if !$bot[paused] {
         #if {!$bot[loop]} {
             #echo {<dfa>\nBot finished.<088>};
-            #format {bot[report-time]} {%T} {};
-            #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
-            #if {$bot[delta-time] > 3600} {
-                #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
-                #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-                #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] Hrs);
-            } {
-                #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
-                #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-                #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
-            };
+            .xp_rate {$bot[stats][xp]} {$bot[start-time]};
+            #var xp_rate_str $xp_rate_str/hr ($xp_time_str);
             #var temp_xp $bot[stats][xp];
             #send {ptell $tmpName Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str)};
             #echo {<dfa>Coins Earned: $bot[stats][coins]<088>};
@@ -362,17 +376,8 @@
                 .bot;
             } {
                 #echo {\nBot finished.};
-                #format {bot[report-time]} {%T} {};
-                #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
-                #if {$bot[delta-time] > 3600} {
-                    #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
-                    #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-                    #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] Hrs);
-                } {
-                    #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
-                    #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-                    #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]}/hr ($bot[delta-time] mins);
-                };
+                .xp_rate {$bot[stats][xp]} {$bot[start-time]};
+                #var xp_rate_str $xp_rate_str/hr ($xp_time_str);
                 #var temp_xp $bot[stats][xp];
                 #send {ptell $tmpName Bot Complete. Mobs Killed: $bot[stats][mobs] XP Gained: @thousandsFormatNumber{$temp_xp} ($xp_rate_str)};
                 #echo {Coins Earned: $bot[stats][coins]};

@@ -12,6 +12,88 @@
 #var tmp_shelter_command 0;
 #var zodiac_riftVnum 0;
 #var zodiac_portalVnum 0;
+#var shelter_held_bot 0;
+#var shelter_bot_wait 0;
+#var shelter_bot_foreign 0;
+#var shelter_defer 0;
+#var regen_bot_foreign 0;
+#list zodiac_held clear;
+#class {zodiac_hold} {kill};
+
+#NOP -- While sheltered in the zodiacs, hold what the steppers (common/bot/bots/czodiacs*.tin) send to go in or out of the;
+#NOP -- portal/rift: their portalRoom/riftRoom ticker and mimic/stars-align delays would otherwise fire inside the shelter;
+#NOP -- priority-1 anchored aliases sit over the normal commands (tt++ takes the first match) and queue them, the class kill puts them back;
+#alias {_zodiac_hold} {
+    #list zodiac_held clear;
+    #if {$bot[active] && "$area" == "Celestial Zodiacs"} {
+        #class {zodiac_hold} {open};
+        #alias {^portal$} {#list zodiac_held add {portal}} {1};
+        #alias {^fracture$} {#list zodiac_held add {fracture}} {1};
+        #alias {^open %%1 chest$} {#list zodiac_held add {open %%1 chest}} {1};
+        #alias {^.unpause$} {#list zodiac_held add {.unpause}} {1};
+        #class {zodiac_hold} {close};
+    };
+};
+
+#NOP -- Drop the hold before our own way back (out, portal/fracture) is sent;
+#alias {_zodiac_release} {#class {zodiac_hold} {kill}};
+
+#NOP -- Send what the steppers tried while we were away, in order, once the bot is handed back;
+#alias {_zodiac_replay} {
+    #foreach {$zodiac_held[%*]} {zodiac_cmd} {$zodiac_cmd};
+    #list zodiac_held clear;
+};
+
+#NOP -- Shelter takes the bot over from the mage SP/MC pause (common/guilds/mage/heartbeat.tin);
+#NOP -- its spBotResume/mcBotResume tickers would run .. and walk the bot on mid-shelter, so kill them;
+#NOP -- and keep bot_toggle at 1 while sheltered so the guild heartbeat starts no new pause;
+#alias {_shelter_hold_bot} {
+    #var shelter_held_bot $bot_toggle;
+    #unticker {spBotResume};
+    #unticker {mcBotResume};
+    #var bot_toggle 1;
+};
+
+#NOP -- Hand the bot back after shelter: if a guild pause was held or SP/MC is low, wait like the guild does before resuming;
+#NOP -- while the player MC regen pause (pausedtoregen 0) is still waiting it keeps bot_toggle at 1 and its MC > 97 resume hands the bot back;
+#NOP -- a bot paused by someone else before shelter (shelter_bot_foreign) is left for them to resume;
+#alias {_shelter_release_bot} {
+    #if {"$pausedtoregen" == "0" || $shelter_bot_foreign} {
+        #if {"$pausedtoregen" == "0"} {
+            #NOP -- the MC regen resume must not resume it either;
+            #if {$shelter_bot_foreign} {#var regen_bot_foreign 1};
+        } {
+            #var bot_toggle 0;
+        };
+    } {
+        #var bot_toggle 0;
+        #NOP -- separate checks: one undefined variable (e.g. my[eternal][heal] without eternal) makes a whole tt++ #if false;
+        #var shelter_need_wait $shelter_held_bot;
+        #if {$hpbar_mc < $mc_danger} {#var shelter_need_wait 1};
+        #if {$my[sp][current] < $sp_danger && !$my[immersion][count] && !$my[immersion][active] && !$my[hm][heal] && !$my[eternal][heal]} {#var shelter_need_wait 1};
+        #if {$bot[active] && $shelter_need_wait} {
+            #var bot_toggle 1;
+            #var shelter_bot_wait 1;
+            #echo {<ffa>Shelter done, waiting on SPs/MC before resuming the bot.<088>};
+            #ticker {shelterBotResume} {
+                #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
+                hp;
+                #if {($my[sp][current] > $sp_threshold || $my[immersion][active]) && $hpbar_mc > $mc_threshold} {
+                    #var shelter_bot_wait 0;
+                    #unticker {shelterBotResume};
+                    #if {"$pausedtoregen" == "1"} {
+                        #var bot_toggle 0;
+                        #if {!$incombat} {..} {.unpause};
+                    };
+                };
+            } {2};
+        } {
+            #if {$bot[active]} {.unpause};
+        };
+    };
+    #var shelter_held_bot 0;
+    #var shelter_bot_foreign 0;
+};
 
 #nop -- secure shelter;
 #alias {shelter} {
@@ -29,28 +111,40 @@
         };
         #if {"$secure_shelter_switch" == "1"} {
             #if {$my[gp1][current] > 78 && "$my[super][current]" == "0" && "$shelter_pause" == "1"} {
-                #if {$bot[active]} {.pause};
                 #map get roomvnum tmp_shelter_vnum;
-                #var shelter_pause 0;
-                #if {"$tmp_shelter_vnum" == "53914"} {
-                    #var tmp_shelter_exit 1;
-                    #var tmp_shelter_command {portal};
-                } {
-                    #if {"$tmp_shelter_vnum" == "54572"} {
+                #NOP -- zodiac steppers (common/bot/bots/czodiacs*.tin): hold off where sheltering breaks their portal/rift run;
+                #NOP -- treasure room out of combat: the mimic is dead (or no chest opened yet) and the stepper takes you out, shelter once outside;
+                #NOP -- anywhere else _zodiac_hold holds the steppers' portal/rift entry and exit while sheltered, _zodiac_replay sends them once we're back;
+                #var shelter_defer 0;
+                #if {("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") && !$incombat} {#var shelter_defer 1};
+                #if {!$shelter_defer} {
+                    #NOP -- bot already paused by someone else (a zodiac stepper in its treasure room): leave its resume to it;
+                    #var shelter_bot_foreign 0;
+                    #if {$bot[active] && (("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") || ($bot[paused] && "$bot_toggle" != "1" && "$pausedtoregen" == "1"))} {#var shelter_bot_foreign 1};
+                    #if {$bot[active]} {.pause};
+                    _shelter_hold_bot;
+                    #var shelter_pause 0;
+                    #if {"$tmp_shelter_vnum" == "53914"} {
                         #var tmp_shelter_exit 1;
-                        #var tmp_shelter_command {rift;fracture};
+                        #var tmp_shelter_command {portal};
                     } {
-                        #var tmp_shelter_exit 0;
+                        #if {"$tmp_shelter_vnum" == "54572"} {
+                            #var tmp_shelter_exit 1;
+                            #var tmp_shelter_command {fracture};
+                        } {
+                            #var tmp_shelter_exit 0;
+                        };
                     };
-                };
-                #if {"$tmp_shelter_exit" == "1"} {
-                    #var tmp_shelter_exit 0;
-                    #var tmp_shelter_return 1;
-                    $tmp_shelter_command;
-                    #map get roomvnum tmp_shelter_vnum;
-                    cast secure shelter;
-                } {
-                    cast secure shelter;
+                    #if {"$tmp_shelter_exit" == "1"} {
+                        #var tmp_shelter_exit 0;
+                        #var tmp_shelter_return 1;
+                        $tmp_shelter_command;
+                        #map get roomvnum tmp_shelter_vnum;
+                        cast secure shelter;
+                    } {
+                        cast secure shelter;
+                    };
+                    _zodiac_hold;
                 };
             };
         };
@@ -59,16 +153,20 @@
                 #if {"$tmp_shelter_return" == "1"} {
                     #var shelter_pause 1;
                     #var tmp_shelter_return 0;
+                    _zodiac_release;
                     out;
                     $tmp_shelter_command;
-                    #if {$bot[active]} {.unpause};
+                    _shelter_release_bot;
+                    _zodiac_replay;
                     #var tmp_shelter_vnum 0;
                     glance;
                     kill mimic;
                 } {
                     #var shelter_pause 1;
+                    _zodiac_release;
                     out;
-                    #if {$bot[active]} {.unpause};
+                    _shelter_release_bot;
+                    _zodiac_replay;
                     #var tmp_shelter_vnum 0;
                     glance;
                 };
@@ -76,16 +174,31 @@
         };
         #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
             #if {"$roomvnum" != "54572" || "$zodiac_riftVnum" || "$zodiac_portalVnum"} {
+                #NOP -- bot already paused by someone else (a zodiac stepper): the MC > 97 resume leaves it to them;
+                #var regen_bot_foreign 0;
+                #if {$bot[paused] && "$bot_toggle" != "1" && "$shelter_pause" == "1"} {#var regen_bot_foreign 1};
                 .pause;
                 #var pausedtoregen 0;
+                #NOP -- this pause owns the bot until MC > 97: stop the guild SP/MC resume tickers (they resume at MC > 90);
+                #NOP -- and keep bot_toggle at 1 so the guild heartbeat starts no new pause meanwhile;
+                #unticker {spBotResume};
+                #unticker {mcBotResume};
+                #var bot_toggle 1;
             };
         };
         #if {$my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
-            #if {"$shelter_pause" == "1"} {
-                #var pausedtoregen 1;
-                #if {$bot[active]} {.unpause;glance};
-            } {
-                #var pausedtoregen 1;
+            #var pausedtoregen 1;
+            #NOP -- while sheltered (or waiting after it) the shelter hands the bot back itself;
+            #if {"$shelter_pause" == "1" && !$shelter_bot_wait} {
+                #var bot_toggle 0;
+                #if {$bot[active] && !$regen_bot_foreign} {
+                    #if {$my[sp][current] < $sp_danger && !$my[immersion][count] && !$my[immersion][active] && !$my[hm][heal] && !$my[eternal][heal]} {
+                        #NOP -- SPs are low: the guild heartbeat right after this pauses and resumes the bot for SPs;
+                    } {
+                        .unpause;glance;
+                    };
+                };
+                #var regen_bot_foreign 0;
             };
         };
     };

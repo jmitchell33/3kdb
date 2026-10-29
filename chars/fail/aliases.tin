@@ -16,4 +16,75 @@
 #alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
 
 
+#NOP -- fail's 3kdb aliases;
+#alias {format_failsaliases} {
+    #format {failalias_name} {%-25s} {<cff>%1<088>};
+    #format {failalias_desc} {%-30s} {<deb>%2<088>};
+    #showme $failalias_name $failalias_desc;
+};
+
+#NOP -- filter types, listed in the help and matched by the first letters (ar finds areas);
+#list fail3kdb_types create {guild;areas;misc};
+
+#NOP -- fail3kdb <filter>: a filter, or the start of one, lists that type. Anything else lists aliases starting with it;
+#alias {fail3kdb} {
+    #var bdb_total 0;
+    #format bdb_arg {%l} {%1};
+    #var bdb_mode {name};
+    #if {"$bdb_arg" != ""} {
+        #foreach {$fail3kdb_types[%*]} {bdb_type} {
+            #regex {$bdb_type} {^$bdb_arg} {#var bdb_mode {type}};
+        };
+    };
+    #echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
+    #echo {<ccf>  -------    <ffa>FAIL'S ALIASES <fff>(&fail3kdb[])  <ccf>-------    <088>  };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<ccf>     Name                 Usage              <088>  };
+    #list fail3kdb index name;
+    #list fail3kdb sort;
+    #foreach $fail3kdb[%*] index {
+        #var bdb_hit 0;
+        #if {"$bdb_arg" == ""} {
+            #var bdb_hit 1;
+        };
+        #elseif {"$bdb_mode" == "type"} {
+            #regex {$index[type]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #else {
+            #regex {$index[name]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #if {$bdb_hit} {
+            #math bdb_total {$bdb_total + 1};
+            format_failsaliases {     $index[name]} {$index[desc]};
+        };
+    };
+    #if {$bdb_total} {
+        #echo {\n<ccf>  Total of $bdb_total aliases returned.<088>};
+    } {
+        #echo {<ccf>  No matches found for <eed>%1<ccf>.<088>};
+    };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<cfc>  Sort using filters: <eaf>fail3kdb <filter><088>};
+    #echo {    <fff>Filters:  <eaf>guild areas misc<088>};
+    #echo {<cfc>  Part of a filter works too: <eaf>fail3kdb ar<088>};
+    #echo {<cfc>  Not a filter? Lists aliases starting with it: <eaf>fail3kdb pig<088>};
+    #echo {<ccf>  ----------------------------------------   <088>  };
+};
+
+#list fail3kdb clear;
+
+#NOP -- guild;
+#list fail3kdb add {{{name} {jr} {type} {guild} {desc} {Juggernaut session gxp and mount status}}};
+
+#NOP -- areas;
+#list fail3kdb add {{{name} {pig1} {type} {areas} {desc} {Walk to Bigpig (Duke Nukem)}}};
+#list fail3kdb add {{{name} {pig2} {type} {areas} {desc} {Walk back from Bigpig (Duke Nukem)}}};
+
+#NOP -- misc;
+#list fail3kdb add {{{name} {wa} {type} {misc} {desc} {map run to vnum or name}}};
+#list fail3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
+#list fail3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+
+.add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
+
 #class {player_aliases} {close};

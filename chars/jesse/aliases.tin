@@ -158,10 +158,10 @@
 
 #nop -- donate corpses to duncan;
 #alias {cdonate1} {
+    wrap all;
     maskon;
     #send {!trace glyph};
     unkeep all preservation;drop all;
-    #if {$corpses[coffin] > 0} {#send {!unwrap all}};
     #if {$corpses[freezer] > 0} {#send {!deslab all}};
     #if {$corpses[cooler] > 0} {#$corpses[cooler] uncooler corpse};
     #delay 10 {#send {!lookup}};
@@ -385,16 +385,17 @@
     kill delundar;
 };
 
-#NOP -- beloch bot;
+#NOP -- beloch bot: auto_beloch is read by the Beloch action in actions.tin, off until belochboton;
+#if {&{auto_beloch} == 0} {#var auto_beloch 0};
 #alias {belochboton} {
-    #var {$auto_beloch} {1};
+    #var auto_beloch 1;
 };
 
 #alias {belochbotoff} {
-    #var {$auto_beloch} {0};
+    #var auto_beloch 0;
 };
 
-#NOP -- amy;
+#NOP -- amy: steps to get to freeway bear;
 #alias {amy1} {s;e;ne;n;n;n};
 #alias {amy2} {u;e;n;nw;ne;n;d;d;s};
 #alias {amy3} {n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
@@ -420,28 +421,53 @@
     #showme $jessealias_name $jessealias_desc;
 };
 
-#alias jesse3kdb {
-    #var tempflag 0;
-    #var number &jesse3kdb[];
-    #showme {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>  };
-    #showme {<ccf>  -------    <ffa>JESSE'S ALIASES<088> <fff>($number)<088>  <ccf>-------    <088>  };
-    #showme {    Filters:  <eaf>corpses boosts combat misc<088>       };
-    #showme {                  <eaf>guild spells<088>                 };
-    #showme {<ccf>  ----------------------------------------   <088>  };
-    #showme {<ccf>     Name                 Usage              <088>  };
+#NOP -- filter types, listed in the help and matched by the first letters (corp finds corpses);
+#list jesse3kdb_types create {corpses;boosts;combat;guild;areas;misc};
+
+#NOP -- jesse3kdb <filter>: a filter, or the start of one, lists that type. Anything else lists aliases starting with it;
+#alias {jesse3kdb} {
+    #var bdb_total 0;
+    #format bdb_arg {%l} {%1};
+    #var bdb_mode {name};
+    #if {"$bdb_arg" != ""} {
+        #foreach {$jesse3kdb_types[%*]} {bdb_type} {
+            #regex {$bdb_type} {^$bdb_arg} {#var bdb_mode {type}};
+        };
+    };
+    #echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
+    #echo {<ccf>  -------    <ffa>JESSE'S ALIASES <fff>(&jesse3kdb[])  <ccf>-------    <088>  };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<ccf>     Name                 Usage              <088>  };
     #list jesse3kdb index name;
     #list jesse3kdb sort;
     #foreach $jesse3kdb[%*] index {
-        #regexp {"%1"} {"$index[type]"} {
-            #var tempflag 1;
-            format_jessesaliases {     $index[name]} {$index[desc]};
-        }
-    };
-    #if !$tempflag {
-        #foreach $jesse3kdb[%*] index {
+        #var bdb_hit 0;
+        #if {"$bdb_arg" == ""} {
+            #var bdb_hit 1;
+        };
+        #elseif {"$bdb_mode" == "type"} {
+            #regex {$index[type]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #else {
+            #regex {$index[name]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #if {$bdb_hit} {
+            #math bdb_total {$bdb_total + 1};
             format_jessesaliases {     $index[name]} {$index[desc]};
         };
     };
+    #if {$bdb_total} {
+        #echo {\n<ccf>  Total of $bdb_total aliases returned.<088>};
+    } {
+        #echo {<ccf>  No matches found for <eed>%1<ccf>.<088>};
+    };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<cfc>  Sort using filters: <eaf>jesse3kdb <filter><088>};
+    #echo {    <fff>Filters:  <eaf>corpses boosts combat guild<088>};
+    #echo {              <eaf>areas misc<088>};
+    #echo {<cfc>  Part of a filter works too: <eaf>jesse3kdb corp<088>};
+    #echo {<cfc>  Not a filter? Lists aliases starting with it: <eaf>jesse3kdb my<088>};
+    #echo {<ccf>  ----------------------------------------   <088>  };
 };
 
 #list jesse3kdb clear;
@@ -452,6 +478,13 @@
 #list jesse3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list jesse3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list jesse3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
+#list jesse3kdb add {{{name} {.cycle_corpses} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler), preserve and absorb it}}};
+#list jesse3kdb add {{{name} {pr} {type} {corpses} {desc} {Preserve up to 50 remains}}};
+#list jesse3kdb add {{{name} {pg} {type} {corpses} {desc} {Preserve up to 50 remains and pick up the preservations}}};
+#list jesse3kdb add {{{name} {pg2} {type} {corpses} {desc} {pg, then store all the preservations}}};
+#list jesse3kdb add {{{name} {cdonate1} {type} {corpses} {desc} {Duncan donate 1: wrap all, mask on, trace glyph, drop all corpses}}};
+#list jesse3kdb add {{{name} {cdonate2} {type} {corpses} {desc} {Duncan donate 2: trace glyph back, then cdonate3}}};
+#list jesse3kdb add {{{name} {cdonate3} {type} {corpses} {desc} {Duncan donate 3: mask off, preserve and store everything}}};
 
 #NOP -- boosts;
 #list jesse3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -461,6 +494,11 @@
 #list jesse3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies (default)}}};  
 #list jesse3kdb add {{{name} {mystrategy-party} {type} {combat} {desc} {Strategy for partying}}}; 
 #list jesse3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
+#list jesse3kdb add {{{name} {setup_reflex} {type} {combat} {desc} {Set reflexes: dream on low HP/SP, use a corpse on low NP, con on low gp2}}};
+#list jesse3kdb add {{{name} {xenostart} {type} {combat} {desc} {Xeno: stop dreaming on low SP}}};
+#list jesse3kdb add {{{name} {xenostop} {type} {combat} {desc} {Xeno done: dream on low SP again}}};
+#list jesse3kdb add {{{name} {3kr} {type} {combat} {desc} {Show the 3kReport kill stats}}};
+#list jesse3kdb add {{{name} {set3kreport} {type} {combat} {desc} {Set 3kReport columns: killer, rounds, class, xp, coins}}};
 
 #NOP -- misc;
 #list jesse3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -469,16 +507,34 @@
 #list jesse3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
 #list jesse3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
 #list jesse3kdb add {{{name} {wa} {type} {misc} {desc} {Speedrun using roomvnums}}};
-#list jesse3kdb add {{{name} {pryout} {type} {misc} {desc} {Exit Prysmyia room}}};
 #list jesse3kdb add {{{name} {bagset} {type} {misc} {desc} {set how many bags to cycle thru}}};
 #list jesse3kdb add {{{name} {bag1} {type} {misc} {desc} {put items in x amount of bags set with bagset}}};
 #list jesse3kdb add {{{name} {bag2} {type} {misc} {desc} {drop all from x amount of bags set with bagset}}};
 #list jesse3kdb add {{{name} {mybrief} {type} {misc} {desc} {reset my brief settings after inductor/crack steppers}}};
 #list jesse3kdb add {{{name} {maskon} {type} {misc} {desc} {remove current helmet and wear mask}}};
 #list jesse3kdb add {{{name} {maskoff} {type} {misc} {desc} {remove mask and wear helmet}}};
+#list jesse3kdb add {{{name} {bag3} {type} {misc} {desc} {donate all from x amount of bags set with bagset}}};
+#list jesse3kdb add {{{name} {refd} {type} {misc} {desc} {Reforge 12 daggers for pxp}}};
+#list jesse3kdb add {{{name} {gagsoff} {type} {misc} {desc} {Clear all gags}}};
+#list jesse3kdb add {{{name} {quit} {type} {misc} {desc} {Quit guard: use quit REALLY to really quit}}};
+
+#NOP -- areas;
+#list jesse3kdb add {{{name} {pryout} {type} {areas} {desc} {Exit Prysmyia room}}};
+#list jesse3kdb add {{{name} {challenge_all} {type} {areas} {desc} {Challenge all arena mobs, beloch too}}};
+#list jesse3kdb add {{{name} {arena_kill_all} {type} {areas} {desc} {Kill all arena mobs, beloch too}}};
+#list jesse3kdb add {{{name} {arena_kill_all2} {type} {areas} {desc} {Kill all arena mobs except beloch}}};
+#list jesse3kdb add {{{name} {belochboton} {type} {areas} {desc} {Beloch bot on}}};
+#list jesse3kdb add {{{name} {belochbotoff} {type} {areas} {desc} {Beloch bot off}}};
+#list jesse3kdb add {{{name} {charm} {type} {areas} {desc} {Forest of charms steps: charm 1-8 or key, charm help}}};
+#list jesse3kdb add {{{name} {amy1} {type} {areas} {desc} {Freeway bear (amy): walk part 1}}};
+#list jesse3kdb add {{{name} {amy2} {type} {areas} {desc} {Freeway bear (amy): walk part 2}}};
+#list jesse3kdb add {{{name} {amy3} {type} {areas} {desc} {Freeway bear (amy): walk part 3}}};
+#list jesse3kdb add {{{name} {amy4} {type} {areas} {desc} {Freeway bear (amy): smash the grate, squeeze through, pry the crack}}};
+#list jesse3kdb add {{{name} {amy5} {type} {areas} {desc} {Freeway bear (amy): go through the crack and walk the last part}}};
 
 #nop -- guild;
-#list jesse3kdb add {{{name} {bag3} {type} {guild} {desc} {donate all from x amount of bags set with bagest}}};
 #list jesse3kdb add {{{name} {reup} {type} {guild} {desc} {after dying you need to re envision your globes til tier 3}}};
+
+.add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
 
 #class {player_aliases} {close};

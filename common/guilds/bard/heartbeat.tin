@@ -5,25 +5,44 @@
 #var karma_use_corpse_between_songs 650;
 #var resume_song 1;
 
+#NOP -- Singing as soon as the MUD says so (the MIP guild line catches up a beat later);
+#action {^You take a deep breath and begin to stretch your vocal cords.} {_bard_singing} {6};
+#action {^You can't cast a spell while singing!} {_bard_singing} {6};
+#action {^You are currently performing %*!} {_bard_singing} {6};
+#var _bcast 0;
+
+#NOP -- Only sets 1 when nothing says singing yet. If a song ends without the bow/cease/lose messages,;
+#NOP -- the 60s safety clears that 1 (Amazing Grace runs about 36s), so spells are never blocked for good.;
+#alias {_bard_singing} {
+    #if {$my[song][rounds] == 0} {
+        #var my[song][rounds] 1;
+        #delay {bard_sing_safety} {#if {$my[song][rounds] == 1} {#var my[song][rounds] 0}} {60};
+    };
+};
+
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
+		#NOP -- The MUD allows one spell a round and none while singing, and one song at a time. So cast;
+		#NOP -- the first missing spell only, nothing while a song plays, and a song only once all picked;
+		#NOP -- spells are up (a song blocks casting until it ends). _bcast 1 = nothing more this beat.;
+		#if {$my[song][rounds] > 0} {#var _bcast 1} {#var _bcast 0};
 		#if {$my[defs][es] > 0} {#NOP} {#if {$defs[es] && $my[gp1][current] > 400 && !$es_override} {#var es_override 1;empowered strikes;#ticker {es_toggle} {#var es_override 0;#unticker es_toggle} {6}} {#nop}};
-		#if {$my[defs][blink] > 0} {#NOP} {#if {$defs[blink]} {cast blink} {#nop}};
-		#if {$my[defs][hs] > 0} {#NOP} {#if {$defs[hs]} {cast hardened skin} {#nop}};
-		#if {$my[defs][mb] > 0} {#NOP} {#if {$defs[mb]} {cast mind blank} {#nop}};
-		#if {$my[defs][pe] > 0} {#NOP} {#if {$defs[pe]} {cast protection from evil} {#nop}};
-		#if {$my[defs][pn] > 0} {#NOP} {#if {$defs[pn]} {cast protection from neutral} {#nop}};
-		#if {$my[defs][pg] > 0} {#NOP} {#if {$defs[pg]} {cast protection from good} {#nop}};
-		#if {$my[defs][pf] > 0} {#NOP} {#if {$defs[pf]} {cast protection from frost} {#nop}};
-		#if {$my[defs][ph] > 0} {#NOP} {#if {$defs[ph]} {cast protection from heat} {#nop}};
+		#if {$_bcast || $my[defs][blink] > 0} {#NOP} {#if {$defs[blink]} {cast blink;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][hs] > 0} {#NOP} {#if {$defs[hs]} {cast hardened skin;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][mb] > 0} {#NOP} {#if {$defs[mb]} {cast mind blank;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][pe] > 0} {#NOP} {#if {$defs[pe]} {cast protection from evil;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][pn] > 0} {#NOP} {#if {$defs[pn]} {cast protection from neutral;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][pg] > 0} {#NOP} {#if {$defs[pg]} {cast protection from good;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][pf] > 0} {#NOP} {#if {$defs[pf]} {cast protection from frost;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][ph] > 0} {#NOP} {#if {$defs[ph]} {cast protection from heat;#var _bcast 1} {#nop}};
 		
-		#if {$my[defs][ag] > 0} {#NOP} {#if {$defs[ag]} {perform amazing grace} {#nop}};
-		#if {$my[defs][o] > 0}  {#NOP} {#if {$defs[om]}  {perform o muse} {#nop}};
+		#if {$_bcast || $my[defs][ag] > 0} {#NOP} {#if {$defs[ag]} {perform amazing grace;#var _bcast 1} {#nop}};
+		#if {$_bcast || $my[defs][o] > 0}  {#NOP} {#if {$defs[om]}  {perform o muse;#var _bcast 1} {#nop}};
 
 		#NOP -- actions that should only be attempted once per round;
 		#if {$action_round < $mip[round] && $mip[round] > 0} {
 			#if {$my[song][rounds] > 1} {#NOP;} {#if $actions_stacked {do_action};};
-			#if {$my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {cast harmonic regeneration} {#nop}};
+			#if {$_bcast || $my[defs][hr] > 0} {#NOP} {#if {$defs[hr] && $my[sp][current] > $protCosts[harmonic regeneration][sp]} {cast harmonic regeneration;#var _bcast 1} {#nop}};
 		} {
 			#NOP -- If you're not in combat, let er rip;
 			#if !$incombat {

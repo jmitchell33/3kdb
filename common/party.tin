@@ -178,17 +178,8 @@
 
 #act {~\e[%*;%+m[PARTY]%* %w: 3kdb bot status} {
     #if {$bot[active] && !$idle_flag} {
-        #format {bot[report-time]} {%T} {};
-        #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
-        #if {$bot[delta-time] > 3600} {
-            #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
-            #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]} ($bot[delta-time] Hrs);
-        } {
-            #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
-            #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]} ($bot[delta-time] mins);
-        };
+        .xp_rate {$bot[stats][xp]} {$bot[start-time]};
+        #var xp_rate_str $xp_rate_str ($xp_time_str);
         #if {!$idle_flag && $bot[active]} {
             #var temp_xp $bot[stats][xp];
             ptell Progress: $bot_current_room/$bot_total_rooms ($bot_progress%) Mobs Killed: $bot[stats][mobs]  XP Gained: @thousandsFormatNumber{$temp_xp}  XP Rate/Hr: $xp_rate_str;

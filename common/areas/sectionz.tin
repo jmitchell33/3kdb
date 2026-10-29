@@ -21,26 +21,39 @@
 #action {^Developer unlocks and opens the large steel door.$} {say hostage} {2};
 
 #NOP -- ALIAS'S TO SAVE YOU TO SECTIONZ;
+#NOP sectionz_busy blocks a second set20/set40 until the first one's 7s run ends (held Enter);
+#var sectionz_busy 0;
+
 #alias {set40} {
-    press start;
-    #delay {1} {pause game};
-    #delay {2} {play};
-    #delay {3} {continue40};
-    #delay {4} {pause game};
-    #delay {5} {play};
-    #delay {6} {unpause};
-	#delay {7} {#map goto 25088};
+    #if {$sectionz_busy} {
+        #echo {<faa>set20/set40 is already running, wait for it to finish.<088>};
+    } {
+        #var sectionz_busy 1;
+        press start;
+        #delay {1} {pause game};
+        #delay {2} {play};
+        #delay {3} {continue40};
+        #delay {4} {pause game};
+        #delay {5} {play};
+        #delay {6} {unpause};
+        #delay {7} {#map goto 25088;#var sectionz_busy 0};
+    };
 };
 
 #alias {set20} {
-    press start;
-    #delay {1} {pause game};
-    #delay {2} {play};
-    #delay {3} {continue20};
-    #delay {4} {pause game};
-    #delay {5} {play};
-    #delay {6} {unpause};
-	#delay {7} {#map goto 24948};
+    #if {$sectionz_busy} {
+        #echo {<faa>set20/set40 is already running, wait for it to finish.<088>};
+    } {
+        #var sectionz_busy 1;
+        press start;
+        #delay {1} {pause game};
+        #delay {2} {play};
+        #delay {3} {continue20};
+        #delay {4} {pause game};
+        #delay {5} {play};
+        #delay {6} {unpause};
+        #delay {7} {#map goto 24948;#var sectionz_busy 0};
+    };
 };
 
 #NOP -- MAKE BALANGOOL GEAR FROM SECTIONZ;

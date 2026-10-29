@@ -1,0 +1,91 @@
+#class {xptracker} {kill};
+#class {xptracker} {open};
+
+#NOP -- Counts kills and xp all the time, bot or not. The caption panel shows it while no bot is running;
+#NOP -- reset_xp starts it over (reset_trackers does too, on connect);
+
+#var xptrack[mobs] 0;
+#var xptrack[xp] 0;
+#format {xptrack[start-time]} {%T} {};
+
+#alias {reset_xp} {
+    #var xptrack[mobs] 0;
+    #var xptrack[xp] 0;
+    #format {xptrack[start-time]} {%T} {};
+    #if {"$draw[status][active]" == "on"} {_caption_data_bot};
+};
+
+#NOP -- Run after each kill to count the xp it gave (update_xp start sets the starting xp for a bot);
+#alias update_xp {
+    #if {"%1" == "start"} {
+        #line oneshot #action {^You have %* total xp.$} {
+            #if {$bot[active]} {
+                #math bot[stats][xp] 0;
+                #math bot[stats][loop][xp] 0;
+            };
+            #format my[xp] {%d} {%%1};
+            #unaction {^You have %* total xp.$};
+        } {2};
+        xp;
+        #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
+    } {
+        #math xptrack[mobs] {$xptrack[mobs] + 1};
+        #if {$bot[active]} {
+            #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
+            #math bot[stats][mobs] {$bot[stats][mobs] + 1};
+        };
+
+        #line oneshot #action {^You have %* total xp.$} {
+            #format temp_xp {%d} {%%1};
+            #if {$my[xp] > 0 && "$temp_xp" != "$my[xp]"} {
+                #if {$temp_xp > $my[xp]} {
+                    #math fight_xp {$temp_xp - $my[xp]};
+                    #math xptrack[xp] {$xptrack[xp] + $fight_xp};
+                    #if {$bot[active]} {
+                        #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
+                        #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
+                    };
+                    #format my[xp] {%d} {%%1};
+                } {
+                    #NOP -- If current xp is less than total xp (spent it on stats or died) update my[xp] to reflect the new baseline;
+                    #format my[xp] {%d} {%%1};
+                }
+            } {
+                #format my[xp] {%d} {%%1};
+            };
+            #unaction {^You have %* total xp.$};
+        };
+        xp;
+        #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
+    };
+
+    #line oneshot #action {^At this rate you will level in %*} {
+        #line gag;
+    } {2};
+};
+
+#NOP -- .xp_rate <xp> <start time>: sets xp_rate_str (xp per hour) and xp_time_str (time since start);
+#alias {.xp_rate} {
+    #format {tmpXpNow} {%T} {};
+    #math tmpXpTime {$tmpXpNow - %2};
+    #if {$tmpXpTime > 3600} {
+        #math tmpXpTime {$tmpXpTime / 3600 * 1.00};
+        #math tmpXpRate {%1 / $tmpXpTime};
+        #var xp_time_str $tmpXpTime Hrs;
+    } {
+        #math tmpXpTime {$tmpXpTime / 60 * 1.00};
+        #NOP -- No time has passed yet right after a reset;
+        #if {$tmpXpTime > 0} {#math tmpXpRate {%1 * 60 / $tmpXpTime}} {#var tmpXpRate 0};
+        #var xp_time_str $tmpXpTime mins;
+    };
+    #var xp_rate_str @thousandsFormatNumber{$tmpXpRate};
+};
+
+#NOP -- Caption text for when no bot is running, the bot's own xp lines take its place while one is;
+#alias {.xp_caption} {
+    .xp_rate {$xptrack[xp]} {$xptrack[start-time]};
+    #var caption_toggle[xp][string] {<cde>XP Tracker: <088>$xp_time_str};
+    #cat caption_toggle[xp][string] {\n Kills: $xptrack[mobs] XP: @thousandsFormatNumber{$xptrack[xp]} ($xp_rate_str/hr)};
+};
+
+#class {xptracker} {close};

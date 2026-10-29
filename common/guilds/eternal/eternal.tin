@@ -436,12 +436,17 @@
 	#var fry_round 1;
 } {2};
 
+#nop - farsight_notify puts a NOTE in the chat window/log and posts to the farsight Discord channel (and general), farsight_ctell does that and ctells too;
 #action {^You notice that %1 has come into view.} {
 	#if {!$idle_flag} {
-		.notify {%1 has reset.};
-		#if $toggles[farsight_notify] {
-			ctell %1 has reset.
+		#if {"$toggles[farsight_notify]" != "1" && "$toggles[farsight_ctell]" != "1"} {#return};
+		.notify {<fcb>FARSIGHT<ddd> %1 has reset.};
+		#nop - no farsight webhook: post to general only;
+		#if {&webhook[url][farsight] || &webhook[url][general]} {
+			#if {&webhook[url][farsight]} {#var discordChannel $webhook[url][farsight]} {#var discordChannel $webhook[url][general]};
+			postDiscord FARSIGHT: $user_cap sees %1 has reset;
 		};
+		#if {"$toggles[farsight_ctell]" == "1"} {ctell %1 has reset.};
 	};
 };
 

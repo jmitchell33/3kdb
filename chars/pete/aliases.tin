@@ -144,6 +144,8 @@
     prots_grace;
     #NOP powers;
     es;
+    #NOP -- maint on: same 11 (maint default), adds the safety watch and comes back after a linkdeath;
+    maint;
 };
 
 #NOP -- cycle through coffin/freezer/cooler for a corpse;
@@ -381,13 +383,14 @@
     kill delundar;
 };
 
-#NOP -- beloch bot;
+#NOP -- beloch bot: auto_beloch is read by the Beloch action in actions.tin, off until belochboton;
+#if {&{auto_beloch} == 0} {#var auto_beloch 0};
 #alias {belochboton} {
-    #var {$auto_beloch} {1};
+    #var auto_beloch 1;
 };
 
 #alias {belochbotoff} {
-    #var {$auto_beloch} {0};
+    #var auto_beloch 0;
 };
 
 #alias {knight6} {
@@ -402,7 +405,7 @@
     #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2};
 };
 
-#NOP -- amy;
+#NOP -- amy: steps to get to freeway bear;
 #alias {amy1} {s;e;ne;n;n;n};
 #alias {amy2} {u;e;n;nw;ne;n;d;d;s};
 #alias {amy3} {n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
@@ -528,28 +531,53 @@
     #showme $petealias_name $petealias_desc;
 };
 
+#NOP -- filter types, listed in the help and matched by the first letters (corp finds corpses);
+#list pete3kdb_types create {corpses;boosts;combat;guild;areas;misc};
+
+#NOP -- pete3kdb <filter>: a filter, or the start of one, lists that type. Anything else lists aliases starting with it;
 #alias {pete3kdb} {
-    #var tempflag 0;
-    #var number &pete3kdb[];
-	#echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
-    #echo {<ccf>  -------    <ffa>PETE'S ALIASES <fff>($number)  <ccf>-------    <088>  };
-    #echo {    Filters:  <eaf>corpses boosts combat misc<088>       };
-    #echo {                  <eaf>guild spells<088>                 };
+    #var bdb_total 0;
+    #format bdb_arg {%l} {%1};
+    #var bdb_mode {name};
+    #if {"$bdb_arg" != ""} {
+        #foreach {$pete3kdb_types[%*]} {bdb_type} {
+            #regex {$bdb_type} {^$bdb_arg} {#var bdb_mode {type}};
+        };
+    };
+    #echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
+    #echo {<ccf>  -------    <ffa>PETE'S ALIASES <fff>(&pete3kdb[])  <ccf>-------    <088>  };
     #echo {<ccf>  ----------------------------------------   <088>  };
     #echo {<ccf>     Name                 Usage              <088>  };
     #list pete3kdb index name;
     #list pete3kdb sort;
     #foreach $pete3kdb[%*] index {
-        #regexp {"%1"} {"$index[type]"} {
-            #var tempflag 1;
+        #var bdb_hit 0;
+        #if {"$bdb_arg" == ""} {
+            #var bdb_hit 1;
+        };
+        #elseif {"$bdb_mode" == "type"} {
+            #regex {$index[type]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #else {
+            #regex {$index[name]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #if {$bdb_hit} {
+            #math bdb_total {$bdb_total + 1};
             format_petesaliases {     $index[name]} {$index[desc]};
         };
     };
-    #if !$tempflag {
-        #foreach $pete3kdb[%*] index {
-            format_petesaliases {     $index[name]} {$index[desc]};
-        };
+    #if {$bdb_total} {
+        #echo {\n<ccf>  Total of $bdb_total aliases returned.<088>};
+    } {
+        #echo {<ccf>  No matches found for <eed>%1<ccf>.<088>};
     };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<cfc>  Sort using filters: <eaf>pete3kdb <filter><088>};
+    #echo {    <fff>Filters:  <eaf>corpses boosts combat guild<088>};
+    #echo {              <eaf>areas misc<088>};
+    #echo {<cfc>  Part of a filter works too: <eaf>pete3kdb corp<088>};
+    #echo {<cfc>  Not a filter? Lists aliases starting with it: <eaf>pete3kdb my<088>};
+    #echo {<ccf>  ----------------------------------------   <088>  };
 };
 
 #list pete3kdb clear;
@@ -563,7 +591,8 @@
 #list pete3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list pete3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list pete3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
-#list pete3kdb add {{{name} {b} {type} {corpse} {desc} {Use a corpse}}};
+#list pete3kdb add {{{name} {b} {type} {corpses} {desc} {Stop singing and perform dirge on the corpse here}}};
+#list pete3kdb add {{{name} {.cycle_corpses} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler) and perform dirge on it}}};
 
 #NOP -- boosts;
 #list pete3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -574,6 +603,10 @@
 #list pete3kdb add {{{name} {setup_defense} {type} {combat} {desc} {Setup defenses}}};
 #list pete3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
 #list pete3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
+#list pete3kdb add {{{name} {setup_reflex} {type} {combat} {desc} {Set reflexes: healing hands, blade dance, martial assault, dirge a corpse on low karma}}};
+#list pete3kdb add {{{name} {def} {type} {combat} {desc} {Defend a player: def <name>}}};
+#list pete3kdb add {{{name} {3kr} {type} {combat} {desc} {Show the 3kReport kill stats}}};
+#list pete3kdb add {{{name} {set3kreport} {type} {combat} {desc} {Set 3kReport columns: killer, rounds, class, xp, coins}}};
 
 #NOP -- misc;
 #list pete3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -585,25 +618,35 @@
 #list pete3kdb add {{{name} {wa} {type} {misc} {desc} {map run to vnum or name}}};
 #list pete3kdb add {{{name} {gagson} {type} {misc} {desc} {turn gags on}}};
 #list pete3kdb add {{{name} {gagsoff} {type} {misc} {desc} {turn gags off}}};
-#list pete3kdb add {{{name} {pryout} {type} {misc} {desc} {attempt to get out of prysmia room}}};
-#list pete3kdb add {{{name} {p6bar} {type} {misc} {desc} {go to barrakeith}}};
-#list pete3kdb add {{{name} {barhel} {type} {misc} {desc} {return from barrakeith}}};
-#list pete3kdb add {{{name} {challenge_all} {type} {misc} {desc} {challenge all mobs in arena}}};
-#list pete3kdb add {{{name} {belochboton} {type} {misc} {desc} {beloch bot ON}}};
-#list pete3kdb add {{{name} {belochbotoff} {type} {misc} {desc} {beloch bot OFF}}};
-#list pete3kdb add {{{name} {arena_kill_all} {type} {misc} {desc} {kill all arena mobs}}};
-#list pete3kdb add {{{name} {arena_kill_all2} {type} {misc} {desc} {kill all arena mobs except beloch}}};
-#list pete3kdb add {{{name} {pede_run} {type} {misc} {desc} {gather all pedes}}};
-#list pete3kdb add {{{name} {kayos_run} {type} {misc} {desc} {gathers all the hunting kayos mobs}}};
 #list pete3kdb add {{{name} {bagset} {type} {misc} {desc} {set # of bags to cycle thru}}};
 #list pete3kdb add {{{name} {bag1} {type} {misc} {desc} {put all into bags 1 through bagcount}}};
 #list pete3kdb add {{{name} {bag2} {type} {misc} {desc} {empty bags back to inventory}}};
-#list pete3kdb add {{{name} {bag3} {type} {misc} {desc} {donate all from each bag high index to 1}}};
 #list pete3kdb add {{{name} {refd} {type} {misc} {desc} {drop forge and reforge 12 daggers}}};
+#list pete3kdb add {{{name} {quit} {type} {misc} {desc} {Quit guard: use quit REALLY to really quit}}};
+#list pete3kdb add {{{name} {.startlog} {type} {misc} {desc} {Bot debug log: .startlog on/off/del}}};
+
+#NOP -- areas;
+#list pete3kdb add {{{name} {pryout} {type} {areas} {desc} {attempt to get out of prysmia room}}};
+#list pete3kdb add {{{name} {challenge_all} {type} {areas} {desc} {challenge all mobs in arena}}};
+#list pete3kdb add {{{name} {arena_kill_all} {type} {areas} {desc} {kill all arena mobs}}};
+#list pete3kdb add {{{name} {arena_kill_all2} {type} {areas} {desc} {kill all arena mobs except beloch}}};
+#list pete3kdb add {{{name} {belochboton} {type} {areas} {desc} {beloch bot ON}}};
+#list pete3kdb add {{{name} {belochbotoff} {type} {areas} {desc} {beloch bot OFF}}};
+#list pete3kdb add {{{name} {pede_run} {type} {areas} {desc} {gather all pedes}}};
+#list pete3kdb add {{{name} {kayos_run} {type} {areas} {desc} {gathers all the hunting kayos mobs}}};
+#list pete3kdb add {{{name} {charm} {type} {areas} {desc} {Forest of charms steps: charm 1-8 or key, charm help}}};
+#list pete3kdb add {{{name} {amy1} {type} {areas} {desc} {Freeway bear (amy): walk part 1}}};
+#list pete3kdb add {{{name} {amy2} {type} {areas} {desc} {Freeway bear (amy): walk part 2}}};
+#list pete3kdb add {{{name} {amy3} {type} {areas} {desc} {Freeway bear (amy): walk part 3}}};
+#list pete3kdb add {{{name} {amy4} {type} {areas} {desc} {Freeway bear (amy): smash the grate, squeeze through, pry the crack}}};
+#list pete3kdb add {{{name} {amy5} {type} {areas} {desc} {Freeway bear (amy): go through the crack and walk the last part}}};
 
 #nop -- guild;
 #list pete3kdb add {{{name} {dh} {type} {guild} {desc} {Defensive Harmony: increase resistances for yourself or others}}};
 #list pete3kdb add {{{name} {hl} {type} {guild} {desc} {Heartening Laugh: +CON}}};
+#list pete3kdb add {{{name} {eva} {type} {guild} {desc} {Thought wave a mob to see its strengths and weaknesses: eva <mob>}}};
 
+
+.add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
 
 #class {player_aliases} {close};
