@@ -35,7 +35,6 @@
 #var gc_last_round 0;
 
 #var fight_bblast 0;
-#var fight_fshroud 0;
 
 
 #NOP -- Alias to swap animal affinity;
@@ -153,6 +152,7 @@
 	_check_power {BC} {greater biocurrent};
 	#if {$my[powers][BC][active]} {#NOP} {_check_power {bc} {biocurrent}};
 	_check_power {Cg} {conductive grasp};
+	_check_power {fs} {flaming shroud};
 
 	#NOP -- GP1 Healing and Decision Tree to use Convert or Body Fuel;
 	#NOP -- If you've yet to use a power this round, we'll use body fuel to replenish psi or convert;
@@ -187,7 +187,7 @@
 	#NOP -- The "if I haven't done anything yet and have Psi/Stam Section;
 	#NOP --- Blur, Demoralize, Recall Pain & Recall Agony;
 
-	#if {$mip[round] == 0} {#var fight_bblast 0;#var fight_fshroud 0};
+	#if {$mip[round] == 0} {#var fight_bblast 0};
 
 	#if {!$hbp} {
 		#if {$my[implants][dm][active] && !$mob[demoralize] && $incombat} {
@@ -196,18 +196,13 @@
 	};
 
 	#if {!$hbp} {
-		#if {$my[implants][bb][active] && $incombat && !$fight_bblast} {
+		_bblast_ok;
+		#if {$my[implants][bb][active] && $incombat && !$fight_bblast && $bblast_ok} {
 			checkStrategy {bblast} {_use_power brilliant blast};
 			#if {$hbp} {#var fight_bblast 1};
 		};
 	};
 
-	#if {!$hbp} {
-		#if {$my[implants][fs][active] && $incombat && !$fight_fshroud} {
-			checkStrategy {fshroud} {_use_power flaming shroud};
-			#if {$hbp} {#var fight_fshroud 1};
-		};
-	};
 
 	#if {$mip[round] < $gc_last_round} {#var gc_last_round 0};
 	#if {!$hbp} {
@@ -245,6 +240,19 @@
 		};
 	};
   gp_round_maintenance;
+};
+
+#alias {_bblast_ok} {
+	#var bblast_ok 0;
+	#var bblast_total 0;
+	#var bblast_aggro 0;
+	#foreach {$room[mobs][%*]} {bblast_mob} {
+		#if {"$bblast_mob[autoName]" != ""} {
+			#math bblast_total {$bblast_total + 1};
+			#if {"$bblast_mob[aggressive]" == "1"} {#math bblast_aggro {$bblast_aggro + 1}};
+		};
+	};
+	#if {$bblast_total == 1 || ($bblast_total > 1 && $bblast_aggro == $bblast_total)} {#var bblast_ok 1};
 };
 
 #NOP -- Alias to check if the power is active;

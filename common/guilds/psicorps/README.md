@@ -97,11 +97,11 @@ Make sure to add adapt body to your power configuration with `addp ab`.
 
 Sustained powers (valor, verve, vigor, biofeedback, precognition, barriers, jaws, astral constructs, adapt body...) are kept up by the heartbeat when they are picked in `maint` and their implant is on (`addp`). Maint starts on with every power picked, so nothing changes until you `maint del <power>` one. `maint list` shows the names, `maint-help` the commands. Picks save with the character.
 
-### Demoralize, brilliant blast, flaming shroud
+### Demoralize, brilliant blast
 
-Single-use powers are strategies: `strategy demoralize`, `strategy bblast`, `strategy fshroud`. Brilliant blast and flaming shroud are used once per fight, at the start of combat; demoralize is repeated until the target can't be re-demoralized.
+Single-use powers are strategies: `strategy demoralize`, `strategy bblast`. Brilliant blast is used once per fight, at the start of combat; demoralize is repeated until the target can't be re-demoralized.
 
-Make sure to add them to your power configuration: `addp dm`, `addp bb` and `addp fs`
+Make sure to add them to your power configuration: `addp dm` and `addp bb`. Flaming shroud wears off, so it is a maint power (`addp fs`, `maint del fshroud` to stop it)
 
 ### Greater mindlink
 
