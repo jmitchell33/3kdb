@@ -279,8 +279,20 @@
                         #if {$rep_change == 0 && ($rep_hits_total > $rep_hits_queried || $rep_query_seq > $rep_list_seq)} {
                             #var rep_hold 1;
                         };
-                        #if {$debug[reps]} {#echo {<ffa>debug reps - filing $tmpFaction, combat is $rep_burst_combat, change $rep_change over $rep_hits new hits, hold is $rep_hold<088>}};
-                        #if {$rep_hits > 0 && !$rep_hold} {
+                        #NOP -- Rep is capped at plus or minus 1,000,000, so a flat row sitting;
+                        #NOP -- on the cap is a move that went nowhere.  Spend the hits so the;
+                        #NOP -- retry check is satisfied, but keep them off the summary;
+                        #var rep_capped 0;
+                        #if {$rep_change == 0 && ($repData[$tmpIx][current_value] >= 1000000 || $repData[$tmpIx][current_value] <= -1000000)} {
+                            #var rep_capped 1;
+                            #var rep_hold 0;
+                        };
+                        #if {$debug[reps]} {#echo {<ffa>debug reps - filing $tmpFaction, combat is $rep_burst_combat, change $rep_change over $rep_hits new hits, hold is $rep_hold, capped is $rep_capped<088>}};
+                        #if {$rep_hits > 0 && $rep_capped} {
+                            #var repBurstUsed[$tmpFaction] $repBurst[$tmpFaction];
+                            #math rep_hits_filed {$rep_hits_filed + $rep_hits};
+                        };
+                        #if {$rep_hits > 0 && !$rep_hold && !$rep_capped} {
                             #NOP -- The change is accounted for now, so the hits are spent;
                             #var repBurstUsed[$tmpFaction] $repBurst[$tmpFaction];
                             #math rep_hits_filed {$rep_hits_filed + $rep_hits};
