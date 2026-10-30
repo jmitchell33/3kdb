@@ -3,8 +3,35 @@
 
 #NOP -- 3kdb alias library with separated listing and description features;
 
+#NOP Word-wrap the description so continuation lines stay under the description column;
 #alias format_3kdblibrary {
-    #format {command_name} {  <cff>%-20s  <deb>%-60s<088>} {%1} {%2};
+    #screen get cols lib_cols;
+    #if {&screen[width] && &split[right]} {
+        #math lib_cols {$screen[width] - $split[left] - $split[right]};
+    };
+    #math lib_width {$lib_cols - 25};
+    #if {$lib_width < 20} {#var lib_width 20};
+    #var lib_name {%1};
+    #var lib_line {};
+    #var lib_desc {%2};
+    #replace lib_desc { } {;};
+    #foreach {$lib_desc} {lib_word} {
+        #format lib_len {%L} {$lib_line};
+        #if {$lib_len == 0} {
+            #var lib_line {$lib_word};
+        } {
+            #format lib_len {%L} {$lib_line $lib_word};
+            #if {$lib_len > $lib_width} {
+                #format {command_name} {  <cff>%-20s  <deb>%s<088>} {$lib_name} {$lib_line};
+                #echo $command_name;
+                #var lib_name {};
+                #var lib_line {$lib_word};
+            } {
+                #var lib_line {$lib_line $lib_word};
+            };
+        };
+    };
+    #format {command_name} {  <cff>%-20s  <deb>%s<088>} {$lib_name} {$lib_line};
     #echo $command_name;
 };
 
@@ -13,69 +40,152 @@
     #echo $command_name;
 };
 
-#alias library3kdb {
+#NOP Usage help, printed after the listing so it is on screen when the list ends;
+#alias dblib_help {
+    #echo {};
+    #echo {<ccf>  ---------------------------------------    <088>};
+    #echo {<ceb>       For more info: dbinfo <alias> <088>};
+    #echo {<cfc>  Sort using filters: dblib <filter> <088>};
+    #echo {    <fff>Filters:  <eaf>eternal rolm crafting mapping<088>};
+    #echo {                <eaf>chaos fantasy science guild misc<088>};
+    #echo {                   <eaf>corpse combat profession debug<088>};
+    #echo {                      <eaf>trackers bot mip<088>};
+    #echo {<cfc>  Guild aliases: <eaf>dblib jug<cfc> (any 3+ letters of a guild)<088>};
+    #echo {<cfc>  Not a filter? Lists aliases starting with it: <eaf>dblib mi<088>};
+    #echo {<ccf>  ---------------------------------------    <088>};
+    #echo {<ceb> Use <bca>%1<ceb> for all aliases %2<088>};
+};
+
+#NOP List by filter type, then by guild name (3+ letters: jug, jugger, juggernaut),
+#NOP else by alias name prefix. Guilds come from common/guilds/<guild>/ locations;
+#alias dblib_mode {
+    #var lib_mode {prefix};
+    #var lib_guild {};
+    #loop 1 &library3kdb_type[] i {
+        #if {"%1" == "$library3kdb_type[$i]"} {
+            #var lib_mode {type};
+        };
+    };
+    #var lib_other {};
+    #format lib_len {%L} {%1};
+    #format lib_word {%l} {%1};
+    #if {"$lib_mode" == "prefix" && $lib_len >= 3} {
+        #loop 1 &library3kdb_location[] i {
+            #if {"$lib_guild" == ""} {
+                #var lib_dir {};
+                #regex {$library3kdb_location[$i]} {common/guilds/{[a-z-]+}/} {
+                    #var lib_dir {&1};
+                };
+                #regex {$lib_dir} {^$lib_word} {
+                    #var lib_guild {$lib_dir};
+                    #var lib_mode {guild};
+                };
+            };
+        };
+        #NOP Other guilds' entries are not loaded (see the #if blocks below), remember the name for a hint;
+        #if {"$lib_guild" == ""} {
+            #foreach {$library3kdb_guilds[%*]} {lib_dir} {
+                #if {"$lib_other" == ""} {
+                    #regex {$lib_dir} {^$lib_word} {
+                        #var lib_other {$lib_dir};
+                    };
+                };
+            };
+        };
+    };
+};
+
+#NOP Guild folders under common/guilds, for the not-your-guild hint;
+#list library3kdb_guilds create {adventurer;angel;bard;bladesinger;breed;changeling;cyborg;elemental;eternal;fremen;gentech;jedi;juggernaut;knight;knights-zorb;mage;monk;necromancer;priest;psicorps;sii};
+
+#NOP Set lib_hit to 1 when library entry %2 matches filter %1 under lib_mode;
+#NOP Guild mode also keeps common/guilds/GUILD/ entries, which apply to every guild;
+#alias dblib_hit {
+    #var lib_hit 0;
+    #if {"$lib_mode" == "type"} {
+        #if {"%1" == "$library3kdb_type[%2]"} {
+            #var lib_hit 1;
+        };
+    };
+    #elseif {"$lib_mode" == "guild"} {
+        #regex {$library3kdb_location[%2]} {common/guilds/{$lib_guild|GUILD}/} {
+            #var lib_hit 1;
+        };
+    };
+    #else {
+        #regex {$library3kdb_name[%2]} {^%1} {
+            #var lib_hit 1;
+        };
+    };
+};
+
+#alias dblib {
     #var tmpFlag 1;
     #var totalType 0;
     #if {"%1" == ""} {
         #var tmpFlag 0;
         #echo {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>};
-        #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>(&library3kdb_name[])<088>  <ccf>-------    <088>};
-        #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
-        #echo {<cfc>  Sort using filters: library3kdb <filter> <088>};
-        #echo {    <fff>Filters:  <eaf>eternal rolm crafting mapping<088>};
-        #echo {                <eaf>chaos fantasy science guild misc<088>};
-        #echo {                   <eaf>corpse combat profession debug<088>};
-        #echo {                      <eaf>trackers bot mip<088>};
-        #echo {<ccf>  ---------------------------------------    <088>};
-        #echo {<ceb> Use <bca>library3kdb1<ceb> for all aliases without description<088>};
+        #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088>    <ccf>-------    <088>};
         #echo {};
         format_3kdblibrary {Alias} {Description};
         #loop 1 &library3kdb_name[] i {
             format_3kdblibrary {$library3kdb_name[$i]} {$library3kdb_desc[$i]};
         };
+        #echo {\n<ccf>  Total of &library3kdb_name[] aliases returned.        <088>};
     } {
+        dblib_mode {%1};
         #format tmpType {%u} {%1};
-        #echo {<ccf>  -------        $tmpType ALIASES       -------    <088>};
+        #if {"$lib_mode" == "guild"} {
+            #format tmpType {%u} {$lib_guild};
+        };
+        #if {"$lib_mode" != "prefix"} {
+            #echo {<ccf>  -------        $tmpType ALIASES       -------    <088>};
+        } {
+            #echo {<ccf>  -------    ALIASES STARTING WITH $tmpType    -------    <088>};
+        };
         format_3kdblibrary {Alias} {Description};
-        #loop 1 &library3kdb_type[] i {
-            #if {"%1" == "$library3kdb_type[$i]"} {
+        #loop 1 &library3kdb_name[] i {
+            dblib_hit {%1} {$i};
+            #if {$lib_hit} {
                 #var tmpFlag 0;
                 format_3kdblibrary {$library3kdb_name[$i]} {$library3kdb_desc[$i]};
                 #math totalType {$totalType + 1};
             };
         };
-        #echo {\n<ccf>  Total of $totalType $tmpType aliases returned.        <088>};
+        #if {"$lib_mode" != "prefix"} {
+            #echo {\n<ccf>  Total of $totalType $tmpType aliases returned.        <088>};
+        } {
+            #echo {\n<ccf>  Total of $totalType aliases starting with $tmpType returned.        <088>};
+        };
     };
     #if {$tmpFlag} {
         #echo {<ccf>  ---------------------------------------    <088>};
         #echo {<ccf>  No matches found for <eed>%1<def>.    <088>};
+        #if {"$lib_other" != ""} {
+            #echo {<ccf>  <eed>$lib_other<ccf> aliases only list while you are on $lib_other.    <088>};
+        };
         #echo {<ccf>  ---------------------------------------    <088>};
     };
+    dblib_help {dblib1} {without description};
 };
 
-#alias library3kdb1 {
+#alias dblib1 {
     #var tmpFlag 1;
     #if {"%1" == ""} {
         #var tmpFlag 0;
         #echo {<ccf>  -------<088>           <ffa>3kdb<088>           <ccf>-------<088>};
         #echo {<ccf>  -------    <ffa>ALIAS LIBRARY<088> <fff>(&library3kdb_name[])<088>  <ccf>-------    <088>};
-        #echo {<ceb>       For more info: 3kdbinfo <alias> <088>};
-        #echo {<cfc>  Sort using filters: library3kdb <filter> <088>};
-        #echo {    <fff>Filters:  <eaf>eternal rolm crafting mapping<088>};
-        #echo {                <eaf>chaos fantasy science guild misc<088>};
-        #echo {                   <eaf>corpse combat profession debug<088>};
-        #echo {                      <eaf>trackers bot mip<088>};
-        #echo {<ccf>  ---------------------------------------    <088>};
-        #echo {<ceb> Use <bca>library3kdb<ceb> for all aliases + description<088>};
         #echo {};
         format_3kdblibrary1 {Alias};
         #loop 1 &library3kdb_name[] i {
             format_3kdblibrary1 {     $library3kdb_name[$i]};
         };
     } {
+        dblib_mode {%1};
         format_3kdblibrary1 {Alias};
-        #loop 1 &library3kdb_type[] i {
-            #if {"%1" == "$library3kdb_type[$i]"} {
+        #loop 1 &library3kdb_name[] i {
+            dblib_hit {%1} {$i};
+            #if {$lib_hit} {
                 #var tmpFlag 0;
                 format_3kdblibrary1 {     $library3kdb_name[$i]};
             };
@@ -84,10 +194,11 @@
     #if {$tmpFlag} {
         #echo {<ccf>  No matches found for <eed>%1<def>.    <088>};
     };
+    dblib_help {dblib} {+ description};
 };
 
-#NOP Check if alias exists in library3kdb and display info;
-#alias 3kdbinfo {
+#NOP Check if alias exists in dblib and display info;
+#alias dbinfo {
     #var alias_found 0;
     #loop 1 &library3kdb_name[] i {
         #if {"%0" == "$library3kdb_name[$i]"} {
@@ -189,6 +300,7 @@
 .add_library {findhere-auto} {mapping} {findhere, then walk the exits that narrow it down until the room is found} {findhere-auto [steps] / findhere-auto stop} {modules/map/findhere.tin};
 .add_library {mapexplore} {mapping} {walk and map every unvisited room of an area, then save} {mapexplore [area] / mapexplore stop} {modules/map/mapper.tin};
 .add_library {loadmap} {mapping} {load mapper and maphelper then goto cursor vnum} {'loadmap'} {modules/map/map.tin};
+.add_library {rotate} {mapping} {Rejected Game: line the map and inductor/crack path up with the room you are in} {'rotate'} {common/map/rej_rotate.tin};
 .add_library {hidemap} {mapping} {hide vtmap split and drawmap} {'hidemap'} {modules/map/map.tin};
 .add_library {voidlink} {mapping} {link exit to vnum and insert void between} {voidlink <dir> <vnum>} {modules/map/mapper.tin};
 .add_library {hmavoid} {mapping} {mark CoT portal exits avoided for pathing} {'hmavoid'} {modules/map/mapper.tin};
@@ -346,6 +458,8 @@
 .add_library {c_invis} {guild} {setup invisibility with contingency} {'c_invis'} {common/guilds/mage/aliases.tin};
 .add_library {clear_align} {guild} {clear prot-good and prot-evil flags in defs before recasting} {'clear_align'} {common/guilds/mage/aliases.tin};
 .add_library {clear_prots} {guild} {remove entire defs table used by mage defense tracking} {'clear_prots'} {common/guilds/mage/aliases.tin};
+.add_library {maint} {guild} {keep picked defenses up via the heartbeat, maint setup also sets their contingencies} {maint setup, maint, maint <spell>, maint default/off/all/clear/list} {common/guilds/mage/aliases.tin};
+.add_library {maint-help} {guild} {help for maint: commands, spell names and how it works} {'maint-help'} {common/guilds/mage/aliases.tin};
 .add_library {summon_types} {guild} {print summon roster by slot with scroll panels} {'summon_types'} {common/guilds/mage/summoner.tin};
 .add_library {summon_select} {guild} {pick summon for strategy list menu off clear or monster key} {summon_select key or off or clear or empty for menu} {common/guilds/mage/summoner.tin};
 .add_library {summon_str} {guild} {giant strength on each summon stack self and golem} {'summon_str'} {common/guilds/mage/summoner.tin};
@@ -381,6 +495,8 @@
 #if {"$guild" == "bard"} {
 .add_library {fillwater} {guild} {go to angel fountain in wayhaven and fill pitcher and glass with water} {'fillwater'} {common/guilds/bard/aliases.tin};
 .add_library {clear_prots} {guild} {turn off all defenses} {'clear_prots'} {common/guilds/bard/aliases.tin};
+.add_library {maint} {guild} {keep picked defenses and songs up via the heartbeat, picks save with ld} {maint, maint <spell>, maint off/all/clear/list} {common/guilds/bard/aliases.tin};
+.add_library {maint-help} {guild} {help for maint: commands, spell names and how it works} {'maint-help'} {common/guilds/bard/aliases.tin};
 .add_library {vamp} {guild} {perform vampire - damage dealt to mob is returned as healing} {'vamp'} {common/guilds/bard/aliases.tin};
 .add_library {black} {guild} {perform black - causes mob to flee} {black <target>} {common/guilds/bard/aliases.tin};
 .add_library {.itune} {guild} {perform invigorating tune - short term benefit which will differ for each person} {'.itune <player>'} {common/guilds/bard/aliases.tin};
@@ -411,11 +527,11 @@
 .add_library {critic} {guild} {perform caustic critic} {'critic'} {common/guilds/bard/aliases.tin};
 .add_library {ebolt} {guild} {perform energy bolt} {'ebolt'} {common/guilds/bard/aliases.tin};
 .add_library {es} {guild} {empowered strikes - weapon strikes do more damage} {'es'} {common/guilds/bard/aliases.tin};
-.add_library {reflex_clear} {guild} {clear reflex perform state} {'reflex_clear'} {common/guilds/bard/aliases.tin};
-.add_library {reflex_critic} {guild} {reflex cast caustic critic when spell points above threshold} {reflex critic then threshold spell points number} {common/guilds/bard/aliases.tin};
-.add_library {reflex_ow} {guild} {reflex dirge corpse when karma below threshold} {reflex ow then threshold karma number} {common/guilds/bard/aliases.tin};
-.add_library {reflex_ma} {guild} {reflex martial assault when guild points above threshold} {reflex ma then threshold karma number} {common/guilds/bard/aliases.tin};
-.add_library {reflex_soothe} {guild} {reflex soothe when spell points below threshold} {reflex soothe then threshold spell points number} {common/guilds/bard/aliases.tin};
+.add_library {reflex_clear} {guild} {remove every reflex you have set} {'reflex_clear'} {common/guilds/bard/aliases.tin};
+.add_library {reflex_critic} {guild} {auto cast caustic critic whenever your SP is above <sp> - e.g. reflex_critic 800 fires at 801+ SP} {reflex_critic <sp>} {common/guilds/bard/aliases.tin};
+.add_library {reflex_ow} {guild} {auto dirge a corpse (ow) whenever your karma drops below <karma> - e.g. reflex_ow 300 fires at 299 or less} {reflex_ow <karma>} {common/guilds/bard/aliases.tin};
+.add_library {reflex_ma} {guild} {auto martial assault whenever your karma is above <karma> - e.g. reflex_ma 600 fires at 601+ karma} {reflex_ma <karma>} {common/guilds/bard/aliases.tin};
+.add_library {reflex_soothe} {guild} {auto soothe whenever your SP drops below <sp> - e.g. reflex_soothe 300 fires at 299 or less} {reflex_soothe <sp>} {common/guilds/bard/aliases.tin};
 };
 
 #NOP -------------------------- Angel Guild Aliases ----------------------------------;
@@ -542,7 +658,7 @@
 .add_library {beepoff} {misc} {turn off terminal beep on events (toggle beep)} {'beepoff'} {common/aliases.tin};
 .add_library {qq} {misc} {toggle mouse capture for clickable UI (toggle mouseActive)} {'qq'} {common/events.tin};
 .add_library {toggle-list} {misc} {3kdb current toggles list} {'toggle-list'} {common/toggles.tin};
-.add_library {sessionlog} {misc} {log the whole game session to logs/<user>/sessions/<char>_<date>.log, old days zstd compressed; toggle sessionlog keeps it on for this character} {sessionlog on|off} {modules/sessionlog/sessionlog.tin};
+.add_library {sessionlog} {misc} {log the whole game session to logs/<user>/sessions/<char>_<date>.log, old days zstd compressed - toggle sessionlog keeps it on for this character} {sessionlog on|off} {modules/sessionlog/sessionlog.tin};
 .add_library {grep} {misc} {search session scrollback buffer} {grep <pattern>} {common/aliases.tin};
 .add_library {do_action} {misc} {run all queued actionStack entries then clear stack} {'do_action'} {common/aliases.tin};
 .add_library {add_action} {misc} {queue one action table row on actionStack if name not already queued} {add_action braced table row same shape as actionStack items} {common/aliases.tin};
@@ -584,8 +700,8 @@
 .add_library {fdkey} {misc} {send saved door combo after dsolve same door number} {fdkey <door number>} {common/areas/falloutshelter.tin};
 .add_library {.fly} {misc} {Guild fly powers} {'.fly'} {common/aliases.tin};
 .add_library {.land} {misc} {Land from guild fly powers} {'.land'} {common/aliases.tin};
-.add_library {zodiac_stones} {Celestial Zodiac Stone Reference} {'zodiac_stones'} {common/areas/celestial_zodiacs.tin};
-.add_library {zodiac_times} {Celestial Zodiac Spawn Times} {'zodiac_times'} {common/areas/celestial_zodiacs.tin};
+.add_library {zodiac_stones} {misc} {Celestial Zodiac Stone Reference} {'zodiac_stones'} {common/areas/celestial_zodiacs.tin};
+.add_library {zodiac_times} {misc} {Celestial Zodiac Spawn Times} {'zodiac_times'} {common/areas/celestial_zodiacs.tin};
 .add_library {zodiac_balance} {misc} {sell zodiac souls and orbs split between the shrines to even out Aeonos and Zephyrak rep} {zodiac_balance [plan]} {common/areas/celestial_zodiacs.tin};
 
 #NOP -------------------------- Debug Aliases ----------------------------------;
@@ -654,6 +770,7 @@
 .add_library {.unpause} {bot} {unpauses the bot} {'.unpause'} {common/bot/generic.tin};
 .add_library {.resume} {bot} {returns to the room that was paused and resumes the bot} {'.resume'} {common/bot/bots.tin};
 .add_library {..} {bot} {tells the bot to walk if it stopped and you don't know why} {'..'} {common/bot/generic.tin};
+.add_library {.skip} {bot} {leave the mob in this room alone and walk on, the bot fights the next mob it finds} {'.skip'} {common/bot/generic.tin};
 .add_library {3kdb} {bot} {share current bot status on party line} {'3kdb'} {common/party.tin};
 .add_library {bcy} {bot} {current bot area cycler list} {'bcy'} {common/bot/bot_cycle.tin};
 .add_library {bcy+} {bot} {add bot to cycler list} {bcy+ <botalias> - Ex: bcy+ smurfs} {common/bot/bot_cycle.tin};
@@ -676,6 +793,7 @@
 .add_library {summonDmg-clear} {trackers} {mage summon damage report - clear data} {'summonDmg-clear'} {modules/dmgtracker/dmgtracker_mage.tin};
 .add_library {summonDmgVaf} {trackers} {mage summon damage report - requires numbers vaf perk} {'summonDmgVaf'} {modules/dmgtracker/dmgtracker_mage.tin};
 .add_library {reset_gxp} {trackers} {general guild gxp tracking reset} {'reset_gxp'} {common/status.tin};
+.add_library {reset_xp} {trackers} {xp tracker reset - kills and xp shown in the caption when no bot is running} {'reset_xp'} {modules/xptracker/xptracker.tin};
 .add_library {dstats} {trackers} {damage tracking report - requires numbers vaf perk} {'dstats'} {modules/dmgtracker/dmgtracker.tin};
 .add_library {dreset} {trackers} {reset damage tracker} {'dreset'} {modules/dmgtracker/dmgtracker.tin};
 .add_library {truckDmg-clear} {trackers} {reset truck damage tracking} {'truckDmg-clear'} {modules/dmgtracker/dmgtracker_jugger.tin};

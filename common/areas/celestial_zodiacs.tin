@@ -187,4 +187,28 @@
     };
 };
 
+#nop - zodiac hour notify. timecheck wraps, so the action only matches the first line and keeps the hour;
+#nop - 4/5/16/17 are portal (tome) hours, 6/7/18/19 fracture (grimoire). Other hours are ignored;
+#nop - *_notify puts a NOTE in the chat window/log and posts to the zodiac Discord channel (and general), *_ctell does that and ctells too;
+#action {^The watch glows with %d soft pulses of light, thrumming with celestial} {.zodiac_hour_notify %1} {2};
+
+#alias {.zodiac_hour_notify} {
+    #var zhour[type] {};
+    #regexp {%1} {^{4|5|16|17}$} {#var zhour[type] portal;#var zhour[label] {PORTAL (tome)}};
+    #regexp {%1} {^{6|7|18|19}$} {#var zhour[type] fracture;#var zhour[label] {FRACTURE (grimoire)}};
+    #if {"$zhour[type]" == ""} {#return};
+    #var zhour[ctell] 0;
+    #if {"$toggles[$zhour[type]_ctell]" == "1"} {#var zhour[ctell] 1};
+    #var zhour[notify] $zhour[ctell];
+    #if {"$toggles[$zhour[type]_notify]" == "1"} {#var zhour[notify] 1};
+    #if {!$zhour[notify]} {#return};
+    .notify {<fcb>$zhour[label]<ddd> zodiac hour %1};
+    #nop - no zodiac webhook yet: post to general only;
+    #if {&webhook[url][zodiac] || &webhook[url][general]} {
+        #if {&webhook[url][zodiac]} {#var discordChannel $webhook[url][zodiac]} {#var discordChannel $webhook[url][general]};
+        postDiscord ZODIAC: $user_cap sees $zhour[label] hour %1;
+    };
+    #if {$zhour[ctell]} {ctell Zodiac hour %1: $zhour[label] time frame};
+};
+
 #class {area_celestial_zodiacs} {close};

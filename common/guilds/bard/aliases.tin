@@ -23,7 +23,8 @@
 };
 
 #NOP ---THIS SECTION IS FOR SONG ALIASES;
-#alias {clear_prots} {#var defs 0};
+#NOP -- Also turns maint off (and saves that), so it is not resumed after a linkdeath;
+#alias {clear_prots} {#var defs 0;#var maint_active 0;#unticker {maint_watch};_maint_save};
 #alias {vamp} {perform vampire};
 #alias {black} {cease;perform black for %0};
 #alias {it %1} {perform invigorating tune for %1};

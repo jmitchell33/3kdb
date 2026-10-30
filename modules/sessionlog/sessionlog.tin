@@ -2,7 +2,7 @@
 #class {sessionlog} {open};
 
 #NOP -- Logs everything in the game session to logs/<system user>/sessions/<character>_YYYY-MM-DD.log,;
-#NOP -- a new file each day, with colors (raw, like the chat logs). Finished days, these and the daily;
+#NOP -- a new file each day, with colors (raw, like the chat logs) and a "TIMESTAMP: HH:MM:SS | " stamp on every line. Finished days, these and the daily;
 #NOP -- chat logs, are compressed with zstd (about 15x smaller) by scripts/compress_logs.sh. Nothing is;
 #NOP -- deleted unless sessionlog[cap_mb] is set: then the oldest go once logs/<system user> is over that many MB.;
 #NOP -- Read them with zstdless or zstdgrep. sessionlog off / sessionlog on stops or restarts it here.;
@@ -28,6 +28,8 @@
 	#format sessionlog[date] {%t} {%Y-%m-%d};
 	#var sessionlog[file] {$sessionlog[dir]/sessions/${user}_$sessionlog[date].log};
 	#script {sessionlog_tmp} {mkdir -p $sessionlog[dir]/sessions};
+	#NOP -- Seconds, not just minutes like the chat logs, so fast-kill timing races can be read back;
+	#log timestamp {TIMESTAMP: %H:%M:%S | };
 	#log append {$sessionlog[file]};
 	#var sessionlog[on] 1;
 };
@@ -65,17 +67,20 @@
 	};
 } {60};
 
-#NOP -- common/index.tin is read in the game session at login, never the startup one. Starting waits until;
-#NOP -- index.tin has read common/private.tin and defaults_on has put back the saved toggles, and a character;
-#NOP -- that has never toggled sessionlog gets sessionlog[enabled].;
-#NOP -- The first compress waits so common/private.tin can change the cap first;
+#NOP -- defaults_on calls this at login, after _variable_import has put back the saved toggles. A character;
+#NOP -- that has never toggled sessionlog gets sessionlog[enabled]. The first compress waits so;
+#NOP -- common/private.tin can change the cap first;
+#alias {.sessionlog_login} {
+	#if {"${toggles[sessionlog]}" == ""} {#var toggles[sessionlog] $sessionlog[enabled]};
+	.sessionlog_start;
+	#delay {sessionlog_compress} {.sessionlog_compress} {30};
+};
+
+#NOP -- The character menu reads common/index.tin in the startup session (gts), so login goes through;
+#NOP -- defaults_on (common/config.tin). This is for a re-read of this file in the game session;
 #info session save;
 #if {"$info[SESSION][NAME]" != "gts"} {
-	#delay {sessionlog_start} {
-		#if {"${toggles[sessionlog]}" == ""} {#var toggles[sessionlog] $sessionlog[enabled]};
-		.sessionlog_start;
-	} {0};
-	#delay {sessionlog_compress} {.sessionlog_compress} {30};
+	#delay {sessionlog_start} {.sessionlog_login} {0};
 };
 
 #class {sessionlog} {close};

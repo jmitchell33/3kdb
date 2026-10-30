@@ -5,14 +5,57 @@
 #var mage[contingencies][mantle] 200;
 #var mage[contingencies][sphere] 799;
 
-#NOP -- GC Tracking;
+#NOP -- Contingency tracking. cast greater contingency / cast contingency with nothing after print the lists:;
+#NOP -- a header, N:You will cast <spell> should your <trigger> ..., then You may cast N ... contingencies.;
+#NOP -- gcLine / cLine keep each line in slot order so the evil/good swap can find and remove the old side.;
+#NOP -- While _cgag is 1 (only during a swap) these actions also gag the list lines.;
 #ACTION {^You have greater contingencies set up on you as follows:} {
+     #if {$_cgag} {#line gag};
      #var gcList {};
+     #list gcLine create {};
+     #var gcKnown 1;
+     #var _clist {gc};
 } {2}
 
-#ACTION {^%d:You will cast %* should your} {
-     #list gcList add {%2};
+#NOP -- The MUD really says "You have a contingencies set up on you as follows:";
+#ACTION {^You have a contingencies set up on you as follows:} {
+     #if {$_cgag} {#line gag};
+     #list cLine create {};
+     #var cKnown 1;
+     #var _clist {c};
+} {2}
+
+#ACTION {^You have no greater contingencies set up} {#var gcList {};#if {$_cgag} {#line gag};#list gcLine create {};#var gcKnown 1;#var _clist {}} {2}
+#ACTION {^You have no contingencies set up} {#if {$_cgag} {#line gag};#list cLine create {};#var cKnown 1;#var _clist {}} {2}
+#NOP -- The closing line also marks the list as seen, in case a header reads differently from the ones above;
+#NOP -- It also says how many you can have: You may cast 8 greater ... / You may cast up to 6 contingencies.;
+#ACTION {^You may cast %* contingencies} {
+     #if {$_cgag} {#line gag};
+     #var _cmaxn 0;
+     #regex {%1} {{[0-9]+}} {#var _cmaxn &1};
+     #regex {%1} {greater} {#var gcKnown 1;#var gcMax $_cmaxn} {#var cKnown 1;#var cMax $_cmaxn};
+     #var _clist {};
+} {2}
+
+#ACTION {^%d:You will cast %*} {
+     #if {$_cgag} {#line gag};
+     #if {"$_clist" == "gc"} {
+         #list gcLine add {%2};
+         #regex {%2} {^{.*?} should your} {#list gcList add {&1}};
+     };
+     #elseif {"$_clist" == "c"} {
+         #list cLine add {%2};
+     };
 } {2};
+
+#if {&{_cgag} == 0} {#var _cgag 0};
+#if {&{gcLine} == 0} {#list gcLine create {}};
+#if {&{cLine} == 0} {#list cLine create {}};
+#if {&{gcKnown} == 0} {#var gcKnown 0};
+#if {&{cKnown} == 0} {#var cKnown 0};
+#if {&{gcMax} == 0} {#var gcMax 0};
+#if {&{cMax} == 0} {#var cMax 0};
+#var _clist {};
 
 
 #NOP --- Mage Summon Aliases;
@@ -55,8 +98,114 @@
 #alias gc_mg {cast greater contingency as major globe#cast major globe};
 #alias gc_shield {cast greater contingency as shield#cast magnificent shield};
 #alias gc_armor {cast greater contingency as armor#cast armor};
-#alias gc_pfg {deplete protection from evil;cast greater contingency as prot_good#cast protection from good;cast protection from good};
-#alias gc_pfe {deplete protection from good;cast greater contingency as prot_evil#cast protection from evil;cast protection from evil};
+#NOP -- Ask the MUD for both contingency lists and run alias %1 two seconds later, once they are in. The lists;
+#NOP -- are gagged meanwhile: one action fires per line, so the list lines gag themselves (_cgag), and the;
+#NOP -- align_gag class catches the wrapped tails, e.g. fail. or below 799. Both are gone before %1 runs.;
+#alias {_cont_fetch} {
+    #var gcKnown 0;
+    #var cKnown 0;
+    #var _cgag 1;
+    #class {align_gag} {open};
+    #action {^%*{fail|below [0-9]+}.$} {#if {"$_clist" != ""} {#line gag}} {9};
+    #class {align_gag} {close};
+    #var _cont_next {%1};
+    cast greater contingency;
+    cast contingency;
+    #delay {cont_fetch} {_cont_fetched} {2};
+};
+
+#alias {_cont_fetched} {
+    #var _cgag 0;
+    #class {align_gag} {kill};
+    $_cont_next;
+};
+
+#NOP -- Swap protection from evil and good. %1 = the side you want (good or evil), %2 = gc, c or prots;
+#NOP -- (what to set up after). It asks the MUD for both contingency lists, then 2 seconds later removes the;
+#NOP -- old side from whichever list has it. That has to happen before the deplete, or the deplete just fires;
+#NOP -- that contingency and it casts the old side again. The heartbeat flag and maint pick move over too.;
+#alias {_align_swap} {
+    #var _anew {%1};
+    #var _akind {%2};
+    #if {"%1" == "good"} {
+        #var _aold {evil};
+        #var _aold_def {pe};
+        #var _anew_def {pg};
+        #var _aold_pick {pfe};
+        #var _anew_pick {pfg};
+    } {
+        #var _aold {good};
+        #var _aold_def {pg};
+        #var _anew_def {pe};
+        #var _aold_pick {pfg};
+        #var _anew_pick {pfe};
+    };
+    #echo {<dea>  Checking your contingencies before switching to protection from $_anew...<088>};
+    _cont_fetch _align_swap_now;
+};
+
+#NOP -- Sets _afound to the slot in list %1 that casts or watches protection from $_aold, 0 if none;
+#alias {_align_find} {
+    #var _afound 0;
+    #if {&%1[] > 0} {
+        #loop 1 &%1[] _ai {
+            #if {$_afound == 0} {
+                #regex {$%1[$_ai]} {{protection from $_aold|prot_$_aold}} {#var _afound $_ai};
+            };
+        };
+    };
+};
+
+#alias {_align_swap_now} {
+    #if {!$gcKnown || !$cKnown} {
+        #echo {<faa>  Your contingency lists did not come back, so nothing was changed. Try again.<088>};
+    } {
+        _align_find gcLine;
+        #var _aremoved_gc $_afound;
+        _align_find cLine;
+        #var _aremoved_c $_afound;
+        #if {$_aremoved_gc} {
+            cast remove greater contingency as $_aremoved_gc;
+            #list gcLine delete $_aremoved_gc;
+            #echo {<dea>  Removed greater contingency $_aremoved_gc (protection from $_aold).<088>};
+        };
+        #if {$_aremoved_c} {
+            cast remove contingency as $_aremoved_c;
+            #list cLine delete $_aremoved_c;
+            #echo {<dea>  Removed contingency $_aremoved_c (protection from $_aold).<088>};
+        };
+        #if {"$defs[$_aold_def]" == "1"} {#var defs[$_anew_def] 1};
+        #var defs[$_aold_def] 0;
+        #if {"$maint_sel[$_aold_pick]" == "1"} {
+            _maint_set $_anew_pick 1;
+            _maint_save;
+        };
+        deplete protection from $_aold;
+        #switch {"$_akind"} {
+            #case {"gc"} {
+                cast greater contingency as prot_$_anew#cast protection from $_anew;
+                cast protection from $_anew;
+            };
+            #case {"c"} {
+                cast contingency as prot_$_anew#cast protection from $_anew;
+                cast protection from $_anew;
+            };
+            #case {"prots"} {
+                #NOP -- Put back the same kind of cover that was removed, on the new side;
+                #if {$_aremoved_gc} {cast greater contingency as prot_$_anew#cast protection from $_anew};
+                #if {$_aremoved_c} {cast contingency as prot_$_anew#cast protection from $_anew};
+                check_extension;
+                cast protection from $_anew;
+                clear_align;
+                #var defs[$_anew_def] 1;
+                echo_prots_$_anew_pick;
+            };
+        };
+    };
+};
+
+#alias gc_pfg {_align_swap good gc};
+#alias gc_pfe {_align_swap evil gc};
 #alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle};
 #alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere};
 
@@ -65,8 +214,8 @@
 #alias c_shield {cast contingency as shield#cast shield};
 #alias c_mshield {cast contingency as shield#cast magnificent shield}
 #alias c_armor {cast contingency as armor#cast armor};
-#alias c_pfg {deplete protection from evil;cast contingency as prot_good#cast protection from good;cast protection from good};
-#alias c_pfe {deplete protection from good;cast contingency as prot_evil#cast protection from evil;cast protection from evil};
+#alias c_pfg {_align_swap good c};
+#alias c_pfe {_align_swap evil c};
 #alias c_blur {cast contingency as blinking#cast blur};
 #alias c_blink {cast contingency as blinking#cast blink}; 
 #alias c_invis {cast contingency as invisibility#cast invisibility};
@@ -76,7 +225,10 @@
     #10 {cast remove contingency as 1};
     #10 {cast remove greater contingency as 1};
     clear_prots;
-    clear_align
+    clear_align;
+    #var maint_active 0;
+    #unticker {maint_watch};
+    _maint_save
 };
 
 #alias {prots_mb} {check_extension;cast mindblank;#var defs[MB] 1;echo_prots_mb};
@@ -85,8 +237,8 @@
 #alias {prots_MG} {check_extension;cast major globe;#var defs[MG] 1;echo_prots_MG};
 #alias {prots_mg} {check_extension;cast minor globe;#var defs[mg] 1;echo_prots_mg};
 #alias {prots_ms} {check_extension;cast magnificent shield;#var defs[ms] 1;echo_prots_ms};
-#alias {prots_pfe} {deplete protection from good;check_extension;cast protection from evil;clear_align;#var defs[pe] 1;echo_prots_pfe};
-#alias {prots_pfg} {deplete protection from evil;check_extension;cast protection from good;clear_align;#var defs[pg] 1;echo_prots_pfg};
+#alias {prots_pfe} {_align_swap evil prots};
+#alias {prots_pfg} {_align_swap good prots};
 #alias {prots_rs} {check_extension;cast rhino skin;clear_align;#var defs[rs] 1;echo_prots_rs};
 #alias {prots_ss} {check_extension;cast stoneskin;#var defs[SS] 1;echo_prots_ss};
 #alias {prots_shield} {check_extension;cast shield;#var defs[shield] 1;echo_prots_shield};

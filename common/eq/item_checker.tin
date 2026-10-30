@@ -17,6 +17,19 @@
 #NOP -- reaches the floor once the corpse is gone (dirge, decay), so the get tries the corpse first, then the floor;
 #action {^-!!!-You have found %*!$} {.notifyWorldDrop {%1}} {2};
 
+#NOP -- worlddrops2: grab world drops lying in the room by name, with or without the -!!!- in front;
+#var worldDropNames {Soul Drinker Blade|[a-z]+ flask [(]purple liquid[)]|PICNP Device|Amulet of Voraxis|Amulet of Waves|exploding kitten|Buckler of Eternia|Frosted (?:armour|boots|breastplate|gauntlets|helmet|shield) of Aylin|Golden Robes of Intellect|Molok's Titanium Breastplate|QT Amulet|Redoubt Cloak|Robe of Therlasia|Shieldbreaker|Shimmering cloak of Aylin|Skull of the Dracolich, Yaxtan|Staff of Elemental Fury|Thundering|TimeRender|red robe made of a fine fabric};
+#NOP -- worlddrops2 action, only exists while the toggle is on;
+#alias {.worlddrops2_watch} {
+    #class {worlddrops2_watch} {kill};
+    #if {"$toggles[worlddrops2]" == "1"} {
+        #class {worlddrops2_watch} {open};
+        #line substitute variables {#action {^{(?i)(?:-[a-z!]+-)?((?:(?:a|an|the) )?(?:$worldDropNames)[^:]*?)\.$}} {.notifyWorldDrop {%%2}} {2}};
+        #class {worlddrops2_watch} {close};
+    };
+};
+#delay {worlddrops2_watch} {.worlddrops2_watch} {7};
+
 #NOP -- The get keyword: the first word below that is in the name (longer words first), else its last word (some drops, like Robe of;
 #NOP -- Therlasia, show another name until they are picked up);
 #var worldDropKeys {shieldbreaker;buckler;breastplate;gauntlets;boots;helmet;shield;armour;cloak;robes;robe;amulet;skull;staff;blade;flask;kitten;timerender;thundering;device};
@@ -38,12 +51,17 @@
     #NOP -- A second copy of some drops explodes as soon as you hold it ("... shudders and trembles in the presence of;
     #NOP -- another of its kind and explodes!", karvec's second Buckler of Eternia on 2026-10-22), so check the inventory;
     #NOP -- first and leave the drop for another character if you already have one;
-    #if !$idle_flag {.worldDropGet {$name}};
-    .notify {<fcb>WORLD DROP<ddd> $name at $roomvnum};
+    #NOP -- worlddrops2: grab it right away, no inventory check;
+    #if !$idle_flag {#if {"$toggles[worlddrops2]" == "1"} {get $worldDropKey from corpse;get $worldDropKey} {.worldDropGet {$name}}};
+    #NOP -- Only the first sighting of a drop sends a notify or Discord post;
+    #if {"$worldDropSeen" == "$name"} {#var worldDropNew 0} {#var worldDropNew 1};
+    #var worldDropSeen {$name};
+    #delay {worlddrop_seen} {#var worldDropSeen {}} {30};
+    #if {$worldDropNew && "$toggles[worlddrops_notify]" != "0"} {.notify {<fcb>WORLD DROP<ddd> $name at $roomvnum}};
     #echo {<cfb>===========> <ccd>WORLD DROP $name<088>};
-    #if {&webhook[url][worlddrops]} {
-        #var discordChannel $webhook[url][worlddrops];
-        postDiscord {WORLD DROP: $user_cap found $name in $room[name] ($area)};
+    #if {$worldDropNew && (&webhook[url][worlddrops] || &webhook[url][general])} {
+        #if {&webhook[url][worlddrops]} {#var discordChannel $webhook[url][worlddrops]} {#var discordChannel $webhook[url][general]};
+        postDiscord WORLD DROP: $user_cap found $name in $room[name] ($area);
     };
     #if {$toggles[worlddrops] && $bot[active] && !$bot[paused]} {
         #echo {<cfb>===========> <ccd>BOT PAUSED, 'toggle worlddrops' turns this off<088>};
@@ -66,7 +84,7 @@
     #delay {worlddrop_inv} {
         #class {worlddrop_inv} {kill};
         #if {$worldDropHave} {
-            .notify {<fcb>WORLD DROP<ddd> you already have $worldDropBase, left it at $roomvnum for another character};
+            #if {"$toggles[worlddrops_notify]" != "0"} {.notify {<fcb>WORLD DROP<ddd> you already have $worldDropBase, left it at $roomvnum for another character}};
             #echo {<cfb>===========> <ccd>ALREADY HAVE $worldDropBase, NOT PICKED UP (a second one can explode)<088>};
         } {
             get $worldDropKey from corpse;

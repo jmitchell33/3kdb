@@ -27,15 +27,17 @@
 #var caption_toggle[eternal][active] 1;
 #var caption_toggle[strategy][active] 1;
 #var caption_toggle[bot][active] 1;
+#var caption_toggle[xp][active] 1;
 #var caption_toggle[bot_cycle][active] 1;
 #var caption_toggle[map][active] 1;
 
 #var caption_toggle[corpses][order] 1;
 #var caption_toggle[eternal][order] 2;
 #var caption_toggle[bot][order] 3;
-#var caption_toggle[strategy][order] 4;
-#var caption_toggle[bot_cycle][order] 5;
-#var caption_toggle[map][order] 6;
+#var caption_toggle[xp][order] 4;
+#var caption_toggle[strategy][order] 5;
+#var caption_toggle[bot_cycle][order] 6;
+#var caption_toggle[map][order] 7;
 #format caption_title_string {%+9sGeneral    Bot    Map%-9s};
 
 #NOP -- Mouse press events;
@@ -436,19 +438,7 @@
 #var theme[caption] <cde>;
 
 #alias .bot_xp_string {
-    #format {bot[report-time]} {%T} {};
-    #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
-    #if {$bot[delta-time] > 3600} {
-        #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
-        #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-        #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
-        #var xp_time_str $bot[delta-time] Hrs;
-    } {
-        #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
-        #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-        #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
-        #var xp_time_str $bot[delta-time] mins;
-    };
+    .xp_rate {$bot[stats][xp]} {$bot[start-time]};
     #var bot[stats][xp_rate_str] $xp_rate_str;
     #var bot[stats][xp_time_str] $xp_time_str;
 };
@@ -533,6 +523,8 @@
     #if {"$caption[tab]" == "general"} {
         #var tmpFirst 1;
         #foreach $caption_order[] key {
+            #NOP -- A running bot shows its own xp, so the xp tracker steps aside;
+            #if {"$key" == "xp" && "$bot[active]" == "1"} {#continue};
             #if $caption_toggle[$key][active] {
                 #if $tmpFirst {
                     #list caption_data add {$caption_toggle[$key][string]};
@@ -649,19 +641,7 @@
         #math bot_current_room {$bot_current_room - 1};
         #math bot_progress {100 * $bot_current_room / $bot_total_rooms};
 
-        #format {bot[report-time]} {%T} {};
-        #math bot[delta-time] {$bot[report-time] - $bot[start-time]};
-        #if {$bot[delta-time] > 3600} {
-            #math bot[delta-time] {$bot[delta-time] / 3600 * 1.00};
-            #math bot[delta-rate] {$bot[stats][xp] / $bot[delta-time]};
-            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
-            #var xp_time_str $bot[delta-time] Hrs;
-        } {
-            #math bot[delta-time] {$bot[delta-time] / 60 * 1.00};
-            #math bot[delta-rate] {$bot[stats][xp] * 60 / $bot[delta-time]};
-            #var xp_rate_str @thousandsFormatNumber{$bot[delta-rate]};
-            #var xp_time_str $bot[delta-time] mins;
-        };
+        .xp_rate {$bot[stats][xp]} {$bot[start-time]};
         #var temp_xp @thousandsFormatNumber{$bot[stats][xp]};
 
         #if {"$caption[tab]" == "bot"} {
@@ -713,6 +693,7 @@
 
     } {
         #var bot_string {<ccc>Bot: <fff>OFF<088>};
+        .xp_caption;
     };
 
     #var caption_toggle[bot][string] $bot_string;

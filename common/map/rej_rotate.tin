@@ -1,142 +1,357 @@
-#class {rej_rotate} {kill}
-#class {rej_rotate} {open}
+#class {rej_rotate} {kill};
+#class {rej_rotate} {open};
 
-#NOP -- When this first loads, it'll be the first room of the maze
-#NOP -- Based on the room[exit] - we'll set it to the first rejected_game[color];
-#NOP -- The map rotation goes clockwise,  n -> e -> s -> w;
+#NOP -- The Rejected Game maze turns a quarter clockwise every so often (n -> e -> s -> w), shown by a;
+#NOP -- block of spinning dots.  The map is the only record of which way it faces: the entrance room;
+#NOP -- 27662 has one exit, and that exit names the orientation (n magenta, e green, s blue, w red).;
+#NOP -- Nothing else stores a colour, so the map, the bot path and rejected_game[color] can't drift apart.;
+#NOP -- Read by loadmap, so it is always on.  Everything checks the map room is in the maze first.;
+#NOP --;
+#NOP -- Two things keep it in step:;
+#NOP --  1. The spinning dots turn the map one quarter straight away, so a bot standing in a fight;
+#NOP --     takes its next step the right way (no look needed in the corpsetrig).;
+#NOP --  2. Every room short ends in the exits the game lists right now, e.g. (n,s).  common/room.tin;
+#NOP --     hands each one to .rej_room_short, which keeps every (room, facing) that could have shown;
+#NOP --     those exits: one step from a room it could have been in, or the same room after a look or;
+#NOP --     the redraw the game sends after a spin, facing the same way (or one more guess against it;
+#NOP --     for a missed or false spin).  The map's own follow wins a tie, so walking in step changes;
+#NOP --     nothing.  When the map isn't one of them and they agree, the map is moved and turned to;
+#NOP --     match.  A straight room (n,s) fits two ways, a corner room settles it.  While the map is;
+#NOP --     ahead of the game from typing ahead (mapper.tin counts its moves), only the facing is fixed.;
+#NOP -- The old colour triggers are gone: they matched any red/magenta etc. text, e.g. a necromancer's;
+#NOP -- famansi familiar, and each one turned the map another quarter on top of the spin.;
 
-#delay .5 {#ECHO {UPDATING MAP ORIENTATION -- PLEASE STAY STILL FOR 3 SECONDS}};
+#var rej_area_name {The Rejected Game};
+#var rej_dirs {n;ne;e;se;s;sw;w;nw};
+#NOP -- rej_turns[k][dir]: where dir points after k quarter turns clockwise;
+#var rej_turns {
+	{0}{{n}{n}{ne}{ne}{e}{e}{se}{se}{s}{s}{sw}{sw}{w}{w}{nw}{nw}}
+	{1}{{n}{e}{ne}{se}{e}{s}{se}{sw}{s}{w}{sw}{nw}{w}{n}{nw}{ne}}
+	{2}{{n}{s}{ne}{sw}{e}{w}{se}{nw}{s}{n}{sw}{ne}{w}{e}{nw}{se}}
+	{3}{{n}{w}{ne}{nw}{e}{n}{se}{ne}{s}{e}{sw}{se}{w}{s}{nw}{sw}}
+};
+#var rej_order {{n}{0}{e}{1}{s}{2}{w}{3}};
+#var rej_colors {{0}{magenta}{1}{green}{2}{blue}{3}{red}};
+#var rej_roomcolors {{0}{<258>}{1}{<228>}{2}{<148>}{3}{<218>}};
+#var rej_spin 0;
+#var rej_rooms {};
+#NOP -- rej_hyp[vnum][facing]: where you could be, facing 0-3 as in rej_colors;
+#var rej_hyp {};
+#var rej_unsure 0;
+#NOP -- rej_ahead: moves the map followed that the game hasn't shown yet, from typing ahead;
+#var rej_ahead 0;
+#var rej_going 0;
+#var rej_moved 0;
 
-#delay 2 {
-	#map get roomexits tempExits;
-	#if {$tempExits[e]} {#var startMap green};
-	#if {$tempExits[w]} {#var startMap red};
-	#if {$tempExits[n]} {#var startMap magenta};
-	#if {$tempExits[s]} {#var startMap blue};
-
-	#if {"$room[exits]" == "n"} {
-		#var rejected_game[color] magenta;
-		#if {"$startMap" == "red"} {rrotate};
-		#if {"$startMap" == "blue"} {rrotate;rrotate};
-		#if {"$startMap" == "green"} {rrotate;rrotate;rrotate};
-	};
-	#if {"$room[exits]" == "e"} {
-		#var rejected_game[color] green;
-		#if {"$startMap" == "magenta"} {rrotate};
-		#if {"$startMap" == "red"} {rrotate;rrotate};
-		#if {"$startMap" == "blue"} {rrotate;rrotate;rrotate};
-	};
-	#if {"$room[exits]" == "s"} {
-		#var rejected_game[color] blue;
-		#if {"$startMap" == "green"} {rrotate};
-		#if {"$startMap" == "magenta"} {rrotate;rrotate};
-		#if {"$startMap" == "red"} {rrotate;rrotate;rrotate};
-	};
-	#if {"$room[exits]" == "w"} {
-		#var rejected_game[color] red;
-		#if {"$startMap" == "magenta"} {rrotate};
-		#if {"$startMap" == "green"} {rrotate;rrotate};
-		#if {"$startMap" == "blue"} {rrotate;rrotate;rrotate};
-	};
-	#delay 1 {rating;#ECHO {MAP ORIENTED... THANK YOU COME AGAIN!}};
+#alias {.rej_load_rooms} {
+	#if {&rej_rooms[] == 0} {#map list {roomarea} {$rej_area_name} {variable} {rej_rooms}};
 };
 
-
-#NOP -- We call it inductor whether you're going to crack or not;
-#alias fixRJColor {
-	#if {$bot[active]} {
-		#var {bot[path]} {$bot[inductor][${rejected_game[color]}]};
-		#unvar bot[steps];
-		#list bot[steps] create $bot[path];
+#NOP -- .rej_sig {k} {list}: the compass exits of an exit list turned k quarters, in a fixed order, into rej_sig;
+#NOP -- u, d, doorway, out and exit don't turn and are left out;
+#alias {.rej_sig} {
+	#local rs_d {};
+	#var rej_sig_in {};
+	#foreach {%2} {rs_d} {
+		#if {"$rs_d" == ""} {#continue};
+		#if {&rej_turns[0][$rs_d]} {#var rej_sig_in[$rej_turns[%1][$rs_d]] 1};
 	};
-	rrotate;
+	#var rej_sig {};
+	#foreach {$rej_dirs} {rs_d} {
+		#if {&rej_sig_in[$rs_d]} {#var rej_sig {$rej_sig;$rs_d}};
+	};
 };
 
-#NOP -- Fix color if the map rotates;
-#var rj_rotate 1;
-#action {{^[\s\.oO]{70}}} {
-	#if {"$area" == "The Rejected Game"} {
-		#if $rj_rotate {
-			#var rj_rotate 0;
-			look;
-			#delay {fixColor} {fixRJColor;#var rj_rotate 1} {2};
-		};
+#NOP -- .rej_fit {vnum}: rej_fit[k] for each k that turns that map room's exits into the live ones (rej_livesig);
+#alias {.rej_fit} {
+	#local rf_d {};
+	#var rej_fit {};
+	#var rej_fitex {};
+	#map get roomexits rej_fitex %1;
+	#var rej_fitlist {};
+	#foreach {*rej_fitex[]} {rf_d} {#var rej_fitlist {$rej_fitlist;$rf_d}};
+	#foreach {0;1;2;3} {rf_d} {
+		.rej_sig $rf_d {$rej_fitlist};
+		#if {"$rej_sig" === "$rej_livesig"} {#var rej_fit[$rf_d] 1};
+	};
+};
+
+#NOP -- .rej_fits_of {vnum}: rej_fits[vnum][facing] for each facing that room shows the live exits in, once per check;
+#alias {.rej_fits_of} {
+	#local rfo_k {};
+	#if {&rej_fitdone[%1]} {#return};
+	#var rej_fitdone[%1] 1;
+	.rej_fit %1;
+	#foreach {*rej_fit[]} {rfo_k} {
+		#math rej_fo_abs {($rej_orient + $rfo_k) % 4};
+		#var rej_fits[%1][$rej_fo_abs] 1;
+	};
+};
+
+#NOP -- .rej_keep {vnum} {facing} {guesses}: keep the cheapest way of being there;
+#alias {.rej_keep} {
+	#if {&rej_next[%1][%2] == 0} {
+		#var rej_next[%1][%2] %3;
 	} {
-		#NOP -- If we're not longer in the rejected game, kill the class;
-		#class rej_rotate kill;
+		#if {%3 < $rej_next[%1][%2]} {#var rej_next[%1][%2] %3};
 	};
+	#if {%3 < $rej_best} {#var rej_best %3};
 };
 
-#NOP -- These are the color patterns to know which Rejected Game map you're in;
-#NOP -- magenta;
-#var swap_color 1;
-#action {~\e[0m\e[31m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta" && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
-#action {~\e[0m\e[35m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "magenta" && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to magenta};#var rejected_game[color] magenta;fixRJColor}} {2};
-
-#NOP -- green;
-#action {~\e[0m\e[32m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
-#action {~\e[0m\e[30;1m%1\e[32m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "green"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to green};#var rejected_game[color] green;fixRJColor}} {2};
-
-#NOP -- blue;
-#action {~\e[0m\e[35m%1\e[34m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
-#action {~\e[0m\e[34m%1\e[35m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "blue"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to blue};#var rejected_game[color] blue;fixRJColor}} {2};
-
-#NOP -- red;
-#action {~\e[0m\e[31m%1\e[30;1m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
-#action {~\e[0m\e[30;1m%1\e[31m%2} {#if {"$area" == "The Rejected Game" && "$rejected_game[color]" != "red"  && $swap_color} {#var swap_color 0;#delay {swapColor} {#var swap_color 1} {2};#echo {setting color to red};#var rejected_game[color] red;fixRJColor}} {2};
-
-
-#NOP Vnums are 27662-28934 30131-30174;
-#alias {rrotate} {
-	#echo {rotating map};
-	#NOP Update the color;
-	#if {"$rejected_game[color]" == "green"} {#var rej_color <228>};
-	#if {"$rejected_game[color]" == "blue"} {#var rej_color <148>};
-	#if {"$rejected_game[color]" == "red"} {#var rej_color <218>};
-	#if {"$rejected_game[color]" == "magenta"} {#var rej_color <258>};
-	#if {"${rej_color}" === ""} {#var rej_color  };
-
-	#loop 27662 30174 cnt {
-		#map get {roomarea} {rarea} {$cnt};
-		#if {"$rarea" == "The Rejected Game"} {
-			#NOP Set new rotation roomcolor;
-			#map at $cnt {#map set roomcolor $rej_color};
-
-			#NOP Get rexits;
-			#map at $cnt {#map get roomexits rexits};
-
-			#NOP Reset new room exits array for each vnum;
-			#var nrexits {};
-
-			#NOP loop through exits and rotate 90°;
-			#foreach {*rexits[]} {rexit} {
-				#NOP Reset keep exit variable for non-rotatable exits;
-				#var kexit no;
-				#NOP Set vnum or new room exit;
-				#switch {"$rexit"} {
-					#case {"n"}	{#var nrexits[e]  $rexits[n]};
-					#case {"e"}	{#var nrexits[s]  $rexits[e]};
-					#case {"s"}	{#var nrexits[w]  $rexits[s]};
-					#case {"w"}	{#var nrexits[n]  $rexits[w]};
-					#case {"ne"}	{#var nrexits[se] $rexits[ne]};
-					#case {"se"}	{#var nrexits[sw] $rexits[se]};
-					#case {"sw"}	{#var nrexits[nw] $rexits[sw]};
-					#case {"nw"}	{#var nrexits[ne] $rexits[nw]};
-					#default	{#var kexit yes}
-				};
-				#NOP Check if non-rotatable exit to keep;
-				#if {"$kexit" == "no"} {
-					#NOP Unlink old direction;
-					#map at $cnt {#map unlink $rexit}
-				};
-			};
-			#NOP Link new directions;
-			#foreach {*nrexits[]} {rexit} {
-				#map at $cnt {#map link $rexit $nrexits[$rexit]}
-			};
+#NOP -- .rej_orient: rej_orient (0-3) from the entrance room's one exit, then the colour and bot path to match;
+#alias {.rej_orient} {
+	#local ro_d {};
+	#var rej_ex {};
+	#map get roomexits rej_ex 27662;
+	#foreach {*rej_ex[]} {ro_d} {
+		#if {&rej_order[$ro_d]} {#var rej_orient $rej_order[$ro_d]};
+	};
+	#var rejected_game[color] $rej_colors[$rej_orient];
+	#NOP -- The four paths are the same walk turned, so only the directions change and bot[step] stays put;
+	#if {$bot[active]} {
+		#if {&bot[inductor][$rejected_game[color]]} {
+			#var {bot[path]} {$bot[inductor][$rejected_game[color]]};
+			#list bot[steps] create {$bot[path]};
 		};
 	};
 };
 
+#NOP -- .rej_turn {k}: turn every maze room's exits k quarters clockwise in one pass;
+#alias {.rej_turn} {
+	#local rt_v {};
+	#local rt_d {};
+	#var rej_k {%1};
+	#if {"$rej_k" == ""} {#return};
+	#math rej_k {$rej_k % 4};
+	#if {$rej_k == 0} {#return};
+	.rej_load_rooms;
+	.rej_orient;
+	#math rej_neworient {($rej_orient + $rej_k) % 4};
+	#var rej_rc {$rej_roomcolors[$rej_neworient]};
+	#foreach {*rej_rooms[]} {rt_v} {
+		#map at $rt_v {#map set roomcolor $rej_rc};
+		#var rej_ex {};
+		#map get roomexits rej_ex $rt_v;
+		#var rej_new {};
+		#foreach {*rej_ex[]} {rt_d} {
+			#if {&rej_turns[0][$rt_d]} {
+				#var rej_new[$rej_turns[$rej_k][$rt_d]] {$rej_ex[$rt_d]};
+				#map at $rt_v {#map unlink $rt_d};
+			};
+		};
+		#foreach {*rej_new[]} {rt_d} {
+			#map at $rt_v {#map link $rt_d $rej_new[$rt_d]};
+		};
+	};
+	.rej_orient;
+	#showme <dfa>Rejected Game: map turned $rej_k, now facing $rejected_game[color]<088>;
+};
 
-#class {rej_rotate} {close}
+#NOP -- .rej_face {facing}: turn the map until it faces that way;
+#alias {.rej_face} {
+	.rej_orient;
+	#math rej_delta {(%1 - $rej_orient + 4) % 4};
+	.rej_turn $rej_delta;
+};
+
+#NOP -- .rej_check {n,s}: the exits the game lists for the room you just entered;
+#alias {.rej_check} {
+	#local rc_v {};
+	#local rc_k {};
+	#local rc_u {};
+	#local rc_f {};
+	#var rej_live {%1};
+	#replace rej_live {,} {;};
+	#replace rej_live {~} {;};
+	.rej_sig 0 {$rej_live};
+	#var rej_livesig {$rej_sig};
+	#NOP -- The cell (u) and the doorway room give nothing to turn by;
+	#if {"$rej_livesig" == ""} {#return};
+	.rej_load_rooms;
+	.rej_orient;
+	#map get roomvnum rej_here;
+	#if {&rej_hyp[] == 0} {#var rej_hyp[$rej_here][$rej_orient] 0};
+	#var rej_fitdone {};
+	#var rej_fits {};
+	#var rej_next {};
+	#var rej_best 99;
+	#NOP -- Each room short: a neighbour, or the same room (a look, or the redraw after a spin).  Staying;
+	#NOP -- costs a guess if the map just followed a move.  A change of facing costs a guess;
+	#foreach {*rej_hyp[]} {rc_v} {
+		#var rej_nb {};
+		#map get roomexits rej_nb $rc_v;
+		#var rej_steps {};
+		#var rej_steps[$rc_v] $rej_moved;
+		#foreach {*rej_nb[]} {rc_k} {#var rej_steps[$rej_nb[$rc_k]] 0};
+		#foreach {*rej_steps[]} {rc_u} {
+			#if {!&rej_rooms[$rc_u]} {#continue};
+			.rej_fits_of $rc_u;
+			#foreach {*rej_hyp[$rc_v][]} {rc_k} {
+				#foreach {*rej_fits[$rc_u][]} {rc_f} {
+					#math rej_cost {$rej_hyp[$rc_v][$rc_k] + $rej_steps[$rc_u]};
+					#if {$rc_f != $rc_k} {#math rej_cost {$rej_cost + 1}};
+					.rej_keep $rc_u $rc_f $rej_cost;
+				};
+			};
+		};
+	};
+	#NOP -- Nowhere near fits (a bad goto, or a long way walked unseen): start again from every maze room;
+	#if {&rej_next[] == 0} {
+		#foreach {*rej_rooms[]} {rc_u} {
+			.rej_fits_of $rc_u;
+			#foreach {*rej_fits[$rc_u][]} {rc_f} {.rej_keep $rc_u $rc_f 0};
+		};
+	};
+	#var rej_hyp {};
+	#var rej_hn 0;
+	#foreach {*rej_next[]} {rc_u} {
+		#foreach {*rej_next[$rc_u][]} {rc_f} {
+			#if {$rej_next[$rc_u][$rc_f] == $rej_best} {
+				#var rej_hyp[$rc_u][$rc_f] 0;
+				#math rej_hn {$rej_hn + 1};
+				#var rej_pick $rc_u;
+				#var rej_pickf $rc_f;
+			};
+		};
+	};
+	#if {$rej_hn == 0} {#return};
+	#NOP -- The map has already gone on ahead, so its room can't be checked yet, only the facing;
+	#if {$rej_ahead > 0} {
+		#var rej_facings {};
+		#foreach {*rej_hyp[]} {rc_u} {
+			#foreach {*rej_hyp[$rc_u][]} {rc_f} {#var rej_facings[$rc_f] 1};
+		};
+		#if {&rej_facings[] == 1} {.rej_face *rej_facings[+1]};
+		#return;
+	};
+	#NOP -- The map followed you there, facing the right way;
+	#if {&rej_hyp[$rej_here][$rej_orient]} {
+		#var rej_unsure 0;
+		#return;
+	};
+	#if {$rej_hn == 1} {
+		#var rej_unsure 0;
+		#if {"$rej_pick" != "$rej_here"} {
+			#var rej_going 1;
+			#map goto $rej_pick;
+			#var rej_going 0;
+			#showme <dfa>Rejected Game: map moved to room $rej_pick<088>;
+		};
+		.rej_face $rej_pickf;
+		#return;
+	};
+	#NOP -- The map's room fits one way only: just the facing is off;
+	#if {&rej_hyp[$rej_here][] == 1} {
+		#var rej_unsure 0;
+		.rej_face *rej_hyp[$rej_here][+1];
+		#return;
+	};
+	#if {!$rej_unsure} {
+		#var rej_unsure 1;
+		#showme <eaa>Rejected Game: map not sure where you are ($rej_hn fits), it fixes itself in the next corner<088>;
+	};
+};
+
+#NOP -- .rej_room_short {room short}: called by common/room.tin's room short action, since only one;
+#NOP -- action fires per line.  Room shorts end in the live exits, e.g. "a maze of circuits (n,s)".;
+#NOP -- This runs before the prompt, where the bot takes its next step;
+#alias {.rej_room_short} {
+	#var rej_moved 0;
+	#if {$rej_ahead > 0} {
+		#var rej_moved 1;
+		#math rej_ahead {$rej_ahead - 1};
+	};
+	#map get roomarea rej_area;
+	#if {"$rej_area" != "$rej_area_name"} {
+		#var rej_hyp {};
+		#return;
+	};
+	#NOP -- The game pads the short out to the cartography map, inside the markers;
+	#regex {%1} {{\(([^()]*)\)\s*$}} {.rej_check {&2}};
+};
+
+#NOP -- .rej_map_entered {vnum}: called by modules/map/mapper.tin's MAP ENTER ROOM, for a follow or mapUndo.;
+#NOP -- The count is dropped if no room arrives for 3 seconds (a move the game refused);
+#alias {.rej_map_entered} {
+	#if {$rej_going} {#return};
+	#map get roomarea rej_area %1;
+	#if {"$rej_area" != "$rej_area_name"} {
+		#var rej_ahead 0;
+		#return;
+	};
+	#math rej_ahead {$rej_ahead + 1};
+	#delay {rej_ahead} {#var rej_ahead 0} {3};
+};
+
+#NOP -- The spin: a block of dots and o's.  Turn on the first line, ignore the rest of the block.;
+#NOP -- At least 10 dots or o's, as the cartography map's rows are 70 spaces then a room (O or ?);
+#action {{^(?=[\s\.oO]{70})(?:\s*[\.oO]){10}}} {
+	#local rs_v {};
+	#local rs_f {};
+	#if {$rej_spin} {#return};
+	#map get roomarea rej_area;
+	#if {"$rej_area" != "$rej_area_name"} {#return};
+	#var rej_spin 1;
+	#delay {rej_spin} {#var rej_spin 0} {3};
+	.rej_turn 1;
+	#NOP -- Everywhere you could be turns with it;
+	#var rej_next {};
+	#foreach {*rej_hyp[]} {rs_v} {
+		#foreach {*rej_hyp[$rs_v][]} {rs_f} {
+			#math rej_sf {($rs_f + 1) % 4};
+			#var rej_next[$rs_v][$rej_sf] 0;
+		};
+	};
+	#var rej_hyp {$rej_next};
+};
+
+#NOP -- rrotate: turn the map one quarter by hand.  rotate: check it against the room you're in.;
+#NOP -- rotate with anything after it, or outside the maze, goes to the game as typed;
+#alias {rrotate} {.rej_turn 1};
+#alias {rotate} {
+	#if {"%0" != ""} {
+		#send {rotate %0};
+		#return;
+	};
+	#map get roomarea rej_area;
+	#if {"$rej_area" != "$rej_area_name"} {
+		#send {rotate};
+		#return;
+	};
+	.rej_orient;
+	#map get roomvnum rej_here;
+	#var rej_hyp {};
+	#var rej_hyp[$rej_here][$rej_orient] 0;
+	#NOP -- The last room short has to be this room.  The map's exit in from the Arcade reads this file;
+	#NOP -- as you step in, while room_short is still the Arcade's, so then wait for the maze's own;
+	#var rej_sync_name {};
+	#var rej_sync_exits {};
+	#regex {$room_short} {{^-R-_(.*?) *\(([^()]*)\)\s*-R-_}} {#var rej_sync_name {&2};#var rej_sync_exits {&3}};
+	#map get roomname rej_sync_mapname;
+	#var rej_sync_mapbase {$rej_sync_mapname};
+	#regex {$rej_sync_mapname} {{^(.*?) *\(}} {#var rej_sync_mapbase {&2}};
+	#if {"$rej_sync_exits" == "" || "$rej_sync_name" !== "$rej_sync_mapbase"} {
+		#showme <dfa>Rejected Game: map facing $rejected_game[color], checking it on the next room<088>;
+		#return;
+	};
+	#var rej_live {$rej_sync_exits};
+	#replace rej_live {,} {;};
+	.rej_sig 0 {$rej_live};
+	#var rej_livesig {$rej_sig};
+	.rej_fit $rej_here;
+	#if {&rej_fit[] == 1 && !&rej_fit[0]} {.rej_turn *rej_fit[+1]};
+	#if {&rej_fit[] == 0} {.rej_check {$rej_sync_exits}};
+	#var rej_hyp {};
+	.rej_orient;
+	#map get roomvnum rej_here;
+	#var rej_hyp[$rej_here][$rej_orient] 0;
+	#showme <dfa>Rejected Game: map facing $rejected_game[color]<088>;
+};
+
+#NOP -- On load (loadmap or a bot), set the colour and bot path from the map, then line the map up;
+#NOP -- with the room you're standing in;
+.rej_orient;
+#map get roomarea rej_area;
+#if {"$rej_area" == "$rej_area_name"} {rotate};
+
+#class {rej_rotate} {close};

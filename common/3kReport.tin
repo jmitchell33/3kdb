@@ -178,52 +178,6 @@
     #send {!(cstats};
 };
 
-#alias update_xp {
-    #if {"%1" == "start"} {
-        #line oneshot #action {^You have %* total xp.$} {
-            #if {$bot[active]} {
-                #math bot[stats][xp] 0;
-                #math bot[stats][loop][xp] 0;
-            };
-            #format my[xp] {%d} {%%1};
-            #unaction {^You have %* total xp.$};
-        } {2};
-        xp;
-        #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
-    } {
-        #if {$bot[active]} {
-            #math bot[stats][loop][mobs] {$bot[stats][loop][mobs] + 1};
-            #math bot[stats][mobs] {$bot[stats][mobs] + 1};
-        };
-        
-        #line oneshot #action {^You have %* total xp.$} {
-            #format temp_xp {%d} {%%1};
-            #if {$my[xp] > 0 && "$temp_exp" != "$my[xp]"} {
-                #if {$temp_xp > $my[xp]} {
-                    #math fight_xp {$temp_xp - $my[xp]};
-                    #if {$bot[active]} {
-                        #math bot[stats][xp] {$bot[stats][xp] + $fight_xp};
-                        #math bot[stats][loop][xp] {$bot[stats][loop][xp] + $fight_xp};
-                    };
-                    #format my[xp] {%d} {%%1};
-                } {
-                    #NOP -- If current xp is less than total xp (spent it on stats or died) update my[xp] to reflect the new baseline;
-                    #format my[xp] {%d} {%%1}; 
-                }
-            } {
-                #format my[xp] {%d} {%%1};
-            };
-            #unaction {^You have %* total xp.$};
-        };
-        xp;
-        #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
-    };
-
-    #line oneshot #action {^At this rate you will level in %*} {
-        #line gag;
-    } {2};
-};
-
 #alias update_coins {
     #NOP -- If the coins don't increase, we know we're down or there's another change making a measurement unreliable;
     #var fight_coins 0;

@@ -5,7 +5,7 @@
 #NOP by typing "quit REALLY";
 #alias {quit} {
     #if { "%1" == "REALLY"} {
-        #SEND quit;
+        #send {quit};
     } {
         #SEND shakeno;
         #SEND {emote pulls out a mirror and looks at himself.};
@@ -471,9 +471,12 @@
     #delay 6 {prots_MG};
     #delay 8 {prots_ss};
     #delay 10 {prots_mb};
+    #NOP -- prots_pfg checks the contingency lists first and casts 2s later (14s), so the rest stay 2s apart;
+    #NOP -- or the MUD says You may not cast another defensive spell so quickly. maint picks up mantle (defs[M]).;
     #delay 12 {prots_pfg};
-    #delay 14 {prots_ps};
-    #delay 16 {cast mantle};
+    #delay 16 {prots_ps};
+    #delay 18 {cast mantle};
+    #delay 20 {maint};
 };
 
 #NOP -- setup contingency with defenses;
@@ -494,8 +497,26 @@
     cast greater contingency as stoneskin#cast stoneskin;
     cast greater contingency as shield#cast magnificent shield;
     cast greater contingency as armor#cast armor;
-    cast greater contingency as protection from good#cast protection from good;
+    #delay {setup_gc_good} {_setup_gc_good} {22};
 };
+
+#NOP -- The 7th GC in a row runs out of SP (2230 each). The hpbar SP is stale right after the other GCs, so the;
+#NOP -- good one starts at 22s (after setup_defense's casts), then waits until there is SP or immersion.;
+#alias {_setup_gc_good} {
+    #if {$my[sp][current] > 2300 || $my[immersion][active]} {
+        #var _gcgood_try 1;
+        cast greater contingency as protection from good#cast protection from good;
+    } {
+        #delay {setup_gc_good} {_setup_gc_good} {4};
+    };
+};
+
+#NOP -- If the MUD still says no SP, try again in 4s. Stops once the good GC is set up.;
+#action {^You do not have enough spell points to cast greater contingency!} {
+    #if {$_gcgood_try} {#delay {setup_gc_good} {_setup_gc_good} {4}};
+};
+#action {^You will cast protection from good should your protection from good ever} {#var _gcgood_try 0};
+#var _gcgood_try 0;
 
 #NOP -- clear greater contingency;
 #alias {clear_gc} {
@@ -593,7 +614,7 @@
 };
 
 #NOP -- cycle through coffin/freezer/cooler for a corpse;
-#alias {.cycle_corpses} {
+#alias {.corpse} {
 	#if {$corpses[coffin] > 0} {
 		#send !unwrap 1;
 	}; #elseif {$corpses[freezer] > 0} {
@@ -604,6 +625,15 @@
 		#echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
 	};
 	cast corpse blast;
+};
+
+#NOP -- corpsetrig cooler step after wrap and slab: those are sent first, so the corpse is only still on the ground;
+#NOP -- once the coffin and freezer are full. The coffin max is learned from "The coffin is full!" (modules/corpsemanager);
+#alias {.corpse_cooler} {
+    #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
+        get corpse;
+        cooler corpse;
+    };
 };
 
 #alias {setup_reflex} {
@@ -689,6 +719,9 @@
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ cBlast2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -702,6 +735,9 @@
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ cBlast2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -717,6 +753,9 @@
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ cBlast2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -733,6 +772,9 @@
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ cBlast2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -860,7 +902,7 @@
     #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2};
 };
 
-#NOP -- amy;
+#NOP -- amy: steps to get to freeway bear;
 #alias {amy1} {s;e;ne;n;n;n};
 #alias {amy2} {u;e;n;nw;ne;n;d;d;s};
 #alias {amy3} {n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
@@ -985,28 +1027,53 @@
     #showme $badgeralias_name $badgeralias_desc;
 };
 
+#NOP -- filter types, listed in the help and matched by the first letters (corp finds corpses);
+#list badger3kdb_types create {corpses;boosts;combat;guild;spells;areas;misc};
+
+#NOP -- badger3kdb <filter>: a filter, or the start of one, lists that type. Anything else lists aliases starting with it;
 #alias {badger3kdb} {
-    #var tempflag 0;
-    #var number &badger3kdb[];
-	#echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
-    #echo {<ccf>  -------    <ffa>BADGERS ALIASES <fff>($number)  <ccf>-------    <088>  };
-    #echo {    Filters:  <eaf>corpses boosts combat misc<088>       };
-    #echo {                  <eaf>guild spells<088>                 };
+    #var bdb_total 0;
+    #format bdb_arg {%l} {%1};
+    #var bdb_mode {name};
+    #if {"$bdb_arg" != ""} {
+        #foreach {$badger3kdb_types[%*]} {bdb_type} {
+            #regex {$bdb_type} {^$bdb_arg} {#var bdb_mode {type}};
+        };
+    };
+    #echo {<ccf>  -------           <ffa>3kdb           <ccf>-------<088>  };
+    #echo {<ccf>  -------    <ffa>BADGERS ALIASES <fff>(&badger3kdb[])  <ccf>-------    <088>  };
     #echo {<ccf>  ----------------------------------------   <088>  };
     #echo {<ccf>     Name                 Usage              <088>  };
     #list badger3kdb index name;
     #list badger3kdb sort;
     #foreach $badger3kdb[%*] index {
-        #regexp {"%1"} {"$index[type]"} {
-            #var tempflag 1;
+        #var bdb_hit 0;
+        #if {"$bdb_arg" == ""} {
+            #var bdb_hit 1;
+        };
+        #elseif {"$bdb_mode" == "type"} {
+            #regex {$index[type]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #else {
+            #regex {$index[name]} {^$bdb_arg} {#var bdb_hit 1};
+        };
+        #if {$bdb_hit} {
+            #math bdb_total {$bdb_total + 1};
             format_badgersaliases {     $index[name]} {$index[desc]};
         };
     };
-    #if !$tempflag {
-        #foreach $badger3kdb[%*] index {
-            format_badgersaliases {     $index[name]} {$index[desc]};
-        };
+    #if {$bdb_total} {
+        #echo {\n<ccf>  Total of $bdb_total aliases returned.<088>};
+    } {
+        #echo {<ccf>  No matches found for <eed>%1<ccf>.<088>};
     };
+    #echo {<ccf>  ----------------------------------------   <088>  };
+    #echo {<cfc>  Sort using filters: <eaf>badger3kdb <filter><088>};
+    #echo {    <fff>Filters:  <eaf>corpses boosts combat guild<088>};
+    #echo {              <eaf>spells areas misc<088>};
+    #echo {<cfc>  Part of a filter works too: <eaf>badger3kdb corp<088>};
+    #echo {<cfc>  Not a filter? Lists aliases starting with it: <eaf>badger3kdb my<088>};
+    #echo {<ccf>  ----------------------------------------   <088>  };
 };
 
 #list badger3kdb clear;
@@ -1020,7 +1087,8 @@
 #list badger3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list badger3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
-#list badger3kdb add {{{name} {b} {type} {corpse} {desc} {Use a corpse}}};
+#list badger3kdb add {{{name} {b} {type} {corpses} {desc} {Spell tap and corpse blast the corpse here}}};
+#list badger3kdb add {{{name} {.corpse} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler) and corpse blast it}}};
 
 #NOP -- boosts;
 #list badger3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -1035,6 +1103,9 @@
 #list badger3kdb add {{{name} {sdmg2} {type} {combat} {desc} {summon damage report for vaf numbers perk}}};
 #list badger3kdb add {{{name} {cleardmg} {type} {combat} {desc} {clear all damage trackers}}};
 #list badger3kdb add {{{name} {ds} {type} {combat} {desc} {view all 3kdb trackers}}};
+#list badger3kdb add {{{name} {setup_reflex} {type} {combat} {desc} {Set reflexes: heal and immersion on low SP, corpse blast, focus mind, shoo summons}}};
+#list badger3kdb add {{{name} {3kr} {type} {combat} {desc} {Show the 3kReport kill stats}}};
+#list badger3kdb add {{{name} {set3kreport} {type} {combat} {desc} {Set 3kReport columns: killer, rounds, class, xp, coins, damage}}};
 
 #NOP -- misc;
 #list badger3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
@@ -1050,13 +1121,6 @@
 #list badger3kdb add {{{name} {rc} {type} {misc} {desc} {Rcost}}};
 #list badger3kdb add {{{name} {gagson} {type} {misc} {desc} {turn gags on}}};
 #list badger3kdb add {{{name} {gagsoff} {type} {misc} {desc} {turn gags off}}};
-#list badger3kdb add {{{name} {pryout} {type} {misc} {desc} {attempt to get out of prysmia room}}};
-#list badger3kdb add {{{name} {p6bar} {type} {misc} {desc} {go to barrakeith}}};
-#list badger3kdb add {{{name} {barhel} {type} {misc} {desc} {return from barrakeith}}};
-#list badger3kdb add {{{name} {challenge_all} {type} {misc} {desc} {challenge all mobs in arena}}};
-#list badger3kdb add {{{name} {arena_kill_all} {type} {misc} {desc} {kill all arena mobs}}};
-#list badger3kdb add {{{name} {pede_run} {type} {misc} {desc} {gather all pedes}}};
-#list badger3kdb add {{{name} {kayos_run} {type} {misc} {desc} {gathers all the hunting kayos mobs}}};
 #list badger3kdb add {{{name} {bagset} {type} {misc} {desc} {set # of bags to cycle thru}}};
 #list badger3kdb add {{{name} {bag1} {type} {misc} {desc} {put all into bags 1 through bagcount}}};
 #list badger3kdb add {{{name} {bag2} {type} {misc} {desc} {empty bags back to inventory}}};
@@ -1066,9 +1130,32 @@
 #list badger3kdb add {{{name} {ustash1} {type} {misc} {desc} {unstash all the jewels i collect/use}}};
 #list badger3kdb add {{{name} {ustash2} {type} {misc} {desc} {unstash all frags/essence}}};
 #list badger3kdb add {{{name} {ore1} {type} {misc} {desc} {unstash ore and prospect ore}}};
-#list badger3kdb add {{{name} {starttacos} {type} {misc} {desc} {start taco bot}}};
-#list badger3kdb add {{{name} {au-sz} {type} {misc} {desc} {auction balangool figurine with caps}}};
 #list badger3kdb add {{{name} {eventlocation} {type} {misc} {desc} {announce location of event on high mortal line}}};
+#list badger3kdb add {{{name} {announce_event} {type} {misc} {desc} {Announce the saved event location on the hm line again}}};
+#list badger3kdb add {{{name} {.au} {type} {misc} {desc} {Auction: .au sz (figurine and caps), .au spite-ring (ring and 8 stones)}}};
+#list badger3kdb add {{{name} {aug} {type} {misc} {desc} {Augur: take off other helmet, wear circlet}}};
+#list badger3kdb add {{{name} {aug2} {type} {misc} {desc} {Augur: take off circlet, wear other helmet}}};
+#list badger3kdb add {{{name} {quit} {type} {misc} {desc} {Quit guard: use quit REALLY to really quit}}};
+#list badger3kdb add {{{name} {.startlog} {type} {misc} {desc} {Bot debug log: .startlog on/off/del}}};
+
+#NOP -- areas;
+#list badger3kdb add {{{name} {pryout} {type} {areas} {desc} {attempt to get out of prysmia room}}};
+#list badger3kdb add {{{name} {challenge_all} {type} {areas} {desc} {challenge all mobs in arena}}};
+#list badger3kdb add {{{name} {arena_kill_all} {type} {areas} {desc} {kill all arena mobs}}};
+#list badger3kdb add {{{name} {pede_run} {type} {areas} {desc} {gather all pedes}}};
+#list badger3kdb add {{{name} {kayos_run} {type} {areas} {desc} {gathers all the hunting kayos mobs}}};
+#list badger3kdb add {{{name} {pig1} {type} {areas} {desc} {Walk to Bigpig}}};
+#list badger3kdb add {{{name} {pig2} {type} {areas} {desc} {Walk back from Bigpig}}};
+#list badger3kdb add {{{name} {charm} {type} {areas} {desc} {Forest of charms steps: charm 1-8 or key, charm help}}};
+#list badger3kdb add {{{name} {smug1} {type} {areas} {desc} {Durantalist: smuggle gear, drop the rest before the fight}}};
+#list badger3kdb add {{{name} {smug2} {type} {areas} {desc} {Durantalist: take gear back out of smuggle after the fight}}};
+#list badger3kdb add {{{name} {hell_pots} {type} {areas} {desc} {Jar puzzle: place fire/earth/water/air jars on shelves 1-4}}};
+#list badger3kdb add {{{name} {sr_holes} {type} {areas} {desc} {Put a hand in the left, centre and right holes}}};
+#list badger3kdb add {{{name} {amy1} {type} {areas} {desc} {Freeway bear (amy): walk part 1}}};
+#list badger3kdb add {{{name} {amy2} {type} {areas} {desc} {Freeway bear (amy): walk part 2}}};
+#list badger3kdb add {{{name} {amy3} {type} {areas} {desc} {Freeway bear (amy): walk part 3}}};
+#list badger3kdb add {{{name} {amy4} {type} {areas} {desc} {Freeway bear (amy): smash the grate, squeeze through, pry the crack}}};
+#list badger3kdb add {{{name} {amy5} {type} {areas} {desc} {Freeway bear (amy): go through the crack and walk the last part}}};
 
 #nop -- guild;
 #list badger3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
@@ -1094,5 +1181,7 @@
 #list badger3kdb add {{{name} {pkmf} {type} {spells} {desc} {Offensive: Toggle Casting mf on Phantasmal Killer on & off}}};
 #list badger3kdb add {{{name} {summd} {type} {spells} {desc} {defending summon config monster summoning three args}}};
 #list badger3kdb add {{{name} {summa} {type} {spells} {desc} {assisting summon config monster summoning three args}}};
+
+.add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
 
 #class {player_aliases} {close};

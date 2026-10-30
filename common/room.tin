@@ -104,7 +104,9 @@
     .clearRoomData;
     #var got_room_short 1;
     #var room_short %1;
-    
+    #NOP -- The Rejected Game turns its map from the exits in this line, see common/map/rej_rotate.tin;
+    #if {&{rej_area_name}} {.rej_room_short {%2}};
+
     #line oneshot #action {^>$} {
 
         #var bot_first_in_room_check 0;
