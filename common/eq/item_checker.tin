@@ -19,11 +19,16 @@
 
 #NOP -- worlddrops2: grab world drops lying in the room by name, with or without the -!!!- in front;
 #var worldDropNames {Soul Drinker Blade|[a-z]+ flask [(]purple liquid[)]|PICNP Device|Amulet of Voraxis|Amulet of Waves|exploding kitten|Buckler of Eternia|Frosted (?:armour|boots|breastplate|gauntlets|helmet|shield) of Aylin|Golden Robes of Intellect|Molok's Titanium Breastplate|QT Amulet|Redoubt Cloak|Robe of Therlasia|Shieldbreaker|Shimmering cloak of Aylin|Skull of the Dracolich, Yaxtan|Staff of Elemental Fury|Thundering|TimeRender|red robe made of a fine fabric};
-#event {RECEIVED LINE} {
+#NOP -- worlddrops2 action, only exists while the toggle is on;
+#alias {.worlddrops2_watch} {
+    #class {worlddrops2_watch} {kill};
     #if {"$toggles[worlddrops2]" == "1"} {
-        #regex {%1} {^{(?i)(?:-[a-z!]+-)?((?:(?:a|an|the) )?(?:$worldDropNames)[^:]*?)\.$}} {.notifyWorldDrop {&2}};
+        #class {worlddrops2_watch} {open};
+        #line substitute variables {#action {^{(?i)(?:-[a-z!]+-)?((?:(?:a|an|the) )?(?:$worldDropNames)[^:]*?)\.$}} {.notifyWorldDrop {%%2}} {2}};
+        #class {worlddrops2_watch} {close};
     };
 };
+#delay {worlddrops2_watch} {.worlddrops2_watch} {7};
 
 #NOP -- The get keyword: the first word below that is in the name (longer words first), else its last word (some drops, like Robe of;
 #NOP -- Therlasia, show another name until they are picked up);
