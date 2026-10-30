@@ -34,6 +34,9 @@
 #var gc_round_interval 15;
 #var gc_last_round 0;
 
+#var fight_bblast 0;
+#var fight_fshroud 0;
+
 
 #NOP -- Alias to swap animal affinity;
 #var aa_used 1;
@@ -184,9 +187,25 @@
 	#NOP -- The "if I haven't done anything yet and have Psi/Stam Section;
 	#NOP --- Blur, Demoralize, Recall Pain & Recall Agony;
 
+	#if {$mip[round] == 0} {#var fight_bblast 0;#var fight_fshroud 0};
+
 	#if {!$hbp} {
 		#if {$my[implants][dm][active] && !$mob[demoralize] && $incombat} {
 			checkStrategy {demoralize} {_use_power demoralize};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[implants][bb][active] && $incombat && !$fight_bblast} {
+			checkStrategy {bblast} {_use_power brilliant blast};
+			#if {$hbp} {#var fight_bblast 1};
+		};
+	};
+
+	#if {!$hbp} {
+		#if {$my[implants][fs][active] && $incombat && !$fight_fshroud} {
+			checkStrategy {fshroud} {_use_power flaming shroud};
+			#if {$hbp} {#var fight_fshroud 1};
 		};
 	};
 
@@ -244,7 +263,7 @@
 #NOP -- %1 - power short name;
 #NOP -- %2 - full power name;
 #alias {_check_power} {
-  #if {!$hbp} {
+  #if {!$hbp && @maint_want{%1}} {
 	_check_powers_list %1;
 	#if $found_power {
       #if {!$my[implants][%1][active] && $my[powers][%1][active]} {
@@ -277,7 +296,7 @@
 };
 
 #alias {_check_adapt_body} {
-  #if {!$hbp} {
+  #if {!$hbp && @maint_want{ab}} {
 	_check_powers_list ab;
     #if $found_power {
       #if {!$my[implants][%1][active] && $my[powers][ab][active]} {
