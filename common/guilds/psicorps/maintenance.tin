@@ -123,15 +123,29 @@
 };
 
 #alias {_maint_pick} {
-    #format _mwords {%l} {%2};
+    #var _mraw {%2};
+    #replace _mraw { } {;};
+    #var _mwords {};
+    #foreach {$_mraw} {_mt} {
+        #if {"$_mt" != ""} {
+            #if {&maint_spells[$_mt]} {
+                #var _mwords {$_mwords =$_mt};
+            } {
+                #format _mlow {%l} {$_mt};
+                #var _mwords {$_mwords $_mlow};
+            };
+        };
+    };
     #foreach {$maint_phrase_order[%*]} {_mp} {#replace _mwords {$_mp} {$maint_phrases[$_mp]}};
     #replace _mwords { } {;};
     #var _mbad {};
     #foreach {$_mwords} {_mw} {
         #if {"$_mw" != ""} {
-            #format _mw {%l} {$_mw};
-            #if {&maint_words[$_mw]} {
-                #var _mk $maint_words[$_mw];
+            #var _mk {};
+            #regex {$_mw} {^={.+}$} {#var _mk {&1}} {
+                #if {&maint_words[$_mw]} {#var _mk $maint_words[$_mw]};
+            };
+            #if {"$_mk" != ""} {
                 #if {"%1" == "t"} {
                     #if {"$maint_sel[$_mk]" == "1"} {_maint_set $_mk 0} {_maint_set $_mk 1};
                 } {
@@ -242,7 +256,7 @@
     #echo {  <ffa>maint                 <fff>start keeping your picked powers up (the default)<088>};
     #echo {  <ffa>maint off             <fff>stop renewing powers (your picks are kept)<088>};
     #echo {  <ffa>maint <power> ...     <fff>pick or unpick (toggles), e.g. <ffa>maint gvalor ac6<088>};
-    #echo {  <ffa>                      <fff>full names work too, and a trailing on or off: <ffa>maint astral construct 3 off<088>};
+    #echo {  <ffa>                      <fff>hpbar codes work exactly as shown (Vv, Bf, GV vs Gv), full names too, and a trailing on or off: <ffa>maint astral construct 3 off<088>};
     #echo {  <ffa>maint add <power> ... <fff>pick<088>};
     #echo {  <ffa>maint del <power> ... <fff>unpick<088>};
     #echo {  <ffa>maint all             <fff>pick every power (also maint default)<088>};
