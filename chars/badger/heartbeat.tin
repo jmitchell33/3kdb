@@ -40,8 +40,35 @@
 
 #NOP -- Send what the steppers tried while we were away, in order, once the bot is handed back;
 #alias {_zodiac_replay} {
-    #foreach {$zodiac_held[%*]} {zodiac_cmd} {$zodiac_cmd};
+    #foreach {$zodiac_held[%*]} {zodiac_cmd} {
+        #NOP -- shelter is waiting on SPs/MC and resumes the bot itself: a held .unpause would cut that short;
+        #if {$shelter_bot_wait && "$zodiac_cmd" == ".unpause"} {
+            #continue;
+        };
+        $zodiac_cmd;
+    };
     #list zodiac_held clear;
+};
+
+#NOP -- Sets sp_low_unhealed to 1 when SPs are under sp_danger and nothing (immersion, hm heal, eternal heal) will heal them;
+#NOP -- each check is its own #if: one undefined variable (e.g. my[eternal][heal] without eternal) makes a whole tt++ #if false;
+#alias {_check_sp_low_unhealed} {
+    #var sp_low_unhealed 0;
+    #if {$my[sp][current] < $sp_danger} {
+        #var sp_low_unhealed 1;
+    };
+    #if {$my[immersion][count]} {
+        #var sp_low_unhealed 0;
+    };
+    #if {$my[immersion][active]} {
+        #var sp_low_unhealed 0;
+    };
+    #if {$my[hm][heal]} {
+        #var sp_low_unhealed 0;
+    };
+    #if {$my[eternal][heal]} {
+        #var sp_low_unhealed 0;
+    };
 };
 
 #NOP -- Shelter takes the bot over from the mage SP/MC pause (common/guilds/mage/heartbeat.tin);
@@ -67,23 +94,34 @@
         };
     } {
         #var bot_toggle 0;
-        #NOP -- separate checks: one undefined variable (e.g. my[eternal][heal] without eternal) makes a whole tt++ #if false;
         #var shelter_need_wait $shelter_held_bot;
         #if {$hpbar_mc < $mc_danger} {#var shelter_need_wait 1};
-        #if {$my[sp][current] < $sp_danger && !$my[immersion][count] && !$my[immersion][active] && !$my[hm][heal] && !$my[eternal][heal]} {#var shelter_need_wait 1};
+        _check_sp_low_unhealed;
+        #if {$sp_low_unhealed} {
+            #var shelter_need_wait 1;
+        };
         #if {$bot[active] && $shelter_need_wait} {
             #var bot_toggle 1;
             #var shelter_bot_wait 1;
             #echo {<ffa>Shelter done, waiting on SPs/MC before resuming the bot.<088>};
             #ticker {shelterBotResume} {
-                #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
-                hp;
-                #if {($my[sp][current] > $sp_threshold || $my[immersion][active]) && $hpbar_mc > $mc_threshold} {
+                #if {!$bot[active]} {
+                    #NOP -- bot was stopped while waiting: drop the wait instead of resuming a stopped bot;
                     #var shelter_bot_wait 0;
                     #unticker {shelterBotResume};
                     #if {"$pausedtoregen" == "1"} {
                         #var bot_toggle 0;
-                        #if {!$incombat} {..} {.unpause};
+                    };
+                } {
+                    #NOP -- backup refresh of SPs/MC in case the hpbar is slow to update;
+                    hp;
+                    #if {($my[sp][current] > $sp_threshold || $my[immersion][active]) && $hpbar_mc > $mc_threshold} {
+                        #var shelter_bot_wait 0;
+                        #unticker {shelterBotResume};
+                        #if {"$pausedtoregen" == "1"} {
+                            #var bot_toggle 0;
+                            #if {!$incombat} {..} {.unpause};
+                        };
                     };
                 };
             } {2};
@@ -148,28 +186,27 @@
                 };
             };
         };
-        #if {"$secure_shelter_switch" == "1"} {
-            #if {"$my[gp1][current]" == "0" && "$shelter_pause" == "0"} {
-                #if {"$tmp_shelter_return" == "1"} {
-                    #var shelter_pause 1;
-                    #var tmp_shelter_return 0;
-                    _zodiac_release;
-                    out;
-                    $tmp_shelter_command;
-                    _shelter_release_bot;
-                    _zodiac_replay;
-                    #var tmp_shelter_vnum 0;
-                    glance;
-                    kill mimic;
-                } {
-                    #var shelter_pause 1;
-                    _zodiac_release;
-                    out;
-                    _shelter_release_bot;
-                    _zodiac_replay;
-                    #var tmp_shelter_vnum 0;
-                    glance;
-                };
+        #NOP -- no secure_shelter_switch check here: 'shelter off' while sheltered must still come back out and hand the bot back;
+        #if {"$my[gp1][current]" == "0" && "$shelter_pause" == "0"} {
+            #if {"$tmp_shelter_return" == "1"} {
+                #var shelter_pause 1;
+                #var tmp_shelter_return 0;
+                _zodiac_release;
+                out;
+                $tmp_shelter_command;
+                _shelter_release_bot;
+                _zodiac_replay;
+                #var tmp_shelter_vnum 0;
+                glance;
+                kill mimic;
+            } {
+                #var shelter_pause 1;
+                _zodiac_release;
+                out;
+                _shelter_release_bot;
+                _zodiac_replay;
+                #var tmp_shelter_vnum 0;
+                glance;
             };
         };
         #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
@@ -192,7 +229,8 @@
             #if {"$shelter_pause" == "1" && !$shelter_bot_wait} {
                 #var bot_toggle 0;
                 #if {$bot[active] && !$regen_bot_foreign} {
-                    #if {$my[sp][current] < $sp_danger && !$my[immersion][count] && !$my[immersion][active] && !$my[hm][heal] && !$my[eternal][heal]} {
+                    _check_sp_low_unhealed;
+                    #if {$sp_low_unhealed} {
                         #NOP -- SPs are low: the guild heartbeat right after this pauses and resumes the bot for SPs;
                     } {
                         .unpause;glance;

@@ -164,6 +164,13 @@
     #var xdeadmanTimeoutActions $deadmanTimeoutActions;
     #var xdeadman_armed $deadman_armed;
     #var xmajor_prof $major_prof;
+    #NOP -- Who you follow, so map follow works again after a reconnect. A quit (menu_ld_skip, startmenu.tin);
+    #NOP -- ends the follow in game, so don't keep it then;
+    #if {&{following} && "$menu_ld_skip" != "1"} {
+        #var xfollowing {$following};
+    } {
+        #var xfollowing {};
+    };
 
     #NOP -- These variables are at a minimum used to draw somewhere;
     #var xsplit $split;
@@ -199,6 +206,13 @@
     #var major_prof $xmajor_prof;
     
     #var dungeon $xdungeon;
+    #NOP -- Still following from before a disconnect, the game keeps the follow while linkdead;
+    #unvar following;
+    #var mapFollow 0;
+    #if {&{xfollowing} && "$xfollowing" != ""} {
+        #var following {$xfollowing};
+        #var mapFollow 1;
+    };
     #var lastBot $xlastBot;
     #var theme $xtheme;
     #var gags $xgags;
@@ -288,17 +302,16 @@
 #if {"$guild" == "mage" || "$guild" == "monk" || "$guild" == "elemental"} {
     #NOP -- 30 round rolling gxp average;
     #alias .gxp_t30_add {
-        #if {&my[gxp][t30][] > 30} {
+        #NOP -- Drop the oldest once 30 are held so the list never goes past 30;
+        #if {&my[gxp][t30][] >= 30} {
             #math my[gxp][t30_total] {$my[gxp][t30_total] - $my[gxp][t30][1]};
             #list my[gxp][t30] delete 1;
-            #list my[gxp][t30] add $my[gxp][last_round];
-            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
-        } {
-            #list my[gxp][t30] add $my[gxp][last_round];
-            #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
         };
+        #list my[gxp][t30] add $my[gxp][last_round];
+        #math my[gxp][t30_total] {$my[gxp][t30_total] + $my[gxp][last_round]};
         #math my[gxp][t30_average] {$my[gxp][t30_total] / &my[gxp][t30][]};
-        #math my[gxp][t30_per_hr] {$my[gxp][t30_average] * 30 * 60};
+        #NOP -- Multiply before dividing, whole number division drops the remainder (9.9/rnd would show as 9);
+        #math my[gxp][t30_per_hr] {$my[gxp][t30_total] * 30 * 60 / &my[gxp][t30][]};
         #format my[gxp][str_t30_per_hr] {%M} {$my[gxp][t30_per_hr]};
     };
 

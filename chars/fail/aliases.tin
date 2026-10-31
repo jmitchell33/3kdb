@@ -15,6 +15,27 @@
 #alias knight6 {play;start;#script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}};
 #alias knight8 {play;start;#script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}};
 
+#NOP -- corpsetrig cooler step after wrap and slab: those are sent first, so the corpse is only still on the ground;
+#NOP -- once the coffin and freezer are full. The coffin max is learned from "The coffin is full!" (modules/corpsemanager);
+#alias {.corpse_cooler} {
+    #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
+        get corpse;
+        cooler corpse;
+    };
+};
+
+#NOP -- alias to setup corpsetrigs;
+#alias {mycorpsetrig} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig-on;
+};
 
 #NOP -- fail's 3kdb aliases;
 #alias {format_failsaliases} {

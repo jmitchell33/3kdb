@@ -94,28 +94,147 @@
     };
 };
 
-#NOP -- "$user leaves following $following" never states a direction -- that;
-#NOP -- direction was printed on an earlier line, so we will;
-#NOP -- walk backwards through the last 15 buffer lines for the first one that;
-#NOP -- isn't itself a "leaves following" line;
-#action {^%1 leaves following %2\.$} {
-    #if {"%1" == "$userCap" && "%2" == "$following" && $mapFollow} {
-        #local scan -1;
-        #var follow_dir {};
-        #while {$scan >= -15} {
-            #buffer get bufline ${scan};
-            #regex {$bufline} {leaves following} {
-                #math scan {$scan - 1};
-            } {
-                #regexp {$bufline} {^%* %w.} {
-                    #var follow_dir {&2};
+#NOP -- Leave messages that don't name the exit, as {start of the message} {map exit};
+#var follow_special_exits {
+    {draws a tile} {draw tile}
+    {leaves into the game} {press start}
+    {leaves by pausing their game} {pause game}
+    {leaves on a shuttle to} {board shuttle}
+};
+
+#var follow_directions {
+    {north} {n}
+    {northeast} {ne}
+    {northwest} {nw}
+    {south} {s}
+    {southeast} {se}
+    {southwest} {sw}
+    {east} {e}
+    {west} {w}
+    {up} {u}
+    {down} {d}
+};
+
+#NOP -- Puts the leader's last leave message in follow_leave, e.g. "leaves west" or "draws a tile".;
+#NOP -- Walks back up to 15 buffer lines. The "leaves following" lines right above are this move (ours and;
+#NOP -- the rest of the party), an older one of ours further up means this move had no leave line, so stop.;
+#NOP -- If the leader was following someone too, the leave line belongs to whoever they followed;
+#alias {.followFindLeave} {
+    #var follow_leave {};
+    #var follow_target {$following};
+    #var follow_scan -1;
+    #var follow_in_block 1;
+    #while {$follow_scan >= -15} {
+        #buffer get follow_bufline $follow_scan;
+        #math follow_scan {$follow_scan - 1};
+        #var follow_is_follow 0;
+        #regexp {$follow_bufline} {leaves following} {#var follow_is_follow 1};
+        #if {$follow_is_follow} {
+            #if {$follow_in_block} {
+                #regexp {$follow_bufline} {{(?:^|m)}$follow_target leaves following %w.} {
+                    #var follow_target {&2};
                 };
-                #local scan -99;
+            } {
+                #regexp {$follow_bufline} {{(?:^|m)}$userCap leaves following} {#var follow_scan -99};
+            };
+        } {
+            #var follow_in_block 0;
+            #regexp {$follow_bufline} {{(?:^|m)}$follow_target {leaves|draws} %*.} {
+                #var follow_leave {&2 &3};
+                #var follow_scan -99;
             };
         };
-        .followMapMove {$follow_dir};
+    };
+};
+
+#NOP -- Moves the map through the exit for a leave message from .followFindLeave, only if this map room has it:;
+#NOP -- the special list first, then the direction or exit word (leaves west, leaves portal), then the last;
+#NOP -- word against the room's exits (leaves through the portal -> enter portal).;
+#NOP -- No match means the map can't follow, so say so and leave the map where it is;
+#alias {.followLeaderMove} {
+    #NOP -- toggle map_follow, blank counts as on until toggles.tin sets the default;
+    #if {"$toggles[map_follow]" == "0"} {#return};
+    #var follow_words {%1};
+    #var follow_exit {};
+    #var follow_room_exits {};
+    #map get roomexits follow_room_exits;
+
+    #var follow_want {};
+    #foreach *follow_special_exits[] follow_phrase {
+        #regexp {$follow_words} {^$follow_phrase} {#var follow_want {$follow_special_exits[$follow_phrase]}};
+    };
+    #NOP -- Most shuttles are "board shuttle", but rooms with several shuttles like the Yavin landing pad;
+    #NOP -- name the destination, "leaves on a shuttle to fantasy" -> board fantasy;
+    #var follow_shuttle {};
+    #regexp {$follow_words} {^leaves on a shuttle to %w} {#var follow_shuttle {board &1}};
+    #if {"$follow_shuttle" != "" && "$follow_room_exits[$follow_shuttle]" != ""} {
+        #var follow_want {$follow_shuttle};
+    };
+    #if {"$follow_want" == ""} {
+        #var follow_word {$follow_words};
+        #replace follow_word {^leaves } {};
+        #var follow_want {$follow_word};
+        #foreach *follow_directions[] follow_dirname {
+            #if {"$follow_word" == "$follow_dirname"} {#var follow_want {$follow_directions[$follow_dirname]}};
+        };
+    };
+    #foreach *follow_room_exits[] follow_ex {
+        #if {"$follow_ex" == "$follow_want"} {#var follow_exit {$follow_ex}};
+    };
+
+    #if {"$follow_exit" == ""} {
+        #var follow_split {$follow_want};
+        #list follow_split {explode} { };
+        #var follow_last {$follow_split[-1]};
+        #var follow_found 0;
+        #foreach *follow_room_exits[] follow_ex {
+            #regexp {$follow_ex} {{(?:^| )}$follow_last{(?: |$)}} {
+                #math follow_found {$follow_found + 1};
+                #var follow_match {$follow_ex};
+            };
+        };
+        #if {$follow_found == 1} {#var follow_exit {$follow_match}};
+    };
+
+    #if {"$follow_exit" != ""} {
+        #map move {$follow_exit};
+    } {
+        #echo {<dfa>MAP: couldn't follow $following ($follow_words), no matching exit here. Type findhere if the map is lost.<088>};
+    };
+};
+
+#NOP -- Our own "leaves following" line means we are following that leader, so it also switches map follow;
+#NOP -- back on. TinTin forgets both after a reconnect while the game keeps us following;
+#action {^%1 leaves following %2\.$} {
+    #if {"%1" == "$userCap"} {
+        #var following {%2};
+        #var mapFollow 1;
+        #if {"$toggles[map_follow]" != "0"} {
+            .followFindLeave;
+            #if {"$follow_leave" != ""} {
+                .followLeaderMove {$follow_leave};
+            } {
+                #echo {<dfa>MAP: couldn't find where $following went. Type findhere if the map is lost.<088>};
+            };
+        };
     };
 } {1};
+
+#NOP -- Section Z moves us without a "leaves following" line. Only move the map when the leader's matching;
+#NOP -- leave line is right above, so pausing or starting the game yourself doesn't move it twice;
+#action {^You are now saved to Section Z with %w.} {
+    #if {$mapFollow && "$following" != ""} {
+        .followFindLeave;
+        #if {"$follow_leave" == "leaves into the game"} {.followLeaderMove {$follow_leave}};
+    };
+} {5};
+
+#action {^You press PAUSE on the game, saving the rest for later.} {
+    #if {$mapFollow && "$following" != ""} {
+        .followFindLeave;
+        #if {"$follow_leave" == "leaves by pausing their game"} {.followLeaderMove {$follow_leave}};
+    };
+} {5};
 
 #NOP -- Rewear the knight shield if you use the wrong one;
 #action {There is no reason to 'bash' here.} {

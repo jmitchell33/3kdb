@@ -149,7 +149,7 @@
 };
 
 #NOP -- cycle through coffin/freezer/cooler for a corpse;
-#alias {.cycle_corpses} {
+#alias {.corpse} {
 	#if {$corpses[coffin] > 0} {
 		#send !unwrap 1;
 	}; #elseif {$corpses[freezer] > 0} {
@@ -182,7 +182,7 @@
 
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        .cycle_corpses;
+        .corpse;
     };
 } {1};
 
@@ -225,11 +225,23 @@
     strategy-clear;
 };
 
+#NOP -- corpsetrig cooler step after wrap and slab: those are sent first, so the corpse is only still on the ground;
+#NOP -- once the coffin and freezer are full. The coffin max is learned from "The coffin is full!" (modules/corpsemanager);
+#alias {.corpse_cooler} {
+    #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
+        get corpse;
+        cooler corpse;
+    };
+};
+
 #NOP -- alias to setup corpsetrigs;
 #alias {mycorpsetrig} {
     corpsetrig-clear;
     corpsetrig+ songcease;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ dirge2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -241,6 +253,9 @@
     corpsetrig-clear;
     corpsetrig+ songcease;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ dirge2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -254,6 +269,9 @@
     corpsetrig-clear;
     corpsetrig+ songcease;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ dirge2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -274,6 +292,9 @@
     corpsetrig-clear;
     corpsetrig+ songcease;
     corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ dirge2;
     corpsetrig+ divvy;
     corpsetrig+ badgers_corpsegrab;
@@ -592,7 +613,7 @@
 #list pete3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list pete3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
 #list pete3kdb add {{{name} {b} {type} {corpses} {desc} {Stop singing and perform dirge on the corpse here}}};
-#list pete3kdb add {{{name} {.cycle_corpses} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler) and perform dirge on it}}};
+#list pete3kdb add {{{name} {.corpse} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler) and perform dirge on it}}};
 
 #NOP -- boosts;
 #list pete3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};

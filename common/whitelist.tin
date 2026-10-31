@@ -1,22 +1,45 @@
 #class {3kdb_whitelist} {kill}
 #class {3kdb_whitelist} {open}
 
+#NOP -- These also keep party[member] up to date, see .party_add and .party_remove in common/party.tin;
 #action {^[PARTY] %w joins the party.$} {
     whitelist+ %1;
+    #NOP -- Joining a party doesn't name who is already in it, so get the full list from members;
+    #if {"%1" == "$user_cap"} {
+        members;
+    } {
+        .party_add {%1};
+    };
 } {2};
 
 #action {^[PARTY] %w has been booted from the party.} {
-    whitelist- %1;
+    #NOP -- If you were booted, clear whitelist and update to default;
+    #if {"%1" == "$user_cap"} {
+        #var party[member] {};
+        whitelist-clear;
+        whitelist_default;
+    } {
+        whitelist- %1;
+        .party_remove {%1};
+    };
 } {2};
 
 #action {^[PARTY] %w has quit the party.$} {
     #NOP -- If you quit the party, clear whitelist and update to default;
     #if {"%1" == "$user_cap"} {
+        #var party[member] {};
         whitelist-clear;
         whitelist_default;
     } {
         whitelist- %1;
+        .party_remove {%1};
     };
+} {2};
+
+#NOP -- Shown when the leader quits and also when you create a party, the name is lowercase;
+#action {^[PARTY] New leader for the party: %w.$} {
+    #format party_leader {%n} {%1};
+    .party_add {$party_leader};
 } {2};
 
 #action {^[PARTY] %w: whitelist room} {
@@ -58,18 +81,15 @@
 
 #alias whitelist-party {
     whitelist_default;
-    members;
-    #line oneshot #action {Total XP gain since party creation :} {
-        #local item {};
-        #foreach $party[member][%*] item {
-            #unvar tmpItem;
-            #format tmpItem {%n} {$item[name]};
-            #var tmpItemExists 0;
-            #list whitelist find {$tmpItem} tmpItemExists;
-            #if !$tmpItemExists {
-                #list whitelist add {$tmpItem};
-                #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
-            };
+    #local item {};
+    #foreach $party[member][%*] item {
+        #unvar tmpItem;
+        #format tmpItem {%n} {$item[name]};
+        #var tmpItemExists 0;
+        #list whitelist find {$tmpItem} tmpItemExists;
+        #if !$tmpItemExists {
+            #list whitelist add {$tmpItem};
+            #echo {==> <cfb> Added $tmpItem to VIP List <088> <==};
         };
     };
 };

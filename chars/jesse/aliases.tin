@@ -15,7 +15,7 @@
 };
 
 #NOP -- cycle through coffin/freezer/cooler for a corpse;
-#alias {.cycle_corpses} {
+#alias {.corpse} {
 	#if {$corpses[coffin] > 0} {
 		#send !unwrap 1;
 	}; #elseif {$corpses[freezer] > 0} {
@@ -273,13 +273,22 @@
     strategy-clear
 };
 
+#NOP -- corpsetrig cooler step after wrap and slab: those are sent first, so the corpse is only still on the ground;
+#NOP -- once the coffin and freezer are full. The coffin max is learned from "The coffin is full!" (modules/corpsemanager);
+#alias {.corpse_cooler} {
+    #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
+        get corpse;
+        cooler corpse;
+    };
+};
+
 #NOP -- aliases to setup corpsetrigs;
 #alias {mycorpsetrig} {
     corpsetrig-clear;
     corpsetrig+ wrap;
     corpsetrig+ slab;
-    corpsetrig+ cooler corpse;
-    corpsetrig+ cooler corpse;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
     corpsetrig+ preserve2;
     corpsetrig+ divvy;
     corpsetrig+ getAll;
@@ -478,7 +487,7 @@
 #list jesse3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list jesse3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list jesse3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
-#list jesse3kdb add {{{name} {.cycle_corpses} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler), preserve and absorb it}}};
+#list jesse3kdb add {{{name} {.corpse} {type} {corpses} {desc} {Get a corpse (coffin, freezer, then cooler), preserve and absorb it}}};
 #list jesse3kdb add {{{name} {pr} {type} {corpses} {desc} {Preserve up to 50 remains}}};
 #list jesse3kdb add {{{name} {pg} {type} {corpses} {desc} {Preserve up to 50 remains and pick up the preservations}}};
 #list jesse3kdb add {{{name} {pg2} {type} {corpses} {desc} {pg, then store all the preservations}}};

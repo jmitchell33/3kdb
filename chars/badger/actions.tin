@@ -64,21 +64,4 @@
 #ticker pipe {#if {$pipe && !$idle_flag} {smoke pipe}} 63;
 #ticker pipe2 {#if {$pipe && !$idle_flag} {smoke pipe}} 75;
 
-#nop tao bot;
-
-#alias {tao_on} {#var tao_toggle 1;repeat nocombat/bow};
-#alias {tao_off} {#unvar tao_toggle;repeat off};
-
-#action {A voice whispers in your mind.  You may proceed.} {
-    #if {!$idle_flag && "$tao_toggle" == "1" && "$area" == "Tao Te Cheng"} {
-        #send {!continue};
-    };
-} {1};
-
-#action {You bow deeply in respect to the ancients.} {
-    #if {!$idle_flag && "$tao_toggle" == "1" && "$area" == "Tao Te Cheng"} {
-        #send {!cast fireball};
-    };
-} {1};
-
 #class {player_actions} {close};
