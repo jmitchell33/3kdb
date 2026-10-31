@@ -1,0 +1,14 @@
+#class {tao_area} {kill};
+#class {tao_area} {open};
+
+#NOP -- Tao Te Cheng: the game starts you over at Book 1, Chapter One every time you open the book;
+#NOP -- This lives outside the bot so it still resets when you walk in before starting the tao bot;
+#NOP -- tao_book and tao_chapter are used by common/bot/bots/tao.tin, chapter 0 means not synced yet;
+#action {^You open the book and before you know it, you are finding the philosophy}
+{
+    #var tao_book 1;
+    #var tao_chapter 0;
+    #echo {<cfc>TAO: Opened the book, count reset to Book 1<088>};
+} {1};
+
+#class {tao_area} {close};

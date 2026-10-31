@@ -17,11 +17,12 @@
 #NOP --   name     full area name as the wiki lists it;
 #NOP --   scaler   your preferred scaler, 0 when you have not picked one;
 #NOP --;
-#NOP -- The seeded rows only load when dungeon[scalers] is empty, so anything;
-#NOP -- you set survives a reload as long as your variables are saved;
+#NOP -- Your saved list is never overwritten. When a dungeon is added to the;
+#NOP -- block below, it is added to your list at 0 the next time .scalers or;
+#NOP -- .set_scaler runs, and everything you already set stays as it is;
 #NOP --;
-#NOP -- Adding a dungeon. Append a #list add line in the block below and keep;
-#NOP -- the key unique, since .set_scaler matches on key alone;
+#NOP -- Adding a dungeon. Append a #list dgSeed add line in .dg_seed below and;
+#NOP -- keep the key unique, since .set_scaler matches on key alone;
 #NOP --;
 #NOP -- Companion file. common/areas/dungeon_data.tin holds the class sizes each;
 #NOP -- of these dungeons rolls at a given scaler, read it with ddata <key>;
@@ -53,6 +54,38 @@
     #var currentScaler %1;
 } {2};
 
+#NOP -- Make sure dungeon[scalers] has every dungeon. A new user gets the full list. Someone with a;
+#NOP -- saved list keeps every row and scaler exactly as they are, only dungeons missing from it are;
+#NOP -- added at 0. Nothing is ever removed or changed here, .reset_scalers is the only thing that wipes;
+#NOP -- When dungeon[scalers] has never been set &dungeon[scalers][] stays as plain text, so test that;
+#NOP -- the variable exists first;
+#alias .dg_ensure {
+    #if {&{dungeon[scalers]} == 0} {
+        .dg_init_vars;
+        #return;
+    };
+    #if {&dungeon[scalers][] == 0} {
+        .dg_init_vars;
+        #return;
+    };
+    .dg_add_missing;
+} {2};
+
+#NOP -- Add any built-in dungeon whose key is not in the saved list yet, at scaler 0;
+#alias .dg_add_missing {
+    .dg_seed;
+    #list dungeon[scalers] indexate key;
+    #loop 1 &dgSeed[] dgSeedIx {
+        #var dgFound 0;
+        #list dungeon[scalers] find {$dgSeed[$dgSeedIx][key]} {dgFound};
+        #if {$dgFound == 0} {
+            #list dungeon[scalers] add {{$dgSeed[$dgSeedIx]}};
+            #echo {  ${dgHint}New dungeon added to your scaler list: $dgName$dgSeed[$dgSeedIx][name]<088>};
+        };
+    };
+    #unvar dgSeed;
+} {2};
+
 #alias .update_scaler {
     #if {$prefScaler == 0} {
         #NOP
@@ -67,9 +100,7 @@
 } {2};
 
 #alias .get_scaler {
-    #if {&dungeon[scalers][] == 0} {
-        .dg_init_vars;
-    };
+    .dg_ensure;
     #var tmpName %0;
     #list dungeon[scalers] indexate name;
     #list dungeon[scalers] find $tmpName tmpIx;
@@ -80,64 +111,107 @@
     };
 };
 
-#NOP -- Parameters are %1 = key %2 = scaler;
+#NOP -- Clamp a scaler to 0-150 into tmpScaler, 0 means no preference;
+#alias .dg_clamp_scaler {
+    #format tmpScaler {%d} {%1};
+    #if {$tmpScaler > 150} {
+        #echo {  <fab>Maximum possible scaler is 150.<088>};
+        #var tmpScaler 150;
+    };
+    #if {$tmpScaler < 0} {
+        #var tmpScaler 0;
+    };
+} {2};
+
+#NOP -- Parameters are %1 = key (or all) %2 = scaler;
 #alias .set_scaler {
+    .dg_ensure;
+    #if {"%2" == ""} {
+        #echo {  <fab>Usage: <fff>.set_scaler <key> <scaler><fab> or <fff>.set_scaler all <scaler><088>};
+        #return;
+    };
+    .dg_clamp_scaler {%2};
+    #if {"%1" == "all"} {
+        #loop 1 &dungeon[scalers][] tmpIx {
+            #var dungeon[scalers][$tmpIx][scaler] $tmpScaler;
+        };
+        #if {$tmpScaler > 0} {
+            #echo {  ${dgHint}All $dgName&dungeon[scalers][]$dgHint dungeons now prefer scaler $dgSet$tmpScaler<088>};
+        } {
+            #echo {  ${dgHint}All $dgName&dungeon[scalers][]$dgHint dungeon preferences cleared<088>};
+        };
+        #return;
+    };
     #list dungeon[scalers] indexate key;
     #format tmpKey {%p} {%1};
     #var tmpIx 0;
-    #var tmpScaler 0;
     #list dungeon[scalers] find {$tmpKey} {tmpIx};
     #if {$tmpIx} {
-        #format tmpScaler {%d} {%2};
-        #if {$tmpScaler <= 150} {
-            #if {$tmpScaler >= 1} {
-                #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler is now $dgSet$tmpScaler<088>};
-                #var dungeon[scalers][$tmpIx][scaler] $tmpScaler;
-            } {
-                #NOP -- 0 is no preference, so the dungeon is left at whatever scaler it has;
-                #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler cleared<088>};
-                #var dungeon[scalers][$tmpIx][scaler] 0;
-            };
+        #var dungeon[scalers][$tmpIx][scaler] $tmpScaler;
+        #if {$tmpScaler > 0} {
+            #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler is now $dgSet$tmpScaler<088>};
         } {
-            #echo {  <fab>Maximum possible scaler is 150.<088>};
-            #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler is now ${dgSet}150<088>};
-            #var dungeon[scalers][$tmpIx][scaler] 150;
+            #NOP -- 0 is no preference, so the dungeon is left at whatever scaler it has;
+            #echo {  $dgName$dungeon[scalers][$tmpIx][name]$dgHint preferred scaler cleared<088>};
         };
     } {
         #echo {  <fab>No dungeon key <efc>%1<fab> found. Run <fff>.scalers<fab> to view all dungeons and keys.<088>};
     };
 } {2};
 
+#NOP -- Set every dungeon back to 0 (no preference), the dungeon list itself is kept;
+#alias .clear_scalers {
+    .set_scaler all 0;
+} {2};
+
+#NOP -- Throw the list away and rebuild it from the rows below, picks up added or removed dungeons;
+#alias .reset_scalers {
+    #list dungeon[scalers] clear;
+    .dg_init_vars;
+    #echo {  ${dgHint}Scaler list rebuilt with $dgName&dungeon[scalers][]$dgHint dungeons, all preferences cleared<088>};
+} {2};
+
 #NOP -------------------------- Scaling dungeons ----------------------------;
 
+#NOP -- The built-in dungeons. Add new ones here, existing users pick them up automatically;
+#alias .dg_seed {
+    #var dgSeed {};
+    #list dgSeed add {{{key} {aegis}       {name} {Aegis Global}               {scaler} {0}}};
+    #list dgSeed add {{{key} {alphabet}    {name} {Alphabet Land}              {scaler} {0}}};
+    #list dgSeed add {{{key} {android}     {name} {Android Showroom}           {scaler} {0}}};
+    #list dgSeed add {{{key} {banshee}     {name} {Banshee's Lair}             {scaler} {0}}};
+    #list dgSeed add {{{key} {carebears}   {name} {Care Bears}                 {scaler} {0}}};
+    #list dgSeed add {{{key} {carnegie}    {name} {Carnegie Hall 2.0}          {scaler} {0}}};
+    #list dgSeed add {{{key} {zodiacs}     {name} {Celestial Zodiacs}          {scaler} {0}}};
+    #list dgSeed add {{{key} {chess}       {name} {Chess Board}                {scaler} {0}}};
+    #list dgSeed add {{{key} {deathtaco}   {name} {Death Taco}                 {scaler} {0}}};
+    #list dgSeed add {{{key} {halo}        {name} {Halo}                       {scaler} {0}}};
+    #list dgSeed add {{{key} {hotel}       {name} {Hotel Transylvania}         {scaler} {0}}};
+    #list dgSeed add {{{key} {kayos}       {name} {Kayos Wars}             {scaler} {0}}};
+    #list dgSeed add {{{key} {mahjongg}    {name} {Mahjongg}                   {scaler} {0}}};
+    #list dgSeed add {{{key} {plinths}     {name} {Marble Plinths}             {scaler} {0}}};
+    #list dgSeed add {{{key} {puppymill}   {name} {Puppy Mill}                 {scaler} {0}}};
+    #list dgSeed add {{{key} {sectionz}    {name} {Section Z}                  {scaler} {0}}};
+    #list dgSeed add {{{key} {smurfland}   {name} {Smurfland}                  {scaler} {0}}};
+    #list dgSeed add {{{key} {terras}      {name} {Terra's Terrific Treehouse} {scaler} {0}}};
+    #list dgSeed add {{{key} {zelligar}    {name} {Zelligar's Castle}          {scaler} {0}}};
+    #list dgSeed add {{{key} {anchorman}   {name} {Anchorman}                  {scaler} {0}}};
+    #list dgSeed add {{{key} {knightarena} {name} {Knight Training Arena}      {scaler} {0}}};
+    #list dgSeed add {{{key} {icepeople}   {name} {Land of the Ice People}     {scaler} {0}}};
+    #list dgSeed add {{{key} {summerset}   {name} {Summerset Warrens 2.0}      {scaler} {0}}};
+    #list dgSeed add {{{key} {treeoflife}  {name} {Tree of Life 2.0}           {scaler} {0}}};
+    #list dgSeed add {{{key} {bombfreaks}  {name} {Bombfreaks' Abbey}          {scaler} {0}}};
+    #list dgSeed add {{{key} {fachan}      {name} {Fachan Village}             {scaler} {0}}};
+    #list dgSeed add {{{key} {rimalkins}   {name} {Rimalkins Cave 2.0}         {scaler} {0}}};
+} {2};
+
+#NOP -- Fill dungeon[scalers] with every built-in dungeon at 0, used for a new or wiped list;
 #alias .dg_init_vars {
-    #list dungeon[scalers] add {{{key} {aegis}       {name} {Aegis Global}               {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {alphabet}    {name} {Alphabet Land}              {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {android}     {name} {Android Showroom}           {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {banshee}     {name} {Banshee's Lair}             {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {carebears}   {name} {Care Bears}                 {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {carnegie}    {name} {Carnegie Hall 2.0}          {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {zodiacs}     {name} {Celestial Zodiacs}          {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {chess}       {name} {Chess Board}                {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {deathtaco}   {name} {Death Taco}                 {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {halo}        {name} {Halo}                       {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {hotel}       {name} {Hotel Transylvania}         {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {kayos}       {name} {Kayos Wars}             {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {mahjongg}    {name} {Mahjongg}                   {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {plinths}     {name} {Marble Plinths}             {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {puppymill}   {name} {Puppy Mill}                 {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {sectionz}    {name} {Section Z}                  {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {smurfland}   {name} {Smurfland}                  {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {terras}      {name} {Terra's Terrific Treehouse} {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {zelligar}    {name} {Zelligar's Castle}          {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {anchorman}   {name} {Anchorman}                  {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {knightarena} {name} {Knight Training Arena}      {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {icepeople}   {name} {Land of the Ice People}     {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {summerset}   {name} {Summerset Warrens 2.0}      {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {treeoflife}  {name} {Tree of Life 2.0}           {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {bombfreaks}  {name} {Bombfreaks' Abbey}          {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {fachan}      {name} {Fachan Village}             {scaler} {0}}};
-    #list dungeon[scalers] add {{{key} {rimalkins}   {name} {Rimalkins Cave 2.0}         {scaler} {0}}};
+    .dg_seed;
+    #loop 1 &dgSeed[] dgSeedIx {
+        #list dungeon[scalers] add {{$dgSeed[$dgSeedIx]}};
+    };
+    #unvar dgSeed;
 };
 
 #alias .dg_rule {
@@ -145,9 +219,7 @@
 } {2};
 
 #alias {.scalers} {
-    #if {&dungeon[scalers][] == 0} {
-        .dg_init_vars;
-    };
+    .dg_ensure;
     .dg_rule;
     #format {dpLine} {  $dgTitle%-28s $dgLabel%-14s %+7s<088>} {PREFERRED SCALERS} {Key} {Scaler};
     #echo {$dpLine};
@@ -165,13 +237,19 @@
         #echo {$dpLine};
     };
     .dg_rule;
-    #echo {  ${dgHint}.set_scaler $dgSet<key> <scaler>$dgHint to update dungeon scaler.<088>};
+    #echo {  ${dgHint}.set_scaler $dgSet<key> <scaler>$dgHint  set one dungeon, 0 clears it, max 150.<088>};
+    #echo {  ${dgHint}.set_scaler all $dgSet<scaler>$dgHint  set every dungeon at once.<088>};
+    #echo {  ${dgHint}.clear_scalers$dgHint  clear every dungeon back to 0 (no preference).<088>};
+    #echo {  ${dgHint}.reset_scalers$dgHint  wipe and rebuild the list, clears all and drops old dungeons.<088>};
+    .dg_rule;
     #echo {  ${dgHint}ddata $dgSet<key>$dgHint for the class table behind the dungeon.<088>};
     .dg_rule;
 };
 
 .add_library {.scalers} {misc} {table of your preferred scaler for every scaling dungeon} {.scalers} {common/areas/dungeons.tin};
-.add_library {.set_scaler} {misc} {set your preferred scaler for one dungeon for the session, 0 clears it} {.set_scaler <key> <scaler>} {common/areas/dungeons.tin};
+.add_library {.set_scaler} {misc} {set your preferred scaler for one dungeon or all of them, 0 clears it} {.set_scaler <key|all> <scaler>} {common/areas/dungeons.tin};
+.add_library {.clear_scalers} {misc} {clear every dungeon scaler preference back to 0} {.clear_scalers} {common/areas/dungeons.tin};
+.add_library {.reset_scalers} {misc} {rebuild the dungeon scaler list from scratch, clears all preferences} {.reset_scalers} {common/areas/dungeons.tin};
 
 
 

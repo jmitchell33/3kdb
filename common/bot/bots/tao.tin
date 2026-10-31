@@ -1,0 +1,348 @@
+#class {bot} {kill}
+
+#NOP -- Tao Te Cheng: bow, kill the guardian, wait for the voice, continue. Runs forever until .stop or .pause;
+#NOP -- Chapters are map rooms 21400 (One) to 21480 (Eighty-One), continue from 81 wraps to 1 and starts a new book;
+
+#NOP -- Book and chapter live outside the bot class so they survive .stop and reloading the bot;
+#if {&{tao_book} == 0}
+{
+    #var tao_book 1;
+};
+#if {&{tao_chapter} == 0}
+{
+    #var tao_chapter 0;
+};
+
+#class {bot} {open}
+
+#var tao[first_vnum] 21400;
+#var tao[last_vnum] 21480;
+#var tao[proceed] 0;
+#var tao[warned] 0;
+#NOP -- Tell the party where we are once each time the bot is started;
+#var tao[announced] 0;
+
+#NOP -- Seconds to wait before looking again: after the bow (empty room or guardian shows up), after the;
+#NOP -- voice that follows a guardian kill, and how long a bow can go unanswered before bot_ticker kicks us;
+#var tao[bow_delay] 1.2;
+#var tao[proceed_delay] 1.7;
+#var tao[stuck_delay] 6;
+
+#NOP -- One step per chapter so the caption Path shows chapters done out of 81;
+#var bot[path] {.tao_step};
+#loop 2 81 tao_index
+{
+    #cat bot[path] {;.tao_step};
+};
+
+#NOP -- Room matching stops at the first hit, so names that contain another name go first (NoBeing before Being);
+#list botmobs clear;
+#foreach {NoBeing;NoMind;NoSelf;NoTime;Nothing;BigMind;Something;Everything;Insubstance;Impermanence;Lao;Beauty;Being;Birth;Dark;Death;Dharma;Discord;Earth;Emptiness;Fullness;Harmony;Heaven;Life;Light;Mind;Others;Peace;Permanence;Self;Silence;Substance;Time;War;Yang;Yin} {tao_mob}
+{
+    #format {tao_target} {%l} {$tao_mob};
+    #list botmobs add {{{long} {$tao_mob} {target} {$tao_target}}};
+};
+#unvar tao_mob;
+#unvar tao_target;
+#unvar tao_index;
+
+#NOP -- Chapter names as the rooms spell them (One .. Eighty-One) mapped to their number;
+#var tao_words {};
+#var tao_ones {One;Two;Three;Four;Five;Six;Seven;Eight;Nine};
+#var tao_teens {Ten;Eleven;Twelve;Thirteen;Fourteen;Fifteen;Sixteen;Seventeen;Eighteen;Nineteen};
+#var tao_tens {Twenty;Thirty;Forty;Fifty;Sixty;Seventy;Eighty};
+#var tao_index 1;
+#foreach {$tao_ones} {tao_word}
+{
+    #var tao_words[$tao_word] $tao_index;
+    #math tao_index {$tao_index + 1};
+};
+#foreach {$tao_teens} {tao_word}
+{
+    #var tao_words[$tao_word] $tao_index;
+    #math tao_index {$tao_index + 1};
+};
+#var tao_ten 20;
+#foreach {$tao_tens} {tao_ten_word}
+{
+    #var tao_words[$tao_ten_word] $tao_ten;
+    #var tao_index 1;
+    #foreach {$tao_ones} {tao_word}
+    {
+        #math tao_words[$tao_ten_word-$tao_word] {$tao_ten + $tao_index};
+        #math tao_index {$tao_index + 1};
+    };
+    #math tao_ten {$tao_ten + 10};
+};
+#unvar tao_ones;
+#unvar tao_teens;
+#unvar tao_tens;
+#unvar tao_ten;
+#unvar tao_ten_word;
+#unvar tao_word;
+#unvar tao_index;
+
+#NOP -- Read the chapter from the map, count books when we pass 81, and keep bot[step] on the chapter;
+#alias {.tao_sync}
+{
+    #map get roomvnum tao_vnum;
+    #if {$tao_vnum < $tao[first_vnum] || $tao_vnum > $tao[last_vnum]}
+    {
+        #if {!$tao[warned]}
+        {
+            #var tao[warned] 1;
+            #echo {<dfa>TAO: Map is not on a chapter room ($tao_vnum). Use .tao_set <chapter> to fix it.<088>};
+        };
+        #return;
+    };
+    #var tao[warned] 0;
+    #math tao_new_chapter {$tao_vnum - $tao[first_vnum] + 1};
+    #if {$tao_new_chapter != $tao_chapter}
+    {
+        #var tao[report] 1;
+        #var tao[new_book] 0;
+        #NOP -- How far forward we moved, going round past 81. Over half the book means we went back;
+        #math tao_forward {($tao_new_chapter - $tao_chapter + 81) % 81};
+        #if {$tao_chapter == 0}
+        {
+            #NOP -- First sync after a fresh load, nothing to compare against;
+        };
+        #elseif {$tao_forward > 40}
+        {
+            #NOP -- Map undo or a room heading correction moved us back, never tell the party;
+            #var tao[report] 0;
+            #NOP -- Going back over 81 (a failed continue from 81) takes the book back off;
+            #if {$tao_new_chapter > $tao_chapter && $tao_book > 1}
+            {
+                #math tao_book {$tao_book - 1};
+            };
+        };
+        #elseif {$tao_new_chapter < $tao_chapter}
+        {
+            #NOP -- Forward to a lower chapter means we went past 81, a warp can land on 1 or 2;
+            #math tao_book {$tao_book + 1};
+            #var tao[new_book] 1;
+        };
+        #var tao_chapter $tao_new_chapter;
+        #var tao[proceed] 0;
+        #NOP -- Only tell the party when a new book starts, every other chapter just echoes locally;
+        #if {$tao[new_book]}
+        {
+            ptell Tao: Starting Book $tao_book, Chapter $tao_chapter;
+            #var tao[announced] 1;
+        };
+        #elseif {!$tao[announced]}
+        {
+            #NOP -- The start message below covers it;
+        };
+        #elseif {$tao[report]}
+        {
+            #echo {<cfc>TAO: Book $tao_book, Chapter $tao_chapter<088>};
+        };
+        #else
+        {
+            #echo {<cfc>TAO: Back to Book $tao_book, Chapter $tao_chapter<088>};
+        };
+    };
+    #if {!$tao[announced]}
+    {
+        #var tao[announced] 1;
+        #if {$tao_chapter == 1}
+        {
+            ptell Tao: Starting Book $tao_book, Chapter $tao_chapter;
+        }
+        {
+            ptell Tao: Bot started on Book $tao_book, Chapter $tao_chapter;
+        };
+    };
+    #math bot[step] {$tao_chapter - 1};
+};
+
+#NOP -- The only bot step: continue once the voice lets us, otherwise bow to bring out the guardian;
+#alias {.tao_step}
+{
+    .tao_sync;
+    #if {$tao[proceed]}
+    {
+        #var tao[proceed] 0;
+        continue;
+    }
+    {
+        bow;
+        #NOP -- Count as walking so bot_ticker leaves us alone, a new bow resets this before it fires;
+        #NOP -- If the bow really gets no answer, stop walking so bot_ticker kicks us again;
+        #var bot[walk] 1;
+        #delay {tao_stuck}
+        {
+            #if {"$bot[alias]" == "tao"}
+            {
+                #var bot[walk] 0;
+            };
+        } {$tao[stuck_delay]};
+    };
+};
+
+#NOP -- .tao_set <chapter> or .tao_set <book> <chapter>: fix the count by hand and move the map there;
+#alias {.tao_set}
+{
+    #if {"%2" == ""}
+    {
+        #var tao_set_book $tao_book;
+        #var tao_set_chapter {%1};
+    }
+    {
+        #var tao_set_book {%1};
+        #var tao_set_chapter {%2};
+    };
+    #NOP -- Check for a missing chapter on its own, an empty value breaks the number checks;
+    #if {"$tao_set_chapter" == ""}
+    {
+        #var tao_set_chapter 0;
+    };
+    #if {$tao_set_chapter < 1 || $tao_set_chapter > 81 || $tao_set_book < 1}
+    {
+        #echo {<dfa>TAO: Usage: .tao_set <chapter> or .tao_set <book> <chapter>, chapter is 1 to 81.<088>};
+        #return;
+    };
+    #var tao_book $tao_set_book;
+    #var tao_chapter $tao_set_chapter;
+    #math tao_vnum {$tao[first_vnum] + $tao_chapter - 1};
+    #map goto $tao_vnum;
+    #echo {<cfc>TAO: Set to Book $tao_book, Chapter $tao_chapter<088>};
+};
+
+#alias {.tao}
+{
+    #echo {<cfc>TAO: Book $tao_book, Chapter $tao_chapter<088>};
+};
+
+#NOP -- The guardian shows up after the bow, look again so the bot finds and kills it;
+#action {^You bow deeply in respect to the ancients.}
+{
+    #format tao[bow_time] {%U};
+    #if {!$bot[paused] && !$idle_flag}
+    {
+        #NOP -- Check the bot is still loaded when it fires, after .stop .bot would go to the mud;
+        #delay {tao_look}
+        {
+            #if {"$bot[alias]" == "tao"}
+            {
+                .bot;
+            };
+        } {$tao[bow_delay]};
+    };
+} {1};
+
+#NOP -- The voice says we can continue, the next .tao_step sends continue;
+#action {^A voice whispers in your mind.  You may proceed.}
+{
+    #var tao[proceed] 1;
+    #if {$bot[paused] || $idle_flag}
+    {
+        #return;
+    };
+    #NOP -- Right after the bow means an empty room, the bow's tao_look already covers it;
+    #format tao_voice_time {%U};
+    #if {$tao_voice_time - $tao[bow_time] < 500000}
+    {
+        #return;
+    };
+    #NOP -- After a guardian kill. Re-adding a delay keeps its old time, so undelay first;
+    #undelay {tao_look};
+    #delay {tao_look}
+    {
+        #if {"$bot[alias]" == "tao"}
+        {
+            .bot;
+        };
+    } {$tao[proceed_delay]};
+} {1};
+
+#NOP -- Sometimes continue warps us two chapters instead of one. The map already took one step on;
+#NOP -- continue, so take the second step here or the bot falls a chapter behind every warp;
+#action {^You feel the Tao warp around you.}
+{
+    #map get roomvnum tao_warp_vnum;
+    #if {$tao_warp_vnum >= $tao[first_vnum] && $tao_warp_vnum <= $tao[last_vnum]}
+    {
+        #math tao_warp_vnum {$tao_warp_vnum + 1};
+        #if {$tao_warp_vnum > $tao[last_vnum]}
+        {
+            #var tao_warp_vnum $tao[first_vnum];
+        };
+        #map goto $tao_warp_vnum;
+    };
+    #unvar tao_warp_vnum;
+} {1};
+
+#NOP -- Most chapter rooms start their description with the chapter name (-D-_ is our long desc prefix);
+#NOP -- When the map disagrees with it, trust the room and move the map, this catches any skip we miss;
+#action {^-D-_%s{[A-Z][a-z]+|[A-Z][a-z]+-[A-Z][a-z]+}%s$}
+{
+    #if {"$bot[alias]" != "tao" || &tao_words[%2] == 0}
+    {
+        #return;
+    };
+    #if {$tao_words[%2] > 81}
+    {
+        #return;
+    };
+    #math tao_room_vnum {$tao[first_vnum] + $tao_words[%2] - 1};
+    #map get roomvnum tao_map_vnum;
+    #if {$tao_map_vnum != $tao_room_vnum}
+    {
+        #echo {<dfa>TAO: Map was on $tao_map_vnum but the room says %2, moving the map.<088>};
+        #map goto $tao_room_vnum;
+    };
+    #unvar tao_room_vnum;
+    #unvar tao_map_vnum;
+} {1};
+
+#NOP -- TEMP: note where A current in the flow of the Way shows up, nobody knows what it does yet;
+#NOP -- Commented out for now. Logs showed rooms with a current never warp (0 of 27 vs about 1 in 4);
+#NOP -- Remove the /* */ to turn it back on;
+/*
+#var tao[current_vnum] 0;
+#NOP -- Items come in as -i-<item> (look_other prefix), common/themes.tin hides the prefix on screen;
+#action {^{-i-|-o-|-w-|-a-|}A current in the flow of the Way.$}
+{
+    #map get roomvnum tao_current_vnum;
+    #NOP -- Only note it once per room, the bot looks more than once;
+    #if {$tao_current_vnum == $tao[current_vnum]}
+    {
+        #return;
+    };
+    #var tao[current_vnum] $tao_current_vnum;
+    #echo {<dfa>TAO: Current in the flow of the Way here (map $tao_current_vnum)<088>};
+} {1};
+*/
+
+#NOP -- Tried to fight before bowing;
+#action {^You have not shown enough respect to the ancients}
+{
+    #if {!$bot[paused] && !$idle_flag}
+    {
+        bow;
+    };
+} {1};
+
+#NOP -- Tried to continue with the guardian still up, the map moved so put it back;
+#action {^You are not yet ready to continue}
+{
+    #var tao[proceed] 0;
+    mapUndo;
+} {1};
+
+#class {bot} {close}
+
+#read common/bot/generic.tin;
+
+#class {bot} {open}
+
+#NOP -- Tao never ends, so replace the generic end of path with nothing and let .tao_sync manage bot[step];
+#alias {.botComplete}
+{
+    #NOP;
+};
+
+#class {bot} {close}

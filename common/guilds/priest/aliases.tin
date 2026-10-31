@@ -2,8 +2,9 @@
 #class {guild_aliases} {open}
 
 #alias {bless_party} {
-    members;
-    #delay 2 {#foreach $party[member][%*] member {bless $member[name-lower]};};
+    #foreach $party[member][%*] member {
+        bless $member[name-lower];
+    };
 };
 
 #alias {buff} {
@@ -11,8 +12,10 @@
 };
 
 #alias {buff_party} {
-    members;
-    #delay 2 {#foreach $party[member][%*] member {bless $member[name-lower];beneficence $member[name-lower];}};
+    #foreach $party[member][%*] member {
+        bless $member[name-lower];
+        beneficence $member[name-lower];
+    };
 };
 
 #NOP -- reset priest gxp tracking;
