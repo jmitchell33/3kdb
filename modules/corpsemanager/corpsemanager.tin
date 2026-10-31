@@ -79,15 +79,35 @@
 #NOP -- Sell your corpses to the morgue and then go back/resuming botting;
 #alias scoffin {
 	#if $bot[active] {.pause};
-    #map get roomvnum donate_go_back;
+	#if {"$area" == "Section Z"} {
+		pause game;
+		#var section_z 1
+	} {
+		#map get roomvnum donate_go_back;
+		#var section_z 0
+	};
+
 	go morgue;
     sell coffin;sell all;
-    #map run $donate_go_back;
-    #if $bot[active] {
-		#delay 10 {
-			i;
-			#var bot[paused] 0;
-			.bot
+
+	#if $section_z {
+		go sz;
+		unpause game;
+		#if $bot[active] {
+			#delay 10 {
+				i;
+				#var bot[paused] 0;
+				.bot
+			};
+		};
+	} {
+		#map run $donate_go_back;
+		#if $bot[active] {
+			#delay 10 {
+				i;
+				#var bot[paused] 0;
+				.bot
+			};
 		};
 	};
 };
