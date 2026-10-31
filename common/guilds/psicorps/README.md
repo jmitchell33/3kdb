@@ -99,7 +99,7 @@ Sustained powers (valor, verve, vigor, biofeedback, precognition, barriers, jaws
 
 ### Demoralize, brilliant blast, flaming shroud
 
-Single-use powers are strategies: `strategy demoralize`, `strategy bblast`, `strategy fshroud`. Brilliant blast is used once per fight, at the start of combat; flaming shroud has no hpbar flag, so it is recast every `fshroud_duration` seconds (default 120, set it to the real duration); demoralize is repeated until the target can't be re-demoralized.
+Single-use powers are strategies: `strategy demoralize`, `strategy bblast`, `strategy fshroud`. Brilliant blast is used once per fight, at the start of combat; flaming shroud has no hpbar flag and lasts Intelligence / 2 rounds, so it is recast when that many combat rounds have passed (Int is read from `score short` the first time, run `fsint` after your Int changes); demoralize is repeated until the target can't be re-demoralized.
 
 Make sure to add them to your power configuration: `addp dm`, `addp bb` and `addp fs`
 

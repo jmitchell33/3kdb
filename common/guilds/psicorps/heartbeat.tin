@@ -36,8 +36,9 @@
 
 #var fight_bblast 0;
 
-#var fshroud_until 0;
-#var fshroud_duration 120;
+#var fshroud_left 0;
+#var fshroud_round 0;
+#var fshroud_int 0;
 
 
 #NOP -- Alias to swap animal affinity;
@@ -206,12 +207,16 @@
 	};
 
 
+	#if {$mip[round] == 0} {#var fshroud_left 0;#var fshroud_round 0};
+	#if {$incombat && $mip[round] > 0 && $mip[round] != $fshroud_round} {
+		#var fshroud_round $mip[round];
+		#if {$fshroud_left > 0} {#math fshroud_left {$fshroud_left - 1}};
+	};
 	#if {!$hbp} {
-		#if {$my[implants][fs][active] && $incombat} {
-			#format fshroud_now {%T};
-			#if {$fshroud_now >= $fshroud_until} {
-				checkStrategy {fshroud} {_use_power flaming shroud};
-				#if {$hbp} {#math fshroud_until {$fshroud_now + $fshroud_duration}};
+		#if {$my[implants][fs][active] && $incombat && $fshroud_left <= 0} {
+			checkStrategy {fshroud} {_use_power flaming shroud};
+			#if {$hbp} {
+				#if {$fshroud_int > 0} {#math fshroud_left {$fshroud_int / 2}} {#var fshroud_left 20;fsint};
 			};
 		};
 	};
@@ -265,6 +270,11 @@
 		};
 	};
 	#if {$bblast_total == 1 || ($bblast_total > 1 && $bblast_aggro == $bblast_total)} {#var bblast_ok 1};
+};
+
+#alias {fsint} {
+	#send {score short};
+	#line oneshot #action {Str: %d%sDex: %d%sWis: %d%sInt: %d%sCon: %d%s Cha: %d} {#var fshroud_int %%7};
 };
 
 #NOP -- Alias to check if the power is active;
