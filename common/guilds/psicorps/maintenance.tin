@@ -48,6 +48,42 @@
     {ac2} {Ac2} {ac3} {Ac3} {ac4} {Ac4} {ac5} {Ac5} {ac6} {Ac6}
 };
 
+#var maint_phrases {
+    {greater valor} {gvalor}
+    {improved valor} {ivalor}
+    {greater verve} {gverve}
+    {improved verve} {iverve}
+    {improved biofeedback} {ibio}
+    {combat precognition} {cprecog}
+    {greater biocurrent} {gbcurrent}
+    {valor} {valor}
+    {verve} {verve}
+    {vigor} {vigor}
+    {biofeedback} {bio}
+    {precognition} {precog}
+    {shield of prudence} {prudence}
+    {dodge} {dodge}
+    {energy barrier} {ebarrier}
+    {inertial barrier} {ibarrier}
+    {displacement} {displace}
+    {ablating} {ablate}
+    {adapt body} {adapt}
+    {bolt} {bolt}
+    {talons} {talons}
+    {combat prescience} {prescience}
+    {expertise} {expertise}
+    {steel jaw} {sjaw}
+    {iron jaw} {ijaw}
+    {conductive grasp} {grasp}
+    {biocurrent} {bcurrent}
+    {astral construct 2} {ac2}
+    {astral construct 3} {ac3}
+    {astral construct 4} {ac4}
+    {astral construct 5} {ac5}
+    {astral construct 6} {ac6}
+};
+#list maint_phrase_order create {greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;dodge;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;expertise;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
+
 #if {&{xmaint_sel}} {#var maint_sel $xmaint_sel} {#var maint_sel {};#foreach {$maint_order[%*]} {_mk} {#var maint_sel[$_mk] 1}};
 #if {"${xmaint_active}" === ""} {#var maint_active 1} {#var maint_active $xmaint_active};
 
@@ -87,7 +123,8 @@
 };
 
 #alias {_maint_pick} {
-    #var _mwords {%2};
+    #format _mwords {%l} {%2};
+    #foreach {$maint_phrase_order[%*]} {_mp} {#replace _mwords {$_mp} {$maint_phrases[$_mp]}};
     #replace _mwords { } {;};
     #var _mbad {};
     #foreach {$_mwords} {_mw} {
@@ -189,7 +226,13 @@
         #case {"check"} {_maint_list};
         #case {"status"} {_maint_list};
         #case {"help"} {maint-help};
-        #default {_maint_pick {t} {%0}};
+        #default {
+            #var _mtail {};
+            #regex {%0} {^{.*} {on|off}$} {#var _mrest {&1};#var _mtail {&2}};
+            #if {"$_mtail" == "off"} {_maint_pick {0} {$_mrest}} {
+                #if {"$_mtail" == "on"} {_maint_pick {1} {$_mrest}} {_maint_pick {t} {%0}};
+            };
+        };
     };
 };
 
@@ -199,6 +242,7 @@
     #echo {  <ffa>maint                 <fff>start keeping your picked powers up (the default)<088>};
     #echo {  <ffa>maint off             <fff>stop renewing powers (your picks are kept)<088>};
     #echo {  <ffa>maint <power> ...     <fff>pick or unpick (toggles), e.g. <ffa>maint gvalor ac6<088>};
+    #echo {  <ffa>                      <fff>full names work too, and a trailing on or off: <ffa>maint astral construct 3 off<088>};
     #echo {  <ffa>maint add <power> ... <fff>pick<088>};
     #echo {  <ffa>maint del <power> ... <fff>unpick<088>};
     #echo {  <ffa>maint all             <fff>pick every power (also maint default)<088>};
