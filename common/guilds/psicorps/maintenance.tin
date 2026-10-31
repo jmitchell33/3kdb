@@ -7,7 +7,7 @@
 #var maint_spells[Gv]   {{name} {Greater Verve}          {power} {greater verve}};
 #var maint_spells[Iv]   {{name} {Improved Verve}         {power} {improved verve}};
 #var maint_spells[Vv]   {{name} {Verve}                  {power} {verve}};
-#var maint_spells[Vg]   {{name} {Vigor}                  {power} {vigor}};
+#var maint_spells[Vg]   {{name} {Vigor / Improved Vigor}  {power} {vigor}};
 #var maint_spells[IB]   {{name} {Improved Biofeedback}   {power} {improved biofeedback}};
 #var maint_spells[Bf]   {{name} {Biofeedback}            {power} {biofeedback}};
 #var maint_spells[PR]   {{name} {Precognition}           {power} {precognition}};
@@ -49,6 +49,7 @@
 };
 
 #var maint_phrases {
+    {improved vigor} {vigor}
     {greater valor} {gvalor}
     {improved valor} {ivalor}
     {greater verve} {gverve}
@@ -82,7 +83,7 @@
     {astral construct 5} {ac5}
     {astral construct 6} {ac6}
 };
-#list maint_phrase_order create {greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;dodge;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;expertise;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
+#list maint_phrase_order create {improved vigor;greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;dodge;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;expertise;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
 
 #if {&{xmaint_sel}} {#var maint_sel $xmaint_sel} {#var maint_sel {};#foreach {$maint_order[%*]} {_mk} {#var maint_sel[$_mk] 1}};
 #if {"${xmaint_active}" === ""} {#var maint_active 1} {#var maint_active $xmaint_active};
