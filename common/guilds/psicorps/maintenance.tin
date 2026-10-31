@@ -21,7 +21,6 @@
 #var maint_spells[Bo]   {{name} {Bolt}                   {power} {bolt}};
 #var maint_spells[Tl]   {{name} {Talons}                 {power} {talons}};
 #var maint_spells[CP]   {{name} {Combat Prescience}      {power} {combat prescience}};
-#var maint_spells[E]    {{name} {Expertise}              {power} {expertise}};
 #var maint_spells[Sj]   {{name} {Steel Jaw}              {power} {steel jaw}};
 #var maint_spells[Ij]   {{name} {Iron Jaw}               {power} {iron jaw}};
 #var maint_spells[Cg]   {{name} {Conductive Grasp}       {power} {conductive grasp}};
@@ -32,7 +31,7 @@
 #var maint_spells[Ac4]  {{name} {Astral Construct 4}     {power} {astral construct 4}};
 #var maint_spells[Ac5]  {{name} {Astral Construct 5}     {power} {astral construct 5}};
 #var maint_spells[Ac6]  {{name} {Astral Construct 6}     {power} {astral construct 6}};
-#list maint_order create {GV;IV;Vr;Gv;Iv;Vv;Vg;IB;Bf;PR;Cp;SP;Eb;Ib;Di;Ab;ab;Bo;Tl;CP;E;Sj;Ij;Cg;BC;bc;Ac2;Ac3;Ac4;Ac5;Ac6};
+#list maint_order create {GV;IV;Vr;Gv;Iv;Vv;Vg;IB;Bf;PR;Cp;SP;Eb;Ib;Di;Ab;ab;Bo;Tl;CP;Sj;Ij;Cg;BC;bc;Ac2;Ac3;Ac4;Ac5;Ac6};
 
 #var maint_words {
     {gvalor} {GV} {ivalor} {IV} {valor} {Vr}
@@ -42,7 +41,7 @@
     {ebarrier} {Eb} {ibarrier} {Ib}
     {displace} {Di} {ablate} {Ab} {adapt} {ab}
     {bolt} {Bo} {talons} {Tl} {prescience} {CP}
-    {expertise} {E} {sjaw} {Sj} {ijaw} {Ij}
+    {sjaw} {Sj} {ijaw} {Ij}
     {grasp} {Cg} {gbcurrent} {BC} {bcurrent} {bc}
     {ac2} {Ac2} {ac3} {Ac3} {ac4} {Ac4} {ac5} {Ac5} {ac6} {Ac6}
 };
@@ -70,7 +69,6 @@
     {bolt} {bolt}
     {talons} {talons}
     {combat prescience} {prescience}
-    {expertise} {expertise}
     {steel jaw} {sjaw}
     {iron jaw} {ijaw}
     {conductive grasp} {grasp}
@@ -81,7 +79,7 @@
     {astral construct 5} {ac5}
     {astral construct 6} {ac6}
 };
-#list maint_phrase_order create {improved vigor;greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;expertise;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
+#list maint_phrase_order create {improved vigor;greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
 
 #if {&{xmaint_sel}} {#var maint_sel $xmaint_sel} {#var maint_sel {};#foreach {$maint_order[%*]} {_mk} {#var maint_sel[$_mk] 1}};
 #if {"${xmaint_active}" === ""} {#var maint_active 1} {#var maint_active $xmaint_active};
@@ -265,7 +263,7 @@
     #echo {  <fff>A power is kept up when it is picked here and its implant is on (addp).<088>};
     #echo {  <fff>Names: gvalor ivalor valor gverve iverve verve vigor ibio bio precog<088>};
     #echo {  <ccc>cprecog prudence ebarrier ibarrier displace ablate adapt bolt<088>};
-    #echo {  <ccc>talons prescience expertise sjaw ijaw grasp gbcurrent bcurrent ac2-ac6<088>};
+    #echo {  <ccc>talons prescience sjaw ijaw grasp gbcurrent bcurrent ac2-ac6<088>};
     #echo {  <fff>Single-use and damage powers are strategies: demoralize, bblast, fshroud, burst, rpain.<088>};
     #echo {<ccf>  =======================================================<088>};
     #echo {};
