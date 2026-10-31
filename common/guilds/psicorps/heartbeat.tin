@@ -36,6 +36,9 @@
 
 #var fight_bblast 0;
 
+#var fshroud_until 0;
+#var fshroud_duration 120;
+
 
 #NOP -- Alias to swap animal affinity;
 #var aa_used 1;
@@ -152,7 +155,6 @@
 	_check_power {BC} {greater biocurrent};
 	#if {$my[powers][BC][active]} {#NOP} {_check_power {bc} {biocurrent}};
 	_check_power {Cg} {conductive grasp};
-	_check_power {fs} {flaming shroud};
 
 	#NOP -- GP1 Healing and Decision Tree to use Convert or Body Fuel;
 	#NOP -- If you've yet to use a power this round, we'll use body fuel to replenish psi or convert;
@@ -203,6 +205,16 @@
 		};
 	};
 
+
+	#if {!$hbp} {
+		#if {$my[implants][fs][active] && $incombat} {
+			#format fshroud_now {%T};
+			#if {$fshroud_now >= $fshroud_until} {
+				checkStrategy {fshroud} {_use_power flaming shroud};
+				#if {$hbp} {#math fshroud_until {$fshroud_now + $fshroud_duration}};
+			};
+		};
+	};
 
 	#if {$mip[round] < $gc_last_round} {#var gc_last_round 0};
 	#if {!$hbp} {
