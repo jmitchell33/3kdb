@@ -1,13 +1,32 @@
+#class {bot} {kill}
 #class {bot} {open}
-#var {areaname} {truck}
-#var {bot[path]} {open freezer 1;out;open freezer 2;out;open freezer 3;out;open freezer 4;out;open freezer 5;out;open freezer 6;out;open freezer 7;out;open freezer 8;out}
-#act {-M-_{Strawberry Shortcake Bar|Screw Ball|Creamsicle Bar|Giant Vanilla Sandwich|Giant Neapolitan Sandwich|Candy Center Crunch Bar|Rainbow Sherbet Pop-Up|Fudgesicle Bar|Snow Cone|The Great White|Choco Taco|Orange Sherbet Pop-Up|Toasted Almond Bar|King Cone Bar|Chocolate Eclair Bar|Spider-Man Bar}} {
-		#var mobname {ice cream};
-		#show $mob[target];		
-		.check_monster
-};
 
-#act {^Ice Cream Wrapper.$} {get wrapper}
+#var {area} {Good Humor Truck};
+#var check_room 0;
+
+#var bot_message_1 '----  ICE CREAM TRUCK STEPPER  ----';
+#var bot_message_2 '----  all eight freezers  ----';
+#echo $bot_message_1;#echo $bot_message_2;
+
+#var {bot[path]} {open freezer 1;out;open freezer 2;out;open freezer 3;out;open freezer 4;out;open freezer 5;out;open freezer 6;out;open freezer 7;out;open freezer 8;out};
+
+#list botmobs clear;
+#list botmobs add {{{long} {Strawberry Shortcake Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {Screw Ball} {target} {ice cream}}};
+#list botmobs add {{{long} {Creamsicle Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {Giant Vanilla Sandwich} {target} {ice cream}}};
+#list botmobs add {{{long} {Giant Neapolitan Sandwich} {target} {ice cream}}};
+#list botmobs add {{{long} {Candy Center Crunch Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {Rainbow Sherbet Pop-Up} {target} {ice cream}}};
+#list botmobs add {{{long} {Fudgesicle Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {Snow Cone} {target} {ice cream}}};
+#list botmobs add {{{long} {The Great White} {target} {ice cream}}};
+#list botmobs add {{{long} {Choco Taco} {target} {ice cream}}};
+#list botmobs add {{{long} {Orange Sherbet Pop-Up} {target} {ice cream}}};
+#list botmobs add {{{long} {Toasted Almond Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {King Cone Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {Chocolate Eclair Bar} {target} {ice cream}}};
+#list botmobs add {{{long} {Spider-Man Bar} {target} {ice cream}}};
+
 #class {bot} {close}
-#read common/bot/generic.tin
-
+#read common/bot/generic.tin;
