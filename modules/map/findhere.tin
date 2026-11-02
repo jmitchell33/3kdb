@@ -394,11 +394,14 @@
 		#if {&findblocked[$fd]} {#continue};
 		#var findauto_groups {};
 		#var findauto_max 0;
+		#var findauto_seen {};
 		#foreach *findroom[$find_count][] fv {
 			#var findauto_dest {$findroom[$find_count][$fv][exits][$fd]};
 			#if {"$findauto_dest" == ""} {
 				#var findauto_key none;
 			} {
+				#if {&findauto_seen[$findauto_dest]} {#continue};
+				#var findauto_seen[$findauto_dest] 1;
 				#map get roomname findauto_name $findauto_dest;
 				#format findauto_key {%H} {@findhere_base{$findauto_name}@findhere_roomkey{$findauto_dest}};
 			};
@@ -417,12 +420,68 @@
 		.findhere_auto_stop {this room has no standard exits to walk};
 		#return;
 	};
+	#if {$findauto_bestscore >= &findroom[$find_count][] * 2} {
+		.findhere_auto_plan;
+		#if {"$findauto_plan" == ""} {
+			.findhere_auto_stop {the &findroom[$find_count][] rooms left look alike on the map as far as it goes};
+			#return;
+		};
+		#var findauto_best $findauto_plan;
+	};
 	#math findauto_left {$findauto_left - 1};
 	#var findauto_back {$findauto_rev[$findauto_best]};
 	#showme <dfa>findhere-auto: walking $findauto_best<088>;
 	#var room[name] {};
 	#var room_short {};
 	findhere2 $findauto_best;
+};
+
+#alias {.findhere_auto_plan} {
+	#local fd {};
+	#local fv {};
+	#var findauto_plan {};
+	#var findplan_count &findroom[$find_count][];
+	#var findplan_q {};
+	#var findplan_q[1][s] {*findroom[$find_count][]};
+	#var findplan_q[1][d] {};
+	#var findplan_seen {};
+	#format findplan_key {%H} {$findplan_q[1][s]};
+	#var findplan_seen[$findplan_key] 1;
+	#var findplan_head 1;
+	#var findplan_tail 1;
+	#while {$findplan_head <= $findplan_tail && $findplan_head <= 300} {
+		#var findplan_s {$findplan_q[$findplan_head][s]};
+		#var findplan_first {$findplan_q[$findplan_head][d]};
+		#math findplan_head {$findplan_head + 1};
+		#foreach {n;ne;e;se;s;sw;w;nw;u;d} fd {
+			#if {"$findplan_first" == "" && &findblocked[$fd]} {#continue};
+			#var findplan_next {};
+			#var findplan_ok 1;
+			#foreach {$findplan_s} fv {
+				#map get roomexits findplan_exits $fv;
+				#if {"$findplan_exits[$fd]" == ""} {#var findplan_ok 0;#break};
+				#var findplan_next[$findplan_exits[$fd]] {};
+			};
+			#if {!$findplan_ok} {#continue};
+			#if {"$findplan_first" == ""} {#var findplan_dir $fd} {#var findplan_dir $findplan_first};
+			#var findplan_keys {};
+			#foreach *findplan_next[] fv {
+				#map get roomname findplan_name $fv;
+				#format findplan_k {%H} {@findhere_base{$findplan_name}@findhere_roomkey{$fv}};
+				#var findplan_keys[$findplan_k] {};
+			};
+			#if {&findplan_next[] < $findplan_count || &findplan_keys[] > 1} {
+				#var findauto_plan $findplan_dir;
+				#return;
+			};
+			#format findplan_key {%H} {*findplan_next[]};
+			#if {&findplan_seen[$findplan_key]} {#continue};
+			#var findplan_seen[$findplan_key] 1;
+			#math findplan_tail {$findplan_tail + 1};
+			#var findplan_q[$findplan_tail][s] {*findplan_next[]};
+			#var findplan_q[$findplan_tail][d] {$findplan_dir};
+		};
+	};
 };
 
 #class {findhere} {close}
