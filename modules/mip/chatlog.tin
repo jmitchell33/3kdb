@@ -11,6 +11,7 @@
 #NOP -- #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
 #NOP -- #var webhook[url][party] https://discord.com/api/webhooks/long_token;
 #NOP -- #var webhook[url][worlddrops] https://discord.com/api/webhooks/long_token;
+#NOP -- #var webhook[url][artifacts] https://discord.com/api/webhooks/long_token;
 #NOP -- #var webhook[url][zodiac] https://discord.com/api/webhooks/long_token;
 #NOP -- #var webhook[url][farsight] https://discord.com/api/webhooks/long_token;
 #NOP -- Every post goes to general, and also to its own channel when that webhook is set;
@@ -41,7 +42,7 @@
 
 	#list payloadStack add {{{channel} {$discordChannel} {payload} {$payload}}};
 	#if {"$discordChannel" != "$webhook[url][general]"} {
-		#if {"$discordChannel" != "$webhook[url][worlddrops]"} {
+		#if {"$discordChannel" != "$webhook[url][worlddrops]" && "$discordChannel" != "$webhook[url][artifacts]"} {
 			#list payloadStack add {{{channel} {$webhook[url][general]} {payload} {$payload}}};
 		};
 	};
