@@ -741,8 +741,21 @@
         } {
             #draw <ccc> tubed box $map[top]-1 -$map[width] $map[bottom] -1;
         };
+        .map_vnum_draw;
     } {
         #map flag vtmap off;
+    };
+};
+
+#alias {.map_vnum_draw} {
+    #if {"$toggles[map_vnum]" == "1" && "$draw[map][active]" == "on" && "$draw[mobile][mode]" != "portrait" && "$map[bottom]" != "0"} {
+        #if {"$draw[room][active]" == "on"} {#math map_vnum_row {$map[bottom] + 1}} {#var map_vnum_row $map[bottom]};
+        #draw <ccc> tubed box $map[top]-1 -$map[width] $map_vnum_row -1;
+        #map get roomvnum map_vnum;
+        #format map_vnum_str { %s } {$map_vnum};
+        #format map_vnum_len {%L} {$map_vnum_str};
+        #math map_vnum_left {-2 - $map_vnum_len};
+        #draw <ccc> tile $map_vnum_row $map_vnum_left $map_vnum_row -3 {$map_vnum_str};
     };
 };
 
