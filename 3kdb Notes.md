@@ -34,6 +34,7 @@ Updating mip.tin
             #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
             #var webhook[url][party] https://discord.com/api/webhooks/long_token;
             #var webhook[url][worlddrops] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][artifacts] https://discord.com/api/webhooks/long_token;
             #var webhook[url][zodiac] https://discord.com/api/webhooks/long_token;
             #var webhook[url][farsight] https://discord.com/api/webhooks/long_token;
             #NOP -- Every post goes to general, and also to its own channel when that webhook is set;
@@ -74,6 +75,7 @@ Updating mip.tin
             #var webhook[url][high_mortal] https://discord.com/api/webhooks/long_token;
             #var webhook[url][party] https://discord.com/api/webhooks/long_token;
             #var webhook[url][worlddrops] https://discord.com/api/webhooks/long_token;
+            #var webhook[url][artifacts] https://discord.com/api/webhooks/long_token;
             #var webhook[url][zodiac] https://discord.com/api/webhooks/long_token;
             #var webhook[url][farsight] https://discord.com/api/webhooks/long_token;
             #NOP -- Every post goes to general, and also to its own channel when that webhook is set;

@@ -1,0 +1,211 @@
+#class {artifacts} {kill};
+#class {artifacts} {open};
+
+#NOP -- Artifacts: guild artifacts don't bind, so like worlddrops2 they are grabbed off the floor right away (no bag;
+#NOP -- check, no bot pause). The game gives them no aset of their own, they show with the usual item prefix;
+#NOP -- (-a-, -o-, -i-) or none, so they are matched by name. Only while 'toggle artifacts' is on;
+#NOP -- People leave artifacts on the floor in town (cot, ss, ...), so nothing happens in a Pinnacle room (map area);
+
+#NOP -- Guilds from https://wemudtogether.com/artifacts-and-world-drops/;
+#NOP -- One row per artifact: pattern (regex, no leading a/an/the, the regex allows one), guild, and the get word(s);
+#NOP -- A get that misses ("There is no <key> here.") tries again with the key's last word;
+#var artifactTable {};
+#alias {.artifactAdd}
+{
+    #list artifactTable add {{{pattern} {%1} {guild} {%2} {key} {%3}}};
+}
+.artifactAdd {tower shield of the Akh'Velahr} {Bladesinger} {tower shield};
+.artifactAdd {Circlet of the Coronal} {Bladesinger} {circlet};
+.artifactAdd {Talisman of the Runemaster} {Bladesinger} {talisman};
+.artifactAdd {Dark Leather Flask} {Bard} {leather flask};
+.artifactAdd {Statue of a Rat Figurine} {Bard} {statue};
+.artifactAdd {Sturdy Kevlar Boots} {Bard} {kevlar boots};
+.artifactAdd {Cloud Crystal} {Breed} {cloud crystal};
+.artifactAdd {Prismatic Rune} {Breed} {prismatic rune};
+.artifactAdd {Polymorphic Energy Ball} {Changeling} {polymorphic energy ball};
+.artifactAdd {Prism of Antithesis} {Changeling} {prism};
+.artifactAdd {Orb [(]metal sphere[)]} {Cyborg} {orb};
+.artifactAdd {Overclock Chip} {Cyborg} {overclock chip};
+.artifactAdd {Portable Super Power Conduit} {Cyborg} {power conduit};
+.artifactAdd {Element Lens} {Elemental} {element lens};
+.artifactAdd {Emission Gem} {Elemental} {emission gem};
+.artifactAdd {Minimental} {Elemental} {minimental};
+.artifactAdd {Mystic Rift} {Elemental} {mystic rift};
+.artifactAdd {Vortex Stabilizer} {Elemental} {vortex stabilizer};
+.artifactAdd {Sardaukar battle harness} {Fremen} {battle harness};
+.artifactAdd {weathered catchpocket} {Fremen} {catchpocket};
+.artifactAdd {Chief Engineer's Matrix} {Gentech} {matrix};
+.artifactAdd {Chief Medical Officer's Module} {Gentech} {module};
+.artifactAdd {[^ ]+ Genomic DNA Crystal} {Gentech} {dna crystal};
+.artifactAdd {large cage covered in runes} {Jedi} {large cage};
+.artifactAdd {glowing red crystal} {Jedi} {red crystal};
+.artifactAdd {Ammo Chip} {Juggernaut} {ammo chip};
+.artifactAdd {Bio Chip} {Juggernaut} {bio chip};
+.artifactAdd {Missile Chip} {Juggernaut} {missile chip};
+.artifactAdd {Breastplate of Timescape} {Knight} {breastplate};
+.artifactAdd {Chalice of Tarin} {Knight} {chalice};
+.artifactAdd {Helm of Gama} {Knight} {helm};
+.artifactAdd {Lance of Doran} {Knight} {lance};
+.artifactAdd {Shield of Keylon} {Knight} {shield};
+.artifactAdd {Sword of Lucanus} {Knight} {sword};
+.artifactAdd {Evil Looking Wand} {Mage} {wand};
+.artifactAdd {Mages' Temporal Vortex} {Mage} {temporal vortex};
+.artifactAdd {Superior Golem Materials} {Mage} {golem materials};
+.artifactAdd {Chromatic Sash} {Monk} {sash};
+.artifactAdd {Irridescent Incense} {Monk} {incense};
+.artifactAdd {Platinum Lace Circlet} {Monk} {circlet};
+.artifactAdd {cold platinum coin} {Necromancer} {platinum coin};
+.artifactAdd {crystal charm} {Necromancer} {crystal charm};
+.artifactAdd {dark, cloudy glass sphere} {Necromancer} {glass sphere};
+.artifactAdd {Dark Leather Strap} {Necromancer} {leather strap};
+.artifactAdd {Dark Skull Key} {Necromancer} {skull key};
+.artifactAdd {shattered jaw bone} {Necromancer} {jaw bone};
+.artifactAdd {small grey stone} {Necromancer} {grey stone};
+.artifactAdd {Chalice of the Gods} {Priest} {chalice};
+.artifactAdd {Heart of Armgrimst} {Priest} {heart};
+.artifactAdd {Heart of Gailenia} {Priest} {heart};
+.artifactAdd {Heart of Malykkar} {Priest} {heart};
+.artifactAdd {Nectar of the Gods} {Priest} {nectar};
+.artifactAdd {Shroud of Saint Illyndus} {Priest} {shroud};
+.artifactAdd {Talisman of Planes} {Priest} {talisman};
+.artifactAdd {Vial of Holy Water} {Priest} {vial};
+.artifactAdd {Psionatrix of Clairsentience} {Psicorps} {psionatrix};
+.artifactAdd {Psionatrix of Metacreativity} {Psicorps} {psionatrix};
+.artifactAdd {Psionatrix of Psychokinesis} {Psicorps} {psionatrix};
+.artifactAdd {Psionatrix of Psychometabolism} {Psicorps} {psionatrix};
+.artifactAdd {Psionatrix of Psychoportation} {Psicorps} {psionatrix};
+.artifactAdd {Psionatrix of Telepathy} {Psicorps} {psionatrix};
+.artifactAdd {Mental Harmonizing Stimulator} {Sii} {stimulator};
+.artifactAdd {Supercharged Blood Culture} {Sii} {blood culture};
+.artifactAdd {Ultrasonic Gestation Resonator} {Sii} {resonator};
+.artifactAdd {Work Order} {Sii} {work order};
+
+#NOP -- All the patterns as one regex alternation, for the actions;
+#var artifactNames {};
+#foreach {*artifactTable[]} {artifactIx}
+{
+    #if {"$artifactNames" == ""}
+    {
+        #var artifactNames {$artifactTable[$artifactIx][pattern]};
+    };
+    #else
+    {
+        #var artifactNames {$artifactNames|$artifactTable[$artifactIx][pattern]};
+    };
+};
+
+#NOP -- Map areas that count as town. The cot, ss, bank, smithy and the rest of the streets are all Pinnacle;
+#var artifactTownAreas {Pinnacle;New Pinnacle;Pinnacle Morgue;Pinnacle's Residential Complex;Pinnacle Mayor's Office;Pinnacle Sports Bar;The Pinnacle Humidor};
+
+#NOP -- Actions only exist while the toggle is on. The floor line (with or without -a-/-o-/-i- in front) gets it;
+#NOP -- and announces it. "<name>: Ok." is the bot's get all picking one up, which only announces (most mob drops;
+#NOP -- show up this way, never on the floor). A short desc after the name, like (slimy ball), is allowed;
+#alias {.artifacts_watch}
+{
+    #class {artifacts_watch} {kill};
+    #if {"$toggles[artifacts]" == "1"}
+    {
+        #class {artifacts_watch} {open};
+        #line substitute variables {#action {^{(?i)(?:-[a-z!]+-)?((?:(?:a|an|the) )?(?:$artifactNames)(?: [(<\[][^:]*)?)\.$}} {.artifactSeen {%%2} {1}} {2}};
+        #line substitute variables {#action {^{(?i)((?:(?:a|an|the) )?(?:$artifactNames)(?: [(<\[][^:]*)?): Ok\.$}} {.artifactSeen {%%2} {0}} {2}};
+        #class {artifacts_watch} {close};
+    };
+}
+#delay {artifacts_watch} {.artifacts_watch} {7};
+
+#NOP -- .artifactInTown: artifactInTown is 1 when the map has the room in a town area. A room the map doesn't know;
+#NOP -- (no area) counts as out of town;
+#alias {.artifactInTown}
+{
+    #var artifactInTown 0;
+    #var artifactArea {};
+    #map get roomarea artifactArea;
+    #foreach {$artifactTownAreas} {artifactTown}
+    {
+        #if {"$artifactArea" == "$artifactTown"}
+        {
+            #var artifactInTown 1;
+        };
+    };
+}
+
+#NOP -- .artifactSeen <name> <get>: get is 1 for a floor sighting (pick it up) and 0 when it was already picked up;
+#alias {.artifactSeen}
+{
+    #var artifactName {%1};
+    .artifactInTown;
+    #if {$artifactInTown}
+    {
+        #return;
+    };
+    #var artifactGuild {Unknown};
+    #var artifactKey {};
+    #foreach {*artifactTable[]} {artifactIx}
+    {
+        #if {"$artifactKey" == ""}
+        {
+            #regex {$artifactName} {^{(?i)(?:(?:a|an|the) )?(?:$artifactTable[$artifactIx][pattern])}}
+            {
+                #var artifactGuild {$artifactTable[$artifactIx][guild]};
+                #var artifactKey {$artifactTable[$artifactIx][key]};
+            };
+        };
+    };
+    #if {"%2" == "1" && !$idle_flag}
+    {
+        .artifactGet {$artifactKey};
+    };
+    #NOP -- Only the first sighting of an artifact sends a notify or Discord post;
+    #if {"$artifactLastSeen" == "$artifactName"}
+    {
+        #return;
+    };
+    #var artifactLastSeen {$artifactName};
+    #delay {artifact_seen}
+    {
+        #var artifactLastSeen {};
+    } {60};
+    .notify {<fcb>ARTIFACT<ddd> $artifactName ($artifactGuild) at $roomvnum};
+    #echo {<cfb>===========> <ccd>ARTIFACT $artifactName ($artifactGuild)<088>};
+    #if {&webhook[url][artifacts] || &webhook[url][general]}
+    {
+        #if {&webhook[url][artifacts]}
+        {
+            #var discordChannel $webhook[url][artifacts];
+        };
+        #else
+        {
+            #var discordChannel $webhook[url][general];
+        };
+        #format artifactTime {%t} {%Y-%m-%d %H:%M};
+        #var artifactRoom {$room[name]};
+        #if {"$artifactRoom" == ""}
+        {
+            #map get roomname artifactRoom;
+        };
+        postDiscord [$artifactTime] ARTIFACT ($artifactGuild): $user_cap found $artifactName in $artifactRoom [$roomvnum] ($area);
+    };
+}
+
+#NOP -- .artifactGet <key>: get it, and if the game doesn't know the key, get the key's last word instead;
+#alias {.artifactGet}
+{
+    #var artifactGetKey {%1};
+    #local words {%1};
+    #list words explode { };
+    #var artifactGetFallback {$words[-1]};
+    #class {artifact_get} {kill};
+    #if {"$artifactGetFallback" != "$artifactGetKey"}
+    {
+        #class {artifact_get} {open};
+        #line substitute variables {#line oneshot #action {^There is no $artifactGetKey here.$} {get $artifactGetFallback} {1}};
+        #class {artifact_get} {close};
+        #delay {artifact_get}
+        {
+            #class {artifact_get} {kill};
+        } {3};
+    };
+    get $artifactGetKey;
+}
+
+#class {artifacts} {close};

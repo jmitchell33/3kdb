@@ -8,6 +8,7 @@
     #if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
     #if {"${toggles[worlddrops2]}" == ""} {#var toggles[worlddrops2] 0};
     #if {"${toggles[worlddrops_notify]}" == ""} {#var toggles[worlddrops_notify] 1};
+    #if {"${toggles[artifacts]}" == ""} {#var toggles[artifacts] 0};
     #if {"${toggles[chatlog_says]}" == ""} {#var toggles[chatlog_says] 1};
     #if {"${toggles[cult]}" == ""} {#var toggles[cult] 0};
     #if {"${toggles[corpse_echo]}" == ""} {#var toggles[corpse_echo] 0};
@@ -43,6 +44,7 @@
 
 #NOP -- What each toggle does, shown in toggle-list;
 #var toggleDesc {
+    {artifacts} {Grabs guild artifacts off the floor (not in Pinnacle) and puts them in your chat window and Discord}
     {3kreport} {Eternals: checks (cstats after a kill for the kill report}
     {chatlog_says} {Puts people's says in your chat log}
     {corpse_echo} {Tells you when a corpse comes out of your bag, coffin or freezer}
@@ -104,6 +106,7 @@
                 #if {"$toggle_var" == "map_vnum"} {init_map};
                 #if {"$toggle_var" == "sessionlog"} {#if $toggles[sessionlog] {.sessionlog_start} {sessionlog off}};
                 #if {"$toggle_var" == "worlddrops2"} {.worlddrops2_watch};
+                #if {"$toggle_var" == "artifacts"} {.artifacts_watch};
             };
         } {
             #send {!toggle $toggle_var};
