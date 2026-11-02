@@ -16,6 +16,15 @@
 #var knight3_1 0;
 #var knight3_2 0;
 
+#var knights[mission] 0;
+#var knights[return] 0;
+#var knights[asked] 0;
+#map get roomvnum tmpKnightsVnum;
+#if {$tmpKnightsVnum == 28795} {
+    mission return;
+    mission ask;
+};
+
 
 #action {%*|  Defeat challenger in arena               : %d/10} {#math knight1_1 {%2/10};};
 #action {%*|  Defeat a 2nd class knight in arena       : %d/5} {#math knight2_1 {%2 / 5};};
@@ -29,27 +38,69 @@
     #NOP We treat the board like an aggro mob so we direct all logic to here instead of the generic;
     #var bot[foundmob] 1;
     #var bot[aggro-mob] 1;
-    examine board;
+    .knights_board;
 } {1};
 
-#action {There is no reason to 'challenge' here.} {examine board} {1};
+#alias {.knights_board} {
+    #if {!$bot[paused]} {
+        #var knights[asked] $bot[step];
+        examine board;
+    };
+};
+
+#alias {.knights_next} {
+    #if {$knights[mission]} {
+        #var knights[return] 1;
+        .pause;
+        #echo {<ffe>KNIGHTS: mission complete, back to Larry to turn it in<088>};
+        #map run 28795;
+        mission return;
+        mission ask;
+    } {
+        #map get roomvnum tmpKnightsVnum;
+        #math tmpKnightsNext {$tmpKnightsVnum + 1};
+        #if {$tmpKnightsNext < 28819} {
+            #var tmpKnightsStage 1;
+        } {
+            #math tmpKnightsStage {2 + ($tmpKnightsNext - 28819) / 3};
+        };
+        #var tmpKnightsCap 0;
+        #if {&knights_maxstage} {
+            #if {$tmpKnightsStage > $knights_maxstage} {#var tmpKnightsCap 1};
+        };
+        #if {$tmpKnightsCap} {
+            #var knights[return] 2;
+            .pause;
+            #echo {<ffe>KNIGHTS: next room is stage $tmpKnightsStage, over knights_maxstage $knights_maxstage, back to Larry<088>};
+            #map run 28795;
+            mission return;
+            mission ask;
+        } {
+            #var bot[walk] 1;
+            .botStep;
+        };
+    };
+};
+
+#action {There is no reason to 'challenge' here.} {.knights_board} {1};
 #action {There {is|are} %w {challenger|challengers} awaiting a noble challenger.} {
     #var knights_left @word_to_number{%2};
-    #if {$knights_left > 0} {challenge};
+    #if {!$bot[paused] && $knights[asked] == $bot[step] && $knights_left > 0} {
+        #var knights[asked] 0;
+        challenge;
+    };
 } {1};
 #action {There are no challengers remaining here.} {
-    #var bot[walk] 1;
     #var knights_left 0;
-    #delay .5 {#if !$incombat {.botStep}};
+    #if {!$bot[paused] && $knights[asked] == $bot[step]} {
+        #var knights[asked] 0;
+        #delay {knights_next} {#if {&bot} {#if !$incombat {.knights_next}}} {.5};
+    };
 } {1};
 
 #action {%*Accepting %* defeat, your challenger} {
     #var incombat 0;
-    #if {$knights_left > 0} {
-        challenge
-    } {
-        .botStep
-    };
+    .knights_board;
 } {1};
 
 #action {%* shifts %* combat style to the %*.} {
@@ -65,7 +116,30 @@
     };
 } {1};
 
-#action {Congratulations!  You have completed the mission} {mission ask;};
+#action {You have completed mission 'Lifelong Training} {
+    #if {!$knights[mission]} {
+        #var knights[mission] 1;
+        #echo {<ffe>KNIGHTS: mission complete, back to Larry once this room's board is clear<088>};
+    };
+} {1};
+#action {You ask Larry, the arena boss if you can help out.} {
+    #delay {knights_restart} {.knights_restart} {2};
+} {1};
+
+#alias {.knights_restart} {
+    #if {$knights[return] == 1} {
+        #var knights[return] 0;
+        #var knights[mission] 0;
+        #var bot[step] 1;
+        #echo {<ffe>KNIGHTS: turned in, starting again<088>};
+        ..;
+    };
+    #if {$knights[return] == 2} {
+        #var knights[return] 0;
+        #echo {<ffe>KNIGHTS: turned in, stopping at the stage cap<088>};
+        .stop;
+    };
+};
 #action {You have been offered the mission} {mission accept;};
     
 #action {You cannot leave while your challenge partner is present.} {#map undo} {1};
