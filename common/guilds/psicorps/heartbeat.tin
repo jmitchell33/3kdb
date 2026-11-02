@@ -34,6 +34,12 @@
 #var gc_round_interval 15;
 #var gc_last_round 0;
 
+#var fight_bblast 0;
+
+#var fshroud_left 0;
+#var fshroud_round 0;
+#var fshroud_int 0;
+
 
 #NOP -- Alias to swap animal affinity;
 #var aa_used 1;
@@ -114,7 +120,6 @@
 	_check_power {SP} {shield of prudence};
 	_check_power {Cp} {combat precognition};
 	_check_power {PR} {precognition};
-	_check_power {D} {dodge};
 	_check_power {Eb} {energy barrier};
 	_check_power {Ib} {inertial barrier};
 	_check_power {Di} {displacement};
@@ -136,7 +141,6 @@
 	_check_power {Bo} {bolt};
 	_check_power {Tl} {talons};
 	_check_power {CP} {combat prescience};
-	_check_power {E} {expertise};
 	_check_power {Sj} {steel jaw};	
 	#if {$my[powers][Sj][active]} {#NOP} {_check_power {Ij} {iron jaw}};
 
@@ -184,9 +188,34 @@
 	#NOP -- The "if I haven't done anything yet and have Psi/Stam Section;
 	#NOP --- Blur, Demoralize, Recall Pain & Recall Agony;
 
+	#if {$mip[round] == 0} {#var fight_bblast 0};
+
 	#if {!$hbp} {
 		#if {$my[implants][dm][active] && !$mob[demoralize] && $incombat} {
 			checkStrategy {demoralize} {_use_power demoralize};
+		};
+	};
+
+	#if {!$hbp} {
+		_bblast_ok;
+		#if {$my[implants][bb][active] && $incombat && !$fight_bblast && $bblast_ok} {
+			checkStrategy {bblast} {_use_power brilliant blast};
+			#if {$hbp} {#var fight_bblast 1};
+		};
+	};
+
+
+	#if {$mip[round] == 0} {#var fshroud_left 0;#var fshroud_round 0};
+	#if {$incombat && $mip[round] > 0 && $mip[round] != $fshroud_round} {
+		#var fshroud_round $mip[round];
+		#if {$fshroud_left > 0} {#math fshroud_left {$fshroud_left - 1}};
+	};
+	#if {!$hbp} {
+		#if {$my[implants][fs][active] && $incombat && $fshroud_left <= 0} {
+			checkStrategy {fshroud} {_use_power flaming shroud};
+			#if {$hbp} {
+				#if {$fshroud_int > 0} {#math fshroud_left {$fshroud_int / 2}} {#var fshroud_left 20;fsint};
+			};
 		};
 	};
 
@@ -228,6 +257,24 @@
   gp_round_maintenance;
 };
 
+#alias {_bblast_ok} {
+	#var bblast_ok 0;
+	#var bblast_total 0;
+	#var bblast_aggro 0;
+	#foreach {$room[mobs][%*]} {bblast_mob} {
+		#if {"$bblast_mob[autoName]" != ""} {
+			#math bblast_total {$bblast_total + 1};
+			#if {"$bblast_mob[aggressive]" == "1"} {#math bblast_aggro {$bblast_aggro + 1}};
+		};
+	};
+	#if {$bblast_total == 1 || ($bblast_total > 1 && $bblast_aggro == $bblast_total)} {#var bblast_ok 1};
+};
+
+#alias {fsint} {
+	#send {score short};
+	#line oneshot #action {Str: %d%sDex: %d%sWis: %d%sInt: %d%sCon: %d%s Cha: %d} {#var fshroud_int %%7};
+};
+
 #NOP -- Alias to check if the power is active;
 #alias _check_powers_list {
 	#var found_power 0;
@@ -244,7 +291,7 @@
 #NOP -- %1 - power short name;
 #NOP -- %2 - full power name;
 #alias {_check_power} {
-  #if {!$hbp} {
+  #if {!$hbp && @maint_want{%1}} {
 	_check_powers_list %1;
 	#if $found_power {
       #if {!$my[implants][%1][active] && $my[powers][%1][active]} {
@@ -277,7 +324,7 @@
 };
 
 #alias {_check_adapt_body} {
-  #if {!$hbp} {
+  #if {!$hbp && @maint_want{ab}} {
 	_check_powers_list ab;
     #if $found_power {
       #if {!$my[implants][%1][active] && $my[powers][ab][active]} {

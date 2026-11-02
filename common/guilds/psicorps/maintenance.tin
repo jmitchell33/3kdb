@@ -1,0 +1,272 @@
+#class {guild_maintenance} {kill}
+#class {guild_maintenance} {open}
+
+#var maint_spells[GV]   {{name} {Greater Valor}          {power} {greater valor}};
+#var maint_spells[IV]   {{name} {Improved Valor}         {power} {improved valor}};
+#var maint_spells[Vr]   {{name} {Valor}                  {power} {valor}};
+#var maint_spells[Gv]   {{name} {Greater Verve}          {power} {greater verve}};
+#var maint_spells[Iv]   {{name} {Improved Verve}         {power} {improved verve}};
+#var maint_spells[Vv]   {{name} {Verve}                  {power} {verve}};
+#var maint_spells[Vg]   {{name} {Vigor / Improved Vigor}  {power} {vigor}};
+#var maint_spells[IB]   {{name} {Improved Biofeedback}   {power} {improved biofeedback}};
+#var maint_spells[Bf]   {{name} {Biofeedback}            {power} {biofeedback}};
+#var maint_spells[PR]   {{name} {Precognition}           {power} {precognition}};
+#var maint_spells[Cp]   {{name} {Combat Precognition}    {power} {combat precognition}};
+#var maint_spells[SP]   {{name} {Shield of Prudence}     {power} {shield of prudence}};
+#var maint_spells[Eb]   {{name} {Energy Barrier}         {power} {energy barrier}};
+#var maint_spells[Ib]   {{name} {Inertial Barrier}       {power} {inertial barrier}};
+#var maint_spells[Di]   {{name} {Displacement}           {power} {displacement}};
+#var maint_spells[Ab]   {{name} {Ablating}               {power} {ablating}};
+#var maint_spells[ab]   {{name} {Adapt Body}             {power} {adapt body}};
+#var maint_spells[Bo]   {{name} {Bolt}                   {power} {bolt}};
+#var maint_spells[Tl]   {{name} {Talons}                 {power} {talons}};
+#var maint_spells[CP]   {{name} {Combat Prescience}      {power} {combat prescience}};
+#var maint_spells[Sj]   {{name} {Steel Jaw}              {power} {steel jaw}};
+#var maint_spells[Ij]   {{name} {Iron Jaw}               {power} {iron jaw}};
+#var maint_spells[Cg]   {{name} {Conductive Grasp}       {power} {conductive grasp}};
+#var maint_spells[BC]   {{name} {Greater Biocurrent}     {power} {greater biocurrent}};
+#var maint_spells[bc]   {{name} {Biocurrent}             {power} {biocurrent}};
+#var maint_spells[Ac2]  {{name} {Astral Construct 2}     {power} {astral construct 2}};
+#var maint_spells[Ac3]  {{name} {Astral Construct 3}     {power} {astral construct 3}};
+#var maint_spells[Ac4]  {{name} {Astral Construct 4}     {power} {astral construct 4}};
+#var maint_spells[Ac5]  {{name} {Astral Construct 5}     {power} {astral construct 5}};
+#var maint_spells[Ac6]  {{name} {Astral Construct 6}     {power} {astral construct 6}};
+#list maint_order create {GV;IV;Vr;Gv;Iv;Vv;Vg;IB;Bf;PR;Cp;SP;Eb;Ib;Di;Ab;ab;Bo;Tl;CP;Sj;Ij;Cg;BC;bc;Ac2;Ac3;Ac4;Ac5;Ac6};
+
+#var maint_words {
+    {gvalor} {GV} {ivalor} {IV} {valor} {Vr}
+    {gverve} {Gv} {iverve} {Iv} {verve} {Vv}
+    {vigor} {Vg} {ibio} {IB} {bio} {Bf}
+    {precog} {PR} {cprecog} {Cp} {prudence} {SP}
+    {ebarrier} {Eb} {ibarrier} {Ib}
+    {displace} {Di} {ablate} {Ab} {adapt} {ab}
+    {bolt} {Bo} {talons} {Tl} {prescience} {CP}
+    {sjaw} {Sj} {ijaw} {Ij}
+    {grasp} {Cg} {gbcurrent} {BC} {bcurrent} {bc}
+    {ac2} {Ac2} {ac3} {Ac3} {ac4} {Ac4} {ac5} {Ac5} {ac6} {Ac6}
+};
+
+#var maint_phrases {
+    {improved vigor} {vigor}
+    {greater valor} {gvalor}
+    {improved valor} {ivalor}
+    {greater verve} {gverve}
+    {improved verve} {iverve}
+    {improved biofeedback} {ibio}
+    {combat precognition} {cprecog}
+    {greater biocurrent} {gbcurrent}
+    {valor} {valor}
+    {verve} {verve}
+    {vigor} {vigor}
+    {biofeedback} {bio}
+    {precognition} {precog}
+    {shield of prudence} {prudence}
+    {energy barrier} {ebarrier}
+    {inertial barrier} {ibarrier}
+    {displacement} {displace}
+    {ablating} {ablate}
+    {adapt body} {adapt}
+    {bolt} {bolt}
+    {talons} {talons}
+    {combat prescience} {prescience}
+    {steel jaw} {sjaw}
+    {iron jaw} {ijaw}
+    {conductive grasp} {grasp}
+    {biocurrent} {bcurrent}
+    {astral construct 2} {ac2}
+    {astral construct 3} {ac3}
+    {astral construct 4} {ac4}
+    {astral construct 5} {ac5}
+    {astral construct 6} {ac6}
+};
+#list maint_phrase_order create {improved vigor;greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
+
+#if {&{xmaint_sel}} {#var maint_sel $xmaint_sel} {#var maint_sel {};#foreach {$maint_order[%*]} {_mk} {#var maint_sel[$_mk] 1}};
+#if {"${xmaint_active}" === ""} {#var maint_active 1} {#var maint_active $xmaint_active};
+
+#alias {_maint_save} {
+    #class global open;
+    #var xmaint_sel $maint_sel;
+    #var xmaint_active $maint_active;
+    #class global close;
+};
+
+#function {maint_want} {
+    #if {!$maint_active} {#return 0};
+    #if {"$maint_sel[%1]" == "1"} {#return 1};
+    #if {&maint_spells[%1]} {#return 0} {#return 1};
+};
+
+#alias {_maint_set} {
+    #var maint_sel[%1] %2;
+};
+
+#alias {_maint_grid} {
+    #var _mcount 0;
+    #var _mrow {};
+    #foreach {$maint_order[%*]} {_mk} {
+        #if {"$maint_sel[$_mk]" == "1"} {
+            #format _mcell {%-28s} {$maint_spells[$_mk][name]};
+            #var _mrow {$_mrow$_mcell};
+            #math _mcount {$_mcount + 1};
+            #if {$_mcount % 2 == 0} {
+                #echo {      <afa>$_mrow<088>};
+                #var _mrow {};
+            };
+        };
+    };
+    #if {"$_mrow" != ""} {#echo {      <afa>$_mrow<088>}};
+    #if {$_mcount == 0} {#echo {      <888>nothing picked<088>}};
+};
+
+#alias {_maint_pick} {
+    #var _mraw {%2};
+    #replace _mraw { } {;};
+    #var _mwords {};
+    #foreach {$_mraw} {_mt} {
+        #if {"$_mt" != ""} {
+            #if {&maint_spells[$_mt]} {
+                #var _mwords {$_mwords =$_mt};
+            } {
+                #format _mlow {%l} {$_mt};
+                #var _mwords {$_mwords $_mlow};
+            };
+        };
+    };
+    #foreach {$maint_phrase_order[%*]} {_mp} {#replace _mwords {$_mp} {$maint_phrases[$_mp]}};
+    #replace _mwords { } {;};
+    #var _mbad {};
+    #foreach {$_mwords} {_mw} {
+        #if {"$_mw" != ""} {
+            #var _mk {};
+            #regex {$_mw} {^={.+}$} {#var _mk {&1}} {
+                #if {&maint_words[$_mw]} {#var _mk $maint_words[$_mw]};
+            };
+            #if {"$_mk" != ""} {
+                #if {"%1" == "t"} {
+                    #if {"$maint_sel[$_mk]" == "1"} {_maint_set $_mk 0} {_maint_set $_mk 1};
+                } {
+                    _maint_set $_mk %1;
+                };
+            } {
+                #var _mbad {$_mbad $_mw};
+            };
+        };
+    };
+    #if {"$_mbad" != ""} {
+        #echo {<faa>  Unknown power:<fff>$_mbad<faa>. Type <ffa>maint list<faa> for the names.<088>};
+    };
+    _maint_changed;
+};
+
+#alias {_maint_changed} {
+    _maint_save;
+    #echo {<dea>---  MAINT PICKS  ---<088>};
+    _maint_grid;
+    #if {$maint_active} {
+        #echo {  <ccc>Maint is on, the heartbeat keeps these up now.<088>};
+    } {
+        #echo {  <ccc>Type <ffa>maint<ccc> to start keeping these up.<088>};
+    };
+};
+
+#alias {_maint_on} {
+    #var maint_active 1;
+    _maint_save;
+    #echo {<dea>---  MAINTENANCE ON  ---<088>};
+    _maint_grid;
+};
+
+#alias {_maint_off} {
+    #var maint_active 0;
+    _maint_save;
+    #echo {<dea>---  MAINTENANCE OFF  ---<088>};
+    #if {"%1" == "cleared"} {
+        #echo {  <ccc>All picks cleared. Powers stay up until they drop, they are just not renewed.<088>};
+    } {
+        #echo {  <ccc>Powers stay up until they drop, they are just not renewed. Picks are kept.<088>};
+    };
+};
+
+#alias {_maint_list} {
+    #echo {};
+    #echo {<ccf>  ====================  PSICORPS MAINT  ====================<088>};
+    #echo {<fff>  Key   Power                      Picked  Implant  Up<088>};
+    #echo {<ccf>  ----  -------------------------  ------  -------  ----<088>};
+    #foreach {$maint_order[%*]} {_mk} {
+        #if {"$maint_sel[$_mk]" == "1"} {#var _mpick {<afa>on    }} {#var _mpick {<888>off   }};
+        #if {$my[implants][$_mk][active]} {#var _mimp {<afa>yes    }} {#var _mimp {<888>no     }};
+        #if {$my[powers][$_mk][active]} {#var _mup {<afa>yes}} {#var _mup {<888>no }};
+        #format _mrow {%-4s  %-25s} {$_mk} {$maint_spells[$_mk][name]};
+        #echo {  <ffa>$_mrow  $_mpick  $_mimp  $_mup<088>};
+    };
+    #echo {<ccf>  ----------------------------------------------------------<088>};
+    #if {$maint_active} {
+        #echo {  <fff>Maint is <afa>ON<fff>. A picked power is kept up when its implant is on.<088>};
+    } {
+        #echo {  <fff>Maint is <faa>OFF<fff>. Type <ffa>maint<fff> to keep the picked powers up.<088>};
+    };
+    #echo {};
+};
+
+#alias {maint} {
+    #format _mcmd {%l} {%1};
+    #var _mrest {};
+    #regex {%0} {^%S {.*}$} {#var _mrest {&2}};
+    #switch {"$_mcmd"} {
+        #case {""} {_maint_on};
+        #case {"on"} {_maint_on};
+        #case {"off"} {_maint_off};
+        #case {"add"} {_maint_pick {1} {$_mrest}};
+        #case {"del"} {_maint_pick {0} {$_mrest}};
+        #case {"remove"} {_maint_pick {0} {$_mrest}};
+        #case {"all"} {
+            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 1};
+            _maint_changed;
+        };
+        #case {"default"} {
+            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 1};
+            _maint_changed;
+        };
+        #case {"clear"} {
+            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 0};
+            _maint_save;
+            _maint_off cleared;
+        };
+        #case {"list"} {_maint_list};
+        #case {"check"} {_maint_list};
+        #case {"status"} {_maint_list};
+        #case {"help"} {maint-help};
+        #default {
+            #var _mtail {};
+            #regex {%0} {^{.*} {on|off}$} {#var _mrest {&1};#var _mtail {&2}};
+            #if {"$_mtail" == "off"} {_maint_pick {0} {$_mrest}} {
+                #if {"$_mtail" == "on"} {_maint_pick {1} {$_mrest}} {_maint_pick {t} {%0}};
+            };
+        };
+    };
+};
+
+#alias {maint-help} {
+    #echo {};
+    #echo {<ccf>  ================  PSICORPS MAINT HELP  ================<088>};
+    #echo {  <ffa>maint                 <fff>start keeping your picked powers up (the default)<088>};
+    #echo {  <ffa>maint off             <fff>stop renewing powers (your picks are kept)<088>};
+    #echo {  <ffa>maint <power> ...     <fff>pick or unpick (toggles), e.g. <ffa>maint gvalor ac6<088>};
+    #echo {  <ffa>                      <fff>hpbar codes work exactly as shown (Vv, Bf, GV vs Gv), full names too, and a trailing on or off: <ffa>maint astral construct 3 off<088>};
+    #echo {  <ffa>maint add <power> ... <fff>pick<088>};
+    #echo {  <ffa>maint del <power> ... <fff>unpick<088>};
+    #echo {  <ffa>maint all             <fff>pick every power (also maint default)<088>};
+    #echo {  <ffa>maint clear           <fff>unpick everything and stop<088>};
+    #echo {  <ffa>maint list            <fff>every power: picked, implant on, up now<088>};
+    #echo {<ccf>  -------------------------------------------------------<088>};
+    #echo {  <fff>A power is kept up when it is picked here and its implant is on (addp).<088>};
+    #echo {  <fff>Names: gvalor ivalor valor gverve iverve verve vigor ibio bio precog<088>};
+    #echo {  <ccc>cprecog prudence ebarrier ibarrier displace ablate adapt bolt<088>};
+    #echo {  <ccc>talons prescience sjaw ijaw grasp gbcurrent bcurrent ac2-ac6<088>};
+    #echo {  <fff>Single-use and damage powers are strategies: demoralize, bblast, fshroud, burst, rpain.<088>};
+    #echo {<ccf>  =======================================================<088>};
+    #echo {};
+};
+
+#class {guild_maintenance} {close}

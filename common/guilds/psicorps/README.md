@@ -93,13 +93,15 @@ If you add `exa mob` to your pre fight check, it will store the best damage type
 
 Make sure to add adapt body to your power configuration with `addp ab`.
 
-### Demoralize, brilliant blast
+### Maint
 
-These are used once per fight at the start. For brilliant blast, it'll only do it if it's considered a safe area. For now that's chessboard, but feel free to modify as you see fit. Eventually, we can add some code around checking number of targets or expand the logic.
+Sustained powers (valor, verve, vigor, biofeedback, precognition, barriers, jaws, astral constructs, adapt body...) are kept up by the heartbeat when they are picked in `maint` and their implant is on (`addp`). Maint starts on with every power picked, so nothing changes until you `maint del <power>` one. `maint list` shows the names, `maint-help` the commands. Picks save with the character.
 
-If you have both demoralize and brilliant blast, it'll try to chain them in one round.
+### Demoralize, brilliant blast, flaming shroud
 
-Make sure to add them to your power configuration: `addp dm` and `addp bb`
+Single-use powers are strategies: `strategy demoralize`, `strategy bblast`, `strategy fshroud`. Brilliant blast is used once per fight, at the start of combat; flaming shroud has no hpbar flag and lasts Intelligence / 2 rounds, so it is recast when that many combat rounds have passed (Int is read from `score short` the first time, run `fsint` after your Int changes); demoralize is repeated until the target can't be re-demoralized.
+
+Make sure to add them to your power configuration: `addp dm`, `addp bb` and `addp fs`
 
 ### Greater mindlink
 
