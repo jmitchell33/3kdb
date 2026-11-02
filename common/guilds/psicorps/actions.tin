@@ -57,10 +57,8 @@
 #alias gs_powers {
 	#var add_powers 1;
 	#unvar gs_powers;
-	#unvar my[implants];
 	#list gs_powers clear;
 	#var powers_added {Added the following powers: };
-	#var vigor_power vigor;
 	#NOP -- Collect every line gs prints (lowest priority, so other actions still get theirs);
 	#var gs_lines {};
 	#class {gs_read} {kill};
@@ -72,13 +70,15 @@
 		#class {gs_read} {kill};
 		_gs_read_tiers;
 		_gs_add_powers {$gs_tiers};
+		#unvar my[implants];
+		#var vigor_power vigor;
 		#foreach $psi_powers[%*] psi_power {
 			#format power1 {%l} {$psi_power[power]};
 			#foreach $gs_powers power {
 				#format power2 {%l} {$power};
 				#if {"$power1" == "$power2"} {
 					#cat powers_added {$power2, };
-					addp $psi_power[key];
+					#if {"$psi_power[key]" != ""} {#var my[implants][$psi_power[key]][active] 1};
 					#NOP -- Improved vigor shares the Vg slot, so maintain it instead of vigor;
 					#if {"$power1" == "improved vigor"} {#var vigor_power {improved vigor}};
 				};
@@ -207,6 +207,8 @@
 	checkStrategy {ragony} {#delay 11 {#var mob[recall_pain] 0}};
 	checkStrategy {rtorment} {#delay 11 {#var mob[recall_pain] 0}};
 } {2};
+
+#delay {psi_gs_powers} {gs_powers} {5};
 
 
 #class {guild_actions} {close}
