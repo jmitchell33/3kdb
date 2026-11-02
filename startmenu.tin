@@ -340,6 +340,17 @@ menu_close_classes;
         #cursor set {%1};
         #return;
     };
+    #if {%1 == 0 && "${menu_num}" == ""} {
+        #if {"${menu_zero}" == "1"} {
+            #unvar menu_zero;
+            #undelay {menu_zero};
+            menu_refresh_ld;
+        } {
+            #var menu_zero 1;
+            #delay {menu_zero} {#unvar menu_zero} {1.5};
+        };
+        #return;
+    };
     #if {$menu[count] < 10} {
         #if {%1 <= $menu[count]} {menu_login %1};
         #return;
@@ -355,6 +366,46 @@ menu_close_classes;
     #var menu[row] $menu_num;
     #var menu[msg] {<ffa>Enter: log in to $menu_chars[$menu_num], or type the next digit<088>};
     menu_draw;
+};
+
+#alias {menu_refresh_ld} {
+    #var menu_refresh_q {};
+    #var menu_refresh_n 0;
+    #foreach {$menu_chars[%*]} {menu_c} {
+        #if {"$menu_ld_at[$menu_c]" != "" && "$menu_linkd[$menu_c]" != "1"} {
+            #list menu_refresh_q add {$menu_c};
+            #math menu_refresh_n {$menu_refresh_n + 1};
+        };
+    };
+    #if {$menu_refresh_n == 0} {
+        #var menu[msg] {<ffa>No linkdead characters to refresh<088>};
+        menu_draw;
+        #return;
+    };
+    #var menu_refresh_done {};
+    #var menu_refresh_on 1;
+    menu_refresh_next;
+};
+
+#alias {menu_refresh_next} {
+    #undelay {menu_refresh_wd};
+    #if {$menu_refresh_n == 0} {
+        #unvar menu_refresh_on;
+        #var menu[msg] {<ffa>Linkdead timers refreshed:$menu_refresh_done<088>};
+        menu_draw;
+        #return;
+    };
+    #var menu_refresh_c $menu_refresh_q[1];
+    #list menu_refresh_q delete 1;
+    #math menu_refresh_n {$menu_refresh_n - 1};
+    #var menu_refresh_done {$menu_refresh_done $menu_refresh_c};
+    #delay {menu_refresh_wd} {
+        #unvar menu_refresh_on;
+        #showme {<faa>Linkdead refresh stopped: $menu_refresh_c did not finish in 2 minutes<088>};
+    } {120};
+    #loop 1 $menu[count] i {
+        #if {"$menu_chars[$i]" == "$menu_refresh_c"} {menu_login $i};
+    };
 };
 
 #NOP -- Arrows and Tab drop a number being typed;
@@ -647,6 +698,7 @@ menu_close_classes;
         #var menu_ld_in 1;
         #var menu_ld_skip 0;
         #unvar xlinkdead_at;
+        #if {"$menu_refresh_on" == "1"} {#delay {menu_refresh_zap} {#zap} {0.1}};
     };
 };
 
@@ -674,16 +726,25 @@ menu_close_classes;
 
 #NOP -- Bring the menu back once every game session has closed (the startup session itself counts as one).;
 #NOP -- The event runs in the closing session, so the check is scheduled in the startup session;
+#alias {_menu_back_check} {
+    #info sessions save;
+    #if {&info[SESSIONS][] <= 1} {
+        #read startmenu.tin;
+    } {
+        #if {"$menu_refresh_on" == "1"} {#delay {menu_back} {_menu_back_check} {0.05}};
+    };
+};
 #event {SESSION DEACTIVATED} {
     #gts {
-        #delay {menu_back} {
-            #info sessions save;
-            #if {&info[SESSIONS][] <= 1} {#read startmenu.tin};
-        } {0.5};
+        #if {"$menu_refresh_on" == "1"} {
+            #delay {menu_back} {_menu_back_check} {0.02};
+        } {
+            #delay {menu_back} {_menu_back_check} {0.5};
+        };
     };
 };
 
 #NOP -- The mouse makes the menu clickable. Hold shift to select text while it's on;
 #config mouse on;
 menu_load;
-menu_draw;
+#if {"$menu_refresh_on" == "1"} {menu_refresh_next} {menu_draw};
