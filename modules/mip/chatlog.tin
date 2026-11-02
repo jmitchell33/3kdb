@@ -39,10 +39,12 @@
 	#NOP -- first paramater is webook destination, second is payload;
 	#var payload @sanitizePayload{%0};
 
+	#list payloadStack add {{{channel} {$discordChannel} {payload} {$payload}}};
 	#if {"$discordChannel" != "$webhook[url][general]"} {
-		#list payloadStack add {{{channel} {$discordChannel} {payload} {$payload}}};
+		#if {"$discordChannel" != "$webhook[url][worlddrops]"} {
+			#list payloadStack add {{{channel} {$webhook[url][general]} {payload} {$payload}}};
+		};
 	};
-	#list payloadStack add {{{channel} {$webhook[url][general]} {payload} {$payload}}};
 	
 
 	#NOP -- Update scripts/discordPost.py to where the python file is located, this depends on the root that;
