@@ -257,5 +257,10 @@ touch demon rune;
     #echo {<fff>A celestial is still alive on this level. Kill it, then .. to carry on.<088>};
 } {1};
 
+#NOP -- Keep from autolooping if you lost the key somehow;
+#action {You do not have the proper key.} {
+    #math bot[step] {$bot[step] + 2};
+} {1};
+
 #class {bot} {close};
 #read common/bot/generic.tin;

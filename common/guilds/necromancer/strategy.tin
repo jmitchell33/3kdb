@@ -82,7 +82,8 @@
             checkStrategy {soulbind} {soulbind};
         };
 
-        #if {$my[necromancer][bloodarc] > 0 && !$mob[bloodarc]} {
+        #NOP -- Skip while an arc is still up or this mob was already arced (cleared on a new mob in common/status.tin);
+        #if {$my[necromancer][bloodarc] > 0 && !$mob[bloodarc] && !$bloodarc_active} {
             checkStrategy {bloodarc} {
                 #if $vaf[numbers] {bloodarc $enemy[name_numbers]} {bloodarc $mob[target]};
             };
