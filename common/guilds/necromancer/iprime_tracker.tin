@@ -1,0 +1,57 @@
+#NOP -- Tracks Invoke Prime successes and failures for the session;
+#NOP -- 'iprime_tracker' shows the counts, 'iprime_tracker reset' clears them;
+#NOP -- Counts are set up outside the class so a guild reload (#class kill) keeps them;
+#if {&{iprime_tracker} == 0}
+{
+    #var iprime_tracker[success] 0;
+    #var iprime_tracker[fail] 0;
+};
+
+#class {iprime_tracker} {kill}
+#class {iprime_tracker} {open}
+
+#NOP -- tt++ fires only one action per line, so this is the only action on these lines;
+#NOP -- outside ips.tin. dmgtracker's iprime flag is set here, and ips.tin (priority 1,
+#NOP -- loaded while guessing the word) calls .iprime_track itself;
+#alias {.iprime_track}
+{
+    #math iprime_tracker[%1] {$iprime_tracker[%1] + 1};
+};
+
+#action {^With iron will, you finally guide the deadly spell toward its target!$}
+{
+    #var cmbt[affects][iprime] 1;
+    .iprime_track success;
+} {2};
+
+#action {^The prime invocation flies out of control!$}
+{
+    .iprime_track fail;
+} {2};
+
+#alias {iprime_tracker}
+{
+    #if {"%1" == "reset"}
+    {
+        #var iprime_tracker[success] 0;
+        #var iprime_tracker[fail] 0;
+        #showme {<bfc>Invoke Prime tracker reset<088>};
+        #return;
+    };
+
+    #local total {};
+    #math total {$iprime_tracker[success] + $iprime_tracker[fail]};
+    #if {$total == 0}
+    {
+        #showme {<bfc>Invoke Prime: no attempts tracked yet<088>};
+        #return;
+    };
+
+    #local successPct {};
+    #local failPct {};
+    #math successPct {$iprime_tracker[success] * 100 / $total};
+    #math failPct {100 - $successPct};
+    #showme {<faa>Invoke Prime:<088> $total attempts  <afa>$iprime_tracker[success] success ($successPct%)<088>  <faa>$iprime_tracker[fail] failed ($failPct%)<088>};
+};
+
+#class {iprime_tracker} {close}
