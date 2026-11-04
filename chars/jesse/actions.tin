@@ -34,14 +34,16 @@
 } {1};
 
 #nop -- soulbind;
-#action {Raising your hands to the sky, you call forth the spirits of the underworld} {
+#nop -- second line of the cast, because the necro action needs the first one (one action fires per line);
+#action {to do your bidding.  Lightning explodes across the sky as the fallen} {
     #if {!$idle_flag} {
         envision soulbind;
     };
 } {1};
 
 #nop -- unholy ground;
-#action {You scream with the power of the netherworld and thrust your hands toward} {
+#nop -- second line of the cast, because the necro action needs the first one (one action fires per line);
+#action {the heavens!  The dark forces answer your calling, snaking their way} {
     #if {!$idle_flag} {
         envision unholy ground;
     };
@@ -51,6 +53,19 @@
 #action {You reach towards the dark clouds in the heavens and call forth} {
     #if {!$idle_flag} {
         envision bloodarc;
+    };
+} {1};
+
+#nop -- the gp1 reflex sends drop pants when NP is low. Absorb up to 5 corpses, unless there are none;
+#nop -- qtrance is instant, so the lockout only has to last until the new NP shows;
+#action {^You have no pants.$} {
+    #if {!$idle_flag && !$corpse_lockout} {
+        #math corpse_total {$corpses[coffin] + $corpses[freezer] + $corpses[cooler]};
+        #if {$corpse_total > 0} {
+            #var corpse_lockout 1;
+            #delay {corpse_lockout} {#var corpse_lockout 0} {4};
+            .corpse_absorb;
+        };
     };
 } {1};
 

@@ -85,7 +85,20 @@
         #NOP -- Skip while an arc is still up or this mob was already arced (cleared on a new mob in common/status.tin);
         #if {$my[necromancer][bloodarc] > 0 && !$mob[bloodarc] && !$bloodarc_active} {
             checkStrategy {bloodarc} {
-                #if $vaf[numbers] {bloodarc $enemy[name_numbers]} {bloodarc $mob[target]};
+                #NOP -- mob[target] is the last mob listed in the room, which can be one that isn't fighting us yet.;
+                #NOP -- Aim at the current enemy so the arc doesn't pull it. A bot picks its own target and fights that;
+                #NOP -- The MUD won't take a full name like aegis assembler model 68-as, but does take the last word;
+                #if $vaf[numbers] {
+                    bloodarc $enemy[name_numbers];
+                } {
+                    #if {"$enemy[target]" != "" && "$bot[active]" != "1"} {
+                        #local arc_words {$enemy[target]};
+                        #list arc_words {explode} { };
+                        bloodarc $arc_words[&arc_words[]];
+                    } {
+                        bloodarc $mob[target];
+                    };
+                };
             };
         };
             

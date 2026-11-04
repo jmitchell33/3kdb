@@ -7,7 +7,7 @@
     reflex clear;
     reflex add hp <70% dream 20;
     reflex add sp <25% dream 20;
-    reflex add gp1 <10000 qtrance unwrap 1/preserve remains/get preservation/absorb>5;
+    reflex add gp1 <10000 drop pants;
     reflex add gp2 <124 con;
     reflex combat on;
     reflex combat;
@@ -26,6 +26,30 @@
 		#echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
 	};
 	qtrance preserve remains/get preservation/absorb;
+};
+
+#NOP -- absorb up to 5 corpses at once, from the coffin first, then freezer, then cooler;
+#NOP -- qtrance does the whole chain instantly, and >n repeats it n times;
+#alias {.corpse_absorb} {
+    #var corpse_left 5;
+    .corpse_absorb_from {unwrap 1} {coffin};
+    .corpse_absorb_from {deslab} {freezer};
+    .corpse_absorb_from {uncooler corpse} {cooler};
+};
+
+#NOP -- %1 command to get a corpse out, %2 where it is. Takes what is there, up to what is still needed;
+#alias {.corpse_absorb_from} {
+    #local take {0};
+    #if {&corpses[%2]} {
+        #local take {$corpses[%2]};
+    };
+    #if {$take > $corpse_left} {
+        #local take {$corpse_left};
+    };
+    #if {$take > 0} {
+        qtrance %1/preserve remains/get preservation/absorb>$take;
+        #math corpse_left {$corpse_left - $take};
+    };
 };
 
 #alias {xenostart} {reflex remove sp <25% dream 20};
@@ -233,7 +257,7 @@
 
 #NOP -- turn gags on and off;
 #alias {gagson} {
-    #nop;
+    gag+ hpbar;
 };
 
 #alias {gagsoff} {
@@ -263,7 +287,7 @@
 #alias {mystrategy-party} {
     strategy-clear;
     strategy call;
-    strategy spark;
+    strategy spark_prime;
     strategy iprime;
     strategy bloodarc;
 };
@@ -503,7 +527,7 @@
 #list jesse3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Setup strategies (default)}}};  
 #list jesse3kdb add {{{name} {mystrategy-party} {type} {combat} {desc} {Strategy for partying}}}; 
 #list jesse3kdb add {{{name} {stclear} {type} {combat} {desc} {Clear strategies}}};
-#list jesse3kdb add {{{name} {setup_reflex} {type} {combat} {desc} {Set reflexes: dream on low HP/SP, use a corpse on low NP, con on low gp2}}};
+#list jesse3kdb add {{{name} {setup_reflex} {type} {combat} {desc} {Set reflexes: dream on low HP/SP, absorb up to 5 corpses on low NP, con on low gp2}}};
 #list jesse3kdb add {{{name} {xenostart} {type} {combat} {desc} {Xeno: stop dreaming on low SP}}};
 #list jesse3kdb add {{{name} {xenostop} {type} {combat} {desc} {Xeno done: dream on low SP again}}};
 #list jesse3kdb add {{{name} {3kr} {type} {combat} {desc} {Show the 3kReport kill stats}}};
@@ -524,6 +548,7 @@
 #list jesse3kdb add {{{name} {maskoff} {type} {misc} {desc} {remove mask and wear helmet}}};
 #list jesse3kdb add {{{name} {bag3} {type} {misc} {desc} {donate all from x amount of bags set with bagset}}};
 #list jesse3kdb add {{{name} {refd} {type} {misc} {desc} {Reforge 12 daggers for pxp}}};
+#list jesse3kdb add {{{name} {gagson} {type} {misc} {desc} {Gag the hpbar}}};
 #list jesse3kdb add {{{name} {gagsoff} {type} {misc} {desc} {Clear all gags}}};
 #list jesse3kdb add {{{name} {quit} {type} {misc} {desc} {Quit guard: use quit REALLY to really quit}}};
 

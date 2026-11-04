@@ -37,6 +37,7 @@
 
 #NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
 #act {^You charge forward and close your jaws on %*} {
+    .circle_power {rabies};
     #if $gags[combat_guild] {#line gag};
     #var opponent[effects][rabies] 1
 } {2};
@@ -48,6 +49,7 @@
 #act {^Your blood boils and you call together all of the fleas that reside} {#var opponent[effects][infest] 1} {2};
 
 #act {The creature has been permanently maimed!} {
+    .circle_power {maim};
     #if $gags[combat_guild] {#line gag};
     #var mob[maim] 1;
     #math my[necromancer][maim] {$my[necromancer][maim] - 1};
@@ -115,7 +117,10 @@
         #send {!repower};
     };
 } {2};
-#action {The powerful force of your beastly nature wells a great power within and} {#var my[necromancer][spirit-howl] 0} {2};
+#action {The powerful force of your beastly nature wells a great power within and} {
+    .circle_power {spirithowl};
+    #var my[necromancer][spirit-howl] 0;
+} {2};
 
 #NOP -- Update what repower powers are available;
 #action {Your repower-restricted abilities are listed below %w...} {
@@ -180,6 +185,7 @@
 
 #NOP -- General Necro Power Tracking;
 #action {You scream with the power of the netherworld and thrust your hands toward} {
+    .circle_power {unholy ground};
     stat_record;
     #var my[necromancer][unholy_ground] 0;
     #var stats[unholy_ground] 0;
@@ -189,16 +195,32 @@
     #echo {<fcd> Necro Stats: Unholy Ground struck <cfc>$stats[unholy_ground] <fcd>times.};
 } {2};
 
+#NOP -- Counts Unholy Ground hits with gags on or off. .trackUG hides the line when combat_guild gags are on;
+#action {^\~%*\~Cold, purple lightning crackles into %* body!$} {.trackUG} {2};
+#action {^\~%*\~%* strikes %* and is dealt a blast of dark energy!$} {.trackUG} {2};
+#action {^\~%*\~Purple lightning arcs from %* to %*!$} {.trackUG} {2};
+#action {^\~%*\~A black bolt of energy blasts into %*!$} {.trackUG} {2};
+#action {^\~%*\~Dark energy crackles from %* to %*!$} {.trackUG} {2};
+#action {^\~%*\~Black lightning races along %* body into %*!$} {.trackUG} {2};
+#action {^\~%*\~An explosion of black energy engulfs %*!$} {.trackUG} {2};
+#action {^\~%*\~%* recoils in a shock from striking %*!$} {.trackUG} {2};
+#action {^\~%*\~Jet black bolts of dark lightning slam into %*!$} {.trackUG} {2};
+#action {^\~%*\~Deathly black energy sizzles through %* flesh!$} {.trackUG} {2};
+#action {^\~%*\~Cool black lightning scorches across %* body!$} {.trackUG} {2};
+#action {^\~%*\~%* is scorched by the dark energy surrounding %*!$} {.trackUG} {2};
+
 #action {  You must wait until repower to rend flesh again %w.} {
     #var my[necromancer][maim] 0;
 } {2};
 
 #NOP -- Tracking Reaper abilities (grim harvest, soulbind, etc.);
 #action {^The celestial blade slashes cleanly through %*} {
+    .circle_power {harvest};
     #var my[necromancer][harvest] 0;
 } {2};
 
 #action {Raising your hands to the sky, you call forth the spirits of the underworld} {
+    .circle_power {soulbind};
     #var my[necromancer][soulbind] 0;
 } {2};
 
@@ -227,6 +249,7 @@
 #NOP -- Bloodarc over: clears the flag and restarts the bot if it was holding, unless it is in combat or you paused it;
 #NOP -- A hold leaves bot[walk] at 1, which bot_ticker skips. $incombat lags a kill by up to 4s, so on a fast kill the arc can end while it still reads 1 and nothing restarts the bot. Release the hold so bot_ticker resumes it once combat really clears;
 #alias {.bloodarcEnd} {
+    .circle_power_end {bloodarc};
     #undelay {bloodarc_failsafe};
     #if {$bloodarc_active} {
         #var bloodarc_active 0;
@@ -242,6 +265,7 @@
 #NOP -- Bloodarc cast: flags it active so .botStep holds in the room (the bot can still fight) and starts the failsafe timer;
 #NOP -- mob[bloodarc] marks this mob as arced so the strategy doesn't burn the second charge on it the next round;
 #action {^Your eyes burn with an unholy crimson flame.$} {
+    .circle_power {bloodarc};
     #var mob[bloodarc] 1;
     #var bloodarc_active 1;
     #math my[necromancer][bloodarc] {$my[necromancer][bloodarc] - 1};
@@ -249,6 +273,7 @@
 } {2};
 
 #action {^The lights in the room waver and swoon.$} {
+    .circle_power {conjure undead};
     #math my[necromancer][conjure_undead] {$my[necromancer][conjure_undead] - 1};
 } {2}
 
@@ -272,6 +297,7 @@
 } {2};
 
 #action {^You drink the glowing blood, then hurl the decanter to the ground.} {
+    .circle_power {bloodfuse};
     #math my[necromancer][decanters][powered] {$my[necromancer][decanters][powered] - 1};
     @max{#math my[necromancer][bloodfuse] {$my[necromancer][bloodfuse] - 1};0};
 } {2};
@@ -279,6 +305,7 @@
 
 #NOP -- When using bloodlet, put the decanter in chest;
 #action {You well up your vampiric strength and your eyes burn brightly with} {
+    .circle_power {bloodlet};
     #math my[necromancer][decanters][full] {$my[necromancer][decanters][full] + 1};
     #math my[necromancer][decanters][empty] {$my[necromancer][decanters][empty] - 1};
     qtrance unkeep decanter/retrieve/open chest/put decanter in chest/deliver;
@@ -379,14 +406,17 @@
 
 #NOP -- Illume;
 #action {^You call upon the material planes of energy to power your soul!$} {
+    .circle_power {spark};
     #math my[necromancer][glamors][current] {$my[necromancer][glamors][current] - 1}
 } {2};
 #NOP -- fury;
 #action {You reach into your animal soul and fly into a fury!} {
+    .circle_power {fury};
     #math my[necromancer][glamors][current] {$my[necromancer][glamors][current] - 1}
 } {2};
 #NOP -- Blaze;
 #action {^You call the fires of hell into your soul!$} {
+    .circle_power {blaze};
     #math my[necromancer][glamors][current] {$my[necromancer][glamors][current] - 1}
 } {2};
 

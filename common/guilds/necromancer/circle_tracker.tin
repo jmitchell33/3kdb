@@ -1,0 +1,528 @@
+#NOP -- Tracks Next Circle % from gs while fighting, to compare gxp between attacks and powers;
+#NOP -- NOTE: only works up to circle 59. From tier I up gs no longer shows percentages, so the;
+#NOP -- tracker turns itself off with a message the first time it sees a gs like that in combat;
+#NOP -- 'toggle circle_tracker' turns it on or off (off by default) and adds a line to the hpbar;
+#NOP -- 'circle_tracker' shows the details, 'circle_tracker reset' clears them. So does recover;
+#NOP -- Each stretch between two samples counts as the first word of Comtrance on gs, or none.;
+#NOP -- Attack messages differ per player and form;
+#NOP -- so they are not used. Only the lines read below need to match, the rest of gs can differ;
+#NOP -- Sends gs from _guild_heartbeat, hpbar line is added in _guild_miphp;
+#NOP -- Powers get their own table and never change the mode numbers;
+#NOP -- How a power is spotted: the memorization message, iprime_tracker's counts, or a .circle_power call;
+#NOP -- in actions.tin. Those calls are there because only one action fires per line;
+#NOP -- What a power earned: gain while it was active, minus what those rounds normally earn with no power;
+#NOP -- Per repower limits need no math here, because only casts that really happened are counted;
+#NOP -- Two powers active together split the gain evenly, so all the rows add up to the total;
+#NOP -- A power can look negative over a short sample. That is just noise;
+
+#NOP -- Stats are set up outside the class so a reload (#class kill) keeps them;
+#if {&{circle_tracker} == 0}
+{
+    #var circle_tracker[gain] 0;
+    #var circle_tracker[rounds] 0;
+    #var circle_tracker[rebased] 0;
+    #var circle_tracker[misses] 0;
+    #var circle_tracker[hpbar] {<dda>Circle:<088> waiting for combat};
+};
+
+#NOP -- Attacks replaced this older layout, which a reconnect can carry over;
+#unvar circle_tracker[powers];
+#unvar circle_tracker[used];
+#unvar circle_tracker[chill_seen];
+#unvar circle_tracker[chill_out];
+
+#NOP -- A reload can land between a gs and its reply, so never carry reply state or the gags over;
+#ungag {^ | %*};
+#ungag {^$};
+#undelay {circle_tracker_timeout};
+#undelay {circle_tracker_send};
+#var circle_live {};
+
+#class {circle_tracker} {kill}
+#class {circle_tracker} {open}
+
+#NOP -- Not worth tracking: no gxp of their own;
+#var circle_tracker_skip {
+    {alter} {1}
+    {charm} {1}
+    {chill} {1}
+    {conjure undead} {1}
+    {create dart} {1}
+    {create light} {1}
+    {dispell} {1}
+    {dream} {1}
+    {protection} {1}
+    {rope trick} {1}
+    {serenity} {1}
+    {shapeshift} {1}
+    {sleep} {1}
+    {soothe} {1}
+    {spark} {1}
+    {turn undead} {1}
+    {veil} {1}
+    {veil of darkness} {1}
+};
+
+#NOP -- tt++ fires only one action per line. Actions here are priority 8 and 9 (default is 5), so;
+#NOP -- any other action on these lines goes first and keeps working, including ones added later;
+#NOP -- The screen body and blank line are hidden with temporary #gags, not #line gag, because a;
+#NOP -- #gag does not use up the line's action. That keeps topup's reagent actions and the;
+#NOP -- blank line action in common/gags/gags.tin working;
+
+#NOP -- Replies come back in order. Each gs sent adds to this queue: t = tracker's, m = typed;
+#alias {.circle_queue}
+{
+    #list {circle_live[queue]} {add} {%1};
+    #NOP -- A gs can go unanswered, so a stuck queue must not hide the next typed gs. Repeated misses;
+    #NOP -- mean this player's gs doesn't look like the one expected, so stop sending it. This is;
+    #NOP -- inline, not an alias, because it can fire after a guild swap killed this class;
+    #delay {circle_tracker_timeout}
+    {
+        #ungag {^ | %*};
+        #ungag {^$};
+        #if {"$circle_live[queue][1]" == "t"}
+        {
+            #math circle_tracker[misses] {$circle_tracker[misses] + 1};
+        };
+        #var circle_live {};
+        #if {$circle_tracker[misses] >= 3 && "$guild" == "necromancer" && "$toggles[circle_tracker]" == "1"}
+        {
+            #var toggles[circle_tracker] 0;
+            #var circle_tracker[misses] 0;
+            #showme {<faa>Circle tracker: could not read your gs screen, turning it off<088>};
+            .circle_tracker_toggled;
+        };
+    }
+    {6};
+};
+
+#NOP -- Typed or scripted gs: never hidden, even mid fight;
+#alias {gs}
+{
+    #if {"%0" == ""}
+    {
+        .circle_queue m;
+        #send {gs};
+    };
+    #else
+    {
+        #send {gs %0};
+    };
+};
+
+#NOP -- Called once per round from _guild_heartbeat. Skips if the last reply is still out;
+#NOP -- ips.tin's dash actions catch gs lines while guessing the word, and its class holds ip_secret_word.;
+#NOP -- A reply caught that way never reaches the actions here, so stop waiting for it;
+#alias {.circle_tracker_round}
+{
+    #if {&{ip_secret_word}}
+    {
+        #ungag {^ | %*};
+        #ungag {^$};
+        #var circle_live {};
+        #return;
+    };
+    #if {&circle_live[queue][] > 0}
+    {
+        #return;
+    };
+    #NOP -- The strategy heartbeat can start invoke prime later in this same tick, so wait until the;
+    #NOP -- tick is over to send, or the reply lands in the middle of it;
+    #delay {circle_tracker_send}
+    {
+        #if {&{ip_secret_word} == 0 && &circle_live[queue][] == 0 && "$guild" == "necromancer" && "$toggles[circle_tracker]" == "1"}
+        {
+            .circle_queue t;
+            #NOP -- The MUD sends a blank line ahead of the screen;
+            #gag {^$};
+            #send {gs};
+        };
+    }
+    {0};
+};
+
+#NOP -- Corner characters change randomly each time, so %. stands in for them. The dashes change with;
+#NOP -- the length of the name and title. Only this line has <*>, and priority 8 tries it before the end line;
+#action {^(%.>%*<*> %* <*>%*<%.)%s$}
+{
+    #if {&circle_live[queue][] == 0}
+    {
+        #return;
+    };
+    #if {"$circle_live[queue][1]" == "t"}
+    {
+        #var circle_live[inside] 1;
+        #var circle_live[pct] {};
+        #var circle_live[circle] {};
+        #var circle_live[comtrance] {};
+        #var circle_tracker[misses] 0;
+        #line gag;
+        #ungag {^$};
+        #gag {^ | %*};
+    };
+    #list {circle_live[queue]} {delete} {1};
+} {8};
+
+#action {^ |  All Circles:[%s%d/%d]%*$}
+{
+    #if {$circle_live[inside]}
+    {
+        #var circle_live[circle] {%2};
+    };
+} {9};
+
+#action {^ |  Next Circle:[%s%d.%d]%*$}
+{
+    #if {$circle_live[inside]}
+    {
+        #var circle_live[pct] {%2.%3};
+    };
+} {9};
+
+#action {^ | Comtrance:%w{ |,}%*$}
+{
+    #if {$circle_live[inside]}
+    {
+        #var circle_live[comtrance] {%1};
+    };
+} {9};
+
+#action {^(%.>-=%*<%.)%s$}
+{
+    #if {$circle_live[inside]}
+    {
+        #var circle_live[inside] 0;
+        #line gag;
+        #ungag {^ | %*};
+        .circle_tracker_sample;
+    };
+} {9};
+
+#NOP -- %1 power name. Called from actions.tin. Marks it active for this stretch and the next 2 rounds,;
+#NOP -- in case its gxp shows up late. Extra rounds don't skew it since their normal gain gets subtracted;
+#NOP -- Bloodarc lasts 5 rounds (10-12s in the logs). Its end message ends it, 8 is if that message is missed;
+#NOP -- A power can arrive by two routes at once, so one round only counts as one cast;
+#alias {.circle_power}
+{
+    #if {"$toggles[circle_tracker]" != "1" || "$circle_tracker_skip[%1]" == "1"}
+    {
+        #return;
+    };
+    #if {"$circle_tracker[attacks][%1][last]" != "$mip[round]"}
+    {
+        #var circle_tracker[attacks][%1][last] {$mip[round]};
+        #math circle_tracker[attacks][%1][casts] {$circle_tracker[attacks][%1][casts] + 1};
+    };
+    #local rounds_on {2};
+    #if {"%1" == "bloodarc"}
+    {
+        #var rounds_on {8};
+    };
+    #math circle_tracker[active][%1] {$mip[round] + $rounds_on};
+};
+
+#NOP -- %1 power name. Called from .bloodarcEnd. The stretch it ended in still counts;
+#alias {.circle_power_end}
+{
+    #if {&circle_tracker[active][%1]}
+    {
+        #var circle_tracker[active][%1] {$mip[round]};
+    };
+};
+
+#NOP -- Same message however a power was cast, and nothing else uses this line;
+#action {You have %d memorization{s|} of %* left %w.$}
+{
+    .circle_power {%3};
+} {9};
+
+#NOP -- The stretch since the last sample belongs to whatever was in use during it;
+#alias {.circle_tracker_mode}
+{
+    #var circle_tracker[mode] {$circle_tracker[comtrance]};
+    #if {"$circle_tracker[mode]" == "" || "$circle_tracker[mode]" == "not"}
+    {
+        #var circle_tracker[mode] {none};
+    };
+};
+
+#NOP -- Invoke prime's lines are ips.tin's and iprime_tracker's, so read the counts they keep;
+#alias {.circle_tracker_iprime}
+{
+    #local casts {};
+    #math casts {$iprime_tracker[success] + $iprime_tracker[fail]};
+    #if {"$casts" != "$circle_tracker[iprime_casts]" && "$circle_tracker[iprime_casts]" != ""}
+    {
+        .circle_power {invoke prime};
+    };
+    #var circle_tracker[iprime_casts] {$casts};
+};
+
+#NOP -- %1 is 1 on a new fight, which ends everything. Others end once their last round was counted;
+#alias {.circle_tracker_expire}
+{
+    #foreach {*circle_tracker[active][]} {circle_power_name}
+    {
+        #if {%1 || $mip[round] >= $circle_tracker[active][$circle_power_name]}
+        {
+            #unvar circle_tracker[active][$circle_power_name];
+        };
+    };
+};
+
+#alias {.circle_tracker_sample}
+{
+    #if {"$circle_live[pct]" == ""}
+    {
+        .circle_tracker_no_percent;
+        #return;
+    };
+
+    #local rounds {};
+    #local new_fight {0};
+    #math rounds {$mip[round] - $circle_tracker[last_round]};
+    #NOP -- A lower round number means a new fight;
+    #if {$rounds < 1}
+    {
+        #var rounds {$mip[round]};
+        #var new_fight {1};
+    };
+    #var circle_tracker[last_round] {$mip[round]};
+
+    #if {"$circle_tracker[pct]" != ""}
+    {
+        .circle_tracker_iprime;
+        .circle_tracker_mode;
+        .circle_tracker_add {$rounds} {$circle_live[pct]};
+    };
+
+    .circle_tracker_iprime;
+    .circle_tracker_expire {$new_fight};
+    #var circle_tracker[pct] {$circle_live[pct]};
+    #var circle_tracker[circle] {$circle_live[circle]};
+    #var circle_tracker[comtrance] {$circle_live[comtrance]};
+    .circle_tracker_hpbar;
+};
+
+#NOP -- %1 rounds, %2 new percent. Percent can pass 100 until you meditate, so only a new circle or;
+#NOP -- a drop (meditate or death) ends a stretch. Those jumps are not gxp earned, so skip them;
+#alias {.circle_tracker_add}
+{
+    #local gain {};
+    #math gain {%2 - $circle_tracker[pct]};
+    #if {$gain < 0 || "$circle_live[circle]" != "$circle_tracker[circle]"}
+    {
+        #math circle_tracker[rebased] {$circle_tracker[rebased] + 1};
+        #return;
+    };
+    #local mode {$circle_tracker[mode]};
+    #math circle_tracker[gain] {$circle_tracker[gain] + $gain};
+    #math circle_tracker[rounds] {$circle_tracker[rounds] + %1};
+    #math circle_tracker[modes][$mode][gain] {$circle_tracker[modes][$mode][gain] + $gain};
+    #math circle_tracker[modes][$mode][rounds] {$circle_tracker[modes][$mode][rounds] + %1};
+    #local active {&circle_tracker[active][]};
+    #if {$active == 0}
+    {
+        .circle_tracker_attack {no powers} {$mode} {%1} {%1} {$gain};
+        #return;
+    };
+    #local share_gain {};
+    #local share_rounds {};
+    #math share_gain {1.000000 * $gain / $active};
+    #math share_rounds {1.000000 * %1 / $active};
+    #foreach {*circle_tracker[active][]} {circle_power_name}
+    {
+        .circle_tracker_attack {$circle_power_name} {$mode} {%1} {$share_rounds} {$share_gain};
+    };
+};
+
+#NOP -- %1 power, %2 mode, %3 rounds it was active, %4 its share of them, %5 its share of the gain;
+#alias {.circle_tracker_attack}
+{
+    #math circle_tracker[attacks][%1][rounds] {$circle_tracker[attacks][%1][rounds] + %3};
+    #math circle_tracker[attacks][%1][modes][%2][rounds] {$circle_tracker[attacks][%1][modes][%2][rounds] + %4};
+    #math circle_tracker[attacks][%1][modes][%2][gain] {$circle_tracker[attacks][%1][modes][%2][gain] + %5};
+};
+
+#NOP -- %1 gain, %2 rounds. Sets circle_rate to percent per 100 rounds;
+#alias {.circle_tracker_rate}
+{
+    #var circle_rate {0.000};
+    #if {%2 > 0}
+    {
+        #math circle_rate {100.000 * %1 / %2};
+    };
+    #format circle_rate {%.3f} {$circle_rate};
+};
+
+#alias {.circle_tracker_hpbar}
+{
+    #local line {<dda>Circle:<bfa>$circle_tracker[pct]%<088>};
+    #foreach {*circle_tracker[modes][]} {circle_mode}
+    {
+        #if {"$circle_mode" != "none"}
+        {
+            .circle_tracker_rate {$circle_tracker[modes][$circle_mode][gain]} {$circle_tracker[modes][$circle_mode][rounds]};
+            #cat line { <dda>$circle_mode:<bfa>$circle_rate<dda>/100rds};
+        };
+    };
+    #local hourly {};
+    .circle_tracker_rate {$circle_tracker[gain]} {$circle_tracker[rounds]};
+    #math hourly {$circle_rate * 18};
+    #format hourly {%.2f} {$hourly};
+    #cat line { <dda>avg:<bfa>$circle_rate<dda>/100rds <dda>hr:<bfa>$hourly%};
+    #var circle_tracker[hpbar] {$line<088>};
+};
+
+#alias {.circle_tracker_no_percent}
+{
+    #var toggles[circle_tracker] 0;
+    #NOP -- Delayed because #line gag on the screen's last line would swallow a #showme here;
+    #delay {0}
+    {
+        #showme {<faa>Circle tracker: gs shows no Next Circle percentage (tier I and up), turning it off<088>};
+        .circle_tracker_toggled;
+    };
+};
+
+#NOP -- Called by the toggle alias. A new baseline keeps time spent off out of the rates;
+#NOP -- Adding or removing an hpbar line changes the screen split, so it needs a full redraw;
+#alias {.circle_tracker_toggled}
+{
+    #var circle_tracker[pct] {};
+    #unvar circle_tracker[active];
+    #var circle_tracker[misses] 0;
+    #var circle_tracker[hpbar] {<dda>Circle:<088> waiting for combat};
+    _guild_miphp;
+    #if {$draw[initiated]}
+    {
+        init_screen;
+    };
+};
+
+#alias {circle_tracker}
+{
+    #if {"%1" == "reset"}
+    {
+        #var circle_tracker[gain] 0;
+        #var circle_tracker[rounds] 0;
+        #var circle_tracker[rebased] 0;
+        #var circle_tracker[pct] {};
+        #unvar circle_tracker[modes];
+        #unvar circle_tracker[attacks];
+        #unvar circle_tracker[active];
+        #var circle_tracker[hpbar] {<dda>Circle:<088> waiting for combat};
+        #showme {<bfc>Circle tracker reset<088>};
+        #return;
+    };
+
+    #local state {<faa>off<088>};
+    #if {"$toggles[circle_tracker]" == "1"}
+    {
+        #local state {<afa>on<088>};
+    };
+    #showme {<bfc>Circle tracker:<088> $state  (toggle circle_tracker, circle_tracker reset)};
+    #if {"$circle_tracker[pct]" != ""}
+    {
+        #showme {  Circle $circle_tracker[circle]  Next Circle: $circle_tracker[pct]%};
+    };
+    #if {$circle_tracker[rounds] == 0}
+    {
+        #showme {  No rounds tracked yet};
+        #return;
+    };
+
+    #local row {};
+    #format row {  %-16s%+8s%+10s%+13s%+10s} {Mode} {Rounds} {Gain %} {% /100 rds} {% /hour};
+    #showme {<fdc>$row<088>};
+    #foreach {*circle_tracker[modes][]} {circle_mode}
+    {
+        .circle_tracker_row {$circle_mode} {$circle_tracker[modes][$circle_mode][gain]} {$circle_tracker[modes][$circle_mode][rounds]};
+    };
+    .circle_tracker_row {total} {$circle_tracker[gain]} {$circle_tracker[rounds]};
+    .circle_tracker_powers;
+    #if {$circle_tracker[rebased] > 0}
+    {
+        #showme {  Skipped $circle_tracker[rebased] drops (new circle or death)};
+    };
+    #showme {  gs shows 2 decimals, so short samples are rough. /hour is 1800 rounds of combat};
+};
+
+#NOP -- Each power's gain minus what its rounds earn with no power in the same mode;
+#alias {.circle_tracker_powers}
+{
+    #local base_hourly {0};
+    #local base_gain {0};
+    #local base_rounds {0};
+    #foreach {*circle_tracker[attacks][no powers][modes][]} {circle_mode}
+    {
+        #math base_gain {$base_gain + $circle_tracker[attacks][no powers][modes][$circle_mode][gain]};
+        #math base_rounds {$base_rounds + $circle_tracker[attacks][no powers][modes][$circle_mode][rounds]};
+    };
+    #var circle_base_all {0};
+    #if {$base_rounds > 0}
+    {
+        #math circle_base_all {1.000000 * $base_gain / $base_rounds};
+    };
+    #local row {};
+    #format row {  %-16s%+8s%+8s%+10s%+10s%+10s} {Power} {Casts} {Rounds} {Extra %} {% /cast} {% /hour};
+    #showme {<fdc>$row<088>};
+    #math base_hourly {$circle_base_all * 1800};
+    #format base_hourly {%.2f} {$base_hourly};
+    #format row {  %-16s%+8s%+8s%+10s%+10s%+10s} {no powers} {-} {$base_rounds} {-} {-} {$base_hourly};
+    #showme {$row};
+    #foreach {*circle_tracker[attacks][]} {circle_power_name}
+    {
+        #if {"$circle_power_name" != "no powers"}
+        {
+            .circle_tracker_power_row {$circle_power_name};
+        };
+    };
+    #showme {  Extra %: what the power earned on top of your normal gain};
+    #showme {  % /hour: how much of your hourly rate came from it. These rows add up to total};
+};
+
+#NOP -- %1 power;
+#alias {.circle_tracker_power_row}
+{
+    #local extra {0};
+    #local base {};
+    #local per_cast {0};
+    #local hourly {};
+    #local row {};
+    #foreach {*circle_tracker[attacks][%1][modes][]} {circle_mode}
+    {
+        #var base {$circle_base_all};
+        #if {$circle_tracker[attacks][no powers][modes][$circle_mode][rounds] > 0}
+        {
+            #math base {1.000000 * $circle_tracker[attacks][no powers][modes][$circle_mode][gain] / $circle_tracker[attacks][no powers][modes][$circle_mode][rounds]};
+        };
+        #math extra {$extra + $circle_tracker[attacks][%1][modes][$circle_mode][gain] - $base * $circle_tracker[attacks][%1][modes][$circle_mode][rounds]};
+    };
+    #if {$circle_tracker[attacks][%1][casts] > 0}
+    {
+        #math per_cast {1.000000 * $extra / $circle_tracker[attacks][%1][casts]};
+    };
+    #math hourly {100.000000 * $extra / $circle_tracker[rounds] * 18};
+    #format extra {%.2f} {$extra};
+    #format per_cast {%.3f} {$per_cast};
+    #format hourly {%.2f} {$hourly};
+    #format row {  %-16s%+8s%+8s%+10s%+10s%+10s} {%1} {$circle_tracker[attacks][%1][casts]} {$circle_tracker[attacks][%1][rounds]} {$extra} {$per_cast} {$hourly};
+    #showme {$row};
+};
+
+#NOP -- %1 name, %2 gain, %3 rounds;
+#alias {.circle_tracker_row}
+{
+    #local gain {};
+    #local hourly {};
+    #local row {};
+    .circle_tracker_rate {%2} {%3};
+    #math hourly {$circle_rate * 18};
+    #format gain {%.2f} {%2};
+    #format hourly {%.2f} {$hourly};
+    #format row {  %-16s%+8s%+10s%+13s%+10s} {%1} {%3} {$gain} {$circle_rate} {$hourly};
+    #showme {$row};
+};
+
+#class {circle_tracker} {close}

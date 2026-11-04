@@ -2,42 +2,57 @@
 #class {common_toggles} {open};
 
 #NOP -- Generic toggle switch;
+#var toggleResetPending 0;
+#NOP -- The defaults, before a player changes anything. Login fills in what's missing, toggle-reset goes back to them;
+#var toggleDefaults {
+    {3kreport} {1}
+    {artifacts} {0}
+    {chatlog_says} {1}
+    {corpse_echo} {0}
+    {cult} {0}
+    {discord_post} {0}
+    {dog_care} {0}
+    {emote_corpse} {1}
+    {emote_dungeon_clear} {1}
+    {emote_eheal} {1}
+    {emote_follow} {1}
+    {emote_heal} {1}
+    {emote_rally} {1}
+    {farsight_ctell} {0}
+    {farsight_notify} {0}
+    {fracture_ctell} {0}
+    {fracture_notify} {0}
+    {go_echo} {1}
+    {map_follow} {1}
+    {map_vnum} {0}
+    {mission} {0}
+    {portal_ctell} {0}
+    {portal_notify} {0}
+    {teleport} {1}
+    {worlddrops} {0}
+    {worlddrops2} {0}
+    {worlddrops_notify} {1}
+};
+
+#NOP -- Same, but only for that guild;
+#var toggleDefaultsGuild {
+    {necromancer} {
+        {circle_tracker} {0}
+        {emote_aid} {1}
+        {recover_parser_off} {0}
+    }
+};
+
 #delay 6 {
-    #if {"${toggles[mission]}" == ""} {#var toggles[mission] 0};
-    #if {"${toggles[3kreport]}" == ""} {#var toggles[3kreport] 1};
-    #if {"${toggles[worlddrops]}" == ""} {#var toggles[worlddrops] 0};
-    #if {"${toggles[worlddrops2]}" == ""} {#var toggles[worlddrops2] 0};
-    #if {"${toggles[worlddrops_notify]}" == ""} {#var toggles[worlddrops_notify] 1};
-    #if {"${toggles[artifacts]}" == ""} {#var toggles[artifacts] 0};
-    #if {"${toggles[chatlog_says]}" == ""} {#var toggles[chatlog_says] 1};
-    #if {"${toggles[cult]}" == ""} {#var toggles[cult] 0};
-    #if {"${toggles[corpse_echo]}" == ""} {#var toggles[corpse_echo] 0};
-    #if {"${toggles[emote_follow]}" == ""} {#var toggles[emote_follow] 1};
-    #if {"${toggles[emote_heal]}" == ""} {#var toggles[emote_heal] 1};
-    #if {"${toggles[emote_eheal]}" == ""} {#var toggles[emote_eheal] 1};
-    #if {"${toggles[emote_rally]}" == ""} {#var toggles[emote_rally] 1};
-    #if {"${toggles[emote_corpse]}" == ""} {#var toggles[emote_corpse] 1};
-    #if {"${toggles[emote_dungeon_clear]}" == ""} {#var toggles[emote_dungeon_clear] 1};
-    #if {"${toggles[farsight_notify]}" == ""} {#var toggles[farsight_notify] 0};
-    #if {"${toggles[farsight_ctell]}" == ""} {#var toggles[farsight_ctell] 0};
-    #if {"${toggles[teleport]}" == ""} {#var toggles[teleport] 1};
-    #if {"${toggles[map_vnum]}" == ""} {#var toggles[map_vnum] 0};
-    #if {"${toggles[portal_notify]}" == ""} {#var toggles[portal_notify] 0};
-    #if {"${toggles[fracture_notify]}" == ""} {#var toggles[fracture_notify] 0};
-    #if {"${toggles[portal_ctell]}" == ""} {#var toggles[portal_ctell] 0};
-    #if {"${toggles[fracture_ctell]}" == ""} {#var toggles[fracture_ctell] 0};
+    #foreach *toggleDefaults[] toggleKey {
+        #if {"$toggles[$toggleKey]" == ""} {#var toggles[$toggleKey] $toggleDefaults[$toggleKey]};
+    };
+    #foreach *toggleDefaultsGuild[$guild][] toggleKey {
+        #if {"$toggles[$toggleKey]" == ""} {#var toggles[$toggleKey] $toggleDefaultsGuild[$guild][$toggleKey]};
+    };
     #NOP -- bothportals_notify/bothportals_ctell were removed, drop them from saved toggles;
     #unvar toggles[bothportals_notify];
     #unvar toggles[bothportals_ctell];
-
-    #if {"$guild" == "necromancer"} {
-        #if {"${toggles[emote_aid]}" == ""} {#var toggles[emote_aid] 1};
-    };
-
-    #if {"${toggles[go_echo]}" == ""} {#var toggles[go_echo] 1};
-    #if {"${toggles[map_follow]}" == ""} {#var toggles[map_follow] 1};
-    #if {"${toggles[discord_post]}" == ""} {#var toggles[discord_post] 0};
-    #if {"${toggles[dog_care]}" == ""} {#var toggles[dog_care] 0};
     #var discordPost $toggles[discord_post];
 };
 
@@ -47,6 +62,7 @@
     {artifacts} {Grabs guild artifacts off the floor (not in Pinnacle) and puts them in your chat window and Discord}
     {3kreport} {Eternals: checks (cstats after a kill for the kill report}
     {chatlog_says} {Puts people's says in your chat log}
+    {circle_tracker} {Necros: sends gs (hidden) each combat round and adds a Next Circle % line to the hpbar. Details with circle_tracker. Won't work at tier I and above}
     {corpse_echo} {Tells you when a corpse comes out of your bag, coffin or freezer}
     {cult} {Jumps into the next cult game by itself}
     {discord_post} {Sends your chat over to Discord}
@@ -69,6 +85,7 @@
     {mission} {Asks for a mission when you find a mission giver}
     {portal_ctell} {Zodiacs: portal_notify, and ctells your clan too}
     {portal_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a portal (tome) hour}
+    {recover_parser_off} {Necros: recover also sends parser off}
     {sessionlog} {Saves everything you see to a log file, one per day}
     {teleport} {Pulls the rope when someone offers you a teleport}
     {worlddrops} {Pauses the bot when a world drop shows up}
@@ -102,11 +119,7 @@
                     #var toggles[$toggle_var] 1;
                     #echo {<cfb>   -----  $toggle_var has been turned on -----<088>};
                 };
-                #if {"$toggle_var" == "discord_post"} {#var discordPost $toggles[discord_post]};
-                #if {"$toggle_var" == "map_vnum"} {init_map};
-                #if {"$toggle_var" == "sessionlog"} {#if $toggles[sessionlog] {.sessionlog_start} {sessionlog off}};
-                #if {"$toggle_var" == "worlddrops2"} {.worlddrops2_watch};
-                #if {"$toggle_var" == "artifacts"} {.artifacts_watch};
+                .toggleChanged {$toggle_var};
             };
         } {
             #send {!toggle $toggle_var};
@@ -114,9 +127,93 @@
     };
 };
 
+#NOP -- .toggleChanged <toggle>: anything that has to happen when this toggle changes;
+#alias {.toggleChanged} {
+    #if {"%1" == "discord_post"} {#var discordPost $toggles[discord_post]};
+    #if {"%1" == "map_vnum"} {init_map};
+    #if {"%1" == "sessionlog"} {#if $toggles[sessionlog] {.sessionlog_start} {sessionlog off}};
+    #if {"%1" == "worlddrops2"} {.worlddrops2_watch};
+    #if {"%1" == "artifacts"} {.artifacts_watch};
+    #if {"%1" == "circle_tracker" && "$guild" == "necromancer"} {.circle_tracker_toggled};
+};
+
+#NOP -- toggle-reset lists what would change and asks first. toggle-reset confirm does it, within 30 seconds;
+#alias {toggle-reset} {
+    #if {"%1" == "confirm"} {
+        #if {!$toggleResetPending} {
+            #echo {<faa>   -----  Nothing to confirm. Type toggle-reset first  -----<088>};
+            #return;
+        };
+        #var toggleResetPending 0;
+        #undelay {toggleResetTimeout};
+        #var toggleResetApply 1;
+        .toggleResetWalk;
+        #echo {<cfb>   -----  $toggleResetCount toggle(s) set back to default  -----<088>};
+        #return;
+    };
+    #var toggleResetApply 0;
+    .toggleResetWalk;
+    #if {$toggleResetCount == 0} {
+        #var toggleResetPending 0;
+        #undelay {toggleResetTimeout};
+        #echo {<cfb>   -----  All toggles are already at their defaults  -----<088>};
+        #return;
+    };
+    #var toggleResetPending 1;
+    #echo {<ffa>   -----  Type <eaf>toggle-reset confirm<ffa> within 30 seconds to change these $toggleResetCount toggle(s)  -----<088>};
+    #delay {toggleResetTimeout} {
+        #var toggleResetPending 0;
+        #echo {<faa>   -----  toggle-reset cancelled, nothing changed  -----<088>};
+    } {30};
+};
+
+#NOP -- Goes through every toggle. Another guild's toggles only count if they're there. The fremen flags are;
+#NOP -- left alone, the bot flips those. sessionlog's default lives in modules/sessionlog/sessionlog.tin;
+#alias {.toggleResetWalk} {
+    #var toggleResetCount 0;
+    #foreach *toggleDefaults[] toggleKey {
+        .toggleResetOne {$toggleKey} {$toggleDefaults[$toggleKey]};
+    };
+    #foreach *toggleDefaultsGuild[] toggleGuild {
+        #foreach *toggleDefaultsGuild[$toggleGuild][] toggleKey {
+            #if {"$toggleGuild" == "$guild" || "$toggles[$toggleKey]" != ""} {
+                .toggleResetOne {$toggleKey} {$toggleDefaultsGuild[$toggleGuild][$toggleKey]};
+            };
+        };
+    };
+    #if {"$toggles[sessionlog]" != ""} {
+        .toggleResetOne {sessionlog} {$sessionlog[enabled]};
+    };
+};
+
+#NOP -- .toggleResetOne <toggle> <default>: toggleResetApply 0 only says what would change;
+#alias {.toggleResetOne} {
+    #if {"$toggles[%1]" != "%2"} {
+        #math toggleResetCount {$toggleResetCount + 1};
+        #if {!$toggleResetApply} {
+            #if {%2} {
+                #echo {<fff>   %1 would turn on<088>};
+            } {
+                #echo {<fff>   %1 would turn off<088>};
+            };
+        } {
+            #var toggles[%1] %2;
+            #if {%2} {
+                #echo {<cfb>   -----  %1 has been turned on -----<088>};
+            } {
+                #echo {<faa>   -----  %1 has been turned off -----<088>};
+            };
+            .toggleChanged {%1};
+        };
+    };
+};
+
+#NOP -- toggle-list <word>: on or off lists by status, anything else matches part of a name or description;
 #alias {toggle-list} {
+    #format tmpFilter {%l} {%0};
+    #format tmpFilter {%p} {$tmpFilter};
+    #var tmpShown 0;
     #echo {<cfb>   ---++---       3kdb Current Toggle Status      ---++---<088>};
-    #echo {<fff>       Usage: toggle <toggle alias> <088>};
     #format tmpLine {        %-21s%-8s%s} {Toggle Alias} {Status} {What it does};
     #echo {<fdc>$tmpLine<088>};
     #NOP -- Descriptions start at column 37 and wrap at the edge of the output area (not under the map), so a long one stays in its column;
@@ -129,16 +226,50 @@
     #if {$tmpDescWidth < 20} {#var tmpDescWidth 20};
     #format tmpDescPad {%+37s} {};
     #foreach *toggles[] item {
-        #if {$toggles[$item]} {
-            #format tmpLine {        %-21s%-8s} {$item} {on};
-            #var tmpLine {<dfc>$tmpLine};
-        } {
-            #format tmpLine {        %-21s%-8s} {$item} {off};
-            #var tmpLine {<fbb>$tmpLine};
+        .toggleListMatch {$item};
+        #if {$tmpMatch} {
+            #math tmpShown {$tmpShown + 1};
+            #if {$toggles[$item]} {
+                #format tmpLine {        %-21s%-8s} {$item} {on};
+                #var tmpLine {<dfc>$tmpLine};
+            } {
+                #format tmpLine {        %-21s%-8s} {$item} {off};
+                #var tmpLine {<fbb>$tmpLine};
+            };
+            .toggleListDesc {$toggleDesc[$item]};
         };
-        .toggleListDesc {$toggleDesc[$item]};
+    };
+    #if {$tmpShown == 0} {
+        #echo {<faa>        No toggles match '$tmpFilter'<088>};
     };
     #echo {<cfb>   ---++---        ---++---        ---++---       ---++---<088>};
+    #echo {<fff>       Usage: toggle <toggle alias> <088>};
+    #echo {<cfc>       Filter: toggle-list <word><088>};
+    #echo {<cfc>       Part of a name or description: <eaf>toggle-list notify<cfc>, <eaf>toggle-list necro<088>};
+    #echo {<cfc>       By status: <eaf>toggle-list on<cfc>, <eaf>toggle-list off<088>};
+    #echo {<cfc>       Back to defaults: <eaf>toggle-reset<cfc> sets every toggle back to how it started (asks first)<088>};
+};
+
+#NOP -- .toggleListMatch <toggle>: set tmpMatch to 1 if the toggle passes tmpFilter;
+#alias {.toggleListMatch} {
+    #var tmpMatch 0;
+    #if {"$tmpFilter" == ""} {
+        #var tmpMatch 1;
+    };
+    #elseif {"$tmpFilter" == "on"} {
+        #var tmpMatch $toggles[%1];
+    };
+    #elseif {"$tmpFilter" == "off"} {
+        #if {!$toggles[%1]} {
+            #var tmpMatch 1;
+        };
+    };
+    #else {
+        #format tmpMatchText {%l} {%1 $toggleDesc[%1]};
+        #regex {$tmpMatchText} {$tmpFilter} {
+            #var tmpMatch 1;
+        };
+    };
 };
 
 #NOP -- .toggleListDesc <text>: echo tmpLine with the text after it, word-wrapped to tmpDescWidth. Wrapped lines start with tmpDescPad;
