@@ -7,8 +7,14 @@
             #if {"$my[necromancer][protection]" == "OFF"} {protection};
         };
         #if {"$toggles[circle_tracker]" == "1" && "$incombat" == "1"} {
+            #var circle_tracker[fought] 1;
             .circle_tracker_round;
         };
+    };
+    #NOP -- One more circle sample once a fight ends, or the kill's gxp stays off the hpbar until the next fight;
+    #if {!$idle_flag && "$toggles[circle_tracker]" == "1" && "$incombat" != "1" && "$circle_tracker[fought]" == "1"} {
+        #var circle_tracker[fought] 0;
+        .circle_tracker_round;
     };
 };
 

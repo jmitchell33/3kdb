@@ -3,6 +3,7 @@
 #NOP -- tracker turns itself off with a message the first time it sees a gs like that in combat;
 #NOP -- 'toggle circle_tracker' turns it on or off (off by default) and adds a line to the hpbar;
 #NOP -- 'circle_tracker' shows the details, 'circle_tracker reset' clears them. So does recover;
+#NOP -- Every gs reply counts as a sample, hidden or typed, so the hpbar always matches the last gs seen;
 #NOP -- Each stretch between two samples counts as the first word of Comtrance on gs, or none.;
 #NOP -- Attack messages differ per player and form;
 #NOP -- so they are not used. Only the lines read below need to match, the rest of gs can differ;
@@ -110,12 +111,26 @@
     };
 };
 
+#NOP -- 1 while ips.tin's class is loaded. Checks the class itself, because a leftover variable can outlive it;
+#function {fnCircleIpLoaded}
+{
+    #info classes save;
+    #foreach {*info[CLASSES][]} {circle_class_index}
+    {
+        #if {"$info[CLASSES][$circle_class_index][arg1]" == "invoke_prime"}
+        {
+            #return 1;
+        };
+    };
+    #return 0;
+};
+
 #NOP -- Called once per round from _guild_heartbeat. Skips if the last reply is still out;
-#NOP -- ips.tin's dash actions catch gs lines while guessing the word, and its class holds ip_secret_word.;
+#NOP -- ips.tin's dash actions catch gs lines while guessing the word;
 #NOP -- A reply caught that way never reaches the actions here, so stop waiting for it;
 #alias {.circle_tracker_round}
 {
-    #if {&{ip_secret_word}}
+    #if {@fnCircleIpLoaded{}}
     {
         #ungag {^ | %*};
         #ungag {^$};
@@ -130,12 +145,16 @@
     #NOP -- tick is over to send, or the reply lands in the middle of it;
     #delay {circle_tracker_send}
     {
-        #if {&{ip_secret_word} == 0 && &circle_live[queue][] == 0 && "$guild" == "necromancer" && "$toggles[circle_tracker]" == "1"}
+        #NOP -- Guild first, since a guild swap kills this class and its function with it;
+        #if {"$guild" == "necromancer" && "$toggles[circle_tracker]" == "1" && &circle_live[queue][] == 0}
         {
-            .circle_queue t;
-            #NOP -- The MUD sends a blank line ahead of the screen;
-            #gag {^$};
-            #send {gs};
+            #if {@fnCircleIpLoaded{} == 0}
+            {
+                .circle_queue t;
+                #NOP -- The MUD sends a blank line ahead of the screen;
+                #gag {^$};
+                #send {gs};
+            };
         };
     }
     {0};
@@ -145,22 +164,37 @@
 #NOP -- the length of the name and title. Only this line has <*>, and priority 8 tries it before the end line;
 #action {^(%.>%*<*> %* <*>%*<%.)%s$}
 {
-    #if {&circle_live[queue][] == 0}
+    #local hide {0};
+    #if {"$circle_live[queue][1]" == "t"}
+    {
+        #local hide {1};
+    };
+    #if {&circle_live[queue][] > 0}
+    {
+        #list {circle_live[queue]} {delete} {1};
+    };
+    #if {$hide == 0 && "$toggles[circle_tracker]" != "1"}
     {
         #return;
     };
-    #if {"$circle_live[queue][1]" == "t"}
+    #var circle_live[inside] 1;
+    #var circle_live[pct] {};
+    #var circle_live[circle] {};
+    #var circle_live[comtrance] {};
+    #if {$hide}
     {
-        #var circle_live[inside] 1;
-        #var circle_live[pct] {};
-        #var circle_live[circle] {};
-        #var circle_live[comtrance] {};
+        #var circle_live[hidden] 1;
         #var circle_tracker[misses] 0;
         #line gag;
         #ungag {^$};
         #gag {^ | %*};
     };
-    #list {circle_live[queue]} {delete} {1};
+    #elseif {"$circle_live[hidden]" == "1"}
+    {
+        #NOP -- A hidden reply that never finished must not hide this one;
+        #var circle_live[hidden] 0;
+        #ungag {^ | %*};
+    };
 } {8};
 
 #action {^ |  All Circles:[%s%d/%d]%*$}
@@ -192,8 +226,12 @@
     #if {$circle_live[inside]}
     {
         #var circle_live[inside] 0;
-        #line gag;
-        #ungag {^ | %*};
+        #if {"$circle_live[hidden]" == "1"}
+        {
+            #var circle_live[hidden] 0;
+            #line gag;
+            #ungag {^ | %*};
+        };
         .circle_tracker_sample;
     };
 } {9};
@@ -274,15 +312,19 @@
 {
     #if {"$circle_live[pct]" == ""}
     {
-        .circle_tracker_no_percent;
+        #NOP -- ips.tin's dash actions ate the line, which says nothing about this player's gs;
+        #if {@fnCircleIpLoaded{} == 0}
+        {
+            .circle_tracker_no_percent;
+        };
         #return;
     };
 
     #local rounds {};
     #local new_fight {0};
     #math rounds {$mip[round] - $circle_tracker[last_round]};
-    #NOP -- A lower round number means a new fight;
-    #if {$rounds < 1}
+    #NOP -- A lower round number means a new fight. The same number is a typed gs in the same round;
+    #if {$rounds < 0}
     {
         #var rounds {$mip[round]};
         #var new_fight {1};
