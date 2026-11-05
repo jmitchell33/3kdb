@@ -1,0 +1,22 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {Rabbit Fields};
+#var check_room 0;
+
+#var bot_message_1 '---- RABBIT HOLE (CAE) STEPPER ----';
+#var bot_message_2 '----  rabbits and Ganderei Cae   ----';
+#echo $bot_message_1;#echo $bot_message_2;
+
+#var {bot[path]} {d;s;w;n;sw;sw;ne;nw;se;w;w;w;w;d;n;s;u;e;e;e;e;ne;s;e;n;u};
+
+#list botmobs clear;
+#list botmobs add {{{long} {Vicious Rabbit} {target} {rabbit}}};
+#list botmobs add {{{long} {King of All Rabbits} {target} {king}}};
+#list botmobs add {{{long} {Ganderei Cae, the Evil Alchemist} {target} {cae}}};
+
+#act {^-i-Dark Black Potion with Yellow Floaties%*} {get-floaties} {1};
+#act {^-i-Sphere of Annihilation%*} {get sphere of annihilation} {1};
+
+#class {bot} {close}
+#read common/bot/generic.tin;
