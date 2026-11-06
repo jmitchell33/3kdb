@@ -271,15 +271,27 @@ git-save() {
   git push
 }
 
-# git-keep-vars <command...>: run a git command with changed vars.tin files moved out of the way,
-# then put them back. Example: git-keep-vars git checkout sandbox9
-# A running game keeps rewriting chars/<you>/vars.tin, and that would otherwise
-# stop git from switching branches. If the game saves mid-command, it tries again.
+# git-keep-vars <command...>: run a git command and keep your newest vars.tin files, moving them
+# out of the way and then putting them back. Example: git-keep-vars git checkout sandbox9
+# A running game keeps rewriting chars/<you>/vars.tin, and that would otherwise stop git from
+# switching branches. If the game saves mid-command, it tries again.
+# Also keeps the vars.tin of each character on your start menu when it's already committed, so a
+# branch with an older copy can't replace it. Other players' files are left alone.
 git-keep-vars() {
-  local top backup tries=1 result
+  local top backup tries=1 result file rel name kept=0 failed=0
   top=$(git rev-parse --show-toplevel) || return
   mkdir -p "$HOME/3kdb-temp" || return
   backup=$(mktemp -d "$HOME/3kdb-temp/vars-backup.XXXXXX") || return
+  if [ -f "$top/chars/startmenu_data.tin" ]; then
+    sed -n '/#VARIABLE {menu_chars}/,/^}/s/.*{[0-9]*} {\([a-z]*\)}.*/\1/p' \
+      "$top/chars/startmenu_data.tin" | while IFS= read -r name; do
+      file="chars/$name/vars.tin"
+      [ -f "$top/$file" ] || continue
+      git -C "$top" ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
+      mkdir -p "$backup/chars/$name"
+      cp -p "$top/$file" "$backup/$file"
+    done
+  fi
   while :; do
     git -C "$top" diff --name-only HEAD -- '*vars.tin' | while IFS= read -r file; do
       [ -f "$top/$file" ] || continue
@@ -296,14 +308,16 @@ git-keep-vars() {
     tries=$((tries + 1))
     sleep 1
   done
-  if [ -n "$(ls -A "$backup")" ]; then
-    if cp -Rp "$backup/." "$top/"; then
-      echo "git-keep-vars: kept your vars.tin changes."
-    else
-      echo "git-keep-vars: could not put vars.tin back. Your copy is safe in $backup"
-      return 1
-    fi
+  while IFS= read -r file; do
+    rel=${file#"$backup"/}
+    cmp -s "$file" "$top/$rel" && continue
+    mkdir -p "$(dirname "$top/$rel")" && cp -p "$file" "$top/$rel" && kept=1 || failed=1
+  done < <(find "$backup" -type f)
+  if [ "$failed" -eq 1 ]; then
+    echo "git-keep-vars: could not put vars.tin back. Your copy is safe in $backup"
+    return 1
   fi
+  [ "$kept" -eq 1 ] && echo "git-keep-vars: kept your newest vars.tin files."
   rm -rf "$backup"
   return "$result"
 }
@@ -563,7 +577,8 @@ Lists your local branches.
 - If you had unsaved work, it makes a commit named `sync-<date>`. Run `git-save "real message"` first if you want a better name.
 
 **`git-keep-vars <command>`**
-- Runs a git command with your changed `vars.tin` files moved aside, then puts them back. If the game saves during the command, it tries again, up to 5 times.
+- Runs a git command and keeps your newest `vars.tin` files. Changed ones are moved aside and put back. If the game saves during the command, it tries again, up to 5 times.
+- It also keeps the `vars.tin` of each character on your start menu when it's already committed, so a branch with an older copy can't replace it. Other players' files are left alone. If you don't use the menu, this part does nothing.
 - Use it when git complains about a `vars.tin` file while switching branches:
   ```bash
   git-keep-vars git checkout fix-bard
