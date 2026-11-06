@@ -1,8 +1,8 @@
-#NOP -- Arrow-key character menu, read at the end of 3k.tin (or your own launcher).;
+#NOP -- Arrow-key character menu. Start it from the repo folder with: tt++ startmenu.tin;
 #NOP -- Up/down picks a character, left/right picks its guild, Enter logs in. Number keys still log in directly.;
 #NOP -- The button row under the list adds, edits or removes characters. Names, guild arrows and buttons can be clicked.;
 #NOP -- The character list, guild lists and last highlighted character are saved in chars/startmenu_data.tin.;
-#NOP -- The first time it runs, the list is built from $player1, $player2, ... in the launcher.;
+#NOP -- The first time it runs, the list is built from $player1, $player2, ... if those are set.;
 #NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads.;
 #NOP -- Characters left linkdead show how long until the game boots them (see menu_ld_hours below), and the next;
 #NOP -- reboot is shown once a character has logged in. q quits;
@@ -23,8 +23,17 @@ menu_close_classes;
 
 #var menu[file] {chars/startmenu_data.tin};
 
-#NOP -- Load the saved list, or build it from startup.tin the first time;
+#NOP -- Git doesn't keep these folders, so a fresh clone is missing them. Chat logs go to logs/<system user>;
+#NOP -- and the reboot times to vars/boot.tin, and neither can be written without its folder;
+#alias {menu_make_folders}
+{
+    #NOP -- Only from the repo folder, so starting tt++ somewhere else doesn't leave these folders there;
+    #script {menu_tmp} {test -f startmenu.tin && mkdir -p "logs/$(whoami)" vars};
+};
+
+#NOP -- Load the saved list, or build it from $player1, $player2, ... the first time;
 #alias {menu_load} {
+    menu_make_folders;
     #script {menu_tmp} {test -f $menu[file] && echo yes};
     #if {"$menu_tmp[1]" == "yes"} {
         #read $menu[file];
