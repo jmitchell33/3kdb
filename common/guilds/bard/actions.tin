@@ -86,17 +86,21 @@
 #action {You wave your hands around, make swooshing and farting sounds,} {#var mob[noxious-cloud] 1;} {6};
 #action {You clasp your hands together, speak forth magical energies, and draw upon} {#var mob[lightning-vortex] 1;} {6};
 #action {^The noxious cloud fades away.$} {#if !$idle_flag {cast noxious cloud}};
+
 #action {The acid clings to %*} {
     #var mob[critic] 1;
+    #if {&acidrain[]} {.acidrain_landed};
 } {2};
 #action {You drench %* in more acid} {
     #var mob[critic] 1;
+    #if {&acidrain[]} {.acidrain_landed};
 } {2};
 #action {Your acid wash on %* has run dry.} {
     #var mob[critic] 0;
 } {2};
 #action {Your acid wash on %* is renewed.} {
     #var mob[critic] 1;
+    #if {&acidrain[]} {.acidrain_landed};
 } {2};
 #action {Smoke curls up from %* as the acid burns.} {
     #var mob[critic] 1;

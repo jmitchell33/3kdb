@@ -87,7 +87,27 @@
     #format dmgBest {%g} {$cmbt[category][%1][high]};
     #format dmgActive {%d} {$tmpPercent};
     #format dmgSummary {%+12s %+9s %+9s %+9s %+9s} {$dmgName} {$dmgAvg} {$dmgTotal} {$dmgBest} {${dmgActive}%};
-    #echo $dmgSummary;
+    .dmgEchoRow {%2} {$dmgSummary};
+};
+
+#NOP -- Echo a section title, every title starting at the same column. A %2 of gap puts a blank line first;
+#format dmgTitleIndent {%20s} {};
+#alias .dmgEchoTitle {
+    #if {"%2" == "gap"} {
+        #echo {\n<faa>%s%s<088>} {$dmgTitleIndent} {%1};
+    } {
+        #echo {<faa>%s%s<088>} {$dmgTitleIndent} {%1};
+    };
+};
+
+#NOP -- Echo a stats row, green if %1 is high and orange if %1 is low;
+#alias .dmgEchoRow {
+    #NOP -- The row is passed to %s, since #echo reads its first argument as a format and the row ends in a %;
+    #if {"%1" == "high"} {
+        #echo {<afa>%s<088>} {%2};
+    } {
+        #if {"%1" == "low"} {#echo {<fca>%s<088>} {%2}} {#echo {%s} {%2}};
+    };
 };
 
 #alias dmgFormatHits {
@@ -137,6 +157,10 @@
     #var cmbt[crit][total] 0;
     #var ewell_round 0;
     #var fry_round 0;
+    #unvar cmbt[multi];
+    #unvar cmbt[round][cat];
+    #var cmbt[round][mobs] 0;
+    #var cmbt[round][dmg] 0;
 
     #var dmgt[curr] 0;
     #var dmgt[avg] 0;
@@ -283,14 +307,13 @@ dreset;
 
 #alias .dmg_round_convoke {
     #if {$mip[round] == $convoke[first_round]} {
-        dmgTrack convoke_1 $dmgAmount $dmgTimes;
+        .dmgRoundAdd convoke_1;
     };
     #if {$mip[round] == $convoke[second_round]} {
-        dmgTrack convoke_2 $dmgAmount $dmgTimes;
+        .dmgRoundAdd convoke_2;
     };
     #if {$mip[round] == $convoke[third_round]} {
-        dmgTrack convoke_3 $dmgAmount $dmgTimes;
-        #var cmbt[affects][convoke] 0;
+        .dmgRoundAdd convoke_3;
     };
 };
 
@@ -299,8 +322,90 @@ dreset;
     #var ewell_round 1;
 } {2};
 
+#NOP -- Each mob hit in a round gets its own "You hit" line, so a category's damage is added up here;
+#NOP -- and only handed to dmgTrack once the round is over, so a 2 mob round counts as 1 round;
+#alias .dmgRoundAdd {
+    #if {$cmbt[round][cat][%1][dmg] > 0} {
+        #math cmbt[round][cat][%1][dmg] {$cmbt[round][cat][%1][dmg] + $dmgAmount};
+        #math cmbt[round][cat][%1][times] {$cmbt[round][cat][%1][times] + $dmgTimes};
+    } {
+        #var cmbt[round][cat][%1][dmg] $dmgAmount;
+        #var cmbt[round][cat][%1][times] $dmgTimes;
+    };
+};
+
+#NOP -- The round is over once the dmg_round_reset delay fires;
+#alias .dmg_round_flush {
+    .dmgRoundTotalEcho;
+    #foreach *cmbt[round][cat][%*] tmpCat {
+        #format dmgDisplay {%g} {$cmbt[round][cat][$tmpCat][dmg]};
+        dmgTrack $tmpCat $cmbt[round][cat][$tmpCat][dmg] $cmbt[round][cat][$tmpCat][times];
+    };
+    #unvar cmbt[round][cat];
+
+    #if {$cmbt[affects][convoke]} {
+        #if {$mip[round] == $convoke[third_round]} {#var cmbt[affects][convoke] 0};
+    };
+
+    #if {$cmbt[round][mobs] > 0} {
+        #NOP -- An eradication round sends a second set of hit lines, resulted in double tracking rounds;
+        #local tmpMobs $cmbt[round][mobs];
+        #local tmpEradRound 0;
+        #if {$cmbt[affects][eradication] && "$cmbt[last][mobs]" != ""} {
+            #local tmpEradRound 1;
+            #local tmpMobs $cmbt[last][mobs];
+        };
+
+        #if {$cmbt[multi][$tmpMobs][rnd] > 0} {
+            #math cmbt[multi][$tmpMobs][rnd] {$cmbt[multi][$tmpMobs][rnd] + 1};
+            #math cmbt[multi][$tmpMobs][dmg] {$cmbt[multi][$tmpMobs][dmg] + $cmbt[round][dmg]};
+            #if {$cmbt[round][dmg] > $cmbt[multi][$tmpMobs][high]} {
+                #var cmbt[multi][$tmpMobs][high] $cmbt[round][dmg];
+            };
+        } {
+            #var cmbt[multi][$tmpMobs][mobs] $tmpMobs;
+            #var cmbt[multi][$tmpMobs][rnd] 1;
+            #var cmbt[multi][$tmpMobs][dmg] $cmbt[round][dmg];
+            #var cmbt[multi][$tmpMobs][high] $cmbt[round][dmg];
+        };
+
+        #NOP -- Keep the mobs hit last round by keyword, and bump round counter;
+        #if {!$tmpEradRound} {
+            #var cmbt[last][kw] {$cmbt[round][kw]};
+            #var cmbt[last][mobs] $cmbt[round][mobs];
+            #math cmbt[last][kwseq] {$cmbt[last][kwseq] + 1};
+        };
+        #math cmbt[last][seq] {$cmbt[last][seq] + 1};
+    };
+    #unvar cmbt[round][kw];
+    #var cmbt[round][mobs] 0;
+    #var cmbt[round][dmg] 0;
+};
+
+#NOP -- One line under the round's hit lines with the total;
+#alias .dmgRoundTotalEcho {
+    #if {$gags[combat_numbers] || $cmbt[round][mobs] < 2} {#return};
+    #local tmpMobs $cmbt[round][mobs];
+    #if {$cmbt[affects][eradication] && "$cmbt[last][mobs]" != ""} {#local tmpMobs $cmbt[last][mobs]};
+    #format tmpTotalDmg {%g} {$cmbt[round][cat][total][dmg]};
+    #format tmpTotalTimes {%g} {$cmbt[round][cat][total][times]};
+    #echo {<efb>[TOTAL]:<088> You hit $tmpMobs monsters $tmpTotalTimes times for $tmpTotalDmg damage.};
+};
+
+#NOP -- The word you target a mob by;
+#alias .dmgMobKeyword {
+    #unvar dmgMobKw;
+    #unvar dmgMobKwWords;
+    #var dmgMobKwName {%1};
+    #replace dmgMobKwName { \[%*\]%*} {};
+    #replace dmgMobKwName { \(%*\)%*} {};
+    #var dmgMobKw {$dmgMobKwName};
+    #regexp {$dmgMobKwName} {{(\S+)\s*$}} {#format dmgMobKw {%l} {&1}};
+};
+
 #alias .dmg_round_reset {
     #delay {dmg_round_reset} {
+        .dmg_round_flush;
         #var cmbt[affects][shield_bash] 0;
         #var cmbt[affects][witchHat] 0;
         #var cmbt[affects][rune_sword_green_rune] 0;
@@ -395,96 +500,99 @@ dreset;
 
         #if {!$ewell_round} {
             #if $fry_round {
-                dmgTrack Fry $dmgAmount $dmgTimes;
+                .dmgRoundAdd Fry;
             } {
-                dmgTrack total $dmgAmount $dmgTimes;
-
+                .dmgRoundAdd total;
+                #math cmbt[round][dmg] {$cmbt[round][dmg] + $dmgAmount};
+                #math cmbt[round][mobs] {$cmbt[round][mobs] + 1};
+                .dmgMobKeyword {%2};
+                #math cmbt[round][kw][$dmgMobKw] {$cmbt[round][kw][$dmgMobKw] + 1};
                 #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
-                    dmgTrack fury $dmgAmount $dmgTimes;
+                    .dmgRoundAdd fury;
                 };
 
                 #if {"$guild" == "necromancer" && $my[necromancer][glamors][raging]} {
-                    dmgTrack rage $dmgAmount $dmgTimes;
+                    .dmgRoundAdd rage;
                 };
 
                 #NOP -- If it's an iprime or eradication round, pull those out;
                 #if {$cmbt[affects][eradication] || $cmbt[affects][iprime]} {
                     #if {$cmbt[affects][eradication]} {
-                        dmgTrack eradication $dmgAmount $dmgTimes;
+                        .dmgRoundAdd eradication;
                     };
 
                     #if {$cmbt[affects][iprime]} {
-                        dmgTrack iprime $dmgAmount $dmgTimes;
+                        .dmgRoundAdd iprime;
                     };
                 } {
                     #if {$mob[lucanus_ring]} {
-                        dmgTrack lucanus $dmgAmount $dmgTimes;
+                        .dmgRoundAdd lucanus;
                     };
                     #if {$cmbt[affects][lucanus_cloak]} {
-                        dmgTrack lucan_cloak $dmgAmount $dmgTimes;
+                        .dmgRoundAdd lucan_cloak;
                     };
                     #if {$cmbt[affects][BGH]} {
-                        dmgTrack BGH $dmgAmount $dmgTimes;
+                        .dmgRoundAdd BGH;
                     };
                     #if {$cmbt[affects][assassin]} {
-                        dmgTrack assassin $dmgAmount $dmgTimes;
+                        .dmgRoundAdd assassin;
                     };
                     #if {$cmbt[affects][tactician]} {
-                        dmgTrack tactician $dmgAmount $dmgTimes;
+                        .dmgRoundAdd tactician;
                     };
                     #if {$cmbt[affects][magician]} {
-                        dmgTrack magician $dmgAmount $dmgTimes;
+                        .dmgRoundAdd magician;
                     };
                     #if {$cmbt[affects][DM]} {
-                        dmgTrack DM $dmgAmount $dmgTimes;
+                        .dmgRoundAdd DM;
                     };
                     #if {$cmbt[affects][bloodfuse]} {
-                        dmgTrack bloodfuse $dmgAmount $dmgTimes;
+                        .dmgRoundAdd bloodfuse;
                     };
                     #if {$cmbt[affects][bloodarc]} {
-                        dmgTrack bloodarc $dmgAmount $dmgTimes;
+                        .dmgRoundAdd bloodarc;
                     };
                     #if {$cmbt[affects][clutch]} {
-                        dmgTrack clutch $dmgAmount $dmgTimes;
+                        .dmgRoundAdd clutch;
                     };
                     #if {$cmbt[affects][grasp]} {
-                        dmgTrack grasp $dmgAmount $dmgTimes;
+                        .dmgRoundAdd grasp;
                     };
                     #if {$cmbt[affects][chill]} {
-                        dmgTrack chill $dmgAmount $dmgTimes;
+                        .dmgRoundAdd chill;
                     };
                     #if {$cmbt[affects][double_invoke]} {
-                        dmgTrack dbl_invoke $dmgAmount $dmgTimes;
+                        .dmgRoundAdd dbl_invoke;
                     };
                     #if {$cmbt[affects][skullfire]} {
-                        dmgTrack skullfire $dmgAmount $dmgTimes;
+                        .dmgRoundAdd skullfire;
                     };
                     #if {$cmbt[affects][witchHat]} {
-                        dmgTrack witchHat $dmgAmount $dmgTimes;
+                        .dmgRoundAdd witchHat;
                     };
                     #if {$cmbt[affects][convoke]} {
                         .dmg_round_convoke;
                     };
                     #if {$cmbt[affects][jump]} {
-                        dmgTrack jump $dmgAmount $dmgTimes;
+                        .dmgRoundAdd jump;
                     };
                     #if {$cmbt[affects][punch]} {
-                        dmgTrack punch $dmgAmount $dmgTimes;
+                        .dmgRoundAdd punch;
                     };
                     #if {$cmbt[affects][kick]} {
-                        dmgTrack kick $dmgAmount $dmgTimes;
+                        .dmgRoundAdd kick;
                     };
                     #if {$cmbt[affects][pointDefense]} {
-                        dmgTrack pointDefense $dmgAmount $dmgTimes;
+                        .dmgRoundAdd pointDefense;
                     };
                     #if {$cmbt[affects][CMC]} {
-                        dmgTrack CMC $dmgAmount $dmgTimes;
+                        .dmgRoundAdd CMC;
                     };
                     #if {$mob[gremlin]} {
-                        dmgTrack gremlin $dmgAmount $dmgTimes;
+                        .dmgRoundAdd gremlin;
                     };
                     #if {$cmbt[affects][marshal]} {
-                        dmgTrack marshal $dmgAmount $dmgTimes;
+                        .dmgRoundAdd marshal;
                     };
                 };
             };
@@ -499,8 +607,7 @@ dreset;
 #alias {dstats} {
     #format dmgHeader {%+12s %+9s %+9s %+9s %+9s} {} {Avg} {Total} {Best} {% Rnds};
     #format tempNumber {%g} {$cmbt[category][total][rnd]};
-    #format dmgTitle  {%+48s} {DAMAGE REPORT ($tempNumber Rounds)};
-    #echo {<faa>$dmgTitle<088>};
+    .dmgEchoTitle {DAMAGE REPORT ($tempNumber Rounds)};
     #echo $dmgHeader;
 
     #if {"%0" == "hits"} {
@@ -514,9 +621,34 @@ dreset;
     } {
         dmgFormat total;
 
+        #NOP -- Highlight the best and worst Avg, leaving out Total since it's the baseline;
+        #var dmgHighName {};
+        #var dmgLowName {};
+        #var tmpRows 0;
         #foreach $cmbt[category][%*] item {
             #if {"$item[name]" != "total" && $item[rnd] > 0} {
-                dmgFormat $item[name];
+                #math tmpRows {$tmpRows + 1};
+                #if {$tmpRows == 1} {
+                    #var dmgHighName $item[name];
+                    #var dmgLowName $item[name];
+                } {
+                    #if {$item[avg] > $cmbt[category][$dmgHighName][avg]} {#var dmgHighName $item[name]};
+                    #if {$item[avg] < $cmbt[category][$dmgLowName][avg]} {#var dmgLowName $item[name]};
+                };
+            };
+        };
+        #if {$tmpRows < 2} {
+            #var dmgHighName {};
+            #var dmgLowName {};
+        };
+
+        #foreach $cmbt[category][%*] item {
+            #if {"$item[name]" != "total" && $item[rnd] > 0} {
+                #if {"$item[name]" == "$dmgHighName"} {
+                    dmgFormat $item[name] high;
+                } {
+                    #if {"$item[name]" == "$dmgLowName"} {dmgFormat $item[name] low} {dmgFormat $item[name]};
+                };
             };
         };
     };
@@ -585,9 +717,67 @@ dreset;
         #echo {\High Summon damage : $tempHighSummonDmg};
     };
     
-    #echo {\n------- DAMAGE BY # OF HTIS -------};
-    #foreach $cmbt[freq][%*] item {
-        #echo {$item[name] hits : @formatThousands{$item[avg]} Avg. achieved $item[count] times};
+    #if {&cmbt[freq][] > 0} {
+        .dmgEchoTitle {DAMAGE BY # OF HITS} gap;
+        #foreach $cmbt[freq][%*] item {
+            #echo {$item[name] hits : @formatThousands{$item[avg]} Avg. achieved $item[count] times};
+        };
+    };
+
+    #if {&cmbt[multi][] > 0} {
+        #local tmpAllRnds 0;
+        #foreach $cmbt[multi][%*] item {
+            #math tmpAllRnds {$tmpAllRnds + $item[rnd]};
+        };
+        #format tmpAllRndsText {%g} {$tmpAllRnds};
+        .dmgEchoTitle {MULTI-HIT ROUNDS ($tmpAllRndsText Rounds)} gap;
+        #format dmgHeader {%+12s %+9s %+9s %+9s %+9s %+9s} {Mobs} {Rounds} {Avg Rnd} {Avg/Mob} {Best Rnd} {% Rnds};
+        #echo $dmgHeader;
+
+        #NOP -- Highlight the best and worst Avg/Mob;
+        #var dmgHighMobs 0;
+        #var dmgLowMobs 0;
+        #var tmpRows 0;
+        #foreach $cmbt[multi][%*] item {
+            #math tmpMobAvg {$item[dmg] / $item[rnd] / $item[mobs]};
+            #math tmpRows {$tmpRows + 1};
+            #if {$tmpRows == 1} {
+                #var dmgHighMobs $item[mobs];
+                #var dmgHighAvg $tmpMobAvg;
+                #var dmgLowMobs $item[mobs];
+                #var dmgLowAvg $tmpMobAvg;
+            } {
+                #if {$tmpMobAvg > $dmgHighAvg} {
+                    #var dmgHighMobs $item[mobs];
+                    #var dmgHighAvg $tmpMobAvg;
+                };
+                #if {$tmpMobAvg < $dmgLowAvg} {
+                    #var dmgLowMobs $item[mobs];
+                    #var dmgLowAvg $tmpMobAvg;
+                };
+            };
+        };
+        #if {$tmpRows < 2} {
+            #var dmgHighMobs 0;
+            #var dmgLowMobs 0;
+        };
+
+        #foreach $cmbt[multi][%*] item {
+            #math tmpRndAvg {$item[dmg] / $item[rnd]};
+            #math tmpMobAvg {$tmpRndAvg / $item[mobs]};
+            #math tmpPercent {1.00 * $item[rnd] / $tmpAllRnds * 100};
+            #format dmgRounds {%g} {$item[rnd]};
+            #format dmgAvg {%g} {$tmpRndAvg};
+            #format dmgMobAvg {%g} {$tmpMobAvg};
+            #format dmgBest {%g} {$item[high]};
+            #format dmgActive {%d} {$tmpPercent};
+            #format dmgSummary {%+12s %+9s %+9s %+9s %+9s %+9s} {$item[mobs]} {$dmgRounds} {$dmgAvg} {$dmgMobAvg} {$dmgBest} {${dmgActive}%};
+            #if {$item[mobs] == $dmgHighMobs} {
+                .dmgEchoRow high {$dmgSummary};
+            } {
+                #if {$item[mobs] == $dmgLowMobs} {.dmgEchoRow low {$dmgSummary}} {.dmgEchoRow none {$dmgSummary}};
+            };
+        };
     };
 
     #echo {\nDamage taken   : Average @formatThousands{$dmgt[avg]} over @formatThousands{$dmgt[count]} hits.  Total: @formatThousands{$dmgt[dmg]} damage.\n};

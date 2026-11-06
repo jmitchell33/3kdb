@@ -3,6 +3,7 @@
 #var bot[active] 1;
 #var bot[paused] 0;
 #var bot[walk] 1;
+#var bot[reverse] 0;
 #NOP -- Bloodarc hold flag used by .botStep, reset to 0 each time the bot class loads;
 #var bot[holding] 0;
 #NOP -- Makes sure the bloodarc flag exists without resetting it if a bloodarc is already up;
@@ -149,12 +150,17 @@
             #var bot[holding] 0;
             #var bot[skip] 0;
             #var bot_first_in_room_check 1;
-            #if {$bot[step] >= &bot[steps][]} {
-                ${bot[steps][${bot[step]}]};
-                .botComplete;
+            #if {$bot[reverse]} {
+                @oppositeDir{${bot[steps][${bot[step]}]}};
+                #math bot[step] {$bot[step] - 1};
             } {
-                ${bot[steps][${bot[step]}]};
-                #math bot[step] {$bot[step] + 1};
+                #if {$bot[step] >= &bot[steps][]} {
+                    ${bot[steps][${bot[step]}]};
+                    .botComplete;
+                } {
+                    ${bot[steps][${bot[step]}]};
+                    #math bot[step] {$bot[step] + 1};
+                };
             };
         };
     };

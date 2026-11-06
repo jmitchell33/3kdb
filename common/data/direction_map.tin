@@ -1,0 +1,23 @@
+#class data_cardinal kill;
+#class data_cardinal open;
+
+#NOP -- Opposite direction lookup, short and long forms. Returns the same form it was given;
+#var directionOpposites {
+    {n}{s}  {s}{n}  {e}{w}  {w}{e}
+    {ne}{sw}  {sw}{ne}  {nw}{se}  {se}{nw}
+    {u}{d}  {d}{u}  {in}{out}  {out}{in}
+    {north}{south}  {south}{north}  {east}{west}  {west}{east}
+    {northeast}{southwest}  {southwest}{northeast}
+    {northwest}{southeast}  {southeast}{northwest}
+    {up}{down}  {down}{up}
+};
+
+#function oppositeDir {
+    #format {dir} {%l} {%0};
+    #if {&directionOpposites[$dir]} {
+        #return $directionOpposites[$dir];
+    };
+    #return {};
+};
+
+#class data_cardinal close;
