@@ -575,7 +575,7 @@ You and the project changed the same lines, and git wants you to choose. Follow 
 
 ### Why does vars.tin always show as changed?
 
-The game keeps rewriting it. The helpers leave it out of commits, so that's normal.
+That's where your character's settings are saved, and the game keeps rewriting it. If your character is in the project, the file shows as changed soon after each commit. That's normal.
 
 ### `git-sync: command not found`
 

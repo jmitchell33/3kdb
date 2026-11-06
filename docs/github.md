@@ -209,7 +209,7 @@ upstream  https://github.com/jmitchell33/3kdb.git
 
 **5. If you've changed any files,** move those changes onto their own branch. `master` should only ever hold what the main project has. If you never changed anything, skip to step 6.
 
-Do you want to keep your character's folder off GitHub? Forks are public, and the next commands upload new files. `private.tin` and `vars.tin` are always left out, but the rest of `chars/byron/` would go up. To keep the whole folder private, run this first:
+Do you want to keep your character's folder off GitHub? Forks are public, and the next commands upload new files. `private.tin` is always left out, and so is `vars.tin` for a new character, but the rest of `chars/byron/` would go up. To keep the whole folder private, run this first:
 
 ```bash
 echo 'chars/byron/' >> .git/info/exclude
@@ -253,8 +253,8 @@ The helpers are short commands like `git-start` and `git-sync`. They go in your 
 sed -i.bak '/^# >>> 3kdb git helpers >>>$/,/^# <<< 3kdb git helpers <<<$/d' ~/.bashrc
 cat >> ~/.bashrc <<'EOF'
 # >>> 3kdb git helpers >>>
-# git-save [message]: stage everything except vars.tin files, commit (default
-# "savepoint") if anything changed, then push -- also pushes commits already made.
+# git-save [message]: stage everything, commit (default "savepoint") if anything
+# changed, then push -- also pushes commits already made.
 # Refuses to run on master, which should only ever hold what upstream has.
 unalias git-save 2>/dev/null
 git-save() {
@@ -263,10 +263,6 @@ git-save() {
     return 1
   fi
   git add . || return
-  # While finishing a merge, keep everything so upstream's changes aren't dropped.
-  if ! git rev-parse -q --verify MERGE_HEAD >/dev/null; then
-    git reset -q -- '*vars.tin'
-  fi
   if git diff --cached --quiet; then
     echo "git-save: nothing new to commit"
   else
@@ -374,7 +370,6 @@ alias git-pr-pro='_git_pr_pro() { \
         echo "Error: Could not find PR description file at $RAW_FILE"; return 1; \
     fi; \
     git add . && \
-    git reset -- *vars.tin 2>/dev/null && \
     git commit -m "$1" 2>/dev/null || echo "No new local uncommitted changes found (or already synced), attempting push..."; \
     git push -u origin "$CURRENT_BRANCH" && \
     gh pr create --repo jmitchell33/3kdb --base master --head "$(gh api user --jq .login):$CURRENT_BRANCH" --title "$1" --body-file "$RAW_FILE"; \
@@ -525,7 +520,7 @@ This pulls in the latest from the project.
 - `git-sync` doesn't make a new branch. It stays on the branch you're on.
 - Save before `git-start`, or your unsaved changes come along to the new branch. If `master` has a different version of a file you edited, git refuses to switch and you stay where you are. Run `git-save`, then `git-start` again. `vars.tin` files are the exception, because `git-start` handles them.
 - `git-save` and `git-sync` push to the branch you're on. If that branch has an open pull request, the changes join it.
-- `git-save` and `git-pr-pro` commit new files in your folder too, including your character's folder if it's new. `private.tin` and `vars.tin` are left out. To keep the whole folder out, see [Part 4, step 5](#part-4-switch-an-existing-clone-to-a-fork).
+- `git-save` and `git-pr-pro` commit new files in your folder too, including your character's folder if it's new. `private.tin` is left out, and so is `vars.tin` for a new character. To keep the whole folder out, see [Part 4, step 5](#part-4-switch-an-existing-clone-to-a-fork).
 
 **Quick checks:**
 
@@ -557,7 +552,7 @@ Lists your local branches.
 **`git-save "message"`**
 - Commits your changes and pushes the branch you're on. The message is optional, and the default is `savepoint`.
 - Also use it to finish a merge after fixing a conflict.
-- Doesn't touch `master` or bring in anything new. Leaves out `vars.tin` files, and refuses to run on `master`.
+- Doesn't touch `master` or bring in anything new. Includes `vars.tin` files, and refuses to run on `master`.
 
 **`git-sync`**
 - The "make everything up to date" command. From any branch, it:
@@ -580,13 +575,13 @@ Lists your local branches.
 - Keep that folder name even if your repo folder has a different name. It's made for you, it sits outside your repo, and `git-pr-pro` looks for the file there.
 
 **`git-pr-pro "PR title"`**
-- Commits anything left (not `vars.tin`), pushes, and opens a pull request to the project using your `git-make-desc` text.
+- Commits anything left, pushes, and opens a pull request to the project using your `git-make-desc` text.
 - Use it when the work is ready, on a branch with no open pull request yet.
 
 ### The ones you can ignore
 
 - **`git-sync-conflict`** is an older, weaker `git-sync`. It doesn't save or push anything.
-- **`git-pr "message"`** is an older `git-pr-pro`. It has a canned description and **does** commit `vars.tin`.
+- **`git-pr "message"`** is an older `git-pr-pro`. It has a canned description.
 - **`git-work <name>`** makes a new branch from wherever you are, with no updating. It's only for building on an unmerged pull request.
 
 ### git-save or git-sync?
@@ -715,7 +710,9 @@ git-save "my changes"
 
 ### vars.tin files
 
-`git-save`, `git-sync` and `git-pr-pro` all leave `chars/*/vars.tin` out of commits. If one of those files is already in the project, it keeps showing as modified in `git status`. That's normal.
+`vars.tin` is where a character's settings are saved. `git-save`, `git-sync` and `git-pr-pro` include changed `chars/*/vars.tin` files in commits, so they go with your pull request. That covers characters already in the project. A new character's `vars.tin` is ignored by git, so it stays on your computer.
+
+The game keeps rewriting the file, so it shows as modified again in `git status` soon after a commit. That's normal.
 
 [Back to top](#3kdb-git-and-github-guide)
 

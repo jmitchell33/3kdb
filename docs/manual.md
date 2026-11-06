@@ -1229,543 +1229,573 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 
 ### General
 
-- `findhere`: finds where you are on the mud to correct map
-- `go`: map run to speedrun Usage: `go <speedrun>`
-- `setup_3kdb`: Recommended mud prefs and first-run 3kdb client setup
-- `dung_reset`: announce dungeon resets Usage: `dung_reset <mj/sz/aegis/dungeonname>`
-- `speedruns`: displays all available speedruns
-- `ld`: go linkdead saving certain variable values
-- `th`: check tellhist
-- `exa`: examine & search stuff Usage: `exa <thing>`
-- `cwho1`: list currently online clan members
-- `calc`: perform mathematical calculations Usage: `calc <mathproblem> - Ex: calc 100/5*25`
-- `dwitch`: duplicate witch then dove them & attack first witch
-- `sra`: examine & search room nouns using MIP
-- `roomnouns`: strip filler words from the room description and list the nouns left Usage: `roomnouns' or roomnouns <text>`
-- `gags`: setup gags for a variety of things around the mud
-- `gag+`: turn on one gag group by list name Usage: `gag-plus then group name from gags output`
-- `gag-`: turn off one gag group by list name Usage: `gag-minus then group name from gags output`
-- `gag-all`: enable every gag group in the list
-- `gag-clear`: disable every gag group in the list
-- `.gswap`: kill current guild and load new one - requires gswap vaf perk Usage: `.gswap <guild>`
-- `gswap`: swap guild in game, then load its scripts once the game confirms and save it for next login Usage: `gswap <guild>`
-- `prys_exit`: exit prysmyia room
-- `dcup`: attacks mike/duplicates creature/touchs dove rune/attacks first mike
-- `beepon`: turn on terminal beep on events (toggle beep)
-- `beepoff`: turn off terminal beep on events (toggle beep)
-- `qq`: toggle mouse capture for clickable UI (toggle mouseActive)
-- `toggle-list`: 3kdb current toggles list
-- `sessionlog`: log the whole game session to logs/&lt;user&gt;/sessions/&lt;char&gt;_&lt;date&gt;.log, old days zstd compressed - toggle sessionlog keeps it on for this character Usage: `sessionlog on|off`
-- `grep`: search session scrollback buffer Usage: `grep <pattern>`
-- `do_action`: run all queued actionStack entries then clear stack
-- `add_action`: queue one action table row on actionStack if name not already queued Usage: `add_action braced table row same shape as actionStack items`
-- `remove_action`: remove queued row from actionStack by matching name field Usage: `remove_action braced table row or same name token as add_action`
-- `beep`: bell if beepon flag set
-- `bagall`: bag all loose items
-- `unbagall`: remove all from bag to room
-- `useHeal`: use healing items from heal list
-- `i`: inventory summary helper
-- `los`: send lineofsight to MUD
-- `stashlist`: stash list helper with assemble hooks
-- `inputswitch`: switch input to named session Usage: `inputswitch <session>`
-- `reset_standings`: reset party standings table
-- `setsplit`: reapply split layout after resize
-- `init_screen`: full screen redraw and layout
-- `draw_all`: redraw hpbar chat caption and room strips that are toggled on
-- `caption-help`: caption panel commands help
-- `caption`: show data caption panel
-- `caption+`: caption panel next tab
-- `caption-`: caption panel previous tab
-- `deadman`: idle deadman arm disarm and timers Usage: `deadman help for syntax`
-- `deadman-help`: show deadman client help
-- `deadman-list`: list deadman presets
-- `deadman+`: add deadman named preset Usage: `deadman+ <n>`
-- `deadman-`: remove deadman preset Usage: `deadman- <n>`
-- `deadman-clear`: clear all deadman presets
-- `quest_newbie`: newbie quest helper
-- `cove_gems`: cove gems pickup run
-- `aoeon`: armour of elements on
-- `aoeoff`: armour of elements off
-- `aoeimmolate`: send immolate corpse once
-- `firebat_west`: walk west into firebat hunting loop
-- `firebat_return`: walk back out of firebat loop
-- `qt_firebat_west`: qtrance west into firebat loop
-- `qt_firebat_return`: qtrance return from firebat loop
-- `cow_run`: gather cow herds speedwalk from southwest corner
-- `dsolve`: fallout shelter door solver start with door room number Usage: `dsolve <door number>`
-- `stopdsolve`: stop fallout shelter door solver
-- `fdkey`: send saved door combo after dsolve same door number Usage: `fdkey <door number>`
-- `.fly`: Guild fly powers
-- `.land`: Land from guild fly powers
-- `zodiac_stones`: Celestial Zodiac Stone Reference
-- `zodiac_times`: Celestial Zodiac Spawn Times
-- `zodiac_balance`: sell zodiac souls and orbs split between the shrines to even out Aeonos and Zephyrak rep Usage: `zodiac_balance [plan]`
+- `findhere`: finds where you are on the mud to correct map.
+- `go`: map run to speedrun. Usage: `go <speedrun>`
+- `setup_3kdb`: Recommended mud prefs and first-run 3kdb client setup.
+- `dung_reset`: announce dungeon resets. Usage: `dung_reset <mj/sz/aegis/dungeonname>`
+- `speedruns`: displays all available speedruns.
+- `ld`: go linkdead saving certain variable values.
+- `th`: check tellhist.
+- `exa`: examine & search stuff. Usage: `exa <thing>`
+- `cwho1`: list currently online clan members.
+- `calc`: perform mathematical calculations. Usage: `calc <mathproblem> - Ex: calc 100/5*25`
+- `dwitch`: duplicate witch then dove them & attack first witch.
+- `sra`: examine & search room nouns using MIP.
+- `roomnouns`: strip filler words from the room description and list the nouns left. Usage: `roomnouns' or roomnouns <text>`
+- `gags`: setup gags for a variety of things around the mud.
+- `gag+`: turn on one gag group by list name. Usage: `gag-plus then group name from gags output`
+- `gag-`: turn off one gag group by list name. Usage: `gag-minus then group name from gags output`
+- `gag-all`: enable every gag group in the list.
+- `gag-clear`: disable every gag group in the list.
+- `.gswap`: kill current guild and load new one - requires gswap vaf perk. Usage: `.gswap <guild>`
+- `gswap`: swap guild in game, then load its scripts once the game confirms and save it for next login. Usage: `gswap <guild>`
+- `prys_exit`: exit prysmyia room.
+- `dcup`: attacks mike/duplicates creature/touchs dove rune/attacks first mike.
+- `beepon`: turn on terminal beep on events (toggle beep).
+- `beepoff`: turn off terminal beep on events (toggle beep).
+- `qq`: toggle mouse capture for clickable UI (toggle mouseActive).
+- `toggle-list`: 3kdb current toggles list.
+- `toggle`: turn a toggle on or off, see toggle-list. Usage: `toggle <name>`
+- `toggle-reset`: set every toggle back to its default, asks first. Usage: `toggle-reset then toggle-reset confirm`
+- `themes`: list color themes or preview one. Usage: `themes or themes <name>`
+- `theme`: switch to a color theme. Usage: `theme <name>`
+- `colors`: show the available colors.
+- `.reload`: reload your character files and guild scripts after editing them.
+- `caption_view`: switch the side panel tab. Usage: `caption_view <general/bot/map>`
+- `sessionlog`: log the whole game session to logs/&lt;user&gt;/sessions/&lt;char&gt;_&lt;date&gt;.log, old days zstd compressed - toggle sessionlog keeps it on for this character. Usage: `sessionlog on|off`
+- `grep`: search session scrollback buffer. Usage: `grep <pattern>`
+- `do_action`: run all queued actionStack entries then clear stack.
+- `add_action`: queue one action table row on actionStack if name not already queued. Usage: `add_action braced table row same shape as actionStack items`
+- `remove_action`: remove queued row from actionStack by matching name field. Usage: `remove_action braced table row or same name token as add_action`
+- `beep`: bell if beepon flag set.
+- `bagall`: bag all loose items.
+- `unbagall`: remove all from bag to room.
+- `useHeal`: use healing items from heal list.
+- `i`: inventory summary helper.
+- `los`: send lineofsight to MUD.
+- `stashlist`: stash list helper with assemble hooks.
+- `inputswitch`: switch input to named session. Usage: `inputswitch <session>`
+- `reset_standings`: reset party standings table.
+- `setsplit`: reapply split layout after resize.
+- `init_screen`: full screen redraw and layout.
+- `draw_all`: redraw hpbar chat caption and room strips that are toggled on.
+- `caption-help`: caption panel commands help.
+- `caption`: show data caption panel.
+- `caption+`: caption panel next tab.
+- `caption-`: caption panel previous tab.
+- `deadman`: idle deadman arm disarm and timers. Usage: `deadman help for syntax`
+- `deadman-help`: show deadman client help.
+- `deadman-list`: list deadman presets.
+- `deadman+`: add deadman named preset. Usage: `deadman+ <n>`
+- `deadman-`: remove deadman preset. Usage: `deadman- <n>`
+- `deadman-clear`: clear all deadman presets.
+- `quest_newbie`: newbie quest helper.
+- `cove_gems`: cove gems pickup run.
+- `aoeon`: armour of elements on.
+- `aoeoff`: armour of elements off.
+- `aoeimmolate`: send immolate corpse once.
+- `firebat_west`: walk west into firebat hunting loop.
+- `firebat_return`: walk back out of firebat loop.
+- `qt_firebat_west`: qtrance west into firebat loop.
+- `qt_firebat_return`: qtrance return from firebat loop.
+- `cow_run`: gather cow herds speedwalk from southwest corner.
+- `dsolve`: fallout shelter door solver start with door room number. Usage: `dsolve <door number>`
+- `stopdsolve`: stop fallout shelter door solver.
+- `fdkey`: send saved door combo after dsolve same door number. Usage: `fdkey <door number>`
+- `.fly`: Guild fly powers.
+- `.land`: Land from guild fly powers.
+- `zodiac_stones`: Celestial Zodiac Stone Reference.
+- `zodiac_times`: Celestial Zodiac Spawn Times.
+- `zodiac_balance`: sell zodiac souls and orbs split between the shrines to even out Aeonos and Zephyrak rep. Usage: `zodiac_balance [plan]`
+- `.scalers`: table of your preferred scaler for every scaling dungeon.
+- `.set_scaler`: set your preferred scaler for one dungeon or all of them, 0 clears it. Usage: `.set_scaler <key|all> <scaler>`
+- `.clear_scalers`: clear every dungeon scaler preference back to 0.
+- `.reset_scalers`: rebuild the dungeon scaler list from scratch, clears all preferences.
+- `3kdb_dungeon_data`: dungeon mob class sizes by scaler with filters. Usage: `3kdb_dungeon_data <dungeon|scaler n|class size|town name|jumps|fixed|help>`
+- `ddata`: short form of 3kdb_dungeon_data. Usage: `ddata help`
 
 ### Mapping
 
-- `maphelp`: echo map helper quick reference
-- `mapon`: start live mapping: brief off, static off
-- `mapoff`: stop live mapping: brief on, static on
-- `mapsearch`: search map rooms by name and note text Usage: `mapsearch <text>`
-- `findhere2`: narrow findhere by walking one exit direction Usage: `findhere2 <direction>`
-- `findhere-auto`: findhere, then walk the exits that narrow it down until the room is found Usage: `findhere-auto [steps] / findhere-auto stop`
-- `mapexplore`: walk and map every unvisited room of an area, then save Usage: `mapexplore [area] / mapexplore stop`
-- `loadmap`: load mapper and maphelper then goto cursor vnum
-- `rotate`: Rejected Game: line the map and inductor/crack path up with the room you are in
-- `hidemap`: hide the map and give its space to the side panel, go and bots still work, saved per character
-- `showmap`: show the map again after hidemap
-- `voidlink`: link exit to vnum and insert void between Usage: `voidlink <dir> <vnum>`
-- `hmavoid`: mark CoT portal exits avoided for pathing
-- `hmfollow`: clear avoid flags on CoT portal exits
-- `mapFull`: toggle fullscreen vtmap and area list
-- `mapUndo`: undo last map edit step
-- `mapbackup`: write dated backup map file under common map
-- `mapf`: pass through to map flag subcommand Usage: `mapf flag name then on or off`
-- `mapvnum`: echo current map cursor vnum into curvnum
-- `maplm`: create landmark label for current vnum Usage: `maplm landmark label text`
-- `mapfind`: list rooms matching pattern in desc name and note Usage: `mapfind pattern text`
-- `mappath`: map find path to pattern then path show Usage: `mappath pattern text`
-- `mapicons`: echo unicode icon palette for map symbols
-- `go_back`: map run back to vnum saved by go alias
+- `maphelp`: echo map helper quick reference.
+- `mapon`: start live mapping: brief off, static off.
+- `mapoff`: stop live mapping: brief on, static on.
+- `mapsearch`: search map rooms by name and note text. Usage: `mapsearch <text>`
+- `findhere2`: narrow findhere by walking one exit direction. Usage: `findhere2 <direction>`
+- `findhere-auto`: findhere, then walk the exits that narrow it down until the room is found. Usage: `findhere-auto [steps] / findhere-auto stop`
+- `mapexplore`: walk and map every unvisited room of an area, then save. Usage: `mapexplore [area] / mapexplore stop`
+- `loadmap`: load mapper and maphelper then goto cursor vnum.
+- `rotate`: Rejected Game: line the map and inductor/crack path up with the room you are in.
+- `hidemap`: hide the map and give its space to the side panel, go and bots still work, saved per character.
+- `showmap`: show the map again after hidemap.
+- `mapgo`: move the map cursor to a speedrun without moving you. Usage: `mapgo <speedrun>`
+- `mapsave`: save common/map/3k_shared.map.
+- `mapload`: load common/map/3k_shared.map.
+- `mapname`: rename the current room. Usage: `mapname <name>`
+- `mapnote`: set the current room note. Usage: `mapnote <note>`
+- `mapsym`: set the current room symbol. Usage: `mapsym <char>`
+- `maparea`: set area name for the current room. Usage: `maparea <name>`
+- `mapexit`: make an exit direction run a command. Usage: `mapexit <exit> <command>`
+- `mapdig`: new exit and room, optional second arg links back. Usage: `mapdig <dir> [new]`
+- `mapdelete`: delete an exit, unlinks and removes the room. Usage: `mapdelete <exit>`
+- `mapunlink`: unlink an exit from its destination. Usage: `mapunlink <exit>`
+- `maplink`: link an exit to a room vnum. Usage: `maplink <exit> <room#>`
+- `mapinsert`: insert a room. Usage: `mapinsert <room#>`
+- `mapm`: move the map cursor one step. Usage: `mapm <dir>`
+- `infoPane`: get current room info.
+- `draw-map-side`: draw the map below the chat window instead of beside it.
+- `draw-map-top`: draw the map in its usual place at the top right.
+- `voidlink`: link exit to vnum and insert void between. Usage: `voidlink <dir> <vnum>`
+- `hmavoid`: mark CoT portal exits avoided for pathing.
+- `hmfollow`: clear avoid flags on CoT portal exits.
+- `mapFull`: toggle fullscreen vtmap and area list.
+- `mapUndo`: undo last map edit step.
+- `mapbackup`: write dated backup map file under common map.
+- `mapf`: pass through to map flag subcommand. Usage: `mapf flag name then on or off`
+- `mapvnum`: echo current map cursor vnum into curvnum.
+- `maplm`: create landmark label for current vnum. Usage: `maplm landmark label text`
+- `mapfind`: list rooms matching pattern in desc name and note. Usage: `mapfind pattern text`
+- `mappath`: map find path to pattern then path show. Usage: `mappath pattern text`
+- `mapicons`: echo unicode icon palette for map symbols.
+- `go_back`: map run back to vnum saved by go alias.
 
 ### Bot commands
 
-- `bot_report`: displays the progress and spoils of the current bot
-- `playercheck`: toggles the playercheck
-- `autocollect`: toggles picking up all items
-- `botlist`: displays all available bots to run
-- `.stop`: stop and kill the bot
-- `.pause`: pauses the bot
-- `.unpause`: unpauses the bot
-- `.resume`: returns to the room that was paused and resumes the bot
-- `..`: tells the bot to walk if it stopped and you don't know why
-- `.skip`: leave the mob in this room alone and walk on, the bot fights the next mob it finds
-- `3kdb`: share current bot status on party line
-- `bcy`: current bot area cycler list
-- `bcy+`: add bot to cycler list Usage: `bcy+ <botalias> - Ex: bcy+ smurfs`
-- `bcy-`: remove bot from cycler list Usage: `bcy+ <botalias> - Ex: bcy- smurfs`
-- `botclear`: clears bot cycler
-- `nextarea`: start next area in the bot cycle list
-- `cycle`: run bot cycler step
-- `ba-necro`: preset necro bot area list
-- `scales`: print dragon scale colors already collected for ignore list
-- `addscale`: mark a dragon color to skip after smuggle scale Usage: `addscale color name`
+- `bot_report`: displays the progress and spoils of the current bot.
+- `playercheck`: toggles the playercheck.
+- `autocollect`: toggles picking up all items.
+- `botlist`: displays all available bots to run.
+- `.stop`: stop and kill the bot.
+- `.pause`: pauses the bot.
+- `.unpause`: unpauses the bot.
+- `.resume`: returns to the room that was paused and resumes the bot.
+- `..`: tells the bot to walk if it stopped and you don't know why.
+- `.skip`: leave the mob in this room alone and walk on, the bot fights the next mob it finds.
+- `3kdb`: share current bot status on party line.
+- `bcy`: current bot area cycler list.
+- `bcy+`: add bot to cycler list. Usage: `bcy+ <botalias> - Ex: bcy+ smurfs`
+- `bcy-`: remove bot from cycler list. Usage: `bcy+ <botalias> - Ex: bcy- smurfs`
+- `botclear`: clears bot cycler.
+- `nextarea`: start next area in the bot cycle list.
+- `cycle`: run bot cycler step.
+- `ba-necro`: preset necro bot area list.
+- `scales`: print dragon scale colors already collected for ignore list.
+- `addscale`: mark a dragon color to skip after smuggle scale. Usage: `addscale color name`
 
 ### Combat
 
-- `strategy-list`: 3kdb available strategies
-- `strategy-clear`: clear strategies
-- `strategy`: run named strategy Usage: `strategy <n>`
-- `strategies`: list or manage strategies
-- `mka-help`: mob kill action help
-- `mka-on`: enable mob kill actions
-- `mka-off`: disable mob kill actions
-- `mka-all`: setup mob kill actions
-- `mka-check`: list queued mob kill actions with priorities
-- `mka-clear`: clear all mob kill action queue entries
-- `mka+`: add preset or custom action repeat once to confirm unknown name Usage: `mka+ action name`
-- `mka-`: remove action by name or list index number Usage: `mka- name or index`
-- `mka++`: raise priority of named action one step Usage: `mka++ action name`
-- `mka--`: lower priority of named action one step Usage: `mka-- action name`
-- `mka`: fire queued actions then kill target or first room mob Usage: `mka optional mob name`
+- `strategy-list`: 3kdb available strategies.
+- `strategy-clear`: clear strategies.
+- `strategy`: run named strategy. Usage: `strategy <n>`
+- `strategies`: list or manage strategies.
+- `mka-help`: mob kill action help.
+- `mka-on`: enable mob kill actions.
+- `mka-off`: disable mob kill actions.
+- `mka-all`: setup mob kill actions.
+- `mka-check`: list queued mob kill actions with priorities.
+- `mka-clear`: clear all mob kill action queue entries.
+- `mka+`: add preset or custom action repeat once to confirm unknown name. Usage: `mka+ action name`
+- `mka-`: remove action by name or list index number. Usage: `mka- name or index`
+- `mka++`: raise priority of named action one step. Usage: `mka++ action name`
+- `mka--`: lower priority of named action one step. Usage: `mka-- action name`
+- `mka`: fire queued actions then kill target or first room mob. Usage: `mka optional mob name`
 
 ### Corpses
 
-- `corpsetrig`: show or edit corpse_trig queue Usage: `see corpsetrig-help`
-- `corpsetrig-help`: corpse trigger help
-- `corpse_trig`: run queued corpse actions after a kill
-- `corpsetrig-all`: show active queue and guild-filtered preset list
-- `corpsetrig-on`: enable corpse_trig firing
-- `corpsetrig-off`: disable corpse_trig firing
-- `corpsetrig-clear`: clear all queued corpse actions
-- `corpsetrig+`: add preset or custom action to queue Usage: `corpsetrig+ action name`
-- `corpsetrig-`: remove action by name or slot number Usage: `corpsetrig- name or number`
-- `corpsetrig++`: raise an action priority in queue Usage: `corpsetrig++ action name`
-- `corpsetrig--`: lower an action priority in queue Usage: `corpsetrig-- action name`
-- `corpsetrig-kb`: toggle killing-blow only versus all blows
-- `dcoffin`: auto run to morgue and donate coffin
-- `dcoffin1`: donate coffin variant one
-- `dcoffin2`: donate coffin variant two
-- `check_corpses`: refresh corpse inventory state
-- `corpse_select`: unwrap deslab or uncooler next corpse by priority
-- `cooler_rotate`: move corpses into cooler with trace glyph necro uses qtrance Usage: `cooler_rotate count or repeat digit`
-- `check_box`: parse colossal box into corpses key count Usage: `check_box storage table key`
-- `corpse_select_necro`: necromancer corpse picker
+- `corpsetrig`: show or edit corpse_trig queue. Usage: `see corpsetrig-help`
+- `corpsetrig-help`: corpse trigger help.
+- `corpse_trig`: run queued corpse actions after a kill.
+- `corpsetrig-all`: show active queue and guild-filtered preset list.
+- `corpsetrig-on`: enable corpse_trig firing.
+- `corpsetrig-off`: disable corpse_trig firing.
+- `corpsetrig-clear`: clear all queued corpse actions.
+- `corpsetrig+`: add preset or custom action to queue. Usage: `corpsetrig+ action name`
+- `corpsetrig-`: remove action by name or slot number. Usage: `corpsetrig- name or number`
+- `corpsetrig++`: raise an action priority in queue. Usage: `corpsetrig++ action name`
+- `corpsetrig--`: lower an action priority in queue. Usage: `corpsetrig-- action name`
+- `corpsetrig-kb`: toggle killing-blow only versus all blows.
+- `dcoffin`: auto run to morgue and donate coffin.
+- `dcoffin1`: donate coffin variant one.
+- `dcoffin2`: donate coffin variant two.
+- `check_corpses`: refresh corpse inventory state.
+- `corpse_select`: unwrap deslab or uncooler next corpse by priority.
+- `cooler_rotate`: move corpses into cooler with trace glyph necro uses qtrance. Usage: `cooler_rotate count or repeat digit`
+- `check_box`: parse colossal box into corpses key count. Usage: `check_box storage table key`
+- `corpse_select_necro`: necromancer corpse picker.
 
 ### Trackers
 
-- `3kReport`: 3kdb kill report - reports all kills - filter last # of kills or by mob name Usage: `3kReport' or 3kReport <#/mob>`
-- `3kReport-clear`: 3kdb kill Report - clear data
-- `summonDmg`: mage summon damage report
-- `summonDmg-clear`: mage summon damage report - clear data
-- `summonDmgVaf`: mage summon damage report - requires numbers vaf perk
-- `reset_gxp`: general guild gxp tracking reset
-- `reset_xp`: xp tracker reset - kills and xp shown in the caption when no bot is running
-- `dstats`: damage tracking report - requires numbers vaf perk
-- `dreset`: reset damage tracker
-- `truckDmg-clear`: reset truck damage tracking
-- `mountDmg-clear`: reset mount damage tracking
-- `supportDmg-clear`: reset support mech damage tracking
-- `defStats`: defense tracking report
-- `istats`: item tracker extraordinaire
-- `istats_reset`: reset item tracker
-- `defStats_reset`: reset defense stats tracker
-- `spellDmg-clear`: clear spell damage tracker
-- `fdmgStats`: fremen damage approximation report - no numbers perk needed
-- `fdmgTable`: fremen damage band breakdown - optional source arg Usage: `fdmgTable <source>`
-- `fdmgReset`: reset fremen damage approximator
-- `3kReport-config`: configure kill report options
-- `3kReport+`: add kill report filter
-- `3kReport-`: remove kill report filter
-- `.reps`: reputation tracking
+- `3kReport`: 3kdb kill report - reports all kills - filter last # of kills or by mob name. Usage: `3kReport' or 3kReport <#/mob>`
+- `3kReport-clear`: 3kdb kill Report - clear data.
+- `summonDmg`: mage summon damage report.
+- `summonDmg-clear`: mage summon damage report - clear data.
+- `summonDmgVaf`: mage summon damage report - requires numbers vaf perk.
+- `reset_gxp`: general guild gxp tracking reset.
+- `reset_xp`: xp tracker reset - kills and xp shown in the caption when no bot is running.
+- `dstats`: damage tracking report - requires numbers vaf perk.
+- `dreset`: reset damage tracker.
+- `truckDmg-clear`: reset truck damage tracking.
+- `mountDmg-clear`: reset mount damage tracking.
+- `supportDmg-clear`: reset support mech damage tracking.
+- `defStats`: defense tracking report.
+- `istats`: item tracker extraordinaire.
+- `istats_reset`: reset item tracker.
+- `defStats_reset`: reset defense stats tracker.
+- `spellDmg-clear`: clear spell damage tracker.
+- `fdmgStats`: fremen damage approximation report - no numbers perk needed.
+- `fdmgTable`: fremen damage band breakdown - optional source arg. Usage: `fdmgTable <source>`
+- `fdmgReset`: reset fremen damage approximator.
+- `3kReport-config`: configure kill report options.
+- `3kReport+`: add kill report filter.
+- `3kReport-`: remove kill report filter.
+- `.reps`: reputation tracking.
 
 ### Crafting
 
-- `jewel-lookup`: displays information about jewels (use jewel-lookup help for details) Usage: `jewel-lookup help`
-- `forge-on`: forge on: activates the blacksmith forge
-- `forge-off`: forge off: deactivates the blacksmith forge
-- `ln`: list nontrivial recipe mouldings in enchanters shop (recipes that provide cxp)
-- `smelter-on`: smelter on: activates the enchanting smelter
-- `gem-lookup`: displays information about gem recipes (use gem-lookup help for details) Usage: `gem-lookup help`
-- `make-gem`: Badger's gem maker v6.9 (use make-gem help for details) Usage: `make-gem help`
-- `miner-on`: mining on Usage: `miner-on' then mine or minefor`
-- `miner-off`: mining off
-- `mine-list`: prints ore deposit names for mine after miner-on
-- `minefor-list`: prints jewel names by ore tier for minefor after miner-on
-- `stashlist assemble`: this is a mud command with auto assemble added for frags/essence/hearts
-- `deposit-lookup`: displays information about mining deposits (use deposit-lookup help for details) Usage: `deposit-lookup help`
-- `mine`: run ore deposit bot path by name after miner-on Usage: `mine <deposit>`
-- `minefor`: run jewel mining queue after miner-on Usage: `minefor <jewel or comma list>`
-- `autosmelt`: smelter auto-smelt preset after smelter-on Usage: `autosmelt <preset>`
-- `assembler`: interactive assemble helper for crafted items
-- `killforge`: unload blacksmith forge class
-- `build_golem`: start golem build sequence for named corpse Usage: `build_golem <corpse name>`
-- `fill_golem`: fill golem parts from held corpses
-- `fill-moulding`: examine moulding and unstash best quality you have
-- `farmer-on`: turn farmer script on
-- `farmer-off`: turn farmer script off
+- `jewel-lookup`: displays information about jewels (use jewel-lookup help for details). Usage: `jewel-lookup help`
+- `forge-on`: forge on: activates the blacksmith forge.
+- `forge-off`: forge off: deactivates the blacksmith forge.
+- `ln`: list nontrivial recipe mouldings in enchanters shop (recipes that provide cxp).
+- `smelter-on`: smelter on: activates the enchanting smelter.
+- `gem-lookup`: displays information about gem recipes (use gem-lookup help for details). Usage: `gem-lookup help`
+- `make-gem`: Badger's gem maker v6.9 (use make-gem help for details). Usage: `make-gem help`
+- `miner-on`: mining on. Usage: `miner-on' then mine or minefor`
+- `miner-off`: mining off.
+- `mine-list`: prints ore deposit names for mine after miner-on.
+- `minefor-list`: prints jewel names by ore tier for minefor after miner-on.
+- `stashlist assemble`: this is a mud command with auto assemble added for frags/essence/hearts.
+- `deposit-lookup`: displays information about mining deposits (use deposit-lookup help for details). Usage: `deposit-lookup help`
+- `mine`: run ore deposit bot path by name after miner-on. Usage: `mine <deposit>`
+- `minefor`: run jewel mining queue after miner-on. Usage: `minefor <jewel or comma list>`
+- `autosmelt`: smelter auto-smelt preset after smelter-on. Usage: `autosmelt <preset>`
+- `assembler`: interactive assemble helper for crafted items.
+- `killforge`: unload blacksmith forge class.
+- `build_golem`: start golem build sequence for named corpse. Usage: `build_golem <corpse name>`
+- `fill_golem`: fill golem parts from held corpses.
+- `fill-moulding`: examine moulding and unstash best quality you have.
+- `farmer-on`: turn farmer script on.
+- `farmer-off`: turn farmer script off.
 
 ### Professions
 
-- `transmute_burn`: transmute crafting mats (type 'transmute_burn' for more help)
-- `transmute_burn2`: This will attempt to transmute all items except ore
-- `refk`: buys a knife then reforges it and disposes of it
-- `refs`: buys a sword then reforges it and disposes of it
-- `ref`: reforge item Actype to defense Usage: `ref <item> <ACtype>`
-- `refg`: reforge item Actype to defense on ground Usage: `refg <item> <Actype>`
-- `refk1`: reforger knife buy reforge dispose step one
-- `refk2`: reforger knife buy reforge dispose step two
-- `transmute_ug`: upgrades items to the next quality tier Usage: `transmute_ug <jewel> <quality> Note: requires curly braces around <quality>`
-- `transmute_ratios`: show transmuter ratios for jewels
-- `transmuter-stats`: transmuter color tracking
+- `transmute_burn`: transmute crafting mats (type 'transmute_burn' for more help).
+- `transmute_burn2`: This will attempt to transmute all items except ore.
+- `refk`: buys a knife then reforges it and disposes of it.
+- `refs`: buys a sword then reforges it and disposes of it.
+- `ref`: reforge item Actype to defense. Usage: `ref <item> <ACtype>`
+- `refg`: reforge item Actype to defense on ground. Usage: `refg <item> <Actype>`
+- `refk1`: reforger knife buy reforge dispose step one.
+- `refk2`: reforger knife buy reforge dispose step two.
+- `transmute_ug`: upgrades items to the next quality tier. Usage: `transmute_ug <jewel> <quality> Note: requires curly braces around <quality>`
+- `transmute_ratios`: show transmuter ratios for jewels.
+- `transmuter-stats`: transmuter color tracking.
 
 ### Chat (MIP)
 
-- `blacklist`: block names from MIP chat window (still logged and Discord) Usage: `blacklist / blacklist+ name / blacklist- name / blacklist-clear`
-- `mipon`: enable MIP capture class
-- `mipoff`: disable MIP capture class
+- `blacklist`: block names from MIP chat window (still logged and Discord). Usage: `blacklist / blacklist+ name / blacklist- name / blacklist-clear`
+- `mipon`: enable MIP capture class.
+- `mipoff`: disable MIP capture class.
 
 ### Eternal
 
-- `dupe`: duplicate items Usage: `dupe <item>`
-- `dc`: duplicate mobs Usage: `dc <mob> or 'dc`
-- `rd3`: reset dungeons for yourself or other players Usage: `rd3 <mj/sz/aegis/dungeonname>`
-- `ewell`: redirect all damage incoming to a mob until it explodes Usage: `ewell <mob> or 'ewell`
-- `rload`: reload unique items Usage: `rload <cup/cooler/freezer/glimmering/feather/item>`
-- `imm`: immunity to all damaging attacks upto a max of 90 rounds
-- `prot`: shrinks oversized hits compared to your max HP Usage: `toggle with prot on or prot off, stacks up to 120 rounds, full rules on mud info protection`
-- `fry`: room or single target damage with damage type equal to your mobs weakest AC Usage: `fry <mob> or 'fry' for all targets`
-- `refresh`: refresh a room that was previously defiled
-- `unload`: unload a room completely
-- `et-res`: resurrect another player or yourself Usage: `et-res <playername/myself>`
-- `tp1`: teleport yourself or party to CoT or teleport to another players party Usage: `tp1 <myself/party/playername>`
-- `tp2`: teleport present party to party member Usage: `tp2 <playername>`
-- `summ1`: summon party to you or a player to CoT Usage: `summ1 <party/playername>`
-- `summ2`: summon another players party to CoT Usage: `summ2 <playername>`
-- `em`: increase your stats upto a max of 50 percent for 1 hour
-- `hw`: xp bonus upto to a max of 32 percent for 1 hour
+- `dupe`: duplicate items. Usage: `dupe <item>`
+- `dc`: duplicate mobs. Usage: `dc <mob> or 'dc`
+- `rd3`: reset dungeons for yourself or other players. Usage: `rd3 <mj/sz/aegis/dungeonname>`
+- `ewell`: redirect all damage incoming to a mob until it explodes. Usage: `ewell <mob> or 'ewell`
+- `rload`: reload unique items. Usage: `rload <cup/cooler/freezer/glimmering/feather/item>`
+- `imm`: immunity to all damaging attacks upto a max of 90 rounds.
+- `prot`: shrinks oversized hits compared to your max HP. Usage: `toggle with prot on or prot off, stacks up to 120 rounds, full rules on mud info protection`
+- `fry`: room or single target damage with damage type equal to your mobs weakest AC. Usage: `fry <mob> or 'fry' for all targets`
+- `refresh`: refresh a room that was previously defiled.
+- `unload`: unload a room completely.
+- `et-res`: resurrect another player or yourself. Usage: `et-res <playername/myself>`
+- `tp1`: teleport yourself or party to CoT or teleport to another players party. Usage: `tp1 <myself/party/playername>`
+- `tp2`: teleport present party to party member. Usage: `tp2 <playername>`
+- `summ1`: summon party to you or a player to CoT. Usage: `summ1 <party/playername>`
+- `summ2`: summon another players party to CoT. Usage: `summ2 <playername>`
+- `em`: increase your stats upto a max of 50 percent for 1 hour.
+- `hw`: xp bonus upto to a max of 32 percent for 1 hour.
 
 ### ROLM
 
-- `rolm`: switch rolm damage by damage type or weapon type Usage: `rolm <dmgtype/wpntype>`
-- `setport`: sets an anchor to your current room
-- `port`: teleport to saved anchor point
-- `dove`: stops all combat in room
+- `rolm`: switch rolm damage by damage type or weapon type. Usage: `rolm <dmgtype/wpntype>`
+- `setport`: sets an anchor to your current room.
+- `port`: teleport to saved anchor point.
+- `dove`: stops all combat in room.
 
 ### Chaos areas
 
-- `charge_hat`: make waerlys velvet hat - charge capacitor - requires 23 lint
-- `makering-blue`: make a blue ring - requires axe/2 blue seeds/terras hammer
-- `makering-red`: make a red ring - requires axe/2 red seeds/terras hammer
-- `makering-white`: make a white ring - requires axe/2 white seeds/terras hammer
-- `makering-green`: make a green ring - requires axe/2 green seeds/terras hammer
-- `charmbracelet`: view charm bracelet options
+- `charge_hat`: make waerlys velvet hat - charge capacitor - requires 23 lint.
+- `makering-blue`: make a blue ring - requires axe/2 blue seeds/terras hammer.
+- `makering-red`: make a red ring - requires axe/2 red seeds/terras hammer.
+- `makering-white`: make a white ring - requires axe/2 white seeds/terras hammer.
+- `makering-green`: make a green ring - requires axe/2 green seeds/terras hammer.
+- `charmbracelet`: view charm bracelet options.
 
 ### Fantasy areas
 
-- `gmaster`: Talk to the Grand Master
-- `shankey`: shansabyks key to unlock door
-- `banu-help`: Mystic Cloak Helper Alias
-- `banu1`: Banu Step 1: search torch/get key
-- `banu2`: Banu Step 2: search trees/east with key from step 1
-- `banu3`: Banu Step 3: search pillar/fly/grab orb - orb 1
-- `banu4`: Banu Step 4: search fountain/get journal
-- `banu5`: Banu Step 5: search pathway/enter
-- `banu6`: Banu Step 6: chat with him/give journal to knight
-- `banu7`: Banu Step 7: open powder/sprinkle powder/enter
-- `banu8`: Banu Step 8: search ivy/get dynamite
-- `banu9`: Banu Step 9: ignite dynamite/drop dynamite
-- `banu99`: Banu Step 9 part 2: kill witch/search runes/get necklace - first tag
-- `banu10`: Banu Step 10: enter with necklace from step 9 part 2
-- `banu11`: Banu Step 11: search statues/fly/pry orb/get orb - orb 2
-- `banu12`: Banu Step 12: search sigil/north after giving orb 2 to guyahi
-- `guy1`: enters code word
-- `banshee-help`: Banshee Helper Alias
-- `banshee_fear`: fear guardians
-- `banshee_dispel`: dispel magic
-- `banshee_jar`: reads runes for code word
-- `get-floaties`: Ganderei Cae: picks up floaties potion
-- `startfishing`: start fishing
-- `stopfishing`: stop fishing
-- `sopem1`: enter sopem part 1
-- `sopem2`: enter sopem part 2
-- `run_uk`: undead knight book and hunt loop
+- `gmaster`: Talk to the Grand Master.
+- `shankey`: shansabyks key to unlock door.
+- `banu-help`: Mystic Cloak Helper Alias.
+- `banu1`: Banu Step 1: search torch/get key.
+- `banu2`: Banu Step 2: search trees/east with key from step 1.
+- `banu3`: Banu Step 3: search pillar/fly/grab orb - orb 1.
+- `banu4`: Banu Step 4: search fountain/get journal.
+- `banu5`: Banu Step 5: search pathway/enter.
+- `banu6`: Banu Step 6: chat with him/give journal to knight.
+- `banu7`: Banu Step 7: open powder/sprinkle powder/enter.
+- `banu8`: Banu Step 8: search ivy/get dynamite.
+- `banu9`: Banu Step 9: ignite dynamite/drop dynamite.
+- `banu99`: Banu Step 9 part 2: kill witch/search runes/get necklace - first tag.
+- `banu10`: Banu Step 10: enter with necklace from step 9 part 2.
+- `banu11`: Banu Step 11: search statues/fly/pry orb/get orb - orb 2.
+- `banu12`: Banu Step 12: search sigil/north after giving orb 2 to guyahi.
+- `guy1`: enters code word.
+- `banshee-help`: Banshee Helper Alias.
+- `banshee_fear`: fear guardians.
+- `banshee_dispel`: dispel magic.
+- `banshee_jar`: reads runes for code word.
+- `get-floaties`: Ganderei Cae: picks up floaties potion.
+- `startfishing`: start fishing.
+- `stopfishing`: stop fishing.
+- `sopem1`: enter sopem part 1.
+- `sopem2`: enter sopem part 2.
+- `run_uk`: undead knight book and hunt loop.
 
 ### Science areas
 
-- `continue20`: enter lvl 20 continue code
-- `continue40`: enter lvl 40 continue code
-- `set20`: save yourself to level 20
-- `set40`: save yourself to level 40
-- `eat-caps1`: swallow one blue capsule for balangool crafts
-- `eat-caps2`: swallow blue and orange capsules
-- `eat-caps3`: swallow blue orange and green capsules
-- `gool green-armour`: make balangool green armour - requires 2 green capsules or stones
-- `gool green-helmet`: make balangool green helmet - requires 2 green capsules or stones
-- `gool green-gloves`: make balangool green gloves - requires 2 green capsules or stones
-- `gool green-boots`: make balangool green boots - requires 2 green capsules or stones
-- `gool orange-armour`: make balangool orange armour - requires 2 orange capsules or stones
-- `gool orange-helmet`: make balangool orange helmet - requires 2 orange capsules or stones
-- `gool orange-gloves`: make balangool orange gloves - requires 2 orange capsules or stones
-- `gool orange-boots`: make balangool orange boots - requires 2 orange capsules or stones
-- `gool blue-armour`: make balangool blue armour - requires 2 blue capsules or stones
-- `gool blue-helmet`: make balangool blue helmet - requires 2 blue capsules or stones
-- `gool blue-gloves`: make balangool blue gloves - requires 2 blue capsules or stones
-- `gool blue-boots`: make balangool blue boots - requires 2 blue capsules or stones
+- `continue20`: enter lvl 20 continue code.
+- `continue40`: enter lvl 40 continue code.
+- `set20`: save yourself to level 20.
+- `set40`: save yourself to level 40.
+- `eat-caps1`: swallow one blue capsule for balangool crafts.
+- `eat-caps2`: swallow blue and orange capsules.
+- `eat-caps3`: swallow blue orange and green capsules.
+- `gool green-armour`: make balangool green armour - requires 2 green capsules or stones.
+- `gool green-helmet`: make balangool green helmet - requires 2 green capsules or stones.
+- `gool green-gloves`: make balangool green gloves - requires 2 green capsules or stones.
+- `gool green-boots`: make balangool green boots - requires 2 green capsules or stones.
+- `gool orange-armour`: make balangool orange armour - requires 2 orange capsules or stones.
+- `gool orange-helmet`: make balangool orange helmet - requires 2 orange capsules or stones.
+- `gool orange-gloves`: make balangool orange gloves - requires 2 orange capsules or stones.
+- `gool orange-boots`: make balangool orange boots - requires 2 orange capsules or stones.
+- `gool blue-armour`: make balangool blue armour - requires 2 blue capsules or stones.
+- `gool blue-helmet`: make balangool blue helmet - requires 2 blue capsules or stones.
+- `gool blue-gloves`: make balangool blue gloves - requires 2 blue capsules or stones.
+- `gool blue-boots`: make balangool blue boots - requires 2 blue capsules or stones.
 
 ### Debugging
 
-- `debug`: TinTin debug all on plus send echo
-- `debugoff`: turn off debug and send hook
-- `echo_on`: echo outbound sends without full debug
-- `mipdebug`: turn on MIP debug output (toggle mipdebug)
-- `mipdebugoff`: turn off MIP debug output (toggle mipdebug)
+- `debug`: TinTin debug all on plus send echo.
+- `debugoff`: turn off debug and send hook.
+- `echo_on`: echo outbound sends without full debug.
+- `mipdebug`: turn on MIP debug output (toggle mipdebug).
+- `mipdebugoff`: turn off MIP debug output (toggle mipdebug).
 
 ### Guild commands
 
 **All guilds**
 
-- `setup_3kdb_hpbar`: send hpconfig line for MIP hpbar per guild
+- `setup_3kdb_hpbar`: send hpconfig line for MIP hpbar per guild.
 
 **Bard**
 
-- `fillwater`: go to angel fountain in wayhaven and fill pitcher and glass with water
-- `clear_prots`: turn off all defenses
-- `maint`: keep picked defenses and songs up via the heartbeat, picks save with ld Usage: `maint, maint <spell>, maint off/all/clear/list`
-- `maint-help`: help for maint: commands, spell names and how it works
-- `vamp`: perform vampire - damage dealt to mob is returned as healing
-- `black`: perform black - causes mob to flee Usage: `black <target>`
-- `.itune`: perform invigorating tune - short term benefit which will differ for each person Usage: `.itune <player>`
-- `pd`: perform dirge - heal karma with a corpse
-- `ag`: perform amazing grace - reduce physical harm done to you
-- `om`: perform o muse - aura of protection
-- `rd`: cast focus the rainbow & perform rainbow of death
-- `rod`: perform rainbow of death & cast focus the rainbow
-- `lotb`: perform leader of the band
-- `itf`: perform into the fire - room damage
-- `ham_bot`: toggle hammer bot on & off
-- `rod_bot`: toggle rainbow of death bot on & off
-- `prots_spells`: cast all defensive spells
-- `prots_songs`: toggle defensive songs on & off - amazing grace & o muse
-- `prots_pfe`: cast protection from evil - defense against evil align mobs
-- `prots_pfg`: cast protection from good - defense against good align mobs
-- `prots_pfn`: cast protection from neutral - defense against neutral align mobs
-- `prots_pfc`: cast protection from frost - defense against ice damage
-- `prots_pfh`: cast protection from heat - defense against fire damage
-- `prots_mb`: cast mind blank - defense against mind damage
-- `prots_hs`: cast hardened skin - defense against edged damage
-- `prots_blink`: cast blink - enemy attacking you may end up missing
-- `prots_hr`: cast harmonic regeneration - health regeneration
-- `prots_grace`: perform amazing grace - reduce physical harm done to you
-- `prots_muse`: perform o muse - aura of protection
-- `buffup`: perform all song buffs for yourself or others Usage: `buffup <player>`
-- `blades`: perform blades dance
-- `critic`: perform caustic critic
-- `ebolt`: perform energy bolt
-- `es`: empowered strikes - weapon strikes do more damage
-- `reflex_clear`: remove every reflex you have set
-- `reflex_critic`: auto cast caustic critic whenever your SP is above &lt;sp&gt; - e.g. reflex_critic 800 fires at 801+ SP Usage: `reflex_critic <sp>`
-- `reflex_ow`: auto dirge a corpse (ow) whenever your karma drops below &lt;karma&gt; - e.g. reflex_ow 300 fires at 299 or less Usage: `reflex_ow <karma>`
-- `reflex_ma`: auto martial assault whenever your karma is above &lt;karma&gt; - e.g. reflex_ma 600 fires at 601+ karma Usage: `reflex_ma <karma>`
-- `reflex_soothe`: auto soothe whenever your SP drops below &lt;sp&gt; - e.g. reflex_soothe 300 fires at 299 or less Usage: `reflex_soothe <sp>`
+- `fillwater`: go to angel fountain in wayhaven and fill pitcher and glass with water.
+- `clear_prots`: turn off all defenses.
+- `maint`: keep picked defenses and songs up via the heartbeat, picks save with ld. Usage: `maint, maint <spell>, maint off/all/clear/list`
+- `maint-help`: help for maint: commands, spell names and how it works.
+- `vamp`: perform vampire - damage dealt to mob is returned as healing.
+- `black`: perform black - causes mob to flee. Usage: `black <target>`
+- `.itune`: perform invigorating tune - short term benefit which will differ for each person. Usage: `.itune <player>`
+- `pd`: perform dirge - heal karma with a corpse.
+- `ag`: perform amazing grace - reduce physical harm done to you.
+- `om`: perform o muse - aura of protection.
+- `rd`: cast focus the rainbow & perform rainbow of death.
+- `rod`: perform rainbow of death & cast focus the rainbow.
+- `lotb`: perform leader of the band.
+- `itf`: perform into the fire - room damage.
+- `ham_bot`: toggle hammer bot on & off.
+- `rod_bot`: toggle rainbow of death bot on & off.
+- `prots_spells`: cast all defensive spells.
+- `prots_songs`: toggle defensive songs on & off - amazing grace & o muse.
+- `prots_pfe`: cast protection from evil - defense against evil align mobs.
+- `prots_pfg`: cast protection from good - defense against good align mobs.
+- `prots_pfn`: cast protection from neutral - defense against neutral align mobs.
+- `prots_pfc`: cast protection from frost - defense against ice damage.
+- `prots_pfh`: cast protection from heat - defense against fire damage.
+- `prots_mb`: cast mind blank - defense against mind damage.
+- `prots_hs`: cast hardened skin - defense against edged damage.
+- `prots_blink`: cast blink - enemy attacking you may end up missing.
+- `prots_hr`: cast harmonic regeneration - health regeneration.
+- `prots_grace`: perform amazing grace - reduce physical harm done to you.
+- `prots_muse`: perform o muse - aura of protection.
+- `buffup`: perform all song buffs for yourself or others. Usage: `buffup <player>`
+- `blades`: perform blades dance.
+- `critic`: perform caustic critic.
+- `ebolt`: perform energy bolt.
+- `es`: empowered strikes - weapon strikes do more damage.
+- `reflex_clear`: remove every reflex you have set.
+- `reflex_critic`: auto cast caustic critic whenever your SP is above &lt;sp&gt; - e.g. reflex_critic 800 fires at 801+ SP. Usage: `reflex_critic <sp>`
+- `reflex_ow`: auto dirge a corpse (ow) whenever your karma drops below &lt;karma&gt; - e.g. reflex_ow 300 fires at 299 or less. Usage: `reflex_ow <karma>`
+- `reflex_ma`: auto martial assault whenever your karma is above &lt;karma&gt; - e.g. reflex_ma 600 fires at 601+ karma. Usage: `reflex_ma <karma>`
+- `reflex_soothe`: auto soothe whenever your SP drops below &lt;sp&gt; - e.g. reflex_soothe 300 fires at 299 or less. Usage: `reflex_soothe <sp>`
 
 **Elemental**
 
-- `blast`: give blast to current enemy - unbriefed Usage: `blast <nob>`
-- `blast2`: give blast to current enemy - briefed Usage: `blast2 <mob>`
-- `gs`: check escore
-- `gs2`: check escore2
-- `acid1`: set resolve & prismatic emission with acid damage
-- `blunt1`: set resolve & prismatic emission with blunt damage
-- `edged1`: set resolve & prismatic emission with edge damage
-- `electric1`: set resolve & prismatic emission with electric damage
-- `fire1`: set resolve & prismatic emission with fire damage
-- `ice1`: set resolve & prismatic emission with ice damage
-- `mind1`: set resolve & prismatic emission with mind damage
-- `poison1`: set resolve & prismatic emission with poison damage
-- `rad1`: set resolve & prismatic emission with radiation damage
-- `energy1`: set resolve & prismatic emission with energy damage
+- `blast`: give blast to current enemy - unbriefed. Usage: `blast <nob>`
+- `blast2`: give blast to current enemy - briefed. Usage: `blast2 <mob>`
+- `gs`: check escore.
+- `gs2`: check escore2.
+- `acid1`: set resolve & prismatic emission with acid damage.
+- `blunt1`: set resolve & prismatic emission with blunt damage.
+- `edged1`: set resolve & prismatic emission with edge damage.
+- `electric1`: set resolve & prismatic emission with electric damage.
+- `fire1`: set resolve & prismatic emission with fire damage.
+- `ice1`: set resolve & prismatic emission with ice damage.
+- `mind1`: set resolve & prismatic emission with mind damage.
+- `poison1`: set resolve & prismatic emission with poison damage.
+- `rad1`: set resolve & prismatic emission with radiation damage.
+- `energy1`: set resolve & prismatic emission with energy damage.
 
 **Fremen**
 
-- `donate_water`: fill & donate litterjons at shimoom
-- `donate_water1`: run to shimoom & donate water - drops all corpses from coffin/freezer/cooler and dupes them with mask
-- `fai_water`: pauses bot and drops all corpses - waits for mask split and then fai's everything
-- `fskills`: see additional information on fremen skills
-- `fremCorpse`: fremen corpse handling preset one
-- `fremCorpse2`: fremen corpse handling preset two
-- `fskills-cheap`: fremen skills list cheap mode
-- `gxp-stats`: show gxp tracking stats
-- `fskill-train`: list captured fremen skills sorted by training cost
+- `donate_water`: fill & donate litterjons at shimoom.
+- `donate_water1`: run to shimoom & donate water - drops all corpses from coffin/freezer/cooler and dupes them with mask.
+- `fai_water`: pauses bot and drops all corpses - waits for mask split and then fai's everything.
+- `fskills`: see additional information on fremen skills.
+- `fremCorpse`: fremen corpse handling preset one.
+- `fremCorpse2`: fremen corpse handling preset two.
+- `fskills-cheap`: fremen skills list cheap mode.
+- `gxp-stats`: show gxp tracking stats.
+- `fskill-train`: list captured fremen skills sorted by training cost.
 
 **Gentech**
 
-- `fill_cpc`: transfer item to CPC and return Usage: `fill_cpc <item name>`
-- `heal_up`: run to gentech infirmary admit flow
-- `shields`: gentech shields routine
-- `gt-repair`: repair twice stabilize tactical on self or named target Usage: `gt-repair optional target name`
-- `timescan`: timescan clear set query then estimate minutes to reset from flux
-- `check_slide`: check hp sp cpc pu gates and set timeslide able flag
-- `grav_well`: smuggle inducer charge grav sequence for gravity well
+- `fill_cpc`: transfer item to CPC and return. Usage: `fill_cpc <item name>`
+- `heal_up`: run to gentech infirmary admit flow.
+- `shields`: gentech shields routine.
+- `gt-repair`: repair twice stabilize tactical on self or named target. Usage: `gt-repair optional target name`
+- `timescan`: timescan clear set query then estimate minutes to reset from flux.
+- `check_slide`: check hp sp cpc pu gates and set timeslide able flag.
+- `grav_well`: smuggle inducer charge grav sequence for gravity well.
 
 **Jedi**
 
-- `weaponstats`: show light weapon mastery and guide lines
-- `setweaponmodetime`: set weapon mode timing
+- `weaponstats`: show light weapon mastery and guide lines.
+- `setweaponmodetime`: set weapon mode timing.
 
 **Juggernaut**
 
-- `ff`: fire all nukes at current enemy
-- `cdef`: cdefend players from getting beat on Usage: `cdef <party/player/show/clear>`
-- `tj`: view toplists from assorted catagories Usage: `tj <age/bdamage/bkill/cage/damage/gxp/jkills/recruits>`
-- `stimheal1`: loop through coffin, freezer and cooler for a corpse to heal stim
-- `stimheal2`: same as stimheal1 except will pause stepper if no corpses
-- `su1`: dismiss & resummon support mech into defend mode
-- `su2`: switch support mech to assault fire & defend mech
-- `su3`: switch support mech to assault electric & defend mech
-- `summonmech`: summon a new support mech & into assault fire
-- `sd`: switch support mech into defend mode
-- `jugg_report`: echo gxp and mount lock summary from tracked rounds
-- `reset_tracking`: clear gxp vars and mount counters used by jugg report
-- `support_defense`: preset support mech to armor repair defend then support reset status
-- `support_offense`: preset support mech to powerplant mount assault fire then reset status
-- `donateSupport`: parse juggs2 list and donate support type to low-stim online juggs Usage: `donateSupport optional type word default airdrop`
+- `ff`: fire all nukes at current enemy.
+- `cdef`: cdefend players from getting beat on. Usage: `cdef <party/player/show/clear>`
+- `tj`: view toplists from assorted catagories. Usage: `tj <age/bdamage/bkill/cage/damage/gxp/jkills/recruits>`
+- `stimheal1`: loop through coffin, freezer and cooler for a corpse to heal stim.
+- `stimheal2`: same as stimheal1 except will pause stepper if no corpses.
+- `su1`: dismiss & resummon support mech into defend mode.
+- `su2`: switch support mech to assault fire & defend mech.
+- `su3`: switch support mech to assault electric & defend mech.
+- `summonmech`: summon a new support mech & into assault fire.
+- `sd`: switch support mech into defend mode.
+- `jugg_report`: echo gxp and mount lock summary from tracked rounds.
+- `reset_tracking`: clear gxp vars and mount counters used by jugg report.
+- `support_defense`: preset support mech to armor repair defend then support reset status.
+- `support_offense`: preset support mech to powerplant mount assault fire then reset status.
+- `donateSupport`: parse juggs2 list and donate support type to low-stim online juggs. Usage: `donateSupport optional type word default airdrop`
 
 **Mage**
 
-- `str_party`: cast giant strength & strength on each party member
-- `prots_mb`: cast mindblank
-- `prots_pa`: cast prismatic aura
-- `prots_ps`: cast prismatic sphere
-- `prots_MG`: cast major globe
-- `prots_mg`: cast minor globe
-- `prots_ms`: cast magnificent shield
-- `prots_pfe`: cast protection from evil
-- `prots_pfg`: cast protection from good
-- `prots_rs`: cast rhino skin
-- `prots_ss`: cast stoneskin
-- `prots_shield`: cast shield
-- `prots_armor`: cast armor
-- `prots_blink`: cast blink
-- `clear_def`: clear contingencies and turn off defenses
-- `activate_sconfig`: activate summon config
-- `clear_sconfig`: clear summon config
-- `ms`: setup summon config Usage: `ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema`
-- `castper`: setup perform with a single target damage spell Usage: `castper' alone will show options - castper <option>`
-- `msc`: quick-set summon config digits and golem lines Usage: `msc two digit pairs then width tokens see mage summoning aliases`
-- `gc_ss`: setup stoneskin with greater contingency
-- `gc_mg`: setup major globe with greater contingency
-- `gc_shield`: setup shield with greater contingency
-- `gc_armor`: setup armor with greater contingency
-- `gc_pfg`: setup protection from good with greater contingency
-- `gc_pfe`: setup protection from evil with greater contingency
-- `gc_mantle`: setup mantle with greater contingency
-- `gc_ps`: setup prismatic sphere with greater contingency
-- `c_rs`: setup rhino skin with contingency
-- `c_mg`: setup minor globe with contingency
-- `c_shield`: setup shield with contingency
-- `c_mshield`: setup magnificent shield with contingency
-- `c_armor`: setup armor with contingency
-- `c_pfg`: setup protection from good with contingency
-- `c_pfe`: setup protection from evil with contingency
-- `c_blur`: setup blur with contingency
-- `c_blink`: setup blink with contingency
-- `c_invis`: setup invisibility with contingency
-- `clear_align`: clear prot-good and prot-evil flags in defs before recasting
-- `clear_prots`: remove entire defs table used by mage defense tracking
-- `maint`: keep picked defenses up via the heartbeat, maint setup also sets their contingencies Usage: `maint setup, maint, maint <spell>, maint default/off/all/clear/list`
-- `maint-help`: help for maint: commands, spell names and how it works
-- `summon_types`: print summon roster by slot with scroll panels
-- `summon_select`: pick summon for strategy list menu off clear or monster key Usage: `summon_select key or off or clear or empty for menu`
-- `summon_str`: giant strength on each summon stack self and golem
+- `str_party`: cast giant strength & strength on each party member.
+- `prots_mb`: cast mindblank.
+- `prots_pa`: cast prismatic aura.
+- `prots_ps`: cast prismatic sphere.
+- `prots_MG`: cast major globe.
+- `prots_mg`: cast minor globe.
+- `prots_ms`: cast magnificent shield.
+- `prots_pfe`: cast protection from evil.
+- `prots_pfg`: cast protection from good.
+- `prots_rs`: cast rhino skin.
+- `prots_ss`: cast stoneskin.
+- `prots_shield`: cast shield.
+- `prots_armor`: cast armor.
+- `prots_blink`: cast blink.
+- `clear_def`: clear contingencies and turn off defenses.
+- `activate_sconfig`: activate summon config.
+- `clear_sconfig`: clear summon config.
+- `ms`: setup summon config. Usage: `ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema`
+- `castper`: setup perform with a single target damage spell. Usage: `castper' alone will show options - castper <option>`
+- `msc`: quick-set summon config digits and golem lines. Usage: `msc two digit pairs then width tokens see mage summoning aliases`
+- `gc_ss`: setup stoneskin with greater contingency.
+- `gc_mg`: setup major globe with greater contingency.
+- `gc_shield`: setup shield with greater contingency.
+- `gc_armor`: setup armor with greater contingency.
+- `gc_pfg`: setup protection from good with greater contingency.
+- `gc_pfe`: setup protection from evil with greater contingency.
+- `gc_mantle`: setup mantle with greater contingency.
+- `gc_ps`: setup prismatic sphere with greater contingency.
+- `c_rs`: setup rhino skin with contingency.
+- `c_mg`: setup minor globe with contingency.
+- `c_shield`: setup shield with contingency.
+- `c_mshield`: setup magnificent shield with contingency.
+- `c_armor`: setup armor with contingency.
+- `c_pfg`: setup protection from good with contingency.
+- `c_pfe`: setup protection from evil with contingency.
+- `c_blur`: setup blur with contingency.
+- `c_blink`: setup blink with contingency.
+- `c_invis`: setup invisibility with contingency.
+- `clear_align`: clear prot-good and prot-evil flags in defs before recasting.
+- `clear_prots`: remove entire defs table used by mage defense tracking.
+- `maint`: keep picked defenses up via the heartbeat, maint setup also sets their contingencies. Usage: `maint setup, maint, maint <spell>, maint default/off/all/clear/list`
+- `maint-help`: help for maint: commands, spell names and how it works.
+- `summon_types`: print summon roster by slot with scroll panels.
+- `summon_select`: pick summon for strategy list menu off clear or monster key. Usage: `summon_select key or off or clear or empty for menu`
+- `summon_str`: giant strength on each summon stack self and golem.
 
 **Necromancer**
 
-- `teleport set`: set necromancer teleport anchor
-- `teleport`: necromancer teleport to saved teleport anchor
-- `preserve_remains`: preserve remains workflow
-- `topup`: top up reagents or supplies run
-- `maskNP`: mask corpse NP quick macros Usage: `maskNP width and digit suffixes see necro aliases`
-- `conjureUndead`: conjure undead
-- `qtNP`: quick teleport necro preset
-- `qtNPc`: qatrance coffin unwrap then preserve absorb Usage: `qtNPc with no args uses defaults or give corpse count`
-- `qtNPf`: qatrance freezer deslab then preserve absorb Usage: `qtNPf with no args uses defaults or give corpse count`
-- `qtNPcl`: qatrance cooler uncooler then preserve absorb Usage: `qtNPcl with no args uses defaults or give corpse count`
-- `check_chest`: necromancer chest check helper
-- `power`: send mud power and parse levels into client tables
-- `powers`: send mud powers and parse levels into client tables
-- `dsave_report`: necromancer dsave mob report
-- `iprime_tracker`: invoke prime success/fail counts Usage: `iprime_tracker or iprime_tracker reset`
-- `circle_tracker`: next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker Usage: `circle_tracker or circle_tracker reset`
-- `recover`: recover, also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on
-- `comt`: switch invoke damage types with comtrance Usage: `comt <damage type>`
+- `teleport set`: set necromancer teleport anchor.
+- `teleport`: necromancer teleport to saved teleport anchor.
+- `preserve_remains`: preserve remains workflow.
+- `topup`: top up reagents or supplies run.
+- `maskNP`: mask corpse NP quick macros. Usage: `maskNP width and digit suffixes see necro aliases`
+- `conjureUndead`: conjure undead.
+- `qtNP`: quick teleport necro preset.
+- `qtNPc`: qatrance coffin unwrap then preserve absorb. Usage: `qtNPc with no args uses defaults or give corpse count`
+- `qtNPf`: qatrance freezer deslab then preserve absorb. Usage: `qtNPf with no args uses defaults or give corpse count`
+- `qtNPcl`: qatrance cooler uncooler then preserve absorb. Usage: `qtNPcl with no args uses defaults or give corpse count`
+- `check_chest`: necromancer chest check helper.
+- `power`: send mud power and parse levels into client tables.
+- `powers`: send mud powers and parse levels into client tables.
+- `dsave_report`: necromancer dsave mob report.
+- `iprime_tracker`: invoke prime success/fail counts. Usage: `iprime_tracker or iprime_tracker reset`
+- `circle_tracker`: next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker. Usage: `circle_tracker or circle_tracker reset`
+- `recover`: recover, also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on.
+- `comt`: switch invoke damage types with comtrance. Usage: `comt <damage type>`
 
 **Priest**
 
-- `bless_party`: bless whole party chain
-- `fftouch`: faithful touch routine
-- `gxp_reset`: reset priest gxp and round tracking counters
-- `hp_monitor`: set party heal threshold as fraction of max hit points Usage: `hp_monitor whole number meaning percent of max`
-- `sp_monitor`: set party radiance threshold as fraction of max spell points Usage: `sp_monitor whole number meaning percent of max`
+- `bless_party`: bless whole party chain.
+- `fftouch`: faithful touch routine.
+- `gxp_reset`: reset priest gxp and round tracking counters.
+- `hp_monitor`: set party heal threshold as fraction of max hit points. Usage: `hp_monitor whole number meaning percent of max`
+- `sp_monitor`: set party radiance threshold as fraction of max spell points. Usage: `sp_monitor whole number meaning percent of max`
 
 **Psicorps**
 
-- `usep`: use selected psicorps power
-- `psi_donate`: donate psi resource run
-- `maint`: keep picked psicorps powers up via the heartbeat Usage: `maint, maint <power>, maint off/all/clear/list`
-- `maint-help`: help for maint: commands, power names and how it works
-- `refill_apump`: refill astral pump flow
-- `track_regen`: track psi regen stats
-- `track_regen_reset`: reset psi regen tracker
-- `gxp_reset`: reset psicorps gxp tracker
-- `reset_pw_tracking`: reset power word tracking
-- `start_pw_tracking`: start power word tracking
-- `stop_pw_tracking`: stop power word tracking
-- `gs_powers`: after gs add tracker entries for powers you already have
-- `aa_swap`: swap animal affinity implant to named affinity Usage: `aa_swap affinity name`
+- `usep`: use selected psicorps power.
+- `psi_donate`: donate psi resource run.
+- `maint`: keep picked psicorps powers up via the heartbeat. Usage: `maint, maint <power>, maint off/all/clear/list`
+- `maint-help`: help for maint: commands, power names and how it works.
+- `refill_apump`: refill astral pump flow.
+- `track_regen`: track psi regen stats.
+- `track_regen_reset`: reset psi regen tracker.
+- `gxp_reset`: reset psicorps gxp tracker.
+- `reset_pw_tracking`: reset power word tracking.
+- `start_pw_tracking`: start power word tracking.
+- `stop_pw_tracking`: stop power word tracking.
+- `gs_powers`: after gs add tracker entries for powers you already have.
+- `aa_swap`: swap animal affinity implant to named affinity. Usage: `aa_swap affinity name`
 
 **Sii**
 
-- `gxp_reset`: reset sii gxp tracker
+- `gxp_reset`: reset sii gxp tracker.
 
 [Back to top](#3kdb-manual)
