@@ -364,7 +364,7 @@ gag+ combat_generic
 
 ### How do I turn a feature on or off?
 
-`toggle-list` shows them all, and `toggle <name>` flips one.
+`toggle-list` shows them all, and `toggle <name>` flips one. `toggle-list <word>` finds one, and `toggle-reset` puts them all back to how they started, after asking first.
 
 ### How do I change guild?
 

@@ -8,10 +8,6 @@
 #var draw[chat][size] .2;
 #var draw[map][active] on;
 #NOP -- hidemap is saved with the other toggles, and this file reloads at every login;
-#if {"$toggles[hidemap]" == ""}
-{
-    #var toggles[hidemap] 0;
-};
 #if {"$toggles[hidemap]" == "1"}
 {
     #var draw[map][active] off;
@@ -823,28 +819,17 @@
     init_screen;
 };
 
-#NOP -- Catches hidemap, showmap and toggle hidemap. Any toggle fires this, so only redraw if the map should change;
-#event {VARIABLE UPDATED toggles}
-{
-    #if {"$toggles[hidemap]" == "1" && "$draw[map][active]" == "on"}
-    {
-        .map_visibility;
-    };
-    #elseif {"$toggles[hidemap]" == "0" && "$draw[map][active]" == "off"}
-    {
-        .map_visibility;
-    };
-};
-
 #alias {hidemap}
 {
     #var toggles[hidemap] 1;
+    .toggleChanged {hidemap};
     #echo {<cfb>   -----  Map hidden. Type showmap to bring it back.  -----<088>};
 };
 
 #alias {showmap}
 {
     #var toggles[hidemap] 0;
+    .toggleChanged {hidemap};
     #echo {<cfb>   -----  Map is showing again.  -----<088>};
 };
 

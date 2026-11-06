@@ -23,6 +23,7 @@
     {fracture_ctell} {0}
     {fracture_notify} {0}
     {go_echo} {1}
+    {hidemap} {0}
     {map_follow} {1}
     {map_vnum} {0}
     {mission} {0}
@@ -132,6 +133,10 @@
 #alias {.toggleChanged} {
     #if {"%1" == "discord_post"} {#var discordPost $toggles[discord_post]};
     #if {"%1" == "map_vnum"} {init_map};
+    #if {"%1" == "hidemap"}
+    {
+        .map_visibility;
+    };
     #if {"%1" == "sessionlog"} {#if $toggles[sessionlog] {.sessionlog_start} {sessionlog off}};
     #if {"%1" == "worlddrops2"} {.worlddrops2_watch};
     #if {"%1" == "artifacts"} {.artifacts_watch};

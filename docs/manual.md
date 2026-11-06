@@ -621,7 +621,7 @@ It reloads its scripts once the game confirms, and remembers your guild for next
 - `reset_gxp` resets guild experience tracking.
 - `.reps` is the reputation tracker.
 
-Some guilds have more. Check `dblib trackers` and `dblib <your guild>`.
+Some guilds have more. Check `dblib trackers` and `dblib <your guild>`. For example, necromancers can turn on `toggle circle_tracker` to add their Next Circle progress to the health bar, and `circle_tracker` shows a table of guild experience by Comtrance mode and power.
 
 [Back to top](#3kdb-manual)
 
@@ -730,6 +730,18 @@ That shows them all, whether each is on, and what it does. To flip one:
 toggle mission
 ```
 
+To find one, add a word. It matches part of a name or description, and `on` or `off` lists by status:
+
+```text
+toggle-list notify
+```
+
+To put every toggle back to how it started, use `toggle-reset`. It lists what would change first, and nothing happens unless you type this within 30 seconds:
+
+```text
+toggle-reset confirm
+```
+
 ### Hide spam (gags)
 
 ```text
@@ -772,7 +784,7 @@ Your choice is saved for each character, so it stays hidden until you bring it b
 showmap
 ```
 
-`toggle hidemap` does the same thing. `mapFull` still opens the full screen map while it's hidden.
+`toggle hidemap` does the same thing, and `toggle-reset` shows the map again. `mapFull` still opens the full screen map while it's hidden.
 
 ### Sounds
 
@@ -1724,6 +1736,8 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `powers`: send mud powers and parse levels into client tables
 - `dsave_report`: necromancer dsave mob report
 - `iprime_tracker`: invoke prime success/fail counts Usage: `iprime_tracker or iprime_tracker reset`
+- `circle_tracker`: next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker Usage: `circle_tracker or circle_tracker reset`
+- `recover`: recover, also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on
 - `comt`: switch invoke damage types with comtrance Usage: `comt <damage type>`
 
 **Priest**
