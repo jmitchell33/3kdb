@@ -502,6 +502,7 @@ If you're not in the right room, you get three choices for 5 seconds:
 
 - `playercheck` turns the check for other players on or off.
 - `autocollect` turns picking up all items on or off.
+- `whitelist` shows your VIP list, the players `playercheck` ignores. `whitelist+ <name>` adds one, `whitelist- <name>` removes one, and `whitelist-party` adds your party.
 
 ### Run several areas in a row
 
@@ -1344,6 +1345,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `infoPane`: get current room info.
 - `draw-map-side`: draw the map below the chat window instead of beside it.
 - `draw-map-top`: draw the map in its usual place at the top right.
+- `notelist`: list every map room that has a note.
 - `voidlink`: link exit to vnum and insert void between. Usage: `voidlink <dir> <vnum>`
 - `hmavoid`: mark CoT portal exits avoided for pathing.
 - `hmfollow`: clear avoid flags on CoT portal exits.
@@ -1360,6 +1362,12 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 
 ### Bot commands
 
+- `whitelist`: show your VIP list, players the bot's playercheck ignores.
+- `whitelist+`: add a player to your VIP list. Usage: `whitelist+ <name>`
+- `whitelist-`: remove a player from your VIP list. Usage: `whitelist- <name>`
+- `whitelist-clear`: clear your VIP list.
+- `whitelist-party`: add your party to your VIP list.
+- `whitelist-room`: add the players in this room to your VIP list.
 - `bot_report`: displays the progress and spoils of the current bot.
 - `playercheck`: toggles the playercheck.
 - `autocollect`: toggles picking up all items.
@@ -1474,6 +1482,11 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `fill-moulding`: examine moulding and unstash best quality you have.
 - `farmer-on`: turn farmer script on.
 - `farmer-off`: turn farmer script off.
+- `farm`: farmer commands and auto farming, after farmer-on, type farm alone for the list. Usage: `farm <option>`
+- `farmhelp`: farmer help, after farmer-on. Usage: `farmhelp <topic>`
+- `borrow-tomes`: borrow a volume of every crafting tome. Usage: `borrow-tomes <1/2/3>`
+- `buy-tomes`: buy a volume of every crafting tome. Usage: `buy-tomes <1/2/3>`
+- `box-tomes`: get a volume of every crafting tome from your box. Usage: `box-tomes <1/2/3>`
 
 ### Professions
 
@@ -1488,10 +1501,16 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `transmute_ug`: upgrades items to the next quality tier. Usage: `transmute_ug <jewel> <quality> Note: requires curly braces around <quality>`
 - `transmute_ratios`: show transmuter ratios for jewels.
 - `transmuter-stats`: transmuter color tracking.
+- `.scrounge`: trappers: scrounge an item in your material order. Usage: `.scrounge <item>`
+- `.scrounge-pref`: trappers: show your scrounge material order.
+- `.scrounge+`: trappers: raise a material's priority. Usage: `.scrounge+ <metal/wood/hide>`
+- `.scrounge-`: trappers: lower a material's priority. Usage: `.scrounge- <metal/wood/hide>`
 
 ### Chat (MIP)
 
 - `blacklist`: block names from MIP chat window (still logged and Discord). Usage: `blacklist / blacklist+ name / blacklist- name / blacklist-clear`
+- `sayhist`: check your say history.
+- `chatlog emotes`: turn logging emotes to the chat log on or off.
 - `mipon`: enable MIP capture class.
 - `mipoff`: disable MIP capture class.
 
@@ -1557,6 +1576,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `get-floaties`: Ganderei Cae: picks up floaties potion.
 - `startfishing`: start fishing.
 - `stopfishing`: stop fishing.
+- `fishlog`: show your fishing journal, after startfishing.
 - `sopem1`: enter sopem part 1.
 - `sopem2`: enter sopem part 2.
 - `run_uk`: undead knight book and hunt loop.
@@ -1590,6 +1610,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `echo_on`: echo outbound sends without full debug.
 - `mipdebug`: turn on MIP debug output (toggle mipdebug).
 - `mipdebugoff`: turn off MIP debug output (toggle mipdebug).
+- `.tickers`: list running tickers and the time left on each.
 
 ### Guild commands
 
@@ -1638,6 +1659,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `reflex_ow`: auto dirge a corpse (ow) whenever your karma drops below &lt;karma&gt; - e.g. reflex_ow 300 fires at 299 or less. Usage: `reflex_ow <karma>`
 - `reflex_ma`: auto martial assault whenever your karma is above &lt;karma&gt; - e.g. reflex_ma 600 fires at 601+ karma. Usage: `reflex_ma <karma>`
 - `reflex_soothe`: auto soothe whenever your SP drops below &lt;sp&gt; - e.g. reflex_soothe 300 fires at 299 or less. Usage: `reflex_soothe <sp>`
+- `.skills`: show the bard skill tracker, .skills reset clears it. Usage: `.skills or .skills reset`
 
 **Elemental**
 
@@ -1700,6 +1722,13 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `support_defense`: preset support mech to armor repair defend then support reset status.
 - `support_offense`: preset support mech to powerplant mount assault fire then reset status.
 - `donateSupport`: parse juggs2 list and donate support type to low-stim online juggs. Usage: `donateSupport optional type word default airdrop`
+
+**Knight**
+
+- `battlecry`: use a random battlecry from your list, or the guild default if it's empty.
+- `battlecry+`: add a battlecry to your list. Usage: `battlecry+ <text>`
+- `battlecry-`: remove a battlecry by its number. Usage: `battlecry- <number>`
+- `battlecry-list`: show your battlecry list.
 
 **Mage**
 
@@ -1777,6 +1806,8 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `gxp_reset`: reset priest gxp and round tracking counters.
 - `hp_monitor`: set party heal threshold as fraction of max hit points. Usage: `hp_monitor whole number meaning percent of max`
 - `sp_monitor`: set party radiance threshold as fraction of max spell points. Usage: `sp_monitor whole number meaning percent of max`
+- `buff`: cast bless and beneficence on a player. Usage: `buff <player>`
+- `buff_party`: cast bless and beneficence on each party member.
 
 **Psicorps**
 
