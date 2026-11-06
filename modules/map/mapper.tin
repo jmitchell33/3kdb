@@ -29,7 +29,9 @@
 		mapupdate;
 	};
 	#NOP -- The Rejected Game counts moves the map made ahead of the game, see common/map/rej_rotate.tin;
-	#if {&{rej_area_name}} {.rej_map_entered %0}
+	#if {&{rej_area_name}} {.rej_map_entered %0};
+	#NOP -- Lets artifacts know the map was in town, see common/eq/artifacts.tin;
+	#if {&{artifactTownAreas}} {.artifactRoomEntered %0};
 };
 
 #event {MAP EXIT ROOM} {
