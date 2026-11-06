@@ -1,6 +1,7 @@
 #NOP -- Arrow-key character menu. Start it from the repo folder with: tt++ startmenu.tin;
-#NOP -- Up/down picks a character, left/right picks its guild, Enter logs in. Number keys still log in directly.;
-#NOP -- The button row under the list adds, edits or removes characters. Names, guild arrows and buttons can be clicked.;
+#NOP -- Up/down picks a character, left/right picks its guild, Enter logs in. Number keys still log in directly, unless the list is scrolling.;
+#NOP -- The list and logo fit themselves to the screen, so a phone or a long list scrolls instead of losing the top.;
+#NOP -- The button row under the list adds, edits or removes characters, or logs in as a guest. Names, guild arrows and buttons can be clicked.;
 #NOP -- The character list, guild lists and last highlighted character are saved in chars/startmenu_data.tin.;
 #NOP -- The first time it runs, the list is built from $player1, $player2, ... if those are set.;
 #NOP -- Each character's current guild is saved in chars/<name>/guild.tin, which their character file reads.;
@@ -59,6 +60,7 @@ menu_close_classes;
     #var menu[row] $menu_sel;
     #if {$menu[count] == 0} {#var menu[row] 1};
     #var menu[btn] 1;
+    #var menu[top] 1;
     #var menu[prompt] {};
     #var menu[msg] {};
     menu_ld_load;
@@ -93,7 +95,8 @@ menu_close_classes;
         #regex {$menu_l} {^chars/{[a-z]+}/vars.tin:#VARIABLE xlinkdead_at {[0-9]+}} {
             #math menu_left {&2 + $menu_ld_hours * 3600 - $menu_ld_now};
             #if {"$menu_linkd[&1]" == "1"} {#var menu_left 1};
-            #if {$menu_left > 0 && &2 > $menu_reboot} {#var menu_ld_at[&1] &2};
+            #NOP -- A guest isn't saved, so it has no linkdead character to keep a timer for;
+            #if {$menu_left > 0 && &2 > $menu_reboot && "&1" != "guest"} {#var menu_ld_at[&1] &2};
         };
     };
 };
@@ -217,67 +220,462 @@ menu_close_classes;
         #list menu[buttons] add {{Edit $menu_chars[$menu_sel]}};
         #list menu[buttons] add {{Remove $menu_chars[$menu_sel]}};
     };
+    #list menu[buttons] add {{Log in as guest}};
     #list menu[buttons] add {Quit};
 };
 
-#alias {menu_draw} {
-    menu_buttons;
-    #screen clear all;
-    #showme {};
-    #showme {<ffa>  Choose a character<088>};
+#NOP -- menu_layout works out what fits. Every row is counted, because anything extra scrolls the top of the menu away;
+#NOP -- menu[overflow]: the list doesn't all fit, so it shows menu[top] to menu[bot] and a row saying what's hidden;
+#NOP -- menu[tight]: so little room that the gaps, reboot line and long help go, to leave more for characters;
+#NOP -- menu_lay_big: there's room for the big logo;
+#alias {menu_layout}
+{
+    #screen get rows menu_lay_rows;
+    #screen get cols menu_lay_cols;
+    #if {$menu_lay_cols < 1}
+    {
+        #var menu_lay_cols 80;
+    };
+    #if {$menu_lay_rows < 1}
+    {
+        #var menu_lay_rows 24;
+    };
+    menu_lay_measure_list;
+    #NOP -- The button row is two spaces, then each button with its brackets and two spaces after;
+    #var menu_lay_len 2;
+    #foreach {$menu[buttons][%*]} menu_lay_b
+    {
+        #format menu_lay_w {%L} {$menu_lay_b};
+        #math menu_lay_len {$menu_lay_len + $menu_lay_w + 6};
+    };
+    menu_lay_wrap $menu_lay_len;
+    #var menu_lay_btn_rows $menu_lay_wrapped;
+    #var menu_lay_msg_rows 0;
+    #if {"$menu[msg]" != ""}
+    {
+        #format menu_lay_w {%L} {$menu[msg]};
+        #math menu_lay_w {$menu_lay_w + 2};
+        menu_lay_wrap $menu_lay_w;
+        #var menu_lay_msg_rows $menu_lay_wrapped;
+    };
     menu_boot_text;
-    #if {"$menu_boot_line" != ""} {#showme {<ddd>  $menu_boot_line<088>}};
-    #showme {};
-    #if {$menu[count] > 0} {#loop 1 $menu[count] i {
-        #var menu_c $menu_chars[$i];
-        #var menu_g $menu[guild][$menu_c];
-        #if {&menu_guilds[$menu_c][] > 1} {#var menu_g {< $menu_g >}};
-        #var menu_n $i;
-        #if {$menu[count] > 9 && $i < 10} {#var menu_n { $i}};
+    #var menu_lay_boot_rows 0;
+    #if {"$menu_boot_line" != ""}
+    {
+        #format menu_lay_w {%L} {$menu_boot_line};
+        #math menu_lay_w {$menu_lay_w + 2};
+        menu_lay_wrap $menu_lay_w;
+        #var menu_lay_boot_rows $menu_lay_wrapped;
+    };
+    #var menu[tight] 0;
+    #var menu[overflow] 0;
+    #var menu_lay_big 0;
+    menu_lay_help;
+    #NOP -- Top row, title, reboot, a gap, the list, a gap, buttons, a gap, message, help, and the input line;
+    #math menu_lay_fixed {6 + $menu_lay_boot_rows + $menu_lay_btn_rows + $menu_lay_msg_rows + $menu_lay_help_rows};
+    #math menu_lay_free {$menu_lay_rows - $menu_lay_fixed};
+    #if {$menu_lay_total <= $menu_lay_free}
+    {
+        #var menu_lay_avail $menu_lay_total;
+        #if {$menu_lay_free - $menu_lay_total >= 8 && $menu_lay_cols >= 36}
+        {
+            #var menu_lay_big 1;
+        };
+    };
+    #else
+    {
+        #var menu[overflow] 1;
+        #math menu_lay_avail {$menu_lay_free - 1};
+        #var menu_lay_want 8;
+        #if {$menu[count] < 8}
+        {
+            #var menu_lay_want $menu[count];
+        };
+        #if {$menu_lay_avail < $menu_lay_want}
+        {
+            #var menu[tight] 1;
+            menu_lay_help;
+            #math menu_lay_free {$menu_lay_rows - 2 - $menu_lay_btn_rows - $menu_lay_msg_rows - $menu_lay_help_rows};
+            #if {$menu_lay_total <= $menu_lay_free}
+            {
+                #var menu[overflow] 0;
+                #var menu_lay_avail $menu_lay_total;
+            };
+            #else
+            {
+                #math menu_lay_avail {$menu_lay_free - 1};
+            };
+        };
+    };
+    #if {$menu_lay_avail < 1}
+    {
+        #var menu_lay_avail 1;
+    };
+    menu_lay_window;
+};
+
+#NOP -- menu_lay_wrap <length>: menu_lay_wrapped set to the rows that text takes. Filling a row exactly counts as two;
+#alias {menu_lay_wrap}
+{
+    #math menu_lay_wrapped {(%1 + $menu_lay_cols) / $menu_lay_cols};
+};
+
+#NOP -- Sets the rows each character takes, as a linkdead timer can wrap on a phone, and whether its guild is padded;
+#alias {menu_lay_measure_list}
+{
+    #var menu_lay_row {};
+    #var menu_lay_pad {};
+    #var menu_lay_total 0;
+    #if {$menu[count] == 0}
+    {
+        #var menu_lay_total 1;
+        #return;
+    };
+    #loop 1 $menu[count] menu_lay_i
+    {
+        #var menu_c $menu_chars[$menu_lay_i];
         menu_ld_text $menu_c;
-        #format menu_line {  %s: %-10s} {$menu_n} {$menu_c};
-        menu_link {menu_click_char $i} {$menu_line};
-        #var menu_line $menu_link;
-        #NOP -- Pad the guild before adding the links, which would count toward the width;
-        #format menu_g {%-16s} {$menu_g};
-        #if {&menu_guilds[$menu_c][] > 1} {
-            menu_link {menu_click_guild $i -1} {<};
-            #replace menu_g {<} {$menu_link};
-            menu_link {menu_click_guild $i 1} {>};
-            #replace menu_g {>} {$menu_link};
+        #format menu_lay_name {%L} {$menu_c};
+        #if {$menu_lay_name < 10}
+        {
+            #var menu_lay_name 10;
         };
-        #var menu_line {$menu_line $menu_g $menu_ld};
-        #if {$i == $menu[row]} {
-            #showme {<AAE><fff>$menu_line<088>};
-        } {
-            #showme {<ddd>$menu_line<088>};
+        #var menu_g $menu[guild][$menu_c];
+        #if {&menu_guilds[$menu_c][] > 1}
+        {
+            #var menu_g {< $menu_g >};
         };
-    }};
-    #if {$menu[count] == 0} {#showme {<ddd>  No characters yet<088>}};
-    #showme {};
+        #format menu_lay_guild {%L} {$menu_g};
+        #var menu_lay_padded $menu_lay_guild;
+        #if {$menu_lay_padded < 16}
+        {
+            #var menu_lay_padded 16;
+        };
+        #format menu_lay_num {%L} {$menu[count]};
+        #math menu_lay_base {2 + $menu_lay_num + 2 + $menu_lay_name + 1};
+        #var menu_lay_pad[$menu_lay_i] 1;
+        #if {"$menu_ld" != ""}
+        {
+            #format menu_lay_w {%L} {$menu_ld};
+            #math menu_lay_len {$menu_lay_base + $menu_lay_padded + 1 + $menu_lay_w};
+        };
+        #else
+        {
+            #math menu_lay_len {$menu_lay_base + $menu_lay_padded};
+            #if {$menu_lay_len >= $menu_lay_cols}
+            {
+                #var menu_lay_pad[$menu_lay_i] 0;
+                #math menu_lay_len {$menu_lay_base + $menu_lay_guild};
+            };
+        };
+        menu_lay_wrap $menu_lay_len;
+        #var menu_lay_row[$menu_lay_i] $menu_lay_wrapped;
+        #math menu_lay_total {$menu_lay_total + $menu_lay_wrapped};
+    };
+};
+
+#NOP -- menu_lay_help sets the help text for where the player is, and the rows it takes;
+#alias {menu_lay_help}
+{
+    #if {"$menu[prompt]" != ""}
+    {
+        #var menu_lay_hint {Type your answer and press Enter. An empty Enter cancels.};
+        #if {$menu[tight]}
+        {
+            #var menu_lay_hint {Empty Enter cancels};
+        };
+    };
+    #elseif {$menu[row] > $menu[count]}
+    {
+        #var menu_lay_hint {Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]   q: quit   or click};
+        #if {$menu[tight]}
+        {
+            #var menu_lay_hint {Left/right, Enter   Up: back};
+        };
+    };
+    #else
+    {
+        #var menu_lay_n {1-$menu[count]: log in directly};
+        #if {$menu[count] > 9 || $menu[overflow]}
+        {
+            #var menu_lay_n {1-$menu[count] then Enter: log in};
+        };
+        #var menu_lay_p {};
+        #if {$menu[overflow]}
+        {
+            #var menu_lay_p {PgUp/PgDn: page   };
+        };
+        #var menu_lay_hint {Up/down: character   ${menu_lay_p}Left/right: guild   Enter: log in   Tab: edit/remove   $menu_lay_n   q: quit   or click};
+        #if {$menu[tight]}
+        {
+            #var menu_lay_hint {Up/down, Enter   Tab: buttons};
+        };
+    };
+    #format menu_lay_w {%L} {$menu_lay_hint};
+    #math menu_lay_w {$menu_lay_w + 2};
+    menu_lay_wrap $menu_lay_w;
+    #var menu_lay_help_rows $menu_lay_wrapped;
+};
+
+#NOP -- menu_lay_window moves the list only as far as it takes to keep the highlighted character on screen;
+#alias {menu_lay_window}
+{
+    #if {$menu[count] == 0}
+    {
+        #var menu[top] 1;
+        #var menu[bot] 0;
+        #return;
+    };
+    #if {!$menu[overflow]}
+    {
+        #var menu[top] 1;
+        #var menu[bot] $menu[count];
+        #return;
+    };
+    #if {$menu[top] < 1}
+    {
+        #var menu[top] 1;
+    };
+    #if {$menu[top] > $menu_sel}
+    {
+        #var menu[top] $menu_sel;
+    };
+    #NOP -- Down past the end: drop rows from the top until the highlighted character fits;
+    #var menu_lay_sum 0;
+    #loop $menu[top] $menu_sel menu_lay_i
+    {
+        #math menu_lay_sum {$menu_lay_sum + $menu_lay_row[$menu_lay_i]};
+    };
+    #while {$menu_lay_sum > $menu_lay_avail && $menu[top] < $menu_sel}
+    {
+        #math menu_lay_sum {$menu_lay_sum - $menu_lay_row[$menu[top]]};
+        #math menu[top] {$menu[top] + 1};
+    };
+    #NOP -- Show as many as fit from there;
+    #var menu[bot] $menu[top];
+    #var menu_lay_sum $menu_lay_row[$menu[top]];
+    #while {$menu[bot] < $menu[count]}
+    {
+        #math menu_lay_i {$menu[bot] + 1};
+        #math menu_lay_w {$menu_lay_sum + $menu_lay_row[$menu_lay_i]};
+        #if {$menu_lay_w > $menu_lay_avail}
+        {
+            #break;
+        };
+        #var menu_lay_sum $menu_lay_w;
+        #var menu[bot] $menu_lay_i;
+    };
+    #NOP -- Room left at the end, such as after turning a phone sideways: bring earlier characters back;
+    #while {$menu[bot] == $menu[count] && $menu[top] > 1}
+    {
+        #math menu_lay_i {$menu[top] - 1};
+        #math menu_lay_w {$menu_lay_sum + $menu_lay_row[$menu_lay_i]};
+        #if {$menu_lay_w > $menu_lay_avail}
+        {
+            #break;
+        };
+        #var menu_lay_sum $menu_lay_w;
+        #var menu[top] $menu_lay_i;
+    };
+};
+
+#alias {menu_logo}
+{
+    #if {$menu_lay_big}
+    {
+        #showme {};
+        #showme {<adf><188>  ██████╗ ██╗  ██╗██████╗ ██████╗ <088>};
+        #showme {<aef><188>  ╚════██╗██║ ██╔╝██╔══██╗██╔══██╗<088>};
+        #showme {<aff><188>   █████╔╝█████╔╝ ██║  ██║██████╔╝<088>};
+        #showme {<afe><188>   ╚═══██╗██╔═██╗ ██║  ██║██╔══██╗<088>};
+        #showme {<afd><188>  ██████╔╝██║  ██╗██████╔╝██████╔╝<088>};
+        #showme {<afc><188>  ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═════╝ <088>};
+        #if {$menu_lay_cols >= 62}
+        {
+            #showme {<ddd>  A community project, built by many players of 3Kingdoms.<088>};
+        };
+        #else
+        {
+            #showme {<ddd>  Built by the 3k community.<088>};
+        };
+        #showme {};
+        #return;
+    };
+    #if {$menu[tight]}
+    {
+        #return;
+    };
+    #if {$menu_lay_cols >= 36}
+    {
+        #showme {<aff><188>  3kdb<088>  <ddd>Built by the 3k community<088>};
+    };
+    #else
+    {
+        #showme {<aff><188>  3kdb<088>};
+    };
+};
+
+#NOP -- The row under a scrolled list. Each side can be clicked to page that way;
+#alias {menu_draw_more}
+{
     #var menu_line {  };
-    #loop 1 &menu[buttons][] i {
+    #if {$menu[top] > 1}
+    {
+        #math menu_lay_i {$menu[top] - 1};
+        menu_link {menu_page -1} {▲ $menu_lay_i above};
+        #cat menu_line {<aff>$menu_link<088>   };
+    };
+    #if {$menu[bot] < $menu[count]}
+    {
+        #math menu_lay_i {$menu[count] - $menu[bot]};
+        menu_link {menu_page 1} {▼ $menu_lay_i below};
+        #cat menu_line {<aff>$menu_link<088>};
+    };
+    #showme {$menu_line};
+};
+
+#alias {menu_draw}
+{
+    menu_buttons;
+    menu_layout;
+    #screen clear all;
+    menu_logo;
+    #if {$menu[tight]}
+    {
+        #showme {<aff><188>  3kdb<088>  <ffa>Choose a character<088>};
+    };
+    #else
+    {
+        #showme {<ffa>  Choose a character<088>};
+        #if {"$menu_boot_line" != ""}
+        {
+            #showme {<ddd>  $menu_boot_line<088>};
+        };
+        #showme {};
+    };
+    #if {$menu[count] > 0}
+    {
+        #loop $menu[top] $menu[bot] i
+        {
+            #var menu_c $menu_chars[$i];
+            #var menu_g $menu[guild][$menu_c];
+            #if {&menu_guilds[$menu_c][] > 1}
+            {
+                #var menu_g {< $menu_g >};
+            };
+            #var menu_n $i;
+            #if {$menu[count] > 9 && $i < 10}
+            {
+                #var menu_n { $i};
+            };
+            menu_ld_text $menu_c;
+            #format menu_line {  %s: %-10s} {$menu_n} {$menu_c};
+            menu_link {menu_click_char $i} {$menu_line};
+            #var menu_line $menu_link;
+            #NOP -- Pad the guild before adding the links, which would count toward the width;
+            #if {$menu_lay_pad[$i]}
+            {
+                #format menu_g {%-16s} {$menu_g};
+            };
+            #if {&menu_guilds[$menu_c][] > 1}
+            {
+                menu_link {menu_click_guild $i -1} {<};
+                #replace menu_g {<} {$menu_link};
+                menu_link {menu_click_guild $i 1} {>};
+                #replace menu_g {>} {$menu_link};
+            };
+            #var menu_line {$menu_line $menu_g};
+            #if {"$menu_ld" != ""}
+            {
+                #var menu_line {$menu_line $menu_ld};
+            };
+            #if {$i == $menu[row]}
+            {
+                #showme {<AAE><fff>$menu_line<088>};
+            };
+            #else
+            {
+                #showme {<ddd>$menu_line<088>};
+            };
+        };
+    };
+    #else
+    {
+        #showme {<ddd>  No characters yet<088>};
+    };
+    #if {$menu[overflow]}
+    {
+        menu_draw_more;
+    };
+    #if {!$menu[tight]}
+    {
+        #showme {};
+    };
+    #var menu_line {  };
+    #loop 1 &menu[buttons][] i
+    {
         menu_link {menu_click_button $i} {[ $menu[buttons][$i] ]};
-        #if {$menu[row] == $menu[count] + 1 && $i == $menu[btn]} {
+        #if {$menu[row] == $menu[count] + 1 && $i == $menu[btn]}
+        {
             #cat menu_line {<AAE><fff>$menu_link<088>  };
-        } {
+        };
+        #else
+        {
             #cat menu_line {<ddd>$menu_link<088>  };
         };
     };
     #showme {$menu_line};
-    #showme {};
-    #if {"$menu[msg]" != ""} {#showme {  $menu[msg]}};
-    #if {"$menu[prompt]" != ""} {
-        #showme {<ddd>  Type your answer and press Enter. An empty Enter cancels.<088>};
-    } {
-        #if {$menu[row] > $menu[count]} {
-            #showme {<ddd>  Left/right: pick a button   Enter: choose   Tab or up: back to $menu_chars[$menu_sel]   q: quit   or click<088>};
-        } {
-            #var menu_line {1-$menu[count]: log in directly};
-            #if {$menu[count] > 9} {#var menu_line {1-$menu[count] then Enter: log in}};
-            #showme {<ddd>  Up/down: character   Left/right: guild   Enter: log in   Tab: edit/remove   $menu_line   q: quit   or click<088>};
-        };
+    #if {!$menu[tight]}
+    {
+        #showme {};
     };
+    #if {"$menu[msg]" != ""}
+    {
+        #showme {  $menu[msg]};
+    };
+    #showme {<ddd>  $menu_lay_hint<088>};
+};
+
+#NOP -- menu_page <-1 or 1>: move a screenful through the list, for PgUp/PgDn and clicking the row under it;
+#alias {menu_page}
+{
+    #if {"$menu[prompt]" != "" || $menu[count] == 0}
+    {
+        #return;
+    };
+    menu_num_cancel;
+    #var menu[msg] {};
+    #math menu_lay_w {$menu_sel + %1 * $menu_lay_avail};
+    menu_jump $menu_lay_w;
+};
+
+#NOP -- menu_wheel <-1 or 1>: one character at a time. Unlike the arrows it stops at the ends instead of wrapping;
+#alias {menu_wheel}
+{
+    #if {"$menu[prompt]" != "" || $menu[count] == 0 || $menu[row] > $menu[count]}
+    {
+        #return;
+    };
+    menu_num_cancel;
+    #var menu[msg] {};
+    #math menu_lay_w {$menu_sel + %1};
+    menu_jump $menu_lay_w;
+};
+
+#alias {menu_jump}
+{
+    #var menu_sel %1;
+    #if {$menu_sel < 1}
+    {
+        #var menu_sel 1;
+    };
+    #if {$menu_sel > $menu[count]}
+    {
+        #var menu_sel $menu[count];
+    };
+    #var menu[row] $menu_sel;
+    menu_save;
+    menu_draw;
 };
 
 #alias {menu_move} {
@@ -360,7 +758,8 @@ menu_close_classes;
         };
         #return;
     };
-    #if {$menu[count] < 10} {
+    #NOP -- With the list scrolling, a character might be off screen, so don't log in without showing it first;
+    #if {$menu[count] < 10 && !$menu[overflow]} {
         #if {%1 <= $menu[count]} {menu_login %1};
         #return;
     };
@@ -427,9 +826,31 @@ menu_close_classes;
     menu_save;
     menu_save_guild $menu_char;
     #var menu_guild_pick $menu[guild][$menu_char];
-    #NOP -- Remove the menu keys before connecting so they aren't copied into the game session.;
-    #NOP -- The mouse goes back off, as 3kdb has it in game until you turn it on with qq;
+    menu_start_connect;
+};
+
+#NOP -- Remove the menu keys before connecting so they aren't copied into the game session.;
+#NOP -- The mouse goes back off, as 3kdb has it in game until you turn it on with qq;
+#alias {menu_start_connect}
+{
     #delay {0} {#class startmenu kill;#config mouse off;menu_connect};
+};
+
+#NOP -- Guests have no password and aren't saved by the game, so this stays off the character list;
+#NOP -- and its folder (ignored by git) is made the first time it's needed;
+#alias {menu_login_guest}
+{
+    #script {menu_tmp} {test -f chars/guest/guest.tin && echo yes};
+    #if {"$menu_tmp[1]" != "yes"}
+    {
+        menu_create_files guest adventurer;
+    };
+    menu_save;
+    #var menu_char guest;
+    #var menu[guild][guest] adventurer;
+    menu_save_guild guest;
+    #var menu_guild_pick adventurer;
+    menu_start_connect;
 };
 
 #NOP -- Every line typed while the menu is up comes here first;
@@ -463,6 +884,7 @@ menu_close_classes;
         #format menu_tmp {%p} {$menu_tmp};
         menu_ask edit_guilds {Guilds for $menu_c, separated by spaces (the first is the default):} {$menu_tmp};
     };
+    #if {"$menu_b" == "Log in as guest"} {menu_login_guest};
     #if {"$menu_b" == "Quit"} {menu_quit};
     #if {"$menu_b" == "Remove $menu_c"} {
         #var menu[edit] $menu_c;
@@ -587,7 +1009,6 @@ menu_close_classes;
     #line log {chars/%1/%1.tin} {#var guild %2;};
     #line log {chars/%1/%1.tin} {#NOP -- The startup menu and gswap save the current guild here;};
     #line log {chars/%1/%1.tin} {#read chars/\$user/guild.tin;};
-    #line log {chars/%1/%1.tin} {};
     #line log {chars/%1/%1.tin} {#NOP -- Load Common files;};
     #line log {chars/%1/%1.tin} {#NOP -- _load_3kdb_common is located in common/config.tin;};
     #line log {chars/%1/%1.tin} {#read common/index.tin;};
@@ -650,6 +1071,21 @@ menu_close_classes;
 #macro {\t} {menu_tab};
 #macro {q} {menu_q};
 #event {CATCH RECEIVED INPUT} {menu_input {%0}};
+#macro {\e[5~} {menu_page -1};
+#macro {\e[6~} {menu_page 1};
+#event {SCROLLED MOUSE WHEEL UP}
+{
+    menu_wheel -1;
+};
+#event {SCROLLED MOUSE WHEEL DOWN}
+{
+    menu_wheel 1;
+};
+#NOP -- Rotating a phone or resizing the window changes how much fits;
+#event {SCREEN RESIZE}
+{
+    menu_draw;
+};
 
 #class startmenu close;
 
@@ -663,6 +1099,8 @@ menu_close_classes;
     #unvar PASSWORD;
     #script {menu_tmp} {test -f chars/$menu_char/private.tin && echo yes};
     #if {"$menu_tmp[1]" == "yes"} {#read chars/$menu_char/private.tin};
+    #NOP -- Git ignores a new character's vars.tin, so a folder from the project can arrive without one;
+    #script {menu_tmp} {cp -n chars/template/vars.tin chars/$menu_char/vars.tin};
     #read chars/$menu_char/$menu_char.tin;
     #NOP -- The guild scripts load when the game welcomes you, so the menu's pick can still replace the file's default;
     #if {"$menu_guild_pick" != "" && "$menu_guild_pick" != "?"} {#var guild $menu_guild_pick};
@@ -670,7 +1108,57 @@ menu_close_classes;
         #NOP -- Not anchored: the prompt can share a line with the name prompt before it;
         #line oneshot #action {Password:} {#send {$PASSWORD}};
     };
+    #line oneshot #action {^Would you like to create this character}
+    {
+        menu_new_char_prompt;
+    };
+    #line oneshot #action {^Are you the owner of that character}
+    {
+        menu_name_in_use_prompt;
+    };
     $menu_char;
+};
+
+#NOP -- 3k asks this for a name that's in use but not saved yet, like a new level 1. y asks for its password, then;
+#NOP -- creates the character again and disconnects the old one. That never gets a Password: prompt, so that;
+#NOP -- action goes, or later game text could set it off. The new ones only listen once 3k has asked;
+#alias {menu_name_in_use_prompt}
+{
+    #showme {<ffa>$user is already in use, by a character that isn't saved yet. If it's yours, type y. If not, type n and pick another name.<088>};
+    #if {"$PASSWORD" != "" && "$PASSWORD" != "\$PASSWORD"}
+    {
+        #unaction {Password:};
+        #line oneshot #action {^Enter any valid password used with this name:}
+        {
+            #send {$PASSWORD};
+        };
+        menu_listen_new_char_passwords;
+    };
+};
+
+#NOP -- 3k doesn't know this name yet. The player answers y or n, since a typo would make a real character.;
+#NOP -- The saved password is used for the two new prompts, and they only listen once 3k has asked.;
+#NOP -- This login never gets a Password: prompt, so that action goes, or later game text could set it off;
+#alias {menu_new_char_prompt}
+{
+    #showme {<ffa>$user isn't on 3k yet. Type y to create this character, or n to cancel. Check the spelling first.<088>};
+    #if {"$PASSWORD" != "" && "$PASSWORD" != "\$PASSWORD"}
+    {
+        #unaction {Password:};
+        menu_listen_new_char_passwords;
+    };
+};
+
+#alias {menu_listen_new_char_passwords}
+{
+    #line oneshot #action {^Enter the password you wish to use:}
+    {
+        #send {$PASSWORD};
+    };
+    #line oneshot #action {^Please type the password again for confirmation:}
+    {
+        #send {$PASSWORD};
+    };
 };
 
 #NOP -- In game: gswap <guild> swaps guilds. Once the game confirms with "You feel... different.",;
