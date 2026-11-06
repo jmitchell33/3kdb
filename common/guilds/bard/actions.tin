@@ -111,14 +111,42 @@
 #action {That creature is already enraged.} {#var mob[enrage] 1;} {6};
 
 #NOP -- Bard Stat Screen Modifications;
-#action {^-= Monetary gifts  : %d coins                                      =-} {
-    #var my[guild][donate_coins] %1
-} {2};
-#action {^-= Item gift value : %d coins                                     =-} {
-    #var my[guild][donate_items] %1;
-    #math my[guild][donate_total] {$my[guild][donate_coins] + $my[guild][donate_items]};
+#NOP -- Redraw a gift line with formatted numbers;
+#alias {.bard_gift_echo} {
+    #local label {%1};
+    #local coins {};
+    #local total {};
+    #local pad {};
+    #format coins {%g} {%2};
+    #local plain {-= $label $coins coins};
+    #local text {-= <128>$label <168>$coins coins<088>};
+    #if {"%3" != ""} {
+        #format total {%g} {%3};
+        #local plain {$plain (Total: $total)};
+        #local text {$text (Total: <168>$total<088>)};
+    };
+    #format pad {%L} {$plain};
+    #math pad {%4 - $pad - 2};
+    #if {$pad < 1} {#local pad 1};
+    #format pad {%-${pad}s} {};
+    #echo {$text$pad=-};
+};
+
+#action {^-= Monetary gifts  : %d coins%s=-$} {
+    #var my[guild][donate_coins] %1;
+    #format bardGiftWidth {%L} {%0};
+    #line gag;
+    .bard_gift_echo {Monetary gifts  :} {%1} {} {$bardGiftWidth};
 } {2};
 
+#NOP -- Append coins + items total to the items total;
+#action {^-= Item gift value : %d coins%s=-$} {
+    #var my[guild][donate_items] %1;
+    #math my[guild][donate_total] {$my[guild][donate_coins] + $my[guild][donate_items]};
+    #format bardGiftWidth {%L} {%0};
+    #line gag;
+    .bard_gift_echo {Item gift value :} {%1} {$my[guild][donate_total]} {$bardGiftWidth};
+} {2};
 
 #NOP -- Track wings;
 #action {^As you complete your invocation, you begin to feel a fiery heat consume} {
