@@ -130,12 +130,22 @@ tt++ startmenu.tin
 You'll see:
 
 ```text
+  ██████╗ ██╗  ██╗██████╗ ██████╗
+  ╚════██╗██║ ██╔╝██╔══██╗██╔══██╗
+   █████╔╝█████╔╝ ██║  ██║██████╔╝
+   ╚═══██╗██╔═██╗ ██║  ██║██╔══██╗
+  ██████╔╝██║  ██╗██████╔╝██████╔╝
+  ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═════╝
+  A community project, built by many players of 3Kingdoms.
+
   Choose a character
 
   No characters yet
 
-  [ Add ]  [ Quit ]
+  [ Add ]  [ Log in as guest ]  [ Quit ]
 ```
+
+On a small screen, or with a long character list, the logo shrinks to one line and the list scrolls.
 
 You must be inside the `3kdb` folder when you run `tt++ startmenu.tin`. The `cd` line above takes care of that.
 
@@ -162,6 +172,21 @@ Byron now appears in the list. The menu has made everything the character needs,
 ## Step 5: Log in
 
 With your character highlighted, press **Enter**. You can also press its number, such as `1`.
+
+**Brand new to 3k?** If that name isn't on the game yet, it asks `Would you like to create this character`. Check the spelling, because this makes a real character, then type `y` and press Enter. Your saved password is used for you. If you didn't save one, type the password you want, twice.
+
+The game then asks a few more questions. Type each answer and press Enter:
+
+- **Male or female**
+- **Your email address**, and whether players can see it
+- **Where you heard about 3Kingdoms**
+- **Whether you can see ANSI colours.** Type `y`, which suits nearly every terminal.
+- **Whether you want a hardcore character.** Type `no` unless you're sure, because one death means that character can no longer advance or leave town. `help hardcore` explains it.
+- **Whether you agree to the game's terms**
+
+3kdb then loads as usual, and the game offers a tutorial. Type `yes` or `no`. The game warns that level 1 characters aren't saved when you quit, and `help purge` says one that doesn't log in for 2 weeks is purged. Getting to level 2 only takes 300 more experience, from killing a few monsters.
+
+**3k only allows one character per player until level 50**, and extra ones have to be registered. Breaking this can get your characters removed, so read `help characters` before making a second one.
 
 If you didn't save a password, type it when the game asks.
 
@@ -204,7 +229,7 @@ cd ~/3kdb
 tt++ startmenu.tin
 ```
 
-Pick your character and press Enter. Type `quit` in the game to go back to the menu.
+Pick your character and press Enter. To go back to the menu, type `ld` in the game. Your character stays linkdead and keeps its equipment. `quit` also goes back to the menu, but it logs you out fully and you can lose equipment. See [Leaving the game](manual.md#leaving-the-game).
 
 ## Using the menu
 
@@ -212,7 +237,8 @@ Pick your character and press Enter. Type `quit` in the game to go back to the m
 - **Up / Down:** pick a character
 - **Left / Right:** change guild, if you listed more than one
 - **Enter:** log in
-- **1 to 9:** log in directly. With 10 or more characters, type the number and then press Enter.
+- **1 to 9:** log in directly. With 10 or more characters, or if the list doesn't all fit on your screen, type the number and then press Enter.
+- **Page Up / Page Down:** move a screenful, if the list doesn't all fit
 - **Tab:** jump to the Edit and Remove buttons
 - **q:** close the program
 
@@ -221,8 +247,11 @@ Pick your character and press Enter. Type `quit` in the game to go back to the m
 - **Add:** add another character
 - **Edit:** change a character's guild list
 - **Remove:** take a character off the menu. Its files are kept.
+- **Log in as guest:** play straight away with no character or password. The game doesn't save guests.
 
 You can also click names, guild arrows and buttons. Hold **Shift** to select text while the menu is showing.
+
+The list shows as many characters as your screen has room for and scrolls as you move. `▲ 3 above   ▼ 5 below` under it shows how many are hidden. You can tap or click that row to page through the list, or use the mouse wheel.
 
 To change guild while logged in, use `gswap` as usual, such as `gswap mage`. 3kdb reloads its scripts for the new guild and remembers it for next time.
 
@@ -286,6 +315,8 @@ It won't ask for a password here, because the character already exists. To have 
 cd ~/3kdb
 echo '#var PASSWORD {yourpassword};' >> chars/byron/private.tin
 ```
+
+Your password won't be sent upstream. Git ignores `private.tin`, so it stays on your computer, and the game's saved settings in `vars.tin` don't include it.
 
 ## Problems and fixes
 
