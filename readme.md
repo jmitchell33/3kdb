@@ -10,31 +10,47 @@ Feel free to contact me on 3k if you have any questions or would like to contrib
 Instructions on installing Tin-Tin are at the bottom.
 
 **CONNECTING TO 3K / BASIC PLAYING**
-#read chars/name/name.tin  -- For example, to play Byron, I would do #read chars/byron/byron.tin from the 'root' directory.
+Run tt++ startmenu.tin from the 'root' directory, pick your character and press Enter. See Getting Started below for first-time setup.
 
 
 **ESSENTIAL STRUCTURE:**
 * chars: Individual character settings.
 * common: Settings shared across all characters/global stuff.
 * modules: Individual script packages that do specific things, that specific characters can choose to utilize.
-* logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... you would create a folder called logs/jerry
+* logs/user: This should be the system user name, not the character.  For example, if you see on the shell line.  jerry@myVPS:/mud/chars/... the folder is called logs/jerry.  The start menu creates it for you.
 
 **Getting Started**
 
-Inside the chars folder, create a copy of the "template" folder, and rename the folder as your character's name and the playername.tin to your character's name.  There are a few variables inside the playername.tin that also need to be updated.
+You need TinTin++ (see Installing Tin-Tin below) and git. Then download 3kdb and open the menu:
 
-Using Byron as an example, the file chars/byron/playername.tin would become chars/byron/byron.tin and I would set the "guild" and "user" variables.
+```
+cd ~
+git clone https://github.com/jmitchell33/3kdb.git
+cd 3kdb
+tt++ startmenu.tin
+```
 
-    #var guild bard;
-    #var user byron;
-    #read chars/$user/vars.tin;
+Press Enter on [ Add ], then type your character's name, guild and password. The menu creates all the files and folders your character needs. Press Enter on your character to log in.
 
-    #NOP -- If discord hooks are setup set this to 1;
-    #var discordPost 1;
+Once you're inside 3k, run these once per character:
 
-    #NOP -- Load Common files;
-    #NOP -- _load_3kdb_common is located in common/config.tin;
-    #read common/index.tin;
+```
+setup_3kdb
+setup_3kdb_hpbar
+```
+
+To play again later:
+
+```
+cd ~/3kdb
+tt++ startmenu.tin
+```
+
+More help:
+* [docs/setup.md](docs/setup.md): the full setup guide, using the menu, and fixes for common problems.
+* [docs/manual.md](docs/manual.md): everything 3kdb can do, including how to make your own aliases and actions.
+* [docs/faq.md](docs/faq.md): short answers to common questions and problems.
+* [docs/github.md](docs/github.md): getting updates, keeping your own changes, forks and pull requests.
 
 # Assumed Guild Defaults
 A few notes on mudside defaults are assumed for each guild.

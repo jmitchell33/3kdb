@@ -7,6 +7,11 @@
 #var draw[chat][active] on;
 #var draw[chat][size] .2;
 #var draw[map][active] on;
+#NOP -- hidemap is saved with the other toggles, and this file reloads at every login;
+#if {"$toggles[hidemap]" == "1"}
+{
+    #var draw[map][active] off;
+};
 #var draw[map][position] top;
 #var draw[map][size] .3;
 #var draw[hpbar][active] on;
@@ -147,6 +152,11 @@
     } {
         #var map[top] 0;
         #var map[bottom] 0;
+        #NOP -- caption[top] comes from map[bottom]. With the map on the side chat is full width, so stay under it;
+        #if {"$draw[map][position]" != "top"}
+        {
+            #var map[bottom] $chat[height];
+        };
     };
 
     
@@ -161,7 +171,8 @@
         #math chat[height] {$chat[rows] + 1};
         #math ticker[top] {$chat[height]};
         #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
-        #if {"$draw[map][active]" == "on" && "$draw[map][position]" == "top" && "$draw[mobile][mode]" != "portrait"} {
+        #NOP -- Hiding the map keeps this column for the caption, so chat stays out of it;
+        #if {"$draw[map][position]" == "top" && "$draw[mobile][mode]" != "portrait"} {
             #math {chat[right]} {-$map[width]-1};
             #var ticker[right] $chat[right];
         } {
@@ -765,6 +776,11 @@
     #if {"$draw[mobile][mode]" == "portrait"} {
         #return;
     };
+    #NOP -- The room strip sits inside the map box, so it goes when the map does;
+    #if {"$draw[map][active]" == "off"}
+    {
+        #return;
+    };
     #NOP Notes from mapper;
     #map get roomname roomMapNameStr;
     #map get roomnote roomMapNoteStr;
@@ -786,6 +802,35 @@
     #var draw[map][position] top;
     init_screen;
     draw_all;
+};
+
+#NOP -- hidemap gives the map's space to the caption panel. Only the drawing goes, the map itself;
+#NOP -- keeps tracking you, so go, findhere and bots still work. The choice is saved per character;
+#alias {.map_visibility}
+{
+    #if {"$toggles[hidemap]" == "1"}
+    {
+        #var draw[map][active] off;
+    };
+    #else
+    {
+        #var draw[map][active] on;
+    };
+    init_screen;
+};
+
+#alias {hidemap}
+{
+    #var toggles[hidemap] 1;
+    .toggleChanged {hidemap};
+    #echo {<cfb>   -----  Map hidden. Type showmap to bring it back.  -----<088>};
+};
+
+#alias {showmap}
+{
+    #var toggles[hidemap] 0;
+    .toggleChanged {hidemap};
+    #echo {<cfb>   -----  Map is showing again.  -----<088>};
 };
 
 #NOP -- Rotation/SSH/tmux size changes reuse initialization after the existing delay.;

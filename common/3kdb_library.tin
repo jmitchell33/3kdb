@@ -288,6 +288,11 @@
 
 .add_library {farmer-on} {crafting} {turn farmer script on} {'farmer-on'} {modules/crafting/crafting.tin};
 .add_library {farmer-off} {crafting} {turn farmer script off} {'farmer-off'} {modules/crafting/crafting.tin};
+.add_library {farm} {crafting} {farmer commands and auto farming, after farmer-on, type farm alone for the list} {farm <option>} {modules/crafting/farmer.tin};
+.add_library {farmhelp} {crafting} {farmer help, after farmer-on} {farmhelp <topic>} {modules/crafting/farmer.tin};
+.add_library {borrow-tomes} {crafting} {borrow a volume of every crafting tome} {borrow-tomes <1/2/3>} {modules/crafting/crafting.tin};
+.add_library {buy-tomes} {crafting} {buy a volume of every crafting tome} {buy-tomes <1/2/3>} {modules/crafting/crafting.tin};
+.add_library {box-tomes} {crafting} {get a volume of every crafting tome from your box} {box-tomes <1/2/3>} {modules/crafting/crafting.tin};
 
 #NOP -------------------------- Mapping Aliases ----------------------------------;
 
@@ -301,7 +306,26 @@
 .add_library {mapexplore} {mapping} {walk and map every unvisited room of an area, then save} {mapexplore [area] / mapexplore stop} {modules/map/mapper.tin};
 .add_library {loadmap} {mapping} {load mapper and maphelper then goto cursor vnum} {'loadmap'} {modules/map/map.tin};
 .add_library {rotate} {mapping} {Rejected Game: line the map and inductor/crack path up with the room you are in} {'rotate'} {common/map/rej_rotate.tin};
-.add_library {hidemap} {mapping} {hide vtmap split and drawmap} {'hidemap'} {modules/map/map.tin};
+.add_library {hidemap} {mapping} {hide the map and give its space to the side panel, go and bots still work, saved per character} {'hidemap'} {common/draw.tin};
+.add_library {showmap} {mapping} {show the map again after hidemap} {'showmap'} {common/draw.tin};
+.add_library {mapgo} {mapping} {move the map cursor to a speedrun without moving you} {mapgo <speedrun>} {modules/map/maphelper.tin};
+.add_library {mapsave} {mapping} {save common/map/3k_shared.map} {'mapsave'} {modules/map/maphelper.tin};
+.add_library {mapload} {mapping} {load common/map/3k_shared.map} {'mapload'} {modules/map/maphelper.tin};
+.add_library {mapname} {mapping} {rename the current room} {mapname <name>} {modules/map/maphelper.tin};
+.add_library {mapnote} {mapping} {set the current room note} {mapnote <note>} {modules/map/maphelper.tin};
+.add_library {mapsym} {mapping} {set the current room symbol} {mapsym <char>} {modules/map/maphelper.tin};
+.add_library {maparea} {mapping} {set area name for the current room} {maparea <name>} {modules/map/maphelper.tin};
+.add_library {mapexit} {mapping} {make an exit direction run a command} {mapexit <exit> <command>} {modules/map/maphelper.tin};
+.add_library {mapdig} {mapping} {new exit and room, optional second arg links back} {mapdig <dir> [new]} {modules/map/maphelper.tin};
+.add_library {mapdelete} {mapping} {delete an exit, unlinks and removes the room} {mapdelete <exit>} {modules/map/maphelper.tin};
+.add_library {mapunlink} {mapping} {unlink an exit from its destination} {mapunlink <exit>} {modules/map/maphelper.tin};
+.add_library {maplink} {mapping} {link an exit to a room vnum} {maplink <exit> <room#>} {modules/map/maphelper.tin};
+.add_library {mapinsert} {mapping} {insert a room} {mapinsert <room#>} {modules/map/maphelper.tin};
+.add_library {mapm} {mapping} {move the map cursor one step} {mapm <dir>} {modules/map/maphelper.tin};
+.add_library {infoPane} {mapping} {get current room info} {'infoPane'} {modules/map/maphelper.tin};
+.add_library {draw-map-side} {mapping} {draw the map below the chat window instead of beside it} {'draw-map-side'} {common/draw.tin};
+.add_library {draw-map-top} {mapping} {draw the map in its usual place at the top right} {'draw-map-top'} {common/draw.tin};
+.add_library {notelist} {mapping} {list every map room that has a note} {'notelist'} {modules/mip/room.tin};
 .add_library {voidlink} {mapping} {link exit to vnum and insert void between} {voidlink <dir> <vnum>} {modules/map/mapper.tin};
 .add_library {hmavoid} {mapping} {mark CoT portal exits avoided for pathing} {'hmavoid'} {modules/map/mapper.tin};
 .add_library {hmfollow} {mapping} {clear avoid flags on CoT portal exits} {'hmfollow'} {modules/map/mapper.tin};
@@ -352,6 +376,7 @@
 .add_library {get-floaties} {fantasy} {Ganderei Cae: picks up floaties potion} {'get-floaties'} {common/areas/misc_common.tin};
 .add_library {startfishing} {fantasy} {start fishing} {'startfishing'} {common/areas/wsea_fishing.tin};
 .add_library {stopfishing} {fantasy} {stop fishing} {'stopfishing'} {common/areas/wsea_fishing.tin};
+.add_library {fishlog} {fantasy} {show your fishing journal, after startfishing} {'fishlog'} {common/areas/wsea_fishing.tin};
 .add_library {sopem1} {fantasy} {enter sopem part 1} {'sopem1'} {common/areas/serinth.tin};
 .add_library {sopem2} {fantasy} {enter sopem part 2} {'sopem2'} {common/areas/serinth.tin};
 .add_library {run_uk} {fantasy} {undead knight book and hunt loop} {'run_uk'} {common/areas/misc_common.tin};
@@ -391,6 +416,10 @@
 .add_library {transmute_ug} {profession} {upgrades items to the next quality tier} {'transmute_ug <jewel> <quality> Note: requires curly braces around <quality>'} {modules/professions/transmuter.tin};
 .add_library {transmute_ratios} {profession} {show transmuter ratios for jewels} {'transmute_ratios'} {modules/professions/transmuter.tin};
 .add_library {transmuter-stats} {profession} {transmuter color tracking} {'transmuter-stats'} {modules/profession/transmuter.tin};
+.add_library {.scrounge} {profession} {trappers: scrounge an item in your material order} {.scrounge <item>} {modules/professions/trapper.tin};
+.add_library {.scrounge-pref} {profession} {trappers: show your scrounge material order} {'.scrounge-pref'} {modules/professions/trapper.tin};
+.add_library {.scrounge+} {profession} {trappers: raise a material's priority} {.scrounge+ <metal/wood/hide>} {modules/professions/trapper.tin};
+.add_library {.scrounge-} {profession} {trappers: lower a material's priority} {.scrounge- <metal/wood/hide>} {modules/professions/trapper.tin};
 
 #NOP -------------------------- Guild hpbar setup ----------------------------------;
 
@@ -485,6 +514,8 @@
 .add_library {powers} {guild} {send mud powers and parse levels into client tables} {'powers'} {common/guilds/necromancer/aliases.tin};
 .add_library {dsave_report} {guild} {necromancer dsave mob report} {'dsave_report'} {common/guilds/necromancer/3kdb.tin};
 .add_library {iprime_tracker} {guild} {invoke prime success/fail counts} {iprime_tracker or iprime_tracker reset} {common/guilds/necromancer/iprime_tracker.tin};
+.add_library {circle_tracker} {guild} {next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker} {circle_tracker or circle_tracker reset} {common/guilds/necromancer/circle_tracker.tin};
+.add_library {recover} {guild} {recover, also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on} {recover} {common/guilds/necromancer/aliases.tin};
 .add_library {comt} {guild} {switch invoke damage types with comtrance} {comt <damage type>} {common/guilds/necromancer/aliases.tin};
 };
 
@@ -529,6 +560,7 @@
 .add_library {reflex_ow} {guild} {auto dirge a corpse (ow) whenever your karma drops below <karma> - e.g. reflex_ow 300 fires at 299 or less} {reflex_ow <karma>} {common/guilds/bard/aliases.tin};
 .add_library {reflex_ma} {guild} {auto martial assault whenever your karma is above <karma> - e.g. reflex_ma 600 fires at 601+ karma} {reflex_ma <karma>} {common/guilds/bard/aliases.tin};
 .add_library {reflex_soothe} {guild} {auto soothe whenever your SP drops below <sp> - e.g. reflex_soothe 300 fires at 299 or less} {reflex_soothe <sp>} {common/guilds/bard/aliases.tin};
+.add_library {.skills} {guild} {show the bard skill tracker, .skills reset clears it} {.skills or .skills reset} {common/guilds/bard/skilltracker.tin};
 };
 
 #NOP -------------------------- Angel Guild Aliases ----------------------------------;
@@ -592,6 +624,13 @@
 };
 
 #NOP -------------------------- Knight Guild Aliases ----------------------------------;
+#if {"$guild" == "knight"}
+{
+.add_library {battlecry} {guild} {use a random battlecry from your list, or the guild default if it's empty} {'battlecry'} {common/guilds/knight/aliases.tin};
+.add_library {battlecry+} {guild} {add a battlecry to your list} {battlecry+ <text>} {common/guilds/knight/aliases.tin};
+.add_library {battlecry-} {guild} {remove a battlecry by its number} {battlecry- <number>} {common/guilds/knight/aliases.tin};
+.add_library {battlecry-list} {guild} {show your battlecry list} {'battlecry-list'} {common/guilds/knight/aliases.tin};
+};
 
 
 #NOP -------------------------- Monk Guild Aliases ----------------------------------;
@@ -604,6 +643,8 @@
 .add_library {gxp_reset} {guild} {reset priest gxp and round tracking counters} {'gxp_reset'} {common/guilds/priest/aliases.tin};
 .add_library {hp_monitor} {guild} {set party heal threshold as fraction of max hit points} {hp_monitor whole number meaning percent of max} {common/guilds/priest/actions.tin};
 .add_library {sp_monitor} {guild} {set party radiance threshold as fraction of max spell points} {sp_monitor whole number meaning percent of max} {common/guilds/priest/actions.tin};
+.add_library {buff} {guild} {cast bless and beneficence on a player} {buff <player>} {common/guilds/priest/aliases.tin};
+.add_library {buff_party} {guild} {cast bless and beneficence on each party member} {'buff_party'} {common/guilds/priest/aliases.tin};
 };
 
 #NOP -------------------------- Psicorps Guild Aliases ----------------------------------;
@@ -654,6 +695,19 @@
 .add_library {beepoff} {misc} {turn off terminal beep on events (toggle beep)} {'beepoff'} {common/aliases.tin};
 .add_library {qq} {misc} {toggle mouse capture for clickable UI (toggle mouseActive)} {'qq'} {common/events.tin};
 .add_library {toggle-list} {misc} {3kdb current toggles list} {'toggle-list'} {common/toggles.tin};
+.add_library {toggle} {misc} {turn a toggle on or off, see toggle-list} {toggle <name>} {common/toggles.tin};
+.add_library {toggle-reset} {misc} {set every toggle back to its default, asks first} {toggle-reset then toggle-reset confirm} {common/toggles.tin};
+.add_library {themes} {misc} {list color themes or preview one} {themes or themes <name>} {common/themes.tin};
+.add_library {theme} {misc} {switch to a color theme} {theme <name>} {common/themes.tin};
+.add_library {colors} {misc} {show the available colors} {'colors'} {modules/colors/colors.tin};
+.add_library {.reload} {misc} {reload your character files and guild scripts after editing them} {'.reload'} {common/aliases.tin};
+.add_library {caption_view} {misc} {switch the side panel tab} {caption_view <general/bot/map>} {common/draw.tin};
+.add_library {whitelist} {bot} {show your VIP list, players the bot's playercheck ignores} {'whitelist'} {common/whitelist.tin};
+.add_library {whitelist+} {bot} {add a player to your VIP list} {whitelist+ <name>} {common/whitelist.tin};
+.add_library {whitelist-} {bot} {remove a player from your VIP list} {whitelist- <name>} {common/whitelist.tin};
+.add_library {whitelist-clear} {bot} {clear your VIP list} {'whitelist-clear'} {common/whitelist.tin};
+.add_library {whitelist-party} {bot} {add your party to your VIP list} {'whitelist-party'} {common/whitelist.tin};
+.add_library {whitelist-room} {bot} {add the players in this room to your VIP list} {'whitelist-room'} {common/whitelist.tin};
 .add_library {sessionlog} {misc} {log the whole game session to logs/<user>/sessions/<char>_<date>.log, old days zstd compressed - toggle sessionlog keeps it on for this character} {sessionlog on|off} {modules/sessionlog/sessionlog.tin};
 .add_library {grep} {misc} {search session scrollback buffer} {grep <pattern>} {common/aliases.tin};
 .add_library {do_action} {misc} {run all queued actionStack entries then clear stack} {'do_action'} {common/aliases.tin};
@@ -707,10 +761,15 @@
 .add_library {echo_on} {debug} {echo outbound sends without full debug} {'echo_on'} {common/aliases.tin};
 .add_library {mipdebug} {debug} {turn on MIP debug output (toggle mipdebug)} {'mipdebug'} {modules/mip/mip.tin};
 .add_library {mipdebugoff} {debug} {turn off MIP debug output (toggle mipdebug)} {'mipdebugoff'} {modules/mip/mip.tin};
+.add_library {.tickers} {debug} {list running tickers and the time left on each} {'.tickers'} {modules/helpers/functions.tin};
 
 #NOP -------------------------- MIP Aliases ----------------------------------;
 
 .add_library {blacklist} {mip} {block names from MIP chat window (still logged and Discord)} {blacklist / blacklist+ name / blacklist- name / blacklist-clear} {modules/mip/blacklist.tin};
+
+.add_library {sayhist} {mip} {check your say history} {'sayhist'} {modules/mip/chatlog.tin};
+
+.add_library {chatlog emotes} {mip} {turn logging emotes to the chat log on or off} {'chatlog emotes'} {modules/mip/chatlog.tin};
 .add_library {mipon} {mip} {enable MIP capture class} {'mipon'} {modules/mip/mip.tin};
 .add_library {mipoff} {mip} {disable MIP capture class} {'mipoff'} {modules/mip/mip.tin};
 

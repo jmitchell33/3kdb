@@ -113,19 +113,50 @@
 }
 #delay {artifacts_watch} {.artifacts_watch} {7};
 
-#NOP -- .artifactInTown: artifactInTown is 1 when the map has the room in a town area. A room the map doesn't know;
-#NOP -- (no area) counts as out of town;
-#alias {.artifactInTown}
+#NOP -- .artifactTownCheck <area>: artifactInTown is 1 when it's a town area;
+#alias {.artifactTownCheck}
 {
     #var artifactInTown 0;
-    #var artifactArea {};
-    #map get roomarea artifactArea;
     #foreach {$artifactTownAreas} {artifactTown}
     {
-        #if {"$artifactArea" == "$artifactTown"}
+        #if {"%1" == "$artifactTown"}
         {
             #var artifactInTown 1;
         };
+    };
+}
+
+#NOP -- .artifactRoomEntered <vnum>: MAP ENTER ROOM calls this. Remembers when the map was last in town;
+#NOP -- #map run moves the map to the end of the run before the game's text for those rooms arrives, so the map's;
+#NOP -- room alone can't say where a line came from. Running out of town would otherwise look like out of town;
+#alias {.artifactRoomEntered}
+{
+    #if {"$toggles[artifacts]" == "1"}
+    {
+        #var artifactArea {};
+        #map get roomarea artifactArea {%1};
+        .artifactTownCheck {$artifactArea};
+        #if {$artifactInTown}
+        {
+            #format artifactTownTime {%T};
+        };
+    };
+}
+
+#NOP -- .artifactInTown: artifactInTown is 1 when the map has the room in a town area, or was in one in the last;
+#NOP -- artifactTownWindow seconds. A room the map doesn't know (no area) counts as out of town;
+#var artifactTownWindow 5;
+#var artifactTownTime 0;
+#alias {.artifactInTown}
+{
+    #var artifactArea {};
+    #map get roomarea artifactArea;
+    .artifactTownCheck {$artifactArea};
+    #local now {};
+    #format now {%T};
+    #if {$now - $artifactTownTime <= $artifactTownWindow}
+    {
+        #var artifactInTown 1;
     };
 }
 
