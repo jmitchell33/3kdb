@@ -60,8 +60,9 @@
 #action {^You lift the drink to your mouth, but in your stomach} {#var my[drunk] 1} {2};
 #action {^You drink the wine and feel healed.$} {#var my[drunk] 0} {2};
 
-#action {^The effects of the%*blue capsule fade away.$} {#if !$idle_flag {swallow blue capsule}} {2};
-#action {^The effects of the%*orange capsule fade away.$} {#if !$idle_flag {swallow orange capsule}} {2};
+#action {^The effects of the%*blue capsule fade away.$} {#if {!$idle_flag && "$toggles[capsules]" == "1"} {swallow blue capsule}} {2};
+#action {^The effects of the%*orange capsule fade away.$} {#if {!$idle_flag && "$toggles[capsules]" == "1"} {swallow orange capsule}} {2};
+#action {^The effects of the%*green capsule fade away.$} {#if {!$idle_flag && "$toggles[capsules_green]" == "1"} {swallow green capsule}} {2};
 
 #NOP #action {Zosimus says: There, it is done, push your hand into the rump of the beast} {push hand into cows rump};
 
