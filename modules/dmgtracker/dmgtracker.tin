@@ -384,7 +384,7 @@ dreset;
 
 #NOP -- One line under the round's hit lines with the total;
 #alias .dmgRoundTotalEcho {
-    #if {$gags[combat_numbers] || "$toggles[dmg_total]" == "0" || $cmbt[round][mobs] < 2} {#return};
+    #if {"$gags[combat_numbers]" == "1" || "$toggles[dmg_total]" == "0" || $cmbt[round][mobs] < 2} {#return};
     #local tmpMobs $cmbt[round][mobs];
     #if {$cmbt[affects][eradication] && "$cmbt[last][mobs]" != ""} {#local tmpMobs $cmbt[last][mobs]};
     #format tmpTotalDmg {%g} {$cmbt[round][cat][total][dmg]};
