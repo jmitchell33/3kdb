@@ -17,8 +17,9 @@
 #var maint_spells[es]    {{name} {Empowered Strikes}       {defs} {es}    {prot} {es}    {bots} {0}};
 #var maint_spells[ag]    {{name} {Amazing Grace (song)}    {defs} {ag}    {prot} {ag}    {bots} {0}};
 #var maint_spells[om]    {{name} {O Muse (song)}           {defs} {om}    {prot} {o}     {bots} {0}};
+#var maint_spells[vamp]  {{name} {Vampire (song)}          {defs} {v}     {prot} {v}     {bots} {0}};
 #var maint_spells[hr]    {{name} {Harmonic Regeneration}   {defs} {hr}    {prot} {hr}    {bots} {1}};
-#list maint_order create {mb;hs;blink;pfe;pfg;pfn;pfc;pfh;es;ag;om;hr};
+#list maint_order create {mb;hs;blink;pfe;pfg;pfn;pfc;pfh;es;ag;om;vamp;hr};
 #NOP -- What maint default picks;
 #list maint_default create {mb;hs;blink;pfe;pfg;pfn;pfc;pfh;es;ag;om};
 
@@ -35,6 +36,7 @@
     {es} {es} {empowered} {es} {strikes} {es}
     {ag} {ag} {grace} {ag}
     {om} {om} {o} {om} {muse} {om}
+    {vamp} {vamp} {v} {vamp} {vampire} {vamp}
     {hr} {hr} {harmonic} {hr} {regen} {hr}
 };
 
@@ -309,7 +311,7 @@
     #echo {  <ffa>maint del <spell> ... <fff>unpick<088>};
     #echo {  <ffa>maint all             <fff>pick every spell and song<088>};
     #echo {  <ffa>maint default         <fff>pick the usual set (replaces your picks)<088>};
-    #echo {  <ffa>                      <888>every spell and song except Harmonic Regeneration<088>};
+    #echo {  <ffa>                      <888>every spell and song except Vampire and Harmonic Regeneration<088>};
     #echo {  <ffa>maint clear           <fff>unpick everything and stop<088>};
     #echo {  <ffa>maint list            <fff>every spell: picked, kept up, up now, variables<088>};
     #echo {<ccf>  ---------------------------------------------------------<088>};
@@ -320,6 +322,7 @@
     #echo {    <ffa>pfn    <ccc>Protection from Neutral <ffa>pfc    <ccc>Protection from Frost<088>};
     #echo {    <ffa>pfh    <ccc>Protection from Heat    <ffa>hr     <ccc>Harmonic Regeneration<088>};
     #echo {    <ffa>ag     <ccc>Amazing Grace (song)    <ffa>om     <ccc>O Muse (song)<088>};
+    #echo {    <ffa>vamp   <ccc>Vampire (song)<088>};
     #echo {<ccf>  ---------------------------------------------------------<088>};
     #echo {  <fff>Fresh login, step by step<088>};
     #echo {  <ccc> <ffa>1.<ccc> Pick your spells once, e.g. <ffa>maint hs mb blink pfe ag<ccc>.<088>};
@@ -336,7 +339,8 @@
     #echo {  <ccc>Harmonic Regeneration is cast once a round when you have the SP.<088>};
     #echo {  <ccc>The hammer and rainbow bots turn it on and off themselves, so<088>};
     #echo {  <ccc>maint leaves it alone unless you pick it. Empowered Strikes waits<088>};
-    #echo {  <ccc>for 400 karma. Nothing is recast while you are idle (deadman).<088>};
+    #echo {  <ccc>for 400 karma. Vampire is only sung in combat, at vampireKarma<088>};
+    #echo {  <ccc>(400) or more. Nothing is recast while you are idle (deadman).<088>};
     #echo {<ccf>  =========================================================<088>};
     #echo {};
 };
