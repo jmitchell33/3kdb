@@ -1,8 +1,288 @@
 #class {guild_hpbar} {kill}
 #class {guild_hpbar} {open}
 
-#action {HP: %d/%d SP: %d/%d K: %d/%d V: %d/%d S:%d|%d%%} {
-    #if $gags[hpbar] {#line gag}
+#NOP -- Bard custom_hp. Type setup_3kdb_hpbar once to send it to the mud with bset;
+#NOP -- Colors use the mud ansi names as @name:text@ (see ansi colors). bset custom_hp 0 resets to the 3k default;
+#NOP -- $COF$ prints Coffin:n/n and $P$ prints P: n, both are blank when there is nothing to show;
+#NOP -- $C$ prints T:xxx (mob health) only in combat;
+#NOP -- Plain version without colors for copy and paste;
+#NOP bset custom_hp HP: &$HP2$& SP: &$SP2$& K: &$K2$& V: &$V2$& S:&$S$&/&$SR$&%& &$C$& &$NL$&PWRS: &$POWERS$& &$NL$&SPELLS: &$SPELLS$& &$NL$&SONGS: &$SONGS$& &$NL$&&$COF$& &G2N: &$G2N%$&&%& (&$G2N$&) Coins: &$AU$& &$P$&;
+#alias {setup_3kdb_hpbar} {
+    #send {bset custom_hp @cyan:HP:@ &$HP2$& @cyan:SP:@ &$SP2$& @cyan:K:@ &$K2$& @cyan:V:@ &$V2$& @cyan:S:@@yellow:&$S$&@/@grey:&$SR$&%@ @hired:&$C$&@ &$NL$&@cyan:PWRS:@ &$POWERS$& &$NL$&@cyan:SPELLS:@ &$SPELLS$& &$NL$&@cyan:SONGS:@ &$SONGS$& &$NL$&@cyan:&$COF$&@ @cyan:G2N:@ @higreen:&$G2N%$&%@ @grey:(&$G2N$&)@ @cyan:Coins:@ @yellow:&$AU$&@ @hicyan:&$P$&@};
+    #send {bset custom_hp ?};
+};
+
+#NOP -- Plain TinTin patterns on purpose. A {{regex}} pattern makes %1 the whole line and shifts every capture by one;
+
+#NOP -- Line 1: HP: 7718/7560 SP: 2809/2809 K: 1045/1953 V: 92/100 S:4/25% T:ble;
+#NOP -- HP SP karma voice stay with MIP (my[hp] my[sp] my[gp1] my[gp2]) because MIP works out my[x][change] from them;
+#NOP -- Writing them here first would make every MIP change read 0, so the bar copy goes in my[bard][bar];
+#action {^HP: %d/%d SP: %d/%d K: %d/%d V: %d/%d S:%d/%d\%%*} {
+    #if $gags[hpbar] {#line gag};
+    #math _bhp_fired[line1] {$_bhp_fired[line1] + 1};
+    #NOP -- Every value in braces. #var name with no value prints #VARIABLE and leaves the old value;
+    #var my[bard][bar][hp] {%1};
+    #var my[bard][bar][hp_max] {%2};
+    #var my[bard][bar][sp] {%3};
+    #var my[bard][bar][sp_max] {%4};
+    #var my[bard][bar][karma] {%5};
+    #var my[bard][bar][karma_max] {%6};
+    #var my[bard][bar][voice] {%7};
+    #var my[bard][bar][voice_max] {%8};
+    #var my[smile] {%9};
+    #var my[bard][smile_reset] {%10};
+    #var my[bard][mob_status] {};
+    #regex {%11} {T:%S} {#var my[bard][mob_status] {&1}};
+    _bhp_dbg {<ffa>line1<088> raw: <ccc>%0<088>};
+    _bhp_dbg {<ffa>line1<088> hp: <afa>%1/%2<088> sp: <afa>%3/%4<088> k: <afa>%5/%6<088> v: <afa>%7/%8<088> smile: <afa>%9<088> reset: <afa>%10%<088> mob: <afa>$my[bard][mob_status]<088>};
 } {2};
+
+#NOP -- Lines 2 to 4: PWRS SPELLS SONGS. Each CODE:VALUE goes in my[bard][powers|spells|songs][CODE];
+#NOP -- On and Yes are stored as 1, Off and No as 0, numbers stay as the rounds left;
+#action {^PWRS: \[ %* \]} {
+    #if $gags[hpbar] {#line gag};
+    _bard_hpbar_pairs {powers} {%1};
+} {2};
+
+#action {^SPELLS: \[ %* \]} {
+    #if $gags[hpbar] {#line gag};
+    _bard_hpbar_pairs {spells} {%1};
+} {2};
+
+#action {^SONGS: \[ %* \]} {
+    #if $gags[hpbar] {#line gag};
+    _bard_hpbar_pairs {songs} {%1};
+} {2};
+
+#NOP -- Line 5: Coffin:47/47 G2N: 66% (47219029) Coins: 87726 P: 13;
+#NOP -- Coffin and P are optional. The bar count is exact, so it replaces the message counting in corpses[coffin];
+#NOP -- Coins go in my[bard][coins], not my[coins], because update_coins in 3kReport.tin measures fight coins from my[coins];
+#NOP -- Captures by position kept coming back empty here, because ( ) and % in a TinTin pattern are not plain text;
+#NOP -- So the action only spots the line, and _bard_hpbar_line5 splits it into words and reads the word after each label;
+#action {^%*G2N: %*Coins: %*} {
+    #if $gags[hpbar] {#line gag};
+    _bard_hpbar_line5 {%0};
+} {2};
+
+#NOP -- %1 the whole line (an alias %0 keeps the braces it was called with, so %1). Words: Coffin:46/47  G2N:  66%  (47190626)  Coins:  88908  P:  37;
+#alias {_bard_hpbar_line5} {
+    #math _bhp_fired[line5] {$_bhp_fired[line5] + 1};
+    #var _bhp_l5 {%1};
+    #format _bhp_l5 {%p} {$_bhp_l5};
+    #replace _bhp_l5 {{\s+}} {;};
+    #list _bhp_tok create {$_bhp_l5};
+    #list _bhp_tok size _bhp_n;
+    #var _bhp_has_coffin 0;
+    #format _bhp_perf_prev {%d} {$my[bard][perf]};
+    #format _bhp_perf_total {%d} {$my[bard][perf_total]};
+    #var my[bard][perf] 0;
+    #loop 1 $_bhp_n _bhp_i {
+        #var _bhp_t {$_bhp_tok[+$_bhp_i]};
+        #math _bhp_j {$_bhp_i + 1};
+        #math _bhp_k {$_bhp_i + 2};
+        #var _bhp_next {$_bhp_tok[+$_bhp_j]};
+        #var _bhp_next2 {$_bhp_tok[+$_bhp_k]};
+        #NOP -- Each word must be the whole value, anchored with ^ and $. About 1 bar in 13 arrives with a split color code;
+        #NOP -- stuck to a word, like a bracket code in front of the coins or a stray m after them. Those words fail the match and keep the last good value;
+        #NOP -- {\d+} not %d. A TinTin %d can match no digits, so on (47174294) it matched nothing and gave an empty value;
+        #regex {$_bhp_t} {^Coffin:{\d+}/{\d+}$} {
+            #var corpses[coffin] {&1};
+            #var corpses[coffin_max] {&2};
+        };
+        #regex {$_bhp_t} {^Coffin:} {#var _bhp_has_coffin 1};
+        #switch {"$_bhp_t"} {
+            #case {"G2N:"} {
+                #regex {$_bhp_next} {^{\d+}\%$} {#var my[bard][g2n_pct] {&1}};
+                #regex {$_bhp_next2} {^\({\d+}\)$} {#var my[bard][g2n_gxp] {&1}};
+            };
+            #case {"Coins:"} {#regex {$_bhp_next} {^{\d+}$} {#var my[bard][coins] {&1}}};
+            #case {"P:"} {#regex {$_bhp_next} {^{\d+}$} {#var my[bard][perf] {&1}}};
+        };
+    };
+    #NOP -- A line with a split color code in it (an open bracket, a semicolon, or a digit or colon followed by m) keeps last round song values;
+    #NOP -- so one garbled P does not drop the song to 0 and restart its progress bar;
+    #var _bhp_dirty 0;
+    #regex {%1} {{\[|;|\dm\b|:m\b}} {#var _bhp_dirty 1};
+    #if {$_bhp_dirty} {
+        #var my[bard][perf] {$_bhp_perf_prev};
+    } {
+        #NOP -- A clean line with no Coffin word means no coffin, so the prompt drops its Coffin row;
+        #if {!$_bhp_has_coffin} {
+            #var corpses[coffin] 0;
+            #var corpses[coffin_max] {};
+        };
+        #NOP -- A line with no P in the middle of a song is held for one line, keeping last round P. Typed commands and;
+        #NOP -- echoes can land inside the bar line and split it before P. Two lines in a row with no P, or the song end;
+        #NOP -- messages in actions.tin, end the song;
+        #var _bhp_held_now 0;
+        #if {$my[bard][perf] == 0} {
+            #if {$_bhp_perf_prev > 1 && !$_bhp_nop_held} {
+                #var my[bard][perf] {$_bhp_perf_prev};
+                #var _bhp_nop_held 1;
+                #var _bhp_held_now 1;
+            } {
+                #var my[bard][perf_total] 0;
+                #var _bhp_nop_held 0;
+            };
+        } {
+            #var _bhp_nop_held 0;
+            #NOP -- perf_total is the length of the song in rounds: the first P of a new song, or the highest P seen since;
+            #if {$_bhp_perf_prev == 0 || $my[bard][perf] > $_bhp_perf_total} {#var my[bard][perf_total] {$my[bard][perf]}};
+        };
+    };
+    _bhp_song_track {%1};
+    _bhp_dbg {<ffa>line5<088> raw: <ccc>%1<088>};
+    _bhp_dbg {<ffa>line5<088> words: <ccc>$_bhp_n<088> coffin: <afa>$corpses[coffin]/$corpses[coffin_max]<088> g2n: <afa>$my[bard][g2n_pct]%<088> gxp: <afa>$my[bard][g2n_gxp]<088> coins: <afa>$my[bard][coins]<088> perf: <afa>$my[bard][perf]/$my[bard][perf_total]<088>};
+};
+
+#NOP -- %1 group name, %2 the text between the brackets;
+#NOP -- my[bard][raw][group] keeps the text in mud order for the prompt in miphp.tin, tables sort their keys;
+#alias {_bard_hpbar_pairs} {
+    #math _bhp_fired[%1] {$_bhp_fired[%1] + 1};
+    #var my[bard][raw][%1] {%2};
+    #var my[bard][%1] {};
+    #var _bhp_list {%2};
+    #replace _bhp_list { } {;};
+    #foreach {$_bhp_list} {_bhp_pair} {
+        #regex {$_bhp_pair} {^%w:%w} {
+            #switch {"&2"} {
+                #case {"On"}  {#var my[bard][%1][&1] 1};
+                #case {"Yes"} {#var my[bard][%1][&1] 1};
+                #case {"Off"} {#var my[bard][%1][&1] 0};
+                #case {"No"}  {#var my[bard][%1][&1] 0};
+                #default      {#var my[bard][%1][&1] {&2}};
+            };
+        };
+    };
+    _bhp_dbg {<ffa>%1<088> raw: <ccc>%2<088>};
+    _bhp_dbg {<ffa>%1<088> parsed: <afa>$my[bard][%1]<088>};
+};
+
+#NOP ----------------------------------- HPBAR DEBUGGER -----------------------------------;
+#NOP -- hpbar-debug        toggles a line per bar line: the raw text and what was stored from it;
+#NOP -- hpbar-check        everything stored right now, how often each action fired, and MIP side by side;
+#NOP -- hpbar-test         feeds a sample bar through the actions (it overwrites the values until the next real bar);
+#NOP -- Debug text goes out with #line ignore so it never sets off the hpbar actions itself;
+#if {!&bard_hpbar_debug} {#var bard_hpbar_debug 0};
+#var _bhp_fired {{line1} {0} {powers} {0} {spells} {0} {songs} {0} {line5} {0}};
+
+#NOP -- Song tracking for the Performing bar. Keeps the last 30 song events for hpbar-songlog;
+#NOP -- and always warns when the song length resets while the song still had rounds left, which empties the bar too early;
+#NOP -- arg 1 the bar line. Reads _bhp_perf_prev, _bhp_perf_total and _bhp_dirty set by _bard_hpbar_line5;
+#if {!&_bhp_songlog} {#list _bhp_songlog clear};
+#var _bhp_nop_held 0;
+#var _bhp_held_now 0;
+#alias {_bhp_song_track} {
+    #format _bhp_now {%t} {%H:%M:%S};
+    #var _bhp_ev {};
+    #var _bhp_warn 0;
+    #if {$_bhp_dirty} {
+        #if {$_bhp_perf_prev > 0} {#var _bhp_ev {broken line, kept P $_bhp_perf_prev of $my[bard][perf_total]}};
+    } {
+        #if {$_bhp_held_now} {#var _bhp_ev {held - this line has no P, kept P $_bhp_perf_prev for one line}};
+        #if {$_bhp_perf_prev == 0 && $my[bard][perf] > 0} {#var _bhp_ev {song start, P $my[bard][perf], length $my[bard][perf_total]}};
+        #if {$_bhp_perf_prev == 1 && $my[bard][perf] == 0} {#var _bhp_ev {song end}};
+        #if {$_bhp_perf_prev > 1 && $my[bard][perf] == 0} {
+            #var _bhp_ev {RESET - P was $_bhp_perf_prev of $_bhp_perf_total and two lines in a row had no P};
+            #var _bhp_warn 1;
+        };
+        #if {$_bhp_perf_prev > 0 && $my[bard][perf] > $_bhp_perf_prev} {
+            #var _bhp_ev {P went up from $_bhp_perf_prev to $my[bard][perf], length was $_bhp_perf_total now $my[bard][perf_total]};
+            #if {$_bhp_perf_prev > 1} {#var _bhp_warn 1};
+        };
+        #if {$_bhp_perf_prev > 0 && $my[bard][perf] > 0 && $_bhp_perf_prev - $my[bard][perf] > 1} {
+            #var _bhp_ev {P skipped from $_bhp_perf_prev to $my[bard][perf]};
+        };
+    };
+    #if {"$_bhp_ev" != ""} {
+        #list _bhp_songlog add {{$_bhp_now  $_bhp_ev  ||  %1}};
+        #list _bhp_songlog size _bhp_sl_n;
+        #while {$_bhp_sl_n > 30} {
+            #list _bhp_songlog delete 1;
+            #math _bhp_sl_n {$_bhp_sl_n - 1};
+        };
+        #if {$_bhp_warn} {
+            #line ignore #showme {<faa>[hpbar] song bar: $_bhp_ev<088>};
+            #line ignore #showme {<faa>[hpbar]   line: <ccc>%1<088>};
+            #line ignore #showme {<faa>[hpbar]   type <ffa>hpbar-songlog<faa> for the song events before it<088>};
+        };
+    };
+};
+
+#alias {hpbar-songlog} {
+    _bhp_show {};
+    _bhp_show {<ccf>  ===================  BARD SONG LOG  ===================<088>};
+    _bhp_show {  <888>Last 30 song events from the hpbar. Each shows the time, what happened, then the bar line<088>};
+    #list _bhp_songlog size _bhp_sl_n;
+    #if {$_bhp_sl_n == 0} {_bhp_show {    <888>nothing yet<088>}};
+    #foreach {$_bhp_songlog[%*]} {_bhp_sl} {_bhp_show {    <fff>$_bhp_sl<088>}};
+    _bhp_show {  <fff>Now: P <afa>$my[bard][perf]<088> of <afa>$my[bard][perf_total]<088>  song <afa>$my[song][title]<088>  <888>(MIP rounds: $my[song][rounds])<088>};
+    _bhp_show {<ccf>  =======================================================<088>};
+    _bhp_show {};
+};
+
+#alias {_bhp_dbg} {
+    #if {$bard_hpbar_debug} {#line ignore #showme {<faf>[hpbar]<088> %1}};
+};
+
+#alias {_bhp_show} {
+    #line ignore #showme {%1};
+};
+
+#alias {hpbar-debug} {
+    #if {"%1" == "on"} {#var bard_hpbar_debug 1} {
+        #if {"%1" == "off"} {#var bard_hpbar_debug 0} {
+            #if {$bard_hpbar_debug} {#var bard_hpbar_debug 0} {#var bard_hpbar_debug 1};
+        };
+    };
+    #if {$bard_hpbar_debug} {
+        _bhp_show {<faf>[hpbar]<088> debug <afa>ON<088>. Each bar line prints its raw text and what was stored. <ffa>hpbar-debug<088> again to stop.};
+    } {
+        _bhp_show {<faf>[hpbar]<088> debug <faa>OFF<088>.};
+    };
+};
+
+#alias {hpbar-check} {
+    _bhp_show {};
+    _bhp_show {<ccf>  ===================  BARD HPBAR CHECK  ===================<088>};
+    _bhp_show {  <fff>Times each action fired since the last #read of hpbar.tin<088>};
+    _bhp_show {    line1 <afa>$_bhp_fired[line1]<088>  PWRS <afa>$_bhp_fired[powers]<088>  SPELLS <afa>$_bhp_fired[spells]<088>  SONGS <afa>$_bhp_fired[songs]<088>  line5 <afa>$_bhp_fired[line5]<088>};
+    _bhp_show {    <888>A 0 means that line never matched. Is setup_3kdb_hpbar set and the bar showing?<088>};
+    _bhp_show {  <fff>Line 1, bar next to MIP<088>};
+    _bhp_show {    hp     bar <afa>$my[bard][bar][hp]/$my[bard][bar][hp_max]<088>  mip <ccc>$my[hp][current]/$my[hp][max]<088>};
+    _bhp_show {    sp     bar <afa>$my[bard][bar][sp]/$my[bard][bar][sp_max]<088>  mip <ccc>$my[sp][current]/$my[sp][max]<088>};
+    _bhp_show {    karma  bar <afa>$my[bard][bar][karma]/$my[bard][bar][karma_max]<088>  mip <ccc>$my[gp1][current]/$my[gp1][max]<088>};
+    _bhp_show {    voice  bar <afa>$my[bard][bar][voice]/$my[bard][bar][voice_max]<088>  mip <ccc>$my[gp2][current]/$my[gp2][max]<088>};
+    _bhp_show {    smiles <afa>$my[smile]<088>  reset <afa>$my[bard][smile_reset]%<088>  mob <afa>$my[bard][mob_status]<088>};
+    _bhp_show {  <fff>Lines 2 to 4, raw text then stored values<088>};
+    _bhp_show {    PWRS   <ccc>$my[bard][raw][powers]<088>};
+    _bhp_show {           <afa>$my[bard][powers]<088>};
+    _bhp_show {    SPELLS <ccc>$my[bard][raw][spells]<088>};
+    _bhp_show {           <afa>$my[bard][spells]<088>};
+    _bhp_show {    SONGS  <ccc>$my[bard][raw][songs]<088>};
+    _bhp_show {           <afa>$my[bard][songs]<088>};
+    _bhp_show {  <fff>Line 5<088>};
+    _bhp_show {    coffin <afa>$corpses[coffin]/$corpses[coffin_max]<088>  g2n <afa>$my[bard][g2n_pct]%<088>  gxp <afa>$my[bard][g2n_gxp]<088>};
+    _bhp_show {    coins  <afa>$my[bard][coins]<088>  <888>(3kReport my[coins]: $my[coins])<088>};
+    _bhp_show {    perf   <afa>$my[bard][perf]<088> of <afa>$my[bard][perf_total]<088>  song <afa>$my[song][title]<088>  <888>(MIP rounds: $my[song][rounds])<088>};
+    _bhp_show {  <fff>Debug is <afa>$bard_hpbar_debug<088> (1 on, 0 off). gags[hpbar] is <afa>$gags[hpbar]<088>.};
+    _bhp_show {<ccf>  ==========================================================<088>};
+    _bhp_show {};
+};
+
+#NOP -- The sample is the bar from the screenshot. Values it should store are listed after it;
+#alias {hpbar-test} {
+    #var _bhp_test_was $bard_hpbar_debug;
+    #var bard_hpbar_debug 1;
+    _bhp_show {<faf>[hpbar]<088> test: feeding a sample bar through the actions};
+    #showme {HP: 7718/7651 SP: 2809/2809 K: 1977/1985 V: 100/100 S:4/66% T:ble};
+    #showme {PWRS: [ H:No ab:No RA:No M:Yes RF:On CS:On KS:Off AB:On ES:35 ]};
+    #showme {SPELLS: [ HS:301 CC:Off PG:146 PE:121 PN:259 PF:82 PH:33 MB:On B:On HR:No FR:0 ]};
+    #showme {SONGS: [ OM:Off LB:Off R:Off SL:Off AG:Off D:Off DW:Off V:Off ]};
+    #showme {Coffin:46/47 G2N: 66% (47197042) Coins: 88908 P: 37};
+    _bhp_show {<faf>[hpbar]<088> test: expect hp 7718/7651, smile 4, reset 66, mob ble, ES 35, HS 301, coffin 46/47, g2n 66, gxp 47197042, coins 88908, perf 37};
+    _bhp_show {<faf>[hpbar]<088> test: no [hpbar] lines above means #showme does not set off actions here, use hpbar-debug on a live bar instead};
+    #var bard_hpbar_debug $_bhp_test_was;
+};
 
 #class {guild_hpbar} {close}

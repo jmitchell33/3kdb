@@ -2,51 +2,266 @@
 #class guild_miphp open;
 
 #var guild_miphp 1;
-#NOP -- Initialize so prompt never shows literal $prot_show / $prot_string_display before first _guild_miphp run;
-#var prot_string_display {};
-#var prot_show {};
+
+#NOP -- Bard prompt drawn the same way as the mud custom_hp from hpbar.tin (setup_3kdb_hpbar);
+#NOP -- Values come from the hpbar actions (my[bard][...]). HP SP K V fall back to MIP until the first bar shows;
+#NOP -- Colors are the mud ansi colors: cyan <068> hicyan <168> himagenta <158> higreen <128> yellow <138> hired <118> grey <078> hiblack <108>;
+#NOP -- Temp values use #var with a _bmp prefix, a #local set in one alias is not seen by the alias that called it;
+
+#NOP -- %1 current, %2 max. Sets _bmp_val to the current value colored like $HP2$ on the mud, then /max, with thousands commas;
+#NOP -- ${_bmp_col} needs the braces, $_bmp_col%1 becomes $_bmp_col7718 and TinTin reads that as one variable name;
+#NOP -- Mud cutoffs read from its own bar: 100+ himagenta, 90 higreen, 75 hicyan, 40 yellow, below that hired;
+#alias {_bard_bar_val} {
+    #var _bmp_pct 0;
+    #if {"%1" != "" && "%2" != ""} {#if {%2 > 0} {#math _bmp_pct {100.0 * %1 / %2}}};
+    #if {$_bmp_pct >= 100} {#var _bmp_col <158>} {
+        #if {$_bmp_pct >= 90} {#var _bmp_col <128>} {
+            #if {$_bmp_pct >= 75} {#var _bmp_col <168>} {
+                #if {$_bmp_pct >= 40} {#var _bmp_col <138>} {#var _bmp_col <118>};
+            };
+        };
+    };
+    #format _bmp_cur {%g} {%1};
+    #format _bmp_max {%g} {%2};
+    #var _bmp_val {${_bmp_col}${_bmp_cur}<088>/${_bmp_max}};
+    #var _bmp_plain {${_bmp_cur}/${_bmp_max}};
+};
+
+#NOP -- Gradient for a percent, the same steps as @graph in modules/helpers/functions.tin;
+#NOP -- arg 1 percent. Sets _bmp_gbg to the background color for a bar and _bmp_gfg to the matching text color;
+#alias {_bmp_grad} {
+    #format _bmp_gq {%d} {%1};
+    #if {$_bmp_gq > 100} {#var _bmp_gq2 {006 168}} {
+        #if {$_bmp_gq == 100} {#var _bmp_gq2 {AFA afa}} {
+            #if {$_bmp_gq >= 90} {#var _bmp_gq2 {AEA aea}} {
+                #if {$_bmp_gq >= 80} {#var _bmp_gq2 {BEA bea}} {
+                    #if {$_bmp_gq >= 70} {#var _bmp_gq2 {BDA bda}} {
+                        #if {$_bmp_gq >= 60} {#var _bmp_gq2 {CDA cda}} {
+                            #if {$_bmp_gq >= 50} {#var _bmp_gq2 {DCA dca}} {
+                                #if {$_bmp_gq >= 40} {#var _bmp_gq2 {DBA dba}} {
+                                    #if {$_bmp_gq >= 30} {#var _bmp_gq2 {EBA eba}} {
+                                        #if {$_bmp_gq >= 20} {#var _bmp_gq2 {EAA eaa}} {#var _bmp_gq2 {FAA faa}};
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+    #regex {$_bmp_gq2} {^%w %w$} {
+        #var _bmp_gbg {<&1>};
+        #var _bmp_gfg {<&2>};
+    };
+};
+
+#NOP -- Graph bar of an exact width, so each graph sits right over the section it stands for on the next line;
+#NOP -- arg 1 current, arg 2 max, arg 3 width in characters. Sets _bmp_gbar. Fills by percent so 50 or 500000 look the same;
+#NOP -- Fill colors are the same steps as @graph in modules/helpers/functions.tin;
+#alias {_bmp_graph} {
+    #format _bmp_gw {%d} {%3};
+    #if {$_bmp_gw < 5} {#var _bmp_gw 5};
+    #var _bmp_gp 0;
+    #if {"%1" != "" && "%2" != ""} {#if {%2 > 0} {#math _bmp_gp {100.0 * %1 / %2}}};
+    #format _bmp_gpi {%d} {$_bmp_gp};
+    _bmp_grad {$_bmp_gpi};
+    #NOP -- How many cells are filled, 0 to the full width;
+    #math _bmp_gfill {$_bmp_gw * $_bmp_gpi / 100};
+    #format _bmp_gfill {%d} {$_bmp_gfill};
+    #if {$_bmp_gfill > $_bmp_gw} {#var _bmp_gfill $_bmp_gw};
+    #if {$_bmp_gfill < 0} {#var _bmp_gfill 0};
+    #math _bmp_grest {$_bmp_gw - $_bmp_gfill};
+    #NOP -- The percent centered in the bar, then cut where the fill ends. The tail is taken off the reversed text;
+    #var _bmp_gtxt {${_bmp_gpi}%};
+    #format _bmp_gtl {%L} {$_bmp_gtxt};
+    #math _bmp_gl {($_bmp_gw - $_bmp_gtl) / 2};
+    #format _bmp_gl {%d} {$_bmp_gl};
+    #math _bmp_gr {$_bmp_gw - $_bmp_gtl - $_bmp_gl};
+    #format _bmp_gs {%-${_bmp_gl}s%s%-${_bmp_gr}s} {} {$_bmp_gtxt} {};
+    #format _bmp_ga {%.${_bmp_gfill}s} {$_bmp_gs};
+    #format _bmp_grv {%r} {$_bmp_gs};
+    #format _bmp_gb {%.${_bmp_grest}s} {$_bmp_grv};
+    #format _bmp_gb {%r} {$_bmp_gb};
+    #NOP -- Percent digits past the filled part are in the bar color, so a short bar still reads in its color;
+    #var _bmp_gbar {<008>${_bmp_gbg}${_bmp_ga}<088>${_bmp_gfg}${_bmp_gb}<088>};
+};
+
+#NOP -- arg 1 plain text of the section under the graph, arg 2 graph label, arg 3 current, arg 4 max;
+#NOP -- Adds label and bar to _bmp_g0, as wide as that section plus the space after it;
+#NOP -- The graph letter stays on the left and is padded before its colon to the width of the section label;
+#NOP -- so H sits over HP with both colons in one column;
+#alias {_bmp_graph_over} {
+    #format _bmp_sw {%L} {%1};
+    #var _bmp_glab {%2};
+    #NOP -- The spaces after the section colon are copied too, so the bar starts where the first number of the section starts;
+    #regex {%1} {^{[^:]*}:{\s*}} {
+        #format _bmp_slw {%L} {&1};
+        #var _bmp_gletter {%2};
+        #replace _bmp_gletter {:} {};
+        #format _bmp_glab {%-${_bmp_slw}s:&2} {$_bmp_gletter};
+    };
+    #format _bmp_lw {%L} {$_bmp_glab};
+    #math _bmp_sw {$_bmp_sw - $_bmp_lw};
+    _bmp_graph {%3} {%4} {$_bmp_sw};
+    #NOP -- Optional arg 5 is the label color, to match the section under it. Cyan when left out;
+    #if {"%5" != ""} {#var _bmp_gcol {%5}} {#var _bmp_gcol <068>};
+    #var _bmp_g0 {$_bmp_g0${_bmp_gcol}$_bmp_glab<088>$_bmp_gbar };
+};
+
+#NOP -- Performing line. Always drawn, so the prompt height never changes when a song starts or ends;
+#NOP -- Song name from the MIP guild line (my[song][title]). Rounds left from the bar P, or MIP when the bar has none;
+#NOP -- The progress bar fills as the song plays, out of the song length in data.tin, or my[bard][perf_total] from hpbar.tin;
+#var _bmp_perf_width 30;
+#format _bmp_perf_blank {%-${_bmp_perf_width}s} {};
+#NOP -- %1 label word without the colon. Sets _bmp_lab to the word on the left, padded, then the colon, in cyan;
+#NOP -- Used for PWRS SPELLS SONGS and Coffin so their colons line up. 6 wide fits SPELLS. Performing is left as is;
+#alias {_bmp_label} {
+    #format _bmp_lab {%-6s} {%1};
+    #var _bmp_lab {<068>${_bmp_lab}:<088>};
+};
+
+#NOP -- Maint colors for the PWRS SPELLS SONGS rows. Maps each hpbar code to its defs[] flag in maintenance.tin;
+#NOP -- defs[flag] 1 is what the heartbeat recasts on, so that is what maintained means here;
+#NOP -- Maintained and up 256 color 121 bright green. Maintained and down <018> red, it gets recast;
+#NOP -- Not maintained (or not a maint spell at all, like CS RF KS CC FR LB) and on <acf> light blue, and off <g12> grey;
+#NOP -- Off means a value of 0 or Off or No;
+#NOP -- Green is 256 color 121 sent as a raw code, since TinTin in truecolor mode would turn a cfb code into truecolor and JuiceSSH shows that as grey. Red is plain ANSI;
+#format _bmp_green {%a[38;5;121m} {27};
+#var _bmp_maint_map {
+    {HS} {hs} {PG} {pg} {PE} {pe} {PN} {pn} {PF} {pf} {PH} {ph} {MB} {mb} {B} {blink} {HR} {hr}
+    {ES} {es} {OM} {om} {AG} {ag}
+};
+
+#NOP -- %1 the raw text between the brackets. Sets _bmp_grp to the same words, colored by maint;
+#alias {_bmp_color_group} {
+    #var _bmp_grp {};
+    #var _bmp_words {%1};
+    #replace _bmp_words { } {;};
+    #foreach {$_bmp_words} {_bmp_w} {
+        #if {"$_bmp_w" != ""} {
+            #var _bmp_cw {$_bmp_w};
+            #regex {$_bmp_w} {^{\w+}:{\w+}$} {
+                #if {"&2" == "0" || "&2" == "Off" || "&2" == "No"} {#var _bmp_off 1} {#var _bmp_off 0};
+                #var _bmp_kept 0;
+                #if {&_bmp_maint_map[&1]} {
+                    #var _bmp_dk {$_bmp_maint_map[&1]};
+                    #if {"$defs[$_bmp_dk]" == "1"} {#var _bmp_kept 1};
+                };
+                #if {$_bmp_kept} {
+                    #if {$_bmp_off} {#var _bmp_cw {<018>&1:&2<088>}} {#var _bmp_cw {${_bmp_green}&1:&2<088>}};
+                } {
+                    #if {$_bmp_off} {#var _bmp_cw {<g12>&1:&2<088>}} {#var _bmp_cw {<acf>&1:&2<088>}};
+                };
+            };
+            #var _bmp_grp {$_bmp_grp $_bmp_cw};
+        };
+    };
+};
+
+#alias {_bard_perf_line} {
+    #format _bmp_left {%d} {$my[bard][perf]};
+    #if {$_bmp_left == 0} {#format _bmp_left {%d} {$my[song][rounds]}};
+    #var _bmp_lab {<068>Performing:<088>};
+    #if {$_bmp_left == 0} {
+        #var _bmp_l6 {$_bmp_lab <108>nothing<088>};
+    } {
+        #if {&my[song][title]} {#var _bmp_song $my[song][title]} {#var _bmp_song {unknown song}};
+        #NOP -- Song length from data.tin when the song is known and has a round count, else the longest P seen;
+        #format _bmp_skey {%l} {$_bmp_song};
+        #var _bmp_total 0;
+        #if {&bard_data[songs][$_bmp_skey]} {
+            #regex {$bard_data[songs][$_bmp_skey][rounds]} {^{\d+}$} {#var _bmp_total {&1}};
+        };
+        #if {$_bmp_total == 0} {#format _bmp_total {%d} {$my[bard][perf_total]}};
+        #if {$_bmp_total < $_bmp_left} {#var _bmp_total $_bmp_left};
+        #math _bmp_fill {$_bmp_perf_width * ($_bmp_total - $_bmp_left) / $_bmp_total};
+        #format _bmp_fill {%d} {$_bmp_fill};
+        #math _bmp_empty {$_bmp_perf_width - $_bmp_fill};
+        #format _bmp_done {%.${_bmp_fill}s} {$_bmp_perf_blank};
+        #format _bmp_todo {%.${_bmp_empty}s} {$_bmp_perf_blank};
+        #if {$_bmp_left == 1} {#var _bmp_word round} {#var _bmp_word rounds};
+        #var _bmp_l6 {$_bmp_lab <168>$_bmp_song<088> <078>[<088><ACF>$_bmp_done<088><G04>$_bmp_todo<088><078>]<088> <138>$_bmp_left<088> $_bmp_word to go};
+    };
+};
 
 #alias {_guild_miphp} {
-	#if {$my[defs][ab] == 1}						{#var ab_string <ACA><fff>ab*<088>} 				{#var ab_string {}};
-	#if {$my[defs][AB] == 1}						{#var ab1_string <ACA><fff>AB*<088>} 				{#var ab1_string {}};
-	#if {$my[defs][mb] == 1}	{#if $defs[mb]		{#var mb_string <ACA><fff>MB*<088>}   				{#var mb_string MB*}}   			 {#var mb_string {}};
-	#if {$my[defs][hr] == 1}	{#if $defs[hr]		{#var hr_string <ACA><fff>HR*<088>}					{#var hr_string HR*}} 				 {#var hr_string {}};
-	#if {$my[defs][rf] == 1}	{#if $defs[rf]		{#var rf_string <ACA><fff>RF*<088>}					{#var rf_string RF*}} 				 {#var rf_string {}};
-	#if {$my[defs][cs] == 1}	{#if $defs[cs]		{#var cs_string <ACA><fff>CS*<088>}					{#var cs_string CS*}} 				 {#var cs_string {}};
-	#if {$my[defs][m] == 1}	    {#if $defs[m]		{#var masque_string <ACA><fff>M*<088>}				{#var masque_string M*}} 			 {#var masque_string {}};
-	#if {$my[defs][blink] > 1}	{#if $defs[blink]	{#var blink_string <ACA><fff>B:$my[defs][blink]*<088>} 				{#var blink_string B:$my[defs][blink]*}} 			 {#var blink_string {}};
-	#if {$my[defs][ag] > 0}		{#if $defs[ag]		{#var ag_string <ACA><fff>AG:$my[defs][ag]*<088>}	{#var ag_string AG:$my[defs][ag]*}} {#var ag_string {}};
-	#if {$my[defs][r] > 0}		{#if $defs[r]		{#var r_string <ACA><fff>R:$my[defs][r]*<088>}		{#var r_string R:$my[defs][r]*}} {#var r_string {}};
-	#if {$my[defs][d] > 0}		{#if $defs[d]		{#var d_string <ACA><fff>D:$my[defs][d]*<088>}		{#var d_string D:$my[defs][d]*}} 	{#var d_string {}};
-	#if {$my[defs][fr] > 0}		{#if $defs[fr]		{#var fr_string <ACA><fff>FR:$my[defs][fr]*<088>}	{#var fr_string FR:$my[defs][fr]*}} {#var fr_string {}};
-	#if {$my[defs][v] > 0}		{#if $defs[v]		{#var v_string <ACA><fff>V:$my[defs][v]*<088>}		{#var v_string V:$my[defs][v]*}} 	 {#var v_string {}};
-	#if {$my[defs][o] > 0}		{#if $defs[om]		{#var o_string <ACA><fff>O:$my[defs][o]*<088>}		{#var o_string O:$my[defs][o]*}} 	 {#var o_string {}};
-	#if {$my[defs][pe] > 0}		{#if $defs[pe]		{#var pe_string <ACA><fff>PE:$my[defs][pe]*<088>}	{#var pe_string PE:$my[defs][pe]*}} {#var pe_string {}};
-	#if {$my[defs][pg] > 0}		{#if $defs[pg]		{#var pg_string <ACA><fff>PG:$my[defs][pg]*<088>}	{#var pg_string PG:$my[defs][pg]*}} {#var pg_string {}};
-	#if {$my[defs][pn] > 0}		{#if $defs[pn]		{#var pn_string <ACA><fff>PN:$my[defs][pn]*<088>}	{#var pn_string PN:$my[defs][pn]*}} {#var pn_string {}};
-	#if {$my[defs][pf] > 0}		{#if $defs[pf]		{#var pf_string <ACA><fff>PF:$my[defs][pf]*<088>}	{#var pf_string PF:$my[defs][pf]*}} {#var pf_string {}};
-	#if {$my[defs][ph] > 0}		{#if $defs[ph]		{#var ph_string <ACA><fff>PH:$my[defs][ph]*<088>}	{#var ph_string PH:$my[defs][ph]*}} {#var ph_string {}};
-	#if {$my[defs][hs] > 0}		{#if $defs[hs]		{#var hs_string <ACA><fff>HS:$my[defs][hs]*<088>}	{#var hs_string HS:$my[defs][hs]*}} {#var hs_string {}};
-	#if {$my[defs][es] > 0}		{#if $defs[es]		{#var es_string <ACA><fff>ES:$my[defs][es]*<088>}	{#var es_string ES:$my[defs][es]*}} {#var es_string {}};
-	#if {$my[defs][ra] > 0}							{#var ra_string <088>RA:$my[defs][ra]*<088>}		{#var ra_string {}};
-	#if {$my[defs][cc] > 0}		{#if $defs[cc]		{#var cc_string <ACA><fff>cc*<088>}					{#var cc_string cc*}} 				{#var cc_string {}};
+    #NOP -- Line 1: HP SP K V, smiles, mob health;
+    #if {&my[bard][bar][hp]} {
+        #var _bmp_bar $my[bard][bar];
+    } {
+        #var _bmp_bar {
+            {hp} {$my[hp][current]} {hp_max} {$my[hp][max]}
+            {sp} {$my[sp][current]} {sp_max} {$my[sp][max]}
+            {karma} {$my[gp1][current]} {karma_max} {$my[gp1][max]}
+            {voice} {$my[gp2][current]} {voice_max} {$my[gp2][max]}
+        };
+    };
+    #NOP -- Line 1 and the graph row over it. Each graph is as wide as the section under it, plus the space after;
+    #var _bmp_g0 {};
+    _bard_bar_val {$_bmp_bar[hp]} {$_bmp_bar[hp_max]};
+    #var _bmp_l1 {${_bmp_col}HP:<088> $_bmp_val};
+    _bmp_graph_over {HP: $_bmp_plain} {H:} {$_bmp_bar[hp]} {$_bmp_bar[hp_max]} {$_bmp_col};
+    _bard_bar_val {$_bmp_bar[sp]} {$_bmp_bar[sp_max]};
+    #var _bmp_l1 {$_bmp_l1 ${_bmp_col}SP:<088> $_bmp_val};
+    _bmp_graph_over {SP: $_bmp_plain} {S:} {$_bmp_bar[sp]} {$_bmp_bar[sp_max]} {$_bmp_col};
+    _bard_bar_val {$_bmp_bar[karma]} {$_bmp_bar[karma_max]};
+    #var _bmp_l1 {$_bmp_l1 ${_bmp_col}K:<088> $_bmp_val};
+    _bmp_graph_over {K: $_bmp_plain} {K:} {$_bmp_bar[karma]} {$_bmp_bar[karma_max]} {$_bmp_col};
+    _bard_bar_val {$_bmp_bar[voice]} {$_bmp_bar[voice_max]};
+    #var _bmp_l1 {$_bmp_l1 ${_bmp_col}V:<088> $_bmp_val};
+    _bmp_graph_over {V: $_bmp_plain} {V:} {$_bmp_bar[voice]} {$_bmp_bar[voice_max]} {$_bmp_col};
+    #var _bmp_l1 {$_bmp_l1 <138>S:$my[smile]<088>/<078>$my[bard][smile_reset]%<088>};
+    #NOP -- Enemy graph goes over the mob health T only. Blank space of the same width sits over the smiles;
+    #NOP -- The bar is at least 5 wide, so over a short T it runs a little past the end of the line;
+    #if {"$my[bard][mob_status]" != ""} {
+        #NOP -- T in the same gradient as the enemy graph over it, by enemy health;
+        _bmp_grad {$enemy[hp]};
+        #var _bmp_l1 {$_bmp_l1 ${_bmp_gfg}T:$my[bard][mob_status]<088>};
+        #format _bmp_s5 {%L} {S:$my[smile]/$my[bard][smile_reset]%};
+        #format _bmp_pad {%-${_bmp_s5}s } {};
+        #var _bmp_g0 {$_bmp_g0$_bmp_pad};
+        #NOP -- E label in the same gradient color as its bar and the T under it;
+        _bmp_graph_over {T:$my[bard][mob_status]} {E:} {$enemy[hp]} {100} {$_bmp_gfg};
+    };
 
-	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $ab1_string $cc_string $hr_string $fr_string $r_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $es_string};
-	#replace prot_string  { } {};
-	#replace prot_string  {*} { };
-	#NOP -- Display: current prot_string. Backup prot_string_display when non-empty so Prots line persists if gline empty/partial. When prot_string empty, clear backup so we show nothing;
-	#if {"$prot_string" != ""} {#var prot_string_display $prot_string} {#var prot_string_display {}};
-	#var prot_show $prot_string;
-	#if {"$prot_show" == ""} {#var prot_show $prot_string_display};
+    #NOP -- Lines 2 to 4: the bracket text exactly as the mud sends it;
+    _bmp_label {PWRS};
+    _bmp_color_group {$my[bard][raw][powers]};
+    #var _bmp_l2 {$_bmp_lab [$_bmp_grp ]};
+    _bmp_label {SPELLS};
+    _bmp_color_group {$my[bard][raw][spells]};
+    #var _bmp_l3 {$_bmp_lab [$_bmp_grp ]};
+    _bmp_label {SONGS};
+    _bmp_color_group {$my[bard][raw][songs]};
+    #var _bmp_l4 {$_bmp_lab [$_bmp_grp ]};
 
-	#if {$my[song][rounds] > 0} {#var song_string ${theme[bard_song]}<dae>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
-	
-	#list temp clear;
-	#list temp add {HP:$hp/$hp_max SP:$sp/$sp_max Karma:$gp1/$gp1_max  Voice:$gp2/$gp2_max  E:$ehealth};
-	#list temp add {H:$my[hp][graph] S:$my[sp][graph] Karma:$my[gp1][graph] Voice:$my[gp2][graph] E:$enemy[graph]};
-	#list temp add {<fff>Prots: $prot_show};
-	#list temp add {$song_string};
-	#var hpbar[prompt] $temp;
+    #NOP -- Line 5: coffin, G2N, coins, song rounds;
+    #NOP -- Coffin first when there is one. Without a coffin the row starts with a plain G2N;
+    #if {"$corpses[coffin_max]" != ""} {
+        _bmp_label {Coffin};
+        #var _bmp_l5 {$_bmp_lab $corpses[coffin]/$corpses[coffin_max] <068>G2N:<088>};
+    } {
+        #var _bmp_l5 {<068>G2N:<088>};
+    };
+    #format _bmp_gxp {%g} {$my[bard][g2n_gxp]};
+    #format _bmp_coins {%g} {$my[bard][coins]};
+    #var _bmp_l5 {$_bmp_l5 <128>$my[bard][g2n_pct]%<088> <078>($_bmp_gxp)<088>};
+    #var _bmp_l5 {$_bmp_l5 <068>Coins:<088> <138>$_bmp_coins<088>};
+    #NOP -- Song rounds are on the Performing line, so the coins row leaves P off;
+
+    _bard_perf_line;
+
+    #list temp clear;
+    #list temp add {{$_bmp_g0} {$_bmp_l1} {$_bmp_l2} {$_bmp_l3} {$_bmp_l4} {$_bmp_l5} {$_bmp_l6}};
+    #var hpbar[prompt] $temp;
+
+    #NOP -- init_screen only sizes the hpbar area when it runs. If the line count changed (new file read in);
+    #NOP -- redo the layout once, or the extra lines fall off the bottom and old lines stay on top;
+    #list hpbar[prompt] size _bmp_rows;
+    #format _bmp_height {%d} {$hpbar[height]};
+    #format _bmp_drawn {%d} {$draw[initiated]};
+    #if {$_bmp_drawn && "$draw[hpbar][active]" == "on" && $_bmp_rows != $_bmp_height} {init_screen};
 };
 
 #class guild_miphp close;
