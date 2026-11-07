@@ -4,6 +4,17 @@
 #var es_override 0;
 #var karma_use_corpse_between_songs 650;
 #var resume_song 1;
+#var vamp_override 0;
+#if {&{vampireKarma}} {#nop} {#var vampireKarma 400};
+
+#alias {_bard_vampire} {
+	#if {$vamp_override || $my[gp1][current] < $vampireKarma} {#return};
+	#format _vsong {%d} {$my[song][rounds]};
+	#if {$_vsong > 0} {#return};
+	#var vamp_override 1;
+	perform vampire;
+	#delay {vamp_toggle} {#var vamp_override 0} {6};
+};
 
 #alias {_guild_heartbeat} {
 	#if !$idle_flag {
@@ -19,6 +30,7 @@
 		
 		#if {$my[defs][ag] > 0} {#NOP} {#if {$defs[ag]} {perform amazing grace} {#nop}};
 		#if {$my[defs][o] > 0}  {#NOP} {#if {$defs[om]}  {perform o muse} {#nop}};
+		#if {$my[defs][v] > 0}  {#NOP} {#if {$defs[v] && $mip[round] > 0} {_bard_vampire} {#nop}};
 
 		#NOP -- actions that should only be attempted once per round;
 		#if {$action_round < $mip[round] && $mip[round] > 0} {
