@@ -1,16 +1,6 @@
 #class {player_config} {kill}
 #class {player_config} {open}
 
-#ALIAS {postload}
-{
-     #map flag static on;
-     #map flag vtmap on;
-     #map flag unicodegraphics on;
-     #map flag terrain on;
-     #map flag direction on;
-     #delay {1} {hp}
-};
-
 #NOP -- Bot Config;
 #var mob_kill_action 1;
 #alias {.pre_fight_check} {#nop};
@@ -19,3 +9,9 @@
 
 
 #class {player_config} {close}
+
+#NOP -- Guild-specific extras go in chars/<name>/guilds/<guild>.tin (e.g. chars/<name>/guilds/priest.tin).;
+#NOP -- This runs after the guild scripts at login and on gswap, so it can override guild defaults;
+#class {player_guild} {kill};
+#script {player_guild_file} {test -f chars/$user/guilds/$guild.tin && echo yes};
+#if {"$player_guild_file[1]" == "yes"} {#read chars/$user/guilds/$guild.tin};

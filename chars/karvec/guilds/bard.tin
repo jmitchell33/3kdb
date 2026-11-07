@@ -1,0 +1,139 @@
+#class {player_guild} {kill}
+#class {player_guild} {open}
+
+#NOP -- Karvec's bard extras. config.tin reads this after the guild scripts at login and on gswap;
+
+#var prot_string_display {};
+#var prot_show {};
+
+#alias {_kbm_num} {
+	#format _kbm_v {%d} {%1};
+	#if {$_kbm_v >= 1000000} {#var _kbm_unit M;#math _kbm_t {$_kbm_v / 100000}} {#var _kbm_unit k;#math _kbm_t {$_kbm_v / 100}};
+	#format _kbm_t {%d} {$_kbm_t};
+	#math _kbm_i {$_kbm_t / 10};
+	#format _kbm_i {%d} {$_kbm_i};
+	#math _kbm_d {$_kbm_t - $_kbm_i * 10};
+	#var _kbm_numout {$_kbm_i.$_kbm_d$_kbm_unit};
+};
+
+#alias {_kbm_pair} {
+	#format _kbm_c {%d} {%2};
+	#format _kbm_m {%d} {%3};
+	#if {$_kbm_c >= 100000 || $_kbm_m >= 100000} {
+		_kbm_num {$_kbm_c};
+		#var _kbm_c {$_kbm_numout};
+		_kbm_num {$_kbm_m};
+		#var _kbm_m {$_kbm_numout};
+	};
+	_kbm_cell {%1:$_kbm_c/$_kbm_m} {%2} {%3};
+};
+
+#alias {_kbm_cell} {
+	#format _kbm_len {%L} {%1};
+	#math _kbm_lp {(15 - $_kbm_len) / 2};
+	#format _kbm_lp {%d} {$_kbm_lp};
+	#math _kbm_rp {15 - $_kbm_len - $_kbm_lp};
+	#format _kbm_txt {%-${_kbm_lp}s%s%-${_kbm_rp}s} {} {%1} {};
+	#format _kbm_w {%L} {$_kbm_txt};
+	#var _kbm_pct 0;
+	#if {"%2" != "" && "%3" != "" && "%3" != "0"} {#math _kbm_pct {100.0 * %2 / %3}};
+	#format _kbm_pct {%d} {$_kbm_pct};
+	#if {$_kbm_pct > 100} {#var _kbm_pct 100};
+	#if {$_kbm_pct < 0} {#var _kbm_pct 0};
+	#math _kbm_n {17 * $_kbm_pct / 100};
+	#format _kbm_n {%d} {$_kbm_n};
+	#var _kbm_bg <AFA>;
+	#if {$_kbm_pct < 100} {#var _kbm_bg <AEA>};
+	#if {$_kbm_pct < 90} {#var _kbm_bg <BEA>};
+	#if {$_kbm_pct < 80} {#var _kbm_bg <BDA>};
+	#if {$_kbm_pct < 70} {#var _kbm_bg <CDA>};
+	#if {$_kbm_pct < 60} {#var _kbm_bg <DCA>};
+	#if {$_kbm_pct < 50} {#var _kbm_bg <DBA>};
+	#if {$_kbm_pct < 40} {#var _kbm_bg <EBA>};
+	#if {$_kbm_pct < 30} {#var _kbm_bg <EAA>};
+	#if {$_kbm_pct < 20} {#var _kbm_bg <FAA>};
+	#if {$_kbm_n > 0} {#var _kbm_lbg $_kbm_bg} {#var _kbm_lbg <AAA>};
+	#if {$_kbm_n >= 17} {#var _kbm_rbg $_kbm_bg} {#var _kbm_rbg <AAA>};
+	#math _kbm_n {$_kbm_n - 1};
+	#if {$_kbm_n < 0} {#var _kbm_n 0};
+	#if {$_kbm_n > 15} {#var _kbm_n 15};
+	#format _kbm_a {%.${_kbm_n}s} {$_kbm_txt};
+	#math _kbm_rn {$_kbm_w - $_kbm_n};
+	#format _kbm_r {%r} {$_kbm_txt};
+	#format _kbm_r {%.${_kbm_rn}s} {$_kbm_r};
+	#format _kbm_b {%r} {$_kbm_r};
+	#var _kbm_out {<fff>$_kbm_lbg▏<008>$_kbm_bg$_kbm_a<070>$_kbm_b<fff>$_kbm_rbg▕<088>};
+};
+
+#alias {_karvec_bard_miphp} {
+	#if {$my[defs][ab] == 1}						{#var ab_string <ACA><fff>ab*<088>} 				{#var ab_string {}};
+	#if {$my[defs][AB] == 1}						{#var ab1_string <ACA><fff>AB*<088>} 				{#var ab1_string {}};
+	#if {$my[defs][mb] == 1}	{#if {$defs[mb]}		{#var mb_string <ACA><fff>MB*<088>}   				{#var mb_string MB*}}   			 {#var mb_string {}};
+	#if {$my[defs][hr] == 1}	{#if {$defs[hr]}		{#var hr_string <ACA><fff>HR*<088>}					{#var hr_string HR*}} 				 {#var hr_string {}};
+	#if {$my[defs][rf] == 1}	{#if $defs[rf]		{#var rf_string <ACA><fff>RF*<088>}					{#var rf_string RF*}} 				 {#var rf_string {}};
+	#if {$my[defs][cs] == 1}	{#if $defs[cs]		{#var cs_string <ACA><fff>CS*<088>}					{#var cs_string CS*}} 				 {#var cs_string {}};
+	#if {$my[defs][m] == 1}	    {#if $defs[m]		{#var masque_string <ACA><fff>M*<088>}				{#var masque_string M*}} 			 {#var masque_string {}};
+	#if {$my[defs][blink] > 1}	{#if {$defs[blink]}	{#var blink_string <ACA><fff>B:$my[defs][blink]*<088>} 				{#var blink_string B:$my[defs][blink]*}} 			 {#var blink_string {}};
+	#if {$my[defs][ag] > 0}		{#if {$defs[ag]}		{#var ag_string <ACA><fff>AG:$my[defs][ag]*<088>}	{#var ag_string AG:$my[defs][ag]*}} {#var ag_string {}};
+	#if {$my[defs][r] > 0}		{#if $defs[r]		{#var r_string <ACA><fff>R:$my[defs][r]*<088>}		{#var r_string R:$my[defs][r]*}} {#var r_string {}};
+	#if {$my[defs][d] > 0}		{#if $defs[d]		{#var d_string <ACA><fff>D:$my[defs][d]*<088>}		{#var d_string D:$my[defs][d]*}} 	{#var d_string {}};
+	#if {$my[defs][fr] > 0}		{#if $defs[fr]		{#var fr_string <ACA><fff>FR:$my[defs][fr]*<088>}	{#var fr_string FR:$my[defs][fr]*}} {#var fr_string {}};
+	#if {$my[defs][v] > 0}		{#if {@bard_prot{v;vampire}}		{#var v_string <ACA><fff>V:$my[defs][v]*<088>}		{#var v_string V:$my[defs][v]*}} 	 {#var v_string {}};
+	#if {$my[defs][o] > 0}		{#if {$defs[om]}		{#var o_string <ACA><fff>O:$my[defs][o]*<088>}		{#var o_string O:$my[defs][o]*}} 	 {#var o_string {}};
+	#if {$my[defs][pe] > 0}		{#if {$defs[pe]}		{#var pe_string <ACA><fff>PE:$my[defs][pe]*<088>}	{#var pe_string PE:$my[defs][pe]*}} {#var pe_string {}};
+	#if {$my[defs][pg] > 0}		{#if {$defs[pg]}		{#var pg_string <ACA><fff>PG:$my[defs][pg]*<088>}	{#var pg_string PG:$my[defs][pg]*}} {#var pg_string {}};
+	#if {$my[defs][pn] > 0}		{#if {$defs[pn]}		{#var pn_string <ACA><fff>PN:$my[defs][pn]*<088>}	{#var pn_string PN:$my[defs][pn]*}} {#var pn_string {}};
+	#if {$my[defs][pf] > 0}		{#if {$defs[pf]}		{#var pf_string <ACA><fff>PF:$my[defs][pf]*<088>}	{#var pf_string PF:$my[defs][pf]*}} {#var pf_string {}};
+	#if {$my[defs][ph] > 0}		{#if {$defs[ph]}		{#var ph_string <ACA><fff>PH:$my[defs][ph]*<088>}	{#var ph_string PH:$my[defs][ph]*}} {#var ph_string {}};
+	#if {$my[defs][hs] > 0}		{#if {$defs[hs]}		{#var hs_string <ACA><fff>HS:$my[defs][hs]*<088>}	{#var hs_string HS:$my[defs][hs]*}} {#var hs_string {}};
+	#if {$my[defs][ks] > 0}		{#if {@bard_prot{ks;}}		{#var ks_string <ACA><fff>KS:$my[defs][ks]*<088>}	{#var ks_string KS:$my[defs][ks]*}} {#var ks_string {}};
+	#if {$my[defs][es] > 0}		{#if {@bard_prot{es;}}		{#var es_string <ACA><fff>ES:$my[defs][es]*<088>}	{#var es_string ES:$my[defs][es]*}} {#var es_string {}};
+	#if {$my[defs][ra] > 0}							{#var ra_string <088>RA:$my[defs][ra]*<088>}		{#var ra_string {}};
+	#if {$my[defs][cc] > 0}		{#if $defs[cc]		{#var cc_string <ACA><fff>cc*<088>}					{#var cc_string cc*}} 				{#var cc_string {}};
+
+	#var prot_string {$ra_string $masque_string $cs_string $rf_string $ab_string $ab1_string $cc_string $hr_string $fr_string $r_string $v_string $d_string $ag_string $o_string $blink_string $pe_string $pg_string $pn_string $pf_string $ph_string $mb_string $hs_string $ks_string $es_string};
+	#replace prot_string  { } {};
+	#replace prot_string  {*} { };
+	#NOP -- Display: current prot_string. Backup prot_string_display when non-empty so Prots line persists if gline empty/partial. When prot_string empty, clear backup so we show nothing;
+	#if {"$prot_string" != ""} {#var prot_string_display $prot_string} {#var prot_string_display {}};
+	#var prot_show $prot_string;
+	#if {"$prot_show" == ""} {#var prot_show $prot_string_display};
+
+	#if {$my[song][rounds] > 0} {#var song_string ${theme[bard_song]}<dae>Singing: $my[song][title] - $my[song][rounds]<088>;} {#var song_string {           }};
+	
+	#list temp clear;
+	_kbm_pair {H} {$hp} {$hp_max};
+	#var _kbm_line {$_kbm_out};
+	_kbm_pair {S} {$sp} {$sp_max};
+	#var _kbm_line {$_kbm_line $_kbm_out};
+	_kbm_pair {K} {$gp1} {$gp1_max};
+	#var _kbm_line {$_kbm_line $_kbm_out};
+	_kbm_pair {V} {$gp2} {$gp2_max};
+	#var _kbm_line {$_kbm_line $_kbm_out};
+	#if {"$enemy[hp]" != ""} {
+		_kbm_cell {E:$enemy[hp]%} {$enemy[hp]} {100};
+		#var _kbm_line {$_kbm_line $_kbm_out};
+	};
+	#list temp add {$_kbm_line};
+	#list temp add {<fff>Prots: $prot_show};
+	#list temp add {$song_string};
+	#var hpbar[prompt] $temp;
+	#list hpbar[prompt] size _kbm_rows;
+	#format _kbm_height {%d} {$hpbar[height]};
+	#format _kbm_drawn {%d} {$draw[initiated]};
+	#if {$_kbm_drawn && "$draw[hpbar][active]" == "on" && $_kbm_rows != $_kbm_height} {init_screen};
+};
+
+#class {player_guild} {close}
+
+#NOP -- Put up defenses at login: turn maint on (the heartbeat keeps the picked defenses up).;
+#NOP -- This file is also read on .reload and gswap, so a flag in its own class (which those don't kill);
+#NOP -- keeps it to once per session, and songs turned off later in the session stay off;
+#if {"$karvec_login[prots]" != "1"} {
+    #class {karvec_login} {open};
+    #var karvec_login[prots] 1;
+    #class {karvec_login} {close};
+    #delay {karvec_prots} {
+        maint;
+    } {3};
+};

@@ -1,0 +1,23 @@
+#NOP -- Set Player specific variables;
+#var user meatloaf;
+#read chars/$user/private.tin;
+#NOP -- Clear the last character's saved variables so they don't carry over to this one;
+#class global kill;
+#read chars/$user/vars.tin;
+#var guild mage;
+#NOP -- The startup menu and gswap save the current guild here;
+#read chars/$user/guild.tin;
+#var my[familiar] Lemmywinks the shiny hamster;
+
+#NOP -- Load Common files;
+#NOP -- _load_3kdb_common is located in common/config.tin;
+#read common/index.tin;
+
+#NOP -- Guild-specific aliases and settings are in guilds.tin, loaded by config.tin;
+
+/* Killing blow/bot management */
+/*#alias {corpsetrig} {
+	#regex {$mip[gline][1]} {{Gem:(\d+)\%}} {#if {&2 < 90} {ffetch gem}};
+	#regex {$mip[gline][1]} {MC} {#delay {1} {ss}}
+	}
+*/

@@ -1,0 +1,24 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- Player specific aliases;
+
+#var again_ld_after 300;
+#var again_ld_idle 300;
+#var again_ld_quiet 0;
+
+#alias {.again_ld_tick} {
+    #if {$incombat || "$jugg[glvl][state]" != ""} {
+        #var again_ld_quiet 0;
+        #return;
+    };
+    #math again_ld_quiet {$again_ld_quiet + 10};
+    #if {$again_ld_quiet >= $again_ld_after && $idle >= $again_ld_idle} {
+        #echo {<faa>$again_ld_quiet seconds out of combat and nothing typed for $idle seconds, going linkdead.<088>};
+        ld;
+    };
+};
+
+#ticker {again_ld} {.again_ld_tick} {10};
+
+#class {player_aliases} {close}
