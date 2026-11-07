@@ -19,6 +19,7 @@
 #var regen_bot_foreign 0;
 #list zodiac_held clear;
 #class {zodiac_hold} {kill};
+#class {regen_hold} {kill};
 
 #NOP -- While sheltered in the zodiacs, hold what the steppers (common/bot/bots/czodiacs*.tin) send to go in or out of the;
 #NOP -- portal/rift: their portalRoom/riftRoom ticker and mimic/stars-align delays would otherwise fire inside the shelter;
@@ -48,6 +49,41 @@
         $zodiac_cmd;
     };
     #list zodiac_held clear;
+};
+
+#NOP -- The MC regen pause (pausedtoregen 0) owns the bot until MC > 97, so anything else that tries to .unpause it is stopped here;
+#NOP -- the zodiac steppers are the main one: their mimic delay sends portal, .unpause and glance, and the bot walked on with MC still low;
+#NOP -- priority 2 and a different pattern so the priority 1 _zodiac_hold alias still queues .unpause while sheltered, its replay lands here;
+#alias {_regen_hold}
+{
+    #class {regen_hold} {open};
+    #alias {^{.unpause}$}
+    {
+        _regen_held_unpause;
+    }
+    {2};
+    #class {regen_hold} {close};
+};
+
+#alias {_regen_release}
+{
+    #class {regen_hold} {kill};
+};
+
+#NOP -- Whoever paused the bot before us is finished now, so the MC > 97 resume is the one that starts it again;
+#NOP -- to walk on early: #var pausedtoregen 1, then ..;
+#alias {_regen_held_unpause}
+{
+    #if {"$pausedtoregen" == "0"}
+    {
+        #var regen_bot_foreign 0;
+        #echo {<ffa>MC regen: bot stays paused until MC > 97 (MC is $my[mental_cognition]).<088>};
+    };
+    #else
+    {
+        _regen_release;
+        .unpause;
+    };
 };
 
 #NOP -- Sets sp_low_unhealed to 1 when SPs are under sp_danger and nothing (immersion, hm heal, eternal heal) will heal them;
@@ -216,6 +252,7 @@
                 #if {$bot[paused] && "$bot_toggle" != "1" && "$shelter_pause" == "1"} {#var regen_bot_foreign 1};
                 .pause;
                 #var pausedtoregen 0;
+                _regen_hold;
                 #NOP -- this pause owns the bot until MC > 97: stop the guild SP/MC resume tickers (they resume at MC > 90);
                 #NOP -- and keep bot_toggle at 1 so the guild heartbeat starts no new pause meanwhile;
                 #unticker {spBotResume};
@@ -225,6 +262,7 @@
         };
         #if {$my[mental_cognition] > 97 && "$pausedtoregen" == "0"} {
             #var pausedtoregen 1;
+            _regen_release;
             #NOP -- while sheltered (or waiting after it) the shelter hands the bot back itself;
             #if {"$shelter_pause" == "1" && !$shelter_bot_wait} {
                 #var bot_toggle 0;
@@ -238,6 +276,12 @@
                 };
                 #var regen_bot_foreign 0;
             };
+        };
+        #NOP -- backstop for code that clears bot[paused] directly and skips .unpause (corpsemanager, psicorps);
+        #if {"$pausedtoregen" == "0" && $bot[active] && !$bot[paused]}
+        {
+            #var regen_bot_foreign 0;
+            .pause;
         };
     };
 };
