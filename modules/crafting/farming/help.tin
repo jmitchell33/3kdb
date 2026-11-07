@@ -1,0 +1,786 @@
+#nop Farmer help. Loaded by farming/index.tin;
+
+#nop ============================================;
+#nop HELP SYSTEM;
+#nop ============================================;
+
+#alias farmhelp {
+    #switch {"%1"} {
+        #case {""} {farmhelp_main};
+        #case {"help"} {farmhelp_topics};
+        #case {"commands"} {farmhelp_commands};
+        #case {"cmds"} {farmhelp_commands};
+        #case {"autofarming"} {farmhelp_autofarming};
+        #case {"auto"} {farmhelp_autofarming};
+        #case {"setfarmlevel"} {farmhelp_setfarmlevel};
+        #case {"fr"} {farmhelp_fr};
+        #case {"stopauto"} {farmhelp_stopauto};
+        #case {"f2"} {farmhelp_f2};
+        #case {"f3"} {farmhelp_f3};
+        #case {"f4"} {farmhelp_f4};
+        #case {"f5"} {farmhelp_f5};
+        #case {"f9"} {farmhelp_f9};
+        #case {"f10"} {farmhelp_f10};
+        #case {"f11"} {farmhelp_f11};
+        #case {"f12"} {farmhelp_f12};
+        #case {"lapt"} {farmhelp_f2};
+        #case {"growplants"} {farmhelp_f3};
+        #case {"togglepause"} {farmhelp_f4};
+        #case {"stopfarming"} {farmhelp_f5};
+        #case {"buysupplies"} {farmhelp_buysupplies};
+        #case {"travel"} {farmhelp_travel};
+        #case {"gofarm"} {farmhelp_gofarm};
+        #case {"homefarm"} {farmhelp_homefarm};
+        #case {"utilities"} {farmhelp_utilities};
+        #case {"cleanplot"} {farmhelp_cleanplot};
+        #case {"feed"} {farmhelp_feed};
+        #case {"toggleecho"} {farmhelp_toggleecho};
+        #case {"toggledisplay"} {farmhelp_toggledisplay};
+        #case {"farmstatus"} {farmhelp_farmstatus};
+        #case {"resetfarm"} {farmhelp_resetfarm};
+        #case {"resetfarmfull"} {farmhelp_resetfarmfull};
+        #case {"farmlook"} {farmhelp_farmlook};
+        #case {"farmgoods"} {farmhelp_farmgoods};
+        #case {"randomfarm"} {farmhelp_randomfarm};
+        #default {
+            #echo {<faa>====================================<088>};
+            #echo {<faa>Unknown help topic: <ccd>%1<088>};
+            #echo {<feb>Type <ccd>farmhelp help<feb> for available topics<088>};
+            #echo {<faa>====================================<088>}
+        }
+    }
+};
+
+#alias farmhelp_main {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Advanced Farming System Help<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<fff>Note:<feb> This is an automated farming<088>};
+    #echo {<feb>      system for 3k.org<088>};
+    #echo {};
+    #echo {<feb> Farm Level is Automatically Detected<088>};
+    #echo {<fff>Note:<feb> If you need to update your farming level you can do the following:<088>};
+    #echo {<ccd>  1.<feb> Type <ccd>craftstats<feb> to auto-detect your level<088>};
+    #echo {<ccd>  2.<feb> Or use: <ccd>setfarmlevel <level><088>};
+    #echo {};
+    #echo {<ffa>AUTO-FARMING Quick Start:<088>};
+    #echo {<ccd>  1.<feb> Start farming: <ccd>fr all<feb> or <ccd>fr cxp<088>};
+    #echo {<ccd>  2.<feb> System does everything automatically!<088>};
+    #echo {<ccd>  3.<feb> Stop anytime: <ccd>stopauto<088>};
+    #echo {};
+    #echo {<ffa>MANUAL FARMING Quick Start:<088>};
+    #echo {<ccd>  1.<feb> Go to shop: <ccd>gofarmstore<088>};
+    #echo {<ccd>  2.<feb> Buy supplies: <ccd>buysupplies all<088>};
+    #echo {<ccd>  3.<feb> Leave shop: <ccd>homefarmstore<088>};
+    #echo {<ccd>  4.<feb> Go to farm: <ccd>gofarm1<feb> to <ccd>gofarm15<088>};
+    #echo {<ccd>  5.<feb> Look at plant: <ccd>f2<feb> or <ccd>lapt<088>};
+    #echo {<ccd>  6.<feb> Start growing: <ccd>f3<feb> or <ccd>growplants<088>};
+    #echo {<ccd>  7.<feb> Wait for harvest message<088>};
+    #echo {<ccd>  8.<feb> Stop & collect: <ccd>f5<feb> or <ccd>stopfarming<088>};
+    #echo {<ccd>  9.<feb> Return home: <ccd>homefarm1<feb> to <ccd>homefarm15<088>};
+    #echo {};
+    #echo {<ffa>View Commands:<088>};
+    #echo {<ccd>  farmstatus<feb>    - View plant status<088>};
+    #echo {<ccd>  farmgoods<feb>     - View harvest inventory<088>};
+    #echo {};
+    #echo {<feb>Optional Settings:<088>};
+    #echo {<ccd>  toggledisplay<feb> - Auto-show status updates<088>};
+    #echo {<ccd>  toggleecho<feb>    - Show debug information<088>};
+    #echo {};
+    #echo {<feb>Type <ccd>farmhelp help<feb> for all topics<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_topics {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Available Help Topics<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>Auto-Farming:<088>};
+    #echo {<ccd>  farmhelp autofarming<feb>    - Auto-farming modes<088>};
+    #echo {<ccd>  farmhelp setfarmlevel<feb>   - Set your level<088>};
+    #echo {<ccd>  farmhelp fr<feb>             - Quick start command<088>};
+    #echo {<ccd>  farmhelp stopauto<feb>       - Stop auto-farming<088>};
+    #echo {};
+    #echo {<ffa>Main Commands:<088>};
+    #echo {<ccd>  farmhelp commands<feb>       - All farming commands<088>};
+    #echo {<ccd>  farmhelp f2<feb>             - Look at plant<088>};
+    #echo {<ccd>  farmhelp f3<feb>             - Start growing<088>};
+    #echo {<ccd>  farmhelp f4<feb>             - Toggle pause<088>};
+    #echo {<ccd>  farmhelp f5<feb>             - Stop farming<088>};
+    #echo {};
+    #echo {<ffa>Experiment Commands:<088>};
+    #echo {<ccd>  farmhelp f9<feb>             - Experiment 1<088>};
+    #echo {<ccd>  farmhelp f10<feb>            - Experiment 2<088>};
+    #echo {<ccd>  farmhelp f11<feb>            - Experiment 3<088>};
+    #echo {<ccd>  farmhelp f12<feb>            - Experiment 4<088>};
+    #echo {};
+    #echo {<ffa>Utility Commands:<088>};
+    #echo {<ccd>  farmhelp buysupplies<feb>    - Buy farming supplies<088>};
+    #echo {<ccd>  farmhelp travel<feb>         - Travel commands<088>};
+    #echo {<ccd>  farmhelp utilities<feb>      - Utility functions<088>};
+    #echo {<ccd>  farmhelp cleanplot<feb>      - Plot cleaning<088>};
+    #echo {<ccd>  farmhelp feed<feb>           - Feeding goblins<088>};
+    #echo {};
+    #echo {<ffa>Display & Debug:<088>};
+    #echo {<ccd>  farmhelp toggleecho<feb>     - Toggle debug mode<088>};
+    #echo {<ccd>  farmhelp toggledisplay<feb>  - Toggle auto-display<088>};
+    #echo {<ccd>  farmhelp farmstatus<feb>     - View status panel<088>};
+    #echo {<ccd>  farmhelp farmgoods<feb>      - View harvest inventory<088>};
+    #echo {<ccd>  farmhelp resetfarm<feb>      - Reset measurements<088>};
+    #echo {<ccd>  farmhelp resetfarmfull<feb>  - Full reset + harvests<088>};
+    #echo {<ccd>  farmhelp farmlook<feb>       - Examine farm<088>};
+    #echo {};
+    #echo {<ffa>Random Farming:<088>};
+    #echo {<ccd>  randomfarm<feb>              - Attempt random recipe<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_commands {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Farming Commands<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>Auto-Farming:<088>};
+    #echo {<ccd>  fr all<feb> or <ccd>farm all<feb> - Auto-farm all farms<088>};
+    #echo {<ccd>  fr cxp<feb> or <ccd>farm cxp<feb> - Auto-farm CXP only<088>};
+    #echo {<ccd>  setfarmlevel <lvl><feb>           - Set your farming level<088>};
+    #echo {<ccd>  stopauto<feb>                     - Stop auto-farming<088>};
+    #echo {};
+    #echo {<ffa>Basic Commands:<088>};
+    #echo {<ccd>  f2 or lapt<feb>                   - Look at plant/ground<088>};
+    #echo {<ccd>  f3 or growplants<feb>             - Start growing<088>};
+    #echo {<ccd>  f4 or togglepause<feb>            - Pause/resume farming<088>};
+    #echo {<ccd>  f5 or stopfarming<feb>            - Stop and harvest<088>};
+    #echo {};
+    #echo {<ffa>Experiment Commands:<088>};
+    #echo {<ccd>  f9 or F9<feb>                     - Experiment F9<088>};
+    #echo {<ccd>  f10 or F10<feb>                   - Experiment F10<088>};
+    #echo {<ccd>  f11 or F11<feb>                   - Experiment F11<088>};
+    #echo {<ccd>  f12 or F12<feb>                   - Experiment F12<088>};
+    #echo {};
+    #echo {<ffa>Travel Commands:<088>};
+    #echo {<ccd>  gofarm#<feb>                      - Go to farm (1-15)<088>};
+    #echo {<ccd>  homefarm#<feb>                    - Return home (1-15)<088>};
+    #echo {<ccd>  gofarmstore<feb>                  - Go to supply shop<088>};
+    #echo {<ccd>  homefarmstore<feb>                - Leave supply shop<088>};
+    #echo {};
+    #echo {<ffa>Utility Commands:<088>};
+    #echo {<ccd>  buysupplies #<feb>                - Buy supplies (1-3 or all)<088>};
+    #echo {<ccd>  farmstatus<feb>                   - Display status panel<088>};
+    #echo {<ccd>  farmgoods<feb>                    - Display harvest inventory<088>};
+    #echo {<ccd>  farmlook<feb>                     - Examine farm conditions<088>};
+    #echo {<ccd>  resetfarm<feb>                    - Reset measurements only<088>};
+    #echo {<ccd>  resetfarmfull<feb>                - Full reset (inc. harvests)<088>};
+    #echo {<ccd>  toggleecho<feb>                   - Toggle debug mode<088>};
+    #echo {<ccd>  toggledisplay<feb>                - Toggle auto-display<088>};
+    #echo {};
+    #echo {<ffa>Random Farming:<088>};
+    #echo {<ccd>  randomfarm<feb>             - Attempt random recipe<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f2 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f2 (lapt)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Examines the plant and ground conditions.<088>};
+    #echo {};
+    #echo {<feb>This command checks:<088>};
+    #echo {<ccd>  •<feb> Ground condition<088>};
+    #echo {<ccd>  •<feb> Insect levels<088>};
+    #echo {<ccd>  •<feb> Mushroom growth<088>};
+    #echo {<ccd>  •<feb> Weed presence<088>};
+    #echo {<ccd>  •<feb> Plant status<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Always use this before starting<088>};
+    #echo {<feb>      to grow to identify the plant type<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f3 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f3 (growplants)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Starts the automated growing process.<088>};
+    #echo {};
+    #echo {<feb>The system will:<088>};
+    #echo {<ccd>  •<feb> Execute the plant's recipe<088>};
+    #echo {<ccd>  •<feb> Apply fertilizers automatically<088>};
+    #echo {<ccd>  •<feb> Water the plant as needed<088>};
+    #echo {<ccd>  •<feb> Use farming tools<088>};
+    #echo {<ccd>  •<feb> Monitor growth progress<088>};
+    #echo {<ccd>  •<feb> Continue until harvest<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> You MUST identify the plant with<088>};
+    #echo {<feb>      <ccd>f2<feb> or <ccd>lapt<feb> before using this!<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f4 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f4 (togglePause)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Pauses or resumes farming automation.<088>};
+    #echo {};
+    #echo {<feb>When paused:<088>};
+    #echo {<ccd>  •<feb> No automatic actions occur<088>};
+    #echo {<ccd>  •<feb> Plant continues to grow naturally<088>};
+    #echo {<ccd>  •<feb> You can manually tend the plant<088>};
+    #echo {<ccd>  •<feb> Variables are preserved<088>};
+    #echo {};
+    #echo {<feb>When resumed:<088>};
+    #echo {<ccd>  •<feb> Automation continues normally<088>};
+    #echo {<ccd>  •<feb> Next round executes as scheduled<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use this if you need to manually<088>};
+    #echo {<feb>      adjust something mid-growth<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f5 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f5 (stopfarming)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Stops farming and cleans up completely.<088>};
+    #echo {};
+    #echo {<feb>This command will:<088>};
+    #echo {<ccd>  •<feb> Harvest the plant<088>};
+    #echo {<ccd>  •<feb> Collect all items from ground<088>};
+    #echo {<ccd>  •<feb> Stash everything in inventory<088>};
+    #echo {<ccd>  •<feb> Release the farm claim<088>};
+    #echo {<ccd>  •<feb> Reset farming variables<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use this when done farming, or<088>};
+    #echo {<feb>      as an emergency stop if needed<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f9 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f9 (F9)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Experiment F9: %+2 Red Test<088>};
+    #echo {};
+    #echo {<feb>This experiment:<088>};
+    #echo {<ccd>  •<feb> Aerates with Detroit air (210 units)<088>};
+    #echo {<ccd>  •<feb> Presses oximeter button<088>};
+    #echo {<ccd>  •<feb> Pushes hygrometer button<088>};
+    #echo {<ccd>  •<feb> Looks at farm conditions<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> This is for testing plant responses<088>};
+    #echo {<feb>      to specific conditions<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f10 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f10 (F10)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Experiment F10: -x Red Test<088>};
+    #echo {};
+    #echo {<feb>This experiment:<088>};
+    #echo {<ccd>  •<feb> Sprays Hunch pesticide (210 units)<088>};
+    #echo {<ccd>  •<feb> Presses oximeter button<088>};
+    #echo {<ccd>  •<feb> Pushes hygrometer button<088>};
+    #echo {<ccd>  •<feb> Looks at farm conditions<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> This is for testing plant responses<088>};
+    #echo {<feb>      to pesticide application<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f11 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f11 (F11)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Experiment F11: +1 Red Test<088>};
+    #echo {};
+    #echo {<feb>This experiment:<088>};
+    #echo {<ccd>  •<feb> Spreads Der'thalas neutralizer (210)<088>};
+    #echo {<ccd>  •<feb> Presses oximeter button<088>};
+    #echo {<ccd>  •<feb> Pushes hygrometer button<088>};
+    #echo {<ccd>  •<feb> Looks at farm conditions<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> This is for testing neutralizer<088>};
+    #echo {<feb>      effects on plant growth<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_f12 {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: f12 (F12)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Experiment F12: Full Test<088>};
+    #echo {};
+    #echo {<feb>This is a comprehensive test that:<088>};
+    #echo {<ccd>  •<feb> Tests all 20 farm actions<088>};
+    #echo {<ccd>  •<feb> Applies 210 units of each<088>};
+    #echo {<ccd>  •<feb> Feeds all goblins between actions<088>};
+    #echo {<ccd>  •<feb> Uses all tools extensively<088>};
+    #echo {<ccd>  •<feb> Checks all measurements<088>};
+    #echo {};
+    #echo {<fff>Warning:<feb> This uses a LOT of supplies!<088>};
+    #echo {<feb>         Only use for thorough testing<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_buysupplies {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: buysupplies<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Purchases all farming supplies at once.<088>};
+    #echo {};
+    #echo {<feb>Usage: <ccd>buysupplies <type><088>};
+    #echo {};
+    #echo {<feb>Types:<088>};
+    #echo {<ccd>  1<feb>  = Simple tools (Levels 10-32)<088>};
+    #echo {<ccd>  2<feb>  = Standard tools (Levels 33-65)<088>};
+    #echo {<ccd>  3<feb>  = Complex tools (Levels 66-100)<088>};
+    #echo {<ccd>  all<feb>= Buys all tools for your skill level<088>};
+    #echo {};
+    #echo {<feb>Buys all of:<088>};
+    #echo {<ccd>  •<feb> Contristometers (all 4 types)<088>};
+    #echo {<ccd>  •<feb> Goblins (all 4 colors)<088>};
+    #echo {<ccd>  •<feb> Nutriometers (all 4 types)<088>};
+    #echo {<ccd>  •<feb> Oximeter and Hygrometer<088>};
+    #echo {<ccd>  •<feb> All fertilizers<088>};
+    #echo {<ccd>  •<feb> All air types<088>};
+    #echo {<ccd>  •<feb> Allwater  types<088>};
+    #echo {<ccd>  •<feb> All pesticides<088>};
+    #echo {<ccd>  •<feb> All neutralizers<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Make sure you have enough money!<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_travel {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Travel Commands<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Use these to travel to/from farms:<088>};
+    #echo {<feb>All gofarm and homefarm start and returns to<088>};
+    #echo {<feb>the main farming room (Paul - The Aged Farmer)<088>};
+    #echo {};
+    #echo {<ffa>Go To Farm:<088>};
+    #echo {<ccd>  gofarm1<feb>  through <ccd>gofarm15<088>};
+    #echo {<feb>  Takes you to the specified farm<088>};
+    #echo {};
+    #echo {<ffa>Return Home:<088>};
+    #echo {<ccd>  homefarm1<feb> through <ccd>homefarm15<088>};
+    #echo {<feb>  Returns you from the specified farm<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Each farm number corresponds:<088>};
+    #echo {<feb>      Use <ccd>gofarm1<feb> then <ccd>homefarm1<088>};
+    #echo {<feb>      Use <ccd>gofarm2<feb> then <ccd>homefarm2<088>};
+    #echo {<feb>      etc.<088>};
+    #echo {};
+    #echo {<feb>Type <ccd>farmhelp gofarm<feb> for details<088>};
+    #echo {<feb>Type <ccd>farmhelp homefarm<feb> for details<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_gofarm {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Go To Farm Commands<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Available farms:<088>};
+    #echo {};
+    #echo {<ccd>  gofarm1<feb>  - Basic farm 1 (Lvls 1-6)<088>};
+    #echo {<ccd>  gofarm2<feb>  - Basic farm 2 (Lvls 2-11)<088>};
+    #echo {<ccd>  gofarm3<feb>  - Basic farm 3 (Lvls 4-13)<088>};
+    #echo {<ccd>  gofarm4<feb>  - Old MacDonalds farm 1 (Lvls 13-24)<088>};
+    #echo {<ccd>  gofarm5<feb>  - Old MacDonalds farm 2 (Lvls 17-30)<088>};
+    #echo {<ccd>  gofarm6<feb>  - Veggie Garden farm 1 (Lvls 21-35)<088>};
+    #echo {<ccd>  gofarm7<feb>  - Veggie Garden farm 2 (Lvls 28-39)<088>};
+    #echo {<ccd>  gofarm8<feb>  - Hippie Commune farm 1 (Lvls 32-43)<088>};
+    #echo {<ccd>  gofarm9<feb>  - Hippie Commune farm 2 (Lvls 37-50)<088>};
+    #echo {<ccd>  gofarm10<feb> - Kwutegs River Valley farm (Lvls 43-54)<088>};
+    #echo {<ccd>  gofarm11<feb> - Luddite Compound farm (Lvls 49-63)<088>};
+    #echo {<ccd>  gofarm12<feb> - Science farm (Lvls 60-74)<088>};
+    #echo {<ccd>  gofarm13<feb> - Serinth farm (Lvls 70-80)<088>};
+    #echo {<ccd>  gofarm14<feb> - Overlands farm (Lvls 80-90)<088>};
+    #echo {<ccd>  gofarm15<feb> - Blingdenwood Village farm (Lvls 90-100)<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Each route is fully automated<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_homefarm {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Return Home Commands<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Return from farms:<088>};
+    #echo {};
+    #echo {<ccd>  homefarm1<feb>  - Return from farm1<088>};
+    #echo {<ccd>  homefarm2<feb>  - Return from farm2<088>};
+    #echo {<ccd>  homefarm3<feb>  - Return from farm3<088>};
+    #echo {<ccd>  homefarm4<feb>  - Return from farm4<088>};
+    #echo {<ccd>  homefarm5<feb>  - Return from farm5<088>};
+    #echo {<ccd>  homefarm6<feb>  - Return from farm6<088>};
+    #echo {<ccd>  homefarm7<feb>  - Return from farm7<088>};
+    #echo {<ccd>  homefarm8<feb>  - Return from farm8<088>};
+    #echo {<ccd>  homefarm9<feb>  - Return from farm9<088>};
+    #echo {<ccd>  homefarm10<feb> - Return from farm10<088>};
+    #echo {<ccd>  homefarm11<feb> - Return from farm11<088>};
+    #echo {<ccd>  homefarm12<feb> - Return from farm12<088>};
+    #echo {<ccd>  homefarm13<feb> - Return from farm13<088>};
+    #echo {<ccd>  homefarm14<feb> - Return from farm14<088>};
+    #echo {<ccd>  homefarm15<feb> - Return from farm15<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Always use matching numbers:<088>};
+    #echo {<feb>      gofarm5 → homefarm5<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_utilities {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Utility Functions<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Helper functions available:<088>};
+    #echo {};
+    #echo {<ffa>Tool Functions:<088>};
+    #echo {<ccd>  tools<feb>          - Use all basic tools<088>};
+    #echo {<ccd>  tools2<feb>         - Use tools without feeding<088>};
+    #echo {<ccd>  goblins<feb>        - Feed all goblins once<088>};
+    #echo {};
+    #echo {<ffa>Feeding Functions:<088>};
+    #echo {<ccd>  feedlittle<feb>     - Small feeding routine<088>};
+    #echo {<ccd>  feedsome<feb>       - Medium feeding routine<088>};
+    #echo {<ccd>  feedsome2<feb>      - Medium+ feeding routine<088>};
+    #echo {<ccd>  feedlots<feb>       - Large feeding routine<088>};
+    #echo {<ccd>  addlittle1<feb>     - Add fertilizers<088>};
+    #echo {<ccd>  addlittle2<feb>     - Add neutralizers<088>};
+    #echo {<ccd>  feed <color><feb>   - Feed specific goblin<088>};
+    #echo {};
+    #echo {<ffa>Display Functions:<088>};
+    #echo {<ccd>  farmstatus<feb>     - Show current status<088>};
+    #echo {<ccd>  farmlook<feb>       - Examine farm conditions<088>};
+    #echo {<ccd>  toggledisplay<feb>  - Toggle auto-display<088>};
+    #echo {<ccd>  toggleecho<feb>     - Toggle debug mode<088>};
+    #echo {<ccd>  resetfarm<feb>      - Reset measurements<088>};
+    #echo {};
+    #echo {<ffa>Plot Cleaning:<088>};
+    #echo {<feb>  See <ccd>farmhelp cleanplot<feb> for details<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_cleanplot {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Plot Cleaning Functions<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>Different cleaning intensities:<088>};
+    #echo {};
+    #echo {<ccd>  cleanplot<feb>       - Basic pest control<088>};
+    #echo {<feb>    Sprays all pesticides<088>};
+    #echo {};
+    #echo {<ccd>  cleanplot2<feb>      - Basic + tools<088>};
+    #echo {<feb>    Pesticides + tools + 1 goblin feed<088>};
+    #echo {};
+    #echo {<ccd>  cleanplot3<feb>      - Standard cleaning<088>};
+    #echo {<feb>    Full pesticides + 4x tools + 4x goblins<088>};
+    #echo {};
+    #echo {<ccd>  cleanplot5<feb>      - Heavy cleaning<088>};
+    #echo {<feb>    Maximum pesticides + extended tools<088>};
+    #echo {};
+    #echo {<ccd>  cleanplot_amish<feb> - Custom intensive<088>};
+    #echo {<feb>    Balanced cleaning with goblin focus<088>};
+    #echo {};
+    #echo {<ccd>  cleanplot3_tuon<feb> - Tuon style<088>};
+    #echo {<feb>    Tuon-specific cleaning routine<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use stronger cleaning for harder<088>};
+    #echo {<feb>      plants or problem conditions<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_feed {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Feeding Commands<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Feed gremlins to test soil quality:<088>};
+    #echo {};
+    #echo {<ffa>Basic Feeding:<088>};
+    #echo {<ccd>  goblins<feb>         - Feed all gremlins once<088>};
+    #echo {<ccd>  feed red<feb>    - Feed red gremlin<088>};
+    #echo {<ccd>  feed blue<feb>   - Feed blue gremlin<088>};
+    #echo {<ccd>  feed green<feb>  - Feed green gremlin<088>};
+    #echo {<ccd>  feed orange<feb> - Feed orange gremlin<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Gremlin reactions tell you about<088>};
+    #echo {<feb>      nutrient levels in the soil<088>};
+    #echo {};
+    #echo {<feb>Reactions (from worst to best):<088>};
+    #echo {<ccd>  •<feb> Takes one smell and refuses<088>};
+    #echo {<ccd>  •<feb> Touches and turns away<088>};
+    #echo {<ccd>  •<feb> Barely manages to eat<088>};
+    #echo {<ccd>  •<feb> Takes his time eating<088>};
+    #echo {<ccd>  •<feb> Eats it and pats belly<088>};
+    #echo {<ccd>  •<feb> Eats it up quickly<088>};
+    #echo {<ccd>  •<feb> Eats it so fast<088>};
+    #echo {<ccd>  •<feb> Cannot eat it fast enough<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_toggleecho {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: toggleecho<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Toggles debug echo mode on/off.<088>};
+    #echo {};
+    #echo {<feb>When ON:<088>};
+    #echo {<ccd>  •<feb> Shows all commands sent to MUD<088>};
+    #echo {<ccd>  •<feb> Displays growth messages<088>};
+    #echo {<ccd>  •<feb> Shows round progression<088>};
+    #echo {<ccd>  •<feb> Reports ideal growth updates<088>};
+    #echo {<ccd>  •<feb> Useful for debugging recipes<088>};
+    #echo {};
+    #echo {<feb>When OFF:<088>};
+    #echo {<ccd>  •<feb> Silent operation mode<088>};
+    #echo {<ccd>  •<feb> Only critical messages shown<088>};
+    #echo {<ccd>  •<feb> Cleaner screen output<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Turn ON when testing new plants<088>};
+    #echo {<feb>      Turn OFF for production farming<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_toggledisplay {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: toggledisplay<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Toggles farm status display on/off.<088>};
+    #echo {};
+    #echo {<feb>When ON:<088>};
+    #echo {<ccd>  •<feb> Displays farm status after updates<088>};
+    #echo {<ccd>  •<feb> Shows all measurements automatically<088>};
+    #echo {<ccd>  •<feb> Updates on ideal growth changes<088>};
+    #echo {<ccd>  •<feb> Real-time monitoring enabled<088>};
+    #echo {};
+    #echo {<feb>When OFF:<088>};
+    #echo {<ccd>  •<feb> No automatic display updates<088>};
+    #echo {<ccd>  •<feb> Must use 'farmstatus' manually<088>};
+    #echo {<ccd>  •<feb> Reduces screen clutter<088>};
+    #echo {};
+    #echo {<feb>Use <ccd>farmstatus<feb> to manually view status<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Keep ON to monitor plant progress<088>};
+    #echo {<feb>      Turn OFF if status spam is annoying<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_farmstatus {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: farmstatus<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Manually displays the farm status panel.<088>};
+    #echo {};
+    #echo {<feb>Shows complete information:<088>};
+    #echo {<ccd>  •<feb> Current plant name & round<088>};
+    #echo {<ccd>  •<feb> Ideal growth percentage<088>};
+    #echo {<ccd>  •<feb> All ground measurements (DA-HY)<088>};
+    #echo {<ccd>  •<feb> Contristometer readings (1-4)<088>};
+    #echo {<ccd>  •<feb> Nutriometer readings (1-4)<088>};
+    #echo {<ccd>  •<feb> Goblin feeding results (4 colors)<088>};
+    #echo {<ccd>  •<feb> Current tool type (Simple/Standard/Complex)<088>};
+    #echo {<ccd>  •<feb> Pause status<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use this to check plant status<088>};
+    #echo {<feb>      without automated updates<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_resetfarm {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: resetfarm<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Resets all farm measurement variables.<088>};
+    #echo {};
+    #echo {<feb>Resets to 0:<088>};
+    #echo {<ccd>  •<feb> Ground conditions (dark/gold/white/glisten)<088>};
+    #echo {<ccd>  •<feb> Water level<088>};
+    #echo {<ccd>  •<feb> Bugs, weeds, mushrooms<088>};
+    #echo {<ccd>  •<feb> All contristometer readings<088>};
+    #echo {<ccd>  •<feb> All nutriometer readings<088>};
+    #echo {<ccd>  •<feb> Oximeter & hygrometer<088>};
+    #echo {<ccd>  •<feb> All goblin readings<088>};
+    #echo {<ccd>  •<feb> Ideal growth percentage to 0<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Useful after plant death or before<088>};
+    #echo {<feb>      starting a completely new plant<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_resetfarmfull {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: resetfarmfull<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Complete reset of all farming data.<088>};
+    #echo {};
+    #echo {<feb>This command resets:<088>};
+    #echo {<ccd>  •<feb> All ground measurements<088>};
+    #echo {<ccd>  •<feb> All tool readings<088>};
+    #echo {<ccd>  •<feb> Harvest count<088>};
+    #echo {<ccd>  •<feb> Harvest inventory<088>};
+    #echo {<ccd>  •<feb> Current plant data<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use <ccd>resetfarm<feb> to only reset<088>};
+    #echo {<feb>      measurements without clearing harvests<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_farmlook {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: farmlook<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Examines all farm conditions at once.<088>};
+    #echo {};
+    #echo {<feb>This command examines:<088>};
+    #echo {<ccd>  •<feb> Ground condition<088>};
+    #echo {<ccd>  •<feb> Insects on plot<088>};
+    #echo {<ccd>  •<feb> Mushrooms present<088>};
+    #echo {<ccd>  •<feb> Weed coverage<088>};
+    #echo {<ccd>  •<feb> Quick glance at farm<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> This is called automatically during<088>};
+    #echo {<feb>      growth rounds but can be used manually<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_autofarming {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Auto-Farming Modes<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Two automated farming modes available:<088>};
+    #echo {};
+    #echo {<ffa>FARM ALL Mode:<088>};
+    #echo {<ccd>  fr all<feb> or <ccd>farm all<088>};
+    #echo {<feb>  • Farms ALL available farms for your level<088>};
+    #echo {<feb>  • Automatically skips plants above your level<088>};
+    #echo {<feb>  • Continues until all farms complete<088>};
+    #echo {<feb>  • Best for maximum exp gain<088>};
+    #echo {};
+    #echo {<ffa>FARM CXP Mode:<088>};
+    #echo {<ccd>  fr cxp<feb> or <ccd>farm cxp<088>};
+    #echo {<feb>  • Farms only CXP-giving farms (farm 4+)<088>};
+    #echo {<feb>  • Only does farms within your level range<088>};
+    #echo {<feb>  • Best for guild exp farming<088>};
+    #echo {};
+    #echo {<ffa>How Auto-Farming Works:<088>};
+    #echo {<ccd>  1.<feb> Calculates valid farms for your level<088>};
+    #echo {<ccd>  2.<feb> Goes to farm store and buys supplies<088>};
+    #echo {<ccd>  3.<feb> Visits each farm in sequence<088>};
+    #echo {<ccd>  4.<feb> Checks each room for plants<088>};
+    #echo {<ccd>  5.<feb> Skips owned/too high level plants<088>};
+    #echo {<ccd>  6.<feb> Grows valid plants automatically<088>};
+    #echo {<ccd>  7.<feb> Continues to next room after harvest<088>};
+    #echo {<ccd>  8.<feb> Returns home when complete<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Set your level first with:<088>};
+    #echo {<ccd>      setfarmlevel <level><088>};
+    #echo {<feb>Auto-farming rests between plants to average 25 commands a minute. Change it with <ccd>farmapm <number><feb>, 0 turns rests off<088>};
+    #echo {<feb>Going idle (deadman) stops farming. <ccd>f4<feb> keeps tending the plant, <ccd>f5<feb> harvests it, <ccd>fr all<feb> restarts auto-farming<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_setfarmlevel {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: setfarmlevel<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Sets your current farming skill level.<088>};
+    #echo {};
+    #echo {<feb>Usage: <ccd>setfarmlevel <level><088>};
+    #echo {};
+    #echo {<feb>This is REQUIRED for auto-farming modes.<088>};
+    #echo {<feb>The system uses this to:<088>};
+    #echo {<ccd>  • Determine which farms you can access<088>};
+    #echo {<ccd>  • Skip plants above your level<088>};
+    #echo {<ccd>  • Calculate optimal farm routes<088>};
+    #echo {};
+    #echo {<feb>Example:<088>};
+    #echo {<ccd>  setfarmlevel 23<088>};
+    #echo {<feb>  This would unlock farms 1-6 for 'farm all'<088>};
+    #echo {<feb>  And farms 4-6 for 'farm cxp'<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Update this as you level up!<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_fr {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: fr (Quick Farm)<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Quick-start command for auto-farming.<088>};
+    #echo {};
+    #echo {<feb>Usage:<088>};
+    #echo {<ccd>  fr all<feb>  - Start farming all available farms<088>};
+    #echo {<ccd>  fr cxp<feb>  - Start farming CXP farms only<088>};
+    #echo {};
+    #echo {<feb>This command:<088>};
+    #echo {<ccd>  • Enables debug mode automatically<088>};
+    #echo {<ccd>  • Starts the selected auto-farm mode<088>};
+    #echo {<ccd>  • Shows detailed progress messages<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Requires farming level to be set first<088>};
+    #echo {<feb>      Use: <ccd>setfarmlevel <level><088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_stopauto {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: stopauto<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Stops auto-farming mode immediately.<088>};
+    #echo {};
+    #echo {<feb>This command:<088>};
+    #echo {<ccd>  • Halts all auto-farming processes<088>};
+    #echo {<ccd>  • Resets auto-farming variables<088>};
+    #echo {<ccd>  • Returns you to farming entrance<088>};
+    #echo {<ccd>  • Switches back to manual mode<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use this if you need to stop<088>};
+    #echo {<feb>      auto-farming for any reason<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_farmgoods {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: farmgoods<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Display your harvested crops inventory.<088>};
+    #echo {};
+    #echo {<feb>This command shows:<088>};
+    #echo {<ccd>  •<feb> Quality and name of each crop<088>};
+    #echo {<ccd>  •<feb> Quantity of each crop type<088>};
+    #echo {<ccd>  •<feb> Total harvests this session<088>};
+    #echo {};
+    #echo {<feb>The inventory is automatically tracked<088>};
+    #echo {<feb>when crops are harvested.<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Use <ccd>resetfarmfull<feb> to clear inventory<088>};
+    #echo {<faa>=========================================<088>}
+};
+
+#alias farmhelp_randomfarm {
+    #echo {<faa>=========================================<088>};
+    #echo {<ffa>    Command: randomfarm<088>};
+    #echo {<faa>=========================================<088>};
+    #echo {<feb>Experimental random recipe generator.<088>};
+    #echo {};
+    #echo {<feb>How it works:<088>};
+    #echo {<ccd>  1.<feb> Identify plant with <ccd>f2<feb> or <ccd>lapt<088>};
+    #echo {<ccd>  2.<feb> Type <ccd>randomfarm<088>};
+    #echo {<ccd>  3.<feb> System generates random actions<088>};
+    #echo {<ccd>  4.<feb> If successful, recipe is logged<088>};
+    #echo {};
+    #echo {<feb>The system considers:<088>};
+    #echo {<ccd>  •<feb> Your farming level<088>};
+    #echo {<ccd>  •<feb> Plant difficulty<088>};
+    #echo {<ccd>  •<feb> Available tools for your level<088>};
+    #echo {<ccd>  •<feb> Current plant growth<088>};
+    #echo {};
+    #echo {<fff>Success:<feb> If plant harvests, full<088>};
+    #echo {<feb>recipe is displayed. PLEASE share<088>};
+    #echo {<feb>with Byron/Badger on 3kdb Discord!<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> Not available in auto-farm mode yet<088>};
+    #echo {<faa>=========================================<088>}
+};
