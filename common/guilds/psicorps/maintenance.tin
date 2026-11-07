@@ -81,111 +81,13 @@
 };
 #list maint_phrase_order create {improved vigor;greater valor;improved valor;greater verve;improved verve;improved biofeedback;combat precognition;greater biocurrent;valor;verve;vigor;biofeedback;precognition;shield of prudence;energy barrier;inertial barrier;displacement;ablating;adapt body;bolt;talons;combat prescience;steel jaw;iron jaw;conductive grasp;biocurrent;astral construct 2;astral construct 3;astral construct 4;astral construct 5;astral construct 6};
 
-#if {&{xmaint_sel}} {#var maint_sel $xmaint_sel} {#var maint_sel {};#foreach {$maint_order[%*]} {_mk} {#var maint_sel[$_mk] 1}};
-#if {"${xmaint_active}" === ""} {#var maint_active 1} {#var maint_active $xmaint_active};
-
-#alias {_maint_save} {
-    #class global open;
-    #var xmaint_sel $maint_sel;
-    #var xmaint_active $maint_active;
-    #class global close;
-};
+#var maint_default {$maint_order};
+#var maint_cfg {{noun}{power}{Nouns}{Powers}{start}{1}{resume}{always}};
 
 #function {maint_want} {
     #if {!$maint_active} {#return 0};
     #if {"$maint_sel[%1]" == "1"} {#return 1};
     #if {&maint_spells[%1]} {#return 0} {#return 1};
-};
-
-#alias {_maint_set} {
-    #var maint_sel[%1] %2;
-};
-
-#alias {_maint_grid} {
-    #var _mcount 0;
-    #var _mrow {};
-    #foreach {$maint_order[%*]} {_mk} {
-        #if {"$maint_sel[$_mk]" == "1"} {
-            #format _mcell {%-28s} {$maint_spells[$_mk][name]};
-            #var _mrow {$_mrow$_mcell};
-            #math _mcount {$_mcount + 1};
-            #if {$_mcount % 2 == 0} {
-                #echo {      <afa>$_mrow<088>};
-                #var _mrow {};
-            };
-        };
-    };
-    #if {"$_mrow" != ""} {#echo {      <afa>$_mrow<088>}};
-    #if {$_mcount == 0} {#echo {      <888>nothing picked<088>}};
-};
-
-#alias {_maint_pick} {
-    #var _mraw {%2};
-    #replace _mraw { } {;};
-    #var _mwords {};
-    #foreach {$_mraw} {_mt} {
-        #if {"$_mt" != ""} {
-            #if {&maint_spells[$_mt]} {
-                #var _mwords {$_mwords =$_mt};
-            } {
-                #format _mlow {%l} {$_mt};
-                #var _mwords {$_mwords $_mlow};
-            };
-        };
-    };
-    #foreach {$maint_phrase_order[%*]} {_mp} {#replace _mwords {$_mp} {$maint_phrases[$_mp]}};
-    #replace _mwords { } {;};
-    #var _mbad {};
-    #foreach {$_mwords} {_mw} {
-        #if {"$_mw" != ""} {
-            #var _mk {};
-            #regex {$_mw} {^={.+}$} {#var _mk {&1}} {
-                #if {&maint_words[$_mw]} {#var _mk $maint_words[$_mw]};
-            };
-            #if {"$_mk" != ""} {
-                #if {"%1" == "t"} {
-                    #if {"$maint_sel[$_mk]" == "1"} {_maint_set $_mk 0} {_maint_set $_mk 1};
-                } {
-                    _maint_set $_mk %1;
-                };
-            } {
-                #var _mbad {$_mbad $_mw};
-            };
-        };
-    };
-    #if {"$_mbad" != ""} {
-        #echo {<faa>  Unknown power:<fff>$_mbad<faa>. Type <ffa>maint list<faa> for the names.<088>};
-    };
-    _maint_changed;
-};
-
-#alias {_maint_changed} {
-    _maint_save;
-    #echo {<dea>---  MAINT PICKS  ---<088>};
-    _maint_grid;
-    #if {$maint_active} {
-        #echo {  <ccc>Maint is on, the heartbeat keeps these up now.<088>};
-    } {
-        #echo {  <ccc>Type <ffa>maint<ccc> to start keeping these up.<088>};
-    };
-};
-
-#alias {_maint_on} {
-    #var maint_active 1;
-    _maint_save;
-    #echo {<dea>---  MAINTENANCE ON  ---<088>};
-    _maint_grid;
-};
-
-#alias {_maint_off} {
-    #var maint_active 0;
-    _maint_save;
-    #echo {<dea>---  MAINTENANCE OFF  ---<088>};
-    #if {"%1" == "cleared"} {
-        #echo {  <ccc>All picks cleared. Powers stay up until they drop, they are just not renewed.<088>};
-    } {
-        #echo {  <ccc>Powers stay up until they drop, they are just not renewed. Picks are kept.<088>};
-    };
 };
 
 #alias {_maint_list} {
@@ -207,44 +109,6 @@
         #echo {  <fff>Maint is <faa>OFF<fff>. Type <ffa>maint<fff> to keep the picked powers up.<088>};
     };
     #echo {};
-};
-
-#alias {maint} {
-    #format _mcmd {%l} {%1};
-    #var _mrest {};
-    #regex {%0} {^%S {.*}$} {#var _mrest {&2}};
-    #switch {"$_mcmd"} {
-        #case {""} {_maint_on};
-        #case {"on"} {_maint_on};
-        #case {"off"} {_maint_off};
-        #case {"add"} {_maint_pick {1} {$_mrest}};
-        #case {"del"} {_maint_pick {0} {$_mrest}};
-        #case {"remove"} {_maint_pick {0} {$_mrest}};
-        #case {"all"} {
-            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 1};
-            _maint_changed;
-        };
-        #case {"default"} {
-            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 1};
-            _maint_changed;
-        };
-        #case {"clear"} {
-            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 0};
-            _maint_save;
-            _maint_off cleared;
-        };
-        #case {"list"} {_maint_list};
-        #case {"check"} {_maint_list};
-        #case {"status"} {_maint_list};
-        #case {"help"} {maint-help};
-        #default {
-            #var _mtail {};
-            #regex {%0} {^{.*} {on|off}$} {#var _mrest {&1};#var _mtail {&2}};
-            #if {"$_mtail" == "off"} {_maint_pick {0} {$_mrest}} {
-                #if {"$_mtail" == "on"} {_maint_pick {1} {$_mrest}} {_maint_pick {t} {%0}};
-            };
-        };
-    };
 };
 
 #alias {maint-help} {
@@ -270,3 +134,4 @@
 };
 
 #class {guild_maintenance} {close}
+#read common/maint.tin
