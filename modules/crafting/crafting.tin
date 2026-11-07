@@ -7,13 +7,19 @@
 
 #nop -- turn on and off farmer script;
 #alias {farmer-on} {
-    #read modules/crafting/farmer.tin;
+    #read modules/crafting/farming/index.tin;
 };
 
-#alias {farmer-off} {
-    stopauto;
-    stopfarming;
-    #class farmer kill;
+#nop -- Stops farming and removes everything it loaded or created, so nothing farming is left when it's off;
+#alias {farmer-off}
+{
+    #if {&{craft_farming}}
+    {
+        stopauto;
+        stopfarming;
+        farm_clear_runtime;
+    };
+    #class {farmer} {kill};
 };
 
 #list tomeTypes add {chef};
