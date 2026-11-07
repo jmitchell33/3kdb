@@ -294,9 +294,62 @@
           #case {"13d"} {cast summon config as monster summoning 13##2#1500#70#defend#summons#always;cast summon config activate};
           #case {"14a"} {cast summon config as monster summoning 14##2#1500#70#assist#summons#always;cast summon config activate};
           #case {"14d"} {cast summon config as monster summoning 14##2#1500#70#defend#summons#always;cast summon config activate};
-          #case {""}   {#echo {<efb>==========<088> <faa>NO CONFIGURATION PROVIDED<088> <efb>==========<088>}};
+          #case {""}
+          {
+              #echo {<efb>==========<088> <faa>NO CONFIGURATION PROVIDED<088> <efb>==========<088>};
+              #echo {<fff>  Type <ffa>ms-help<fff> to see how to use ms.<088>};
+          };
+          #case {"help"}
+          {
+              ms-help;
+          };
           #default 	 {cast summon config as monster summoning %0;cast summon config activate};
      };
+};
+
+#NOP -- how to use ms, from the game's info summon config;
+#alias {ms-help}
+{
+    #echo {};
+    #echo {<ccf>  ===================  MAGE MS HELP  ===================<088>};
+    #echo {  <fff>ms sets up a summon config and turns it on.<088>};
+    #echo {};
+    #echo {  <fff>Shortcuts:<088>};
+    #echo {  <ffa>ms 5a      <fff>2 summons from spell 5, assisting (any spell 1-14)<088>};
+    #echo {  <ffa>ms 5d      <fff>2 summons from spell 5, defending (any spell 1-14)<088>};
+    #echo {  <ffa>ms golema  <fff>your golem, assisting<088>};
+    #echo {  <ffa>ms golemd  <fff>your golem, defending<088>};
+    #echo {  <888>           All of them need 1500 sp and 70%% concentration or less.<088>};
+    #echo {};
+    #echo {  <fff>Your own config, 8 parts with # between them:<088>};
+    #echo {  <ffa>ms <spell>#<name>#<count>#<sp>#<conc>#<action>#summons#<when><088>};
+    #echo {    <ffa>spell    <fff>monster summoning spell, 1-14<088>};
+    #echo {    <ffa>name     <fff>which monster, leave empty to let the spell pick<088>};
+    #echo {    <ffa>count    <fff>how many to summon<088>};
+    #echo {    <ffa>sp       <fff>only cast with at least this much sp<088>};
+    #echo {    <ffa>conc     <fff>only cast with at most this concentration %%<088>};
+    #echo {    <ffa>action   <fff>assist or defend<088>};
+    #echo {    <ffa>summons  <fff>the group name, keep it as summons for 3kdb<088>};
+    #echo {    <ffa>when     <fff>always, or combat to only cast in combat<088>};
+    #echo {};
+    #echo {  <fff>Examples:<088>};
+    #echo {  <ffa>ms 3#ghoul#3#1500#35#assist#summons#always<088>};
+    #echo {  <ffa>ms 11##2#1500#70#defend#summons#combat<088>};
+    #echo {};
+    #echo {  <fff>Good to know:<088>};
+    #echo {  <fff>- Anything that isn't a shortcut goes after<088>};
+    #echo {    <ffa>cast summon config as monster summoning<fff>, then it's activated.<088>};
+    #echo {  <fff>- You get 1 config at spell level 50, 2 at 100 and 3 at 150.<088>};
+    #echo {  <fff>- One spell can have 2 configs, e.g. <ffa>ms 11a<fff> and <ffa>ms 11d<fff>.<088>};
+    #echo {};
+    #echo {  <fff>Other commands:<088>};
+    #echo {  <ffa>summon_types                   <fff>monsters for each spell<088>};
+    #echo {  <ffa>cast summon config             <fff>show your configs<088>};
+    #echo {  <ffa>cast remove summon config 1    <fff>remove config number 1<088>};
+    #echo {  <ffa>activate_sconfig               <fff>turn configs on<088>};
+    #echo {  <ffa>cast summon config deactivate  <fff>turn configs off<088>};
+    #echo {  <ffa>clear_sconfig                  <fff>remove all and turn off<088>};
+    #echo {<ccf>  ======================================================<088>};
 };
 
 #NOP -- activate summon config;

@@ -1749,7 +1749,8 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `clear_def`: clear contingencies and turn off defenses.
 - `activate_sconfig`: activate summon config.
 - `clear_sconfig`: clear summon config.
-- `ms`: setup summon config. Usage: `ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema`
+- `ms`: setup summon config. Usage: `ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema' - see 'ms-help'`
+- `ms-help`: help for ms: shortcuts, building your own summon config and related commands.
 - `castper`: setup perform with a single target damage spell. Usage: `castper' alone will show options - castper <option>`
 - `msc`: quick-set summon config digits and golem lines. Usage: `msc two digit pairs then width tokens see mage summoning aliases`
 - `gc_ss`: setup stoneskin with greater contingency.
