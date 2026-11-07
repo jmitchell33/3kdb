@@ -1499,9 +1499,10 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `fill_golem`: fill golem parts from held corpses.
 - `fill-moulding`: examine moulding and unstash best quality you have.
 - `farmer-on`: turn farmer script on.
-- `farmer-off`: turn farmer script off.
+- `farmer-off`: turn farmer script off, stop farming and remove everything it loaded.
 - `farm`: farmer commands and auto farming, after farmer-on, type farm alone for the list. Usage: `farm <option>`
 - `farmhelp`: farmer help, after farmer-on. Usage: `farmhelp <topic>`
+- `farmapm`: show or set the commands a minute auto-farming averages by resting between plants, after farmer-on, 0 turns rests off. Usage: `farmapm <number>`
 - `borrow-tomes`: borrow a volume of every crafting tome. Usage: `borrow-tomes <1/2/3>`
 - `buy-tomes`: buy a volume of every crafting tome. Usage: `buy-tomes <1/2/3>`
 - `box-tomes`: get a volume of every crafting tome from your box. Usage: `box-tomes <1/2/3>`

@@ -1,0 +1,3382 @@
+#nop ============================================================================;
+#nop    3K FARMING SCRIPT - TINTIN++ VERSION;
+#nop    Everything that makes the farmer run. Loaded by farming/index.tin;
+#nop    Help is in help.tin. Recipes are in recipes_farmNN.tin, one file per farm;
+#nop ============================================================================;
+
+#nop ============================================;
+#nop VARIABLE INITIALIZATION;
+#nop ============================================;
+
+#nop set this to 0 if your not a 3kdb user or update the speedruns, farm_land1 etc to yours in section 9;
+#var craft_farming[data][travel_toggle] 1;
+
+#nop core variables;
+
+#nop plant name;
+#var craft_farming[data][plant] None;
+
+#nop plant min and trivial levels;
+#var craft_farming[data][plant_min_skill] 0;
+#var craft_farming[data][plant_trivial_skill] 0;
+
+#nop current plant round;
+#var craft_farming[data][plantround] 0;
+
+#nop echo toggle state (debuging);
+#var craft_farming[data][echo] 0;
+
+#nop ideal plant growth percentage;
+#var craft_farming[data][ideal_growth] 0;
+
+#nop pause state;
+#var craft_farming[data][paused] 0;
+
+#nop tool type;
+#var craft_farming[data][tool_type] {};
+
+#nop toggle for farm status (on by default);
+#var craft_farming[data][farm_status] 1;
+
+#nop measurements;
+#var craft_farming[data][dark] {0};
+#var craft_farming[data][gold] {0};
+#var craft_farming[data][white] {0};
+#var craft_farming[data][glisten] {0};
+#var craft_farming[data][water] {0};
+#var craft_farming[data][bugs] {0};
+#var craft_farming[data][weeds] {0};
+#var craft_farming[data][mushrooms] {0};
+
+#nop contristometer 1;
+#var craft_farming[data][contristometer_1] {0};
+
+#nop contristometer 2;
+#var craft_farming[data][contristometer_2] {0};
+
+#nop contristometer 3;
+#var craft_farming[data][contristometer_3] {0};
+
+#nop contristometer 4;
+#var craft_farming[data][contristometer_4] {0};
+
+#nop nutriometer 1;
+#var craft_farming[data][nutriometer_1] {0};
+
+#nop nutriometer 2;
+#var craft_farming[data][nutriometer_2] {0};
+
+#nop nutriometer 3;
+#var craft_farming[data][nutriometer_3] {0};
+
+#nop nutriometer 4;
+#var craft_farming[data][nutriometer_4] {0};
+
+#nop oximeter;
+#var craft_farming[data][oximeter] {0};
+
+#nop hygrometer;
+#var craft_farming[data][hygrometer] {0};
+
+#nop goblins;
+#var craft_farming[data][goblin_green] {0};
+#var craft_farming[data][goblin_red] {0};
+#var craft_farming[data][goblin_blue] {0};
+#var craft_farming[data][goblin_orange] {0};
+
+#nop Harvest tracking variables;
+#var craft_farming[data][harvest_count] 0;
+#list craft_farming[harvests] create {};
+
+#nop Auto-Farming System Variables;
+#var craft_farming[data][farming_level] 0;
+#var craft_farming[data][auto_mode] manual;
+#var craft_farming[data][auto_active] 0;
+#var craft_farming[data][current_farm_num] 0;
+#var craft_farming[data][max_farms] 0;
+#var craft_farming[data][current_farm_id] 0;
+#var craft_farming[data][path_index] 0;
+#var craft_farming[data][room_has_plant] 0;
+#var craft_farming[data][plant_owner] {};
+#var craft_farming[data][go_toggle] 0;
+
+#nop Farm land level ranges;
+#var craft_farming[farmland][min][1] 1;
+#var craft_farming[farmland][min][2] 2;
+#var craft_farming[farmland][min][3] 4;
+#var craft_farming[farmland][min][4] 13;
+#var craft_farming[farmland][min][5] 17;
+#var craft_farming[farmland][min][6] 21;
+#var craft_farming[farmland][min][7] 28;
+#var craft_farming[farmland][min][8] 32;
+#var craft_farming[farmland][min][9] 37;
+#var craft_farming[farmland][min][10] 43;
+#var craft_farming[farmland][min][11] 49;
+#var craft_farming[farmland][min][12] 60;
+#var craft_farming[farmland][min][13] 70;
+#var craft_farming[farmland][min][14] 80;
+#var craft_farming[farmland][min][15] 90;
+
+#var craft_farming[farmland][max][1] 6;
+#var craft_farming[farmland][max][2] 11;
+#var craft_farming[farmland][max][3] 13;
+#var craft_farming[farmland][max][4] 24;
+#var craft_farming[farmland][max][5] 30;
+#var craft_farming[farmland][max][6] 35;
+#var craft_farming[farmland][max][7] 39;
+#var craft_farming[farmland][max][8] 43;
+#var craft_farming[farmland][max][9] 50;
+#var craft_farming[farmland][max][10] 54;
+#var craft_farming[farmland][max][11] 63;
+#var craft_farming[farmland][max][12] 74;
+#var craft_farming[farmland][max][13] 80;
+#var craft_farming[farmland][max][14] 90;
+#var craft_farming[farmland][max][15] 100;
+
+#nop CXP-giving farms;
+#var craft_farming[farmland][cxp][1] 1;
+#var craft_farming[farmland][cxp][2] 1;
+#var craft_farming[farmland][cxp][3] 1;
+#var craft_farming[farmland][cxp][4] 1;
+#var craft_farming[farmland][cxp][5] 1;
+#var craft_farming[farmland][cxp][6] 1;
+#var craft_farming[farmland][cxp][7] 1;
+#var craft_farming[farmland][cxp][8] 1;
+#var craft_farming[farmland][cxp][9] 1;
+#var craft_farming[farmland][cxp][10] 1;
+#var craft_farming[farmland][cxp][11] 1;
+#var craft_farming[farmland][cxp][12] 1;
+#var craft_farming[farmland][cxp][13] 1;
+#var craft_farming[farmland][cxp][14] 1;
+#var craft_farming[farmland][cxp][15] 1;
+
+#var craft_farming[farm_path] {e;e;e;n;w;w;n;e;e;n;w;w;w;s;s;s};
+#list craft_farming[farm_list] create {};
+#list craft_farming[path_directions] create {};
+
+#nop Plant size tracking;
+#var craft_farming[data][plant_size] {sproutling};
+
+#nop Size to percentage mapping;
+#var craft_farming[sizes][sproutling] 5;
+#var craft_farming[sizes][tiny] 15;
+#var craft_farming[sizes][puny] 25;
+#var craft_farming[sizes][little] 35;
+#var craft_farming[sizes][knee-height] 45;
+#var craft_farming[sizes][chest-height] 55;
+#var craft_farming[sizes][person-sized] 65;
+#var craft_farming[sizes][towering] 75;
+#var craft_farming[sizes][massive] 85;
+#var craft_farming[sizes][GIGANTIC] 95;
+#var craft_farming[sizes][harvestable] 100;
+
+#nop Target commands a minute, averaged over a plant and the rest after it. 0 turns rests off;
+#var craft_farming[pace][apm] 25;
+#var craft_farming[pace][sent] 0;
+#var craft_farming[pace][started] 0;
+#var craft_farming[pace][rest] 0;
+#var craft_farming[pace][in_recipe] 0;
+
+#nop Random plant growing variables;
+#var craft_farming[random][active] 0;
+#list craft_farming[random][log] create {};
+#list craft_farming[random][actions] create {};
+
+#nop ============================================;
+#nop TRIGGERS (ACTIONS);
+#nop ============================================;
+
+#nop farm level capture using the mud command craftstats;
+#action {^  Farming    : %s%d / %s%d \(%s%d\%\) \[%s%*%s\]$} {
+    #var craft_farming[data][farming_level] %2;
+    setfarmlevel $craft_farming[data][farming_level];
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Farming level automatically detected:<088> %2}
+    }
+} {2};
+
+#nop Auto-detect farming level on load;
+#delay 1 {
+    #if {!$idle_flag} {
+        #send craftstats
+    }
+};
+
+#action {^Type: %1$} {
+    #if {$idle_flag} {
+        farm_idle_stop
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        #local plant_name %1;
+        save_plant {$plant_name};
+        
+        #nop Check if we have a recipe by looking in plantaction;
+        #local has_recipe 0;
+        
+        #nop Check against known plants;
+        #switch {"$craft_farming[data][plant]"} {
+            #case {"white potato"} {#var has_recipe 1};
+            #case {"broccoli"} {#var has_recipe 1};
+            #case {"green pepper"} {#var has_recipe 1};
+            #case {"beefsteak tomato"} {#var has_recipe 1};
+            #case {"mcintosh apple"} {#var has_recipe 1};
+            #case {"yellow bean"} {#var has_recipe 1};
+            #case {"blueberry"} {#var has_recipe 1};
+            #case {"green bean"} {#var has_recipe 1};
+            #case {"zucchini"} {#var has_recipe 1};
+            #case {"cauliflower"} {#var has_recipe 1};
+            #case {"roma tomato"} {#var has_recipe 1};
+            #case {"green apple"} {#var has_recipe 1};
+            #case {"valencia orange"} {#var has_recipe 1};
+            #case {"raspberry"} {#var has_recipe 1};
+            #case {"red pepper"} {#var has_recipe 1};
+            #case {"red potato"} {#var has_recipe 1};
+            #case {"tangerine"} {#var has_recipe 1};
+            #case {"peach"} {#var has_recipe 1};
+            #case {"orange pepper"} {#var has_recipe 1};
+            #case {"nantes carrot"} {#var has_recipe 1};
+            #case {"snap pea"} {#var has_recipe 1};
+            #case {"blackberry"} {#var has_recipe 1};
+            #case {"canteloupe"} {#var has_recipe 1};
+            #case {"navel orange"} {#var has_recipe 1};
+            #case {"new potato"} {#var has_recipe 1};
+            #case {"eggplant"} {#var has_recipe 1};
+            #case {"avocado"} {#var has_recipe 1};
+            #case {"blue potato"} {#var has_recipe 1};
+            #case {"bosc pear"} {#var has_recipe 1};
+            #case {"jalapeno pepper"} {#var has_recipe 1};
+            #case {"yellow pepper"} {#var has_recipe 1};
+            #case {"alfalfa sprout"} {#var has_recipe 1};
+            #case {"red plum"} {#var has_recipe 1};
+            #case {"mandarin orange"} {#var has_recipe 1};
+            #case {"boysenberry"} {#var has_recipe 1};
+            #case {"baby eggplant"} {#var has_recipe 1};
+            #case {"english cucumber"} {#var has_recipe 1};
+            #case {"banana"} {#var has_recipe 1};
+            #case {"white plum"} {#var has_recipe 1};
+            #case {"yukon gold potato"} {#var has_recipe 1};
+            #case {"mottled pepper"} {#var has_recipe 1};
+            #case {"brussel sprout"} {#var has_recipe 1};
+            #case {"bartlet pear"} {#var has_recipe 1};
+            #case {"mango"} {#var has_recipe 1};
+            #case {"russet potato"} {#var has_recipe 1};
+            #case {"gooseberry"} {#var has_recipe 1};
+            #case {"spaghetti squash"} {#var has_recipe 1};
+            #case {"asparagus"} {#var has_recipe 1};
+            #case {"lychee"} {#var has_recipe 1};
+            #case {"habanero pepper"} {#var has_recipe 1};
+            #case {"lentil"} {#var has_recipe 1};
+            #case {"pomegranate"} {#var has_recipe 1};
+            #case {"kiwi"} {#var has_recipe 1};
+            #case {"salmonberry"} {#var has_recipe 1};
+            #case {"persimmon"} {#var has_recipe 1};
+            #case {"ginger"} {#var has_recipe 1};
+            #case {"honey sugar apple"} {#var has_recipe 1};
+            #case {"tomatillo"} {#var has_recipe 1};
+            #case {"bamboo shoot"} {#var has_recipe 1};
+            #case {"yellow carrot"} {#var has_recipe 1};
+            #case {"guava"} {#var has_recipe 1};
+            #case {"quince"} {#var has_recipe 1};
+            #case {"thimbleberry"} {#var has_recipe 1};
+            #case {"chokecherry"} {#var has_recipe 1};
+            #case {"coconut"} {#var has_recipe 1};
+            #case {"wasabi"} {#var has_recipe 1};
+            #case {"luffa"} {#var has_recipe 1};
+            #case {"radicchio"} {#var has_recipe 1};
+            #case {"white celery"} {#var has_recipe 1};
+            #case {"kaffir lime"} {#var has_recipe 1};
+            #case {"ceylon spinach"} {#var has_recipe 1};
+            #case {"artichoke"} {#var has_recipe 1};
+            #case {"taro"} {#var has_recipe 1};
+            #case {"loganberry"} {#var has_recipe 1};
+            #case {"chickpea"} {#var has_recipe 1};
+            #case {"papaya"} {#var has_recipe 1};
+            #case {"white gooseberry"} {#var has_recipe 1};
+            #case {"fava bean"} {#var has_recipe 1};
+            #case {"passion fruit"} {#var has_recipe 1};
+            #case {"prickly pear"} {#var has_recipe 1};
+            #case {"hubbard squash"} {#var has_recipe 1};
+            #case {"fennel"} {#var has_recipe 1};
+            #case {"pomelo"} {#var has_recipe 1};
+            #case {"buffaloberry"} {#var has_recipe 1};
+            #case {"canna"} {#var has_recipe 1};
+            #case {"guar"} {#var has_recipe 1};
+            #case {"bok choy"} {#var has_recipe 1};
+            #case {"cloudberry"} {#var has_recipe 1};
+            #case {"chayote"} {#var has_recipe 1};
+            #case {"mechanized broccoli"} {#var has_recipe 1};
+            #case {"holy onion"} {#var has_recipe 1};
+            #case {"soybean"} {#var has_recipe 1};
+            #case {"pink grape"} {#var has_recipe 1};
+            #case {"pawpaw"} {#var has_recipe 1};
+            #case {"date"} {#var has_recipe 1};
+            #case {"dragonfruit"} {#var has_recipe 1};
+            #case {"vanilla"} {#var has_recipe 1};
+            #case {"yam"} {#var has_recipe 1};
+            #case {"apricot"} {#var has_recipe 1};
+            #case {"shallot"} {#var has_recipe 1};
+            #case {"honorable tangelo"} {#var has_recipe 1};
+            #case {"cybernetic lettuce"} {#var has_recipe 1};
+            #default {#var has_recipe 0}
+        };
+        
+        #if {$has_recipe == 1} {
+            #local plant_min {$craft_farming[data][plant_min_skill]};
+            
+            #if {$craft_farming[data][farming_level] < $plant_min} {
+                #echo {<faa>Plant level ($plant_min) too high - skipping<088>};
+                farm_walk_next_room
+            };
+            #else {
+                #if {$craft_farming[data][echo] == 1} {
+                    #echo {<ffa>Recipe found: $craft_farming[data][plant]<088>}
+                };
+                start_farming
+            }
+        };
+        #else {
+            #echo {<faa>No recipe for: %1 - skipping<088>};
+            farm_walk_next_room
+        }
+    };
+    #else {
+        #local plant_name %1;
+        save_plant {$plant_name};
+        #if {$craft_farming[data][echo] == 1} {
+            #echo {<ffa>Plant identified:<088> $craft_farming[data][plant]}
+        }
+    }
+} {2};
+
+#action {^Minimum Skill: %d$} {
+    #var craft_farming[data][plant_min_skill] %1
+} {2};
+
+#action {^Trivial Skill: %d$} {
+    #var craft_farming[data][plant_trivial_skill] %1;
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffc>Plant Skills: <fff>Min:$craft_farming[data][plant_min_skill] <ffc>Triv: <fff>$craft_farming[data][plant_trivial_skill]<088>}
+    }
+} {2};
+
+#nop plant detection - basic (no owner);
+#action {^-i-A sproutling %* plant.$} {
+    #var craft_farming[data][room_has_plant] 1;
+    
+    #nop Capture size and set growth percentage;
+    #var craft_farming[data][plant_size] sproutling;
+    
+    #if {&craft_farming[sizes][%1]} {
+        #var craft_farming[data][ideal_growth] {$craft_farming[sizes][%1]}
+    };
+    #else {
+        #var craft_farming[data][ideal_growth] 5
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<afa>Found plant: %1 %2 (Growth: $craft_farming[data][ideal_growth]%%)<088>}
+    }
+} {2};
+
+#nop plant detection - with owner (captures size and updates growth);
+#action {^-i-A {sproutling|tiny|puny|little|knee-height|chest-height|person-sized|towering|massive|GIGANTIC|harvestable} %* plant, owned by %*.$} {
+    #var craft_farming[data][room_has_plant] 1;
+    #var craft_farming[data][plant_owner] {%3};
+    
+    #nop Capture size and set growth percentage;
+    #var craft_farming[data][plant_size] {%1};
+    
+    #if {&craft_farming[sizes][%1]} {
+        #var craft_farming[data][ideal_growth] {$craft_farming[sizes][%1]}
+    };
+    #else {
+        #var craft_farming[data][ideal_growth] 5
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<afa>Found plant: %1 %2 owned by %3 (Growth: $craft_farming[data][ideal_growth]%%)<088>}
+    };
+    
+    #if {$craft_farming[data][farm_status] == 1} {
+        show_farm_status
+    }
+} {2};
+
+#nop harvest ready;
+#action {^The plant shivers, nudges, and moves its leaves into its final position} {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+    
+    stop_farming;
+    
+    #if {$craft_farming[random][active] == 1} {
+        save_random_success
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Harvested: Ready to harvest!<088>}
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        continue_auto_farming
+    }
+} {2};
+
+#action {The spindly leaves of the %* plant come together%*} {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+    
+    stop_farming;
+    
+    #if {$craft_farming[random][active] == 1} {
+        save_random_success
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Harvested: Ready to harvest!<088>}
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        continue_auto_farming
+    }
+} {2};
+
+#action {With the tinkling of a bell,%*} {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+    
+    stop_farming;
+    
+    #if {$craft_farming[random][active] == 1} {
+        save_random_success
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Harvested: Ready to harvest!<088>}
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        continue_auto_farming
+    }
+} {2};
+
+#action {%*the plant is now ready to harvest!} {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+    
+    stop_farming;
+    
+    #if {$craft_farming[random][active] == 1} {
+        save_random_success
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Harvested: Ready to harvest!<088>}
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        continue_auto_farming
+    }
+} {2};
+
+#nop harvest inventory tracking;
+#action {^The %w %* tumbles to your feet.$} {
+    #local quality {%1};
+    #local crop_name {%2};
+    #local full_name {$quality $crop_name};
+    
+    #nop Increment harvest count;
+    #math craft_farming[data][harvest_count] {$craft_farming[data][harvest_count] + 1};
+    
+    #nop Track in harvest inventory;
+    #if {&craft_farming[harvests][$full_name]} {
+        #math craft_farming[harvests][$full_name] {$craft_farming[harvests][$full_name] + 1}
+    };
+    #else {
+        #var craft_farming[harvests][$full_name] 1
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Harvested:<fff> $full_name (Total this session: $craft_farming[data][harvest_count])<088>}
+    }
+} {2};
+
+#nop Growth Messages;
+#action {%* flowers pop and rattle as they are hauled%*} {
+    do_grow_message 1
+} {2};
+
+#action {With a triumphant scream, the %* plant explodes%*} {
+    do_grow_message 2
+} {2};
+
+#action {The %* plant screams in delight%*} {
+    do_grow_message 3
+} {2};
+
+#action {The faint smell of soap and cumin rises to your nose%*} {
+    do_grow_message 4
+} {2};
+
+#action {The roots of the %* plant plungs into the ground%*} {
+    do_grow_message 5
+} {2};
+
+#action {With a shift to the left, and a shift to the right,%*} {
+    do_grow_message 6
+} {2};
+
+#action {The %* plan sighs tremendously, as if it was%*} {
+    do_grow_message 7
+} {2};
+
+#action {The smell of burnt bone marrow overwhelms you as%*} {
+    do_grow_message 8
+} {2};
+
+#action {The roots of the %* plant tear up the ground%*} {
+    do_grow_message 9
+} {2};
+
+#action {The %* plant spins in a torrent, moving skyward%*} {
+    do_grow_message 10
+} {2};
+
+#action {The roots of the %* plant spiral up around%*} {
+    do_grow_message 12
+} {2};
+
+#action {The roots of the %* plant disappear deep into the ground%*} {
+    do_grow_message 13
+} {2};
+
+#action {Soil flies in every direction as the %* plant races%*} {
+    do_grow_message 14
+} {2};
+
+#action {As in a nature documentary, the %* leaves grow right%*} {
+    do_grow_message 15
+} {2};
+
+#action {The smell of angel wing feathers fills your soul as the%*} {
+    do_grow_message 16
+} {2};
+
+#action {The scent of wildflowers and oak wine barrels fills%*} {
+    do_grow_message 17
+} {2};
+
+#action {The %* plant ascends vertically into the blue sky%*} {
+    do_grow_message 18
+} {2};
+
+#action {The smell of rotted lilacs showers you as the%*} {
+    do_grow_message 19
+} {2};
+
+#action {With a shriek of delight, the %* plant dances%*} {
+    do_grow_message 20
+} {2};
+
+#action {With a pop, a twirl, and a sweet little coo,%*} {
+    do_grow_message 21
+} {2};
+
+#action {The %* leaves coil around itself clockwise,%*} {
+    do_grow_message 22
+} {2};
+
+#action {The %* roots launch themselves skywards to drive%*} {
+    do_grow_message 23
+} {2};
+
+#action {A massive explosion knocks you back as the%*} {
+    do_grow_message 24
+} {2};
+
+#action {The sound of children laughing comes from the leaves%*} {
+    do_grow_message 25
+} {2};
+
+#action {A tri-harmonic sound blasts in your ears as the%*} {
+    do_grow_message 26
+} {2};
+
+#action {The %* plant dances a slow, luxurious dance high%*} {
+    do_grow_message 27
+} {2};
+
+#action {With leaves all-aquiver, the %* plant undergoes%*} {
+    do_grow_message 28
+} {2};
+
+#action {The %* plant's leaves buffet you with wind%*} {
+    do_grow_message 30
+} {2};
+
+#action {The %* plant gives a little cough, and moves%*} {
+    do_grow_message 31
+} {2};
+
+#action {The roots of the %* plant reach downward, and grasp%*} {
+    do_grow_message 32
+} {2};
+
+#action {Leaving no trace of its former self behind it,%*} {
+    do_grow_message 33
+} {2};
+
+#action {The %* plant shrugs its leaves as it sends it%*} {
+    do_grow_message 34
+} {2};
+
+#nop Shrinking Messages;
+#action {The %* plant heaves upwards momentarily, only to sink%*} {
+    do_shrink_message 35
+} {2};
+
+#action {A cough emanates from the %* plant as it wastes away%*} {
+    do_shrink_message 36
+} {2};
+
+#action {The %* plant shivers right before your eyes,%*} {
+    do_shrink_message 37
+} {2};
+
+#action {The roots of the %* plant shrink up around the stem%*} {
+    do_shrink_message 38
+} {2};
+
+#action {A spinning noise is heard as the %* plant constricts%*} {
+    do_neutral_message 39
+} {2};
+
+#action {With a slump, the %* plant shrinks right before%*} {
+    do_shrink_message 40
+} {2};
+
+#action {The leaves of the plant pull back from your reach as the%*} {
+    do_neutral_message 41
+} {2};
+
+#action {The roots of the %* plant reach deep into the ground,%*} {
+    do_neutral_message 42
+} {2};
+
+#action {The %* plant squiggles and niggles, but%*} {
+    do_neutral_message 43
+} {2};
+
+#action {With a stench like oozing foot sores%*} {
+    do_neutral_message 44
+} {2};
+
+#action {The leaves of the %* plant shrug upwards, as if asking%*} {
+    do_neutral_message 45
+} {2};
+
+#nop Death Messages;
+#action {The %* plant blinks its flowers twice at you%*} {
+    do_death_message 46
+} {2};
+
+#action {The roots of the %* plant reach skyward%*} {
+    do_death_message 47
+} {2};
+
+#action {POOF!  The %* plant disappears%*} {
+    do_death_message 48
+} {2};
+
+#action {With a scream of anguish that pierces your soul, the%*} {
+    do_death_message 49
+} {2};
+
+#action {The %* plant shrugs its leaves, points them upwards%*} {
+    do_death_message 50
+} {2};
+
+#nop ground conditions;
+#action {^The %* soil is tinged with %* flecks of gold, %* flecks} {
+    #switch {"%1"} {
+        #case {"pale brown"} {#var craft_farming[data][dark] 1};
+        #case {"light brown"} {#var craft_farming[data][dark] 2};
+        #case {"dark brown"} {#var craft_farming[data][dark] 3};
+        #case {"black"} {#var craft_farming[data][dark] 4};
+        #default {#var craft_farming[data][dark] {0}}
+    };
+    #switch {"%2"} {
+        #case {"a few"} {#var craft_farming[data][gold] 1};
+        #case {"some"} {#var craft_farming[data][gold] 2};
+        #case {"many"} {#var craft_farming[data][gold] 3};
+        #case {"a swath of"} {#var craft_farming[data][gold] 4};
+        #default {#var craft_farming[data][gold] {0}}
+    };
+    #switch {"%3"} {
+        #case {"a few"} {#var craft_farming[data][white] 1};
+        #case {"some"} {#var craft_farming[data][white] 2};
+        #case {"many"} {#var craft_farming[data][white] 3};
+        #case {"a swath of"} {#var craft_farming[data][white] 4};
+        #default {#var craft_farming[data][white] {0}}
+    }
+} {2};
+
+#action {, and glistens a sickly %* colour. The soil is %*} {
+    #switch {"%1"} {
+        #case {"yellow"} {#var craft_farming[data][glisten] 1};
+        #case {"yellow-green"} {#var craft_farming[data][glisten] 2};
+        #case {"green-yellow"} {#var craft_farming[data][glisten] 3};
+        #case {"green"} {#var craft_farming[data][glisten] 4};
+        #default {#var craft_farming[data][glisten] {0}}
+    };
+    #switch {"%2"} {
+        #case {"bone dry."} {#var craft_farming[data][water] 1};
+        #case {"somewhat dry."} {#var craft_farming[data][water] 2};
+        #case {"somewhat"} {#var craft_farming[data][water] 2};
+        #case {"damp."} {#var craft_farming[data][water] 3};
+        #case {"soaked."} {#var craft_farming[data][water] 4};
+        #default {#var craft_farming[data][water] {0}}
+    }
+} {2};
+
+#action {^This plot of farm has %* bugs.} {
+    #switch {"%1"} {
+        #case {"virtually no"} {#var craft_farming[data][bugs] 1};
+        #case {"some"} {#var craft_farming[data][bugs] 2};
+        #case {"many"} {#var craft_farming[data][bugs] 3};
+        #case {"innumerable"} {#var craft_farming[data][bugs] 4};
+        #default {#var craft_farming[data][bugs] {0}}
+    }
+} {2};
+
+#action {^This plot of farm has %* weeds.} {
+    #switch {"%1"} {
+        #case {"very few"} {#var craft_farming[data][weeds] 1};
+        #case {"few"} {#var craft_farming[data][weeds] 2};
+        #case {"a bunch of"} {#var craft_farming[data][weeds] 3};
+        #case {"a lot of"} {#var craft_farming[data][weeds] 4};
+        #default {#var craft_farming[data][weeds] {0}}
+    };
+} {2};
+
+#action {^This plot of farm has %* wild mushrooms.} {
+    #switch {"%1"} {
+        #case {"very few"} {#var craft_farming[data][mushrooms] 1};
+        #case {"few"} {#var craft_farming[data][mushrooms] 2};
+        #case {"a bunch of"} {#var craft_farming[data][mushrooms] 3};
+        #case {"a lot of"} {#var craft_farming[data][mushrooms] 4};
+        #default {#var craft_farming[data][mushrooms] {0}}
+    }
+} {2};
+
+#nop oximeter readings;
+#action {%* no bubbles$} {
+    #var craft_farming[data][oximeter] 1
+} {2};
+
+#action {%* a lone bubble$} {
+    #var craft_farming[data][oximeter] 2
+} {2};
+
+#action {%* few bubbles$} {
+    #var craft_farming[data][oximeter] 3
+} {2};
+
+#action {%* a large number of bubbles$} {
+    #var craft_farming[data][oximeter] 4
+} {2};
+
+#action {%* a massive number of bubbles$} {
+    #var craft_farming[data][oximeter] 5
+} {2};
+
+#action {%* BUBBLES BUBBLES EVERYWHERE$} {
+    #var craft_farming[data][oximeter] 6
+} {2};
+
+#nop hygrometer readings;
+#action {%* sloshing at all.$} {
+    #var craft_farming[data][hygrometer] 1
+} {2};
+
+#action {%* tiny wee bit o sloshing.$} {
+    #var craft_farming[data][hygrometer] 2
+} {2};
+
+#action {%* sloshing. No doubt$} {
+    #var craft_farming[data][hygrometer] 3
+} {2};
+
+#action {%* a lot of sloshing, old bean.$} {
+    #var craft_farming[data][hygrometer] 4
+} {2};
+
+#action {%* enormous amount of sloshing.$} {
+    #var craft_farming[data][hygrometer] 5
+} {2};
+
+#action {^Anticlimatic, AMIRITE?$} {
+    #var craft_farming[data][hygrometer] 6
+} {2};
+
+#nop contristometer 1 readings;
+#action {^ping ping.$} {
+    #var craft_farming[data][contristometer_1] 1
+} {2};
+
+#action {^ping PING.$} {
+    #var craft_farming[data][contristometer_1] 2
+} {2};
+
+#action {^pinG PING.$} {
+    #var craft_farming[data][contristometer_1] 3
+} {2};
+
+#action {^piNG PING.$} {
+    #var craft_farming[data][contristometer_1] 4
+} {2};
+
+#action {^pING PING.$} {
+    #var craft_farming[data][contristometer_1] 5
+} {2};
+
+#action {^PING PING.$} {
+    #var craft_farming[data][contristometer_1] 6
+} {2};
+
+#nop contristometer 2 readings;
+#action {^weet weet.$} {
+    #var craft_farming[data][contristometer_2] 1
+} {2};
+
+#action {^weet WEET.$} {
+    #var craft_farming[data][contristometer_2] 2
+} {2};
+
+#action {^weeT WEET.$} {
+    #var craft_farming[data][contristometer_2] 3
+} {2};
+
+#action {^weET WEET.$} {
+    #var craft_farming[data][contristometer_2] 4
+} {2};
+
+#action {^wEET WEET.$} {
+    #var craft_farming[data][contristometer_2] 5
+} {2};
+
+#action {^WEET WEET.$} {
+    #var craft_farming[data][contristometer_2] 6
+} {2};
+
+#nop contristometer 3 readings;
+#action {^pong pong.$} {
+    #var craft_farming[data][contristometer_3] 1
+} {2};
+
+#action {^pong PONG.$} {
+    #var craft_farming[data][contristometer_3] 2
+} {2};
+
+#action {^ponG PONG.$} {
+    #var craft_farming[data][contristometer_3] 3
+} {2};
+
+#action {^poNG PONG.$} {
+    #var craft_farming[data][contristometer_3] 4
+} {2};
+
+#action {^pONG PONG.$} {
+    #var craft_farming[data][contristometer_3] 5
+} {2};
+
+#action {^PONG PONG.$} {
+    #var craft_farming[data][contristometer_3] 6
+} {2};
+
+#nop contristometer 4 readings;
+#action {^woot woot.$} {
+    #var craft_farming[data][contristometer_4] 1
+} {2};
+
+#action {^woot WOOT.$} {
+    #var craft_farming[data][contristometer_4] 2
+} {2};
+
+#action {^wooT WOOT.$} {
+    #var craft_farming[data][contristometer_4] 3
+} {2};
+
+#action {^woOT WOOT.$} {
+    #var craft_farming[data][contristometer_4] 4
+} {2};
+
+#action {^wOOT WOOT.$} {
+    #var craft_farming[data][contristometer_4] 5
+} {2};
+
+#action {^WOOT WOOT.$} {
+    #var craft_farming[data][contristometer_4] 6
+} {2};
+
+#nop nutriometer type I;
+#action {^You stick the Type I nutriometer into the soil and the readout window turns\n%a.$} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        #switch {"%1"} {
+            #case {"almost white"}     {#var craft_farming[data][nutriometer_1] {1}};
+            #case {"light chartreuse"} {#var craft_farming[data][nutriometer_1] {2}};
+            #case {"dark chartreuse"}  {#var craft_farming[data][nutriometer_1] {3}};
+            #case {"light green"}      {#var craft_farming[data][nutriometer_1] {4}};
+            #case {"dark green"}       {#var craft_farming[data][nutriometer_1] {5}};
+            #default                   {#var craft_farming[data][nutriometer_1] {0}}
+        }
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard" || "$craft_farming[data][tool_type]" == "Complex"} {
+        #switch {"%1"} {
+            #case {"almost white"}     {#var craft_farming[data][nutriometer_1] {1}};
+            #case {"light chartreuse"} {#var craft_farming[data][nutriometer_1] {2}};
+            #case {"dark chartreuse"}  {#var craft_farming[data][nutriometer_1] {3}};
+            #case {"light green"}      {#var craft_farming[data][nutriometer_1] {4}};
+            #case {"green"}            {#var craft_farming[data][nutriometer_1] {5}};
+            #case {"bright green"}     {#var craft_farming[data][nutriometer_1] {6}};
+            #default                   {#var craft_farming[data][nutriometer_1] {0}}
+        }
+    };
+} {2};
+
+#nop nutriometer type II;
+#action {^You stick the Type II nutriometer into the soil and the readout window\nturns %a.$} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        #switch {"%1"} {
+            #case {"almost white"} {#var craft_farming[data][nutriometer_2] {1}};
+            #case {"light aqua"}   {#var craft_farming[data][nutriometer_2] {2}};
+            #case {"dark aqua"}    {#var craft_farming[data][nutriometer_2] {3}};
+            #case {"light blue"}   {#var craft_farming[data][nutriometer_2] {4}};
+            #case {"dark blue"}    {#var craft_farming[data][nutriometer_2] {5}};
+            #default               {#var craft_farming[data][nutriometer_2] {0}}
+        }
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard" || "$craft_farming[data][tool_type]" == "Complex"} {
+        #switch {"%1"} {
+            #case {"almost white"} {#var craft_farming[data][nutriometer_2] {1}};
+            #case {"light aqua"}   {#var craft_farming[data][nutriometer_2] {2}};
+            #case {"dark aqua"}    {#var craft_farming[data][nutriometer_2] {3}};
+            #case {"light blue"}   {#var craft_farming[data][nutriometer_2] {4}};
+            #case {"blue"}         {#var craft_farming[data][nutriometer_2] {5}};
+            #case {"bright blue"}  {#var craft_farming[data][nutriometer_2] {6}};
+            #default               {#var craft_farming[data][nutriometer_2] {0}}
+        }
+    };
+} {2};
+
+#nop nutriometers type III;
+#action {^You stick the Type III nutriometer into the soil and the readout window\nturns %a.$} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        #switch {"%1"} {
+            #case {"almost white"}  {#var craft_farming[data][nutriometer_3] {1}};
+            #case {"light yellow"}  {#var craft_farming[data][nutriometer_3] {2}};
+            #case {"dark yellow"}   {#var craft_farming[data][nutriometer_3] {3}};
+            #case {"light orange"}  {#var craft_farming[data][nutriometer_3] {4}};
+            #case {"dark orange"}   {#var craft_farming[data][nutriometer_3] {5}};
+            #default                {#var craft_farming[data][nutriometer_3] {0}}
+        }
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard" || "$craft_farming[data][tool_type]" == "Complex"} {
+        #switch {"%1"} {
+            #case {"almost white"}  {#var craft_farming[data][nutriometer_3] {1}};
+            #case {"light yellow"}  {#var craft_farming[data][nutriometer_3] {2}};
+            #case {"dark yellow"}   {#var craft_farming[data][nutriometer_3] {3}};
+            #case {"light orange"}  {#var craft_farming[data][nutriometer_3] {4}};
+            #case {"orange"}        {#var craft_farming[data][nutriometer_3] {5}};
+            #case {"bright orange"} {#var craft_farming[data][nutriometer_3] {6}};
+            #default                {#var craft_farming[data][nutriometer_3] {0}}
+        }
+    };
+} {2};
+
+#nop nutriometer type IV;
+#action {^You stick the Type IV nutriometer into the soil and the readout window\nturns %a.$} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        #switch {"%1"} {
+            #case {"almost white"} {#var craft_farming[data][nutriometer_4] {1}};
+            #case {"light pink"}   {#var craft_farming[data][nutriometer_4] {2}};
+            #case {"dark pink"}    {#var craft_farming[data][nutriometer_4] {3}};
+            #case {"light red"}    {#var craft_farming[data][nutriometer_4] {4}};
+            #case {"dark red"}     {#var craft_farming[data][nutriometer_4] {5}};
+            #default               {#var craft_farming[data][nutriometer_4] {0}}
+        }
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard" || "$craft_farming[data][tool_type]" == "Complex"} {
+        #switch {"%1"} {
+            #case {"almost white"} {#var craft_farming[data][nutriometer_4] {1}};
+            #case {"light pink"}   {#var craft_farming[data][nutriometer_4] {2}};
+            #case {"dark pink"}    {#var craft_farming[data][nutriometer_4] {3}};
+            #case {"light red"}    {#var craft_farming[data][nutriometer_4] {4}};
+            #case {"red"}          {#var craft_farming[data][nutriometer_4] {5}};
+            #case {"bright red"}   {#var craft_farming[data][nutriometer_4] {6}};
+            #default               {#var craft_farming[data][nutriometer_4] {0}}
+        }
+    };
+} {2};
+
+#nop goblin triggers;
+#action {The %* goblin takes one%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {1}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {1}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin touches%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {0}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {2}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin barely manages%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {2}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {3}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin takes his time%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {3}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {4}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin eats it and%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {4}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {5}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin eats it up%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {5}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {6}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin eats it so%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {0}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {7}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#action {The %* goblin cannot eat%*} {
+    #if {"$craft_farming[data][tool_type]" == "Simple"} {
+        setgoblinvalue {%1} {6}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Standard"} {
+        setgoblinvalue {%1} {8}
+    };
+    #elseif {"$craft_farming[data][tool_type]" == "Complex"} {
+        setgoblinvalue {%1} {1}
+    }
+} {2};
+
+#nop ============================================;
+#nop MESSAGE HANDLING ALIASES;
+#nop ============================================;
+
+#alias do_grow_message {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Round results: Growth <fff>(msg %1)<088>}
+    };
+    #math craft_farming[data][plantround] {$craft_farming[data][plantround] + 1};
+    
+    #if {$craft_farming[data][farm_status] == 1} {
+        show_farm_status
+    };
+    
+    #if {$idle_flag} {
+        farm_idle_stop
+    };
+    #else {
+        plantaction
+    }
+};
+
+#alias do_neutral_message {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<feb>Round results: NO Growth <fff>(msg %1)<088>}
+    };
+    #math craft_farming[data][plantround] {$craft_farming[data][plantround] + 1};
+    
+    #if {$craft_farming[data][farm_status] == 1} {
+        show_farm_status
+    };
+    
+    #if {$idle_flag} {
+        farm_idle_stop
+    };
+    #else {
+        plantaction
+    }
+};
+
+#alias do_shrink_message {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<faa>Round results: Shrinking <fff>(msg %1)<088>}
+    };
+    #math craft_farming[data][plantround] {$craft_farming[data][plantround] + 1};
+    
+    #if {$craft_farming[data][farm_status] == 1} {
+        show_farm_status
+    };
+    
+    #if {$idle_flag} {
+        farm_idle_stop
+    };
+    #else {
+        plantaction
+    }
+};
+
+#alias do_death_message {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #var craft_farming[data][paused] 0;
+        reset_farm_variables;
+        #return
+    };
+
+    stop_farming;
+    
+    #if {$craft_farming[random][active] == 1} {
+        #echo {<faa>Random farming failed - plant died.<088>};
+        #var craft_farming[random][active] 0;
+        #var craft_farming[random][log] {};
+        #list craft_farming[random][actions] clear
+    };
+    
+    reset_farm_variables;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<faa>===========================================<088>};
+        #echo {<faa>Round results: Dead <fff>(msg %1)<088>};
+        #echo {<fff>Farming stopped and variables reset<088>};
+        #echo {<faa>===========================================<088>}
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        continue_auto_farming
+    }
+};
+
+#nop ============================================;
+#nop MAIN PLANT ACTION ALIAS;
+#nop ============================================;
+
+#alias plantaction {
+    #if {$craft_farming[data][plantround] == 0} {
+        #format {craft_farming[pace][started]} {%T};
+        #var craft_farming[pace][sent] 0
+    };
+    
+    #nop Recipes only skip measuring while this is on, typed commands are never skipped;
+    #var craft_farming[pace][in_recipe] 1;
+    
+    #if {$craft_farming[data][paused] == 0} {
+        #nop Check if random farming is active;
+        #if {$craft_farming[random][active] == 1} {
+            execute_random_round;
+            #var craft_farming[pace][in_recipe] 0;
+            #return
+        };
+        #switch {"$craft_farming[data][plant]"} {
+            #case {"white potato"} {farml1whitepotato};
+            #case {"broccoli"} {farml1broccoli};
+            #case {"green pepper"} {farml1greenpepper};
+            #case {"beefsteak tomato"} {farml1beefsteaktomato};
+            #case {"mcintosh apple"} {farml1mcintoshapple};
+            #case {"yellow bean"} {farml1yellowbean};
+            #case {"blueberry"} {farml2blueberry};
+            #case {"green bean"} {farml2greenbean};
+            #case {"zucchini"} {farml2zucchini};
+            #case {"cauliflower"} {farml2cauliflower};
+            #case {"roma tomato"} {farml2romatomato};
+            #case {"green apple"} {farml2greenapple};
+            #case {"valencia orange"} {farml2valencia};
+            #case {"raspberry"} {farml2raspberry};
+            #case {"red pepper"} {farml2redpepper};
+            #case {"red potato"} {farml2redpotato};
+            #case {"tangerine"} {farml3tangerine};
+            #case {"peach"} {farml3peach};
+            #case {"orange pepper"} {farml3orangepepper};
+            #case {"nantes carrot"} {farml3nantescarrot};
+            #case {"snap pea"} {farml4snappea};
+            #case {"blackberry"} {farml5blackberry};
+            #case {"canteloupe"} {farml5canteloupe};
+            #case {"navel orange"} {farml5navelorange};
+            #case {"new potato"} {farml5newpotato};
+            #case {"eggplant"} {farml6eggplant};
+            #case {"avocado"} {farml6avocado};
+            #case {"blue potato"} {farml6bluepotato};
+            #case {"bosc pear"} {farml6boscpear};
+            #case {"jalapeno pepper"} {farml6jalapeno};
+            #case {"yellow pepper"} {farml7yellowpepper};
+            #case {"alfalfa sprout"} {farml8alfalfasprout};
+            #case {"red plum"} {farml8redplum};
+            #case {"mandarin orange"} {farml8mandarin};
+            #case {"boysenberry"} {farml9boysenberry};
+            #case {"baby eggplant"} {farml10babyeggplant};
+            #case {"english cucumber"} {farml11englishcucumber};
+            #case {"banana"} {farml11banana};
+            #case {"white plum"} {farml8whiteplum};
+            #case {"yukon gold potato"} {farml11yukongold};
+            #case {"mottled pepper"} {farml12mottledpepper};
+            #case {"brussel sprout"} {farml14brusselsprout};
+            #case {"bartlet pear"} {farml14bartletpear};
+            #case {"mango"} {farml15mango};
+            #case {"russet potato"} {farml16russetpotato};
+            #case {"gooseberry"} {farml17gooseberry};
+            #case {"spaghetti squash"} {farml18spaghetti};
+            #case {"asparagus"} {farml19asparagus};
+            #case {"lychee"} {farml20lychee};
+            #case {"habanero pepper"} {farml22habanero};
+            #case {"lentil"} {farml22lentil};
+            #case {"pomegranate"} {farml25pomegranate};
+            #case {"kiwi"} {farml25kiwi};
+            #case {"salmonberry"} {farml28salmonberry};
+            #case {"persimmon"} {farml28persimmon};
+            #case {"ginger"} {farml30ginger};
+            #case {"honey sugar apple"} {farml32honeysugarapple};
+            #case {"tomatillo"} {farml34tomatillo};
+            #case {"bamboo shoot"} {farml35bambooshoot};
+            #case {"yellow carrot"} {farml38yellowcarrot};
+            #case {"guava"} {farml39guava};
+            #case {"quince"} {farml40quince};
+            #case {"thimbleberry"} {farml41thimbleberry};
+            #case {"chokecherry"} {farml43chokecherry};
+            #case {"coconut"} {farml43coconut};
+            #case {"wasabi"} {farml45wasabi};
+            #case {"luffa"} {farml47luffa};
+            #case {"radicchio"} {farml48radicchio};
+            #case {"white celery"} {farml49whitecelery};
+            #case {"kaffir lime"} {farml50kaffirlime};
+            #case {"ceylon spinach"} {farml52ceylonspinach};
+            #case {"artichoke"} {farml52artichoke};
+            #case {"taro"} {farml53taro};
+            #case {"loganberry"} {farml54loganberry};
+            #case {"chickpea"} {farml57chickpea};
+            #case {"papaya"} {farml58papaya};
+            #case {"white gooseberry"} {farml58whitegooseberry};
+            #case {"fava bean"} {farml60favabean};
+            #case {"passion fruit"} {farml60passionfruit};
+            #case {"prickly pear"} {farml64pricklypear};
+            #case {"hubbard squash"} {farml66hubbardsquash};
+            #case {"fennel"} {farml66fennel};
+            #case {"pomelo"} {farml69pomelo};
+            #case {"buffaloberry"} {farml71buffaloberry};
+            #case {"canna"} {farml72canna};
+            #case {"guar"} {farml74guar};
+            #case {"bok choy"} {farml75bokchoy};
+            #case {"cloudberry"} {farml75cloudberry};
+            #case {"chayote"} {farml78chayote};
+            #case {"mechanized broccoli"} {farml81mechanizedbroccoli};
+            #case {"holy onion"} {farml84holyonion};
+            #case {"soybean"} {farml30soybean};
+            #case {"pink grape"} {farml35pinkgrape};
+            #case {"pawpaw"} {farml37pawpaw};
+            #case {"date"} {farml37date};
+            #case {"dragonfruit"} {farml49dragonfruit};
+            #case {"vanilla"} {farml64vanilla};
+            #case {"yam"} {farml67yam};
+            #case {"apricot"} {farml72apricot};
+            #case {"shallot"} {farml76shallot};
+            #case {"honorable tangelo"} {farml80honorabletangelo};
+            #case {"cybernetic lettuce"} {farml81cyberneticlettuce};
+            #default {
+                #if {$craft_farming[data][echo] == 1} {
+                    #echo {<faa>No recipe for: $craft_farming[data][plant]<088>}
+                }
+            }
+        }
+    };
+    #var craft_farming[pace][in_recipe] 0
+};
+
+#nop Seconds to wait so this plant and its rest average out to the target APM;
+#alias farm_rest_seconds {
+    #local now 0;
+    #format {now} {%T};
+    #var craft_farming[pace][rest] 0;
+    #if {$craft_farming[pace][apm] > 0} {
+        #math craft_farming[pace][rest] {$craft_farming[pace][sent] * 60 / $craft_farming[pace][apm] - ($now - $craft_farming[pace][started])}
+    };
+    #if {$craft_farming[pace][rest] < 2} {
+        #var craft_farming[pace][rest] 2
+    }
+};
+
+#nop Deadman fired: stop auto-farming and stop tending the plant until the player says so;
+#alias farm_idle_stop {
+    #if {$craft_farming[data][auto_active] == 0 && ($craft_farming[data][plantround] == 0 || $craft_farming[data][paused] == 1)} {
+        #return
+    };
+    
+    #var craft_farming[data][auto_active] 0;
+    #var craft_farming[data][auto_mode] {manual};
+    #var craft_farming[data][current_farm_num] 0;
+    #var craft_farming[data][path_index] 0;
+    #var craft_farming[data][go_toggle] 0;
+    #var craft_farming[data][paused] 1;
+    farm_cancel_delays;
+    #echo {<faa>Idle: farming stopped.<feb> <ccd>f4<feb> keeps tending this plant, <ccd>f5<feb> harvests and releases it, <ccd>fr all<feb> restarts auto-farming<088>}
+};
+
+#nop Cancels every pending farming delay: the rest timer and the farm_d_ walking and travel delays;
+#alias farm_cancel_delays
+{
+    #undelay {farm_%*};
+};
+
+#nop Removes what farming creates while it runs, since class kill only removes what was loaded. farmer-off runs it;
+#alias farm_clear_runtime
+{
+    farm_cancel_delays;
+    #unaction {The ferryman says: Well, we're here! Good luck with your travels.};
+    #unaction {The ferryman says: Well, here you are. I hope that you had a good time};
+    #unaction {forms of life, but beyond the tracks, nothing else appears.};
+    #unaction {world which has long since been extinct, destroyed, forgotten.};
+    #unvar {crop_display};
+    #unvar {total_line};
+};
+
+#nop Catches deadman during a rest or between rounds. Sends nothing to the game;
+#ticker {farm_idle_watch} {
+    #if {$idle_flag} {
+        farm_idle_stop
+    }
+} {5};
+
+#alias farmapm {
+    #if {"%1" != ""} {
+        #var craft_farming[pace][apm] {%1}
+    };
+    #echo {<ffa>Auto-farming rests between plants to average <fff>$craft_farming[pace][apm]<ffa> commands a minute (0 = no rests)<088>}
+};
+
+#nop ============================================;
+#nop UTILITY ALIASES;
+#nop ============================================;
+
+#alias aerate {
+    sne aerate %0
+};
+
+#alias fertilize {
+    sne fertilize %0
+};
+
+#alias spread {
+    sne spread %0
+};
+
+#alias spray {
+    sne spray %0
+};
+
+#alias water {
+    sne water %0
+};
+
+#alias sne {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+    
+    #nop Measuring tools and goblins only report conditions and no recipe reads the result;
+    #if {$craft_farming[pace][in_recipe] == 1 && "%0" == "{jab|cantilever|feed|push hygrometer|depress oximeter} %*"} {
+        #return
+    };
+    
+    #math craft_farming[pace][sent] {$craft_farming[pace][sent] + 1};
+    #send {%0};
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Debug:<088> %0}
+    }
+};
+
+#alias farm_look {
+    sne examine ground;
+    sne examine insects;
+    sne examine mushrooms;
+    sne examine weeds;
+    sne glance
+};
+
+#alias save_plant {
+    #var craft_farming[data][plant] %0;
+    #var craft_farming[data][plantround] 0
+};
+
+#alias stop_farming {
+    #var craft_farming[data][paused] 0;
+    #var craft_farming[data][ideal_growth] 0;
+    #var craft_farming[data][plantround] 0;
+    sne harvest;
+    sne get all;
+    sne stash all;
+    sne releaseclaim
+};
+
+#alias togglepause {
+    #if {$craft_farming[data][paused] == 0} {
+        #if {$craft_farming[data][echo] == 1} {
+            #echo {<faa>Pausing Automated Farming.<088>}
+        };
+        #var craft_farming[data][paused] 1
+    };
+    #else {
+        #if {$craft_farming[data][echo] == 1} {
+            #echo {<faa>Resuming Automated Farming.<088>}
+        };
+        #var craft_farming[data][paused] 0
+    }
+};
+
+#alias reset_farm_variables {
+    #var craft_farming[data][dark] {0};
+    #var craft_farming[data][gold] {0};
+    #var craft_farming[data][white] {0};
+    #var craft_farming[data][glisten] {0};
+    #var craft_farming[data][water] {0};
+    #var craft_farming[data][bugs] {0};
+    #var craft_farming[data][weeds] {0};
+    #var craft_farming[data][mushrooms] {0};
+    #var craft_farming[data][contristometer_1] {0};
+    #var craft_farming[data][contristometer_2] {0};
+    #var craft_farming[data][contristometer_3] {0};
+    #var craft_farming[data][contristometer_4] {0};
+    #var craft_farming[data][nutriometer_1] {0};
+    #var craft_farming[data][nutriometer_2] {0};
+    #var craft_farming[data][nutriometer_3] {0};
+    #var craft_farming[data][nutriometer_4] {0};
+    #var craft_farming[data][oximeter] {0};
+    #var craft_farming[data][hygrometer] {0};
+    #var craft_farming[data][goblin_green] {0};
+    #var craft_farming[data][goblin_red] {0};
+    #var craft_farming[data][goblin_blue] {0};
+    #var craft_farming[data][goblin_orange] {0};
+    #var craft_farming[data][ideal_growth] 0;
+    #var craft_farming[data][plantround] 0;
+    #var craft_farming[data][plant_size] {sproutling};
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Farm variables reset to 0<088>}
+    }
+};
+
+#alias reset_farm_full {
+    reset_farm_variables;
+    #var craft_farming[data][harvest_count] 0;
+    #list craft_farming[harvests] clear;
+    #var craft_farming[data][plant] None;
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ffa>Full farm reset complete - all harvests cleared<088>}
+    }
+};
+
+#alias start_farming {
+    #if {"$craft_farming[data][plant]" != "None"} {
+        #if {$craft_farming[data][echo] == 1} {
+            #echo {Started automated farming for: $craft_farming[data][plant]}
+        };
+        #nop Call plantaction to start growing;
+        plantaction
+    };
+    #else {
+        #if {$craft_farming[data][echo] == 1} {
+            #echo {No plant selected! Identify a plant first.}
+        }
+    }
+};
+
+#alias setgoblinvalue {
+    #local tmpColor {%1};
+    #local tmpValue {%2};
+    
+    #if {"$tmpColor" == "red"} {
+        #var craft_farming[data][goblin_red] {$tmpValue}
+    };
+    #elseif {"$tmpColor" == "blue"} {
+        #var craft_farming[data][goblin_blue] {$tmpValue}
+    };
+    #elseif {"$tmpColor" == "green"} {
+        #var craft_farming[data][goblin_green] {$tmpValue}
+    };
+    #elseif {"$tmpColor" == "orange"} {
+        #var craft_farming[data][goblin_orange] {$tmpValue}
+    }
+};
+
+#alias farmgoods {
+    #local border {====================================};
+    #echo {<faa>$border<088>};
+    #echo {<ffa>    Harvested Farm Goods<088>};
+    #echo {<faa>$border<088>};
+    
+    #if {&craft_farming[harvests][] == 0} {
+        #echo {<feb>  No harvests recorded this session<088>}
+    };
+    #else {
+        #foreach {*craft_farming[harvests][%*]} {crop} {
+            #format crop_display {<ccd>  %-3s <feb>%s} {$craft_farming[harvests][$crop]} {$crop};
+            #echo {$crop_display<088>}
+        }
+    };
+    
+    #echo {<faa>$border<088>};
+    #format total_line {<ccd>  Total Harvests: <fff>%s} {$craft_farming[data][harvest_count]};
+    #echo {$total_line<088>};
+    #echo {<faa>$border<088>}
+};
+
+#nop ============================================;
+#nop TUON HELPER ALIASES;
+#nop ============================================;
+
+#alias tools {
+    sne jab type I nutriometer;
+    sne jab type II nutriometer;
+    sne jab type III nutriometer;
+    sne jab type IV nutriometer;
+    sne cantilever type I contristometer;
+    sne cantilever type II contristometer;
+    sne cantilever type III contristometer;
+    sne cantilever type IV contristometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    addlittle1;
+    addlittle2;
+    fertilize some smurfy fertilizer;
+    spread little burns brand neutralizer;
+    spread little der'thalas neutralizer;
+    spread little burns brand neutralizer;
+    spread little der'thalas neutralizer;
+    water some gulf of mexico water;
+    water little gulf of mexico water
+};
+
+#alias tools2 {
+    sne jab type I nutriometer;
+    sne jab type II nutriometer;
+    sne jab type III nutriometer;
+    sne jab type IV nutriometer;
+    sne cantilever type I contristometer;
+    sne cantilever type II contristometer;
+    sne cantilever type III contristometer;
+    sne cantilever type IV contristometer;
+    addlittle1;
+    addlittle2;
+    sne depress oximeter button;
+    sne push hygrometer button
+};
+
+#alias goblins {
+    feed red;
+    feed blue;
+    feed green;
+    feed orange
+};
+
+#alias cleanplot {
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots ant cave pesticide
+};
+
+#alias cleanplot2 {
+    cleanplot;
+    sne jab type I nutriometer;
+    sne jab type II nutriometer;
+    sne jab type III nutriometer;
+    sne jab type IV nutriometer;
+    sne cantilever type I contristometer;
+    sne cantilever type II contristometer;
+    sne cantilever type III contristometer;
+    sne cantilever type IV contristometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    sne push hygrometer button
+};
+
+#alias cleanplot3 {
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots ant cave pesticide;
+    #4 sne jab type I nutriometer;
+    #4 sne jab type II nutriometer;
+    #4 sne jab type III nutriometer;
+    #4 sne jab type IV nutriometer;
+    #4 sne cantilever type I contristometer;
+    #4 sne cantilever type II contristometer;
+    #4 sne cantilever type III contristometer;
+    #4 sne cantilever type IV contristometer;
+    #4 feed red;
+    #4 feed blue;
+    #4 feed green;
+    #4 feed orange;
+    #11 sne push hygrometer button;
+    #10 sne depress oximeter button
+};
+
+#alias cleanplot5 {
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots ant cave pesticide;
+    #4 sne jab type I nutriometer;
+    #4 sne jab type II nutriometer;
+    #4 sne jab type III nutriometer;
+    #4 sne jab type IV nutriometer;
+    #4 sne cantilever type I contristometer;
+    #6 sne cantilever type II contristometer;
+    #4 sne cantilever type III contristometer;
+    #4 sne cantilever type IV contristometer;
+    #4 feed red;
+    #4 feed blue;
+    #4 feed green;
+    #4 feed orange;
+    #4 sne push hygrometer button;
+    #4 sne depress oximeter button
+};
+
+#alias cleanplot_amish {
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots ant cave pesticide;
+    #4 sne jab type I nutriometer;
+    #4 sne jab type II nutriometer;
+    #4 sne jab type III nutriometer;
+    #4 sne jab type IV nutriometer;
+    #4 sne cantilever type I contristometer;
+    #4 sne cantilever type II contristometer;
+    #4 sne cantilever type III contristometer;
+    #4 sne cantilever type IV contristometer;
+    #4 feed red;
+    #8 feed blue;
+    #4 feed green;
+    #12 feed orange;
+    #11 sne push hygrometer button;
+    #10 sne depress oximeter button
+};
+
+#alias cleanplot3_tuon {
+    spray lots hunch pesticide;
+    spray lots murus faralain pesticide;
+    spray lots mount perplexus pesticide;
+    spray lots ant cave pesticide;
+    #4 sne jab type I nutriometer;
+    #4 sne jab type II nutriometer;
+    #4 sne jab type III nutriometer;
+    #4 sne jab type IV nutriometer;
+    #4 sne cantilever type I contristometer;
+    #4 sne cantilever type II contristometer;
+    #4 sne cantilever type III contristometer;
+    #4 sne cantilever type IV contristometer;
+    #4 feed red;
+    #4 feed blue;
+    #4 feed green;
+    #4 feed orange;
+    sne push hygrometer button
+};
+
+#alias feedlittle {
+    fertilize lots smurfy fertilizer;
+    water lots atlantis water;
+    fertilize some alphabet fertilizer;
+    fertilize lots happy ed's fertilizer;
+    aerate lots ryogi-pei air;
+    spread little burns brand neutralizer;
+    spread little der'thalas neutralizer
+};
+
+#alias feedsome {
+    #2 fertilize lots smurfy fertilizer;
+    #2 water lots atlantis water;
+    fertilize lots alphabet fertilizer;
+    #2 fertilize lots happy ed's fertilizer;
+    aerate lots ryogi-pei air;
+    aerate lots genlab air
+};
+
+#alias feedsome2 {
+    fertilize lots smurfy fertilizer;
+    water lots atlantis water;
+    fertilize lots alphabet fertilizer;
+    fertilize lots happy ed's fertilizer;
+    fertilize lots hippie fertilizer;
+    aerate lots ryogi-pei air;
+    aerate lots genlab air;
+    spread some cowville neutralizer;
+    spread some der'thalas neutralizer;
+    spread some garou neutralizer;
+    spread some burns brand neutralizer
+};
+
+#alias feedlots {
+    #2 fertilize lots smurfy fertilizer;
+    #2 fertilize lots hippie fertilizer;
+    #3 water lots atlantis water;
+    #2 fertilize some alphabet fertilizer;
+    #3 fertilize lots happy ed's fertilizer;
+    aerate lots ryogi-pei air;
+    #3 aerate lots genlab air
+};
+
+#alias addlittle1 {
+    fertilize little smurfy fertilizer;
+    fertilize little alphabet fertilizer;
+    fertilize little happy ed's fertilizer;
+    fertilize little hippie fertilizer
+};
+
+#alias addlittle2 {
+    spread some cowville neutralizer;
+    spread some der'thalas neutralizer;
+    spread some burns brand neutralizer;
+    spread some garou neutralizer
+};
+
+#alias feed {
+    sne feed %0 goblin
+};
+
+#nop ============================================;
+#nop EXPERIMENT ALIASES;
+#nop ============================================;
+
+#alias do_experiment_9 {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Execute Experiment f9 (+2 red)}
+    };
+    aerate lots detroit air;
+    sne depress oximeter button;
+    sne push hygrometer button
+};
+
+#alias do_experiment_10 {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Execute Experiment f10 (-x red)}
+    };
+    spray lots hunch pesticide;
+    sne depress oximeter button;
+    sne push hygrometer button
+};
+
+#alias do_experiment_11 {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Execute Experiment f11 (+1 red)}
+    };
+    spread lots der'thalas neutralizer;
+    sne depress oximeter button;
+    sne push hygrometer button
+};
+
+#alias do_experiment_12 {
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Execute Experiment F12}
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Alphabet fertilizer}
+    };
+    fertilize lots alphabet fertilizer;
+    say alphabet fertilizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Hippie fertilizer}
+    };
+    fertilize lots hippie fertilizer;
+    say hippie fertilizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Smurfy fertilizer}
+    };
+    fertilize lots smurfy fertilizer;
+    say smurfy fertilizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Happy Ed's fertilizer}
+    };
+    fertilize lots happy ed's fertilizer;
+    say happy ed's fertilizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Detroit air}
+    };
+    aerate lots detroit air;
+    say detroit air;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Ryogi-Pei air}
+    };
+    aerate lots ryogi-pei air;
+    say ryogi-pei air;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Serinth air}
+    };
+    aerate lots serinth air;
+    say serinth air;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Genlab air}
+    };
+    aerate lots genlab air;
+    say genlab air;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Gulf of Mexico water}
+    };
+    water lots gulf of mexico water;
+    say gulf of mexico water;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Atlantis water}
+    };
+    water lots atlantis water;
+    say atlantis water;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Wayhaven water}
+    };
+    water lots wayhaven water;
+    say wayhaven water;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: R'lyeh water}
+    };
+    water lots r'lyeh water;
+    say r'lyeh water;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Hunch pesticide}
+    };
+    spray lots hunch pesticide;
+    say hunch pesticide;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Ant Cave pesticide}
+    };
+    spray lots ant cave pesticide;
+    say ant cave pesticide;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Murus Faralain pesticide}
+    };
+    spray lots murus faralain pesticide;
+    say murus faralain pesticide;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Mount Perplexus pesticide}
+    };
+    spray lots mount perplexus pesticide;
+    say mount perplexus pesticide;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Cowville neutralizer}
+    };
+    spread lots cowville neutralizer;
+    say cowville neutralizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Der'thalas neutralizer}
+    };
+    spread lots der'thalas neutralizer;
+    say der'thalas neutralizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Garou neutralizer}
+    };
+    spread lots garou neutralizer;
+    say garou neutralizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {Testing: Burns brand neutralizer}
+    };
+    spread lots burns brand neutralizer;
+    say burns brand neutralizer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne depress oximeter button;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne push hygrometer button;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne jab type I nutriometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne jab type II nutriometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne jab type III nutriometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne jab type IV nutriometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne cantilever type I contristometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne cantilever type II contristometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne cantilever type III contristometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    #8 sne cantilever type IV contristometer;
+    feed red;
+    feed blue;
+    feed green;
+    feed orange;
+    
+    farm_look
+};
+
+#nop ============================================;
+#nop TRAVEL ALIASES - GO TO FARM;
+#nop ============================================;
+
+#nop farm 1;
+#alias gofarm1 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land1
+    };
+    #else {
+        nw
+    }
+};
+
+#alias homefarm1 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        se
+    }
+};
+
+#nop farm 2;
+#alias gofarm2 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land2
+    };
+    #else {
+        n
+    }
+};
+
+#alias homefarm2 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        s
+    }
+};
+
+#nop farm 3;
+#alias gofarm3 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land3
+    };
+    #else {
+        ne
+    }
+};
+
+#alias homefarm3 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        sw
+    }
+};
+
+#nop farm 4;
+#alias gofarm4 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land4
+    };
+    #else {
+        se;sw;s;se;s;e;n;enter;s;s;s;s;w;nw;nw;nw;w;grasp rake
+    }
+};
+
+#alias homefarm4 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;e;se;se;se;e;n;n;n;n;vortex;s;w;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 5;
+#alias gofarm5 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land5
+    };
+    #else {
+        se;sw;s;se;s;e;n;enter;s;s;s;s;w;nw;nw;nw;w;w;w;n;n;n;n;grasp rake
+    }
+};
+
+#alias homefarm5 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;s;s;s;s;e;e;e;se;se;se;n;n;n;n;s;w;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 6;
+#alias gofarm6 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land6
+    };
+    #else {
+        se;sw;s;se;s;e;n;enter;e;e;e;s;w;ne;n;n;grasp rake
+    }
+};
+
+#alias homefarm6 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;s;s;sw;e;n;w;w;w;vortex;s;w;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 7;
+#alias gofarm7 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land7
+    };
+    #else {
+        se;sw;s;se;s;e;n;enter;e;e;e;s;w;ne;n;n;n;n;e;s;s;s;s;e;n;n;n;n;e;s;s;s;s;e;n;n;grasp rake
+    }
+};
+
+#alias homefarm7 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;s;s;w;n;n;n;n;w;s;s;s;s;w;n;n;n;n;w;s;s;s;s;sw;e;n;w;w;w;s;w;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 8;
+#alias gofarm8 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land8
+    };
+    #else {
+        se;sw;s;se;s;e;n;enter;e;n;climb vine;n;n;n;enter;n;w;door;w;ne;e;grasp rake
+    }
+};
+
+#alias homefarm8 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;w;sw;e;e;s;s;s;s;s;s;s;w;s;w;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 9;
+#alias gofarm9 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land9
+    };
+    #else {
+        sw;s;se;s;e;n;enter;e;n;climb vine;n;e;gate;grasp 
+    }
+};
+
+#alias homefarm9 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;w;s;s;s;w;s;w;n;nw;n;ne;
+    }
+};
+
+#nop farm 10;
+#alias gofarm10 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land10
+    };
+    #else {
+        se;sw;s;se;s;e;n;e;n;shuttle;board science;enter;u;n;n;n;n;d;n;w;w;w;w;w;w;w;w;n;n;n;n;w;n;n;n;w;w;w;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;nw;w;w;ne;n;n;w;nw;grasp rake
+    }
+};
+
+#alias homefarm10 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;se;e;s;s;sw;e;e;se;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;e;e;e;s;s;s;e;s;s;s;s;e;e;e;e;e;e;e;e;s;u;s;s;s;s;d;out;w;w;n;w;w;w;n;n;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 11;
+#alias gofarm11 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land11
+    };
+    #else {
+        se;sw;s;se;s;e;n;e;n;shuttle;board science;enter;u;n;n;n;n;d;n;w;w;w;w;w;w;w;w;n;n;n;n;w;n;n;n;w;w;w;n;n;n;path;n;n;n;n;w;grasp rake
+    }
+};
+
+#alias homefarm11 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;e;s;s;s;s;path;s;s;s;e;e;e;s;s;s;e;s;s;s;s;e;e;e;e;e;e;e;e;s;u;s;s;s;s;d;out;w;w;n;w;w;w;n;n;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 12;
+#alias gofarm12 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land12
+    };
+    #else {
+        se;sw;s;se;s;e;n;e;n;shuttle;board science;enter;u;n;n;n;n;d;n;w;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;grasp rake
+    }
+};
+
+#alias homefarm12 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;s;e;s;s;s;s;s;s;s;s;s;s;u;s;s;s;s;d;out;w;w;n;w;w;w;n;n;n;nw;n;ne;nw
+    }
+};
+
+#nop farm 13;
+#alias gofarm13 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go serinth;
+        #line oneshot #action {The ferryman says: Well, we're here!  Good luck with your travels.} {
+            go farm_land13
+        }
+    };
+    #else {
+        n;w;w;s;w;w;w;portal;w;w;w;w;w;w;w;s;s;s;s;s;s;s;s;e;charter serinth;
+        #line oneshot #action {The ferryman says: Well, we're here!  Good luck with your travels.} {
+            se;se;se;e;s;s;s;s;s;w;s;s;s;s;e;se;se;s;grasp rake
+        }
+    }
+};
+
+#alias homefarm13 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go ferry;
+        #line oneshot #action {The ferryman says: Well, here you are.  I hope that you had a good time} {
+            go farming
+        }
+    };
+    #else {
+        wash hands;n;nw;nw;n;w;n;n;n;n;n;e;n;n;n;w;nw;nw;nw;board ferry;
+        #line oneshot #action {The ferryman says: Well, here you are.  I hope that you had a good time} {
+            w;n;n;n;n;n;n;n;n;e;e;e;e;e;e;e;portal;e;e;e;n;e;n;n;n;nw;n;ne;nw
+        }
+    }
+};
+
+#nop farm 14;
+#alias gofarm14 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go overl;
+        #line oneshot #action {forms of life, but beyond the tracks, nothing else appears.} {
+            go farm_land14
+        }
+    };
+    #else {
+        se;sw;s;se;s;e;n;e;n;shuttle;board fantasy;portal;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;leave;e;ne;ne;e;e;ne;ne;ne;e;ne;ne;n;
+        #line oneshot #action {world which has long since been extinct, destroyed, forgotten.} {
+            portal;#delay {farm_d_portal14} {se;sw;s;e;se;se;s;grasp rake} {6}
+        }
+    }
+};
+
+#alias homefarm14 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go overlands;
+        #line oneshot #action {world which has long since been extinct, destroyed, forgotten.} {
+            go farming
+        }
+    };
+    #else {
+        wash hands;n;nw;nw;w;n;ne;nw;portal;
+        #line oneshot #action {forms of life, but beyond the tracks, nothing else appears.} {
+            portal;#delay {farm_d_portal15} {s;s;s;portal;e;e;e;n;e;n;n;n;nw;n;ne;nw} {6}
+        }
+    }
+};
+
+#nop farm 15;
+#alias gofarm15 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_land15
+    };
+    #else {
+        n;w;w;s;w;w;w;portal;e;e;e;e;e;e;e;e;e;e;e;e;e;e;e;leave;e;ne;ne;e;e;e;e;e;se;e;se;se;se;enter;w;w;w;w;grasp rake
+    }
+};
+
+#alias homefarm15 {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        wash hands;e;e;e;e;leave;n;n;n;n;n;n;nw;w;portal;e;e;e;n;e;n;n;n;nw;n;ne;nw
+    }
+};
+
+#nop main farm store (east of paul npc);
+#alias gofarmstore {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farm_store
+    };
+    #else {
+        e
+    }
+};
+    
+#alias homefarmstore {
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        go farming
+    };
+    #else {
+        w
+    }
+};
+
+#nop ============================================;
+#nop BUY SUPPLIES;
+#nop ============================================;
+
+#alias buy_supplies {
+    #if {"%1" == ""} {
+        #echo {<faa>==============================<088>};
+        #echo {<ccd>Farm Level: <fff>$craft_farming[data][farming_level]<088>};
+        #echo {<ffa>Usage: <ccd>buysupplies <level><088>};
+        #echo {<feb>Options:<088>};
+        #echo {<fff>  1<feb> = Simple (Levels 10-32)<088>};
+        #echo {<fff>  2<feb> = Standard (Levels 33-65)<088>};
+        #echo {<fff>  3<feb> = Complex (Levels 66-100)<088>};
+        #echo {<fff>  all<feb> = Buys everything you need<088>};
+        #echo {<ccd>Note: 'all' Buys appropriate tools based on your level<088>};
+        #echo {<ccd> All options include all common supplies<088>};
+        #echo {<faa>==============================<088>}
+    };
+    #elseif {"%1" == "1"} {
+        #var craft_farming[data][tool_type] Simple;
+        buy A simple type I contristometer;
+        buy A simple type II contristometer;
+        buy A simple type III contristometer;
+        buy A simple type IV contristometer;
+        buy A cage holding a tiny blue goblin;
+        buy A cage holding a tiny green goblin;
+        buy A cage holding a tiny orange goblin;
+        buy A cage holding a tiny red goblin;
+        buy A Mark I Type I nutriometer;
+        buy A Mark I Type II nutriometer;
+        buy A Mark I Type III nutriometer;
+        buy A Mark I Type IV nutriometer;
+        buy A simple oximeter;
+        buy A simple hygrometer;
+        buy_supplies_common;
+        get all
+    };
+    #elseif {"%1" == "2"} {
+        #var craft_farming[data][tool_type] Standard;
+        buy A standard type I contristometer;
+        buy A standard type II contristometer;
+        buy A standard type III contristometer;
+        buy A standard type IV contristometer;
+        buy A cage holding a medium-sized blue goblin;
+        buy A cage holding a medium-sized green goblin;
+        buy A cage holding a medium-sized orange goblin;
+        buy A cage holding a medium-sized red goblin;
+        buy A Mark II Type I nutriometer;
+        buy A Mark II Type II nutriometer;
+        buy A Mark II Type III nutriometer;
+        buy A Mark II Type IV nutriometer;
+        buy A standard oximeter;
+        buy A standard hygrometer;
+        buy_supplies_common;
+        get all
+    };
+    #elseif {"%1" == "3"} {
+        #var craft_farming[data][tool_type] Complex;
+        buy A complex type I contristometer;
+        buy A complex type II contristometer;
+        buy A complex type III contristometer;
+        buy A complex type IV contristometer;
+        buy A cage holding a large blue goblin;
+        buy A cage holding a large green goblin;
+        buy A cage holding a large orange goblin;
+        buy A cage holding a large red goblin;
+        buy A Mark III Type I nutriometer;
+        buy A Mark III Type II nutriometer;
+        buy A Mark III Type III nutriometer;
+        buy A Mark III Type IV nutriometer;
+        buy A complex oximeter;
+        buy A complex hygrometer;
+        buy_supplies_common;
+        get all
+    };
+    #elseif {"%1" == "all"} {
+        #nop Determine which tools to buy based on level;
+        #if {$craft_farming[data][farming_level] >= 10 && $craft_farming[data][farming_level] <= 32} {
+            #var craft_farming[data][tool_type] Simple;
+            buy A simple type I contristometer;
+            buy A simple type II contristometer;
+            buy A simple type III contristometer;
+            buy A simple type IV contristometer;
+            buy A cage holding a tiny blue goblin;
+            buy A cage holding a tiny green goblin;
+            buy A cage holding a tiny orange goblin;
+            buy A cage holding a tiny red goblin;
+            buy A Mark I Type I nutriometer;
+            buy A Mark I Type II nutriometer;
+            buy A Mark I Type III nutriometer;
+            buy A Mark I Type IV nutriometer;
+            buy A simple oximeter;
+            buy A simple hygrometer
+        };
+        #elseif {$craft_farming[data][farming_level] >= 33 && $craft_farming[data][farming_level] <= 65} {
+            #var craft_farming[data][tool_type] Standard;
+            buy A standard type I contristometer;
+            buy A standard type II contristometer;
+            buy A standard type III contristometer;
+            buy A standard type IV contristometer;
+            buy A cage holding a medium-sized blue goblin;
+            buy A cage holding a medium-sized green goblin;
+            buy A cage holding a medium-sized orange goblin;
+            buy A cage holding a medium-sized red goblin;
+            buy A Mark II Type I nutriometer;
+            buy A Mark II Type II nutriometer;
+            buy A Mark II Type III nutriometer;
+            buy A Mark II Type IV nutriometer;
+            buy A standard oximeter;
+            buy A standard hygrometer
+        };
+        #elseif {$craft_farming[data][farming_level] >= 66} {
+            #var craft_farming[data][tool_type] Complex;
+            buy A complex type I contristometer;
+            buy A complex type II contristometer;
+            buy A complex type III contristometer;
+            buy A complex type IV contristometer;
+            buy A cage holding a large blue goblin;
+            buy A cage holding a large green goblin;
+            buy A cage holding a large orange goblin;
+            buy A cage holding a large red goblin;
+            buy A Mark III Type I nutriometer;
+            buy A Mark III Type II nutriometer;
+            buy A Mark III Type III nutriometer;
+            buy A Mark III Type IV nutriometer;
+            buy A complex oximeter;
+            buy A complex hygrometer
+        };
+        #else {
+            #echo {<faa>Farming level too low <fff>(need level 10+ to use tools)<088>};
+            #var craft_farming[data][tool_type] None
+        };
+        buy_supplies_common;
+        get all
+    };
+    #else {
+        #echo {<faa>Invalid option. Use <fff>1, 2, 3 or all.<088>}
+    }
+};
+
+#alias buy_supplies_common {
+    buy A tank of Detroit air;
+    buy A tank of Genlab air;
+    buy A tank of Ryogi-Pei air;
+    buy A tank of Serinth air;
+    buy A bag of Happy Ed's fertilizer;
+    buy A bag of alphabet fertilizer;
+    buy A bag of hippie fertilizer;
+    buy A bag of smurfy fertilizer;
+    buy A barrel of Burns brand neutralizer;
+    buy A barrel of Cowville neutralizer;
+    buy A barrel of Der'thalas neutralizer;
+    buy A barrel of Garou neutralizer;
+    buy A barrel of Ant Cave pesticide;
+    buy A barrel of Hunch pesticide;
+    buy A barrel of Mount Perplexus pesticide;
+    buy A barrel of Murus Faralain pesticide;
+    buy A barrel of Gulf of Mexico water;
+    buy A barrel of R'lyeh water;
+    buy A barrel of Wayhaven water;
+    buy A conch filled with Atlantis water;
+    get all
+};
+
+#nop ============================================;
+#nop AUTO FARMING SYSTEM;
+#nop ============================================;
+
+#nop calculate valid farm lands;
+#alias calculate_valid_farms {
+    #list craft_farming[farm_list] clear;
+    
+    #loop {1} {15} {tmpfarm} {
+        #local min_lvl {$craft_farming[farmland][min][$tmpfarm]};
+        #local max_lvl {$craft_farming[farmland][max][$tmpfarm]};
+        
+        #if {"$craft_farming[data][auto_mode]" == "all"} {
+            #if {$craft_farming[data][farming_level] >= $min_lvl && $craft_farming[data][farming_level] <= $max_lvl} {
+                #list craft_farming[farm_list] add {$tmpfarm};
+                #if {$craft_farming[data][echo] == 1} {
+                    #echo {<caf>Valid farm: farm_land$tmpfarm ($min_lvl-$max_lvl)<088>}
+                }
+            }
+        };
+        #elseif {"$craft_farming[data][auto_mode]" == "cxp"} {
+            #if {$craft_farming[data][farming_level] >= $min_lvl  && $craft_farming[data][farming_level] <= $max_lvl} {
+                #list craft_farming[farm_list] add {$tmpfarm};
+                #if {$craft_farming[data][echo] == 1} {
+                    #echo {<caf>Valid CXP farm: farm_land$tmpfarm ($min_lvl-$max_lvl)<088>}
+                };
+            };
+        };
+    };
+    
+    #list craft_farming[farm_list] size craft_farming[data][max_farms];
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<caf>Found $craft_farming[data][max_farms] valid farm(s)<088>}
+    }
+};
+
+#alias start_auto_farming {
+    #if {$craft_farming[data][auto_active] == 1} {
+        #echo {<faa>Auto-farming already active!<088>};
+        #return
+    };
+    
+    #if {$craft_farming[data][farming_level] == 0} {
+        #echo {<faa>Please set farming level first: <fff>setfarmlevel <level><088>};
+        #return
+    };
+    
+    #var craft_farming[data][auto_active] 1;
+    #var craft_farming[data][current_farm_num] 0;
+    
+    calculate_valid_farms;
+    
+    #if {$craft_farming[data][max_farms] == 0} {
+        #echo {<faa>No valid farms found for your level!<088>};
+        #var craft_farming[data][auto_active] 0;
+        #return
+    };
+    
+    #echo {<caf>Found $craft_farming[data][max_farms] valid farm(s)!<088>};
+    #echo {<ffa>┌── STEP 1: GOING TO FARM STORE ───┐<088>};
+    
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        #if {$craft_farming[data][go_toggle] == 0} {
+            #var craft_farming[data][go_toggle] 1;
+            go farm_store;
+            #delay {farm_d_store_go} {
+                #var craft_farming[data][go_toggle] 0;
+                #echo {<ffa>┌── STEP 2: PURCHASING SUPPLIES ───┐<088>};
+                auto_buy_supplies
+            } {10}
+        }
+    };
+    #else {
+        gofarmstore;
+        #delay {farm_d_store_walk} {
+            #echo {<ffa>┌── STEP 2: PURCHASING SUPPLIES ───┐<088>};
+            auto_buy_supplies
+        } {5}
+    }
+};
+
+#alias auto_buy_supplies {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+
+    #echo {<ffa>→ Purchasing supplies...<088>};
+    buysupplies all;
+    
+    #delay {farm_d_buy} {
+        #if {$idle_flag} {
+            farm_idle_stop;
+            #return
+        };
+        
+        #echo {<fff>✓ <ffa>Supplies purchased!<088>};
+        #echo {<ffa>━━━ STEP 3: HEADING TO FIRST FARM ━━━<088>};
+        
+        #if {$craft_farming[data][travel_toggle] == 0} {
+            homefarmstore;
+            #delay {farm_d_first_farm} {farm_next_location} {3}
+        };
+        #else {
+            farm_next_location
+        }
+    } {5}
+};
+
+#alias farm_next_location {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+
+    #math craft_farming[data][current_farm_num] {$craft_farming[data][current_farm_num] + 1};
+    
+    #if {$craft_farming[data][current_farm_num] > $craft_farming[data][max_farms]} {
+        #echo {<caf>━━━ ALL FARMS COMPLETE! ━━━<088>};
+        stop_auto_farming;
+        #return
+    };
+    
+    #local next_farm {$craft_farming[farm_list][$craft_farming[data][current_farm_num]]};
+    #var craft_farming[data][current_farm_id] {$next_farm};
+    #local farm_room {farm_land$next_farm};
+    
+    #echo {<caf>━━━ FARM $craft_farming[data][current_farm_num] of $craft_farming[data][max_farms] (farm_land$next_farm) ━━━<088>};
+    
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        #if {$craft_farming[data][go_toggle] == 0} {
+            #var craft_farming[data][go_toggle] 1;
+            go $farm_room;
+            #delay {farm_d_farm_go} {
+                #var craft_farming[data][go_toggle] 0;
+                #path destroy;
+                #delay {farm_d_farm_arrive} {
+                    #if {$craft_farming[data][echo] == 1} {
+                        #echo {<caf>Arrived at farm_land$next_farm<088>}
+                    };
+                    farm_start_current
+                } {2}
+            } {10}
+        }
+    };
+    #else {
+        gofarm$next_farm;
+        #delay {farm_d_farm_walk} {
+            #if {$craft_farming[data][echo] == 1} {
+                #echo {<caf>Arrived at farm_land$next_farm<088>}
+            };
+            farm_start_current
+        } {7}
+    }
+};
+
+#alias farm_start_current {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+
+    #var craft_farming[data][path_index] 0;
+    #list craft_farming[path_directions] clear;
+    #list craft_farming[path_directions] create {e} {e} {e} {n} {w} {w} {n} {e} {e} {n} {w} {w} {w} {s} {s} {s};
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<afa>Starting first room - checking plant...<088>}
+    };
+    
+    farm_check_plant
+};
+
+#alias farm_check_plant {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+
+    #var craft_farming[data][room_has_plant] 0;
+    #var craft_farming[data][plant_owner] {};
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<afa>Checking for plant...<088>}
+    };
+    
+    sne look;
+    
+    #delay {farm_d_check} {
+        #if {$idle_flag} {
+            farm_idle_stop;
+            #return
+        };
+        
+        #if {$craft_farming[data][room_has_plant] == 0} {
+            #if {$craft_farming[data][echo] == 1} {
+                #echo {<feb>No plant - moving on<088>}
+            };
+            #if {$craft_farming[data][auto_active] == 1} {
+                farm_walk_next_room
+            }
+        };
+        #else {
+            #if {"$craft_farming[data][plant_owner]" != ""} {
+                #echo {<faa>Plant owned by $craft_farming[data][plant_owner] - skipping<088>};
+                farm_walk_next_room
+            };
+            #else {
+                sne look at plant
+            }
+        }
+    } {2}
+};
+
+#alias farm_walk_next_room {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+
+    #math craft_farming[data][path_index] {$craft_farming[data][path_index] + 1};
+    
+    #local path_total {&craft_farming[path_directions][]};
+    
+    #if {$craft_farming[data][path_index] > $path_total} {
+        #if {$craft_farming[data][echo] == 1} {
+            #echo {<caf>All rooms in farm_land$craft_farming[data][current_farm_id] complete!<088>}
+        };
+        #if {$craft_farming[data][travel_toggle] == 0} {
+            homefarm$craft_farming[data][current_farm_id];
+            #delay {farm_d_leave_walk} {farm_next_location} {7}
+        };
+        #else {
+            sne wash hands;
+            #delay {farm_d_leave_go} {farm_next_location} {3}
+        };
+        #return
+    };
+    
+    #local next_dir {$craft_farming[path_directions][$craft_farming[data][path_index]]};
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<feb>Moving: $next_dir (room $craft_farming[data][path_index] of $path_total)<088>}
+    };
+    
+    sne $next_dir;
+    
+    #delay {farm_d_next_plot} {farm_check_plant} {2}
+};
+
+#alias continue_auto_farming {
+    #if {$idle_flag} {
+        farm_idle_stop;
+        #return
+    };
+
+    #if {$craft_farming[data][auto_active] == 1} {
+        farm_rest_seconds;
+        #echo {<feb>Resting <fff>$craft_farming[pace][rest]<feb> seconds before the next plot (<fff>$craft_farming[pace][sent]<feb> commands, target <fff>$craft_farming[pace][apm]<feb> a minute)<088>};
+        #delay {farm_rest} {
+            #if {$craft_farming[data][auto_active] == 1} {
+                farm_walk_next_room
+            }
+        } {$craft_farming[pace][rest]}
+    }
+};
+
+#alias stop_auto_farming {
+    farm_cancel_delays;
+    #var craft_farming[data][auto_active] 0;
+    #var craft_farming[data][auto_mode] {manual};
+    #var craft_farming[data][current_farm_num] 0;
+    #var craft_farming[data][path_index] 0;
+    
+    #if {$craft_farming[data][travel_toggle] == 1} {
+        #if {$craft_farming[data][go_toggle] == 0} {
+            #var craft_farming[data][go_toggle] 1;
+            go farming;
+            #delay {farm_d_stop_return} {
+                #var craft_farming[data][go_toggle] 0;
+                #echo {<caf>Auto-farming stopped - Returned to farming area<088>}
+            } {7}
+        }
+    };
+    #else {
+        #echo {<caf>Auto-farming stopped<088>}
+    }
+};
+
+#alias fr {
+    #switch {"%1"} {
+        #case {""} {
+            #echo {<ffa>Usage: <fff>fr <all|cxp><088>};
+            #echo {<feb>  <ccd>fr all<feb> - Farm all available farms<088>};
+            #echo {<feb>  <ccd>fr cxp<feb> - Farm CXP farms only<088>}
+        };
+        #case {"all"} {
+            #var craft_farming[data][auto_mode] all;
+            start_auto_farming
+        };
+        #case {"cxp"} {
+            #var craft_farming[data][auto_mode] cxp;
+            start_auto_farming
+        };
+        #default {
+            #echo {<faa>Invalid option: <fff>%1<088>};
+            #echo {<feb>Use: <ccd>fr all<feb> or <ccd>fr cxp<088>}
+        }
+    }
+};
+
+#alias farm {
+    #switch {"%1"} {
+        #case {""} {
+            #echo {<faa>═══════════════════════════════════════════════════════<088>};
+            #echo {<ffa>FARM COMMAND USAGE:<088>};
+            #echo {<faa>═══════════════════════════════════════════════════════<088>};
+            #echo {  <ffc>farm all<feb>     - Farm all available farms based on your skill<088>};
+            #echo {  <ffc>farm cxp<feb>     - Farm CXP-giving farms only (advanced)<088>};
+            #echo {  <ffc>fr all<feb>       - Quick start: farm all<088>};
+            #echo {  <ffc>fr cxp<feb>       - Quick start: farm CXP<088>};
+            #echo {<faa>═══════════════════════════════════════════════════════<088>};
+            #echo {<feb>Type <ccd>farmhelp autofarming<feb> for detailed help<088>};
+            #echo {<faa>═══════════════════════════════════════════════════════<088>}
+        };
+        #case {"all"} {
+            #if {$craft_farming[data][farming_level] == 0} {
+                #echo {<ffa>Please set your farming level first: <ccd>setfarmlevel <level><088>}
+            };
+            #else {
+                #var craft_farming[data][auto_mode] all;
+                #echo {<ffa>Starting AUTO FARM ALL mode - Farming until complete!<088>};
+                start_auto_farming
+            }
+        };
+        #case {"cxp"} {
+            #if {$craft_farming[data][farming_level] == 0} {
+                #echo {<ffa>Please set your farming level first: <ffc>setfarmlevel <level><088>}
+            };
+            #else {
+                #var craft_farming[data][auto_mode] cxp;
+                #echo {<ffa>Starting FARM CXP mode - CXP farms only!<088>};
+                start_auto_farming
+            }
+        };
+        #default {
+            #echo {<faa>Invalid option: <fff>%1<088>};
+            #echo {<feb>Type <ccd>farm<feb> for usage information<088>}
+        }
+    }
+};
+
+#alias setfarmlevel {
+    #if {"%1" == ""} {
+        #echo {<faa>Current farming level: <fff>$craft_farming[data][farming_level]<088>};
+        #echo {<feb>Usage: <ccd>setfarmlevel <level><088>}
+    };
+    #else {
+        #var craft_farming[data][farming_level] {%1};
+        #echo {<ffa>Farming level set to: <fff>%1<088>};
+        
+        #nop Calculate available farms;
+        #local farm_count 0;
+        #loop {1} {15} {tmpfarm} {
+            #if {%1 >= $craft_farming[farmland][min][$tmpfarm] && %1 <= $craft_farming[farmland][max][$tmpfarm]} {
+                #math farm_count {$farm_count + 1}
+            }
+        };
+        
+        #echo {<feb>Available farms: <fff>$farm_count<feb> farms unlocked<088>}
+    }
+};
+
+#alias stopauto {
+    #if {$craft_farming[data][auto_active] == 1} {
+        #echo {<faa>Stopping auto-farming...<088>};
+        stop_auto_farming
+    };
+    #else {
+        #echo {<feb>Auto-farming is not currently active<088>}
+    }
+};
+
+#nop ============================================;
+#nop MAIN COMMAND ALIASES;
+#nop ============================================;
+
+#alias f2 {lapt};
+#alias f3 {growplants};
+#alias f4 {togglepause};
+#alias f5 {stopfarming};
+#alias f9 {do_experiment_9};
+#alias f10 {do_experiment_10};
+#alias f11 {do_experiment_11};
+#alias f12 {do_experiment_12};
+
+#alias lapt {
+    farm_look;
+    sne look at plant
+};
+
+#alias growplants {
+    plantaction
+};
+
+#alias stopfarming {
+    stop_farming
+};
+
+#alias resetfarm {
+    reset_farm_variables
+};
+
+#alias resetfarmfull {
+    reset_farm_full
+};
+
+#alias toggleecho {
+    #if {$craft_farming[data][echo] == 0} {
+        #var craft_farming[data][echo] 1;
+        #echo {<ffa>Echo On<088>}
+    };
+    #else {
+        #var craft_farming[data][echo] 0;
+        #echo {<faa>Echo Off<088>}
+    }
+};
+
+#alias toggledisplay {
+        #if {$craft_farming[data][farm_status] == 0} {
+        #var craft_farming[data][farm_status] 1;
+        #echo {<ffa>Farm Status On<088>}
+    };
+    #else {
+        #var craft_farming[data][farm_status] 0;
+        #echo {<faa>Farm Status Off<088>}
+    }
+};
+
+#alias farmlook {
+    farm_look
+};
+
+#alias buysupplies {
+    buy_supplies %0
+};
+
+#alias buysuppliescommon {
+    buy_supplies_common
+};
+
+#alias farmstatus {
+    show_farm_status
+};
+
+#alias show_farm_status {
+    #local border {======================================================================};
+    #local pause_text {};
+    #local mode_text {};
+    
+    #if {$craft_farming[data][paused] == 1} {
+        #var pause_text {On}
+    };
+    #else {
+        #var pause_text {Off}
+    };
+    
+    #if {$craft_farming[data][auto_active] == 1} {
+        #if {"$craft_farming[data][auto_mode]" == "all"} {
+            #var mode_text {Auto-All}
+        };
+        #else {
+            #var mode_text {Auto-CXP}
+        }
+    };
+    #else {
+        #var mode_text {Manual}
+    };
+    
+    #echo {<faa>$border<088>};
+    #echo {<ccd>Plant: <ffa>$craft_farming[data][plant]  <ccd>Round: <ffa>$craft_farming[data][plantround]  <ccd>Growth: <ffa>$craft_farming[data][ideal_growth]%  <ccd>Size: <ffa>$craft_farming[data][plant_size]<088>};
+    #echo {<faa>----------------------------------------------------------------------<088>};
+    #echo {<ccd>   DA    GO    WH    YE    H2    BU    WE    MU    OX    HY<088>};
+    #echo {<bea>   %-5s %-5s %-5s %-5s %-5s %-5s %-5s %-5s %-5s %-5s<088>} {$craft_farming[data][dark]} {$craft_farming[data][gold]} {$craft_farming[data][white]} {$craft_farming[data][glisten]} {$craft_farming[data][water]} {$craft_farming[data][bugs]} {$craft_farming[data][weeds]} {$craft_farming[data][mushrooms]} {$craft_farming[data][oximeter]} {$craft_farming[data][hygrometer]};
+    #echo {<faa>----------------------------------------------------------------------<088>};
+    #echo {<ccd>Contrist I-IV: <bea>%-5s %-5s %-5s %-5s  <ccd>Nutri I-IV: <bea>%-5s %-5s %-5s %-5s<088>} {$craft_farming[data][contristometer_1]} {$craft_farming[data][contristometer_2]} {$craft_farming[data][contristometer_3]} {$craft_farming[data][contristometer_4]} {$craft_farming[data][nutriometer_1]} {$craft_farming[data][nutriometer_2]} {$craft_farming[data][nutriometer_3]} {$craft_farming[data][nutriometer_4]};
+    #echo {<ccd>Goblins: Green: <bea>%-4s <ccd>Red: <bea>%-4s <ccd>Blue: <bea>%-4s <ccd>Orange: <bea>%-4s<088>} {$craft_farming[data][goblin_green]} {$craft_farming[data][goblin_red]} {$craft_farming[data][goblin_blue]} {$craft_farming[data][goblin_orange]};
+    #echo {<faa>$border<088>};
+    #echo {<ccd>Tool: <ffa>$craft_farming[data][tool_type]  <ccd>Paused: <ffa>$pause_text  <ccd>Mode: <ffa>$mode_text  <ccd>Level: <ffa>$craft_farming[data][farming_level]  <ccd>Harvests: <ffa>$craft_farming[data][harvest_count]<088>};
+    #echo {<faa>$border<088>}
+};
+
+#alias randomfarm {
+    #if {$craft_farming[data][farming_level] == 0} {
+        #echo {<faa>Error:<fff> Farming level not set. Type 'craftstats' first.<088>};
+        #return
+    };
+    
+    #if {"$craft_farming[data][plant]" == "None"} {
+        #echo {<faa>Error:<fff> No plant identified. Use 'f2' or 'lapt' first.<088>};
+        #return
+    };
+    
+    #if {$craft_farming[data][plant_min_skill] > $craft_farming[data][farming_level]} {
+        #echo {<faa>Error:<fff> Plant level ($craft_farming[data][plant_min_skill]) is too high for your farming level ($craft_farming[data][farming_level]).<088>};
+        #return
+    };
+    
+    #var craft_farming[data][paused] 0;
+    #var craft_farming[random][active] 1;
+    #list craft_farming[random][log] clear;
+    
+    #echo {<caf>======================================<088>};
+    #echo {<ffa>  Random Farming Activated<088>};
+    #echo {<caf>======================================<088>};
+    #echo {<feb>Plant: <fff>$craft_farming[data][plant]<088>};
+    #echo {<feb>Min Level: <fff>$craft_farming[data][plant_min_skill]<088>};
+    #echo {<feb>Your Level: <fff>$craft_farming[data][farming_level]<088>};
+    #echo {<caf>======================================<088>};
+    
+    execute_random_round
+};
+
+#alias execute_random_round {
+    #local tmp_random_growth {$craft_farming[data][ideal_growth]};
+    #local tmp_random_level {$craft_farming[data][farming_level]};
+    #local tmp_random_round {$craft_farming[data][plantround]};
+    #local tmp_random_plant_level {$craft_farming[data][plant_min_skill]};
+    
+    #nop Calculate complexity based on plant level;
+    #local tmp_random_complexity 1;
+    #if {$tmp_random_plant_level >= 60} {
+        #math tmp_random_complexity 5
+    };
+    #elseif {$tmp_random_plant_level >= 40} {
+        #math tmp_random_complexity 4
+    };
+    #elseif {$tmp_random_plant_level >= 20} {
+        #math tmp_random_complexity 3
+    };
+    #elseif {$tmp_random_plant_level >= 10} {
+        #math tmp_random_complexity 2
+    };
+    
+    #nop Determine tool availability;
+    #local tmp_random_can_use_tools 0;
+    #local tmp_random_can_feed_gremlins 0;
+    
+    #if {$tmp_random_level >= 10} {
+        #var tmp_random_can_use_tools 1
+    };
+    
+    #if {$tmp_random_level >= 15} {
+        #var tmp_random_can_feed_gremlins 1
+    };
+    
+    #if {$craft_farming[data][echo] == 1} {
+        #echo {<ccd>DEBUG: Round $tmp_random_round | Growth $tmp_random_growth% | Complexity $tmp_random_complexity<088>}
+    };
+    
+    #nop Round 0 - Initial setup;
+    #if {$tmp_random_round == 0} {
+        #local tmp_random_log {};
+        #format tmp_random_log {Round %-2d: stake claim} {$tmp_random_round};
+        #list craft_farming[random][log] add {$tmp_random_log};
+        sne stake claim;
+        
+        #nop Base fertilizers - always available;
+        #local tmp_random_amt {};
+        #local tmp_random_rnd 0;
+        #math tmp_random_rnd {1d3};
+        
+        #switch {$tmp_random_rnd} {
+            #case {1} {#var tmp_random_amt {little}};
+            #case {2} {#var tmp_random_amt {some}};
+            #case {3} {#var tmp_random_amt {lots}}
+        };
+        
+        #format tmp_random_log {Round %-2d: fertilize %s hippie fertilizer} {$tmp_random_round} {$tmp_random_amt};
+        #list craft_farming[random][log] add {$tmp_random_log};
+        fertilize $tmp_random_amt hippie fertilizer;
+        
+        #math tmp_random_rnd {1d3};
+        #switch {$tmp_random_rnd} {
+            #case {1} {#var tmp_random_amt {little}};
+            #case {2} {#var tmp_random_amt {some}};
+            #case {3} {#var tmp_random_amt {lots}}
+        };
+        
+        #format tmp_random_log {Round %-2d: water %s wayhaven water} {$tmp_random_round} {$tmp_random_amt};
+        #list craft_farming[random][log] add {$tmp_random_log};
+        water $tmp_random_amt wayhaven water;
+        
+        #format tmp_random_log {Round %-2d: grow plant} {$tmp_random_round};
+        #list craft_farming[random][log] add {$tmp_random_log};
+        sne grow plant;
+        #return
+    };
+    
+    #nop Subsequent rounds - scale actions based on complexity;
+    #local tmp_random_num_actions 0;
+    #math tmp_random_num_actions {$tmp_random_complexity + 1d3};
+    
+    #nop Build action pool as a table with cmd and item;
+    #local tmp_random_pool {};
+    #list tmp_random_pool create {};
+    #list tmp_random_pool add {{cmd}{fertilize}{item}{alphabet fertilizer}};
+    #list tmp_random_pool add {{cmd}{fertilize}{item}{hippie fertilizer}};
+    #list tmp_random_pool add {{cmd}{fertilize}{item}{smurfy fertilizer}};
+    #list tmp_random_pool add {{cmd}{fertilize}{item}{happy ed's fertilizer}};
+    #list tmp_random_pool add {{cmd}{water}{item}{gulf of mexico water}};
+    #list tmp_random_pool add {{cmd}{water}{item}{atlantis water}};
+    #list tmp_random_pool add {{cmd}{water}{item}{wayhaven water}};
+    #list tmp_random_pool add {{cmd}{water}{item}{r'lyeh water}};
+    
+    #if {$tmp_random_growth < 50} {
+        #list tmp_random_pool add {{cmd}{spray}{item}{hunch pesticide}};
+        #list tmp_random_pool add {{cmd}{spray}{item}{ant cave pesticide}};
+        #list tmp_random_pool add {{cmd}{spray}{item}{murus faralain pesticide}};
+        #list tmp_random_pool add {{cmd}{spray}{item}{mount perplexus pesticide}}
+    };
+    
+    #if {$tmp_random_can_use_tools == 1} {
+        #list tmp_random_pool add {{cmd}{aerate}{item}{detroit air}};
+        #list tmp_random_pool add {{cmd}{aerate}{item}{ryogi-pei air}};
+        #list tmp_random_pool add {{cmd}{aerate}{item}{serinth air}};
+        #list tmp_random_pool add {{cmd}{aerate}{item}{genlab air}};
+        #list tmp_random_pool add {{cmd}{spread}{item}{cowville neutralizer}};
+        #list tmp_random_pool add {{cmd}{spread}{item}{der'thalas neutralizer}};
+        #list tmp_random_pool add {{cmd}{spread}{item}{garou neutralizer}};
+        #list tmp_random_pool add {{cmd}{spread}{item}{burns brand neutralizer}}
+    };
+    
+    #list tmp_random_pool shuffle;
+    
+    #nop Execute random actions;
+    #loop {1} {$tmp_random_num_actions} {tmp_random_idx} {
+        #if {$tmp_random_idx <= &tmp_random_pool[]} {
+            #local tmp_random_action {$tmp_random_pool[$tmp_random_idx]};
+            #local tmp_random_cmd {$tmp_random_action[cmd]};
+            #local tmp_random_item {$tmp_random_action[item]};
+            #local tmp_random_amt {};
+            #local tmp_random_log {};
+            
+            #local tmp_random_rnd 0;
+            #math tmp_random_rnd {1d3};
+            #switch {$tmp_random_rnd} {
+                #case {1} {#var tmp_random_amt {little}};
+                #case {2} {#var tmp_random_amt {some}};
+                #case {3} {#var tmp_random_amt {lots}}
+            };
+            
+            #format tmp_random_log {Round %-2d: %s %s %s} {$tmp_random_round} {$tmp_random_cmd} {$tmp_random_amt} {$tmp_random_item};
+            #list craft_farming[random][log] add {$tmp_random_log};
+            
+            $tmp_random_cmd $tmp_random_amt $tmp_random_item
+        }
+    };
+    
+    #nop Use tools if available and complexity warrants it;
+    #if {$tmp_random_can_use_tools == 1 && $tmp_random_complexity >= 2} {
+        #local tmp_random_rnd 0;
+        #local tmp_random_log {};
+        
+        #math tmp_random_rnd {1d2};
+        #if {$tmp_random_rnd == 1} {
+            #format tmp_random_log {Round %-2d: depress oximeter button} {$tmp_random_round};
+            #list craft_farming[random][log] add {$tmp_random_log};
+            sne depress oximeter button
+        };
+        
+        #math tmp_random_rnd {1d2};
+        #if {$tmp_random_rnd == 1} {
+            #format tmp_random_log {Round %-2d: push hygrometer button} {$tmp_random_round};
+            #list craft_farming[random][log] add {$tmp_random_log};
+            sne push hygrometer button
+        }
+    };
+    
+    #nop Feed gremlins if high enough level and complexity;
+    #if {$tmp_random_can_feed_gremlins == 1 && $tmp_random_complexity >= 3} {
+        #local tmp_random_rnd 0;
+        #math tmp_random_rnd {1d4};
+        #if {$tmp_random_rnd >= 3} {
+            #local tmp_random_gremlin_count 0;
+            #math tmp_random_gremlin_count {1d2};
+            
+            #loop {1} {$tmp_random_gremlin_count} {tmp_random_grem} {
+                #local tmp_random_color {};
+                #local tmp_random_log {};
+                
+                #math tmp_random_rnd {1d4};
+                
+                #switch {$tmp_random_rnd} {
+                    #case {1} {#var tmp_random_color {red}};
+                    #case {2} {#var tmp_random_color {blue}};
+                    #case {3} {#var tmp_random_color {green}};
+                    #case {4} {#var tmp_random_color {orange}}
+                };
+                
+                #format tmp_random_log {Round %-2d: feed %s gremlin} {$tmp_random_round} {$tmp_random_color};
+                #list craft_farming[random][log] add {$tmp_random_log};
+                sne feed $tmp_random_color gremlin
+            }
+        }
+    }
+};
+
+#alias save_random_success {
+    #echo {<caf>======================================<088>};
+    #echo {<ffa>  SUCCESSFUL RANDOM HARVEST!<088>};
+    #echo {<caf>======================================<088>};
+    #echo {<feb>Plant: <fff>$craft_farming[data][plant]<088>};
+    #echo {<feb>Level: <fff>$craft_farming[data][plant_min_skill] - $craft_farming[data][plant_trivial_skill]<088>};
+    #echo {<caf>======================================<088>};
+    #echo {<ffa>RECIPE LOG:<088>};
+    
+    #foreach {*craft_farming[random][log][%*]} {tmp_idx} {
+        #echo {  <ccd>$craft_farming[random][log][$tmp_idx]<088>}
+    };
+    
+    #echo {<caf>======================================<088>};
+    #echo {<ffa>PLEASE SHARE THIS WITH BYRON/BADGER<088>};
+    #echo {<feb>Screenshot or copy/paste to 3kdb Discord<088>};
+    #echo {<caf>======================================<088>};
+    
+    #var craft_farming[random][active] 0
+};
+
+#nop ============================================;
+#nop STARTUP MESSAGE; 
+#nop ============================================;
+
+#alias startup_farm_message {
+    #echo {<faa>===================================================<088>};
+    #echo {<ffa>        Advanced Farming System Loaded<088>};
+    #echo {<faa>===================================================<088>};
+    #echo {<feb>Converted and modified by Badger on 2025/11/03<088>};
+    #echo {};
+    #echo {<ffa>AUTO-FARMING:<088>};
+    #echo {<ccd>  fr all<feb> or <ccd>fr cxp<feb>          - Auto-farm everything<088>};
+    #echo {<ccd>  stopauto<feb>                            - Stop if needed<088>};
+    #echo {};
+    #echo {<fff>Note:<feb> auto-farming automatically buys all supplies needed<088>};
+    #echo {};
+    #echo {<ffa>MANUAL FARMING:<088>};
+    #echo {<fff>  1. <ccd>gofarmstore<feb>                 - Go to farm store<088>};
+    #echo {<fff>  2. <ccd>buysupplies all<feb>             - Buy supplies<088>};
+    #echo {<fff>  3. <ccd>homefarmstore<feb>               - Go back to Npc<088>};
+    #echo {<fff>  4. <ccd>gofarm#<feb> (1-15)              - Go to farm<088>};
+    #echo {<fff>  5. <ccd>f2<feb> or <ccd>lapt<feb>        - Identify plant<088>};
+    #echo {<fff>  6. <ccd>f3<feb> or <ccd>growplants<feb>  - Start growing (if recipe known)<088>};
+    #echo {<fff>  7. <ccd>randomfarm<feb>                  - Try random recipe (experimental!)<088>};
+    #echo {<fff>  8. <ccd>f5<feb> or <ccd>stopfarming<feb> - Harvest & clean up<088>};
+    #echo {<fff>  9. <ccd>homefarm#<feb>                   - Return home<088>};
+    #echo {};
+    #echo {<ffa>View Commands:<088>};
+    #echo {<ccd>  farmstatus<feb>                          - View plant status<088>};
+    #echo {<ccd>  farmgoods<feb>                           - View harvest inventory<088>};
+    #echo {};
+    #echo {<feb>Type <ccd>farmhelp<feb> for complete help<088>};
+    #echo {<faa>===================================================<088>}
+};
+
+#nop Shows what to type when walking into the main farming room, unless auto-farming is passing through;
+#action {^-R-_The Farming Room.}
+{
+    #if {$craft_farming[data][auto_active] == 1}
+    {
+        #return;
+    };
+    #echo {<ffa>Farming:<088>};
+    #echo {  <ccd>fr all<feb>     - auto-farm every farm for your level, supplies included<088>};
+    #echo {  <ccd>fr cxp<feb>     - auto-farm CXP farms only<088>};
+    #echo {  <ccd>stopauto<feb>   - stop auto-farming<088>};
+    #echo {  <ccd>farmstatus<feb> - plant status, <ccd>farmgoods<feb> - harvests so far<088>};
+    #echo {  <ccd>farmhelp<feb>   - all farming help<088>};
+};
+
+#echo {<fff>Loading...<088>};
+#delay 4 {startup_farm_message};
