@@ -265,9 +265,9 @@ touch demon rune;
 #NOP -- step and pause. Once the celestial is dead, .. sends the same step again;
 #action {^You cannot leave while there are still celestials present on this level.$} {
     #map undo;
-    #math bot[step] {$bot[step] - 1};
-    .pause;
-    #echo {<fff>A celestial is still alive on this level. Kill it, then .. to carry on.<088>};
+    #math bot[step] {$bot[step] - 2};
+    #var bot[reverse] 1;
+    #echo {<fff>A celestial is still alive on this level...Reversing course.<088>};
 } {1};
 
 #NOP -- Keep from autolooping if you lost the key somehow;

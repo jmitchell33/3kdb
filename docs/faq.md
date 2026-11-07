@@ -30,6 +30,10 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [How do I change my saved password?](#how-do-i-change-my-saved-password)
   - [Add didn't ask for my password. Why?](#add-didnt-ask-for-my-password-why)
   - [Does Remove delete my character?](#does-remove-delete-my-character)
+  - [Can I try the game without making a character?](#can-i-try-the-game-without-making-a-character)
+  - [Some of my characters aren't showing on the menu](#some-of-my-characters-arent-showing-on-the-menu)
+  - [My new character disappeared](#my-new-character-disappeared)
+  - [It asks "Are you the owner of that character"](#it-asks-are-you-the-owner-of-that-character)
   - [What does the linkdead timer on the menu mean?](#what-does-the-linkdead-timer-on-the-menu-mean)
   - [How do I refresh my linkdead timers?](#how-do-i-refresh-my-linkdead-timers)
   - [Why don't I see the next reboot time?](#why-dont-i-see-the-next-reboot-time)
@@ -223,9 +227,27 @@ cd ~/3kdb
 echo '#var PASSWORD {yourpassword};' >> chars/byron/private.tin
 ```
 
+Your password won't be sent upstream. Git ignores `private.tin`, so it stays on your computer, and the game's saved settings in `vars.tin` don't include it.
+
 ### Does Remove delete my character?
 
 No. It only takes the character off the menu, and the files stay. Your game character isn't affected either.
+
+### Can I try the game without making a character?
+
+Yes. Pick `[ Log in as guest ]` on the menu. It needs no password, and the game doesn't save guests.
+
+### Some of my characters aren't showing on the menu
+
+They're further down the list. It shows as many as fit on your screen and scrolls as you move. `▲ 3 above   ▼ 5 below` under it shows how many are hidden. Use the arrow keys or Page Up and Page Down, or tap that row.
+
+### My new character disappeared
+
+The game warns that level 1 characters aren't saved when you quit, and `help purge` says one that doesn't log in for 2 weeks is purged. Getting to level 2 only takes 300 more experience, from killing a few monsters. If it's gone, log in from the menu and it asks to create the name again.
+
+### It asks "Are you the owner of that character"
+
+That name is in use by a character that isn't saved yet, like a new level 1 still logged in somewhere. If it's yours, type `y`. Your saved password is used for you, or type it if you didn't save one, then answer the new character questions again. The old copy gets disconnected. If it isn't yours, type `n` and pick another name.
 
 ### What does the linkdead timer on the menu mean?
 
@@ -308,7 +330,7 @@ findhere-auto
 
 ### How do I log out?
 
-`quit` logs out properly, and `ld` leaves your character linkdead. See [Leaving the game](manual.md#leaving-the-game).
+Use `ld` to stay linkdead. Your character stays in the game and keeps its equipment. `quit` logs out fully, and you can lose equipment. See [Leaving the game](manual.md#leaving-the-game).
 
 ### How do I close the whole program?
 
@@ -328,7 +350,7 @@ That's how 3kdb is set up. Pressing Enter on an empty line repeats what you last
 
 ### The game shows "More:" and seems stuck
 
-It's waiting at a long help page. Press Enter for the next page, or `q` to stop.
+It's waiting at a long help page. Press Enter for the next page, or `q` to stop. To stop the pauses, run `setmod ROWS 999`. See `help setmod` for more.
 
 ### How do I run two commands at once?
 
@@ -489,10 +511,16 @@ explorer.exe .
 
 ### I saved my alias, but it doesn't work
 
-The game only sees your change after you reload:
+The game only sees your change after you load it:
 
 ```text
 .reload
+```
+
+Or load just the file you changed:
+
+```text
+#read chars/byron/aliases.tin
 ```
 
 If it still doesn't work, look for a missing `;` or `}`. See [If something doesn't work](manual.md#if-something-doesnt-work).
@@ -503,7 +531,7 @@ Check the pattern matches the game's text exactly. Only one action fires per lin
 
 ### My action keeps firing forever
 
-It's setting itself off. Type this and press Enter to remove all your actions, then fix the file and run `.reload`:
+It's setting itself off. Type this and press Enter to remove all your actions, then fix the file and run `.reload` or `#read chars/byron/actions.tin`:
 
 ```text
 #class {player_actions} {kill}
@@ -547,7 +575,7 @@ cd ~/3kdb
 git-sync
 ```
 
-Then run `.reload`, or log back in.
+Then run `.reload`, or log back in. If only one file changed, you can `#read` that file instead.
 
 ### Clone or fork?
 

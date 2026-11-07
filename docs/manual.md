@@ -165,6 +165,8 @@ The menu creates everything your character needs.
 
 Press **Enter** on your character. You'll see the screen fill up as 3kdb loads. Give it about 10 seconds to finish.
 
+If the name isn't on the game yet, it asks `Would you like to create this character`. Check the spelling, then type `y` to create it, or `n` to cancel. Your saved password is used for you, and the game asks a few more questions. See [Step 5 of the setup guide](setup.md#step-5-log-in). Get to level 2 soon, because level 1 characters can be lost. 3k also only allows one character per player until level 50, so read `help characters` before making a second one.
+
 ### Run setup once
 
 Do this once per character. Type each line and press Enter:
@@ -208,7 +210,8 @@ tt++ startmenu.tin
 - **Up / Down:** pick a character
 - **Left / Right:** change guild, if you listed more than one
 - **Enter:** log in
-- **1 to 9:** log in directly. With 10 or more characters, type the number and then press Enter.
+- **1 to 9:** log in directly. With 10 or more characters, or if the list doesn't all fit on your screen, type the number and then press Enter.
+- **Page Up / Page Down:** move a screenful, if the list doesn't all fit
 - **Tab:** jump to the Edit and Remove buttons
 - **q:** close the program
 
@@ -216,9 +219,12 @@ tt++ startmenu.tin
 - **Add:** add a character
 - **Edit:** change a character's guild list. The first one listed is the default.
 - **Remove:** take a character off the menu. Its files are kept.
+- **Log in as guest:** play straight away with no character or password. The game doesn't save guests.
 - **Quit:** close the program
 
 You can also click names, guild arrows and buttons. Hold **Shift** to select text while the menu is showing.
+
+The list shows as many characters as your screen has room for and scrolls as you move. `▲ 3 above   ▼ 5 below` under it shows how many are hidden. You can tap or click that row to page through the list, or use the mouse wheel.
 
 **The menu also shows:**
 - **Next reboot:** when the game will next restart. It appears after a character has logged in.
@@ -253,6 +259,8 @@ Once you're logged in, the screen has these areas. Their exact size depends on y
 - `draw_all` redraws the panels.
 
 **On a small screen or phone:** 3kdb switches to a phone layout when the window is 75 columns wide or less. It redraws when you resize the window.
+
+The start menu fits itself to your screen too. The logo shrinks to one line, and the character list scrolls, so the buttons always stay in view.
 
 [Back to top](#3kdb-manual)
 
@@ -292,7 +300,11 @@ calc 100/5*25
 
 **Use the mouse** with `qq`. It turns mouse clicks on or off, so you can click the data panel tabs. Run `qq` again to turn it off, which also lets you select text normally.
 
-**Long help pages** stop with `More: 0-19(26) : [q,b,<cr>]`. Press Enter for the next page, `b` to go back, or `q` to stop.
+**Long help pages** stop with `More: 0-19(26) : [q,b,<cr>]`. Press Enter for the next page, `b` to go back, or `q` to stop. To stop the pauses, set a bigger page size. `help setmod` explains this and the other options:
+
+```text
+setmod ROWS 999
+```
 
 **Commands starting with `#`** go to TinTin++ itself, not the game. TinTin++ has its own help too:
 
@@ -516,7 +528,9 @@ This is the bot cycler:
 
 ### Add your own steps
 
-Your character's `config.tin` can run commands before a bot starts or before each fight. See [Bot hooks](#bot-hooks).
+The easiest way is [mob kill actions](#mob-kill-actions), a list of commands that fire when you start a fight, including when a bot starts one. Use `mka+` to add one.
+
+For anything else, your character's `config.tin` can run commands before a bot starts or before each fight. See [Bot hooks](#bot-hooks).
 
 [Back to top](#3kdb-manual)
 
@@ -703,9 +717,11 @@ Every post goes to `general`, and also to its own channel when that one is set. 
 **4. Turn it on in the game:**
 
 ```text
-.reload
+#read chars/byron/private.tin
 toggle discord_post
 ```
+
+`.reload` works too, in place of the `#read`.
 
 If posts don't appear, look for errors in `logs/<your system username>/discordPost.log`.
 
@@ -797,21 +813,21 @@ showmap
 
 ## Leaving the game
 
-There are two ways to leave, and they aren't the same.
+There are two ways to leave, and they aren't the same. Use `ld` unless you mean to log out fully.
 
-**`quit`** logs your character out properly, and you go back to the menu.
-
-```text
-quit
-```
-
-**`ld`** saves your settings and disconnects, leaving your character linkdead in the game. You go back to the menu, which shows a timer.
+**`ld`** saves your settings and disconnects, leaving your character linkdead in the game with its equipment. You go back to the menu, which shows a timer.
 
 ```text
 ld
 ```
 
 Without the linkdead perk, the game boots a linkdead character after 24 hours. With it, only a reboot does.
+
+**`quit`** logs your character out fully, and you can lose equipment. You go back to the menu.
+
+```text
+quit
+```
 
 To close the program from the menu, press `q`. In plain TinTin++, type `#end`.
 
@@ -916,6 +932,8 @@ nano ~/3kdb/chars/byron/aliases.tin
 .reload
 ```
 
+For a small change like this, you can load just this file instead with `#read chars/byron/aliases.tin`.
+
 **6. Try it:**
 
 ```text
@@ -986,7 +1004,7 @@ nano ~/3kdb/chars/byron/actions.tin
 };
 ```
 
-**3. Save it, and run `.reload` in the game.**
+**3. Save it, and run `.reload` or `#read chars/byron/actions.tin` in the game.**
 
 **4. Run `hi`.** You should see your message appear.
 
@@ -1018,7 +1036,7 @@ Now `say pick gold ring` shows `You picked: gold ring`.
 ### Be careful with actions
 
 - **Match as exactly as you can.** A loose pattern can fire on chat, so someone could set off your action just by saying something. Using `^` helps a lot.
-- **Don't make loops.** If your action says something that sets off the same action, it will run forever. If it happens, type this and press Enter to remove all your actions, then fix the file and run `.reload`:
+- **Don't make loops.** If your action says something that sets off the same action, it will run forever. If it happens, type this and press Enter to remove all your actions, then fix the file and run `.reload` or `#read chars/byron/actions.tin`:
   ```text
   #class {player_actions} {kill}
   ```
@@ -1157,7 +1175,7 @@ After saving a file, load it in the game with:
 .reload
 ```
 
-That reloads your character's files and your guild's scripts. To load just one file:
+That reloads your character's files and your guild's scripts. For something simple, it's quicker to load just the file you changed:
 
 ```text
 #read chars/byron/aliases.tin
@@ -1167,7 +1185,7 @@ Remember that your files only change what's in the game when you reload or log b
 
 ### If something doesn't work
 
-- **The game says `There is no reason to...`:** the game doesn't know that word, so your alias didn't load. Run `.reload`, and check the name.
+- **The game says `There is no reason to...`:** the game doesn't know that word, so your alias didn't load. Run `.reload` or `#read` the file, and check the name.
 - **Check whether your alias loaded.** This shows it if it exists:
   ```text
   #alias {hi}
@@ -1200,7 +1218,7 @@ cd ~/3kdb
 git-sync
 ```
 
-Log out and back in, or run `.reload`, to load the new code. If you've changed project files, [github.md](github.md#keep-your-changes-and-still-update) explains how to keep your changes.
+Run `ld` and log back in, or run `.reload`, to load the new code. If only one file changed, you can `#read` that file instead. If you've changed project files, [github.md](github.md#keep-your-changes-and-still-update) explains how to keep your changes.
 
 [Back to top](#3kdb-manual)
 
@@ -1750,7 +1768,8 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `clear_def`: clear contingencies and turn off defenses.
 - `activate_sconfig`: activate summon config.
 - `clear_sconfig`: clear summon config.
-- `ms`: setup summon config. Usage: `ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema`
+- `ms`: setup summon config. Usage: `ms <config> OR ms <#/golem/a/d> - Ex: 'ms 5a' or 'ms golema' - see 'ms-help'`
+- `ms-help`: help for ms: shortcuts, building your own summon config and related commands.
 - `castper`: setup perform with a single target damage spell. Usage: `castper' alone will show options - castper <option>`
 - `msc`: quick-set summon config digits and golem lines. Usage: `msc two digit pairs then width tokens see mage summoning aliases`
 - `gc_ss`: setup stoneskin with greater contingency.

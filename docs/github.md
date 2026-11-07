@@ -345,33 +345,6 @@ git-start() {
   echo "           it loads from now on (relog, #read) comes from this branch."
 }
 
-# 2. Commit, push your branch to origin, and target the upstream repo for the PR
-# Usage: git-pr "my update message"
-alias git-pr='_git_pr() { \
-    if [ -z "$1" ]; then echo "Error: Provide a commit description."; return 1; fi; \
-    CURRENT_BRANCH=$(git branch --show-current); \
-    if [ "$CURRENT_BRANCH" = "master" ]; then \
-        echo "Error: You are on master! Create a branch first using git-start."; return 1; \
-    fi; \
-    git add . && \
-    git commit -m "$1" 2>/dev/null || echo "No new local uncommitted changes found, attempting push..."; \
-    git push -u origin "$CURRENT_BRANCH" && \
-    gh pr create --repo jmitchell33/3kdb --base master --head "$(gh api user --jq .login):$CURRENT_BRANCH" --title "$1" --body "Automated branch PR."; \
-}; _git_pr'
-
-# 3. Pull latest upstream master changes into your current branch
-# Usage: Run this inside your feature branch if you hit a conflict
-alias git-sync-conflict='_git_sync_conflict() { \
-    CURRENT_BRANCH=$(git branch --show-current); \
-    if [ "$CURRENT_BRANCH" = "master" ]; then \
-        echo "Error: You are on master."; return 1; \
-    fi; \
-    git checkout master && \
-    git pull upstream master && \
-    git checkout "$CURRENT_BRANCH" && \
-    git merge master; \
-}; _git_sync_conflict'
-
 # Usage: git-pr-pro "My Clean Pull Request Title"
 alias git-pr-pro='_git_pr_pro() { \
     if [ -z "$1" ]; then echo "Error: Provide a PR Title in quotes."; return 1; fi; \
@@ -397,8 +370,6 @@ git-make-desc() {
     echo "--- Paste your PR body text below. When done, press Ctrl+D on a new blank line to save ---"
     cat > "$HOME/3kdb-temp/pr.md"
 }
-
-alias git-work='git checkout -b'
 
 # git-sync: bring everything up to date with upstream (jmitchell33/3kdb).
 #   1. saves and pushes any uncommitted work on your branch
@@ -593,12 +564,6 @@ Lists your local branches.
 - Commits anything left, pushes, and opens a pull request to the project using your `git-make-desc` text.
 - Use it when the work is ready, on a branch with no open pull request yet.
 
-### The ones you can ignore
-
-- **`git-sync-conflict`** is an older, weaker `git-sync`. It doesn't save or push anything.
-- **`git-pr "message"`** is an older `git-pr-pro`. It has a canned description.
-- **`git-work <name>`** makes a new branch from wherever you are, with no updating. It's only for building on an unmerged pull request.
-
 ### git-save or git-sync?
 
 - `git-save` sends **my** work up to GitHub.
@@ -630,10 +595,10 @@ git-start new-bot
 **New work that needs the waiting one's code.** Run this from the waiting pull request's branch:
 
 ```bash
-git-work new-bot
+git checkout -b new-bot
 ```
 
-If you used `git-work`, the new branch contains the waiting commits. Wait for that pull request to merge, run `git-sync`, and **then** run `git-pr-pro`. Otherwise the new pull request also shows everything from the old one.
+The new branch contains the waiting commits. Wait for that pull request to merge, run `git-sync`, and **then** run `git-pr-pro`. Otherwise the new pull request also shows everything from the old one.
 
 [Back to top](#3kdb-git-and-github-guide)
 
