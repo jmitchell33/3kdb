@@ -12,8 +12,8 @@
     #if {"%1" == ""} {
         #var tmpFlag 0;
         #echo {<ccf>  -------     CURRENT SPEEDRUNS (<fff>&speedruns_name[]<ccf>)   -------    <088>};
-        #echo {<fff>    Filters:  <ccf>shop  mob  area  eq  misc      <088>};
-        #echo {<ccf>                 clan crafting               <088>};
+        #echo {<fff>    Filters:  <ccf>shop  mob  area  eq  item  misc      <088>};
+        #echo {<ccf>                 clan crafting, or any word      <088>};
         #echo {<ccf>  ---------------------------------------    <088>};
         #echo {<ccf>     Name                 Description        <088>};
 
@@ -31,13 +31,24 @@
                 #math totalType {$totalType + 1};
             };
         };
+        #if {$totalType == 0} {
+            #format tmpSearch {%l} {%0};
+            #loop 1 &speedruns_name[] i {
+                #format tmpLow {%l} {$speedruns_name[$i] $speedruns_desc[$i]};
+                #if {"$tmpLow" == "%*$tmpSearch%*"} {
+                    #var tmpFlag 0;
+                    format_speedrun {     $speedruns_name[$i]} {$speedruns_desc[$i]};
+                    #math totalType {$totalType + 1};
+                };
+            };
+        };
         #echo {\n<ccf>  Total of $totalType $tmpType speedruns returned.        <088>};
         #echo {<ccf>  Use <dfc>go name<ccf> to run to that location.        <088>};
     };
     #if {$tmpFlag} {
         #echo {<ccf>  ---------------------------------------    <088>};
         #echo {<ccf>  No matches found for <eed>%1<def>.    <088>};
-        #echo {<ccf>  Valid choices are <eed>shop, mob, area, eq, misc, clan, crafting<def>.    <088>};
+        #echo {<ccf>  Valid choices are <eed>shop, mob, area, eq, item, misc, clan, crafting<def>, or a word from the name or description.    <088>};
         #echo {<ccf>  ---------------------------------------    <088>};
     }
 };
