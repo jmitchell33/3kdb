@@ -3,8 +3,8 @@
 
 #NOP --- MAINT: pick which defenses the guild heartbeat keeps up. Type maint-help;
 #NOP -- heartbeat.tin recasts a spell while defs[<defs>] is 1 and my[prots][<prot>] (hpbar) is 0.;
-#NOP -- maint only sets those defs flags from your picks. Picks are copied to xmaint_sel in class;
-#NOP -- global, which _variable_export writes to chars/<you>/vars.tin, so ld and the autosave keep them.;
+#NOP -- maint only sets those defs flags from your picks. The shared code is common/maint.tin, picks are;
+#NOP -- saved per guild in xmaint[mage] (class global, chars/<you>/vars.tin), so ld and the autosave keep them.;
 #NOP -- Contingency fields, for maint setup: cspell = the spell it casts, ctrig = its trigger (empty = none,;
 #NOP -- mindblank has no trigger), cval = mage[contingencies] key for the HP value (mantle/sphere), cshow =;
 #NOP -- how the trigger reads in the contingency lists (regex alternatives).;
@@ -44,219 +44,18 @@
     {pfg} {pfg} {pg} {pfg} {good} {pfg}
 };
 
-#NOP -- Nothing saved yet: start with maint_default;
-#if {&{xmaint_sel}} {#var maint_sel $xmaint_sel} {#var maint_sel {};#foreach {$maint_default[%*]} {_mk} {#var maint_sel[$_mk] 1}};
-#var maint_active 0;
+#NOP -- Spells in the same group conflict in game (one globe, one skin, one shield, evil or good), so picking;
+#NOP -- one unpicks the rest of its group and stops recasting them.;
+#var maint_cfg {{noun}{spell}{Nouns}{Spells}{start}{0}{resume}{linkdeath}};
+#var maint_cmds {{all}{_maint_all}{setup}{maint_setup}{list}{_cont_fetch _maint_list}{check}{_cont_fetch _maint_list}{status}{_cont_fetch _maint_list}};
 
-#alias {_maint_save} {
-    #class global open;
-    #var xmaint_sel $maint_sel;
-    #var xmaint_active $maint_active;
-    #class global close;
-};
+#action {^You already have %*} {_maint_refused} {8};
+#action {^You are already protected by %*} {_maint_refused} {8};
+#action {^Another defensive spell is conflicting} {_maint_refused} {8};
+#action {^You do not have enough spell points to cast %*} {_maint_nosp {%1}} {8};
 
-#NOP -- Maint was on when you last saved (ld / autosave), so after a linkdeath return turn it back on once;
-#NOP -- the login has settled (postload ends at 12s) and the hpbar has said which spells are up. Not on a;
-#NOP -- fresh login: spells are down and setup_defense casts them, maint would cast over it. maint off saves off.;
-#alias {_maint_resume} {
-    #if {!$maint_active} {
-        #echo {<dea>  maint was on before you logged out, turning it back on.<088>};
-        _maint_on;
-    };
-};
-#if {"$xmaint_active" == "1" && "$login_linkdeath" == "1"} {#delay {maint_resume} {_maint_resume} {15}};
-
-#NOP -- %1 key, %2 1 or 0. Spells in the same group conflict in game (one globe, one skin, one shield,;
-#NOP -- evil or good), so picking one unpicks the rest of its group and stops recasting them.;
-#alias {_maint_set} {
-    #var maint_sel[%1] %2;
-    #var _mblock[%1] 0;
-    #if {%2} {
-        #foreach {$maint_order[%*]} {_mg} {
-            #if {"$_mg" != "%1" && "$maint_spells[$_mg][group]" == "$maint_spells[%1][group]"} {
-                #var maint_sel[$_mg] 0;
-                #if {$maint_active} {#var defs[$maint_spells[$_mg][defs]] 0};
-            };
-        };
-    };
-};
-
-#NOP -- Keep one pick per group (the first in maint_order), e.g. old saved picks with both globes;
-#alias {_maint_tidy} {
-    #var _mseen {};
-    #var _mtidied 0;
-    #foreach {$maint_order[%*]} {_mk} {
-        #if {"$maint_sel[$_mk]" == "1"} {
-            #var _mgrp $maint_spells[$_mk][group];
-            #if {&_mseen[$_mgrp]} {
-                #var maint_sel[$_mk] 0;
-                #var _mtidied 1;
-            } {
-                #var _mseen[$_mgrp] 1;
-            };
-        };
-    };
-    #if {$_mtidied} {_maint_save};
-};
-
-#NOP -- Push the picks into defs: picked spells 1, the rest 0;
-#alias {_maint_apply} {
-    #foreach {$maint_order[%*]} {_mk} {
-        #if {"$maint_sel[$_mk]" == "1" && "$_mblock[$_mk]" != "1"} {
-            #var defs[$maint_spells[$_mk][defs]] 1;
-        } {
-            #var defs[$maint_spells[$_mk][defs]] 0;
-        };
-    };
-};
-
-#NOP -- Picked spell names, two per line;
-#alias {_maint_grid} {
-    #var _mcount 0;
-    #var _mrow {};
-    #foreach {$maint_order[%*]} {_mk} {
-        #if {"$maint_sel[$_mk]" == "1"} {
-            #format _mcell {%-24s} {$maint_spells[$_mk][name]};
-            #var _mrow {$_mrow$_mcell};
-            #math _mcount {$_mcount + 1};
-            #if {$_mcount % 2 == 0} {
-                #echo {      <afa>$_mrow<088>};
-                #var _mrow {};
-            };
-        };
-    };
-    #if {"$_mrow" != ""} {#echo {      <afa>$_mrow<088>}};
-    #if {$_mcount == 0} {#echo {      <888>nothing picked<088>}};
-};
-
-#NOP -- %1 = 1 pick, 0 unpick, t toggle. %2 = spell words;
-#alias {_maint_pick} {
-    #var _mwords {%2};
-    #replace _mwords { } {;};
-    #var _mbad {};
-    #foreach {$_mwords} {_mw} {
-        #if {"$_mw" != ""} {
-            #format _mw {%l} {$_mw};
-            #if {&maint_words[$_mw]} {
-                #var _mk $maint_words[$_mw];
-                #if {"%1" == "t"} {
-                    #if {"$maint_sel[$_mk]" == "1"} {_maint_set $_mk 0} {_maint_set $_mk 1};
-                } {
-                    _maint_set $_mk %1;
-                };
-            } {
-                #var _mbad {$_mbad $_mw};
-            };
-        };
-    };
-    #if {"$_mbad" != ""} {
-        #echo {<faa>  Unknown spell:<fff>$_mbad<faa>. Type <ffa>maint list<faa> for the names.<088>};
-    };
-    _maint_changed;
-};
-
-#alias {_maint_changed} {
-    _maint_save;
-    #if {$maint_active} {_maint_apply};
-    #echo {<dea>---  MAINT PICKS  ---<088>};
-    _maint_grid;
-    #if {$maint_active} {
-        #echo {  <ccc>Maint is on, the heartbeat keeps these up now.<088>};
-    } {
-        #echo {  <ccc>Type <ffa>maint<ccc> to start keeping these up.<088>};
-    };
-};
-
-#alias {_maint_on} {
-    _maint_tidy;
-    #var _mcount 0;
-    #foreach {$maint_order[%*]} {_mk} {
-        #if {"$maint_sel[$_mk]" == "1"} {#math _mcount {$_mcount + 1}};
-    };
-    #if {$_mcount == 0} {
-        #echo {<faa>  Nothing picked yet. Pick spells with <ffa>maint <spell><faa>, see <ffa>maint-help<faa>.<088>};
-    } {
-        #var _mblock {};
-        #foreach {$maint_order[%*]} {_mk} {#var _mstuck[$_mk] 0};
-        #var _mrefused 0;
-        _maint_apply;
-        #var maint_active 1;
-        #echo {<dea>---  MAINTENANCE ON  ---<088>};
-        #ticker {maint_watch} {_maint_watch} {2};
-        _maint_save;
-        _maint_grid;
-    };
-};
-
-#alias {_maint_off} {
-    #foreach {$maint_order[%*]} {_mk} {
-        #var defs[$maint_spells[$_mk][defs]] 0;
-    };
-    #var maint_active 0;
-    #unticker {maint_watch};
-    _maint_save;
-    #echo {<dea>---  MAINTENANCE OFF  ---<088>};
-    #if {"%1" == "cleared"} {
-        #echo {  <ccc>All picks cleared. Spells stay up until they drop, they are just not recast.<088>};
-    } {
-        #echo {  <ccc>Spells stay up until they drop, they are just not recast. Picks are kept.<088>};
-    };
-};
-
-#NOP -- Safety net: while maint is on, maint_watch runs every 2s. A picked spell that stays down for 5 checks;
-#NOP -- (about 10s) while the MUD keeps refusing casts (already have / conflicting) is blocked: maint stops;
-#NOP -- recasting it and says so. Running out of SP is a different message, so that never blocks anything.;
-#action {^You already have %*} {#var _mrefused 1} {8};
-#action {^You are already protected by %*} {#var _mrefused 1} {8};
-#action {^Another defensive spell is conflicting} {#var _mrefused 1} {8};
-#NOP -- Out of SP is not a refusal: the spell it names (or the whole check, if no name matches) is not counted;
-#action {^You do not have enough spell points to cast %*} {
-    #NOP -- The name ends in . or ! so it matches when it starts with the spell name and is at most 1 longer;
-    #format _mnosp_name {%l} {%1};
-    #format _mnosp_len {%L} {$_mnosp_name};
-    #var _mnosp_hit 0;
-    #foreach {$maint_order[%*]} {_mk} {
-        #format _mnosp_nm {%l} {$maint_spells[$_mk][name]};
-        #format _mnosp_nl {%L} {$_mnosp_nm};
-        #if {$_mnosp_len - $_mnosp_nl <= 1} {
-            #regex {$_mnosp_name} {^$_mnosp_nm} {#var _mnosp[$_mk] 1;#var _mnosp_hit 1};
-        };
-    };
-    #if {!$_mnosp_hit} {#var _mnosp_all 1};
-} {8};
-#var _mrefused 0;
-#var _mnosp {};
-#var _mnosp_all 0;
-#var _mblock {};
-
-#NOP -- Sets _mupnow to 1 when spell %1 shows as up;
 #alias {_maint_isup} {
     #if {"$my[prots][$maint_spells[%1][prot]]" == "1"} {#var _mupnow 1} {#var _mupnow 0};
-};
-
-#alias {_maint_watch} {
-    #if {!$maint_active} {
-        #unticker {maint_watch};
-    } {
-        #foreach {$maint_order[%*]} {_mx} {
-            _maint_isup $_mx;
-            #if {"$maint_sel[$_mx]" == "1" && "$defs[$maint_spells[$_mx][defs]]" == "1" && !$_mupnow} {
-                #if {$_mrefused && !$_mnosp_all && "$_mnosp[$_mx]" != "1"} {#math _mstuck[$_mx] {$_mstuck[$_mx] + 1}};
-            } {
-                #var _mstuck[$_mx] 0;
-            };
-            #if {$_mstuck[$_mx] >= 5} {
-                #var _mstuck[$_mx] 0;
-                #var _mblock[$_mx] 1;
-                #var defs[$maint_spells[$_mx][defs]] 0;
-                #echo {<faa>  maint: stopped recasting <fff>$maint_spells[$_mx][name]<faa>, the MUD keeps refusing it.<088>};
-                #echo {<faa>  Another defense conflicts with it, or it is up but not on your hpbar. See <ffa>maint list<faa>.<088>};
-            };
-        };
-        #var _mrefused 0;
-        #var _mnosp {};
-        #var _mnosp_all 0;
-    };
 };
 
 #NOP -- Table of every spell: picked, kept up by the heartbeat (defs), and up on the hpbar (my[prots]);
@@ -467,51 +266,21 @@
     _maint_setup_next;
 };
 
-#alias {maint} {
-    #format _mcmd {%l} {%1};
-    #var _mrest {};
-    #regex {%0} {^%S {.*}$} {#var _mrest {&2}};
-    #switch {"$_mcmd"} {
-        #case {""} {_maint_on};
-        #case {"on"} {_maint_on};
-        #case {"off"} {_maint_off};
-        #case {"add"} {_maint_pick {1} {$_mrest}};
-        #case {"del"} {_maint_pick {0} {$_mrest}};
-        #case {"remove"} {_maint_pick {0} {$_mrest}};
-        #case {"all"} {
-            _maint_tidy;
-            #NOP -- One spell per group: keep the one already picked, else the first in maint_order (the;
-            #NOP -- stronger one). Evil/good is your choice. Aura and blink clash with something not yet known.;
-            #foreach {$maint_order[%*]} {_mk} {
-                #var _mtaken 0;
-                #foreach {$maint_order[%*]} {_mg} {
-                    #if {"$maint_spells[$_mg][group]" == "$maint_spells[$_mk][group]" && "$maint_sel[$_mg]" == "1"} {#var _mtaken 1};
-                };
-                #if {!$_mtaken && "$_mk" != "pfe" && "$_mk" != "pfg" && "$_mk" != "pa" && "$_mk" != "blink"} {_maint_set $_mk 1};
-            };
-            _maint_changed;
-            #echo {  <ccc>One per group: major or minor globe, stoneskin or rhino skin, mag shield or shield.<088>};
-            #echo {  <ccc>Not added: evil/good (pick <ffa>maint pfe<ccc> or <ffa>maint pfg<ccc>), aura and blink (they<088>};
-            #echo {  <ccc>conflict with other defenses, pick them yourself with <ffa>maint pa<ccc> / <ffa>maint blink<ccc>).<088>};
+#alias {_maint_all} {
+    _maint_tidy;
+    #NOP -- One spell per group: keep the one already picked, else the first in maint_order (the;
+    #NOP -- stronger one). Evil/good is your choice. Aura and blink clash with something not yet known.;
+    #foreach {$maint_order[%*]} {_mk} {
+        #var _mtaken 0;
+        #foreach {$maint_order[%*]} {_mg} {
+            #if {"$maint_spells[$_mg][group]" == "$maint_spells[$_mk][group]" && "$maint_sel[$_mg]" == "1"} {#var _mtaken 1};
         };
-        #case {"default"} {
-            #NOP -- The usual set: replaces your picks with maint_default;
-            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 0};
-            #foreach {$maint_default[%*]} {_mk} {_maint_set $_mk 1};
-            _maint_changed;
-        };
-        #case {"clear"} {
-            #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 0};
-            _maint_save;
-            _maint_off cleared;
-        };
-        #case {"setup"} {maint_setup};
-        #case {"list"} {_cont_fetch _maint_list};
-        #case {"check"} {_cont_fetch _maint_list};
-        #case {"status"} {_cont_fetch _maint_list};
-        #case {"help"} {maint-help};
-        #default {_maint_pick {t} {%0}};
+        #if {!$_mtaken && "$_mk" != "pfe" && "$_mk" != "pfg" && "$_mk" != "pa" && "$_mk" != "blink"} {_maint_set $_mk 1};
     };
+    _maint_changed;
+    #echo {  <ccc>One per group: major or minor globe, stoneskin or rhino skin, mag shield or shield.<088>};
+    #echo {  <ccc>Not added: evil/good (pick <ffa>maint pfe<ccc> or <ffa>maint pfg<ccc>), aura and blink (they<088>};
+    #echo {  <ccc>conflict with other defenses, pick them yourself with <ffa>maint pa<ccc> / <ffa>maint blink<ccc>).<088>};
 };
 
 #alias {maint-help} {
@@ -578,3 +347,4 @@
 };
 
 #class {guild_maintenance} {close}
+#read common/maint.tin
