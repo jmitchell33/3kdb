@@ -49,6 +49,9 @@
 #action {{^You finish your performance with a bow.$|^You cease your performance of %*.$}} {
     #var song_selected 0;
     #var my[song][rounds] 0;
+    #NOP -- Song over, so the hpbar Performing bar ends now and does not hold its last P;
+    #var my[bard][perf] 0;
+    #var my[bard][perf_total] 0;
     #if {$actions_stacked && $mip[round] > 0 && !$idle_flag} {
         do_action;
     };
@@ -60,6 +63,8 @@
     #math cmbt[songs][lost][total] {$cmbt[songs][lost][total] + 1};
     #var song_selected 0;
     #var my[song][rounds] 0;
+    #var my[bard][perf] 0;
+    #var my[bard][perf_total] 0;
     #if {$actions_stacked && $mip[round] > 0 && !$idle_flag} {
         do_action;
     };
