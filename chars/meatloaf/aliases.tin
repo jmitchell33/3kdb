@@ -1,0 +1,29 @@
+#class {player_aliases} {kill}
+#class {player_aliases} {open}
+
+#NOP -- Mage aliases (setup_defense, contingencies, corpsetrig1, pmo) are in guilds/mage.tin;
+
+#alias {_player_deadmanActions} {
+    .pause;
+};
+
+#alias {check_beads} {
+     #math hp_overmax_max {$my[hp][max] * 5};
+     #math hp_overmax_shortfall {$hp_overmax_max - $my[hp][current]};
+     #math grasps_needed {$hp_overmax_shortfall / 33};
+
+     #math sp_threshold {$my[sp][max] * .20};
+     #math sp_extra {$my[sp][current] - $sp_threshold};
+     #math grasps_possible {$sp_extra / 100};
+
+     #if {$grasps_needed < $grasps_possible} {
+          #var grasp_beads $grasps_needed;
+     } {
+          #var grasp_beads $grasps_possible;
+     };
+
+     #$grasp_beads {grasp beads};
+};
+
+
+#class {player_aliases} {close}

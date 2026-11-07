@@ -1,0 +1,200 @@
+#class {player_guild} {kill}
+#class {player_guild} {open}
+
+#NOP -- Meatloaf's mage extras. config.tin reads this after the guild scripts at login and on gswap;
+
+#read modules/dmgtracker/dmgtracker_mage.tin;
+
+#NOP -- Settings: k casts slow (and darkness 3s later), cperf performs ospell, golem_haste (off) would keep the golem hasted.;
+#NOP -- Only haste yourself (karvec was told not to bother hasting summons), which the mage heartbeat keeps up;
+#NOP -- (common/guilds/mage/heartbeat.tin). slow is 0 because the;
+#NOP -- slow strategy (summoner_on) already casts it every fight. summon: the monster summoning level summoner uses;
+#var cast[darkness] 0;
+#var cast[slow] 0;
+#var cast[golem_haste] 0;
+#var cast[ospell] incinerate;
+#var cast[summon] 8;
+
+#NOP -- Defensive contingencies;
+#alias {c1} {cast greater contingency as armor#cast armor;cast armor};
+#alias {c2} {cast greater contingency as shield#cast magnificent shield;cast magnificent shield};
+#alias {c3} {cast greater contingency as stoneskin#cast stoneskin;cast stoneskin};
+#alias {c4} {cast greater contingency as major globe#cast major globe;cast major globe};
+#alias {c5} {cast greater contingency as prismatic sphere#400#cast prismatic sphere;cast prismatic sphere};
+#alias {c6} {cast greater contingency as mantle#400#cast mantle;cast mantle};
+
+#NOP -- Contingency list, read from the game's listing;
+#list {temp} create {};
+#ACTION {^%d:You will cast %w should your %w ever} {
+     #list temp set %1 {%2};
+};
+
+#var def[min_sp] 3000;
+#var def[waiting] 0;
+#list defq create {};
+
+#alias {setup_defense} {
+     #undelay {def_step};
+     #if {"%0" == "stop"} {
+          #list defq clear;
+          #echo {<faa>setup_defense stopped.<088>};
+          #return;
+     };
+     clear_c;
+     clear_gc;
+     #list defq create {setup_c;gc_mantle;gc_ps;gc_mg;gc_ss;gc_shield;gc_armor;prots_ss;prots_MG;prots_ms;prots_armor;prots_ps;cast mantle;prots_pfe};
+     #var def[waiting] 0;
+     #delay {def_step} {.def_next} {2};
+};
+
+#alias {.def_next} {
+     #if {&defq[] == 0} {
+          #echo {<afa>setup_defense done.<088>};
+          #return;
+     };
+     #local {_sp} {0};
+     #if {&my[sp][current]} {#local {_sp} {$my[sp][current]}};
+     #if {$_sp >= $def[min_sp]} {
+          #var def[waiting] 0;
+          #local {_cmd} {$defq[1]};
+          #list defq delete 1;
+          $_cmd;
+     } {
+          #if {!$def[waiting]} {
+               #var def[waiting] 1;
+               #echo {<ffa>setup_defense: waiting for $def[min_sp] SP before $defq[1] ($_sp now).<088>};
+          };
+     };
+     #delay {def_step} {.def_next} {2};
+};
+
+#act {^You have no physical form and cannot perform actions.$} {#if {&defq[] > 0} {setup_defense stop}};
+
+#alias {setup_c} {
+     cast contingency as prot_evil#cast protection from evil;
+};
+
+#alias {setup_gc} {
+     cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
+     cast greater contingency as major globe#cast major globe;
+     cast greater contingency as stoneskin#cast stoneskin;
+     cast greater contingency as shield#cast magnificent shield;
+     cast greater contingency as armor#cast armor;
+};
+
+#alias {clear_c} {
+     #10 {cast remove contingency as 1};
+};
+
+#alias {clear_gc} {
+     #10 {cast remove greater contingency as 1};
+};
+
+#NOP -- Offensive perform;
+#alias {cperf} {cast perform as cast $cast[ospell];cast activate combat};
+
+#NOP -- Shortcuts;
+#alias {cost} {cast rcost};
+#alias pmo {cast polymorph other on %0;};
+
+#NOP -- Deeppockets: recast when it fades, once the fight is past round 1;
+#act {^  -> Your deeppocket begins to fade... <-$} {recast_dp};
+#NOP -- The retry delay is named so priest.tin can cancel it (after a gswap recast_dp would go to the game as text);
+#alias {recast_dp} {#if {$mip[round] > 1} {cast deeppockets} {#delay {cast_dp} {recast_dp} {3}}};
+#delay {cast_dp} {recast_dp} {1};
+
+#NOP -- k <mob>: attack, cast slow, and darkness 3 seconds later;
+#nop #alias {k %1} {kill %1;#if {$cast[slow]} {cast slow};#if {$cast[darkness]} {#delay {3} {cast darkness}}};
+
+#NOP -- Golem haste;
+#act {seems to slow down...$} {#if {$cast[golem_haste]} {cast haste on golem}};
+
+#NOP ===== summoner =====;
+
+#NOP -- Mage corpse actions: only stash components. The game's ktrig does spell tap, corpse blast and get all.;
+#NOP -- No coffin, freezer or cocoon, so no wrap/slab/fuse, and the heartbeat studies the spellbook out of combat.;
+#NOP -- Clears the list first. summoner_on only adds the missing ones;
+#alias corpsetrig1 {
+     corpsetrig-clear;
+     corpsetrig+ crafting;
+};
+
+#NOP -- Turn a mage strategy on. strategy toggles, so only call it when it is off;
+#alias {_ml_strategy_on} {
+    #local {_on} {0};
+    #local {_st} {};
+    #foreach {$strategyActive[%*]} {_st} {#if {"$_st[name]" == "%1"} {#var _on 1}};
+    #if {!$_on} {strategy %1};
+};
+#alias {_ml_strategy_off} {
+    #local {_on} {0};
+    #local {_st} {};
+    #foreach {$strategyActive[%*]} {_st} {#if {"$_st[name]" == "%1"} {#var _on 1}};
+    #if {$_on} {strategy %1};
+};
+#NOP -- Remove a corpse action if it is in the list;
+#alias {_ml_corpse_off} {
+    #local {_i} {};
+    #loop &corpseActions[] 1 _i {#if {"$corpseActions[$_i][name]" == "%1"} {#list corpseActions delete $_i}};
+};
+#NOP -- Add a corpse action unless it is already in the list;
+#alias {_ml_corpse_on} {
+    #local {_on} {0};
+    #local {_ca} {};
+    #foreach {$corpseActions[%*]} {_ca} {#if {"$_ca[name]" == "%1"} {#var _on 1}};
+    #if {!$_on} {corpsetrig+ %1};
+};
+
+#NOP -- summoner_on: turns on the strategies the mage heartbeat and strategy scripts act on (common/guilds/mage) and;
+#NOP -- adds the mage corpse actions, only the missing ones. Client side only, nothing is sent to the game. Master keeps;
+#NOP -- strategies and corpse actions per guild across gswap and login (_guild_lists_swap in common/status.tin), so;
+#NOP -- priest never gets these. Strategies, from badger's setup: slow,;
+#NOP -- golem_assist (recast the golem when it dies), summon_mf (monstrous fortitude on summons missing it), spelltap;
+#NOP -- (spell tap always below 30% SP, never above 70%), gstrength (giant strength;
+#NOP -- on you and the party when mystic immersion starts). Mystic immersion, ash, saturation (explosive release or;
+#NOP -- corpse blast), self haste, study spellbook and the low SP or MC bot pause are always on in the mage heartbeat;
+#NOP -- shoosummons sends summons away when room damage (Zodiacs boulders) makes you attack them. summon_tank stays;
+#NOP -- off: its "defend me" swap doesn't move aggro, the summon config's defend mode is what makes summons tank;
+#alias {summoner_on} {
+    #foreach {slow;golem_assist;summon_mf;spelltap;gstrength;shoosummons} {_mst} {_ml_strategy_on $_mst};
+    #NOP -- summon_haste off: the stone golem can't be hasted, so it recast haste on summons every round;
+    #foreach {summon_haste;summon_tank} {_mst} {_ml_strategy_off $_mst};
+    #NOP -- The game's ktrig does spell tap, corpse blast and get all in mage (startmenu's gswap keeps it per guild);
+    #foreach {spelltap;wrap;cBlast;getAll;slab;cocoon;spellbook} {_mca} {_ml_corpse_off $_mca};
+    _ml_corpse_on crafting;
+};
+
+#NOP -- summoner [assist]: set the game's summon config (badger's killmode). By default 2 monster summoning $cast[summon];
+#NOP -- defending (they tank) and 2 assisting, with assist all 4 assist. The golem always assists. Each needs 1500 SP;
+#NOP -- and 70 concentration to cast. It costs SP, so it is never sent at login. Summons already out keep the mode they;
+#NOP -- were cast with, so shoo them to get the new one;
+#alias {summoner} {
+    clear_sconfig;
+    #if {"%0" == "assist"} {
+        ms $cast[summon]##4#1500#70#assist#summons#always;
+    } {
+        ms $cast[summon]##2#1500#70#defend#summons#always;
+        ms $cast[summon]##2#1500#70#assist#summons#always;
+    };
+    ms golema;
+};
+
+#class {player_guild} {close}
+
+#NOP -- summoner_on once per session, the first time this file is read (login or gswap to mage). The flag is in its;
+#NOP -- own class, which .reload and gswap don't kill (like chars/karvec/guilds/bard.tin);
+#if {"$meatloaf_login[summoner]" != "1"} {
+    #class {meatloaf_login} {open};
+    #var meatloaf_login[summoner] 1;
+    #class {meatloaf_login} {close};
+    #delay {meatloaf_summoner} {summoner_on} {3};
+};
+
+#if {&meatloaf_login[guild]} {#var _ml_from $meatloaf_login[guild]} {#var _ml_from login};
+#if {"$_ml_from" == "priest" || ("$_ml_from" == "login" && "$login_linkdeath" != "1")} {
+    #delay {meatloaf_defense} {setup_defense} {6};
+};
+#class {meatloaf_login} {open};
+#var meatloaf_login[guild] mage;
+#class {meatloaf_login} {close};

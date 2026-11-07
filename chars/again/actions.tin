@@ -1,0 +1,16 @@
+#class {player_actions} {kill}
+#class {player_actions} {open}
+
+#NOP --- Player specific actions;
+
+#NOP -- Wimpy: pause the bot so it doesn't attack again before HP regens. Type .. to continue;
+#action {Your legs run away with you %w.} {
+    .followMapMove %1;
+    #if {$bot[active] && !$bot[paused]} {
+        .pause;
+        #echo {<ffa>Wimpied - bot paused. Type .. to continue once you've regenerated<088>};
+    };
+} {2};
+
+
+#class {player_actions} {close}

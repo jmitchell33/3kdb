@@ -1,0 +1,40 @@
+#class {player_guild} {kill}
+#class {player_guild} {open}
+
+#NOP -- Meatloaf's priest extras, from the old .tt priest file. config.tin reads this after the guild scripts at login and on gswap;
+
+#NOP -- k <mob>: attack, ffire after 3 seconds, then rift and beckon once the fight is past round 2;
+#alias {k %1} {
+    kill %1;
+    #delay {ffire} {ffire} {3};
+    #delay {psummon} {#if {$mip[round] > 2} {rift;beckon}} {6};
+};
+
+#NOP -- Corpses: wrap after offering, and unwrap one to offer if mana is low in a fight;
+#act {You offer the corpse up to Solaris.} {wrap all};
+#act {^There is no corpse here to offer up to Solaris.} {#if {$my[gp1][current] < 40 && $mip[round]} {unwrap}};
+
+#NOP -- After-kill routine for the corpsetrig manager. Add it with corpsetrig+ priest_corpse (enter it twice, it's a custom action);
+#alias {priest_corpse} {=give all;unwrap;lifeforce;soulforce;offer};
+
+#NOP -- Shortcuts;
+#alias {cost} {rcost};
+#alias {gs} {gscore};
+#alias {gs2} {gscore2};
+#alias {info} {priest};
+
+#NOP -- Follower;
+#act {You command your servant to remotely get all.} {=follow};
+#alias {=g} {=get all};
+#alias {=ga} {=give all};
+
+#class {player_guild} {close}
+
+#NOP -- Cancel mage.tin's pending delays after a gswap, or their alias names would go to the game as text;
+#undelay {meatloaf_summoner};
+#undelay {cast_dp};
+#undelay {meatloaf_defense};
+#undelay {def_step};
+#class {meatloaf_login} {open};
+#var meatloaf_login[guild] priest;
+#class {meatloaf_login} {close};

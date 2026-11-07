@@ -13,24 +13,17 @@
     kill %1;
 }
 
-#alias {.mob_kill_action} {
-    examine $mob[target];
-    kill $mob[target];
-}
-
 #NOP ---MISC;
-#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box;golem give all to byron;put all in box};
+#alias {unbag_all} {#loop 1 %1 i {get all from bag $i;put all in box};get all from disc;put all in box;get all from buckler;put all in box};
 #alias {bag_all %1} {get all from disc;#loop 1 %1 i {put all in bag $i}};
 
 
-#alias corpse_trig {
-    get coins from corpse;wrap corpse;
-    #if {$darkness} {remove ring of darkness};
-    #if {$combat[pf]} {actuate psychofeedback int for con};
-
+#NOP -- After-kill extras for the corpsetrig manager (common/corpsetrig.tin). Add it;
+#NOP -- once with corpsetrig+ ser_corpse (enter it twice, it's a custom action).;
+#NOP -- Coins and wrapping are left to the in-game ktrig;
+#alias ser_corpse {
     #if {"$area" == "Section Z"} {
         get all from corpse;
-        eat green;eat blue;eat orange;
     };
     #if {"$area" == "Westersea Thugs" || "$area" == "Westersea Sewer"} {
       get lockbox from corpse;
@@ -55,108 +48,18 @@
   fold reality;
 };
 
-#NOP --- Botting configurations;
+#alias {boostup} {
+        psychofeedback wis for str;
+        #delay {2} {improved vigor};
+        #delay {4} {displacement};
+        #delay {6} {improved biofeedback};
+        #delay {8} {energy barrier};
+        #delay {10} {psychofeedback off};
+        #delay {12} {psychofeedback wis for con};
+        #delay {14} {greater valor};
+        #delay {16} {inertial barrier};
+        #delay {18} {ablating};
+        #delay {20} {psychofeedback off}
+        };
 
-#alias {.pre_fight_check} {
-  #var _bb 0;
-  #var _dm 0;
-};
-
-
-
-#NOP --- Psicorps power configurations;
-
-#alias {defense} {
-  #var psiwield 1;
-  #var psiwield_1 shard;
-  #var psiwield_2 shard 2;
-  #var use_expertise 0;
-  #var combat {};
-
-  #nop -- Defense buffs;
-
-  #var combat[ab] 1;
-  #var combat[Cp] 1;
-  #var combat[Eb] 1;
-  #var combat[IB] 1;
-  #var combat[IV] 1;
-  #var combat[Ib] 1;
-  #var combat[Iv] 0;
-  #var combat[Vg] 1;
-  #var combat[Vr] 0;
-  #var combat[Vv] 0;
-
-  #nop -- Combat buffs;
-
-  #var combat[AA] 1;
-  #var combat[Bo] 1;
-  #var combat[CP] 1;
-  #var combat[pf] 0;
-  #var combat[Sj] 0;
-
-  #nop -- Combat powers;
-
-  #var combat[bb] 0;
-  #var combat[bc] 0;
-  #var combat[BC] 1;
-  #var combat[dm] 1;
-  #var combat[ragony] 0;
-  #var combat[rpain] 0;
-};
-
-#alias {attack} {
-  #var psiwield 1;
-  #var psiwield_1 shard;
-  #var psiwield_2 shard 2;
-  #var use_expertise 0;
-  #var combat {};
-
-  #nop -- Defense buffs;
-
-  #var combat[Vr] 0;
-  #var combat[Eb] 0;
-  #var combat[Cp] 0;
-  #var combat[Iv] 0;
-  #var combat[IV] 0;
-  #var combat[Ib] 0;
-  #var combat[IB] 0;
-  #var combat[Vg] 1;
-  #var combat[Vv] 0;
-  #var combat[ab] 0;
-
-  #nop -- Combat buffs;
-
-  #var combat[AA] 1;
-  #var combat[Ac4] 0;
-  #var combat[Bo] 1;
-  #var combat[Cg] 0;
-  #var combat[CP] 1;
-  #var combat[Sj] 1;
-  #var combat[pf] 1;
-
-  #nop -- Combat powers;
-
-  #var combat[bc] 0;
-  #var combat[BC] 1;
-  #var combat[E] 1;
-  #var combat[ragony] 1;
-  #var combat[rpain] 0;
-};
-
-#alias {solo} {
-addp GV;
-addp IB;
-addp PR;
-addp Di;
-addp Ib;
-addp Eb;
-addp Ab;
-addp SP;
-addp Vg;
-addp Gv;
-addp CP;
-addp Bo;
-addp Ac6;
-addp BC;
-addp PC;
-}
+#class {player_aliases} {close}
