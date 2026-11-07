@@ -1,0 +1,307 @@
+#class {guild_maintenance} {open}
+
+#alias {_maint_load} {
+    #if {&{xmaint}} {#nop} {
+        #class global open;
+        #var xmaint {};
+        #class global close;
+    };
+    #if {&{xmaint_sel} && !&xmaint[$guild]} {
+        #local {_old} {};
+        #foreach {*xmaint_sel[%*]} {_mk} {
+            #if {&maint_spells[$_mk]} {#local {_old[$_mk]} {$xmaint_sel[$_mk]}};
+        };
+        #if {&_old[] > 0} {
+            #class global open;
+            #var xmaint[$guild] {{sel}{$_old}{active}{$xmaint_active}};
+            #unvar xmaint_sel;
+            #unvar xmaint_active;
+            #class global close;
+        };
+    };
+    #class {guild_maintenance} {open};
+    #if {&xmaint[$guild][sel]} {
+        #var maint_sel {$xmaint[$guild][sel]};
+        #var _msaved $xmaint[$guild][active];
+    } {
+        #var maint_sel {};
+        #foreach {$maint_default[%*]} {_mk} {#var maint_sel[$_mk] 1};
+        #var _msaved $maint_cfg[start];
+    };
+    #var maint_active 0;
+    #var _mblock {};
+    #var _mstuck {};
+    #var _mlast {};
+    #var _mnosp {};
+    #var _mnosp_all 0;
+    #if {"$maint_cfg[resume]" == "always"} {
+        #if {"$_msaved" == "1"} {#var maint_active 1};
+    } {
+        #if {"$_msaved" == "1" && "$login_linkdeath" == "1"} {#delay {maint_resume} {_maint_resume} {15}};
+    };
+    #class {guild_maintenance} {close};
+};
+
+#alias {_maint_save} {
+    #class global open;
+    #var xmaint[$guild] {{sel}{$maint_sel}{active}{$maint_active}};
+    #class global close;
+};
+
+#alias {_maint_resume} {
+    #if {!$maint_active} {
+        #echo {<dea>  maint was on before you logged out, turning it back on.<088>};
+        _maint_on;
+    };
+};
+
+#alias {_maint_set} {
+    #var maint_sel[%1] %2;
+    #var _mblock[%1] 0;
+    #if {%2} {
+        #if {"$maint_spells[%1][group]" != ""} {
+            #foreach {$maint_order[%*]} {_mg} {
+                #if {"$_mg" != "%1" && "$maint_spells[$_mg][group]" == "$maint_spells[%1][group]"} {
+                    #var maint_sel[$_mg] 0;
+                    #if {$maint_active && "$maint_spells[$_mg][defs]" != ""} {#var defs[$maint_spells[$_mg][defs]] 0};
+                };
+            };
+        };
+    } {
+        #if {$maint_active && "$maint_spells[%1][defs]" != ""} {#var defs[$maint_spells[%1][defs]] 0};
+    };
+};
+
+#alias {_maint_tidy} {
+    #var _mseen {};
+    #var _mtidied 0;
+    #foreach {$maint_order[%*]} {_mk} {
+        #var _mgrp {$maint_spells[$_mk][group]};
+        #if {"$maint_sel[$_mk]" == "1" && "$_mgrp" != ""} {
+            #if {&_mseen[$_mgrp]} {
+                #var maint_sel[$_mk] 0;
+                #var _mtidied 1;
+            } {
+                #var _mseen[$_mgrp] 1;
+            };
+        };
+    };
+    #if {$_mtidied} {_maint_save};
+};
+
+#alias {_maint_apply} {
+    #foreach {$maint_order[%*]} {_mk} {
+        #if {"$maint_spells[$_mk][defs]" != ""} {
+            #if {"$maint_sel[$_mk]" == "1" && "$_mblock[$_mk]" != "1"} {
+                #var defs[$maint_spells[$_mk][defs]] 1;
+            } {
+                #if {"$maint_spells[$_mk][bots]" != "1"} {#var defs[$maint_spells[$_mk][defs]] 0};
+            };
+        };
+    };
+};
+
+#alias {_maint_count} {
+    #var _mcount 0;
+    #foreach {$maint_order[%*]} {_mk} {
+        #if {"$maint_sel[$_mk]" == "1"} {#math _mcount {$_mcount + 1}};
+    };
+};
+
+#alias {_maint_grid} {
+    #var _mcount 0;
+    #var _mrow {};
+    #foreach {$maint_order[%*]} {_mk} {
+        #if {"$maint_sel[$_mk]" == "1"} {
+            #format _mcell {%-28s} {$maint_spells[$_mk][name]};
+            #var _mrow {$_mrow$_mcell};
+            #math _mcount {$_mcount + 1};
+            #if {$_mcount % 2 == 0} {
+                #echo {      <afa>$_mrow<088>};
+                #var _mrow {};
+            };
+        };
+    };
+    #if {"$_mrow" != ""} {#echo {      <afa>$_mrow<088>}};
+    #if {$_mcount == 0} {#echo {      <888>nothing picked<088>}};
+};
+
+#alias {_maint_pick} {
+    #var _mraw {%2};
+    #replace _mraw { } {;};
+    #var _mwords {};
+    #foreach {$_mraw} {_mt} {
+        #if {"$_mt" != ""} {
+            #if {&maint_spells[$_mt]} {
+                #var _mwords {$_mwords =$_mt};
+            } {
+                #format _mlow {%l} {$_mt};
+                #var _mwords {$_mwords $_mlow};
+            };
+        };
+    };
+    #if {&{maint_phrase_order}} {
+        #foreach {$maint_phrase_order[%*]} {_mp} {#replace _mwords {$_mp} {$maint_phrases[$_mp]}};
+    };
+    #replace _mwords { } {;};
+    #var _mbad {};
+    #foreach {$_mwords} {_mw} {
+        #if {"$_mw" != ""} {
+            #var _mk {};
+            #regex {$_mw} {^={.+}$} {#var _mk {&1}} {
+                #if {&maint_words[$_mw]} {#var _mk $maint_words[$_mw]};
+            };
+            #if {"$_mk" != ""} {
+                #if {"%1" == "t"} {
+                    #if {"$maint_sel[$_mk]" == "1"} {_maint_set $_mk 0} {_maint_set $_mk 1};
+                } {
+                    _maint_set $_mk %1;
+                };
+            } {
+                #var _mbad {$_mbad $_mw};
+            };
+        };
+    };
+    #if {"$_mbad" != ""} {
+        #echo {<faa>  Unknown $maint_cfg[noun]:<fff>$_mbad<faa>. Type <ffa>maint list<faa> for the names.<088>};
+    };
+    _maint_changed;
+};
+
+#alias {_maint_changed} {
+    _maint_save;
+    #if {$maint_active} {_maint_apply};
+    #echo {<dea>---  MAINT PICKS  ---<088>};
+    _maint_grid;
+    #if {$maint_active} {
+        #echo {  <ccc>Maint is on, the heartbeat keeps these up now.<088>};
+    } {
+        #echo {  <ccc>Type <ffa>maint<ccc> to start keeping these up.<088>};
+    };
+};
+
+#alias {_maint_on} {
+    _maint_tidy;
+    _maint_count;
+    #if {$_mcount == 0} {
+        #echo {<faa>  Nothing picked yet. Pick with <ffa>maint <$maint_cfg[noun]><faa>, see <ffa>maint-help<faa>.<088>};
+    } {
+        #var _mblock {};
+        #var _mstuck {};
+        #var _mlast {};
+        #var maint_active 1;
+        _maint_apply;
+        #echo {<dea>---  MAINTENANCE ON  ---<088>};
+        _maint_save;
+        _maint_grid;
+    };
+};
+
+#alias {_maint_off} {
+    #foreach {$maint_order[%*]} {_mk} {
+        #if {"$maint_spells[$_mk][defs]" != ""} {
+            #if {"$maint_spells[$_mk][bots]" != "1" || "$maint_sel[$_mk]" == "1"} {
+                #var defs[$maint_spells[$_mk][defs]] 0;
+            };
+        };
+    };
+    #var maint_active 0;
+    #undelay {maint_resume};
+    _maint_save;
+    #echo {<dea>---  MAINTENANCE OFF  ---<088>};
+    #if {"%1" == "cleared"} {
+        #echo {  <ccc>All picks cleared. $maint_cfg[Nouns] stay up until they drop, they are just not renewed.<088>};
+    } {
+        #echo {  <ccc>$maint_cfg[Nouns] stay up until they drop, they are just not renewed. Picks are kept.<088>};
+    };
+};
+
+#alias {_maint_nosp} {
+    #format _mnow {%T};
+    #format _mnosp_name {%l} {%1};
+    #format _mnosp_len {%L} {$_mnosp_name};
+    #var _mnosp_hit 0;
+    #foreach {$maint_order[%*]} {_mk} {
+        #format _mnosp_nm {%l} {$maint_spells[$_mk][name]};
+        #format _mnosp_nl {%L} {$_mnosp_nm};
+        #if {$_mnosp_len - $_mnosp_nl <= 1} {
+            #regex {$_mnosp_name} {^$_mnosp_nm} {#var _mnosp[$_mk] $_mnow;#var _mnosp_hit 1};
+        };
+    };
+    #if {!$_mnosp_hit} {#var _mnosp_all $_mnow};
+};
+
+#alias {_maint_refused} {
+    #if {$maint_active} {
+        #format _mnow {%T};
+        #foreach {$maint_order[%*]} {_mx} {
+            _maint_isup $_mx;
+            #if {"$maint_sel[$_mx]" == "1" && "$defs[$maint_spells[$_mx][defs]]" == "1" && !$_mupnow} {
+                #format _mns {%d} {$_mnosp[$_mx]};
+                #format _mml {%d} {$_mlast[$_mx]};
+                #format _mms {%d} {$_mstuck[$_mx]};
+                #if {$_mnow - $_mnosp_all > 10 && $_mnow - $_mns > 10} {
+                    #if {$_mnow - $_mml > 20} {#var _mms 0};
+                    #math _mstuck[$_mx] {$_mms + 1};
+                    #var _mlast[$_mx] $_mnow;
+                };
+            } {
+                #var _mstuck[$_mx] 0;
+            };
+            #if {"$_mstuck[$_mx]" == "5"} {
+                #var _mstuck[$_mx] 0;
+                #var _mblock[$_mx] 1;
+                #var defs[$maint_spells[$_mx][defs]] 0;
+                #echo {<faa>  maint: stopped recasting <fff>$maint_spells[$_mx][name]<faa>, the MUD keeps refusing it.<088>};
+                #echo {<faa>  Another defense conflicts with it, or it is up but not on your hpbar. See <ffa>maint list<faa>.<088>};
+            };
+        };
+    };
+};
+
+#alias {maint} {
+    #format _mcmd {%l} {%1};
+    #var _mrest {};
+    #regex {%0} {^%S {.*}$} {#var _mrest {&2}};
+    #if {"$_mcmd" != "" && &maint_cmds[$_mcmd]} {
+        $maint_cmds[$_mcmd];
+    } {
+        #switch {"$_mcmd"} {
+            #case {""} {_maint_on};
+            #case {"on"} {_maint_on};
+            #case {"off"} {_maint_off};
+            #case {"add"} {_maint_pick {1} {$_mrest}};
+            #case {"del"} {_maint_pick {0} {$_mrest}};
+            #case {"remove"} {_maint_pick {0} {$_mrest}};
+            #case {"all"} {
+                #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 1};
+                _maint_changed;
+            };
+            #case {"default"} {
+                #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 0};
+                #foreach {$maint_default[%*]} {_mk} {_maint_set $_mk 1};
+                _maint_changed;
+            };
+            #case {"clear"} {
+                #foreach {$maint_order[%*]} {_mk} {_maint_set $_mk 0};
+                _maint_save;
+                _maint_off cleared;
+            };
+            #case {"list"} {_maint_list};
+            #case {"check"} {_maint_list};
+            #case {"status"} {_maint_list};
+            #case {"help"} {maint-help};
+            #default {
+                #var _mtail {};
+                #regex {%0} {^{.*} {on|off}$} {#var _mrest {&1};#var _mtail {&2}};
+                #if {"$_mtail" == "off"} {_maint_pick {0} {$_mrest}} {
+                    #if {"$_mtail" == "on"} {_maint_pick {1} {$_mrest}} {_maint_pick {t} {%0}};
+                };
+            };
+        };
+    };
+};
+
+#class {guild_maintenance} {close}
+
+_maint_load;
