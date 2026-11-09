@@ -121,6 +121,8 @@
 			#NOP Combat round counter;
 			#if !$total_rounds {#var total_rounds 1} {#math total_rounds {$total_rounds + 1};};
 			#format total_rounds_string {%g} {$total_rounds};
+			#NOP Round tracker (modules/roundlog), only while toggle rounds is on;
+			#if {"$toggles[rounds]" == "1"} {.roundlog_round};
 
 			#NOP Average first 10 rounds to detect fast vs long fight for some powers;
 			#if {$mip[round] <= 10 && $mip[round] > 1 && $mip[round] > $mip[last_round]} {

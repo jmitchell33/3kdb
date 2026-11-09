@@ -632,6 +632,7 @@ It reloads its scripts once the game confirms, and remembers your guild for next
 - `dstats` is the damage report, and `dreset` resets it. It needs the numbers perk.
 - `defStats` is the defense report, and `defStats_reset` resets it.
 - `istats` is the item tracker, and `istats_reset` resets it.
+- `rounds` is the combat round tracker. Turn it on with `toggle rounds`. It shows your rounds all time, this session, and how many each guild level took. It reads your guild level from `score`, and `recover` checks `score` by itself, for any guild. `rounds note <text>` adds your own line to the log, `rounds check` reads `score` again, and `rounds-help` explains it all. 3kdb also reads `score` (hidden) at every login and return from linkdeath; typing `score` yourself always shows it. It keeps its own count, so nothing that clears `total_rounds` touches it. The count is saved every round to `logs/<your system username>/rounds/`, so a crash or linkdeath loses at most one round.
 - `reset_xp` resets the XP tracker on the data panel.
 - `reset_gxp` resets guild experience tracking.
 - `.reps` is the reputation tracker.
@@ -666,7 +667,7 @@ Some guilds have more. Check `dblib trackers` and `dblib <your guild>`. For exam
 
 ### Chat window
 
-Tells, party, clan, guild and high mortal chat all show in the chat window. They're also saved to `logs/<your system username>/`.
+Tells, party, clan, guild and high mortal chat all show in the chat window. They're also saved to `logs/<your system username>/chatlogs/`, one file per day.
 
 To hide someone from the chat window:
 
@@ -723,7 +724,7 @@ toggle discord_post
 
 `.reload` works too, in place of the `#read`.
 
-If posts don't appear, look for errors in `logs/<your system username>/discordPost.log`.
+If posts don't appear, look for errors in `logs/<your system username>/discord/discordPost.log`.
 
 `private.tin` is never uploaded by git, so your URLs stay private as long as you keep them in that file.
 
@@ -1273,6 +1274,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `beepon`: turn on terminal beep on events (toggle beep).
 - `beepoff`: turn off terminal beep on events (toggle beep).
 - `qq`: toggle mouse capture for clickable UI (toggle mouseActive).
+- `recover`: recover, then a hidden score updates your saved score info and logs it if toggle rounds is on. Necros: also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on.
 - `toggle-list`: 3kdb current toggles list.
 - `toggle`: turn a toggle on or off, see toggle-list. Usage: `toggle <name>`
 - `toggle-reset`: set every toggle back to its default, asks first. Usage: `toggle-reset then toggle-reset confirm`
@@ -1465,6 +1467,8 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `defStats`: defense tracking report.
 - `istats`: item tracker extraordinaire.
 - `istats_reset`: reset item tracker.
+- `rounds`: combat rounds all time, this session and per guild level. Turn on with toggle rounds. Usage: `rounds`, `rounds note <text>` or `rounds check`
+- `rounds-help`: what the round tracker does and its commands.
 - `defStats_reset`: reset defense stats tracker.
 - `spellDmg-clear`: clear spell damage tracker.
 - `fdmgStats`: fremen damage approximation report - no numbers perk needed.
@@ -1816,7 +1820,6 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `dsave_report`: necromancer dsave mob report.
 - `iprime_tracker`: invoke prime success/fail counts. Usage: `iprime_tracker or iprime_tracker reset`
 - `circle_tracker`: next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker. Usage: `circle_tracker or circle_tracker reset`
-- `recover`: recover, also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on.
 - `comt`: switch invoke damage types with comtrance. Usage: `comt <damage type>`
 
 **Priest**

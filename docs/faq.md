@@ -394,7 +394,7 @@ Use `gswap <guild>` as usual, and 3kdb follows. You need the perk for it in the 
 
 ### Where are my chat logs?
 
-In `logs/<your system username>/`, inside your `3kdb` folder.
+In `logs/<your system username>/chatlogs/`, inside your `3kdb` folder, one file per day. Older ones may be compressed (`.zst`): read those with `zstdless`.
 
 ### How do I hide someone from my chat window?
 
@@ -672,7 +672,7 @@ Your log folder is missing. Opening the menu creates it. If you logged in anothe
 
 ```bash
 cd ~/3kdb
-mkdir -p "logs/$(whoami)" vars
+mkdir -p "logs/$(whoami)/chatlogs" "logs/$(whoami)/discord" vars
 ```
 
 ### `There is no reason to '...' here`

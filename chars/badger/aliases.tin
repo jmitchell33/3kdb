@@ -629,7 +629,11 @@
 
 #NOP -- corpsetrig cooler step after wrap and slab: those are sent first, so the corpse is only still on the ground;
 #NOP -- once the coffin and freezer are full. The coffin max is learned from "The coffin is full!" (modules/corpsemanager);
+#NOP -- Only runs if you own a cooler and a freezer, so it never picks up a corpse it can't store;
 #alias {.corpse_cooler} {
+    #if {"$inventory[cooler]" != "1" || "$inventory[freezer]" != "1"} {
+        #return;
+    };
     #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
         get corpse;
         cooler corpse;

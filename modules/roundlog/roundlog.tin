@@ -1,0 +1,336 @@
+#class {roundlog} {kill};
+#class {roundlog} {open};
+
+#NOP -- Combat round tracker. Off by default, turn it on with: toggle rounds;
+#NOP -- Counts every combat round (from the MIP round number, so it works with or without the numbers vaf perk);
+#NOP -- in its own counter, roundlog[total]. Nothing that clears total_rounds touches it;
+#NOP -- Files, per character, under logs/<system user>/rounds/ (logs/ is in .gitignore, so they never get pushed):;
+#NOP --   <character>_rounds.log        what happened and when, in plain words, one line per event;
+#NOP --   <character>_rounds_state.tin  the counts, saved every round so a crash or lost connection loses at most one;
+#NOP -- Guild level comes from score (modules/score/score.tin, which never stores bank, quests, title and so on);
+#NOP -- Levels can be numbers or tiers like I, II, IV;
+#NOP -- recover (common/aliases.tin, any guild) is logged and sends a hidden score 3 seconds later. A new level;
+#NOP -- then counts its rounds up to that recover;
+#NOP -- 'rounds' shows the counts, 'rounds note <text>' adds a line to the log, 'rounds check' reads score again;
+
+#NOP -- File paths for this character;
+#alias {.roundlog_paths} {
+    #var roundlog_file[dir] {$sessionlog[dir]/rounds};
+    #var roundlog_file[log] {$roundlog_file[dir]/${user}_rounds.log};
+    #var roundlog_file[state] {$roundlog_file[dir]/${user}_rounds_state.tin};
+};
+
+#NOP -- .roundlog_write <event> <details>: one line in the log. Columns: date and time, character, guild and;
+#NOP -- level (the last one score showed, ? until score has been seen), all-time round count, what happened, details;
+#alias {.roundlog_write} {
+    #format roundlog_stamp {%t} {%Y-%m-%d %H:%M:%S};
+    #format roundlog_count {%g} {$roundlog[total]};
+    #if {"$roundlog[level][text]" == ""} {
+        #format roundlog_where {%n ?} {$guild};
+    } {
+        #var roundlog_where {$roundlog[level][guild] $roundlog[level][text]};
+    };
+    #NOP -- Details wrap at 60 characters. Extra lines start under the details column, other columns blank;
+    #format roundlog_wrapped {%%60w} {%2};
+    #if {&roundlog_wrapped[] == 0} {
+        #var roundlog_wrapped[1] {};
+    };
+    #format roundlog_line {%s | %-12s | %-20s | round %+11s | %-19s | %s} {$roundlog_stamp} {$user} {$roundlog_where} {$roundlog_count} {%1} {$roundlog_wrapped[1]};
+    #line log {$roundlog_file[log]} {$roundlog_line};
+    #NOP -- Only with 2 or more lines: #loop 2 1 would count down instead of skipping;
+    #if {&roundlog_wrapped[] > 1} {
+        #loop 2 &roundlog_wrapped[] roundlog_idx {
+            #format roundlog_line {%-19s | %-12s | %-20s |       %+11s | %-19s | %s} {} {} {} {} {} {$roundlog_wrapped[$roundlog_idx]};
+            #line log {$roundlog_file[log]} {$roundlog_line};
+        };
+    };
+    #unvar roundlog_wrapped;
+};
+
+#NOP -- Save the counts. Runs every counted round;
+#alias {.roundlog_save} {
+    #format roundlog[saved] {%t} {%Y-%m-%d %H:%M:%S};
+    #class roundlog_save kill;
+    #class roundlog_save open;
+    #var roundlog_saved $roundlog;
+    #class roundlog_save close;
+    #class roundlog_save write {$roundlog_file[state]};
+    #class roundlog_save kill;
+};
+
+#NOP -- Load this character's saved counts, or start new ones;
+#alias {.roundlog_load} {
+    .roundlog_paths;
+    #script {roundlog_tmp} {mkdir -p '$roundlog_file[dir]' && test -f '$roundlog_file[state]' && echo yes || echo no};
+    #unvar roundlog;
+    #if {"$roundlog_tmp[1]" == "yes"} {
+        #read {$roundlog_file[state]};
+        #var roundlog $roundlog_saved;
+        #class roundlog_save kill;
+    };
+    #if {"$roundlog[char]" != "$user"} {
+        #var roundlog {};
+        #var roundlog[char] {$user};
+        #var roundlog[total] 0;
+        #format roundlog[started] {%t} {%Y-%m-%d %H:%M:%S};
+        .roundlog_write {STARTED} {Round tracking started for $user. Every combat round from now on is counted.};
+    };
+    #var roundlog[recover][pending] 0;
+    #var roundlog[session_start] $roundlog[total];
+    .roundlog_save;
+};
+
+#NOP -- defaults_on runs this at login and when you come back from linkdeath;
+#alias {.roundlog_login} {
+    #if {"$toggles[rounds]" != "1"} {
+        #return;
+    };
+    #if {"$roundlog[char]" != "$user"} {
+        .roundlog_load;
+    } {
+        .roundlog_paths;
+        #var roundlog[session_start] $roundlog[total];
+    };
+    #if {"$login_linkdeath" == "1"} {
+        .roundlog_write {BACK FROM LINKDEATH} {Counts last saved $roundlog[saved].};
+    } {
+        .roundlog_write {LOGIN} {Counts last saved $roundlog[saved].};
+    };
+    #NOP -- defaults_on sends a hidden score after this, which gives the guild level;
+};
+
+#NOP -- No guild level yet: send a hidden score to get it;
+#alias {.roundlog_level_unknown} {
+    #if {"$roundlog[level][text]" == ""} {
+        #delay {roundlog_score} {.score_quiet} {1};
+    };
+};
+
+#NOP -- MIP calls this every round number it gets (modules/mip/stats.tin). Only a real new round counts:;
+#NOP -- the round number is above 0 and not the same as the last one (that's the fight ending);
+#alias {.roundlog_round} {
+    #if {"$toggles[rounds]" != "1" || "$roundlog[char]" != "$user"} {
+        #return;
+    };
+    #if {$mip[round] <= 0 || $mip[round] == $mip[last_round]} {
+        #return;
+    };
+    #math roundlog[total] {$roundlog[total] + 1};
+    .roundlog_save;
+};
+
+#NOP -- .roundlog_level <guild> <level>: write a line when the guild level is new or has changed;
+#NOP -- modules/score runs it from the Guild part of score, e.g. "Guild    : Necromancer (54)";
+#alias {.roundlog_level} {
+    #if {"$toggles[rounds]" != "1" || "$roundlog[char]" != "$user"} {
+        #return;
+    };
+    #var roundlog_guild {%1};
+    #var roundlog_level {%2};
+    #format roundlog_now {%t} {%Y-%m-%d %H:%M};
+
+    #NOP -- First time: this level's count starts now, partway through it;
+    #if {"$roundlog[level][text]" == ""} {
+        #var roundlog[level][guild] {$roundlog_guild};
+        #var roundlog[level][text] {$roundlog_level};
+        #var roundlog[level][start] $roundlog[total];
+        #var roundlog[level][since] {$roundlog_now};
+        #var roundlog[level][partial] 1;
+        .roundlog_write {GUILD LEVEL} {$roundlog_guild $roundlog_level. Tracking started partway through this level, so its count starts here.};
+        .roundlog_save;
+        #return;
+    };
+    #if {"$roundlog_guild" == "$roundlog[level][guild]" && "$roundlog_level" == "$roundlog[level][text]"} {
+        #return;
+    };
+
+    #NOP -- A recover just before this score is when the level changed, so count up to it;
+    #var roundlog_mark $roundlog[total];
+    #var roundlog_upto {};
+    #if {"$roundlog[recover][pending]" == "1"} {
+        #var roundlog_mark $roundlog[recover][at];
+        #format roundlog_upto {%g} {$roundlog_mark};
+        #var roundlog_upto { Counted up to the recover at round $roundlog_upto.};
+    };
+    #math roundlog_took {$roundlog_mark - $roundlog[level][start]};
+    #format roundlog_took_str {%g} {$roundlog_took};
+    #var roundlog_partial {};
+    #if {"$roundlog[level][partial]" == "1"} {
+        #var roundlog_partial { Tracking started partway through it, so the real count is higher.};
+    };
+
+    #list {roundlog[history]} {add} {{
+        {guild} {$roundlog[level][guild]}
+        {level} {$roundlog[level][text]}
+        {rounds} {$roundlog_took}
+        {from} {$roundlog[level][since]}
+        {to} {$roundlog_now}
+        {partial} {$roundlog[level][partial]}
+    }};
+
+    #if {"$roundlog_guild" != "$roundlog[level][guild]"} {
+        .roundlog_write {GUILD CHANGED} {$roundlog[level][guild] $roundlog[level][text] -> $roundlog_guild $roundlog_level. $roundlog_took_str rounds on $roundlog[level][guild] $roundlog[level][text].$roundlog_upto$roundlog_partial};
+    } {
+        .roundlog_write {GUILD LEVEL} {$roundlog_guild $roundlog[level][text] -> $roundlog_level. Level $roundlog[level][text] took $roundlog_took_str rounds (since $roundlog[level][since]).$roundlog_upto$roundlog_partial};
+    };
+
+    #var roundlog[level][guild] {$roundlog_guild};
+    #var roundlog[level][text] {$roundlog_level};
+    #var roundlog[level][start] $roundlog_mark;
+    #var roundlog[level][since] {$roundlog_now};
+    #var roundlog[level][partial] 0;
+    #var roundlog[recover][pending] 0;
+    .roundlog_save;
+};
+
+#NOP -- The recover alias (common/aliases.tin) runs this, for any guild, then sends a hidden score. Most recovers;
+#NOP -- come right after a new guild level, but not all, so score checks whether the level really changed;
+#alias {.roundlog_recover} {
+    #if {"$toggles[rounds]" != "1" || "$roundlog[char]" != "$user"} {
+        #return;
+    };
+    #if {"$roundlog[recover][at]" == ""} {
+        .roundlog_write {RECOVER} {First recover tracked.};
+    } {
+        #math roundlog_since {$roundlog[total] - $roundlog[recover][at]};
+        #format roundlog_since {%g} {$roundlog_since};
+        .roundlog_write {RECOVER} {$roundlog_since rounds since the last recover.};
+    };
+    #var roundlog[recover][at] $roundlog[total];
+    #var roundlog[recover][pending] 1;
+    .roundlog_save;
+    #delay {roundlog_recover_pending} {#var roundlog[recover][pending] 0} {30};
+};
+
+#NOP -- toggle rounds runs this (common/toggles.tin);
+#alias {.roundlog_toggle} {
+    #if {"$toggles[rounds]" == "1"} {
+        #if {"$roundlog[char]" != "$user"} {
+            .roundlog_load;
+        } {
+            .roundlog_paths;
+        };
+        .roundlog_write {TRACKING ON} {Rounds are counted again from here.};
+        .roundlog_level_unknown;
+    } {
+        #if {"$roundlog[char]" == "$user"} {
+            .roundlog_write {TRACKING OFF} {Rounds are not counted until it's turned back on.};
+            .roundlog_save;
+        };
+    };
+};
+
+#NOP -- rounds-help (or rounds help): what the round tracker does and its commands;
+#alias {rounds-help} {
+    .roundlog_paths;
+    #echo {<ccf>-------- Round tracker help --------<088>};
+    #echo {<fff>Counts your combat rounds: all time, this session, and how many each guild level took.<088>};
+    #echo {<fff>It's off until you turn it on, and stays on or off for this character.<088>};
+    #echo {};
+    #echo {<ffa>  toggle rounds        <fff>Turn the tracker on or off. Rounds while it's off aren't counted.<088>};
+    #echo {<ffa>  rounds               <fff>Show the counts: all time, this session, this guild level, since<088>};
+    #echo {<fff>                       the last recover, and every finished guild level.<088>};
+    #echo {<ffa>  rounds note <text>   <fff>Add your own line to the log, with the time and round count.<088>};
+    #echo {<ffa>  rounds check         <fff>Read your guild level from score again (score stays hidden).<088>};
+    #echo {<ffa>  rounds-help          <fff>This help. rounds help does the same.<088>};
+    #echo {};
+    #echo {<fff>How it works:<088>};
+    #echo {<fff>  - Every combat round counts once, from the round number the game sends (MIP), so it works<088>};
+    #echo {<fff>    with or without the numbers vaf perk. It keeps its own count, so clearing total_rounds<088>};
+    #echo {<fff>    or anything else doesn't change it.<088>};
+    #echo {<fff>  - Your guild level comes from score. A hidden score is sent at login and when you come back<088>};
+    #echo {<fff>    from linkdeath. Typing score or sc yourself always shows it. Tiers like I or IV work too.<088>};
+    #echo {<fff>  - When your guild level changes, the log says how many rounds the old level took. The first<088>};
+    #echo {<fff>    level you track says partway, because rounds before you turned it on aren't in it.<088>};
+    #echo {<fff>  - recover is logged, then a hidden score checks for a new guild level (circle or tier for<088>};
+    #echo {<fff>    necros). If there is one, the old level's rounds are counted up to that recover.<088>};
+    #echo {<fff>  - The counts are saved every round, so a crash, linkdeath or lost connection loses at most one.<088>};
+    #echo {};
+    #echo {<fff>Files (in logs/, which is never sent to git):<088>};
+    #echo {<fff>  Log:   $roundlog_file[log]<088>};
+    #echo {<fff>         one line per event: date and time, character, guild and level, round count, what happened<088>};
+    #echo {<fff>  Saved: $roundlog_file[state]<088>};
+};
+
+#NOP -- rounds: show the counts. rounds note <text>: add a line to the log. rounds check: read score again;
+#alias {rounds} {
+    #if {"%1" == "help"} {
+        rounds-help;
+        #return;
+    };
+    #if {"$toggles[rounds]" != "1"} {
+        #echo {<faa>Round tracking is off. Turn it on with: toggle rounds. See rounds-help<088>};
+        #return;
+    };
+    #if {"$roundlog[char]" != "$user"} {
+        .roundlog_load;
+    };
+    #if {"%1" == "note"} {
+        #var roundlog_note {%0};
+        #replace roundlog_note {^note%s} {};
+        #if {"$roundlog_note" == "" || "$roundlog_note" == "note"} {
+            #echo {<faa>Usage: rounds note <text><088>};
+            #return;
+        };
+        .roundlog_write {NOTE} {$roundlog_note};
+        #echo {<cfb>Added to $roundlog_file[log]: $roundlog_note<088>};
+        #return;
+    };
+    #if {"%1" == "check"} {
+        .score_quiet;
+        #delay {roundlog_check} {
+            #if {"$roundlog[level][text]" == ""} {
+                #echo {<faa>No guild level found in score.<088>};
+            } {
+                #echo {<cfb>Guild level: $roundlog[level][guild] $roundlog[level][text]<088>};
+            };
+        } {2};
+        #return;
+    };
+    #if {"%1" != ""} {
+        #echo {<faa>Usage: rounds, rounds note <text>, rounds check. See rounds-help<088>};
+        #return;
+    };
+
+    #format roundlog_show[total] {%g} {$roundlog[total]};
+    #math roundlog_show[session] {$roundlog[total] - $roundlog[session_start]};
+    #format roundlog_show[session] {%g} {$roundlog_show[session]};
+    #echo {<ccf>-------- Combat rounds: $user --------<088>};
+    #echo {<fff>  All time:      <ffa>$roundlog_show[total]<fff> rounds, counted since $roundlog[started]<088>};
+    #echo {<fff>  This session:  <ffa>$roundlog_show[session]<fff> rounds<088>};
+    #if {"$roundlog[level][text]" == ""} {
+        #echo {<fff>  Guild level:   not seen yet, type score or rounds check<088>};
+    } {
+        #math roundlog_show[level] {$roundlog[total] - $roundlog[level][start]};
+        #format roundlog_show[level] {%g} {$roundlog_show[level]};
+        #var roundlog_show[partial] {};
+        #if {"$roundlog[level][partial]" == "1"} {
+            #var roundlog_show[partial] { (tracking started partway through this level)};
+        };
+        #echo {<fff>  Guild level:   $roundlog[level][guild] $roundlog[level][text], <ffa>$roundlog_show[level]<fff> rounds so far, since $roundlog[level][since]$roundlog_show[partial]<088>};
+    };
+    #if {"$roundlog[recover][at]" != ""} {
+        #math roundlog_show[recover] {$roundlog[total] - $roundlog[recover][at]};
+        #format roundlog_show[recover] {%g} {$roundlog_show[recover]};
+        #echo {<fff>  Last recover:  <ffa>$roundlog_show[recover]<fff> rounds ago<088>};
+    };
+    #if {&roundlog[history][] > 0} {
+        #echo {<fff>  Finished levels:<088>};
+        #foreach {*roundlog[history][]} {roundlog_idx} {
+            #format roundlog_show[rounds] {%g} {$roundlog[history][$roundlog_idx][rounds]};
+            #var roundlog_show[partial] {};
+            #if {"$roundlog[history][$roundlog_idx][partial]" == "1"} {
+                #var roundlog_show[partial] { (partway, real count is higher)};
+            };
+            #echo {<fff>    $roundlog[history][$roundlog_idx][guild] $roundlog[history][$roundlog_idx][level]: <ffa>$roundlog_show[rounds]<fff> rounds, $roundlog[history][$roundlog_idx][from] to $roundlog[history][$roundlog_idx][to]$roundlog_show[partial]<088>};
+        };
+    };
+    #echo {<fff>  Log file:      $roundlog_file[log]<088>};
+};
+
+#class {roundlog} {close};
+
+#NOP -- A re-read of this file during play keeps counting;
+#if {"$toggles[rounds]" == "1" && "$roundlog[char]" != "$user" && "$user" != ""} {
+    .roundlog_load;
+};

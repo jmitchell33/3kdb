@@ -65,6 +65,28 @@
 };
 
 
+#NOP -- recover for every guild. Most players recover after a new guild level, so a hidden score follows;
+#NOP -- and updates my[score] (modules/score). With toggle rounds on, the recover is logged too;
+#alias {recover} {
+    #if {"%0" == ""} {
+        #send {recover};
+    };
+    #else {
+        #send {recover %0};
+    };
+    #if {"$guild" == "necromancer"} {
+        #if {"$toggles[recover_parser_off]" == "1"} {
+            #send {parser off};
+        };
+        #NOP -- Recover usually follows a meditate, which starts a new circle, so the tracker's stats start over;
+        #if {"$toggles[circle_tracker]" == "1"} {
+            circle_tracker reset;
+        };
+    };
+    .roundlog_recover;
+    #delay {score_recover} {.score_quiet} {3};
+};
+
 #NOP -- Override the alias for inventory to reset the variables and set alias to pick which corpse to use;
 #alias {i} {
     #if {"%1" == "unkept"} {
@@ -93,8 +115,15 @@
         #var inventory_check 1;
         #var corpse_check 1;
         #var corpses[inventory] 0;
+        #NOP -- The cooler line in the listing sets this back to 1 (modules/corpsemanager);
+        #var inventory[cooler] 0;
         #send i;
-        #delay 2 {#var corpse_check 0;#var inventory_check 0;};
+        #delay 2
+        {
+            #var corpse_check 0;
+            #var inventory_check 0;
+            .cooler_after_inventory;
+        };
     };
 };
 

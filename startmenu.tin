@@ -24,12 +24,13 @@ menu_close_classes;
 
 #var menu[file] {chars/startmenu_data.tin};
 
-#NOP -- Git doesn't keep these folders, so a fresh clone is missing them. Chat logs go to logs/<system user>;
+#NOP -- Git doesn't keep these folders, so a fresh clone is missing them. Chat logs go to logs/<system user>/chatlogs;
+#NOP -- (Discord post files to logs/<system user>/discord);
 #NOP -- and the reboot times to vars/boot.tin, and neither can be written without its folder;
 #alias {menu_make_folders}
 {
     #NOP -- Only from the repo folder, so starting tt++ somewhere else doesn't leave these folders there;
-    #script {menu_tmp} {test -f startmenu.tin && mkdir -p "logs/$(whoami)" vars};
+    #script {menu_tmp} {test -f startmenu.tin && mkdir -p "logs/$(whoami)/chatlogs" "logs/$(whoami)/discord" vars};
 };
 
 #NOP -- Load the saved list, or build it from $player1, $player2, ... the first time;

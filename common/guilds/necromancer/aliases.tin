@@ -235,22 +235,6 @@
     };
 };
 
-#NOP -- Recover usually follows a meditate, which starts a new circle, so the tracker's stats start over;
-#alias {recover} {
-    #if {"%0" == ""} {
-        #send {recover};
-    };
-    #else {
-        #send {recover %0};
-    };
-    #if {"$toggles[recover_parser_off]" == "1"} {
-        #send {parser off};
-    };
-    #if {"$toggles[circle_tracker]" == "1"} {
-        circle_tracker reset;
-    };
-};
-
 #alias {topup} {
     #echo {<dfa>-------- Restocking Reagents --------<088>};
     gs;
