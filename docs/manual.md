@@ -539,7 +539,7 @@ Hell's Swirling Mists, through the Portal of Evil, is a stack of dark rooms whos
 
 - `+hell` starts the stepper from outside. It walks in, fights every devil on planes 1 to 4, then walks plane 5 to the mountain room and stops. `hellbot` starts it from inside the mists.
 - `hnext` takes one step toward the mountain, if you'd rather walk yourself.
-- Inside the mists, `n`, `e`, `s`, `w`, `u` and `d` move by this week's words. `u`, `n` and `e` head down toward the mountain.
+- Inside the mists, `n`, `e`, `s`, `w`, `u` and `d` move by this week's words. `u`, `n` and `e` head down toward the mountain. They go back to normal as soon as you're in a room outside the mists, and `hellclear` does it straight away.
 - `hell` shows the plane you're on and this week's words, and `hell-help` lists every command.
 - The map follows you, and `findhere` and `findhere-auto` work there once the week's words are known.
 
@@ -1622,6 +1622,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `hellbot`: Rastafan Hell: start the hell stepper where you stand in the mists (+hell starts it from outside).
 - `hellplane`: Rastafan Hell: say which plane you are on if hnext lost count. Usage: `hellplane <1-5>`
 - `hellreset`: Rastafan Hell: forget the learned exit names and learn them again.
+- `hellclear`: Rastafan Hell: put n e s w u d and the exit words back to normal now (leaving the mists does it by itself).
 
 ### Science areas
 

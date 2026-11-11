@@ -1,4 +1,6 @@
 #class {rastafan_hell} {kill};
+#NOP -- A reload drops the in-mists aliases too, the next mists room makes them again;
+#class {rastafan_hell_dirs} {kill};
 #class {rastafan_hell} {open};
 
 #NOP -- Rastafan's Hell, the Swirling Mists (in through the Portal of Evil, map 10377, out with 'out').;
@@ -7,7 +9,7 @@
 #NOP --;
 #NOP -- Layout (walked 2026-11-11):;
 #NOP --   Planes 1-4 are 3x3x3 cubes.  The portal drops you in the centre of plane 1 (the room that says;
-#NOP --   'Turn back now or be forever lost').  Each plane has one corner showing all six exits; its three;
+#NOP --   'Turn back now or be forever lost').  Each plane has one corner showing all six exits, its three;
 #NOP --   outward exits (the 'down' names) all lead to the next plane, arriving in the opposite corner, and;
 #NOP --   the game may say 'further from your soul', but it says that on plain moves too and;
 #NOP --   not on every drop, so plane changes are read from the exit counts instead (.hell_in_mists).;
@@ -452,6 +454,7 @@
     #var hell[soul] {};
     #var hell[plane] 0;
     #map goto 10377;
+    .hell_off;
 };
 
 #action {^There is no reason to '%*' here.} {
@@ -526,13 +529,39 @@
     };
 };
 
+#NOP -- Out of the mists: n e s w u d and the six words go back to normal;
+#alias {.hell_off} {
+    #var hell[active] 0;
+    #list hell[queue] clear;
+    #undelay {hell_defer};
+    #undelay {hell_retry};
+    #var hell[defer] 0;
+    #var hell[botwait] 0;
+    .hell_dirs_off;
+};
+
+#NOP -- Backup, in case a room was missed: every 5s while the aliases are on, check MIP's room name and;
+#NOP -- the last room title.  Either one outside the Swirling Mists clears them;
+#ticker {hell_guard} {
+    #if {$hell[active]} {
+        #var hell_guard_out 0;
+        #if {"$room[name]" != ""} {
+            #regex {$room[name]} {^Swirling Mists} {#NOP} {#var hell_guard_out 1};
+        };
+        #if {"$room_short" != ""} {
+            #regex {$room_short} {^{-R-_|}Swirling Mists} {#NOP} {#var hell_guard_out 1};
+        };
+        #if {$hell_guard_out} {
+            .hell_off;
+        };
+    };
+} {5};
+
 #alias {.hell_not_mists} {
     #if {!$hell[active]} {
         #return;
     };
-    #var hell[active] 0;
-    #list hell[queue] clear;
-    .hell_dirs_off;
+    .hell_off;
     #NOP -- Coming back down to the mountain room announces it and moves the map again;
     #if {$hell[p5][step] == 5} {
         #var hell[p5][step] -1;
@@ -1470,6 +1499,8 @@
     #echo {<cdd>                     toward the mountain), the six words work too<088>};
     #echo {<cdd>hellplane <1-5>  -   tell it which plane you're on if it lost count<088>};
     #echo {<cdd>hellreset        -   forget this week's names and learn them again<088>};
+    #echo {<cdd>hellclear        -   put n e s w u d back to normal now (they clear by themselves when you<088>};
+    #echo {<cdd>                     leave the mists; the next mists room turns them on again)<088>};
     #echo {<cdd>findhere-auto    -   lost on the map in the mists: finds the room and puts hell back in step<088>};
     #echo {};
     #echo {<fff>Good to know<088>};
@@ -1481,6 +1512,12 @@
     #echo {<cdd>   fight: no quit, teleport or running.<088>};
     #echo {<cdd> - Mountain room: 'The mist seems to form around something here', scale mountain.<088>};
     #echo {<cdd> - #var hell_debug 1 shows where each room's exits were read from.<088>};
+};
+
+#NOP -- By hand, in case the aliases are ever left behind, the next mists room turns them on again;
+#alias {hellclear} {
+    .hell_off;
+    #echo {<128>Hell: n e s w u d and the exit words are back to normal.<088>};
 };
 
 #alias {hellreset} {
