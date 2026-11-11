@@ -56,6 +56,8 @@
     #var deathReport[mob_killed] %1;
     #if {&acidrain[]} {.acidrain_died {%1}};
     _cleanMobKilled;
+    #NOP -- For the damage tracker's late lines (modules/dmgtracker/dmgtracker.tin);
+    #if {&{dmgtracker}} {.dmg_mob_died {$deathReport[mob_killed]}};
     #var kbIgnore 0;
     #var fakeKill 0;
     _kbCheckIgnore;
