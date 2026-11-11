@@ -1,0 +1,647 @@
+#class summon_data kill;
+#class summon_data open;
+
+#NOP -- The one list of mage summons. Read for every guild by common/index.tin, and by;
+#NOP -- common/guilds/mage/data.tin, so non-mages in a group with a mage still use it.;
+#NOP -- Add or fix a summon here only. Fields:;
+#NOP --   ms, name, key, dtype  the summon_types / summon_select roster (key is what you summon by);
+#NOP --   look_name   the name in a room look, with A/An. .summonLookupName in common/guilds/mage/summoner.tin;
+#NOP --   say_name    the name said to it (say <say> 2, defend me), from .summonLookupName;
+#NOP --   hit_name    the name on its "<hit> hit for N damage!" line, with A/An. The damage tracker;
+#NOP --               files that hit under name. modules/dmgtracker/dmgtracker_mage.tin;
+#NOP --   kb_ignore   1 to skip the corpse trigger when it dies. common/corpsetrig.tin matches its;
+#NOP --               hit_name without the A/An, as death lines have none (Celestial Lion gurgles...).;
+#NOP --               Leave 0 on names normal mobs share (Orc, Troll...) or killing those breaks.;
+#NOP -- An empty look_name or hit_name is skipped. Names are case sensitive and must match the game.;
+
+#var summon_types {};
+#list summon_types add {{
+    {ms} {} {name} {Something} {key} {something} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#NOP -- Golems;
+#list summon_types add {{
+    {ms} {1} {name} {Straw golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Rope golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Wood golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Flesh golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Clay golem} {key} {golem} {dtype} {blunt}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Stone golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Iron golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Crystal golem} {key} {golem} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 12;
+#list summon_types add {{
+    {ms} {12} {name} {Abyssal tentacle} {key} {tentacle} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {12} {name} {Giant eagle} {key} {eagle} {dtype} {}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {12} {name} {Mind flayer} {key} {flayer} {dtype} {mental}
+    {look_name} {} {say_name} {}
+    {hit_name} {}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 11;
+#list summon_types add {{
+    {ms} {11} {name} {Celestial hawk} {key} {hawk} {dtype} {fire}
+    {look_name} {A Celestial Hawk} {say_name} {hawk}
+    {hit_name} {A Celestial Hawk}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {11} {name} {Chain devil} {key} {devil} {dtype} {blunt}
+    {look_name} {A Chain Devil} {say_name} {devil}
+    {hit_name} {A Chain Devil}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {11} {name} {Fey sprite} {key} {sprite} {dtype} {energy}
+    {look_name} {A Fey Sprite} {say_name} {sprite}
+    {hit_name} {A Fey Sprite}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {11} {name} {Chupacabra} {key} {chupacabra} {dtype} {energy}
+    {look_name} {A Snarling, Blood-soaked Chupacabra} {say_name} {chupacabre}
+    {hit_name} {A Snarling, Blood-soaked Chupacabra}
+    {kb_ignore} {1}
+}};
+#NOP -- Monster Summoning 10;
+#list summon_types add {{
+    {ms} {10} {name} {Celestial lion} {key} {lion} {dtype} {radiation}
+    {look_name} {A Celestial Lion} {say_name} {lion}
+    {hit_name} {A Celestial Lion}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {10} {name} {Undead wraith} {key} {wraith} {dtype} {acid}
+    {look_name} {An Undead Wraith} {say_name} {wraith}
+    {hit_name} {An Undead Wraith}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {10} {name} {Shadow panther} {key} {panther} {dtype} {electric}
+    {look_name} {A Shadow Panther} {say_name} {panther}
+    {hit_name} {A Shadow Panther}
+    {kb_ignore} {1}
+}};
+#NOP -- Monster Summoning 9;
+#list summon_types add {{
+    {ms} {9} {name} {Demon hellhound} {key} {hellhound} {dtype} {}
+    {look_name} {A Demon Hellhound} {say_name} {hellhound}
+    {hit_name} {A Demon Hellhound}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {9} {name} {Fey dryad} {key} {dryad} {dtype} {}
+    {look_name} {A Fey Dryad} {say_name} {dryad}
+    {hit_name} {A Fey Dryad}
+    {kb_ignore} {1}
+}};
+#list summon_types add {{
+    {ms} {9} {name} {Beast owlbear} {key} {owlbear} {dtype} {}
+    {look_name} {A Beast Owlbear} {say_name} {owlbear}
+    {hit_name} {A Beast Owlbear}
+    {kb_ignore} {1}
+}};
+#NOP -- Monster Summoning 8;
+#list summon_types add {{
+    {ms} {8} {name} {Storm giant} {key} {storm giant} {dtype} {}
+    {look_name} {An Enormous Storm Giant} {say_name} {storm giant}
+    {hit_name} {An Enormous Storm Giant}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {8} {name} {Cloud giant} {key} {cloud giant} {dtype} {}
+    {look_name} {An Enormous Cloud Giant} {say_name} {cloud giant}
+    {hit_name} {An Enormous Cloud Giant}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 7;
+#list summon_types add {{
+    {ms} {7} {name} {10-headed hydra} {key} {hydra} {dtype} {}
+    {look_name} {A Hu-goddamn-mongous 10-headed Hydra} {say_name} {hydra}
+    {hit_name} {A Hu-goddamn-mongous 10-headed Hydra}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Night hag} {key} {hag} {dtype} {}
+    {look_name} {A Fugly Night Hag} {say_name} {hag}
+    {hit_name} {A Fugly Night Hag}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Neo-otyugh} {key} {neo-otyugh} {dtype} {}
+    {look_name} {An Enormous Neo-otyugh} {say_name} {neo-otyugh}
+    {hit_name} {An Enormous Neo-otyugh}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Roper} {key} {roper} {dtype} {}
+    {look_name} {A Gargantuan Roper} {say_name} {roper}
+    {hit_name} {A Gargantuan Roper}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Mind flayer} {key} {flayer} {dtype} {}
+    {look_name} {A Damn Ugly Mind-flayer} {say_name} {mind-flayer}
+    {hit_name} {A Damn Ugly Mind-flayer}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Fire lizard} {key} {lizard} {dtype} {}
+    {look_name} {A Crimson-red Fire Lizard} {say_name} {lizard}
+    {hit_name} {A Crimson-red Fire Lizard}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {8-headed pyro-hydra} {key} {pyro-hydra} {dtype} {}
+    {look_name} {An Enormous, 8-headed Pyro-hydra} {say_name} {pyro-hydra}
+    {hit_name} {An Enormous, 8-headed Pyro-hydra}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Spectre} {key} {spectre} {dtype} {}
+    {look_name} {A Shimmering Spectre} {say_name} {spectre}
+    {hit_name} {A Shimmering Spectre}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Mummy} {key} {mummy} {dtype} {}
+    {look_name} {A Rotting Mummy} {say_name} {mummy}
+    {hit_name} {A Rotting Mummy}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Frost giant} {key} {frost giant} {dtype} {}
+    {look_name} {An Enormous Frost Giant} {say_name} {frost giant}
+    {hit_name} {An Enormous Frost Giant}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Fire giant} {key} {fire giant} {dtype} {}
+    {look_name} {An Enormous Fire Giant} {say_name} {fire giant}
+    {hit_name} {An Enormous Fire Giant}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Stone giant} {key} {stone giant} {dtype} {}
+    {look_name} {An Enormous Stone Giant} {say_name} {stone giant}
+    {hit_name} {An Enormous Stone Giant}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Hill giant} {key} {hill giant} {dtype} {}
+    {look_name} {An Enormous Hill Giant} {say_name} {hill giant}
+    {hit_name} {An Enormous Hill Giant}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Ettin} {key} {ettin} {dtype} {}
+    {look_name} {A 2-headed Ettin} {say_name} {ettin}
+    {hit_name} {A 2-headed Ettin}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Umber hulk} {key} {hulk} {dtype} {}
+    {look_name} {A Giant Umber Hulk} {say_name} {hulk}
+    {hit_name} {A Giant Umber Hulk}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Phoenix} {key} {phoenix} {dtype} {}
+    {look_name} {A Huge Flaming Phoenix} {say_name} {phoenix}
+    {hit_name} {A Huge Flaming Phoenix}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Gorgon} {key} {gorgon} {dtype} {}
+    {look_name} {A Obsidian-black Gorgon} {say_name} {gorgon}
+    {hit_name} {A Obsidian-black Gorgon}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Xorn} {key} {xorn} {dtype} {}
+    {look_name} {A Rock-encrusted Xorn} {say_name} {xorn}
+    {hit_name} {A Rock-encrusted Xorn}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Chimera} {key} {chimera} {dtype} {}
+    {look_name} {A 3-headed Chimera} {say_name} {chimera}
+    {hit_name} {A 3-headed Chimera}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {7} {name} {Giant slug} {key} {slug} {dtype} {}
+    {look_name} {A Giant Slug} {say_name} {slug}
+    {hit_name} {A Giant Slug}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 6;
+#list summon_types add {{
+    {ms} {6} {name} {Wyvern} {key} {wyvern} {dtype} {}
+    {look_name} {A Terrible Wyvern} {say_name} {wyvern}
+    {hit_name} {A Terrible Wyvern}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Wraith} {key} {wraith} {dtype} {}
+    {look_name} {A Near-invisible Wraith} {say_name} {wraith}
+    {hit_name} {A Near-invisible Wraith}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Otyugh} {key} {otyugh} {dtype} {}
+    {look_name} {A Stinky-assed Otyugh} {say_name} {otyugh}
+    {hit_name} {A Stinky-assed Otyugh}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Troll} {key} {troll} {dtype} {}
+    {look_name} {An Enormous Troll} {say_name} {troll}
+    {hit_name} {An Enormous Troll}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Manticore} {key} {manticore} {dtype} {}
+    {look_name} {A Terrifying Manticore} {say_name} {manticore}
+    {hit_name} {A Terrifying Manticore}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Weretiger} {key} {weretiger} {dtype} {}
+    {look_name} {A Disfigured Weretiger} {say_name} {weretiger}
+    {hit_name} {A Disfigured Weretiger}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Wight} {key} {wight} {dtype} {}
+    {look_name} {A Rotting Wight} {say_name} {wight}
+    {hit_name} {A Rotting Wight}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Rakshasa} {key} {rakshasa} {dtype} {}
+    {look_name} {A Dangerous Rakshasa} {say_name} {rakshasa}
+    {hit_name} {A Dangerous Rakshasa}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Jackalwere} {key} {jackalwere} {dtype} {}
+    {look_name} {A Disfigured Jackalwere} {say_name} {jackalwere}
+    {hit_name} {A Disfigured Jackalwere}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Phase spider} {key} {spider} {dtype} {}
+    {look_name} {A Shimmering Phase Spider} {say_name} {spider}
+    {hit_name} {A Shimmering Phase Spider}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Carrion crawler} {key} {crawler} {dtype} {}
+    {look_name} {A Disgusting Carrion Crawler} {say_name} {crawler}
+    {hit_name} {A Disgusting Carrion Crawler}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Ogre magi} {key} {magi} {dtype} {}
+    {look_name} {A Powerful Ogre Magi} {say_name} {ogre magi}
+    {hit_name} {A Powerful Ogre Magi}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {Salamander} {key} {salamander} {dtype} {}
+    {look_name} {A Firey Salamander} {say_name} {salamander}
+    {hit_name} {A Firey Salamander}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {6} {name} {8-headed hydra} {key} {hydra} {dtype} {}
+    {look_name} {An Enormous 8-headed Hydra} {say_name} {hydra}
+    {hit_name} {An Enormous 8-headed Hydra}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 5;
+#list summon_types add {{
+    {ms} {5} {name} {Minotaur} {key} {Minotaur} {dtype} {}
+    {look_name} {An Enormous Minotaur} {say_name} {minotaur}
+    {hit_name} {An Enormous Minotaur}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {Displacer beast} {key} {beast} {dtype} {}
+    {look_name} {A Shimmering Black Displacer Beast} {say_name} {beast}
+    {hit_name} {A Shimmering Black Displacer Beast}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {Poisonous snake} {key} {snake} {dtype} {}
+    {look_name} {A Giant Poisonous Snake} {say_name} {poisonous snake}
+    {hit_name} {A Giant Poisonous Snake}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {Wereboar} {key} {wereboar} {dtype} {}
+    {look_name} {A Disfigured Wereboar} {say_name} {wereboar}
+    {hit_name} {A Disfigured Wereboar}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {Leucrotta} {key} {leucrotta} {dtype} {}
+    {look_name} {A Swift Leucrotta} {say_name} {leucrotta}
+    {hit_name} {A Swift Leucrotta}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {7-headed hydra} {key} {hydra} {dtype} {}
+    {look_name} {A Gnarly 7-headed Hydra} {say_name} {hydra}
+    {hit_name} {A Gnarly 7-headed Hydra}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {Cockatrice} {key} {cockatrice} {dtype} {}
+    {look_name} {A Nasty Cockatrice} {say_name} {cockatrice}
+    {hit_name} {A Nasty Cockatrice}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {5} {name} {Giant spider} {key} {spider} {dtype} {}
+    {look_name} {A Giant Spider} {say_name} {spider}
+    {hit_name} {A Giant Spider}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 4;
+#list summon_types add {{
+    {ms} {4} {name} {Hell hound} {key} {hound} {dtype} {}
+    {look_name} {A Froth-mouthed Hell Hound} {say_name} {hound}
+    {hit_name} {A Froth-mouthed Hell Hound}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Ghast} {key} {ghast} {dtype} {}
+    {look_name} {A Rotting Ghast} {say_name} {ghast}
+    {hit_name} {A Rotting Ghast}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Ape} {key} {ape} {dtype} {}
+    {look_name} {A Carnivorous Ape} {say_name} {ape}
+    {hit_name} {A Carnivorous Ape}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {5-headed hydra} {key} {hydra} {dtype} {}
+    {look_name} {A 5-headed Hydra} {say_name} {hydra}
+    {hit_name} {A 5-headed Hydra}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Gargoyle} {key} {gargoyle} {dtype} {}
+    {look_name} {A Stony Gargoyle} {say_name} {gargoyle}
+    {hit_name} {A Stony Gargoyle}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Giant snake} {key} {snake} {dtype} {}
+    {look_name} {A Giant Constrictive Snake} {say_name} {snake}
+    {hit_name} {A Giant Constrictive Snake}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Owlbear} {key} {owlbear} {dtype} {}
+    {look_name} {A Huge Owlbear} {say_name} {owlbear}
+    {hit_name} {A Huge Owlbear}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Werewolf} {key} {werewolf} {dtype} {}
+    {look_name} {A Disfigured Werewolf} {say_name} {werewolf}
+    {hit_name} {A Disfigured Werewolf}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Ice toad} {key} {ice toad} {dtype} {}
+    {look_name} {A Large Ice Toad} {say_name} {ice toad}
+    {hit_name} {A Large Ice Toad}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Poisonous toad} {key} {poisonous toad} {dtype} {}
+    {look_name} {An Enormous Poisonous Toad} {say_name} {poisonous toad}
+    {hit_name} {An Enormous Poisonous Toad}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {4} {name} {Dark shadow} {key} {shadow} {dtype} {}
+    {look_name} {A Dark Shadow} {say_name} {shadow}
+    {hit_name} {A Dark Shadow}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 3;
+#list summon_types add {{
+    {ms} {3} {name} {Huge spider} {key} {huge spider} {dtype} {}
+    {look_name} {A Huge Spider} {say_name} {spider}
+    {hit_name} {A Huge Spider}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Giant boring beetle} {key} {boring beetle} {dtype} {}
+    {look_name} {A Giant Boring Beetle} {say_name} {beetle}
+    {hit_name} {A Giant Boring Beetle}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Smelly bugbear} {key} {smelly bugbear} {dtype} {}
+    {look_name} {A Smelly Bugbear} {say_name} {bugbear}
+    {hit_name} {A Smelly Bugbear}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Disfigured wererat} {key} {wererat} {dtype} {}
+    {look_name} {A Disfigured Wererat} {say_name} {wererat}
+    {hit_name} {A Disfigured Wererat}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Large spider} {key} {large spider} {dtype} {}
+    {look_name} {A Large Spider} {say_name} {spider}
+    {hit_name} {A Large Spider}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Giant weasel} {key} {weasel} {dtype} {}
+    {look_name} {A Giant Weasel} {say_name} {weasel}
+    {hit_name} {A Giant Weasel}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Rotting ghoul} {key} {ghoul} {dtype} {}
+    {look_name} {A Rotting Ghoul} {say_name} {ghoul}
+    {hit_name} {A Rotting Ghoul}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Giant tick} {key} {giant tick} {dtype} {}
+    {look_name} {A Giant Tick} {say_name} {tick}
+    {hit_name} {A Giant Tick}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Large ogre} {key} {ogre} {dtype} {}
+    {look_name} {A Large Ogre} {say_name} {ogre}
+    {hit_name} {A Large Ogre}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {3} {name} {Giant lizard} {key} {lizard} {dtype} {}
+    {look_name} {A Giant Lizard} {say_name} {lizard}
+    {hit_name} {A Giant Lizard}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 2;
+#list summon_types add {{
+    {ms} {2} {name} {Lemure} {key} {lemure} {dtype} {}
+    {look_name} {A Lemure (devil)} {say_name} {lemure}
+    {hit_name} {A Lemure (devil)}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {2} {name} {Giant toad} {key} {toad} {dtype} {}
+    {look_name} {A Giant Toad} {say_name} {toad}
+    {hit_name} {A Giant Toad}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {2} {name} {Stirge} {key} {stirge} {dtype} {}
+    {look_name} {A Stirge} {say_name} {stirge}
+    {hit_name} {A Stirge}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {2} {name} {Gnoll} {key} {gnoll} {dtype} {}
+    {look_name} {A Gnoll} {say_name} {gnoll}
+    {hit_name} {A Gnoll}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {2} {name} {Giant centipede} {key} {centipede} {dtype} {}
+    {look_name} {A Giant Centipede} {say_name} {centipede}
+    {hit_name} {A Giant Centipede}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {2} {name} {Ugly troglodyte} {key} {troglodyte} {dtype} {}
+    {look_name} {An Ugly Troglodyte} {say_name} {troglodyte}
+    {hit_name} {An Ugly Troglodyte}
+    {kb_ignore} {0}
+}};
+#NOP -- Monster Summoning 1;
+#list summon_types add {{
+    {ms} {1} {name} {Manes} {key} {manes} {dtype} {}
+    {look_name} {A Manes (demon)} {say_name} {manes}
+    {hit_name} {A Manes (demon)}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Giant rat} {key} {rat} {dtype} {}
+    {look_name} {A Giant Rat} {say_name} {rat}
+    {hit_name} {A Giant Rat}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Small kobold} {key} {kobold} {dtype} {}
+    {look_name} {A Small Kobold} {say_name} {kobold}
+    {hit_name} {A Small Kobold}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Mean hobgoblin} {key} {hobgoblin} {dtype} {}
+    {look_name} {A Mean Hobgoblin} {say_name} {hobgoblin}
+    {hit_name} {A Mean Hobgoblin}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Goblin} {key} {goblin} {dtype} {}
+    {look_name} {A Goblin} {say_name} {goblin}
+    {hit_name} {A Goblin}
+    {kb_ignore} {0}
+}};
+#list summon_types add {{
+    {ms} {1} {name} {Orc} {key} {orc} {dtype} {}
+    {look_name} {An Orc} {say_name} {orc}
+    {hit_name} {An Orc}
+    {kb_ignore} {0}
+}};
+
+#NOP -- Just the names, used in the damage tracker;
+#local tmpItem 1;
+#list summon_types_list clear;
+#loop 1 &summon_types[] tmpItem
+{
+    #list summon_types_list add $summon_types[$tmpItem][name];
+};
+
+#NOP -- Death line names of the kb_ignore summons, for _kbCheckIgnore in common/corpsetrig.tin;
+#list summon_kb_ignore clear;
+#foreach $summon_types[%*] tmpSummon
+{
+    #if {$tmpSummon[kb_ignore] && "$tmpSummon[hit_name]" != ""}
+    {
+        #regex {$tmpSummon[hit_name]} {^%w %*$}
+        {
+            #list summon_kb_ignore add {&2};
+        };
+    };
+};
+
+#class summon_data close;
