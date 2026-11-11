@@ -548,12 +548,11 @@
 	#gag {^in it for long term cold storage by 'cooler <item>' and removing};
 	#gag {^cooled items by 'uncooler <item>'. The Tech Ultra-Cooler contains:$};
 
-	#NOP -- Contents only after the contains line: any corpse, and any preserved one whatever its bar looks like;
+	#NOP -- Contents only after the contains line: any corpse, and any preserved one whatever its bar or size;
 	#action {^cooled items by 'uncooler <item>'. The Tech Ultra-Cooler contains:$} {
 		#class cooler_quiet open;
-		#gag {{^The (?:.+ )?(?:corpse|remains) of .+$}};
-		#gag {{^(?:\S+ )?a preserved, .*(?:corpse|remains) of .+$}};
-		#gag {{^[\[(][|*\-]+[\])] (?:corpse|remains)\.$}};
+		#gag {{^~?The (?:.+ )?(?:corpse|remains) of .+$}};
+		#gag {{^~?(?:[\[(][|*\-]+[\])] |.*a preserved, ).*(?:corpse|remains)}};
 		#class cooler_quiet close;
 	} {2};
 
@@ -573,21 +572,20 @@
 	#var inventory[cooler] 1;
 	#var corpses[cooler] 0;
 	#var cooler_update 1;
-	#action {{^The (.*)(corpse|remains) of (.*)}} {
+	#NOP -- A ~ in front means the corpse is kept;
+	#action {{^~?The (.*)(corpse|remains) of (.*)}} {
 		#if $cooler_update {#math corpses[cooler] {$corpses[cooler] + 1}};
 	} {6};
-	#action {{(.*) a preserved, (.*) of (.*)}} {
-		#if $cooler_update {#math corpses[cooler] {$corpses[cooler] + 1}};
-	} {6};
-	#NOP -- A preserved corpse can also be just its bar, e.g. "(-|---) corpse.";
-	#action {{^[\[(][|*\-]+[\])] (?:corpse|remains)\.$}} {
+	#NOP -- Any preserved corpse: a bar of any length in front, or "a preserved," in the line, any size or name;
+	#NOP -- e.g. "(---|-) a preserved, sliced up corpse of Hockey Fan." and bar only "(-|---) corpse.";
+	#NOP -- One pattern, so a line is only counted once;
+	#action {{^~?(?:[\[(][|*\-]+[\])] |.*a preserved, ).*(?:corpse|remains)}} {
 		#if $cooler_update {#math corpses[cooler] {$corpses[cooler] + 1}};
 	} {6};
 	#delay 2 {
 		#var cooler_update 0;
-		#unaction {{^The (.*)(corpse|remains) of (.*)}};
-		#unaction {{(.*) a preserved, (.*) of (.*)}};
-		#unaction {{^[\[(][|*\-]+[\])] (?:corpse|remains)\.$}};
+		#unaction {{^~?The (.*)(corpse|remains) of (.*)}};
+		#unaction {{^~?(?:[\[(][|*\-]+[\])] |.*a preserved, ).*(?:corpse|remains)}};
 		_update_corpse_string;
 	};
 } {2};
