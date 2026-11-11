@@ -39,6 +39,7 @@ This is the full guide to 3kdb: what it is, how to use it, and how to add your o
   - [Bot settings](#bot-settings)
   - [Run several areas in a row](#run-several-areas-in-a-row)
   - [Add your own steps](#add-your-own-steps)
+  - [Rastafan Hell](#rastafan-hell)
 - [Deadman timer](#deadman-timer)
 - [Fighting](#fighting)
   - [Strategies](#strategies)
@@ -531,6 +532,18 @@ This is the bot cycler:
 The easiest way is [mob kill actions](#mob-kill-actions), a list of commands that fire when you start a fight, including when a bot starts one. Use `mka+` to add one.
 
 For anything else, your character's `config.tin` can run commands before a bot starts or before each fight. See [Bot hooks](#bot-hooks).
+
+### Rastafan Hell
+
+Hell's Swirling Mists, through the Portal of Evil, is a stack of dark rooms whose exits are words like `yonder` and `thisway`. The words point a different way every Wednesday, by the mud's clock (`time`). 3kdb works them out as you walk, and saves them in `vars/boot.tin` so all your characters can use them.
+
+- `+hell` starts the stepper from outside. It walks in, fights every devil on planes 1 to 4, then walks plane 5 to the mountain room and stops. `hellbot` starts it from inside the mists.
+- `hnext` takes one step toward the mountain, if you'd rather walk yourself.
+- Inside the mists, `n`, `e`, `s`, `w`, `u` and `d` move by this week's words. `u`, `n` and `e` head down toward the mountain.
+- `hell` shows the plane you're on and this week's words, and `hell-help` lists every command.
+- The map follows you, and `findhere` and `findhere-auto` work there once the week's words are known.
+
+Past the sign room on plane 4, monsters won't let you leave a fight. You can't quit, teleport or run. In the mountain room, type `scale mountain` to climb.
 
 [Back to top](#3kdb-manual)
 
@@ -1235,7 +1248,7 @@ Run `ld` and log back in, or run `.reload`, to load the new code. If only one fi
 - **`common/map/`:** the map, and the speedrun list
 - **`modules/`:** bigger features, like the map, crafting and trackers
 - **`logs/`:** your chat and session logs
-- **`vars/`:** the saved reboot times
+- **`vars/`:** the saved reboot times, door combos and Rastafan Hell's exit words, shared by all your characters
 - **`scripts/`:** Python helpers, such as the one that posts to Discord
 - **`docs/`:** these guides
 
@@ -1603,6 +1616,12 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `sopem1`: enter sopem part 1.
 - `sopem2`: enter sopem part 2.
 - `run_uk`: undead knight book and hunt loop.
+- `hell-help`: Rastafan Hell: list the hell commands and what they do.
+- `hnext`: Rastafan Hell (Swirling Mists): one step toward the mountain, learning the week's exit names on the way, then scales the mountain.
+- `hell`: Rastafan Hell: plane and this week's learned exit names. In the mists, n e s w u d send them (u n e head toward the mountain).
+- `hellbot`: Rastafan Hell: start the hell stepper where you stand in the mists (+hell starts it from outside).
+- `hellplane`: Rastafan Hell: say which plane you are on if hnext lost count. Usage: `hellplane <1-5>`
+- `hellreset`: Rastafan Hell: forget the learned exit names and learn them again.
 
 ### Science areas
 

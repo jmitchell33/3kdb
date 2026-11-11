@@ -1,0 +1,72 @@
+#class {bot} {kill};
+#class {bot} {open};
+
+#NOP -- Rastafan Hell stepper (+hell): the Swirling Mists from the portal down to the mountain.;
+#NOP -- The exit names change every Wednesday, so there's no fixed path.  Every step asks;
+#NOP -- common/areas/rastafan_hell.tin where to go: on planes 1-4 it visits all 27 rooms of the cube,;
+#NOP -- nearest first, then takes the way down; on plane 5 it walks the route to the mountain room;
+#NOP -- and stops there (scale mountain is up to you, a Devil Guard waits at the top).;
+#NOP -- If the week's names aren't learned yet, the first steps are hnext's learning walk.;
+#NOP -- Mobs are killed and rooms with players are skipped by the usual bot code (common/bot/generic.tin).;
+#NOP -- Mobs seen 2026-11-11: Lesser Devil (plane 1), Large Devil (2), Greater Devil (3),;
+#NOP -- Hiilirn / Briexeq / Reeilz / Gliern, Devil Prince (4), Ibnixis, Devil Lord and Rabsitho (5).;
+
+#var {area} {Hell};
+#var check_room 1;
+
+#var bot_message_1 '---- RASTAFAN HELL STEPPER ----';
+#var bot_message_2 '---- ALL DEVILS, TO THE MOUNTAIN ----';
+#show $bot_message_1;
+#show $bot_message_2;
+
+#NOP -- The path is one step command over and over, each one picks its own direction.;
+#NOP -- .check_room puts bot[step] back to 1, so the end is never reached;
+#var {bot[path]} {};
+#loop 1 100 hell_i {
+    #var {bot[path]} {$bot[path]hellstep;};
+};
+
+#alias {hellstep} {
+    .hell_bot_step;
+};
+
+#alias {.check_room} {
+    #var bot[walk] 1;
+    #var bot[step] 1;
+    .botStep;
+};
+
+#alias {.hell_bot_step} {
+    #if {!$hell[active]} {
+        #echo {<138>Hell stepper: not in the Swirling Mists, paused.  Go in through the portal and type ..<088>};
+        .pause;
+        #return;
+    };
+    #NOP -- Still waiting for the last room's exits: .hell_room_now asks again when they come;
+    #if {$hell[defer]} {
+        #var hell[botwait] 1;
+        #return;
+    };
+    #NOP -- The room for the last move has arrived by now, anything left is a move that never landed;
+    #list hell[queue] clear;
+    .hell_pick_sweep;
+    .hell_check_pick {.hell_pick_sweep};
+    #if {"$hell_pick" == ""} {
+        #echo {<138>Hell stepper: no step to take, paused.  Type hell to see why, then ..<088>};
+        .pause;
+        #return;
+    };
+    #if {"$hell_pick" == "scale mountain"} {
+        #echo {<128>Hell stepper: at the mountain room.  scale mountain when you're ready.<088>};
+        .botComplete;
+        #return;
+    };
+    .hell_go $hell_pick;
+};
+
+#list botmobs clear;
+#list botmobs add {{{long} {Cerberus} {target} {cerberus}}};
+#list botmobs add {{{long} {Devil} {target} {devil}}};
+
+#class {bot} {close};
+#read common/bot/generic.tin;

@@ -35,6 +35,8 @@
 	#replace findname {-R-_} {};
 	#format findname {%p} {$findname};
 	#var findbase {@findhere_base{$findname}};
+	#NOP -- A long exit list comes cut off with no closing bracket, e.g. "Swirling Mists (yonder,thatway,";
+	#regex {$findbase} {{^(.*?) *\([^()]*$}} {#var findbase {&2}};
 	#NOP -- Matches the bare name or the name followed by any (exits);
 	#var findpattern {$findbase{| \(.*\)}};
 };
@@ -119,6 +121,8 @@
 	#if {"$findexits" == ""} {#var findexits {$room[exits]}};
 	#replace findexits {,} {;};
 	#replace findexits {~} {;};
+	#NOP -- Rastafan Hell's exit words change weekly, its map rooms use fixed labels, see common/areas/rastafan_hell.tin;
+	#if {&{hell_area}} {.hell_findhere_exits};
 	#var findsig {@findhere_sig{$findexits}};
 	#var findfull {@findhere_canon{$findexits}};
 };
@@ -212,6 +216,7 @@
 #alias {.findhere_result} {
 	#if {&findroom[$find_count][] == 1} {
 		#map goto *findroom[$find_count][1..1];
+		#if {&{hell_area}} {.hell_from_map};
 		#var finding_here off;
 		#var findauto off;
 		#send !brief on yes;
@@ -258,7 +263,12 @@
 	#NOP -- The map is still in some old room, and with follow on TinTin sends that room's exit command;
 	#NOP -- instead (a w exit made with mapexit sends enter), so send the plain direction;
 	#map flag nofollow on;
-	#send {%1};
+	#NOP -- In Rastafan Hell the label is sent as this week's word for it;
+	#if {&{hell_area} && $hell[active] && &hell_dir[%1]} {
+		.hell_go $hell_dir[%1];
+	} {
+		#send {%1};
+	};
 	#map flag nofollow off;
 	#NOP -- Where each candidate's exit leads;
 	#unvar tempVnums;

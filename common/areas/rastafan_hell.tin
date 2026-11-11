@@ -1,0 +1,1498 @@
+#class {rastafan_hell} {kill};
+#class {rastafan_hell} {open};
+
+#NOP -- Rastafan's Hell, the Swirling Mists (in through the Portal of Evil, map 10377, out with 'out').;
+#NOP -- The six exit words (yonder thatway thisway anotherway overthere overhere) are n e s w u d;
+#NOP -- shuffled every Wednesday, so this file learns them again by watching where moves go.;
+#NOP --;
+#NOP -- Layout (walked 2026-11-11):;
+#NOP --   Planes 1-4 are 3x3x3 cubes.  The portal drops you in the centre of plane 1 (the room that says;
+#NOP --   'Turn back now or be forever lost').  Each plane has one corner showing all six exits; its three;
+#NOP --   outward exits (the 'down' names) all lead to the next plane, arriving in the opposite corner, and;
+#NOP --   the game may say 'further from your soul', but it says that on plain moves too and;
+#NOP --   not on every drop, so plane changes are read from the exit counts instead (.hell_in_mists).;
+#NOP --   Plane 4's way-down corner is 'Swirling Mists - With A Big Sign'.;
+#NOP --   Plane 5 is a small maze.  From where you land: the down name you can see twice, the other down;
+#NOP --   name the next room shows, the last down name, then the way back up.  That room says 'The mist;
+#NOP --   seems to form around something here', has one exit, and 'scale mountain' goes to map 49896.;
+#NOP --;
+#NOP -- Learning works in any cube room: moving X makes exactly one exit appear or disappear, and if;
+#NOP -- name G appears, X and G are opposites.  hnext walks to a plain corner first to learn the pairs,;
+#NOP -- then finds the six-exit corner for the down names.  What it learns is saved in vars/boot.tin;
+#NOP -- (xhellk, shared by every character) with the mud's week it was learned in.  Stepping into the;
+#NOP -- mists reads it again (an alt may have learned the week already), asks the mud 'time', and;
+#NOP -- learns again only when the saved names are from before the mud's last Wednesday midnight.;
+#NOP --;
+#NOP -- While you are in the mists: n e s w u d (and the six words) are aliases that send the learned;
+#NOP -- name.  u n e go toward the mountain, the way the area drawing stacks the planes.  The aliases;
+#NOP -- are made when you step into the mists and removed when you leave, so normal play keeps its own.;
+#NOP -- common/room.tin calls .hell_room at the prompt after every room.;
+
+#var hell_names {yonder;thatway;thisway;anotherway;overthere;overhere};
+#var hell_labels {{u}{d}{n}{s}{e}{w}};
+#var hell_area 1;
+#NOP -- #var hell_debug 1 shows where each room's exits were read from;
+#if {!&{hell_debug}} {
+    #var hell_debug 0;
+};
+#var hell {{active}{0}{plane}{0}{queue}{}{soul}{}{has}{}{cnt}{0}{rep}{}{pos}{}{arrival}{}{corner}{}{seen}{}{retry}{0}{vnum}{}{defer}{0}{botwait}{0}{p5}{{step}{-1}}{arrpend}{0}{back}{}{back_from}{}};
+#var hellk {{opp}{}{down}{}{role}{}{final}{0}{saved}{0}{week}{}};
+
+#NOP -------------------------------------------------------------------;
+#NOP  SAVED KNOWLEDGE;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- Save to vars/boot.tin through _bootVar_export (common/status.tin), which calls .hell_boot_merge;
+#alias {.hell_save} {
+    #format hellk[saved] {%T};
+    #if {"$hellk[week]" == "" && "$hell_mudweek" != ""} {
+        #var hellk[week] {$hell_mudweek};
+    };
+    _bootVar_export;
+};
+
+#NOP -- Every session writes vars/boot.tin when it exports (ld does), so keep whichever copy of the;
+#NOP -- names is newer: the file's (another character learned them) or this session's;
+#alias {.hell_boot_merge} {
+    #unvar xhellk;
+    #line quiet #read vars/boot.tin;
+    #if {&xhellk[saved] && $xhellk[saved] > $hellk[saved]} {
+        #var hellk {$xhellk};
+        .hell_reps;
+        .hell_labels;
+    };
+    #elseif {$hellk[saved] > 0} {
+        #class {bootVars} {open};
+        #var {xhellk} {$hellk};
+        #class {bootVars} {close};
+    };
+};
+
+#NOP -- Take the names from vars/boot.tin when they are newer than this session's;
+#alias {.hell_load} {
+    #unvar xhellk;
+    #line quiet #read vars/boot.tin;
+    #if {&xhellk[saved] && $xhellk[saved] > $hellk[saved]} {
+        #var hellk {$xhellk};
+    };
+    .hell_reps;
+    .hell_labels;
+};
+
+#NOP -- The names change on Wednesdays by the mud's clock, not the player's: ask the mud 'time' (its;
+#NOP -- box is hidden) and compare the week the names were learned in;
+#var hell_mudweek {};
+#var hell_wedtime 0;
+#var hell_timewait 0;
+#var hell_mon {{Jan}{1}{Feb}{2}{Mar}{3}{Apr}{4}{May}{5}{Jun}{6}{Jul}{7}{Aug}{8}{Sep}{9}{Oct}{10}{Nov}{11}{Dec}{12}};
+#var hell_wday {{Sun}{0}{Mon}{1}{Tue}{2}{Wed}{3}{Thu}{4}{Fri}{5}{Sat}{6}};
+
+#alias {.hell_time_check} {
+    #if {$hell_timewait} {
+        #return;
+    };
+    #var hell_timewait 1;
+    #class {hell_time} {kill};
+    #class {hell_time} {open};
+    #gag {^ ___%*};
+    #gag {^(___%*)};
+    #gag {^ |%s|$};
+    #gag {^ |___%*};
+    #gag {^ | Marble Time/Date%*};
+    #gag {^ | Your Zone's Time%*};
+    #class {hell_time} {close};
+    #send {time};
+    #delay {hell_time_off} {
+        #class {hell_time} {kill};
+        #var hell_timewait 0;
+    } {3};
+};
+
+#action {^ | Marble Time/Date (%*): %w %w %d %d:%d:%d %d} {
+    #var hell_tm_y {%8};
+    #var hell_tm_m {$hell_mon[%3]};
+    #var hell_tm_d {%4};
+    #if {$hell_tm_m <= 2} {
+        #math hell_tm_y {$hell_tm_y - 1};
+    };
+    #math hell_tm_era {$hell_tm_y / 400};
+    #math hell_tm_yoe {$hell_tm_y - $hell_tm_era * 400};
+    #if {$hell_tm_m > 2} {
+        #math hell_tm_mp {$hell_tm_m - 3};
+    };
+    #else {
+        #math hell_tm_mp {$hell_tm_m + 9};
+    };
+    #math hell_tm_doy {(153 * $hell_tm_mp + 2) / 5 + $hell_tm_d - 1};
+    #math hell_tm_doe {$hell_tm_yoe * 365 + $hell_tm_yoe / 4 - $hell_tm_yoe / 100 + $hell_tm_doy};
+    #math hell_tm_days {$hell_tm_era * 146097 + $hell_tm_doe - 719468};
+    #NOP -- Days back to the last Wednesday, then that Wednesday's day number is the week;
+    #math hell_tm_back {($hell_wday[%2] + 4) % 7};
+    #math hell_mudweek {$hell_tm_days - $hell_tm_back};
+    #NOP -- And when that Wednesday's midnight was, on this computer's clock;
+    #format hell_tm_now {%T};
+    #math hell_wedtime {$hell_tm_now - $hell_tm_back * 86400 - %5 * 3600 - %6 * 60 - %7};
+    .hell_week_check;
+};
+
+#alias {.hell_week_check} {
+    #if {&hellk[opp][] == 0 && &hellk[down][] == 0} {
+        #return;
+    };
+    #if {"$hellk[week]" == "$hell_mudweek"} {
+        #return;
+    };
+    #NOP -- Saved without a week (before the mud said what week it is): fine if saved since Wednesday;
+    #if {"$hellk[week]" == "" && $hellk[saved] >= $hell_wedtime} {
+        #var hellk[week] {$hell_mudweek};
+        .hell_save;
+        #return;
+    };
+    #echo {<138>Hell: a new week by the mud's clock, the exit names have changed.  Learning them again.<088>};
+    .hell_forget;
+};
+
+#NOP -- Forget everything learned (a move disagreed, or hellreset);
+#alias {.hell_forget} {
+    #var hellk {{opp}{}{down}{}{role}{}{final}{0}{saved}{0}{week}{}};
+    #var hell[rep] {};
+    #var hell[pos] {};
+    #var hell[arrival] {};
+    #var hell[corner] {};
+    #var hell[seen] {};
+    .hell_save;
+    .hell_dirs_refresh;
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  HELPERS;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- The exits from this room's text, which always comes before the prompt.  MIP's exit list can;
+#NOP -- arrive after it, still holding the last room's exits (2026-11-11), so it is only the fallback.;
+#NOP -- Verbose mode: the -X- line, sometimes wrapped onto a second line.  Brief mode: the room title;
+#var hell_xtext {};
+#var hell_xpart 0;
+#action {{^-X-_\s*There (?:are|is) \w+ obvious exits?: (.*?)\s*-X-_\s*$}} {
+    #var hell_xtext {%2};
+    #var hell_xpart 0;
+} {4};
+#action {{^-X-_\s*There (?:are|is) \w+ obvious exits?: (.*?)\s*$}} {
+    #var hell_xtext {%2};
+    #var hell_xpart 1;
+} {5};
+#action {{^\s+(.*?)\s*-X-_\s*$}} {
+    #if {$hell_xpart} {
+        #var hell_xtext {$hell_xtext %2};
+        #var hell_xpart 0;
+    };
+} {5};
+
+#NOP -- hell[has][name] and hell[cnt] for this room;
+#alias {.hell_read_exits} {
+    #var hell[has] {};
+    #var hell[cnt] 0;
+    #var hell_tmp {$room[exits]};
+    #var hell_title {};
+    #regex {$room_short} {{\(([^()]*)\)\s*(?:-R-_)?\s*$}} {
+        #var hell_title {&2};
+    };
+    #var hell_src mip;
+    #if {"$hell_xtext" != ""} {
+        #var hell_tmp {$hell_xtext};
+        #var hell_src exits-line;
+    };
+    #elseif {"$hell_title" != ""} {
+        #var hell_tmp {$hell_title};
+        #var hell_src title;
+    };
+    #if {$hell_debug} {
+        #echo {<138>hell debug: exits from $hell_src: $hell_tmp  (move: $hell[queue][1])<088>};
+    };
+    #var hell_xtext {};
+    #var hell_xpart 0;
+    #replace hell_tmp {~} {;};
+    #replace hell_tmp {,} {;};
+    #replace hell_tmp { } {};
+    #foreach {$hell_tmp} {hell_x} {
+        #if {"$hell_x" != ""} {
+            #var hell[has][$hell_x] 1;
+            #math hell[cnt] {$hell[cnt] + 1};
+        };
+    };
+};
+
+#NOP -- .hell_pair {a} {b}: a and b are opposites.  A different answer than before means the names moved;
+#alias {.hell_pair} {
+    #if {&hellk[opp][%1]} {
+        #NOP -- Only a known cube plane can prove the names changed: plane 5 looks like a cube room;
+        #if {"$hellk[opp][%1]" != "%2" && $hell[plane] >= 1 && $hell[plane] <= 4} {
+            #echo {<118>Hell: %1 no longer looks opposite $hellk[opp][%1], the names have changed.  Learning again.<088>};
+            .hell_forget;
+        };
+        #return;
+    };
+    #var hellk[opp][%1] {%2};
+    #var hellk[opp][%2] {%1};
+    #echo {<128>Hell: %1 and %2 are opposites.<088>};
+    .hell_reps;
+    #if {&hellk[opp][] == 6} {
+        .hell_save;
+        .hell_dirs_refresh;
+    };
+};
+
+#NOP -- Once all three pairs are known, the first name of each pair (abc order) is its axis.;
+#NOP -- hell[pos][axis] is 0 1 2, and 2 means moving that axis name is blocked;
+#alias {.hell_reps} {
+    #var hell[rep] {};
+    #if {&hellk[opp][] == 6} {
+        #foreach {*hellk[opp][]} {hell_x} {
+            #if {"$hell_x" < "$hellk[opp][$hell_x]"} {
+                #var hell[rep][$hell_x] 1;
+            };
+        };
+    };
+};
+
+#NOP -- Position from the exits.  Only a room with fewer than six exits says where it is;
+#alias {.hell_pos_from_exits} {
+    #if {&hell[rep][] == 3 && $hell[cnt] < 6} {
+        #var hell[pos] {};
+        #foreach {*hell[rep][]} {hell_x} {
+            #var hell_o {$hellk[opp][$hell_x]};
+            #if {!&hell[has][$hell_x]} {
+                #var hell[pos][$hell_x] 2;
+            };
+            #elseif {!&hell[has][$hell_o]} {
+                #var hell[pos][$hell_x] 0;
+            };
+            #else {
+                #var hell[pos][$hell_x] 1;
+            };
+        };
+    };
+};
+
+#NOP -- .hell_step {name}: move the tracked position one step;
+#alias {.hell_step} {
+    #if {&hell[pos][] != 3 || !&hellk[opp][%1]} {
+        #var hell[pos] {};
+        #return;
+    };
+    #if {&hell[rep][%1]} {
+        #math hell[pos][%1] {$hell[pos][%1] + 1};
+        #var hell_x {%1};
+    };
+    #else {
+        #var hell_x {$hellk[opp][%1]};
+        #math hell[pos][$hell_x] {$hell[pos][$hell_x] - 1};
+    };
+    #if {$hell[pos][$hell_x] < 0 || $hell[pos][$hell_x] > 2} {
+        #var hell[pos] {};
+    };
+};
+
+#NOP -- hell_key: the position as text, e.g. 202, in axis order;
+#alias {.hell_key} {
+    #var hell_key {};
+    #var hell_iscorner 1;
+    #foreach {*hell[rep][]} {hell_x} {
+        #var hell_key {$hell_key$hell[pos][$hell_x]};
+        #if {$hell[pos][$hell_x] == 1} {
+            #var hell_iscorner 0;
+        };
+    };
+};
+
+#NOP -- The down names are the outward names of the six-exit corner the position is at;
+#alias {.hell_down_from_here} {
+    #var hellk[down] {};
+    #foreach {*hell[rep][]} {hell_x} {
+        #if {$hell[pos][$hell_x] == 2} {
+            #var hellk[down][$hell_x] 1;
+        };
+        #else {
+            #var hellk[down][$hellk[opp][$hell_x]] 1;
+        };
+    };
+    .hell_down_learned;
+};
+
+#NOP -- Down names from the corner a plane was entered at: they point away from it;
+#alias {.hell_down_from_arrival} {
+    #var hellk[down] {};
+    #foreach {*hell[rep][]} {hell_x} {
+        #if {$hell[arrival][$hell_x] == 0} {
+            #var hellk[down][$hell_x] 1;
+        };
+        #else {
+            #var hellk[down][$hellk[opp][$hell_x]] 1;
+        };
+    };
+    .hell_down_learned;
+};
+
+#alias {.hell_down_learned} {
+    #var hellk[role] {};
+    #var hellk[final] 0;
+    #var hell_list {};
+    #foreach {*hellk[down][]} {hell_x} {
+        #var hell_list {$hell_list $hell_x};
+    };
+    #echo {<128>Hell: the way down is$hell_list.<088>};
+    .hell_save;
+    .hell_dirs_refresh;
+};
+
+#NOP -- hell_dpos[axis]: the down corner, 2 where the axis name itself is a down name;
+#alias {.hell_dpos} {
+    #var hell_dpos {};
+    #foreach {*hell[rep][]} {hell_x} {
+        #if {&hellk[down][$hell_x]} {
+            #var hell_dpos[$hell_x] 2;
+        };
+        #else {
+            #var hell_dpos[$hell_x] 0;
+        };
+    };
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  DIRECTION ALIASES (only while in the mists);
+#NOP -------------------------------------------------------------------;
+
+#NOP -- hell_dir[label]: the name each of u d n s e w sends.  u n e are the down names, in the order;
+#NOP -- plane 5 shows them once it has been walked this week, abc order until then;
+#alias {.hell_labels} {
+    #var hell_dir {};
+    #if {&hellk[down][] != 3 || &hellk[opp][] != 6} {
+        #return;
+    };
+    #if {$hellk[final]} {
+        #var hell_dir[u] {$hellk[role][u]};
+        #var hell_dir[n] {$hellk[role][n]};
+        #var hell_dir[e] {$hellk[role][e]};
+    };
+    #else {
+        #var hell_i 0;
+        #foreach {*hellk[down][]} {hell_x} {
+            #math hell_i {$hell_i + 1};
+            #if {$hell_i == 1} {#var hell_dir[u] {$hell_x}};
+            #if {$hell_i == 2} {#var hell_dir[n] {$hell_x}};
+            #if {$hell_i == 3} {#var hell_dir[e] {$hell_x}};
+        };
+    };
+    #var hell_dir[d] {$hellk[opp][$hell_dir[u]]};
+    #var hell_dir[s] {$hellk[opp][$hell_dir[n]]};
+    #var hell_dir[w] {$hellk[opp][$hell_dir[e]]};
+};
+
+#alias {.hell_dirs_on} {
+    #class {rastafan_hell_dirs} {kill};
+    #class {rastafan_hell_dirs} {open};
+    #alias {yonder} {.hell_go yonder};
+    #alias {thatway} {.hell_go thatway};
+    #alias {thisway} {.hell_go thisway};
+    #alias {anotherway} {.hell_go anotherway};
+    #alias {overthere} {.hell_go overthere};
+    #alias {overhere} {.hell_go overhere};
+    #alias {u} {.hell_dir u};
+    #alias {d} {.hell_dir d};
+    #alias {n} {.hell_dir n};
+    #alias {s} {.hell_dir s};
+    #alias {e} {.hell_dir e};
+    #alias {w} {.hell_dir w};
+    #class {rastafan_hell_dirs} {close};
+    .hell_labels;
+};
+
+#alias {.hell_dirs_off} {
+    #class {rastafan_hell_dirs} {kill};
+};
+
+#alias {.hell_dirs_refresh} {
+    .hell_labels;
+};
+
+#alias {.hell_dir} {
+    #if {&hell_dir[%1]} {
+        .hell_go $hell_dir[%1];
+    };
+    #else {
+        #echo {<138>Hell: directions not learned yet, type hnext to walk and learn them, or use the words.<088>};
+    };
+};
+
+#NOP -- Every move in the mists goes through here, so the next room knows how you got there;
+#alias {.hell_go} {
+    #list hell[queue] add {%1};
+    #send {%1};
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  GAME MESSAGES;
+#NOP -------------------------------------------------------------------;
+
+#action {^Your body is wracked with pain as you grow further from your soul.} {
+    #var hell[soul] further;
+};
+
+#action {^A small wave of relief flushes thr{ough|u} you as you move closer to your soul.} {
+    #var hell[soul] closer;
+};
+
+#NOP -- The portal messages keep the map in step: in the mists it waits on the entrance room;
+#action {^Ultimate agony overcomes you as you feel your very soul removed from your} {
+    #var hell[soul] enter;
+    #map goto 49782;
+};
+
+#action {^Ultimate relief overwhelms you as you feel your soul replaced into your} {
+    #var hell[soul] {};
+    #var hell[plane] 0;
+    #map goto 10377;
+};
+
+#action {^There is no reason to '%*' here.} {
+    #if {$hell[active] && &hell[queue][]} {
+        #list hell[queue] delete 1;
+        #NOP -- No room follows a failed move, so the hell stepper has to be poked to try again;
+        #if {&{bot[active]} && "$bot[file]" == "rastafan_hell"} {
+            #math hell[retry] {$hell[retry] + 1};
+            #if {$hell[retry] <= 3} {
+                #delay {hell_retry} {.check_room} {1};
+            };
+            #else {
+                #echo {<118>Hell stepper: three moves in a row failed, paused.  Type hell, then ..<088>};
+                .pause;
+            };
+        };
+    };
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  EACH ROOM;
+#NOP -------------------------------------------------------------------;
+
+#alias {.hell_room} {
+    #var hell_inmists 0;
+    #regex {$room_short} {^{-R-_|}Swirling Mists} {
+        #var hell_inmists 1;
+    };
+    #if {!$hell_inmists} {
+        .hell_not_mists;
+        #return;
+    };
+    #NOP -- A cut-off title (five or six exits next to the minimap) and no -X- line: MIP's exits can;
+    #NOP -- still be the last room's, so after a move ask the game with 'exits' and wait for it (or 2s);
+    #var hell_title_ok 0;
+    #regex {$room_short} {{\(([^()]*)\)\s*(?:-R-_)?\s*$}} {
+        #var hell_title_ok 1;
+    };
+    #if {"$hell_xtext" == "" && !$hell_title_ok && &hell[queue][]} {
+        #var hell[defer] 1;
+        #send {exits};
+        #delay {hell_defer} {.hell_room_now} {2};
+        #return;
+    };
+    .hell_room_now;
+};
+
+#alias {.hell_room_now} {
+    #undelay {hell_defer};
+    #var hell[defer] 0;
+    .hell_in_mists;
+    .hell_mark_seen;
+    .hell_map_follow;
+    #NOP -- The stepper asked for a step while the room was waiting;
+    #if {$hell[botwait]} {
+        #var hell[botwait] 0;
+        #if {&{bot[active]} && "$bot[file]" == "rastafan_hell"} {
+            .check_room;
+        };
+    };
+};
+
+#NOP -- The answer to that 'exits';
+#action {^Exits: %*} {
+    #if {$hell[defer]} {
+        #var hell_xtext {%1};
+        #replace hell_xtext { } {};
+        #regex {$hell_xtext} {{^(.*?),*$}} {
+            #var hell_xtext {&2};
+        };
+        .hell_room_now;
+    };
+};
+
+#alias {.hell_not_mists} {
+    #if {!$hell[active]} {
+        #return;
+    };
+    #var hell[active] 0;
+    #list hell[queue] clear;
+    .hell_dirs_off;
+    #NOP -- Coming back down to the mountain room announces it and moves the map again;
+    #if {$hell[p5][step] == 5} {
+        #var hell[p5][step] -1;
+    };
+    #regex {$room_short} {^{-R-_|}Mountain Base} {
+        #map goto 49896;
+    };
+};
+
+#alias {.hell_in_mists} {
+    #if {!$hell[active]} {
+        #var hell[active] 1;
+        .hell_load;
+        .hell_dirs_on;
+        .hell_time_check;
+    };
+    #var hell_prev {$hell[has]};
+    #var hell_prevcnt {$hell[cnt]};
+    #var hell[retry] 0;
+    .hell_read_exits;
+    #var hell_mv {};
+    #if {&hell[queue][]} {
+        #var hell_mv {$hell[queue][1]};
+        #list hell[queue] delete 1;
+    };
+    #var hell_soul {$hell[soul]};
+    #var hell[soul] {};
+    #NOP -- The soul lines can't be trusted for plane changes: 'further' also shows on plain moves;
+    #NOP -- inside a cube, and overhere went down a plane without it (2026-11-11).  The exit counts;
+    #NOP -- can: only a six-exit room has a way off its plane, and every room next to one inside the;
+    #NOP -- cube has four or five exits.  So six (or plane 5's two-exit landing) after six is a plane;
+    #NOP -- change, and six after plane 5's landing is the way back up;
+    #var hell_change {};
+    #if {"$hell_mv" != "" && "$hell_soul" != "enter"} {
+        #if {$hell_prevcnt == 6 && $hell[cnt] == 2} {
+            #var hell_change down;
+        };
+        #elseif {$hell_prevcnt == 2 && $hell[cnt] == 6} {
+            #var hell_change up;
+        };
+        #elseif {$hell_prevcnt == 6 && $hell[cnt] == 6} {
+            #if {&hellk[down][$hell_mv]} {
+                #var hell_change down;
+            };
+            #elseif {&hellk[down][] == 3} {
+                #var hell_change up;
+            };
+            #elseif {$hell[plane] == 1 || "$hell_soul" != "closer"} {
+                #var hell_change down;
+            };
+            #else {
+                #var hell_change up;
+            };
+        };
+    };
+
+    #if {"$hell_soul" == "enter"} {
+        #var hell[plane] 1;
+        #list hell[queue] clear;
+        #var hell[arrival] {};
+        #var hell[arrpend] 0;
+        #var hell[corner] {};
+        #var hell[seen] {};
+        #var hell[back] {};
+        #var hell[back_from] {};
+        .hell_center;
+        #return;
+    };
+    #NOP -- #return inside a #regex body doesn't leave the alias, so the regexes only set flags;
+    #var hell_entrance 0;
+    #var hell_mountain 0;
+    #regex {$room[long]} {Turn back now or be forever lost} {
+        #var hell_entrance 1;
+    };
+    #regex {$room[long]} {The mist seems to form around something here} {
+        #var hell_mountain 1;
+    };
+    #if {$hell_entrance} {
+        #var hell[plane] 1;
+        #if {"$hell_mv" != ""} {
+            .hell_cube_move;
+        };
+        .hell_center;
+        #return;
+    };
+    #if {"$hell_change" == "down"} {
+        .hell_went_down;
+        #return;
+    };
+    #if {"$hell_change" == "up"} {
+        .hell_went_up;
+        #return;
+    };
+    #if {$hell_mountain} {
+        .hell_target;
+        #return;
+    };
+    #if {$hell[p5][step] == 5} {
+        #NOP -- Walked out of the mountain room: the route starts again from the landing room;
+        #var hell[p5][step] -1;
+        #return;
+    };
+    #if {$hell[plane] == 5} {
+        .hell_p5_move;
+        #return;
+    };
+    #if {$hell[plane] <= 4 && "$hell_mv" != ""} {
+        .hell_cube_move;
+    };
+};
+
+#NOP -- hell[seen][key]: cube rooms visited on this plane, for the stepper's sweep;
+#alias {.hell_mark_seen} {
+    #if {$hell[plane] <= 4 && &hell[pos][] == 3} {
+        .hell_key;
+        #var hell[seen][$hell_key] 1;
+    };
+};
+
+#alias {.hell_center} {
+    #var hell[pos] {};
+    #foreach {*hell[rep][]} {hell_x} {
+        #var hell[pos][$hell_x] 1;
+    };
+};
+
+#NOP -- A move inside a cube: learn a pair, follow the position, look for the six-exit corner;
+#alias {.hell_cube_move} {
+    #NOP -- Plane not known: it could be plane 5, so only learn while something is still missing;
+    #var hell_learn 1;
+    #if {$hell[plane] == 0 && &hellk[opp][] == 6 && &hellk[down][] == 3} {
+        #var hell_learn 0;
+    };
+    #var hell_gain {};
+    #var hell_ngain 0;
+    #var hell_nlost 0;
+    #foreach {*hell[has][]} {hell_x} {
+        #if {!&hell_prev[$hell_x]} {
+            #var hell_gain {$hell_x};
+            #math hell_ngain {$hell_ngain + 1};
+        };
+    };
+    #foreach {*hell_prev[]} {hell_x} {
+        #if {!&hell[has][$hell_x]} {
+            #math hell_nlost {$hell_nlost + 1};
+        };
+    };
+    #if {$hell_ngain == 1 && $hell_nlost == 0 && $hell_learn} {
+        .hell_pair {$hell_mv} {$hell_gain};
+    };
+    #if {"$hell_mv" == "$hell[back_from]"} {
+        #var hell[back_from] {};
+        #if {&hellk[opp][$hell_mv]} {
+            #var hell[back] {$hellk[opp][$hell_mv]};
+        };
+    };
+    #if {&hell[rep][] != 3} {
+        #return;
+    };
+
+    #var hell_had {&hell[pos][]};
+    #if {$hell_had == 3} {
+        .hell_step {$hell_mv};
+    };
+    #if {$hell[cnt] < 6} {
+        .hell_pos_from_exits;
+        #NOP -- First room after landing in a plane: work out the corner landed on;
+        #if {$hell_had != 3 && $hell[arrpend]} {
+            #var hell[arrival] {$hell[pos]};
+            #var hell[arrpend] 0;
+            .hell_unstep {$hell_mv};
+        };
+    };
+    #if {$hell[arrpend]} {
+        #return;
+    };
+    #if {&hell[pos][] != 3} {
+        #return;
+    };
+    .hell_key;
+    #if {$hell_iscorner} {
+        #var hell[corner][$hell_key] {$hell[cnt]};
+    };
+
+    #if {&hellk[down][] == 3} {
+        #NOP -- At the down corner it must show six exits, or the names have changed;
+        .hell_dpos;
+        #var hell_atdown 1;
+        #foreach {*hell[rep][]} {hell_x} {
+            #if {$hell[pos][$hell_x] != $hell_dpos[$hell_x]} {
+                #var hell_atdown 0;
+            };
+        };
+        #if {$hell_atdown && $hell[cnt] != 6 && $hell[plane] >= 1} {
+            #echo {<118>Hell: this should be the way down but it isn't, the names have changed.  Learning again.<088>};
+            .hell_forget;
+        };
+        #return;
+    };
+    #if {&hell[arrival][] == 3} {
+        .hell_down_from_arrival;
+        #return;
+    };
+    #if {$hell_iscorner && $hell[cnt] == 6 && $hell[plane] == 1} {
+        .hell_down_from_here;
+    };
+};
+
+#NOP -- hell[arrival] = hell[pos] one step back along {name};
+#alias {.hell_unstep} {
+    #if {&hell[rep][%1]} {
+        #math hell[arrival][%1] {$hell[arrival][%1] - 1};
+    };
+    #else {
+        #var hell_x {$hellk[opp][%1]};
+        #math hell[arrival][$hell_x] {$hell[arrival][$hell_x] + 1};
+    };
+};
+
+#alias {.hell_went_down} {
+    #if {$hell[plane] > 0} {
+        #math hell[plane] {$hell[plane] + 1};
+    };
+    #NOP -- Left from a known six-exit corner: its outward names are the way down;
+    #if {&hellk[down][] != 3 && &hell[pos][] == 3} {
+        .hell_key;
+        #if {$hell_iscorner} {
+            .hell_down_from_here;
+        };
+    };
+    #var hell[corner] {};
+    #var hell[seen] {};
+    #var hell[arrival] {};
+    #var hell[arrpend] 0;
+    #var hell[p5] {{step}{-1}};
+    #if {&hellk[down][] == 3 && &hell[rep][] == 3} {
+        .hell_dpos;
+        #foreach {*hell[rep][]} {hell_x} {
+            #math hell[arrival][$hell_x] {2 - $hell_dpos[$hell_x]};
+        };
+        #var hell[pos] {$hell[arrival]};
+    };
+    #else {
+        #var hell[pos] {};
+        #var hell[arrival] {};
+        #var hell[arrpend] 1;
+    };
+    #NOP -- Plane 5 is the only landing room with two exits (cube corners show six);
+    #if {$hell[cnt] == 2} {
+        #var hell[plane] 5;
+        #var hell[pos] {};
+        #var hell[arrpend] 0;
+    };
+    #if {$hell[plane] == 5} {
+        .hell_p5_arrive;
+        #echo {<128>Hell: down to plane 5, the maze with the mountain.<088>};
+    };
+    #elseif {$hell[plane] > 0} {
+        #echo {<128>Hell: down to plane $hell[plane].<088>};
+    };
+    #else {
+        #echo {<128>Hell: down a plane.<088>};
+    };
+};
+
+#alias {.hell_went_up} {
+    #if {$hell[plane] > 1} {
+        #math hell[plane] {$hell[plane] - 1};
+    };
+    #if {$hell[plane] > 0} {
+        #echo {<128>Hell: back up to plane $hell[plane].<088>};
+    };
+    #else {
+        #echo {<128>Hell: back up a plane.<088>};
+    };
+    #NOP -- Left from the corner the plane was entered at: the way down points away from it;
+    #if {&hellk[down][] != 3 && &hell[pos][] == 3} {
+        #var hell[arrival] {$hell[pos]};
+        .hell_down_from_arrival;
+    };
+    #var hell[corner] {};
+    #var hell[seen] {};
+    #var hell[arrival] {};
+    #var hell[arrpend] 0;
+    #var hell[pos] {};
+    #var hell[p5] {{step}{-1}};
+    #if {&hellk[down][] == 3 && &hell[rep][] == 3} {
+        .hell_dpos;
+        #var hell[pos] {$hell_dpos};
+        #if {$hell[plane] > 1} {
+            #foreach {*hell[rep][]} {hell_x} {
+                #math hell[arrival][$hell_x] {2 - $hell_dpos[$hell_x]};
+            };
+        };
+    };
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  PLANE 5;
+#NOP -------------------------------------------------------------------;
+
+#NOP -- The landing room has two exits: a down name (F) and the way back up (U).;
+#NOP -- Route: F, F, then S (the B room's exit that isn't F or U), then Y (the last down name), then U;
+#alias {.hell_p5_arrive} {
+    #var hell[p5] {{step}{0}{F}{}{U}{}{S}{}{Y}{}};
+    #foreach {*hell[has][]} {hell_x} {
+        #if {&hellk[down][$hell_x]} {
+            #var hell[p5][F] {$hell_x};
+        };
+        #else {
+            #var hell[p5][U] {$hell_x};
+        };
+    };
+};
+
+#alias {.hell_p5_route} {
+    #var hell_want {};
+    #switch {$hell[p5][step]} {
+        #case {0} {#var hell_want {$hell[p5][F]}};
+        #case {1} {#var hell_want {$hell[p5][F]}};
+        #case {2} {#var hell_want {$hell[p5][S]}};
+        #case {3} {#var hell_want {$hell[p5][Y]}};
+        #case {4} {#var hell_want {$hell[p5][U]}};
+    };
+};
+
+#alias {.hell_p5_move} {
+    #if {$hell[p5][step] == 5} {
+        #return;
+    };
+    #if {$hell[p5][step] < 0} {
+        .hell_p5_check_landing;
+        #return;
+    };
+    #if {"$hell_mv" == ""} {
+        #return;
+    };
+    .hell_p5_route;
+    #if {"$hell_mv" == "$hell_want" && "$hell_want" != ""} {
+        #math hell[p5][step] {$hell[p5][step] + 1};
+    };
+    #else {
+        #var hell[p5][step] -1;
+        #echo {<138>Hell: off the plane 5 route.  Walk back to the landing room (two exits, one goes up) and hnext picks it up.<088>};
+        #return;
+    };
+    #if {$hell[p5][step] == 2} {
+        #foreach {*hell[has][]} {hell_x} {
+            #if {"$hell_x" != "$hell[p5][F]" && "$hell_x" != "$hell[p5][U]"} {
+                #var hell[p5][S] {$hell_x};
+            };
+        };
+        #foreach {*hellk[down][]} {hell_x} {
+            #if {"$hell_x" != "$hell[p5][F]" && "$hell_x" != "$hell[p5][S]"} {
+                #var hell[p5][Y] {$hell_x};
+            };
+        };
+        #if {!&hellk[down][$hell[p5][S]]} {
+            #echo {<118>Hell: plane 5 doesn't match what was learned, the names may have changed.<088>};
+        };
+        #elseif {!$hellk[final]} {
+            #var hellk[role][n] {$hell[p5][F]};
+            #var hellk[role][e] {$hell[p5][S]};
+            #var hellk[role][u] {$hell[p5][Y]};
+            #var hellk[final] 1;
+            .hell_save;
+            .hell_dirs_refresh;
+            #echo {<128>Hell: directions set for the week, type hell to see them.<088>};
+        };
+    };
+};
+
+#NOP -- The landing room again (walked back to it): start the route over;
+#alias {.hell_p5_check_landing} {
+    #if {$hell[cnt] != 2 || "$hell[p5][F]" == ""} {
+        #return;
+    };
+    #if {&hell[has][$hell[p5][F]] && &hell[has][$hell[p5][U]]} {
+        #var hell[p5][step] 0;
+        #echo {<128>Hell: back at the plane 5 landing room.<088>};
+    };
+};
+
+#alias {.hell_target} {
+    #var hell[plane] 5;
+    #if {$hell[p5][step] == 5} {
+        #return;
+    };
+    #var hell[p5][step] 5;
+    #echo {<128>Hell: the mountain is here.  scale mountain (or hnext) to climb it.<088>};
+    #map goto 50502;
+    #if {"$toggles[hidemap]" == "1"} {
+        showmap;
+    };
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  THE MAP;
+#NOP -------------------------------------------------------------------;
+#NOP -- The map's mists rooms use the fixed labels n e s w u d for their exits (this week's words;
+#NOP -- change).  Planes 1-4 are vnums 56000-56107, 27 a plane, by (u,n,e) 0-2 with 2 toward the way;
+#NOP -- down, except the entrance 49782 (plane 1 centre) and the sign room 49078 (plane 4 way down).;
+#NOP -- Plane 5 is 56108-56134 by (u,n,e) from its landing room, except the mountain room 50502.;
+
+#NOP -- hell_lab: the label for exit word {name}, or empty.  Before the week's labels are fixed by;
+#NOP -- plane 5, its landing's two words are n and s anyway;
+#alias {.hell_label} {
+    #var hell_lab {};
+    #if {$hell[plane] == 5 && !$hellk[final]} {
+        #if {"%1" == "$hell[p5][F]"} {
+            #var hell_lab n;
+        };
+        #if {"%1" == "$hell[p5][U]"} {
+            #var hell_lab s;
+        };
+        #return;
+    };
+    #foreach {n;e;s;w;u;d} {hell_x} {
+        #if {"$hell_dir[$hell_x]" == "%1"} {
+            #var hell_lab {$hell_x};
+        };
+    };
+};
+
+#NOP -- hell_labs: this room's exits as labels, in n e s w u d order;
+#alias {.hell_labels_here} {
+    #var hell_labs {};
+    #foreach {*hell[has][]} {hell_y} {
+        .hell_label {$hell_y};
+        #if {"$hell_lab" == ""} {
+            #var hell_labs {?};
+            #return;
+        };
+        #var hell_labhave[$hell_lab] 1;
+    };
+    #foreach {n;e;s;w;u;d} {hell_y} {
+        #if {&hell_labhave[$hell_y]} {
+            #var hell_labs {$hell_labs,$hell_y};
+        };
+    };
+    #unvar hell_labhave;
+};
+
+#NOP -- After every mists room: put the map where you are.  Fixed rooms set it outright, other moves;
+#NOP -- follow the map exit for the move's label, and a map room whose exits don't match is dropped;
+#alias {.hell_map_follow} {
+    #var hell_mapnew {};
+    #if {"$hell_soul" == "enter" || $hell_entrance} {
+        #var hell_mapnew 49782;
+    };
+    #elseif {$hell_mountain} {
+        #var hell_mapnew 50502;
+    };
+    #elseif {$hell[cnt] == 6 && $hell[plane] == 4 && "$hell_change" == "up"} {
+        #var hell_mapnew 49078;
+    };
+    #elseif {"$hell_change" == "down" && $hell[plane] == 5} {
+        #var hell_mapnew 56108;
+    };
+    #elseif {"$hell_mv" != "" && "$hell[vnum]" != ""} {
+        .hell_label {$hell_mv};
+        #if {"$hell_lab" != ""} {
+            #map get roomexits hell_mx $hell[vnum];
+            #if {&hell_mx[$hell_lab]} {
+                #var hell_mapnew {$hell_mx[$hell_lab]};
+            };
+        };
+    };
+    #regex {$room_short} {^{-R-_|}Swirling Mists - With A Big Sign} {
+        #var hell_mapnew 49078;
+    };
+    #if {"$hell_mapnew" == ""} {
+        #if {"$hell_mv" != ""} {
+            #var hell[vnum] {};
+        };
+        #return;
+    };
+    #NOP -- Check the map room has this room's exits;
+    .hell_labels_here;
+    #map get roomname hell_mname $hell_mapnew;
+    #var hell_mlabs {@findhere_exits{$hell_mname}};
+    #if {"$hell_labs" != "?" && ",$hell_mlabs" != "$hell_labs"} {
+        #if {"$hell[vnum]" != ""} {
+            #echo {<138>Hell: lost the map position (map has $hell_mlabs, here is $hell_labs).  findhere puts it back.<088>};
+        };
+        #var hell[vnum] {};
+        #return;
+    };
+    #var hell[vnum] {$hell_mapnew};
+    #map goto $hell_mapnew;
+};
+
+#NOP -- After findhere: take the plane and position from the map room it found;
+#alias {.hell_from_map} {
+    #map get roomvnum hell_fv;
+    #var hell_fc {};
+    #if {"$hell_fv" == "49782"} {
+        #var hell_fp 1;
+        #var hell_fc {{u}{1}{n}{1}{e}{1}};
+    };
+    #elseif {"$hell_fv" == "49078"} {
+        #var hell_fp 4;
+        #var hell_fc {{u}{2}{n}{2}{e}{2}};
+    };
+    #elseif {$hell_fv >= 56000 && $hell_fv <= 56107} {
+        #math hell_fp {($hell_fv - 56000) / 27 + 1};
+        #math hell_fi {($hell_fv - 56000) % 27};
+        #math hell_fu {$hell_fi / 9};
+        #math hell_fn {($hell_fi / 3) % 3};
+        #math hell_fe {$hell_fi % 3};
+        #var hell_fc {{u}{$hell_fu}{n}{$hell_fn}{e}{$hell_fe}};
+    };
+    #elseif {"$hell_fv" == "50502" || ($hell_fv >= 56108 && $hell_fv <= 56134)} {
+        #var hell_fp 5;
+    };
+    #else {
+        #return;
+    };
+    #var hell[vnum] {$hell_fv};
+    #var hell[plane] {$hell_fp};
+    #var hell[corner] {};
+    #var hell[seen] {};
+    #var hell[arrival] {};
+    #var hell[arrpend] 0;
+    #var hell[pos] {};
+    #echo {<128>Hell: found you on plane $hell_fp.<088>};
+    #if {$hell_fp == 5} {
+        #var hell[p5] {{step}{-1}{F}{$hell_dir[n]}{U}{$hell_dir[s]}{S}{$hell_dir[e]}{Y}{$hell_dir[u]}};
+        #if {"$hell_fv" == "50502"} {
+            #var hell[p5][step] 5;
+        };
+        #return;
+    };
+    #NOP -- Cube position: each label's coordinate onto the axis of its word;
+    #if {&hell[rep][] == 3 && &hell_dir[] == 6} {
+        #foreach {u;n;e} {hell_x} {
+            #var hell_w {$hell_dir[$hell_x]};
+            #if {&hell[rep][$hell_w]} {
+                #var hell[pos][$hell_w] {$hell_fc[$hell_x]};
+            };
+            #else {
+                #math hell[pos][$hellk[opp][$hell_w]] {2 - $hell_fc[$hell_x]};
+            };
+        };
+    };
+};
+
+#NOP -- hell_bfs: the first label of the shortest map path from vnum %1 to vnum %2 (mists exits only);
+#alias {.hell_bfs} {
+    #var hell_bfs {};
+    #var hell_bq {};
+    #list hell_bq add {%1};
+    #var hell_bseen {};
+    #var hell_bseen[%1] {-};
+    #var hell_bi 1;
+    #while {$hell_bi <= &hell_bq[] && $hell_bi <= 200} {
+        #var hell_bv {$hell_bq[$hell_bi]};
+        #math hell_bi {$hell_bi + 1};
+        #if {"$hell_bv" == "%2"} {
+            #var hell_bfs {$hell_bseen[$hell_bv]};
+            #return;
+        };
+        #map get roomexits hell_bx $hell_bv;
+        #foreach {n;e;s;w;u;d} {hell_bl} {
+            #if {&hell_bx[$hell_bl]} {
+                #var hell_bd {$hell_bx[$hell_bl]};
+                #if {!&hell_bseen[$hell_bd]} {
+                    #if {"$hell_bv" == "%1"} {
+                        #var hell_bseen[$hell_bd] {$hell_bl};
+                    };
+                    #else {
+                        #var hell_bseen[$hell_bd] {$hell_bseen[$hell_bv]};
+                    };
+                    #list hell_bq add {$hell_bd};
+                };
+            };
+        };
+    };
+};
+
+#NOP -- findhere: this room's exit words as labels, so they compare with the map's names;
+#alias {.hell_findhere_exits} {
+    #if {!$hell[active] || &hell_dir[] != 6} {
+        #return;
+    };
+    #var hell_fx {};
+    #foreach {$findexits} {hell_y} {
+        .hell_label {$hell_y};
+        #if {"$hell_lab" != ""} {
+            #var hell_fx {$hell_fx;$hell_lab};
+        };
+    };
+    #var findexits {$hell_fx};
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  HNEXT: one step toward the mountain, learning on the way;
+#NOP -------------------------------------------------------------------;
+
+#alias {hnext} {
+    #if {!$hell[active]} {
+        #echo {<138>Hell: you're not in the Swirling Mists.<088>};
+        #return;
+    };
+    #if {&hell[queue][] || $hell[defer]} {
+        #echo {<138>Hell: still moving, wait for the room.<088>};
+        #return;
+    };
+    .hell_pick;
+    .hell_check_pick {.hell_pick};
+    #if {"$hell_pick" == ""} {
+        #return;
+    };
+    #if {"$hell_pick" == "scale mountain"} {
+        #send {scale mountain};
+        #return;
+    };
+    .hell_go $hell_pick;
+};
+
+#NOP -- .hell_check_pick {picker}: a pick the room doesn't have means the position was wrong, so;
+#NOP -- forget it and pick again (any exit, then the exits put it right);
+#alias {.hell_check_pick} {
+    #if {"$hell_pick" == "" || "$hell_pick" == "scale mountain" || &hell[has][$hell_pick]} {
+        #return;
+    };
+    #echo {<138>Hell: lost track of where this room is, finding it again.<088>};
+    #var hell[pos] {};
+    %1;
+};
+
+#NOP -- hell_pick: the next thing to send, or empty with a message;
+#alias {.hell_pick} {
+    #var hell_pick {};
+    #if {$hell[p5][step] == 5} {
+        #var hell_pick {scale mountain};
+        #return;
+    };
+    #if {$hell[plane] == 5} {
+        .hell_pick_p5;
+        #return;
+    };
+    #if {&hell[rep][] != 3} {
+        .hell_pick_pairs;
+        #return;
+    };
+    #if {&hell[pos][] != 3} {
+        #NOP -- Six exits and no idea where: any step tells us;
+        #foreach {*hell[has][]} {hell_x} {
+            #if {"$hell_pick" == ""} {
+                #var hell_pick {$hell_x};
+            };
+        };
+        #return;
+    };
+    #if {&hellk[down][] == 3} {
+        .hell_dpos;
+        #foreach {*hell[rep][]} {hell_x} {
+            #if {"$hell_pick" == "" && $hell[pos][$hell_x] != $hell_dpos[$hell_x]} {
+                #if {$hell_dpos[$hell_x] == 2} {
+                    #var hell_pick {$hell_x};
+                };
+                #else {
+                    #var hell_pick {$hellk[opp][$hell_x]};
+                };
+            };
+        };
+        #if {"$hell_pick" == ""} {
+            #foreach {*hellk[down][]} {hell_x} {
+                #if {"$hell_pick" == ""} {
+                    #var hell_pick {$hell_x};
+                };
+            };
+        };
+        #return;
+    };
+    .hell_pick_corner;
+};
+
+#NOP -- Pairs unknown: get to a plain corner (three exits), then step out and back along each exit;
+#alias {.hell_pick_pairs} {
+    #if {"$hell[back]" != ""} {
+        #var hell_pick {$hell[back]};
+        #var hell[back] {};
+        #if {&hell[has][$hell_pick]} {
+            #return;
+        };
+        #var hell_pick {};
+    };
+    #if {$hell[cnt] == 3} {
+        #foreach {*hell[has][]} {hell_x} {
+            #if {"$hell_pick" == "" && !&hellk[opp][$hell_x]} {
+                #var hell_pick {$hell_x};
+            };
+        };
+        #NOP -- The way back is the name that appears, which .hell_cube_move learns as its pair;
+        #var hell[back_from] {$hell_pick};
+        #return;
+    };
+    #NOP -- Not a corner: take an exit that doesn't lead away from an edge we're on;
+    #foreach {*hell[has][]} {hell_x} {
+        #if {"$hell_pick" == ""} {
+            #if {&hellk[opp][$hell_x]} {
+                #var hell_o {$hellk[opp][$hell_x]};
+                #if {&hell[has][$hell_o]} {
+                    #var hell_pick {$hell_x};
+                };
+            };
+            #else {
+                #var hell_pick {$hell_x};
+            };
+        };
+    };
+};
+
+#NOP -- Pairs known, way down unknown: visit corners until the six-exit one (plane 1), or step out of;
+#NOP -- a six-exit corner to see which way it goes (other planes when the landing corner isn't known);
+#alias {.hell_pick_corner} {
+    .hell_key;
+    #if {$hell_iscorner && $hell[cnt] == 6 && $hell[plane] > 1} {
+        #foreach {*hell[rep][]} {hell_x} {
+            #if {"$hell_pick" == ""} {
+                #if {$hell[pos][$hell_x] == 2} {
+                    #var hell_pick {$hell_x};
+                };
+                #else {
+                    #var hell_pick {$hellk[opp][$hell_x]};
+                };
+            };
+        };
+        #return;
+    };
+    #var hell_best 99;
+    #var hell_target {};
+    #foreach {0;2} {hell_a} {
+        #foreach {0;2} {hell_b} {
+            #foreach {0;2} {hell_c} {
+                #if {!&hell[corner][$hell_a$hell_b$hell_c]} {
+                    .hell_corner_dist {$hell_a} {$hell_b} {$hell_c};
+                    #if {$hell_dist < $hell_best} {
+                        #var hell_best $hell_dist;
+                        #var hell_target {$hell_t};
+                    };
+                };
+            };
+        };
+    };
+    #if {&hell_target[] != 3} {
+        #echo {<118>Hell: every corner visited and no way down found.  Type hellreset and try again.<088>};
+        #return;
+    };
+    #foreach {*hell[rep][]} {hell_x} {
+        #if {"$hell_pick" == "" && $hell_target[$hell_x] != $hell[pos][$hell_x]} {
+            #if {$hell_target[$hell_x] > $hell[pos][$hell_x]} {
+                #var hell_pick {$hell_x};
+            };
+            #else {
+                #var hell_pick {$hellk[opp][$hell_x]};
+            };
+        };
+    };
+};
+
+#NOP -- .hell_corner_dist {a} {b} {c}: hell_t[axis] for that room (axis order) and hell_dist steps to it;
+#alias {.hell_corner_dist} {
+    #var hell_t {};
+    #var hell_dist 0;
+    #var hell_i 0;
+    #var hell_digits {{1}{%1}{2}{%2}{3}{%3}};
+    #foreach {*hell[rep][]} {hell_x} {
+        #math hell_i {$hell_i + 1};
+        #var hell_t[$hell_x] {$hell_digits[$hell_i]};
+        #math hell_dd {$hell_t[$hell_x] - $hell[pos][$hell_x]};
+        #if {$hell_dd < 0} {
+            #math hell_dd {0 - $hell_dd};
+        };
+        #math hell_dist {$hell_dist + $hell_dd};
+    };
+};
+
+#NOP -- The stepper's pick: on a cube plane, walk to the nearest room not visited yet, and once all;
+#NOP -- 27 are done head for the way down.  Plane 5, or anything not learned yet, is hnext's pick;
+#alias {.hell_pick_sweep} {
+    #var hell_pick {};
+    #if {$hell[plane] > 4 || $hell[p5][step] == 5 || &hell[rep][] != 3 || &hellk[down][] != 3 || &hell[pos][] != 3} {
+        .hell_pick;
+        #return;
+    };
+    #var hell_best 99;
+    #var hell_target {};
+    #foreach {0;1;2} {hell_a} {
+        #foreach {0;1;2} {hell_b} {
+            #foreach {0;1;2} {hell_c} {
+                #if {!&hell[seen][$hell_a$hell_b$hell_c]} {
+                    .hell_corner_dist {$hell_a} {$hell_b} {$hell_c};
+                    #if {$hell_dist < $hell_best} {
+                        #var hell_best $hell_dist;
+                        #var hell_target {$hell_t};
+                    };
+                };
+            };
+        };
+    };
+    #if {&hell_target[] != 3} {
+        .hell_pick;
+        #return;
+    };
+    #foreach {*hell[rep][]} {hell_x} {
+        #if {"$hell_pick" == "" && $hell_target[$hell_x] != $hell[pos][$hell_x]} {
+            #if {$hell_target[$hell_x] > $hell[pos][$hell_x]} {
+                #var hell_pick {$hell_x};
+            };
+            #else {
+                #var hell_pick {$hellk[opp][$hell_x]};
+            };
+        };
+    };
+};
+
+#alias {.hell_pick_p5} {
+    #if {$hell[p5][step] < 0} {
+        #NOP -- Off the route: the map knows the way if it knows the room;
+        #if {"$hell[vnum]" != "" && $hellk[final]} {
+            .hell_bfs {$hell[vnum]} {50502};
+            #if {"$hell_bfs" != "" && "$hell_bfs" != "-"} {
+                #var hell_pick {$hell_dir[$hell_bfs]};
+                #return;
+            };
+        };
+        #echo {<138>Hell: off the plane 5 route.  Walk back to the landing room (two exits, one goes up), or findhere.<088>};
+        #return;
+    };
+    #if {&hellk[down][] != 3 || "$hell[p5][F]" == ""} {
+        #echo {<138>Hell: the way down wasn't learned before plane 5.  Go back up a plane (the exit that says closer) and hnext there.<088>};
+        #return;
+    };
+    .hell_p5_route;
+    #var hell_pick {$hell_want};
+};
+
+#NOP -------------------------------------------------------------------;
+#NOP  PLAYER COMMANDS;
+#NOP -------------------------------------------------------------------;
+
+#alias {hell} {
+    #echo {<168>---- Rastafan Hell ----<088>};
+    #if {$hell[active]} {
+        #var hell_list {};
+        #foreach {*hell[has][]} {hell_x} {
+            #var hell_list {$hell_list $hell_x};
+        };
+        #echo {Plane: $hell[plane]   Exits here:$hell_list};
+    };
+    #else {
+        #echo {Not in the Swirling Mists.};
+    };
+    #if {&hellk[opp][] == 0} {
+        #echo {Nothing learned yet this week.  In the mists, hnext walks and learns.};
+    };
+    #else {
+        #echo {Opposites:};
+        #foreach {*hell[rep][]} {hell_x} {
+            #echo {   $hell_x <-> $hellk[opp][$hell_x]};
+        };
+        #if {&hell[rep][] != 3} {
+            #foreach {*hellk[opp][]} {hell_x} {
+                #echo {   $hell_x <-> $hellk[opp][$hell_x]};
+            };
+        };
+    };
+    #if {&hellk[down][] == 3} {
+        #var hell_list {};
+        #foreach {*hellk[down][]} {hell_x} {
+            #var hell_list {$hell_list $hell_x};
+        };
+        #echo {Way down:$hell_list};
+        .hell_labels;
+        #if {$hellk[final]} {
+            #echo {Directions (set for the week):};
+        };
+        #else {
+            #echo {Directions (u n e may swap round once plane 5 is walked):};
+        };
+        #foreach {u;n;e;d;s;w} {hell_x} {
+            #echo {   $hell_x = $hell_dir[$hell_x]};
+        };
+    };
+    #echo {hell-help lists all the hell commands.};
+};
+
+#alias {hellplane} {
+    #if {"%1" != "1" && "%1" != "2" && "%1" != "3" && "%1" != "4" && "%1" != "5"} {
+        #echo {<138>Usage: hellplane <1-5><088>};
+        #return;
+    };
+    #var hell[plane] %1;
+    #var hell[pos] {};
+    #var hell[corner] {};
+    #var hell[seen] {};
+    #var hell[arrival] {};
+    #var hell[p5] {{step}{-1}};
+    #echo {<128>Hell: plane set to %1.<088>};
+};
+
+#NOP -- Start the hell stepper where you stand.  +hell runs the map to the portal first, which only;
+#NOP -- works from outside: the map's own Swirling Mists rooms are from old weeks;
+#alias {hellbot} {
+    #if {!$hell[active]} {
+        #echo {<138>Hell: hellbot starts the stepper inside the Swirling Mists.  From outside use +hell.<088>};
+        #return;
+    };
+    #var bot[alias] hell;
+    #var bot[file] rastafan_hell;
+    #var bot[loop] 0;
+    #var bot[playercheck] 1;
+    #var bot[start_vnum] 49782;
+    #read common/bot/bots/rastafan_hell.tin;
+    update_xp start;
+    ..;
+};
+
+#alias {hell-help} {
+    #echo {     <fff>Rastafan Hell (Swirling Mists) Aliases<088>};
+    #echo {<eaf>---------------------------------------------------------------------------<088>};
+    #echo {<fff>Alias            -   What the alias does<088>};
+    #echo {};
+    #echo {<cdd>+hell            -   start the stepper from outside: runs to the Portal of Evil, goes in,<088>};
+    #echo {<cdd>                     kills every devil in all 27 rooms of planes 1-4, then walks plane 5<088>};
+    #echo {<cdd>                     to the mountain room and stops (scale mountain is up to you)<088>};
+    #echo {<cdd>hellbot          -   start the same stepper from wherever you are inside the mists<088>};
+    #echo {<cdd>hnext            -   take one step toward the mountain (learns the week's names on the way,<088>};
+    #echo {<cdd>                     scales the mountain when you're in the mountain room)<088>};
+    #echo {<cdd>hell             -   plane you're on, the learned exit names and the direction table<088>};
+    #echo {<cdd>n e s w u d      -   inside the mists only: move by the learned names (u n e head down<088>};
+    #echo {<cdd>                     toward the mountain), the six words work too<088>};
+    #echo {<cdd>hellplane <1-5>  -   tell it which plane you're on if it lost count<088>};
+    #echo {<cdd>hellreset        -   forget this week's names and learn them again<088>};
+    #echo {<cdd>findhere-auto    -   lost on the map in the mists: finds the room and puts hell back in step<088>};
+    #echo {};
+    #echo {<fff>Good to know<088>};
+    #echo {<cdd> - The six words (yonder thatway thisway anotherway overthere overhere) change every<088>};
+    #echo {<cdd>   Wednesday by the mud's clock ('time').  What's learned is saved in vars/boot.tin for all<088>};
+    #echo {<cdd>   your characters, so an alt uses them straight away.<088>};
+    #echo {<cdd> - In: enter portal at the Portal of Evil.  Out: 'out' in the plane 1 centre room.<088>};
+    #echo {<cdd> - The sign room is plane 4's way down.  Past it (plane 5) monsters won't let you leave a<088>};
+    #echo {<cdd>   fight: no quit, teleport or running.<088>};
+    #echo {<cdd> - Mountain room: 'The mist seems to form around something here', scale mountain.<088>};
+    #echo {<cdd> - #var hell_debug 1 shows where each room's exits were read from.<088>};
+};
+
+#alias {hellreset} {
+    .hell_forget;
+    #echo {<128>Hell: forgot this week's directions.<088>};
+};
+
+.hell_load;
+
+#NOP -- Read again while standing in the mists (a reload): pick the room up straight away;
+#if {&{room_short}} {
+    .hell_room;
+};
+
+#class {rastafan_hell} {close};
