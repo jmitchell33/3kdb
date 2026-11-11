@@ -24,7 +24,7 @@
     #class {worlddrops2_watch} {kill};
     #if {"$toggles[worlddrops2]" == "1"} {
         #class {worlddrops2_watch} {open};
-        #line substitute variables {#action {^{(?i)(?:-[a-z!]+-)?((?:(?:a|an|the) )?(?:$worldDropNames)[^:]*?)\.$}} {.notifyWorldDrop {%%2}} {2}};
+        #line substitute variables {#action {^{(?i)(?:-[a-z!]+-)?((?:(?:a|an|the) )?(?:$worldDropNames)[^:]*?)\.$}} {.notifyWorldDrop {%%2} {floor}} {2}};
         #class {worlddrops2_watch} {close};
     };
 };
@@ -34,8 +34,41 @@
 #NOP -- Therlasia, show another name until they are picked up);
 #var worldDropKeys {shieldbreaker;buckler;breastplate;gauntlets;boots;helmet;shield;armour;cloak;robes;robe;amulet;skull;staff;blade;flask;kitten;timerender;thundering;device};
 
+#NOP -- Areas where a world drop on the floor is someone's (put down in town, in a pub), so worlddrops2 leaves it;
+#NOP -- and says nothing.  Drops you find on your own kills are still picked up there;
+#var worldDropSafeAreas {Pinnacle};
+
+#NOP -- @worldDropBaseName{text}: lower case, no a/an/the in front, no <..> or (..) tags;
+#function {worldDropBaseName} {
+    #format result {%l} {%0};
+    #replace result {%s<%*>} {};
+    #replace result {%s(%*)} {};
+    #regex {$result} {{^(?:a|an|the) (.*)$}} {#var result {&2}};
+};
+
+#NOP -- A world drop you put down yourself isn't grabbed again off the floor this session;
+#var worldDropDropped {};
+#action {^You drop %*.$} {
+    #var worldDropDroppedName {@worldDropBaseName{%1}};
+    #regex {$worldDropDroppedName} {{(?i)$worldDropNames}} {
+        #var worldDropDropped[$worldDropDroppedName] 1;
+    };
+} {5};
+
+#NOP -- Each drop in each room notifies once a session, not every time the room is looked at;
+#var worldDropNotified {};
+
+#NOP -- .notifyWorldDrop {name} [floor]: floor is a drop seen lying in the room (worlddrops2), not one from your kill;
 #alias .notifyWorldDrop {
     #local name {%1};
+    #if {"%2" == "floor"} {
+        #map get roomarea worldDropArea;
+        #if {"$worldDropArea" != "" && ";$worldDropSafeAreas;" == "%*;$worldDropArea;%*"} {#return};
+        #var worldDropFloorName {@worldDropBaseName{$name}};
+        #if {&worldDropDropped[$worldDropFloorName]} {#return};
+        #NOP -- Already seen lying here this session: don't try to get it again every time the room shows;
+        #if {&worldDropNotified[$worldDropFloorName@$roomvnum]} {#return};
+    };
     #NOP -- worldDropKey is a #var: a #local set inside a #regex branch is gone when the branch ends;
     #var worldDropKey {};
     #local lname {};
@@ -53,10 +86,10 @@
     #NOP -- first and leave the drop for another character if you already have one;
     #NOP -- worlddrops2: grab it right away, no inventory check;
     #if !$idle_flag {#if {"$toggles[worlddrops2]" == "1"} {get $worldDropKey from corpse;get $worldDropKey} {.worldDropGet {$name}}};
-    #NOP -- Only the first sighting of a drop sends a notify or Discord post;
-    #if {"$worldDropSeen" == "$name"} {#var worldDropNew 0} {#var worldDropNew 1};
-    #var worldDropSeen {$name};
-    #delay {worlddrop_seen} {#var worldDropSeen {}} {30};
+    #NOP -- Only the first sighting of a drop in a room this session sends a notify or Discord post;
+    #var worldDropNoteKey {@worldDropBaseName{$name}@$roomvnum};
+    #if {&worldDropNotified[$worldDropNoteKey]} {#var worldDropNew 0} {#var worldDropNew 1};
+    #var worldDropNotified[$worldDropNoteKey] 1;
     #if {$worldDropNew && "$toggles[worlddrops_notify]" != "0"} {.notify {<fcb>WORLD DROP<ddd> $name at $roomvnum}};
     #echo {<cfb>===========> <ccd>WORLD DROP $name<088>};
     #if {$worldDropNew && (&webhook[url][worlddrops] || &webhook[url][general])} {
