@@ -39,6 +39,7 @@ This is the full guide to 3kdb: what it is, how to use it, and how to add your o
   - [Bot settings](#bot-settings)
   - [Run several areas in a row](#run-several-areas-in-a-row)
   - [Add your own steps](#add-your-own-steps)
+  - [Rastafan Hell](#rastafan-hell)
 - [Deadman timer](#deadman-timer)
 - [Fighting](#fighting)
   - [Strategies](#strategies)
@@ -532,6 +533,18 @@ The easiest way is [mob kill actions](#mob-kill-actions), a list of commands tha
 
 For anything else, your character's `config.tin` can run commands before a bot starts or before each fight. See [Bot hooks](#bot-hooks).
 
+### Rastafan Hell
+
+Hell's Swirling Mists, through the Portal of Evil, is a stack of dark rooms whose exits are words like `yonder` and `thisway`. The words point a different way every Wednesday, by the mud's clock (`time`). 3kdb works them out as you walk, and saves them in `vars/boot.tin` so all your characters can use them.
+
+- `+hell` starts the stepper from outside. It walks in, fights every devil on planes 1 to 4, then walks plane 5 to the mountain room and stops. `hellbot` starts it from inside the mists.
+- `hnext` takes one step toward the mountain, if you'd rather walk yourself.
+- Inside the mists, `n`, `e`, `s`, `w`, `u` and `d` move by this week's words. `u`, `n` and `e` head down toward the mountain. They go back to normal as soon as you're in a room outside the mists, and `hellclear` does it straight away.
+- `hell` shows the plane you're on and this week's words, and `hell-help` lists every command.
+- The map follows you, and `findhere` and `findhere-auto` work there once the week's words are known.
+
+Past the sign room on plane 4, monsters won't let you leave a fight. You can't quit, teleport or run. In the mountain room, type `scale mountain` to climb.
+
 [Back to top](#3kdb-manual)
 
 ---
@@ -632,6 +645,7 @@ It reloads its scripts once the game confirms, and remembers your guild for next
 - `dstats` is the damage report, and `dreset` resets it. It needs the numbers perk.
 - `defStats` is the defense report, and `defStats_reset` resets it.
 - `istats` is the item tracker, and `istats_reset` resets it.
+- `rounds` is the combat round tracker. Turn it on with `toggle rounds`. It shows your rounds all time, this session, and how many each guild level took. It reads your guild level from `score`, and `recover` checks `score` by itself, for any guild. `rounds note <text>` adds your own line to the log, `rounds check` reads `score` again, and `rounds-help` explains it all. 3kdb also reads `score` (hidden) at every login and return from linkdeath; typing `score` yourself always shows it. It keeps its own count, so nothing that clears `total_rounds` touches it. The count is saved every round to `logs/<your system username>/rounds/`, so a crash or linkdeath loses at most one round.
 - `reset_xp` resets the XP tracker on the data panel.
 - `reset_gxp` resets guild experience tracking.
 - `.reps` is the reputation tracker.
@@ -666,7 +680,7 @@ Some guilds have more. Check `dblib trackers` and `dblib <your guild>`. For exam
 
 ### Chat window
 
-Tells, party, clan, guild and high mortal chat all show in the chat window. They're also saved to `logs/<your system username>/`.
+Tells, party, clan, guild and high mortal chat all show in the chat window. They're also saved to `logs/<your system username>/chatlogs/`, one file per day.
 
 To hide someone from the chat window:
 
@@ -723,7 +737,7 @@ toggle discord_post
 
 `.reload` works too, in place of the `#read`.
 
-If posts don't appear, look for errors in `logs/<your system username>/discordPost.log`.
+If posts don't appear, look for errors in `logs/<your system username>/discord/discordPost.log`.
 
 `private.tin` is never uploaded by git, so your URLs stay private as long as you keep them in that file.
 
@@ -1234,7 +1248,7 @@ Run `ld` and log back in, or run `.reload`, to load the new code. If only one fi
 - **`common/map/`:** the map, and the speedrun list
 - **`modules/`:** bigger features, like the map, crafting and trackers
 - **`logs/`:** your chat and session logs
-- **`vars/`:** the saved reboot times
+- **`vars/`:** the saved reboot times, door combos and Rastafan Hell's exit words, shared by all your characters
 - **`scripts/`:** Python helpers, such as the one that posts to Discord
 - **`docs/`:** these guides
 
@@ -1273,6 +1287,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `beepon`: turn on terminal beep on events (toggle beep).
 - `beepoff`: turn off terminal beep on events (toggle beep).
 - `qq`: toggle mouse capture for clickable UI (toggle mouseActive).
+- `recover`: recover, then a hidden score updates your saved score info and logs it if toggle rounds is on. Necros: also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on.
 - `toggle-list`: 3kdb current toggles list.
 - `toggle`: turn a toggle on or off, see toggle-list. Usage: `toggle <name>`
 - `toggle-reset`: set every toggle back to its default, asks first. Usage: `toggle-reset then toggle-reset confirm`
@@ -1465,6 +1480,8 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `defStats`: defense tracking report.
 - `istats`: item tracker extraordinaire.
 - `istats_reset`: reset item tracker.
+- `rounds`: combat rounds all time, this session and per guild level. Turn on with toggle rounds. Usage: `rounds`, `rounds note <text>` or `rounds check`
+- `rounds-help`: what the round tracker does and its commands.
 - `defStats_reset`: reset defense stats tracker.
 - `spellDmg-clear`: clear spell damage tracker.
 - `fdmgStats`: fremen damage approximation report - no numbers perk needed.
@@ -1599,6 +1616,13 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `sopem1`: enter sopem part 1.
 - `sopem2`: enter sopem part 2.
 - `run_uk`: undead knight book and hunt loop.
+- `hell-help`: Rastafan Hell: list the hell commands and what they do.
+- `hnext`: Rastafan Hell (Swirling Mists): one step toward the mountain, learning the week's exit names on the way, then scales the mountain.
+- `hell`: Rastafan Hell: plane and this week's learned exit names. In the mists, n e s w u d send them (u n e head toward the mountain).
+- `hellbot`: Rastafan Hell: start the hell stepper where you stand in the mists (+hell starts it from outside).
+- `hellplane`: Rastafan Hell: say which plane you are on if hnext lost count. Usage: `hellplane <1-5>`
+- `hellreset`: Rastafan Hell: forget the learned exit names and learn them again.
+- `hellclear`: Rastafan Hell: put n e s w u d and the exit words back to normal now (leaving the mists does it by itself).
 
 ### Science areas
 
@@ -1816,7 +1840,6 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `dsave_report`: necromancer dsave mob report.
 - `iprime_tracker`: invoke prime success/fail counts. Usage: `iprime_tracker or iprime_tracker reset`
 - `circle_tracker`: next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker. Usage: `circle_tracker or circle_tracker reset`
-- `recover`: recover, also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on.
 - `comt`: switch invoke damage types with comtrance. Usage: `comt <damage type>`
 
 **Priest**

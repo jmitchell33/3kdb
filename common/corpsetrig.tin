@@ -21,11 +21,20 @@
 #NOP -- We don't want to track a KB on certain deaths, like a mage summon;
 #alias _kbCheckIgnore {
     #switch {"$deathReport[mob_killed]"} {
-        #case {"Celestial Lion"} {#var kbIgnore 1};
-        #case {"Undead Wraith"} {#var kbIgnore 1};
-        #case {"Shadow Panther"} {#var kbIgnore 1};
         #case {"Something"} {#var kbIgnore 1};
         #case {"Undead"} {#if {"$guild" == "necromancer"} {#var kbIgnore 1}};
+        #NOP -- Mage summons with kb_ignore 1 in common/guilds/mage/summon_data.tin;
+        #default
+        {
+            #foreach $summon_kb_ignore[%*] tmpKbName
+            {
+                #if {"$deathReport[mob_killed]" == "$tmpKbName"}
+                {
+                    #var kbIgnore 1;
+                    #break;
+                };
+            };
+        };
     };
 };
 
@@ -56,6 +65,8 @@
     #var deathReport[mob_killed] %1;
     #if {&acidrain[]} {.acidrain_died {%1}};
     _cleanMobKilled;
+    #NOP -- For the damage tracker's late lines (modules/dmgtracker/dmgtracker.tin);
+    #if {&{dmgtracker}} {.dmg_mob_died {$deathReport[mob_killed]}};
     #var kbIgnore 0;
     #var fakeKill 0;
     _kbCheckIgnore;

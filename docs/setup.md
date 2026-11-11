@@ -277,9 +277,9 @@ Did it stop with an error because you changed some files? See [Keep your changes
 
 ## What the menu creates for you
 
-Each time it opens, the menu makes these two folders if they're missing:
+Each time it opens, the menu makes these folders if they're missing:
 
-- `logs/<your system username>/` for your chat logs
+- `logs/<your system username>/chatlogs/` for your chat logs, and `logs/<your system username>/discord/` for Discord posting
 - `vars/` for the reboot times shown on the menu
 
 When you add a new character, it makes:
@@ -347,7 +347,7 @@ Your log folder is missing. Opening the menu creates it. If you logged in anothe
 
 ```bash
 cd ~/3kdb
-mkdir -p "logs/$(whoami)" vars
+mkdir -p "logs/$(whoami)/chatlogs" "logs/$(whoami)/discord" vars
 ```
 
 **`3kdb has no scripts for: ...`**

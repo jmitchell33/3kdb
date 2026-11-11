@@ -328,6 +328,8 @@ If that can't tell which room you're in, try:
 findhere-auto
 ```
 
+In Rastafan Hell's Swirling Mists, these need this week's exit words first. Walk a few steps with `hnext`, then try again.
+
 ### How do I log out?
 
 Use `ld` to stay linkdead. Your character stays in the game and keeps its equipment. `quit` logs out fully, and you can lose equipment. See [Leaving the game](manual.md#leaving-the-game).
@@ -394,7 +396,7 @@ Use `gswap <guild>` as usual, and 3kdb follows. You need the perk for it in the 
 
 ### Where are my chat logs?
 
-In `logs/<your system username>/`, inside your `3kdb` folder.
+In `logs/<your system username>/chatlogs/`, inside your `3kdb` folder, one file per day. Older ones may be compressed (`.zst`): read those with `zstdless`.
 
 ### How do I hide someone from my chat window?
 
@@ -431,6 +433,10 @@ help rules
 ```text
 +turkeys
 ```
+
+### How do I get through Rastafan Hell?
+
+Its exits change every Wednesday, so there's no fixed path. `+hell` runs the stepper from outside, and `hnext` takes one step at a time. `hell-help` lists everything. See [Rastafan Hell](manual.md#rastafan-hell).
 
 ### How do I stop a bot?
 
@@ -672,7 +678,7 @@ Your log folder is missing. Opening the menu creates it. If you logged in anothe
 
 ```bash
 cd ~/3kdb
-mkdir -p "logs/$(whoami)" vars
+mkdir -p "logs/$(whoami)/chatlogs" "logs/$(whoami)/discord" vars
 ```
 
 ### `There is no reason to '...' here`

@@ -2,6 +2,10 @@
 #class {dmgtracker} {open}
 
 #var dmgtracker 1;
+#NOP -- Counters for .dmgLateLines;
+#if {!&cmbt[lineseq]} {#var cmbt[lineseq] 0};
+#if {!&cmbt[killed_n]} {#var cmbt[killed_n] 0};
+#if {!&cmbt[late][lines]} {#var cmbt[late] {{lines}{0}{dmg}{0}}};
 
 #alias .trackExtraAttack {
     #math cmbt[extra_attacks][round] {$cmbt[extra_attacks][round] + 1};
@@ -325,6 +329,8 @@ dreset;
 #NOP -- Each mob hit in a round gets its own "You hit" line, so a category's damage is added up here;
 #NOP -- and only handed to dmgTrack once the round is over, so a 2 mob round counts as 1 round;
 #alias .dmgRoundAdd {
+    #NOP -- Categories this hit line went into, for .dmgLateLine;
+    #var dmgLineCats[%1] 1;
     #if {$cmbt[round][cat][%1][dmg] > 0} {
         #math cmbt[round][cat][%1][dmg] {$cmbt[round][cat][%1][dmg] + $dmgAmount};
         #math cmbt[round][cat][%1][times] {$cmbt[round][cat][%1][times] + $dmgTimes};
@@ -334,8 +340,79 @@ dreset;
     };
 };
 
+#NOP -- Late lines: a dead mob's last damage comes at the end of the next round's hit lines.  Those lines;
+#NOP -- are taken out of the round (so it isn't counted as 2 mobs) and added to the stats without a round;
+
+#NOP -- Called by common/corpsetrig.tin when a mob dies;
+#alias .dmg_mob_died {
+    #format dmgDiedName {%l} {%1};
+    #math cmbt[killed_n] {$cmbt[killed_n] + 1};
+    #format dmgDiedTime {%U};
+    #var cmbt[killed][$cmbt[killed_n]] {{name}{$dmgDiedName}{seq}{$cmbt[lineseq]}{time}{$dmgDiedTime}};
+};
+
+#alias .dmgLateLines {
+    #if {&cmbt[round][lines][] < 2 || &cmbt[killed][] == 0} {#return};
+    #local first {$cmbt[round][lines][1][seq]};
+    #NOP -- Deaths at least 0.75s before this round started, by name.  A death message can come just before;
+    #NOP -- its own round's hit line, late lines come a round later;
+    #local firstTime {$cmbt[round][lines][1][time]};
+    #var dmgLateDue {};
+    #foreach *cmbt[killed][] tmpKill {
+        #if {$cmbt[killed][$tmpKill][seq] < $first && $firstTime - $cmbt[killed][$tmpKill][time] > 750000} {
+            #local kn {$cmbt[killed][$tmpKill][name]};
+            #if {&dmgLateDue[$kn]} {
+                #math dmgLateDue[$kn] {$dmgLateDue[$kn] + 1};
+            } {
+                #var dmgLateDue[$kn] 1;
+            };
+        };
+    };
+    #if {&dmgLateDue[] == 0} {#return};
+    #NOP -- From the end, never the first line. Names may be shortened, so a prefix match counts;
+    #local li {&cmbt[round][lines][]};
+    #while {$li > 1} {
+        #local ln {$cmbt[round][lines][$li][name]};
+        #var dmgLateHit {};
+        #foreach *dmgLateDue[] tmpDue {
+            #if {"$dmgLateHit" == "" && $dmgLateDue[$tmpDue] > 0} {
+                #if {"$ln" == "$tmpDue" || "$tmpDue" == "$ln %*" || "$ln" == "$tmpDue %*"} {#var dmgLateHit {$tmpDue}};
+            };
+        };
+        #if {"$dmgLateHit" == ""} {#break};
+        #math dmgLateDue[$dmgLateHit] {$dmgLateDue[$dmgLateHit] - 1};
+        .dmgLateLine $li;
+        #math li {$li - 1};
+    };
+};
+
+#NOP -- .dmgLateLine <n>: move line n's damage from this round to the stats;
+#alias .dmgLateLine {
+    #local ld {$cmbt[round][lines][%1][dmg]};
+    #local lt {$cmbt[round][lines][%1][times]};
+    #foreach *cmbt[round][lines][%1][cats][] tmpCat {
+        #math cmbt[round][cat][$tmpCat][dmg] {$cmbt[round][cat][$tmpCat][dmg] - $ld};
+        #math cmbt[round][cat][$tmpCat][times] {$cmbt[round][cat][$tmpCat][times] - $lt};
+        #if {$cmbt[round][cat][$tmpCat][dmg] <= 0} {#unvar cmbt[round][cat][$tmpCat]};
+        #if {$cmbt[category][$tmpCat][rnd] > 0} {
+            #math cmbt[category][$tmpCat][dmg] {$cmbt[category][$tmpCat][dmg] + $ld};
+            #math cmbt[category][$tmpCat][avg] {$cmbt[category][$tmpCat][dmg] / $cmbt[category][$tmpCat][rnd]};
+        };
+    };
+    #math cmbt[round][dmg] {$cmbt[round][dmg] - $ld};
+    #math cmbt[round][mobs] {$cmbt[round][mobs] - 1};
+    #local lk {$cmbt[round][lines][%1][kw]};
+    #math cmbt[round][kw][$lk] {$cmbt[round][kw][$lk] - 1};
+    #if {$cmbt[round][kw][$lk] <= 0} {#unvar cmbt[round][kw][$lk]};
+    #NOP -- It was the dead mob's, not the current one's;
+    #math mob[damage_dealt] {$mob[damage_dealt] - $ld};
+    #math cmbt[late][lines] {$cmbt[late][lines] + 1};
+    #math cmbt[late][dmg] {$cmbt[late][dmg] + $ld};
+};
+
 #NOP -- The round is over once the dmg_round_reset delay fires;
 #alias .dmg_round_flush {
+    .dmgLateLines;
     .dmgRoundTotalEcho;
     #foreach *cmbt[round][cat][%*] tmpCat {
         #format dmgDisplay {%g} {$cmbt[round][cat][$tmpCat][dmg]};
@@ -380,6 +457,14 @@ dreset;
     #unvar cmbt[round][kw];
     #var cmbt[round][mobs] 0;
     #var cmbt[round][dmg] 0;
+    #NOP -- Kills before this round are used up, later ones are for the next round;
+    #if {&cmbt[round][lines][] > 0} {
+        #local first {$cmbt[round][lines][1][seq]};
+        #foreach *cmbt[killed][] tmpKill {
+            #if {$cmbt[killed][$tmpKill][seq] < $first} {#unvar cmbt[killed][$tmpKill]};
+        };
+    };
+    #var cmbt[round][lines] {};
 };
 
 #NOP -- One line under the round's hit lines with the total;
@@ -498,6 +583,8 @@ dreset;
 
         #if {$vaf[numbers]} {#var incombat 1};
 
+        #var dmgLineCats {};
+        #math cmbt[lineseq] {$cmbt[lineseq] + 1};
         #if {!$ewell_round} {
             #if $fry_round {
                 .dmgRoundAdd Fry;
@@ -595,6 +682,10 @@ dreset;
                         .dmgRoundAdd marshal;
                     };
                 };
+                #NOP -- Kept for .dmgLateLines;
+                #format dmgLineName {%l} {%2};
+                #format dmgLineTime {%U};
+                #list cmbt[round][lines] add {{{name}{$dmgLineName}{kw}{$dmgMobKw}{seq}{$cmbt[lineseq]}{time}{$dmgLineTime}{dmg}{$dmgAmount}{times}{$dmgTimes}{cats}{$dmgLineCats}}};
             };
         };
         .dmg_round_reset;
