@@ -347,16 +347,19 @@ dreset;
 #alias .dmg_mob_died {
     #format dmgDiedName {%l} {%1};
     #math cmbt[killed_n] {$cmbt[killed_n] + 1};
-    #var cmbt[killed][$cmbt[killed_n]] {{name}{$dmgDiedName}{seq}{$cmbt[lineseq]}};
+    #format dmgDiedTime {%U};
+    #var cmbt[killed][$cmbt[killed_n]] {{name}{$dmgDiedName}{seq}{$cmbt[lineseq]}{time}{$dmgDiedTime}};
 };
 
 #alias .dmgLateLines {
     #if {&cmbt[round][lines][] < 2 || &cmbt[killed][] == 0} {#return};
     #local first {$cmbt[round][lines][1][seq]};
-    #NOP -- Deaths before this round started, by name;
+    #NOP -- Deaths at least 0.75s before this round started, by name.  A death message can come just before;
+    #NOP -- its own round's hit line, late lines come a round later;
+    #local firstTime {$cmbt[round][lines][1][time]};
     #var dmgLateDue {};
     #foreach *cmbt[killed][] tmpKill {
-        #if {$cmbt[killed][$tmpKill][seq] < $first} {
+        #if {$cmbt[killed][$tmpKill][seq] < $first && $firstTime - $cmbt[killed][$tmpKill][time] > 750000} {
             #local kn {$cmbt[killed][$tmpKill][name]};
             #if {&dmgLateDue[$kn]} {
                 #math dmgLateDue[$kn] {$dmgLateDue[$kn] + 1};
@@ -681,7 +684,8 @@ dreset;
                 };
                 #NOP -- Kept for .dmgLateLines;
                 #format dmgLineName {%l} {%2};
-                #list cmbt[round][lines] add {{{name}{$dmgLineName}{kw}{$dmgMobKw}{seq}{$cmbt[lineseq]}{dmg}{$dmgAmount}{times}{$dmgTimes}{cats}{$dmgLineCats}}};
+                #format dmgLineTime {%U};
+                #list cmbt[round][lines] add {{{name}{$dmgLineName}{kw}{$dmgMobKw}{seq}{$cmbt[lineseq]}{time}{$dmgLineTime}{dmg}{$dmgAmount}{times}{$dmgTimes}{cats}{$dmgLineCats}}};
             };
         };
         .dmg_round_reset;
