@@ -1,0 +1,121 @@
+#class {score_reader} {kill};
+#class {score_reader} {open};
+
+#NOP -- Reads a few fields from score into my[score] whenever score is shown, and at every login or return from;
+#NOP -- linkdeath (hidden, see .score_quiet), whether toggle rounds is on or not. my is saved in vars.tin, so only;
+#NOP -- harmless fields are kept. Never stored: Exp, Money, Bank, Quests, your title line, best kills,;
+#NOP -- arch foe, hp/sp/gp. Each pattern starts at its score line, so other lines with these words don't match;
+#NOP --   my[score][level_title] my[score][level]   e.g. Oracle, 135   (Level    : Oracle (135));
+#NOP --   my[score][guild] my[score][guild_level]   e.g. Necromancer, 54 or a tier like IV (Guild    : Necromancer (54));
+#NOP --   my[score][status]                         e.g. Lich, Black Pearl;
+#NOP --   my[score][age]                            e.g. 80 d 15 h 54 m;
+#NOP --   my[score][explore] my[score][kills] my[score][deaths];
+#NOP --   my[score][circle]                         necros only, the Circle: line;
+#NOP --   my[score][updated]                        when score was last read;
+
+#alias {.score_updated} {
+    #format my[score][updated] {%t} {%Y-%m-%d %H:%M:%S};
+};
+
+#NOP -- .score_quiet: send score with its output gagged, so my[score] fills in without the spam. Login,;
+#NOP -- linkdeath return, recover (any guild) and rounds check use it. Each gag matches one score;
+#NOP -- line only, and they all go 3 seconds later. A guild's own extra score line can still show;
+#alias {.score_quiet} {
+    #class score_quiet kill;
+    #class score_quiet open;
+    #NOP -- First line: your name and title (the name can be first or not), then your alignment in brackets;
+    #var score_title_pat {(?i)^.*\b};
+    #cat score_title_pat {$user};
+    #cat score_title_pat {\b.*\([^()]+\)\s*$};
+    #gag {{$score_title_pat}};
+    #gag {{^\s*$}};
+    #NOP -- (?:>\s)? lets each line start with a "> " prompt;
+    #gag {{^(?:>\s)?Str:\s.*\bLevel\s+:}};
+    #gag {{^(?:>\s)?Dex:\s.*\bAge\s+:}};
+    #gag {{^(?:>\s)?Wis:\s.*\bGuild\s+:}};
+    #gag {{^(?:>\s)?Int:\s.*\bStatus\s+:}};
+    #gag {{^(?:>\s)?Con:\s.*\bArch foe\s*:}};
+    #gag {{^(?:>\s)?Cha:\s.*\bBest kill\s*:}};
+    #gag {{^(?:>\s)?Expl:\s.*\bBest solo\s*:}};
+    #gag {{^(?:>\s)?Hps\s+:.*\bDeaths\s+:}};
+    #gag {{^(?:>\s)?Sps\s+:.*\bKills\s+:}};
+    #gag {{^(?:>\s)?Gps\s+:.*\bHunted by\s*:}};
+    #gag {{^(?:>\s)?\s*(?:Wimpy:\s.*?)?Defense\s+:}};
+    #gag {{^(?:>\s)?Resistances:}};
+    #gag {{^(?:>\s)?Your wimpy is }};
+    #gag {{^(?:>\s)?Circle:\s\S+\s+NP:}};
+    #gag {{^(?:>\s)?Type 'gscore' or 'gs' to see your guild score\.$}};
+    #class score_quiet close;
+    #send {score};
+    #delay {score_quiet} {#class score_quiet kill} {3};
+};
+
+#NOP -- Typing score or sc yourself always shows it: this drops any gags left from .score_quiet first;
+#alias {score} {
+    #class score_quiet kill;
+    #undelay {score_quiet};
+    #if {"%0" == ""} {
+        #send {score};
+    } {
+        #send {score %0};
+    };
+};
+
+#alias {sc} {
+    #class score_quiet kill;
+    #undelay {score_quiet};
+    #if {"%0" == ""} {
+        #send {sc};
+    } {
+        #send {sc %0};
+    };
+};
+
+#NOP -- Each pattern allows a "> " prompt at the start of the line;
+#action {{^(?:>\s)?Str:.*\bLevel\s+:\s(.+?)\s\((\d+)\)}} {
+    #var my[score][level_title] {%2};
+    #var my[score][level] {%3};
+    .score_updated;
+} {5};
+
+#action {{^(?:>\s)?Dex:.*\bAge\s+:\s(.+?)\s\s+Money\s}} {
+    #var my[score][age] {%2};
+} {5};
+
+#NOP -- The guild level in brackets can be missing. Necros then get it from the Circle: line below;
+#NOP -- The round tracker (modules/roundlog) also uses the guild level;
+#action {{^(?:>\s)?Wis:.*\bGuild\s+:\s(.+?)(?:\s\(([^()]+)\))?\s\s+Bank\s}} {
+    #var my[score][guild] {%2};
+    #var my[score][guild_level] {%3};
+    .score_updated;
+    #if {"%3" != "" && "$toggles[rounds]" == "1"} {
+        .roundlog_level {%2} {%3};
+    };
+} {5};
+
+#action {{^(?:>\s)?Int:.*\bStatus\s+:\s(.+?)\s\s+Quests\s}} {
+    #var my[score][status] {%2};
+} {5};
+
+#action {{^(?:>\s)?Expl:\s+([\d,]+)\s}} {
+    #var my[score][explore] {%2};
+    #replace my[score][explore] {,} {};
+} {5};
+
+#action {{^(?:>\s)?Hps\s+:.*\bDeaths\s+:\s(\d+)}} {
+    #var my[score][deaths] {%2};
+} {5};
+
+#action {{^(?:>\s)?Sps\s+:.*\bKills\s+:\s(\d+)}} {
+    #var my[score][kills] {%2};
+} {5};
+
+#NOP -- Necros: Circle: is a number, or a tier in roman numerals (I, II, IV...);
+#action {{^(?:>\s)?Circle:\s(\S+)\s+NP:}} {
+    #var my[score][circle] {%2};
+    #if {"$my[score][guild_level]" == "" && "$toggles[rounds]" == "1"} {
+        .roundlog_level {$my[score][guild]} {%2};
+    };
+} {5};
+
+#class {score_reader} {close};

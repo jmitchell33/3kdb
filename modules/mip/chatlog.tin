@@ -51,19 +51,19 @@
 	#NOP -- Update scripts/discordPost.py to where the python file is located, this depends on the root that;
 	#NOP -- tintin is being called from;	
 	#NOP -- The post runs in the background so a big batch doesn't hang the client. Each batch gets;
-	#NOP -- its own file (the script deletes it), and errors go to logs/$sysUser/discordPost.log;
+	#NOP -- its own file (the script deletes it), and errors go to $discordDir/discordPost.log;
 	#NOP -- Each message is written as one line, channel <tab> text, with #line log (no shell, no JSON);
 	#NOP -- here), and the script builds the JSON, so quotes, backslashes and the like can't break a batch;
 	#delay sendPayload {
-		#format discordFile {logs/$sysUser/discordTmp-%U.txt};
+		#format discordFile {$discordDir/discordTmp-%U.txt};
 		#format discordTab {%a} {9};
 		#loop 1 &payloadStack[] discordIdx {
 			#var discordLine {$payloadStack[$discordIdx][payload]};
 			#replace discordLine {$discordTab} { };
 			#line log {$discordFile} {$payloadStack[$discordIdx][channel]$discordTab$discordLine};
 		};
-		#system {python3 scripts/discordPost.py $discordFile >> logs/$sysUser/discordPost.log 2>&1 &};
-		#if $debug[discord] {#echo {Discord: posting in the background, errors in logs/$sysUser/discordPost.log}};
+		#system {python3 scripts/discordPost.py $discordFile >> $discordDir/discordPost.log 2>&1 &};
+		#if $debug[discord] {#echo {Discord: posting in the background, errors in $discordDir/discordPost.log}};
 		#list payloadStack clear;
 	} {10};
 };
@@ -80,6 +80,13 @@
 
 #NOP -- Get system user name to log to;
 #script {sysUser} {whoami};#var sysUser $sysUser[1];
+
+#NOP -- Chat logs go to logs/<system user>/chatlogs/<date>.log, and the Discord post files (temp batches,;
+#NOP -- discordPost.log for errors, and the lock) to logs/<system user>/discord/. #line log can't make a folder,;
+#NOP -- so they're made here;
+#var chatlogDir {logs/$sysUser/chatlogs};
+#var discordDir {logs/$sysUser/discord};
+#script {chatlog_tmp} {mkdir -p '$chatlogDir' '$discordDir'};
 
 #function sanitizePayload {
 	#NOP -- Discord posts no longer go through JSON or a shell here (see sendPayload), so the text is;
@@ -345,8 +352,8 @@
 
 			#NOP if it's the same as the last line, do nothing to prevent spam;
 			#if {"$mip[comm][cdata]" != "$lastData"} {
-				#line log {logs/$sysUser/$datestamp} {$timestamp\};
-				#line log {logs/$sysUser/$datestamp} {$mip[comm][cdata]};
+				#line log {$chatlogDir/$datestamp} {$timestamp\};
+				#line log {$chatlogDir/$datestamp} {$mip[comm][cdata]};
 				_mip_chat_sender_blacklisted;
 				#if {$_mip_blacklist_hit == 1} {
 					#NOP Blacklisted: still log and Discord, only skip chat window;
@@ -509,8 +516,8 @@
 	#var altLabel {$chat[alt][type] via $chat[alt][via]};
 	#format {timestamp_save} {%t} {[%H:%M] };
 	#format {datestamp} {%t} {%Y-%m-%d.log};
-	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-	#line log {logs/$sysUser/$datestamp} {<ead>$chat[alt][from] [$altLabel]<088>: $mip[comm][data]};
+	#line log {$chatlogDir/$datestamp} {$timestamp_save\};
+	#line log {$chatlogDir/$datestamp} {<ead>$chat[alt][from] [$altLabel]<088>: $mip[comm][data]};
 	#var mip[comm][source] {$chat[alt][from] [$altLabel]};
 	#if {$_mip_blacklist_hit == 1} {
 		#var discordText ${mip[comm][source]}: ${mip[comm][data]};
@@ -790,8 +797,8 @@
 				#IF {"&2" == "x"} {
 					#NOP Message to another player;
 					#var mip[comm][twoway] {to};
-					#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-					#line log {logs/$sysUser/$datestamp} {<ead>To &3<088>: &4};
+					#line log {$chatlogDir/$datestamp} {$timestamp_save\};
+					#line log {$chatlogDir/$datestamp} {<ead>To &3<088>: &4};
 					update_chat <178>To $mip[comm][source]<088>: $mip[comm][data];
 				} {
 					#NOP Message from another player;
@@ -800,8 +807,8 @@
 					#if {"$mip[comm][source]" != ""} {
 						#if {$chat[log][emotes]} {
 							#var mip[comm][twoway] {from};
-							#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-							#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+							#line log {$chatlogDir/$datestamp} {$timestamp_save\};
+							#line log {$chatlogDir/$datestamp} {<ead>&3<088>: &4};
 							_mip_chat_sender_blacklisted;
 							#if {$_mip_blacklist_hit == 1} {
 								#var discordText ${mip[comm][source]}: ${mip[comm][data]};
@@ -818,8 +825,8 @@
 						} {
 							#if {"$chat[act_tell][from]" == "$mip[comm][source]"} {
 								#var mip[comm][twoway] {from};
-								#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
-								#line log {logs/$sysUser/$datestamp} {<ead>&3<088>: &4};
+								#line log {$chatlogDir/$datestamp} {$timestamp_save\};
+								#line log {$chatlogDir/$datestamp} {<ead>&3<088>: &4};
 								_mip_chat_sender_blacklisted;
 								#if {$_mip_blacklist_hit == 1} {
 									#var discordText ${mip[comm][source]}: ${mip[comm][data]};
@@ -923,9 +930,9 @@
 	#var chat[text]  <edc>NOTE: <ddd>%0<088>;
 	#format {timestamp_save} {%t} {[%H:%M] };
 	#format {datestamp} {%t} {%Y-%m-%d.log};
-	#line log {logs/$sysUser/$datestamp} {$timestamp_save\};
+	#line log {$chatlogDir/$datestamp} {$timestamp_save\};
 	#if {"%2" == ""} {#var notifyLine {%1}} {#var notifyLine {%0}};
-	#line log {logs/$sysUser/$datestamp} {<edc>NOTE ($user_cap): <ddd>$notifyLine<088>};
+	#line log {$chatlogDir/$datestamp} {<edc>NOTE ($user_cap): <ddd>$notifyLine<088>};
 
 	#var chat[entry] ${timestamp}${chat[text]};
 	#list chat[general] ins -1 $chat[entry];
