@@ -485,7 +485,10 @@ dreset;
     #replace dmgMobKwName { \[%*\]%*} {};
     #replace dmgMobKwName { \(%*\)%*} {};
     #var dmgMobKw {$dmgMobKwName};
-    #regexp {$dmgMobKwName} {{(\S+)\s*$}} {#format dmgMobKw {%l} {&1}};
+    #NOP -- The last word that starts with a letter, so trailing tags like the ones on Lucifer (empowered) (hellfire) in braces are skipped;
+    #NOP -- A braced keyword ends up as a variable key and TinTin warns about it;
+    #NOP -- The outer braces are capture group 1, so the word is in group 3;
+    #regexp {$dmgMobKwName} {{(^|\s)(\w\S*)(\s+\W\S*)*\s*$}} {#format dmgMobKw {%l} {&3}};
 };
 
 #alias .dmg_round_reset {

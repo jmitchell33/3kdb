@@ -7,13 +7,28 @@
        #echo { \n\n<116>EVENT FOUND<088>!!!!!!!!!!!!!\n\n};
        #map get roomvnum vnum_event;
        .stop;
-       plunge;
-       #class {bot} {kill};
-       #delay 3 {
-            #read common/bot/bots/kayos.tin;
-            #var bot[alias] kayos;
-            enter;
-        };
+       #NOP -- Kayos loads only after the plunge works, the bot class is gone so these live in their own class;
+       #class {findevent} {open};
+       #NOP -- Priority 1 so this wins over the maphelper leap action, .kayosLeap keeps the map in step;
+       #action {You leap into the unknown!} {
+           .kayosLeap;
+           #class {findevent} {kill};
+           #delay 3 {
+               #read common/bot/bots/kayos.tin;
+               #var bot[alias] kayos;
+               enter;
+           };
+       } {1};
+       #action {^There is no reason to 'plunge' here.$} {
+           #class {findevent} {kill};
+           #echo {<faa>PLUNGE FAILED - NOT AT THE PORTAL (VNUM $vnum_event), KAYOS NOT LOADED<088>};
+       } {1};
+       #class {findevent} {close};
+       #NOP -- Moves already sent can carry us past the portal, so wait for them to land and walk back;
+       #delay 1.5 {
+           #map run {$vnum_event};
+           plunge;
+       };
  } {1};
 	
 #class {bot} {close}

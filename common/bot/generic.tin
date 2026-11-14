@@ -119,6 +119,7 @@
     #NOP -- Pending kicks would send .bot to the mud once the bot class is gone;
     #undelay {bot_kick};
     #undelay {bot_restart};
+    #undelay {bot_resume};
     #unvar bot;
     #unalias {..};
     #class {bot} {kill};
@@ -226,6 +227,7 @@
 #alias {.skip} {
     #undelay {bot_kick};
     #undelay {bot_restart};
+    #undelay {bot_resume};
     #var bot[foundmob] 0;
     #var bot[aggro-mob] 0;
     #var bot[foundobject] 0;
@@ -282,11 +284,9 @@
             #if {"$bot[alias]" == "knights"} {#NOP} {
                 #if $actions_stacked {
                     do_action;
-                    #delay 2 {
-                        .bot;
-                    };
+                    #delay {bot_resume} {#if {!$bot[walk]} {.bot}} {2};
                 } {
-                    #delay .5 {.bot};
+                    #delay {bot_resume} {#if {!$bot[walk]} {.bot}} {.5};
                 };
             };
         };
