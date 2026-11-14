@@ -792,6 +792,7 @@ menu_close_classes;
         #return;
     };
     #var menu_refresh_done {};
+    #var menu_refresh_sel {$menu_chars[$menu_sel]};
     #var menu_refresh_on 1;
     menu_refresh_next;
 };
@@ -800,6 +801,13 @@ menu_close_classes;
     #undelay {menu_refresh_wd};
     #if {$menu_refresh_n == 0} {
         #unvar menu_refresh_on;
+        #loop 1 $menu[count] i {
+            #if {"$menu_chars[$i]" == "$menu_refresh_sel"} {
+                #var menu_sel $i;
+                #var menu[row] $i;
+            };
+        };
+        menu_save;
         #var menu[msg] {<ffa>Linkdead timers refreshed:$menu_refresh_done<088>};
         menu_draw;
         #return;
@@ -1218,7 +1226,7 @@ menu_close_classes;
         #class global open;
         #if {"$menu_ld_skip" == "1"} {#unvar xlinkdead_at} {#format xlinkdead_at {%T}};
         #class global close;
-        _variable_export;
+        #if {"$menu_refresh_on" == "1"} {#class global write chars/$user/vars.tin} {_variable_export};
     };
 };
 
