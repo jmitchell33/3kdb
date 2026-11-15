@@ -285,6 +285,7 @@
 #var sessionActive 0;
 #action {^3Kingdoms welcomes you!} {
     #var sessionActive 1;
+    #if {"$menu_refresh_on" == "1"} {#return};
     #var login_linkdeath 0;
     _load_3kdb_common;
     defaults_on;
@@ -293,6 +294,7 @@
 #NOP -- login_linkdeath tells guild files (e.g. maint) this is a return from linkdeath, spells still up;
 #action {^3Kingdoms welcomes you back from linkdeath.} {
     #var sessionActive 1;
+    #if {"$menu_refresh_on" == "1"} {#return};
     #var login_linkdeath 1;
     _load_3kdb_common;
     defaults_on;
