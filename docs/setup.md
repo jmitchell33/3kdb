@@ -6,7 +6,7 @@ This guide takes you from nothing to playing 3Kingdoms with 3kdb.
 
 Anything in a grey box is something to type or paste. On GitHub, a copy button appears in the corner of the box when you hover over it or tap it. If you don't see one, select the text and copy it.
 
-**Other guides:** [manual.md](manual.md) explains everything 3kdb can do, [faq.md](faq.md) has short answers, and [github.md](github.md) covers git and GitHub.
+**Other guides:** [manual.md](manual.md) explains everything 3kdb can do, [faq.md](faq.md) has short answers, [github.md](github.md) covers git and GitHub, and [tmux.md](tmux.md) covers playing on a server.
 
 ## Contents
 
@@ -20,6 +20,7 @@ Anything in a grey box is something to type or paste. On GitHub, a copy button a
 
 **After that**
 - [Playing from now on](#playing-from-now-on)
+- [Playing on a server (tmux)](#playing-on-a-server-tmux)
 - [Using the menu](#using-the-menu)
 - [Getting updates](#getting-updates)
 - [What the menu creates for you](#what-the-menu-creates-for-you)
@@ -65,6 +66,12 @@ sudo apt install -y git
 ```
 
 **How to paste into a terminal:** right-click, or press `Ctrl+Shift+V`. Plain `Ctrl+V` usually doesn't work. Press Enter after each command.
+
+**Playing on a server you SSH into?** Install **tmux** on the server too. It's optional, and keeps the game running when your connection drops. See [Playing on a server (tmux)](#playing-on-a-server-tmux).
+
+```bash
+sudo apt install -y tmux
+```
 
 [Back to top](#3kdb-setup-guide)
 
@@ -121,6 +128,12 @@ You now have a folder called `3kdb` in your home folder, linked to your fork. Fo
 ---
 
 ## Step 3: Open the menu
+
+**On a server with tmux**, start tmux first, then run the commands below inside it:
+
+```bash
+tmux new -A -s 3k
+```
 
 ```bash
 cd ~/3kdb
@@ -215,6 +228,7 @@ bset auto_shield 1
 **That's it. Enjoy!** Good next commands to try in the game:
 
 - `dblib` lists the aliases
+- `dblog` shows what's changed in 3kdb lately
 - `mapgo cot` sets your map position to Center of Town
 - `botlist`, `speedruns` and `strategies` show what else is available
 
@@ -230,6 +244,22 @@ tt++ startmenu.tin
 ```
 
 Pick your character and press Enter. To go back to the menu, type `ld` in the game. Your character stays linkdead and keeps its equipment. `quit` also goes back to the menu, but it logs you out fully and you can lose equipment. See [Leaving the game](manual.md#leaving-the-game).
+
+If you play in tmux, run `tmux new -A -s 3k` first. If 3kdb is still running in there, you're straight back in the game.
+
+## Playing on a server (tmux)
+
+This is optional. If 3kdb runs on a server you SSH into, run it inside **tmux**. Without it, closing the window or losing your connection closes 3kdb and leaves your character linkdead without saving. With it, 3kdb keeps running, and you can come back from any device.
+
+1. Install it once: `sudo apt install -y tmux`
+2. Start or rejoin it, every time:
+   ```bash
+   tmux new -A -s 3k
+   ```
+3. The first time, start 3kdb inside it as normal (`cd ~/3kdb`, then `tt++ startmenu.tin`).
+4. To leave it running, press `Ctrl+b`, let go, then press `d`.
+
+To switch from your PC to your phone, SSH in from the phone and run the same `tmux new -A -s 3k`. The screen follows the size of whichever device you typed on last, and 3kdb redraws itself about 3 seconds later. [tmux.md](tmux.md) has the full guide: the settings to use, what happens to the screen size on each device and how to fix it, how to take another device off, and fixes for common problems.
 
 ## Using the menu
 
@@ -272,6 +302,8 @@ git-sync
 ```
 
 If you're logged in, log out and back in to load the new code.
+
+`dblog new` in the game shows what an update would bring in, and `dblog` shows what's changed once you have it.
 
 Did it stop with an error because you changed some files? See [Keep your changes and still update](github.md#keep-your-changes-and-still-update).
 

@@ -106,6 +106,8 @@
      #map flag direction on;
      #delay {1} {hp};
      #delay {6} {_area_speedruns;_area_bots;3kdb_banner};
+     #NOP -- The end of the who2 list shows the dblog notice, once per login (common/dblog.tin);
+     #var dblog_login_pending 1;
      #delay {10} {_update_players};
      #NOP -- Necromancer: repower a couple of seconds after who2 so the hpbar picks up repower status;
      #delay {12} {#if {"$guild" == "necromancer"} {#send {repower}}};
@@ -181,6 +183,7 @@
         #unvar tmpList;
         #class tmp kill;
         #if {&players > 0} {#echo {<ffd>3kdb -- Successfully updated players list with &players[] players added.}};
+        dblog_after_who2;
     };
 };
 
@@ -289,6 +292,7 @@
     #var login_linkdeath 0;
     _load_3kdb_common;
     defaults_on;
+    .numbers_login_check;
     #delay 1 {#map goto 6220};
 } {1};
 #NOP -- login_linkdeath tells guild files (e.g. maint) this is a return from linkdeath, spells still up;
@@ -298,6 +302,7 @@
     #var login_linkdeath 1;
     _load_3kdb_common;
     defaults_on;
+    .numbers_login_check;
     look;
     #delay 1 {
         #if {"$room[name]" == "Entrance Building to Pinnacle (jump)"} {
@@ -306,10 +311,25 @@
     };
 } {1};
 
-#NOP -- If numbers are detected, read in the damage tracker;
-#act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
+#NOP -- If numbers are detected, read in the damage tracker. With toggle numbers off it stays armed;
+#NOP -- but does nothing, so turning the toggle back on picks the perk up on the next hit;
+#alias {.numbers_detect_arm}
+{
+    #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
+        .numbers_detected;
+    } {2};
+};
+
+#alias {.numbers_detected}
+{
+    .numbers_auto_on;
+    #if {"$toggles[numbers]" == "0"}
+    {
+        #return;
+    };
     #unact {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}};
     #var vaf[numbers] 1;
+    #var numbersPerk 1;
     #read modules/dmgtracker/dmgtracker.tin;
     #if {"$guild" == "mage"} {
         #read modules/dmgtracker/dmgtracker_mage.tin;
@@ -318,7 +338,215 @@
         #read modules/dmgtracker/dmgtracker_jugger.tin;
     };
     istats_reset;
-} {2};
+};
+
+#NOP -- numbersPerk: 1 has the perk, 0 doesn't, unset not checked yet;
+#NOP -- Fresh and linkdeath logins: ask the game with numbers and hide its answer. Only during this check, a numbers;
+#NOP -- the player types later always shows. A hit line also finds the perk if the check gets no answer;
+#alias {.numbers_login_check}
+{
+    #unvar numbersPerk;
+    #class numbers_check kill;
+    #class numbers_check open;
+    #action {^You do not have the 'numbers' vaf perk.  See 'vaf list numbers'$}
+    {
+        #line gag;
+        #var numbersPerk 0;
+        #var vaf[numbers] 0;
+        .numbers_auto_off;
+        .numbers_check_done;
+    };
+    #action {^You have the 'numbers' vaf perk active.  You can turn off totals by$}
+    {
+        #line gag;
+        #var numbersPerk 1;
+        .numbers_check_active;
+    };
+    #action {^typing 'numbers totals' (and rely on your guild object to show you)$}
+    {
+        #line gag;
+    };
+    #action {^and you can turn them off all together with 'numbers off'$}
+    {
+        #line gag;
+        .numbers_check_done;
+    };
+    #class numbers_check close;
+    #NOP -- The answer to numbers off sent for toggle numbers off is hidden by the action further down;
+    #var numbersChecking 1;
+    #delay {numbers_check} {.numbers_check_done} {15};
+    #send {numbers};
+};
+
+#NOP -- The perk is on in the game. Toggle numbers on: load the trackers now. Off: turn it off in the game;
+#alias {.numbers_check_active}
+{
+    .numbers_auto_on;
+    #if {"$toggles[numbers]" == "0"}
+    {
+        #send {numbers off};
+        #return;
+    };
+    #if {&dmgtracker}
+    {
+        #return;
+    };
+    .numbers_detected;
+};
+
+#NOP -- numbersAutoOff 1: 3kdb turned toggle numbers off because you don't have the perk (saved in vars.tin);
+#NOP -- Once the perk shows up (login check, a damage line or numbers on), it turns itself back on;
+#alias {.numbers_auto_off}
+{
+    #if {"$toggles[numbers]" == "0"}
+    {
+        #return;
+    };
+    #var toggles[numbers] 0;
+    #var numbersAutoOff 1;
+    .kill_dmg_trackers;
+    #var enemy[name_numbers] {};
+    #echo {<faa>   -----  numbers has been turned off, you don't have the numbers vaf perk  -----<088>};
+};
+
+#alias {.numbers_auto_on}
+{
+    #if {"$numbersAutoOff" != "1"}
+    {
+        #return;
+    };
+    #unvar numbersAutoOff;
+    #if {"$toggles[numbers]" != "0"}
+    {
+        #return;
+    };
+    #var toggles[numbers] 1;
+    #echo {<cfb>   -----  numbers has been turned on, the numbers vaf perk was found  -----<088>};
+};
+
+#NOP -- The answer is in, or 15 seconds went by: stop hiding numbers lines. Wait a moment for numbers off's answer;
+#alias {.numbers_check_done}
+{
+    #undelay {numbers_check};
+    #delay {numbers_check_end}
+    {
+        #class numbers_check kill;
+        #var numbersChecking 0;
+    } {3};
+};
+
+#NOP -- toggle numbers off: back to how 3kdb runs without the perk, and off in the game too if you have it;
+#NOP -- .numbers_off quiet: the game turned it off already (you typed numbers off), don't send it again;
+#alias {.numbers_off}
+{
+    #if {"%1" != "quiet" && ("$numbersPerk" == "1" || "$vaf[numbers]" == "1")}
+    {
+        #var numbersPerk 1;
+        #send {numbers off};
+    };
+    .kill_dmg_trackers;
+    #var vaf[numbers] 0;
+    #var enemy[name_numbers] {};
+    .numbers_detect_arm;
+};
+
+#NOP -- toggle numbers on: on in the game too if you have it and load the trackers. Not checked yet: watch;
+#NOP -- for the next hit line. Not while the damage tracker is loaded, it owns that action. quiet: the game did it already;
+#alias {.numbers_on}
+{
+    #if {"$numbersPerk" == "0"}
+    {
+        #echo {<faa>   -----  You don't have the numbers vaf perk, see 'vaf list numbers'  -----<088>};
+        .numbers_auto_off;
+        #return;
+    };
+    #if {"%1" != "quiet" && "$numbersPerk" == "1"}
+    {
+        #send {numbers on};
+    };
+    #if {&dmgtracker}
+    {
+        #return;
+    };
+    .numbers_detect_arm;
+    #if {"$numbersPerk" == "1"}
+    {
+        .numbers_detected;
+    };
+};
+
+#NOP -- You typed numbers on/off in the game: toggle numbers follows. Only hidden during the login check;
+#var numbersChecking 0;
+#action {^Numbers are now off.$}
+{
+    #if {$numbersChecking}
+    {
+        #line gag;
+    };
+    #var numbersPerk 1;
+    #unvar numbersAutoOff;
+    #if {"$toggles[numbers]" != "0"}
+    {
+        #var toggles[numbers] 0;
+        #echo {<faa>   -----  numbers has been turned off (3kdb follows the game)  -----<088>};
+        .numbers_off quiet;
+    };
+} {5};
+#action {^Numbers are now on.$}
+{
+    #var numbersPerk 1;
+    .numbers_auto_on;
+    #if {"$toggles[numbers]" == "0"}
+    {
+        #var toggles[numbers] 1;
+        #echo {<cfb>   -----  numbers has been turned on (3kdb follows the game)  -----<088>};
+        .numbers_on quiet;
+    };
+} {5};
+
+#NOP -- numbers-info: what 3kdb knows about the numbers perk right now;
+#alias {numbers-info}
+{
+    #if {"$toggles[numbers]" == "0"}
+    {
+        #echo {<faa>   toggle numbers: off. 3kdb acts like you don't have the perk<088>};
+    };
+    #else
+    {
+        #echo {<cfb>   toggle numbers: on<088>};
+    };
+    #if {"$numbersPerk" == "0"}
+    {
+        #echo {<faa>   Perk: you don't have it (checked at login), see 'vaf list numbers'<088>};
+    };
+    #elseif {"$vaf[numbers]" == "1"}
+    {
+        #echo {<cfb>   Perk: found, 3kdb aims at mobs by the name in your damage lines<088>};
+    };
+    #elseif {"$toggles[numbers]" == "0"}
+    {
+        #echo {<fff>   Perk: not used while the toggle is off<088>};
+    };
+    #elseif {"$numbersPerk" == "1"}
+    {
+        #echo {<cfb>   Perk: you have it<088>};
+    };
+    #else
+    {
+        #echo {<fff>   Perk: not seen yet. 3kdb finds it from your first 'You hit ... for N damage.' line<088>};
+    };
+    #if {&dmgtracker}
+    {
+        #echo {<cfb>   Damage tracker: loaded, see dstats<088>};
+    };
+    #else
+    {
+        #echo {<fff>   Damage tracker: not loaded<088>};
+    };
+    #echo {<cfc>   Type <eaf>toggle numbers<cfc> to turn it on or off. It sends numbers on/off to the game too<088>};
+};
+
+.numbers_detect_arm;
 
 
 #class common_config close;
