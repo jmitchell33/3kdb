@@ -1,0 +1,965 @@
+#class {area_westersea} {kill};
+#class {area_westersea} {open};
+
+#NOP -- CITY OF WESTERSEA MISSION HELPER;
+#NOP -- Solutions come from the wemudtogether.com Westersea guide (fantasy page) and karvec's logs.;
+#NOP -- Type wsea for the command list.  Room numbers are from common/map/3k_shared.map.;
+
+#NOP -- Where each mission is handed in.  Keys are the lower case mission names from the book.;
+#NOP -- cmd is sent at the giver, how is the hint wsea book shows while the mission is open.;
+#var wsea_db {
+    {scout the town}        {{giver} {Tinny} {vnum} {4757} {cmd} {say complete} {how} {walk the encampment SW of Tinny, then from Tinny all e, ne, n, examine trees, examine vegetation, push aside branches}}
+    {scout the realm}       {{giver} {Tinny} {vnum} {4757} {cmd} {say complete} {how} {wsea scout for the three areas}}
+    {sewer cleanup}         {{giver} {Tinny} {vnum} {4757} {cmd} {say complete} {how} {+wsea-sewer, or wsea grind sewer to repeat it for rep}}
+    {grab guard reports}    {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {wsea reports walks the walls and grabs every desk}}
+    {report fight to mayne} {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {kill the spy that jumps you on the walls}}
+    {fortify westersea}     {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {wsea fortify, wait for Bern, then wsea chests}}
+    {find the lieutenant}   {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {wsea lieutenant}}
+    {inform the widow}      {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {wsea widow}}
+    {slum cleanup}          {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {+wsea-slum, or wsea grind slum to repeat it for rep}}
+    {eavesdropping}         {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {wsea eavesdrop}}
+    {city volunteers}       {{giver} {Captain Mayne} {vnum} {5805} {cmd} {say complete} {how} {wsea lamps, then walk the streets}}
+    {deliver sewer report}  {{giver} {Captain Mayne} {vnum} {5805} {cmd} {give report to mayne;say complete} {how} {wsea turnin}}
+    {longtooth's defeat}    {{giver} {Jainie Markson} {vnum} {5820} {cmd} {say complete} {how} {kill Longtooth in the sewers}}
+    {kail's defeat}         {{giver} {Jainie Markson} {vnum} {5820} {cmd} {say complete} {how} {kill Pretty boy Kail}}
+    {caught a fish?}        {{giver} {Sain Ash} {vnum} {5810} {cmd} {give 10 acota fish to sain} {how} {bait rod with meat, thread line, catch 10 acota fish}}
+    {sewer excursion}       {{giver} {Alister} {vnum} {5850} {cmd} {say complete} {how} {wsea excursion}}
+    {a hungry guard}        {{giver} {Tommy} {vnum} {6202} {cmd} {give roll to tommy} {how} {wsea rolls}}
+    {an unwelcome visitor}  {{giver} {Tommy} {vnum} {6202} {cmd} {say complete} {how} {wsea visitor 1, 2, then 3}}
+    {send word to alister}  {{giver} {Alister} {vnum} {5850} {cmd} {say it's time;say mission} {how} {wsea visitor 3}}
+    {find the church tomb}  {{giver} {Alister} {vnum} {5850} {cmd} {say complete;say mission} {how} {wsea tapestry, then wsea belfry}}
+    {explore church tomb}   {{giver} {Alister} {vnum} {5850} {cmd} {say complete} {how} {wsea karithal male or female}}
+    {church tomb cleanup}   {{giver} {Alister} {vnum} {5850} {cmd} {say complete} {how} {wsea eggs, then the holes (wsea help)}}
+    {make contact}          {{giver} {Alister} {vnum} {5850} {cmd} {say complete} {how} {wsea contact, finish Assist Presence, then say history at the sphere}}
+    {assist presence}       {{giver} {} {vnum} {} {cmd} {} {how} {wsea presence (needs lockpicking and alchemy)}}
+    {slay dotar}            {{giver} {} {vnum} {} {cmd} {} {how} {go wsea_dotar, kill the blockers, w, kill dotar (use fire)}}
+    {lacking strength}      {{giver} {} {vnum} {} {cmd} {} {how} {push cart east of the church, needs about 800 combined STR}}
+};
+
+
+#var wsea {{quiet} {0} {parsing} {0} {lamps} {0} {grind} {} {then} {} {rep} {0}};
+#var wsea_lamps {};
+
+#NOP -- MISSION BOOK PARSER;
+#NOP -- flip/browse prints a table.  Every row is stored in wsea[book][Mission][Task] = percent.;
+#NOP -- wsea[quiet] gags the table when the helper sent flip itself.;
+#action {^| #|%sMISSION%s|%*|} {
+    #unvar wsea[book];
+    #var wsea[parsing] 1;
+    #if {$wsea[quiet]} {#line gag};
+} {4};
+
+#action {^|%s{\d+}|%*|%s|%s|$} {
+    #if {$wsea[parsing]} {
+        #format wsea[current] {%p} {%3};
+        #if {$wsea[quiet]} {#line gag};
+    };
+} {4};
+
+#action {^|  |%s|%*|%s{\d+}%s|$} {
+    #if {$wsea[parsing]} {
+        #format tmpTask {%p} {%2};
+        #var {wsea[book][$wsea[current]][$tmpTask]} {%4};
+        #if {$wsea[quiet]} {#line gag};
+    };
+} {4};
+
+#action {^{\.--\.|\|--\+}%*} {#if {$wsea[parsing] && $wsea[quiet]} {#line gag}} {4};
+
+#action {^!--!%*} {
+    #if {$wsea[parsing]} {
+        #var wsea[parsing] 0;
+        #if {$wsea[quiet]} {#line gag};
+        #var wsea[quiet] 0;
+        #NOP -- Whatever asked for the book runs now that it is parsed;
+        #switch {"$wsea[then]"} {
+            #case {"show"} {.wsea_show};
+            #case {"turnin"} {.wsea_turnin};
+            #case {"grindstart"} {.wsea_grind_start};
+            #case {"grindsync"} {.wsea_grind_count;.wsea_grind_after};
+        };
+        #var wsea[then] {};
+    };
+} {4};
+
+#NOP -- Sets wsea_isdone to 1 when every task of mission %1 is at 100;
+#alias .wsea_done {
+    #var wsea_isdone 1;
+    #foreach {*wsea[book][%1][]} {tmpTask} {
+        #if {${wsea[book][%1][$tmpTask]} < 100} {#var wsea_isdone 0};
+    };
+};
+
+#NOP -- Current Westersea rep from common/reps.tin, 0 if it has not been read yet;
+#alias .wsea_rep {
+    #var wsea[rep] 0;
+    #var tmpIx 0;
+    #if {&repData[]} {
+        #list repData indexate rep_key;
+        #list repData find {The City of Westersea} tmpIx;
+    };
+    #if {$tmpIx} {
+        #if {"$repData[$tmpIx][current_value]" != ""} {#var wsea[rep] $repData[$tmpIx][current_value]};
+    };
+};
+
+#alias .wsea_show {
+    .wsea_rep;
+    #echo {<fff>  Westersea missions<088>   <cdd>rep: $wsea[rep]   (An Unwelcome Visitor needs about 100k)<088>};
+    #foreach {*wsea[book][]} {tmpMission} {
+        .wsea_done {$tmpMission};
+        #format tmpKey {%l} {$tmpMission};
+        #if {$wsea_isdone} {
+            #if {"$wsea_db[$tmpKey][giver]" != ""} {
+                #echo {<afa>  $tmpMission<088> - done, hand in to $wsea_db[$tmpKey][giver] (wsea turnin)};
+            } {
+                #echo {<afa>  $tmpMission<088> - done};
+            };
+        } {
+            #if {"$wsea_db[$tmpKey][how]" != ""} {
+                #echo {<ffa>  $tmpMission<088> - $wsea_db[$tmpKey][how]};
+            } {
+                #echo {<ffa>  $tmpMission<088> - not in the helper yet};
+            };
+        };
+    };
+};
+
+#NOP -- Walks to each giver with a finished mission and hands it in;
+#alias .wsea_turnin {
+    #var tmpCount 0;
+    #foreach {*wsea[book][]} {tmpMission} {
+        .wsea_done {$tmpMission};
+        #format tmpKey {%l} {$tmpMission};
+        #if {$wsea_isdone && "$wsea_db[$tmpKey][vnum]" != ""} {
+            #echo {<afa>Westersea: handing in $tmpMission to $wsea_db[$tmpKey][giver]<088>};
+            #map run $wsea_db[$tmpKey][vnum];
+            #foreach {$wsea_db[$tmpKey][cmd]} {tmpCmd} {$tmpCmd};
+            #math tmpCount {$tmpCount + 1};
+        };
+    };
+    #if {$tmpCount == 0} {#echo {<ffa>Westersea: nothing in the book is finished yet.<088>}};
+};
+
+
+#NOP -- GRIND: repeat sewer or slum cleanup for rep (from karvec's old wsea_combined + wsea_mission_parser);
+#NOP -- Kills are counted per task, mobs whose task is done are left alone for the next round, and at 100 the;
+#NOP -- bot pauses where it is, hands in, takes the mission again, walks back and carries on from the same step.;
+
+#NOP -- Kills each task needs;
+#var wsea_grindneed {
+    {Sewer Cleanup} {{Vanquish sewer monster} {20}}
+    {Slum Cleanup} {{Dispose of shady leaders} {3} {Dispose of brigands} {5} {Dispose of ruffians} {10}}
+};
+
+#NOP -- Slum kills by the name in the death message (lower case): the task and the bot target line.;
+#NOP -- Every sewer monster counts for the one sewer task, so the sewer bot keeps its own mob list;
+#var wsea_slummobs {
+    {shady leader} {{task} {Dispose of shady leaders} {long} {Shady leader} {target} {leader}}
+    {tough looking brigand} {{task} {Dispose of brigands} {long} {Tough looking brigand} {target} {brigand}}
+    {mischievous ruffian} {{task} {Dispose of ruffians} {long} {Mischievous ruffian} {target} {ruffian}}
+};
+
+#alias .wsea_grind {
+    #var tmpOk 1;
+    #switch {"%1"} {
+        #case {"sewer"} {#var wsea[grind] {Sewer Cleanup};#var wsea[grindbot] {wsea-sewer}};
+        #case {"slum"} {#var wsea[grind] {Slum Cleanup};#var wsea[grindbot] {wsea-slum}};
+        #default {#var tmpOk 0;#echo {<ffa>usage: wsea grind sewer|slum<088>}};
+    };
+    #if {$tmpOk} {
+        #var wsea[runs] 0;
+        #var wsea[turnin] 0;
+        #echo {<afa>Westersea: grinding $wsea[grind].  wsea stop ends it.<088>};
+        #NOP -- Read the book first so kills already made this round are counted;
+        #var wsea[quiet] 1;
+        #var wsea[then] grindstart;
+        flip;
+    };
+};
+
+#NOP -- wsea[left][task] = kills still needed, from the book (or the full amount if %1 is full);
+#alias .wsea_grind_count {
+    #unvar wsea[left];
+    #foreach *wsea_grindneed[$wsea[grind]][] tmpTask {
+        #var tmpNeed $wsea_grindneed[$wsea[grind]][$tmpTask];
+        #var tmpPct 0;
+        #if {"%1" != "full" && &wsea[book][$wsea[grind]][]} {
+            #if {&wsea[book][$wsea[grind]][$tmpTask]} {#var tmpPct $wsea[book][$wsea[grind]][$tmpTask]};
+        };
+        #math tmpDone {($tmpPct * $tmpNeed + 50) / 100};
+        #format tmpDone {%d} {$tmpDone};
+        #math {wsea[left][$tmpTask]} {$tmpNeed - $tmpDone};
+    };
+};
+
+#alias .wsea_grind_left {
+    #var wsea_grind_total 0;
+    #foreach *wsea[left][] tmpTask {
+        #if {$wsea[left][$tmpTask] > 0} {#math wsea_grind_total {$wsea_grind_total + $wsea[left][$tmpTask]}};
+    };
+};
+
+#NOP -- Called once the book is read at the start;
+#alias .wsea_grind_start {
+    #format tmpKey {%l} {$wsea[grind]};
+    #var wsea[handstep] {};
+    #if {&wsea[book][$wsea[grind]][]} {
+        .wsea_grind_count;
+        .wsea_grind_left;
+        #if {$wsea_grind_total == 0} {
+            #echo {<afa>Westersea: $wsea[grind] is already done - handing it in first.<088>};
+            #var wsea[handstep] complete;
+        };
+    } {
+        #echo {<afa>Westersea: taking $wsea[grind] from $wsea_db[$tmpKey][giver] first.<088>};
+        #var wsea[handstep] take;
+    };
+    #if {"$wsea[handstep]" != ""} {
+        #NOP -- The You add action starts the bot once the giver has handed the mission over;
+        #var wsea[turnin] 1;
+        #var wsea[resume] {};
+        #map run $wsea_db[$tmpKey][vnum];
+        .wsea_grind_say;
+        #delay {wsea_handin_stuck} {
+            #if {"$wsea[handstep]" != ""} {
+                #echo {<faa>Westersea: no answer from the giver at step $wsea[handstep].  Sort it out by hand, then wsea grind again.<088>};
+                #var wsea[handstep] {};
+                #undelay {wsea_say_retry};
+            };
+        } {40};
+        #return;
+    };
+    .wsea_grind_show;
+    #if {$bot[active] && "$bot[alias]" == "$wsea[grindbot]"} {
+        .wsea_grind_targets;
+    } {
+        +$wsea[grindbot];
+        #NOP -- The bot file sets its mob list when it loads, 4 seconds after +;
+        #delay {wsea_targets} {.wsea_grind_targets} {6};
+    };
+};
+
+#alias .wsea_grind_show {
+    #var tmpLine {};
+    #foreach *wsea[left][] tmpTask {#var tmpLine {$tmpLine  $tmpTask: $wsea[left][$tmpTask]}};
+    #echo {<afa>Westersea: $wsea[grind] kills left -$tmpLine<088>};
+};
+
+#NOP -- Slum: only the mobs whose task still needs kills are targets, so done ones stay up for the next round;
+#alias .wsea_grind_targets {
+    #if {"$wsea[grind]" != "Slum Cleanup" || !$bot[active]} {#return};
+    #list bot[mobs] clear;
+    #foreach *wsea_slummobs[] tmpMob {
+        #var tmpTask {$wsea_slummobs[$tmpMob][task]};
+        #if {$wsea[left][$tmpTask] > 0} {
+            #list bot[mobs] add {{{long} {$wsea_slummobs[$tmpMob][long]} {target} {$wsea_slummobs[$tmpMob][target]}}};
+        };
+    };
+};
+
+#alias .wsea_grind_stop {
+    #undelay {wsea_regrind};
+    #undelay {wsea_targets};
+    #unticker {wsea_turnin};
+    #undelay {wsea_say_retry};
+    #undelay {wsea_handin_stuck};
+    #var wsea[handstep] {};
+    #unticker {wsea_eavesdrop};
+    #var wsea[rollstep] {};
+    #undelay {wsea_rolls_stuck};
+    #var wsea[grind] {};
+    #var wsea[turnin] 0;
+    #var wsea[lamps] 0;
+    #var wsea[desert] {};
+    #unticker {wsea_clear};
+    #undelay {wsea_desert_trap};
+    .wsea_main_done;
+    #if {$bot[active]} {.stop};
+    #echo {<afa>Westersea helper stopped.<088>};
+};
+
+#NOP -- The death message comes just before the update, so deathReport[mob_killed] is the mob that counted;
+#action {^You update the %* mission.$} {
+    #if {"$wsea[main]" == "ashton" && "%1" == "an unwelcome visitor"} {
+        .wsea_main_done;
+        kill ashton;
+        .wsea_expect {update:an unwelcome visitor} {.wsea_v2_handin} {0} {120};
+    } {
+        #if {"$wsea[mexp]" == "update:%1"} {.wsea_step_ok};
+    };
+    #if {"$wsea[clean]" != "" && "%1" == "church tomb cleanup"} {.wsea_clean_updated};
+    #if {"$wsea[desert]" == "right" && "%1" == "scout the realm"} {
+        #var wsea[desert] cleric;
+        #echo {<afa>Westersea desert: Scout the Realm updated, answering the cleric with say no.<088>};
+    };
+    #format tmpKey {%l} {$wsea[grind]};
+    #if {"$tmpKey" != "" && "%1" == "$tmpKey" && !$wsea[turnin]} {
+        #var tmpTask {};
+        #if {"$wsea[grind]" == "Sewer Cleanup"} {
+            #var tmpTask {Vanquish sewer monster};
+        } {
+            #format tmpMob {%l} {$deathReport[mob_killed]};
+            #if {&wsea_slummobs[$tmpMob]} {#var tmpTask {$wsea_slummobs[$tmpMob][task]}};
+        };
+        #if {"$tmpTask" == ""} {
+            #NOP -- Don't know what counted, so read the book to get back in step;
+            #var wsea[quiet] 1;
+            #var wsea[then] grindsync;
+            flip;
+        } {
+            #math {wsea[left][$tmpTask]} {$wsea[left][$tmpTask] - 1};
+            .wsea_grind_after;
+        };
+    };
+} {5};
+
+#alias .wsea_grind_after {
+    .wsea_grind_left;
+    #if {$wsea_grind_total <= 0} {
+        .wsea_grind_turnin;
+    } {
+        .wsea_grind_targets;
+    };
+};
+
+#NOP -- Pause the bot here, wait out any fight, then hand in and come back;
+#alias .wsea_grind_turnin {
+    #var wsea[turnin] 1;
+    #if {$bot[active]} {.pause};
+    #map get roomvnum wsea[resume];
+    #ticker {wsea_turnin} {#if {!$incombat} {#unticker {wsea_turnin};.wsea_grind_handin}} {1};
+};
+
+#NOP -- Each say waits for the giver's answer: a giver still talking ignores you ("You politely refuse to;
+#NOP -- interrupt"), which once lost the retake.  [handstep] is complete, then take, then empty when done;
+#alias .wsea_grind_handin {
+    #format tmpKey {%l} {$wsea[grind]};
+    #math wsea[runs] {$wsea[runs] + 1};
+    .wsea_rep;
+    #echo {<afa>Westersea: $wsea[grind] done ($wsea[runs] this session, rep $wsea[rep]) - handing in, taking it again and coming back.<088>};
+    #map run $wsea_db[$tmpKey][vnum];
+    #var wsea[handstep] complete;
+    .wsea_grind_say;
+    #delay {wsea_handin_stuck} {
+        #if {"$wsea[handstep]" != ""} {
+            #echo {<faa>Westersea: no answer from the giver at step $wsea[handstep] - the bot stays paused.  Sort it out by hand, then wsea grind again.<088>};
+            #var wsea[handstep] {};
+            #undelay {wsea_say_retry};
+        };
+    } {40};
+};
+
+#NOP -- Says it again every 4 seconds until the giver answers (the stuck delay gives up after 40);
+#alias .wsea_grind_say {
+    #format tmpKey {%l} {$wsea[grind]};
+    #if {"$wsea[handstep]" == "complete"} {say complete};
+    #if {"$wsea[handstep]" == "take"} {say $tmpKey};
+    #if {"$wsea[handstep]" != ""} {#delay {wsea_say_retry} {.wsea_grind_say} {4}};
+};
+
+#action {^You politely refuse to interrupt %*.} {
+    #if {"$wsea[handstep]" != ""} {#delay {wsea_say_retry} {.wsea_grind_say} {3}};
+    #if {"$wsea[mainsay]" != ""} {#delay {wsea_main_retry} {.wsea_main_say} {3}};
+    #if {"$wsea[mexp]" != ""} {#delay {wsea_step_wait} {.wsea_step_timeout} {12}};
+} {4};
+
+#action {^As you complete the last task} {
+    #if {"$wsea[handstep]" == "complete"} {
+        #NOP -- The giver won't hand the mission out again for a second or two;
+        #var wsea[handstep] take;
+        #delay {wsea_say_retry} {.wsea_grind_say} {2.5};
+    };
+    #if {"$wsea[mexp]" == "complete"} {.wsea_step_ok};
+} {4};
+
+#alias .wsea_main_set {
+    #var wsea[mainsay] {%1};
+    #undelay {wsea_main_retry};
+    #if {"%1" != ""} {.wsea_main_say};
+};
+
+#alias .wsea_main_say {
+    #if {"$wsea[mainsay]" != ""} {say $wsea[mainsay]};
+};
+
+#alias .wsea_main_done {
+    #var wsea[main] {};
+    #var wsea[mexp] {};
+    #var wsea[mthen] {};
+    #var wsea[mfall] {};
+    #var wsea[clean] {};
+    .wsea_main_set {};
+    #undelay {wsea_step_wait};
+    #undelay {wsea_main_stuck};
+    #undelay {wsea_ash_look};
+    #undelay {wsea_clean_wait};
+    #undelay {wsea_clean_act};
+};
+
+#alias .wsea_main_stuck {
+    #if {"$wsea[main]" == ""} {#return};
+    #echo {<faa>Westersea: no answer at step $wsea[main]. Sort it out by hand, then run the step again.<088>};
+    .wsea_main_done;
+};
+
+#alias .wsea_step {
+    #var wsea[mexp] {%3};
+    #var wsea[mthen] {%4};
+    #var wsea[mfall] {%5};
+    #if {"%1" != ""} {#map run %1};
+    .wsea_main_set {%2};
+    #delay {wsea_step_wait} {.wsea_step_timeout} {12};
+};
+
+#alias .wsea_expect {
+    #var wsea[mexp] {%1};
+    #var wsea[mthen] {%2};
+    #var wsea[mfall] {%3};
+    #delay {wsea_step_wait} {.wsea_step_timeout} {%4};
+};
+
+#alias .wsea_step_ok {
+    #undelay {wsea_step_wait};
+    #var tmpThen {$wsea[mthen]};
+    #var wsea[mexp] {};
+    #var wsea[mthen] {};
+    #var wsea[mfall] {};
+    .wsea_main_set {};
+    $tmpThen;
+};
+
+#alias .wsea_step_timeout {
+    #if {"$wsea[mexp]" == ""} {#return};
+    #if {"$wsea[mfall]" == "1"} {
+        .wsea_step_ok;
+        #return;
+    };
+    #echo {<faa>Westersea: no $wsea[mexp] came. Sort it out by hand, then run the step again.<088>};
+    .wsea_main_done;
+};
+
+#action {^You add %* as a mission in your book.} {
+    #if {"$wsea[mexp]" == "add:%1"} {.wsea_step_ok};
+    #format tmpKey {%l} {$wsea[grind]};
+    #if {"$wsea[handstep]" == "take" && "%1" == "$tmpKey"} {
+        #var wsea[handstep] {};
+        #undelay {wsea_handin_stuck};
+        #undelay {wsea_say_retry};
+        .wsea_grind_count full;
+        .wsea_grind_show;
+        #if {"$wsea[resume]" != ""} {#map run $wsea[resume]};
+        #delay {wsea_regrind} {
+            #var wsea[turnin] 0;
+            #if {$bot[active]} {.wsea_grind_targets;..} {+$wsea[grindbot];#delay {wsea_targets} {.wsea_grind_targets} {6}};
+        } {2};
+    };
+} {4};
+
+
+#NOP -- GUARD AND CITY WORK;
+
+#NOP -- Fortify Westersea: Bern makes the gear from Mayne's note, wsea chests delivers it;
+#alias .wsea_fortify {
+    #map run 5814;
+    give note to bern;
+    #echo {<ffa>Wait for Bern to finish the weapons and armour, then type wsea chests.<088>};
+};
+
+#NOP -- The six chests: NE tower, SE tower, SE station, SW tower bartizan, western station, fair station;
+#alias .wsea_chests {
+    #map run 6024;fortify chest;
+    #map run 6096;fortify chest;
+    #map run 5884;fortify chest;
+    #map run 6067;fortify chest;
+    #map run 5987;fortify chest;
+    #map run 5992;fortify chest;
+    #map run 5805;say complete;
+};
+
+#NOP -- Eavesdropping: the merchants are east of the castle entry, but it only works from the path below it;
+#alias .wsea_eavesdrop {
+    #map run 5926;
+    d;e;
+    eavesdrop;
+    #ticker {wsea_eavesdrop} {eavesdrop} {5};
+    #delay {wsea_eavesdrop_stop} {#unticker {wsea_eavesdrop}} {90};
+};
+#action {^You update the eavesdropping mission.$} {#unticker {wsea_eavesdrop};#undelay {wsea_eavesdrop_stop}} {4};
+
+#NOP -- City Volunteers: examine every street lamp seen while this is on;
+#action {^-i-A street lamp.$} {
+    #if {$wsea[lamps]} {
+        #map get roomvnum tmpVnum;
+        #if {!&wsea_lamps[$tmpVnum]} {
+            #var wsea_lamps[$tmpVnum] 1;
+            examine lamp;
+        };
+    };
+} {1};
+
+#NOP -- A Hungry Guard: Bern sells the steel bowls (item 5), Per trades one roll per bowl, Tommy takes the rolls.;
+#NOP -- Per takes a bowl only once he has finished explaining the deal, and one at a time: each takes him a few;
+#NOP -- seconds and a bowl given meanwhile is refused ("You decide not to give that to Per Tussletoff right now.").;
+#NOP -- Tommy also takes one roll at a time. So each give waits for the answer to the last (seen 2026-10-17);
+#alias .wsea_rolls {
+    #map run 5814;#5 buy 5;
+    #map run 45753;
+    #var wsea[rolls] 0;
+    #var wsea[rollstep] per;
+    say honey glazed vanilla rolls;
+    .wsea_rolls_wait;
+};
+#alias .wsea_rolls_wait {
+    #delay {wsea_rolls_stuck} {
+        #var wsea[rollstep] {};
+        #echo {<faa>wsea rolls: no answer from Per or Tommy for a minute, stopped.<088>};
+    } {60};
+};
+#action {^Per continues: For each steel bowl or set of steel bells you give} {
+    #if {"$wsea[rollstep]" == "per"} {give bowl to per};
+} {4};
+#action {^Per hands a sizzling warm vanilla roll to you.$} {
+    #if {"$wsea[rollstep]" == "per"} {
+        #math wsea[rolls] {$wsea[rolls] + 1};
+        .wsea_rolls_wait;
+        #if {$wsea[rolls] < 5} {give bowl to per} {
+            #var wsea[rollstep] tommy;
+            #var wsea[rolls] 0;
+            #map run 6202;
+            give roll to tommy;
+        };
+    };
+} {4};
+#action {^Tommy crams the tasty rolls and mumbles a muffled: Thank you.$} {
+    #if {"$wsea[rollstep]" == "tommy"} {
+        #math wsea[rolls] {$wsea[rolls] + 1};
+        .wsea_rolls_wait;
+        #if {$wsea[rolls] < 5} {give roll to tommy} {
+            #var wsea[rollstep] {};
+            #undelay {wsea_rolls_stuck};
+        };
+    };
+} {4};
+
+
+#NOP -- MAIN LINE;
+
+#NOP -- An Unwelcome Visitor, from Tommy.  1 is Lady Anne and Sir Michael, 2 is Ashton, 3 hands the note on;
+#alias .wsea_visitor {
+    #switch {"%1"} {
+        #case {"1"} {
+            .wsea_main_done;
+            .wsea_rep;
+            #if {$wsea[rep] > 0 && $wsea[rep] < 100000} {#echo {<faa>Westersea rep is $wsea[rep].  Sir Michael wanted about 100k (96.6k was not enough).<088>}};
+            .wsea_step {6202} {an unwelcome visitor} {add:an unwelcome visitor} {.wsea_v1_anne} {1};
+        };
+        #case {"2"} {
+            .wsea_main_done;
+            #var wsea[main] ashtonfind;
+            #list wsea_ashrooms create {5831;5833;5830;5834};
+            #var wsea[ashidx] 0;
+            .wsea_ashton_next;
+            #delay {wsea_main_stuck} {.wsea_main_stuck} {90};
+        };
+        #case {"3"} {
+            .wsea_main_done;
+            #map run 6202;give note to tommy;
+            .wsea_expect {add:send word to alister} {.wsea_v3_alister} {0} {90};
+        };
+        #default {#echo {<ffa>usage: wsea visitor 1|2|3  (1 Lady Anne + Sir Michael, 2 find Ashton, say Tom, kill him after Who sent you?, 3 note to Tommy then Alister)<088>}};
+    };
+};
+
+#alias .wsea_v1_anne {.wsea_step {5879} {ivar cutters} {update:an unwelcome visitor} {.wsea_v1_michael} {1}};
+#alias .wsea_v1_michael {.wsea_step {5932} {jan trotters} {update:an unwelcome visitor} {.wsea_v1_done} {0}};
+#alias .wsea_v1_done {#echo {<afa>Westersea: Sir Michael told you about Tom Fablepott. Next: wsea visitor 2<088>}};
+#action {^As you are lacking in your reputation within the city, Sir Michael} {
+    #if {"$wsea[mexp]" != ""} {
+        .wsea_main_done;
+        .wsea_rep;
+        #echo {<faa>Westersea: Sir Michael wants more rep (about 100k), you have $wsea[rep]. Grind sewer/slum, then wsea visitor 1 again.<088>};
+    };
+} {4};
+
+#action {^Ashton Nibble gasps for breath, then slumps into death.} {get note from corpse} {5};
+
+#alias .wsea_ashton_next {
+    #if {"$wsea[main]" != "ashtonfind"} {#return};
+    #math wsea[ashidx] {$wsea[ashidx] + 1};
+    #if {$wsea[ashidx] > &wsea_ashrooms[]} {
+        #echo {<faa>Westersea: Ashton isn't along the brick wall (5830-5834) right now. Try wsea visitor 2 again in a bit.<088>};
+        .wsea_main_done;
+        #return;
+    };
+    #map run $wsea_ashrooms[$wsea[ashidx]];
+    glance;
+    #delay {wsea_ash_look} {.wsea_ashton_check} {2};
+};
+
+#alias .wsea_ashton_check {
+    #if {"$wsea[main]" != "ashtonfind"} {#return};
+    #var tmpAsh 0;
+    #foreach {$room[mobs][%*]} {tmpRm} {#if {"$tmpRm[name]" == "%*Ashton%*"} {#var tmpAsh 1}};
+    #if {$tmpAsh} {
+        #var wsea[main] ashton;
+        #echo {<afa>Westersea: found Ashton. Saying the name and waiting for "Who sent you?" before killing him.<088>};
+        say tom fablepott;
+    } {
+        .wsea_ashton_next;
+    };
+};
+
+#alias .wsea_v2_handin {.wsea_step {6202} {complete} {complete} {.wsea_v2_done} {0}};
+#alias .wsea_v2_done {#echo {<afa>Westersea: An Unwelcome Visitor handed in. Next: wsea visitor 3<088>}};
+
+#alias .wsea_v3_alister {.wsea_step {5850} {it's time} {complete} {.wsea_v3_take} {0}};
+#alias .wsea_v3_take {.wsea_step {5850} {find the church tomb} {add:find the church tomb} {.wsea_v3_done} {1}};
+#alias .wsea_v3_done {#echo {<afa>Westersea: Find the Church Tomb taken. Next: wsea tapestry<088>}};
+
+#NOP -- Find the Church Tomb part 1: the tapestry in the east passage, then the hidden back room;
+#alias .wsea_tapestry {
+    .wsea_main_done;
+    .wsea_step {5850} {find the church tomb} {add:find the church tomb} {.wsea_tapestry_do} {1};
+};
+
+#alias .wsea_tapestry_do {
+    #map run 5849;
+    #4 turn left dial;#3 turn centre dial;#5 turn right dial;
+    push explosion;push boulder;push orb;push vase;
+    get candle;get rope;
+    push button;
+    #echo {<afa>Westersea: tapestry done, candle and rope taken. Next: wsea belfry<088>};
+};
+
+#NOP -- Part 2: fix the belfry cord for the chisel, then carve the inscription at Alister;
+#alias .wsea_belfry {
+    .wsea_main_done;
+    #map run 5856;pull cord;repair cord;pull cord;get chisel;
+    #map run 5850;
+    read inscription;carve c;insert candle into hole;
+    .wsea_step {} {complete} {complete} {.wsea_belfry_done} {0};
+};
+#alias .wsea_belfry_done {#echo {<afa>Westersea: Find the Church Tomb handed in. Next: wsea karithal male|female<088>}};
+
+#NOP -- Explore Church Tomb: say your name in Karithal at the barrier, 5863 (down four, north three from Alister);
+#NOP -- Reverse the name, add s (male) or k (female), vowels become -, m nrp, then r pr (so nrp becomes nprp), k klp, s zz;
+#function wsea_karithal {
+    #format result {%l} {%1};
+    #format result {%r} {$result};
+    #if {"%2" == "female"} {#cat result k} {#cat result s};
+    #foreach {a;e;i;o;u;y} {tmpVowel} {#replace result {$tmpVowel} {-}};
+    #replace result {m} {nrp};
+    #replace result {r} {pr};
+    #replace result {k} {klp};
+    #replace result {s} {zz};
+};
+
+#alias .wsea_karithal {
+    #if {"%1" != "male" && "%1" != "female"} {
+        #echo {<ffa>usage: wsea karithal male|female<088>};
+        #return;
+    };
+    .wsea_main_done;
+    #var wsea[karithal] {@wsea_karithal{$user;%1}};
+    #echo {<afa>Westersea: $user in Karithal is $wsea[karithal]<088>};
+    .wsea_step {5850} {explore church tomb} {add:explore church tomb} {.wsea_karithal_go} {1};
+};
+
+#alias .wsea_karithal_go {
+    #map run 5863;
+    murmur $wsea[karithal];
+    .wsea_expect {update:explore church tomb} {.wsea_karithal_back} {0} {30};
+};
+
+#alias .wsea_karithal_back {#delay {wsea_karithal_back} {.wsea_step {5850} {complete} {complete} {.wsea_karithal_done} {0}} {1}};
+#alias .wsea_karithal_done {#echo {<afa>Westersea: Explore Church Tomb handed in. Next: wsea cleanup (the cocoon)<088>}};
+
+#action {^A protective cocoon forms around your body and you move forward.} {#map goto 5864} {4};
+
+#NOP -- Church Tomb Cleanup: break egg in the sticky cavern 5868 (sac spiders, the first egg holds the cocoon), then;
+#NOP -- the holes in 5869 (beetles) and 5876 (clouds of insects), one update each, 10 in all, complete at Alister;
+#alias .wsea_eggs {
+    .wsea_main_done;
+    .wsea_step {5850} {church tomb cleanup} {add:church tomb cleanup} {.wsea_clean_start} {1};
+};
+
+#alias .wsea_clean_start {
+    #var wsea[clean] eggs;
+    #var wsea[cleanups] 0;
+    #list wsea_holes clear;
+    #foreach {5869 left beetle;5869 centre beetle;5869 right beetle;5876 left insects;5876 centre insects;5876 right insects} {tmpHole} {
+        #list wsea_holes add {{$tmpHole}};
+    };
+    #map run 5868;
+    break egg;
+    #delay {wsea_clean_wait} {.wsea_clean_next} {25};
+};
+
+#action {^You whack one of the nearest eggs which immediately cracks open.} {
+    #if {"$wsea[clean]" == "eggs"} {
+        #delay {wsea_clean_act} {kill spider} {1.5};
+        #delay {wsea_clean_wait} {.wsea_clean_next} {60};
+    };
+} {4};
+
+#action {^You can't find any more eggs to break.} {
+    #if {"$wsea[clean]" == "eggs"} {
+        #echo {<afa>Westersea: no eggs left. If the first one dropped a sticky cocoon it's on the floor here (5868): get cocoon, smuggle yours first if you carry one.<088>};
+        .wsea_clean_next;
+    };
+} {4};
+
+#action {^You insert your hand into one of the holes} {
+    #if {"$wsea[clean]" == "hole"} {
+        #delay {wsea_clean_act} {kill $wsea[cleanmob]} {2.5};
+        #delay {wsea_clean_wait} {.wsea_clean_next} {60};
+    };
+} {4};
+
+#alias .wsea_clean_updated {
+    #math wsea[cleanups] {$wsea[cleanups] + 1};
+    #if {$wsea[cleanups] >= 10} {
+        #var wsea[clean] {};
+        #undelay {wsea_clean_wait};
+        #delay {wsea_clean_act} {.wsea_step {5850} {complete} {complete} {.wsea_clean_done} {0}} {1};
+        #return;
+    };
+    #if {"$wsea[clean]" == "eggs"} {
+        #delay {wsea_clean_act} {break egg} {1};
+        #delay {wsea_clean_wait} {.wsea_clean_next} {25};
+    } {
+        #delay {wsea_clean_act} {.wsea_clean_next} {1};
+    };
+};
+
+#alias .wsea_clean_next {
+    #undelay {wsea_clean_wait};
+    #if {&wsea_holes[] == 0} {
+        #echo {<faa>Westersea: holes done but only $wsea[cleanups] of 10 updates. flip to see what's left.<088>};
+        #var wsea[clean] {};
+        #return;
+    };
+    #var wsea[clean] hole;
+    #list wsea_holes get 1 tmpHole;
+    #list wsea_holes delete 1;
+    #regex {$tmpHole} {^%d %w %w$} {
+        #var wsea[cleanmob] {&3};
+        #map run &1;
+        insert hand in &2 hole;
+    };
+    #delay {wsea_clean_wait} {.wsea_clean_next} {10};
+};
+
+#alias .wsea_clean_done {#echo {<afa>Westersea: Church Tomb Cleanup handed in. Next: wsea contact<088>}};
+
+#NOP -- Make Contact: take it at Alister, then touch the sphere (map exit from 5871), that hands you Assist Presence;
+#alias .wsea_contact {
+    .wsea_main_done;
+    .wsea_step {5850} {make contact} {add:make contact} {.wsea_contact_go} {1};
+};
+
+#alias .wsea_contact_go {
+    #map run 50358;
+    .wsea_expect {add:assist presence} {.wsea_contact_done} {1} {20};
+};
+
+#alias .wsea_contact_done {#echo {<ffa>Westersea: sphere touched. Next: wsea presence (lockpicking + alchemy), then back to the sphere: say history, listen to the end, wsea turnin.<088>}};
+
+#NOP -- Assist Presence: chirping box from Jorbin goes into the wall behind the library buttons;
+#alias .wsea_presence {
+    #map run 45572;buy 7;
+    #map run 20700;
+    #4 press left button;#8 press right button;
+    plant chirping box;
+    #echo {<ffa>Then collect the dust in the future mansion, refine it into copperas with alchemy and sprinkle copperas on sphere.<088>};
+};
+
+
+#NOP -- Scout the Town and Scout the Realm update when you walk into one room per task. Rooms from karvec's;
+#NOP -- logs (2026-10-16 and 17), all on the shared map: Town northern mountain chain 42827 At a frozen glade (the;
+#NOP -- hidden path north of the clearing 4746, the map's push branches exit from 5885). Faeries 37171 In the shade of an ash;
+#NOP -- tree. Desert: the push right eye exit from the hole 26553 into 26554. Wasteland 16004 Approach to Medlar;
+#NOP -- (e,s,n,w), one step w of 16002. The Town encampment room isn't in the logs;
+#alias .wsea_scout {
+    #switch {"%1"} {
+        #case {"town"} {#map run 42827};
+        #case {"faeries"} {#map run 37171};
+        #case {"wasteland"} {
+            #echo {<faa>Snow Wasteland rooms scramble your moves. If the walk stops, step back to 16002 and go w.<088>};
+            #map run 16004;
+        };
+        #case {"desert"} {.wsea_desert};
+        #default {
+            #echo {<fff>  Scout the Town / Scout the Realm - each task updates when you walk into its room, then wsea turnin<088>};
+            #echo {<cdd>  wsea scout town      : walk to 42827 At a frozen glade (northern mountain chain, through the hidden path)<088>};
+            #echo {<cdd>                         The encampment task: walk around the area just south-west of Tinny.<088>};
+            #echo {<cdd>  wsea scout faeries   : walk to 37171 In the shade of an ash tree<088>};
+            #echo {<cdd>  wsea scout wasteland : walk to 16004 Approach to Medlar (Medlar Castle).  Do NOT stepper out with go magic/go anywhere - a mob there makes you drop all.<088>};
+            #echo {<cdd>  wsea scout desert    : walk to the hole 26553 and do the puzzle, waiting out the snakes (push right eye updates it)<088>};
+        };
+    };
+};
+
+#NOP -- .wsea_clear <then>: run <then> once out of combat for 4 s in a row ($incombat lags up to 4 s, so a fight;
+#NOP -- that just started can be missed, the snake refusals below retry then);
+#alias .wsea_clear {
+    #var wsea[clearthen] {%1};
+    #var wsea[clearok] 0;
+    #ticker {wsea_clear} {
+        #if {$incombat} {#var wsea[clearok] 0} {#math wsea[clearok] {$wsea[clearok] + 1}};
+        #if {$wsea[clearok] >= 4} {#unticker {wsea_clear};$wsea[clearthen]};
+    } {1};
+};
+
+#NOP -- Scout the Realm, desert (Snake Pit). From Meatloaf's 11-15 run: sidewinders in the pit 26550 block the hole;
+#NOP -- ("A snake will not let you pass.", the map moves on anyway), the hole 26553 is full of snakes, push left eye;
+#NOP -- is a trap with more, walk like an egyptian is refused while any are alive, then the whirring sound, push right;
+#NOP -- eye updates the mission, and the cleric's question wants say no (answer isn't a command). wsea[desert] is the;
+#NOP -- step: walk, hole, trap, egypt, right, cleric. Each step waits out the fight first;
+#alias .wsea_desert {
+    #map get roomvnum tmpV;
+    #undelay {wsea_desert_trap};
+    #if {"$tmpV" == "26553"} {
+        #var wsea[desert] hole;
+        #echo {<afa>Westersea desert: in the hole, waiting for the fight to end, then the drawings and push left eye.<088>};
+        .wsea_clear {.wsea_desert_hole};
+    } {
+        #var wsea[desert] walk;
+        #echo {<afa>Westersea desert: walking to the hole, then the puzzle. wsea stop ends it.<088>};
+        #map run 26553;
+    };
+};
+
+#alias .wsea_desert_hole {
+    #var wsea[desert] trap;
+    exa drawing 1;exa drawing 2;exa drawing 3;exa drawing 4;
+    push left eye;
+    #delay {wsea_desert_trap} {#if {"$wsea[desert]" == "trap"} {#var wsea[desert] egypt;.wsea_clear {.wsea_desert_egypt}}} {8};
+};
+
+#alias .wsea_desert_egypt {#if {"$wsea[desert]" == "egypt"} {walk like an egyptian}};
+
+#action {^A snake will not let you pass.$} {
+    #if {"$wsea[desert]" == "walk"} {
+        mapUndo;
+        #echo {<afa>Westersea desert: snakes in the way, going on once they're dead.<088>};
+        .wsea_clear {#map run 26553};
+    };
+} {2};
+#action {^You cautiously enter the dark hole.$} {
+    #if {"$wsea[desert]" == "walk"} {
+        #var wsea[desert] hole;
+        .wsea_clear {.wsea_desert_hole};
+    };
+} {2};
+#action {^you have stumbled into another trap.} {
+    #if {"$wsea[desert]" == "trap"} {
+        #undelay {wsea_desert_trap};
+        #var wsea[desert] egypt;
+        .wsea_clear {.wsea_desert_egypt};
+    };
+} {2};
+#action {^You can't do a thing with all these snakes trying to kill you!$} {
+    #if {"$wsea[desert]" == "egypt"} {.wsea_clear {.wsea_desert_egypt}};
+    #if {"$wsea[desert]" == "right"} {.wsea_clear {push right eye}};
+} {2};
+#action {a loud whirring sound can be heard} {
+    #if {"$wsea[desert]" == "egypt"} {
+        #var wsea[desert] right;
+        push right eye;
+    };
+} {2};
+#action {^The cleric asks you: Tell me young one, can all this be true?} {
+    #if {"$wsea[desert]" == "cleric"} {say no};
+} {2};
+#action {^You are wise beyond your years young one.$} {
+    #if {"$wsea[desert]" == "cleric"} {
+        #var wsea[desert] {};
+        #map goto 26554;
+        #echo {<afa>Westersea desert: done. Shadownar the Cleric is here. Way out: e, portal, u, trail. Then wsea turnin.<088>};
+    };
+} {2};
+
+#alias .wsea_help {
+    #echo {     <fff>Westersea Mission Helper<088>};
+    #echo {<eaf>---------------------------------------------------------------<088>};
+    #echo {<fff>Missions are from Tinny (say missions).  wsea book shows what each open one needs.<088>};
+    #echo {};
+    #echo {<cdd>wsea book              - read the mission book and show the next step for each<088>};
+    #echo {<cdd>wsea turnin            - hand in every finished mission at its giver<088>};
+    #echo {<cdd>wsea grind sewer|slum  - repeat a cleanup for rep, handing it in when it hits 100<088>};
+    #echo {<cdd>wsea stop              - stop grinding, eavesdropping and the lamp check<088>};
+    #echo {<eaf>  Guard and city work<088>};
+    #echo {<cdd>wsea reports           - bot: walk the walls, grab report at every desk<088>};
+    #echo {<cdd>wsea fortify / chests  - give Bern the note / fill the six weapon chests<088>};
+    #echo {<cdd>wsea lieutenant        - enter alley to the dead lieutenant<088>};
+    #echo {<cdd>wsea widow             - say death to Weave Poll<088>};
+    #echo {<cdd>wsea eavesdrop         - eavesdrop on the merchants until it updates<088>};
+    #echo {<cdd>wsea lamps             - examine each street lamp you walk past (City Volunteers)<088>};
+    #echo {<cdd>wsea rolls             - A Hungry Guard: bowls from Bern, rolls from Per, rolls to Tommy<088>};
+    #echo {<cdd>wsea excursion         - walk to the hole down to the cubes (Sewer Excursion)<088>};
+    #echo {<cdd>wsea scout [town|faeries|wasteland|desert] - walk to where a scout task updates<088>};
+    #echo {<eaf>  Main line (in order)<088>};
+    #echo {<cdd>wsea visitor 1|2|3     - An Unwelcome Visitor (needs ~100k rep for Sir Michael). 3: note to Tommy, it's time and the next mission at Alister<088>};
+    #echo {<cdd>wsea tapestry          - Find the Church Tomb: takes it from Alister if needed, tapestry puzzle, rope and candle<088>};
+    #echo {<cdd>wsea belfry            - cord, chisel, then carve c, candle and complete at Alister<088>};
+    #echo {<cdd>wsea karithal male|female - Explore Church Tomb: takes it, murmurs your name at the barrier, complete<088>};
+    #echo {<cdd>wsea cleanup|eggs      - Church Tomb Cleanup: takes it, eggs, the six holes, complete (first egg is the cocoon)<088>};
+    #echo {<cdd>wsea contact           - Make Contact: takes it, touches the sphere (gives Assist Presence)<088>};
+    #echo {<cdd>wsea presence          - Assist Presence: chirping box and library buttons<088>};
+    #echo {<eaf>---------------------------------------------------------------<088>};
+};
+
+#alias {wsea} {
+    #switch {"%1"} {
+        #case {""} {.wsea_help};
+        #case {"help"} {.wsea_help};
+        #case {"book"} {#var wsea[then] show;flip};
+        #case {"turnin"} {#var wsea[then] turnin;flip};
+        #case {"grind"} {.wsea_grind %2};
+        #case {"stop"} {.wsea_grind_stop};
+        #case {"reports"} {+wsea-reports};
+        #case {"fortify"} {.wsea_fortify};
+        #case {"chests"} {.wsea_chests};
+        #case {"lieutenant"} {#map run 45578};
+        #case {"widow"} {#map run 5914;say death};
+        #case {"eavesdrop"} {.wsea_eavesdrop};
+        #case {"lamps"} {#var wsea[lamps] 1;#echo {<afa>Westersea: examining street lamps as you pass them.<088>}};
+        #case {"rolls"} {.wsea_rolls};
+        #case {"excursion"} {#map run 6157;#echo {<ffa>Now go to Alister and wsea turnin.<088>}};
+        #case {"scout"} {.wsea_scout %2};
+        #case {"visitor"} {.wsea_visitor %2};
+        #case {"tapestry"} {.wsea_tapestry};
+        #case {"belfry"} {.wsea_belfry};
+        #case {"karithal"} {.wsea_karithal %2};
+        #case {"eggs"} {.wsea_eggs};
+        #case {"cleanup"} {.wsea_eggs};
+        #case {"contact"} {.wsea_contact};
+        #case {"presence"} {.wsea_presence};
+        #default {#echo {<ffa>wsea: unknown command %1 - type wsea for the list<088>}};
+    };
+};
+
+#action {^You turn to attack %*.$} {.wsea_grind_switch {%1}} {5};
+
+#alias .wsea_grind_switch {
+    #if {"$wsea[grind]" != "Slum Cleanup" || !$bot[active] || $wsea[turnin]} {#return};
+    #format tmpMob {%l} {%1};
+    #if {!&wsea_slummobs[$tmpMob]} {#return};
+    #var tmpTask {$wsea_slummobs[$tmpMob][task]};
+    #if {$wsea[left][$tmpTask] > 0} {#return};
+    #var tmpSwitch {};
+    #foreach {$room[mobs][%*]} {tmpRm} {
+        #format tmpRmName {%l} {$tmpRm[name]};
+        #if {"$tmpSwitch" == "" && &wsea_slummobs[$tmpRmName]} {
+            #var tmpTask {$wsea_slummobs[$tmpRmName][task]};
+            #if {$wsea[left][$tmpTask] > 0} {#var tmpSwitch {$wsea_slummobs[$tmpRmName][target]}};
+        };
+    };
+    #if {"$tmpSwitch" == ""} {#return};
+    #echo {<afa>Westersea: %1 isn't needed, switching to the $tmpSwitch<088>};
+    kill $tmpSwitch;
+};
+
+#class {area_westersea} {close};
