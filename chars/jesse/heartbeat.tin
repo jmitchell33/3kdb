@@ -150,9 +150,12 @@
                 };
             };
             #case {"storing"} {
-                #var jdonate[state] check;
-                #var jdonate[wait] 1;
-                look;
+                #NOP -- cdonate3 clears cdonate_storing when its last pass is done;
+                #if {"$cdonate_storing" != "1"} {
+                    #var jdonate[state] check;
+                    #var jdonate[wait] 1;
+                    look;
+                };
             };
             #case {"check"} {
                 .jdonate_room_has_corpse;
