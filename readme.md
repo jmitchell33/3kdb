@@ -46,11 +46,28 @@ cd ~/3kdb
 tt++ startmenu.tin
 ```
 
+**Playing on a server? (optional)**
+
+If 3kdb runs on a server you connect to with SSH, run it inside **tmux**. tmux keeps the game running when you close the window or your connection drops, and lets you carry on from another device, such as starting on your PC and switching to your phone. Install it with `sudo apt install -y tmux`, then start 3kdb inside it:
+
+```
+tmux new -A -s 3k
+cd ~/3kdb
+tt++ startmenu.tin
+```
+
+Press `Ctrl+b` then `d` to leave it running, and `tmux new -A -s 3k` to come back from any device. [docs/tmux.md](docs/tmux.md) explains it all, including what happens to the screen size when you switch devices.
+
+**Seeing what's new**
+
+3kdb tells you at login when new changes have come in. In the game, `dblog` lists the latest ones, `dblog new` checks GitHub for changes you haven't pulled yet, and `dblog help` shows how to search them. See [Finding commands](docs/manual.md#finding-commands).
+
 More help:
 * [docs/setup.md](docs/setup.md): the full setup guide, using the menu, and fixes for common problems.
 * [docs/manual.md](docs/manual.md): everything 3kdb can do, including how to make your own aliases and actions.
 * [docs/faq.md](docs/faq.md): short answers to common questions and problems.
 * [docs/github.md](docs/github.md): getting updates, keeping your own changes, forks and pull requests.
+* [docs/tmux.md](docs/tmux.md): optional, for playing on a server and switching between devices.
 
 # Assumed Guild Defaults
 A few notes on mudside defaults are assumed for each guild.

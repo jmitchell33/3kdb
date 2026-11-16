@@ -6,6 +6,7 @@ This is the full guide to 3kdb: what it is, how to use it, and how to add your o
 - [setup.md](setup.md): the quick install steps
 - [faq.md](faq.md): short answers to common questions and problems
 - [github.md](github.md): updates, forks and sending in changes
+- [tmux.md](tmux.md): optional, for playing on a server and switching between devices
 
 **How to read this manual:**
 - Anything in a grey box is something to type, paste or put in a file.
@@ -146,6 +147,8 @@ tt++ startmenu.tin
 ```
 
 Don't install TinTin++ with `apt-get`, because that version is very far behind. Use the instructions at https://tintin.mudhalla.net/install.php instead.
+
+**Playing on a server you SSH into?** Run 3kdb inside **tmux**, so it keeps running when your connection drops and you can carry on from another device. It's optional. See [tmux.md](tmux.md).
 
 [Back to top](#3kdb-manual)
 
@@ -348,6 +351,16 @@ dbinfo go
 ```
 
 That shows its type, how to use it, what it does, and which file it's in.
+
+**See what's changed in 3kdb lately:**
+
+```text
+dblog
+```
+
+That shows the 10 newest changes, with a `*` on ones you haven't seen yet. At login, 3kdb tells you when new ones have come in. `dblog more` shows the next 10, and `dblog all` shows them all. To find one, add words (`dblog hell bot`), or use `dblog file <part of a file name>`, `dblog by <name>` or `dblog since 2w`. `dblog show <hash>` gives the full write-up and the files it changed. `dblog new` checks GitHub for changes you haven't pulled yet. `dblog help` lists it all.
+
+Only changes that made it into the main 3kdb project show, so unfinished or dropped work never does, and a change that was undone hides along with the undo.
 
 **The game has its own help** too:
 
@@ -643,10 +656,12 @@ It reloads its scripts once the game confirms, and remembers your guild for next
 
 - `3kReport` is the kill report. `3kReport 10` shows your last 10 kills, and `3kReport <mob>` filters by mob. `3kReport-clear` clears it.
 - `dstats` is the damage report, and `dreset` resets it. It needs the numbers perk.
+- 3kdb checks for the numbers perk at each login, including coming back from linkdeath, by sending `numbers` and hiding the answer. If the game doesn't answer, it finds the perk from your first `You hit ... for N damage.` line instead. `toggle numbers` turns it off: 3kdb sends `numbers off` to the game and acts like you don't have the perk, so no `dstats`, and it aims at mobs by their short name. Turning it back on sends `numbers on`. Typing `numbers on` or `numbers off` yourself flips the toggle to match, and nothing you type is hidden. `numbers-info` shows where it's at.
 - `defStats` is the defense report, and `defStats_reset` resets it.
 - `istats` is the item tracker, and `istats_reset` resets it.
 - `rounds` is the combat round tracker. Turn it on with `toggle rounds`. It shows your rounds all time, this session, and how many each guild level took. It reads your guild level from `score`, and `recover` checks `score` by itself, for any guild. `rounds note <text>` adds your own line to the log, `rounds check` reads `score` again, and `rounds-help` explains it all. 3kdb also reads `score` (hidden) at every login and return from linkdeath; typing `score` yourself always shows it. It keeps its own count, so nothing that clears `total_rounds` touches it. The count is saved every round to `logs/<your system username>/rounds/`, so a crash or linkdeath loses at most one round.
 - `reset_xp` resets the XP tracker on the data panel.
+- After each kill, 3kdb checks `xp` and `coins` (and `(cstats` for Eternals with `toggle 3kreport` on) to track what the kill gave. `toggle kill_stats` turns those checks off. Kills still count, but the XP tracker, bot stats and `3kReport` show 0 xp and coins earned while it's off. Mages still check `coins`, since their familiar fetches need it. Turning it back on starts counting from your xp at that moment.
 - `reset_gxp` resets guild experience tracking.
 - `.reps` is the reputation tracker.
 
@@ -844,6 +859,8 @@ quit
 ```
 
 To close the program from the menu, press `q`. In plain TinTin++, type `#end`.
+
+**In tmux**, leaving tmux with `Ctrl+b` then `d` isn't leaving the game. 3kdb keeps running and your character stays logged in. See [Leave and come back](tmux.md#leave-and-come-back).
 
 [Back to top](#3kdb-manual)
 
@@ -1265,6 +1282,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `findhere`: finds where you are on the mud to correct map.
 - `go`: map run to speedrun. Usage: `go <speedrun>`
 - `setup_3kdb`: Recommended mud prefs and first-run 3kdb client setup.
+- `dblog`: recent 3kdb changes from GitHub, 10 at a time. dblog more, dblog all, dblog <words>, file, by, since, show <hash>, new. dblog help explains. Usage: `dblog [more|all|<count>|<words>|file <part>|by <name>|since <when>|show <hash>|new|help]`
 - `dung_reset`: announce dungeon resets. Usage: `dung_reset <mj/sz/aegis/dungeonname>`
 - `speedruns`: displays all available speedruns.
 - `ld`: go linkdead saving certain variable values.
@@ -1474,6 +1492,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `reset_xp`: xp tracker reset - kills and xp shown in the caption when no bot is running.
 - `dstats`: damage tracking report - requires numbers vaf perk.
 - `dreset`: reset damage tracker.
+- `numbers-info`: shows toggle numbers, if 3kdb found the numbers vaf perk and if dstats is loaded.
 - `truckDmg-clear`: reset truck damage tracking.
 - `mountDmg-clear`: reset mount damage tracking.
 - `supportDmg-clear`: reset support mech damage tracking.
@@ -1613,6 +1632,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `startfishing`: start fishing.
 - `stopfishing`: stop fishing.
 - `fishlog`: show your fishing journal, after startfishing.
+- `wsea`: Westersea mission helper: mission book, hand-ins, rep grind, guard work and the main line. wsea alone lists the commands. Usage: `wsea [command]`
 - `sopem1`: enter sopem part 1.
 - `sopem2`: enter sopem part 2.
 - `run_uk`: undead knight book and hunt loop.

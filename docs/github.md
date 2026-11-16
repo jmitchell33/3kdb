@@ -271,27 +271,40 @@ git-save() {
   git push
 }
 
+# _git_menu_chars <repo top>: print the names of the characters on your start menu, one per line.
+_git_menu_chars() {
+  [ -f "$1/chars/startmenu_data.tin" ] || return 0
+  sed -n '/#VARIABLE {menu_chars}/,/^}/s/.*{[0-9]*} {\([a-z]*\)}.*/\1/p' "$1/chars/startmenu_data.tin"
+}
+
 # git-keep-vars <command...>: run a git command and keep your newest vars.tin files, moving them
 # out of the way and then putting them back. Example: git-keep-vars git checkout sandbox9
 # A running game keeps rewriting chars/<you>/vars.tin, and that would otherwise stop git from
 # switching branches. If the game saves mid-command, it tries again.
 # Also keeps the vars.tin of each character on your start menu when it's already committed, so a
 # branch with an older copy can't replace it. Other players' files are left alone.
+# Files hidden with git-hide-vars are kept too, and stay hidden afterwards.
 git-keep-vars() {
-  local top backup tries=1 result file rel name kept=0 failed=0
+  local top backup tries=1 result file rel name kept=0 failed=0 hidden
   top=$(git rev-parse --show-toplevel) || return
   mkdir -p "$HOME/3kdb-temp" || return
   backup=$(mktemp -d "$HOME/3kdb-temp/vars-backup.XXXXXX") || return
-  if [ -f "$top/chars/startmenu_data.tin" ]; then
-    sed -n '/#VARIABLE {menu_chars}/,/^}/s/.*{[0-9]*} {\([a-z]*\)}.*/\1/p' \
-      "$top/chars/startmenu_data.tin" | while IFS= read -r name; do
-      file="chars/$name/vars.tin"
-      [ -f "$top/$file" ] || continue
-      git -C "$top" ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
-      mkdir -p "$backup/chars/$name"
+  _git_menu_chars "$top" | while IFS= read -r name; do
+    file="chars/$name/vars.tin"
+    [ -f "$top/$file" ] || continue
+    git -C "$top" ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
+    mkdir -p "$backup/chars/$name"
+    cp -p "$top/$file" "$backup/$file"
+  done
+  hidden=$(git -C "$top" ls-files -v -- '*vars.tin' | sed -n 's/^S //p')
+  for file in $hidden; do
+    if [ -f "$top/$file" ]; then
+      mkdir -p "$backup/$(dirname "$file")"
       cp -p "$top/$file" "$backup/$file"
-    done
-  fi
+    fi
+    git -C "$top" update-index --no-skip-worktree "$file"
+    git -C "$top" checkout -q HEAD -- "$file"
+  done
   while :; do
     git -C "$top" diff --name-only HEAD -- '*vars.tin' | while IFS= read -r file; do
       [ -f "$top/$file" ] || continue
@@ -313,6 +326,10 @@ git-keep-vars() {
     cmp -s "$file" "$top/$rel" && continue
     mkdir -p "$(dirname "$top/$rel")" && cp -p "$file" "$top/$rel" && kept=1 || failed=1
   done < <(find "$backup" -type f)
+  for file in $hidden; do
+    git -C "$top" ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
+    git -C "$top" update-index --skip-worktree "$file"
+  done
   if [ "$failed" -eq 1 ]; then
     echo "git-keep-vars: could not put vars.tin back. Your copy is safe in $backup"
     return 1
@@ -320,6 +337,44 @@ git-keep-vars() {
   [ "$kept" -eq 1 ] && echo "git-keep-vars: kept your newest vars.tin files."
   rm -rf "$backup"
   return "$result"
+}
+
+# git-hide-vars [name...]: stop git from seeing changes to your characters' vars.tin files, so
+# they stay on your computer and stop going into commits and pull requests. With no names it
+# hides the vars.tin of each character on your start menu. Only changes your own folder.
+# Undo with git-unhide-vars. Run it again in a new clone, since a clone starts with none hidden.
+git-hide-vars() {
+  local top name file
+  top=$(git rev-parse --show-toplevel) || return
+  [ $# -gt 0 ] || set -- $(_git_menu_chars "$top")
+  if [ $# -eq 0 ]; then
+    echo "git-hide-vars: no start menu characters found. Name them: git-hide-vars byron"
+    return 1
+  fi
+  for name in "$@"; do
+    file="chars/$name/vars.tin"
+    if ! git -C "$top" ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+      echo "git-hide-vars: $file isn't in the project, so git already ignores it."
+      continue
+    fi
+    git -C "$top" update-index --skip-worktree "$file" && echo "git-hide-vars: hid $file"
+  done
+}
+
+# git-unhide-vars [name...]: undo git-hide-vars, so git sees changes to those vars.tin files again.
+# With no names it unhides every hidden vars.tin.
+git-unhide-vars() {
+  local top name file
+  top=$(git rev-parse --show-toplevel) || return
+  if [ $# -eq 0 ]; then
+    set -- $(git -C "$top" ls-files -v -- 'chars/*/vars.tin' | sed -n 's|^S chars/\(.*\)/vars.tin$|\1|p')
+    [ $# -gt 0 ] || { echo "git-unhide-vars: no vars.tin files are hidden."; return 0; }
+  fi
+  for name in "$@"; do
+    file="chars/$name/vars.tin"
+    git -C "$top" ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
+    git -C "$top" update-index --no-skip-worktree "$file" && echo "git-unhide-vars: unhid $file"
+  done
 }
 
 # git-start <name>: update master, push it to your fork, then make a new branch from it.
@@ -537,7 +592,7 @@ Lists your local branches.
 **`git-save "message"`**
 - Commits your changes and pushes the branch you're on. The message is optional, and the default is `savepoint`.
 - Also use it to finish a merge after fixing a conflict.
-- Doesn't touch `master` or bring in anything new. Includes `vars.tin` files, and refuses to run on `master`.
+- Doesn't touch `master` or bring in anything new. Includes `vars.tin` files unless you hid them with `git-hide-vars`, and refuses to run on `master`.
 
 **`git-sync`**
 - The "make everything up to date" command. From any branch, it:
@@ -550,11 +605,19 @@ Lists your local branches.
 **`git-keep-vars <command>`**
 - Runs a git command and keeps your newest `vars.tin` files. Changed ones are moved aside and put back. If the game saves during the command, it tries again, up to 5 times.
 - It also keeps the `vars.tin` of each character on your start menu when it's already committed, so a branch with an older copy can't replace it. Other players' files are left alone. If you don't use the menu, this part does nothing.
+- Files hidden with `git-hide-vars` are kept too, and stay hidden afterwards.
 - Use it when git complains about a `vars.tin` file while switching branches:
   ```bash
   git-keep-vars git checkout fix-bard
   ```
 - Don't use it for `git-sync`. See [Part 9](#part-9-merge-conflicts).
+
+**`git-hide-vars [name...]`**
+- Stops git from seeing changes to your characters' `vars.tin` files, so they stay on your computer and stop going into commits and pull requests. With no names, it hides the `vars.tin` of each character on your start menu.
+- Only changes your own folder. Nothing goes to GitHub, and other players aren't affected.
+- Run it once. Run it again after a new clone, or after adding a character to the start menu.
+- Undo it with `git-unhide-vars` (all of them) or `git-unhide-vars <name>`. See [vars.tin files](#varstin-files).
+- Installed the helpers before this one was added? You'll get `command not found`. Paste the [Part 5](#part-5-install-the-git-helpers) block again to update them.
 
 **`git-make-desc`**
 - Saves your pull request description to `~/3kdb-temp/pr.md`, overwriting the old one.
@@ -570,6 +633,80 @@ Lists your local branches.
 - `git-sync` does the same, **and** gets everyone else's work and updates everything.
 
 `git-save` lets you name the commit, and it can't cause a merge conflict because it brings nothing in. `git-sync` names the commit `sync-<date>` and can hit a conflict.
+
+### Without the helpers
+
+These are the plain git commands each helper runs, so you can type or paste them yourself. They need a fork set up with [Part 3](#part-3-set-up-a-fork-from-scratch) or [Part 4](#part-4-switch-an-existing-clone-to-a-fork). Run them from the top of your folder. Put in your own branch name in place of `fix-bard`, and your own message or title.
+
+The helpers also handle `vars.tin` while you play. These commands don't, so if one refuses because of a `vars.tin` file, use the steps under `merge did not start` in [Part 9](#part-9-merge-conflicts) with that command in place of `git-sync`. If you hid the file, use the steps in [vars.tin files](#varstin-files) instead.
+
+**`git-start fix-bard`.** If you're on `master`:
+
+```bash
+git pull upstream master
+git push origin master
+git checkout -b fix-bard
+```
+
+If you're on another branch:
+
+```bash
+git fetch upstream master:master
+git push origin master
+git checkout -b fix-bard master
+```
+
+`git fetch upstream master:master` only works when you're not on `master`, which is why there are two versions.
+
+**`git-save "my changes"`.** Don't run it on `master`. Skip the second line if `git status` shows nothing changed:
+
+```bash
+git add .
+git commit -m "my changes"
+git push -u origin HEAD
+```
+
+`-u origin HEAD` sends the branch to your fork under the same name, and works for a new branch too. After the first time, plain `git push` is enough.
+
+**`git-sync`.** If you're on `master`:
+
+```bash
+git pull --ff-only upstream master
+git push origin master
+```
+
+If you're on another branch, save first (the same three lines as `git-save`), then:
+
+```bash
+git fetch upstream master:master
+git push origin master
+git merge --no-edit master
+git push
+```
+
+If `git merge` says `CONFLICT`, fix it with [Part 9](#part-9-merge-conflicts) before the last line.
+
+**`git-make-desc`.** Write your description in a text editor. In `nano`, save with Ctrl+O then Enter, and exit with Ctrl+X:
+
+```bash
+mkdir -p ~/3kdb-temp
+nano ~/3kdb-temp/pr.md
+```
+
+**`git-pr-pro "PR title"`.** Don't run it on `master`. Put your GitHub username in place of `yourname`:
+
+```bash
+git add .
+git commit -m "PR title"
+git push -u origin HEAD
+gh pr create --repo jmitchell33/3kdb --base master --head yourname:fix-bard --title "PR title" --body-file ~/3kdb-temp/pr.md
+```
+
+Skip the commit line if there's nothing new to commit.
+
+**`git-keep-vars`.** See `merge did not start` in [Part 9](#part-9-merge-conflicts), or [vars.tin files](#varstin-files) for a hidden file.
+
+**`git-hide-vars`.** See [vars.tin files](#varstin-files).
 
 [Back to top](#3kdb-git-and-github-guide)
 
@@ -677,7 +814,7 @@ git-sync
 cp ~/3kdb-temp/my-vars.tin chars/byron/vars.tin
 ```
 
-If it says the same thing again, the game saved at that moment, so start over from the first line. Avoid `git stash` for this while playing. The game rewrites the file straight away, so `git stash pop` refuses to run, and it also sweeps up your other unsaved work.
+If it says the same thing again, the game saved at that moment, so start over from the first line. If you hid that `vars.tin` with `git-hide-vars`, run `git-unhide-vars` first and `git-hide-vars` once you're done, because `git checkout` can't see a hidden file. Avoid `git stash` for this while playing. The game rewrites the file straight away, so `git stash pop` refuses to run, and it also sweeps up your other unsaved work.
 
 **`you are on master`** (from `git-save`)
 
@@ -693,6 +830,46 @@ git-save "my changes"
 `vars.tin` is where a character's settings are saved. `git-save`, `git-sync` and `git-pr-pro` include changed `chars/*/vars.tin` files in commits, so they go with your pull request. That covers characters already in the project. A new character's `vars.tin` is ignored by git, so it stays on your computer.
 
 The game keeps rewriting the file, so it shows as modified again in `git status` soon after a commit. That's normal.
+
+**Rather not deal with it?** Run `git-hide-vars` once. `git status`, `git-save`, `git-sync` and `git-pr-pro` stop seeing your characters' `vars.tin`, and the file stays on your computer.
+
+- Your settings stop going up to GitHub, so they won't follow you to a new clone.
+- It only changes your own folder, so other players keep their files.
+- The files are still in the project. If the project changes one, git refuses to update. `git-start` and `git-keep-vars` deal with that and keep your copy. For `git-sync`, see `merge did not start` above.
+
+**Without the helpers.** These are the plain git commands, so you can type or paste them yourself. Run them from the top of your folder, and use your own character's name in place of `byron`. Do it once for each character.
+
+Hide a `vars.tin`:
+
+```bash
+git update-index --skip-worktree chars/byron/vars.tin
+```
+
+Unhide it:
+
+```bash
+git update-index --no-skip-worktree chars/byron/vars.tin
+```
+
+See which ones are hidden. Each line starting with `S` is hidden:
+
+```bash
+git ls-files -v chars | grep '^S'
+```
+
+If `git pull`, `git checkout` or `git merge` refuses because of a hidden file (`Your local changes to the following files would be overwritten`), this saves your copy, runs the command, then puts your copy back and hides it again. Put the command that refused on the fifth line, shown here as `git pull --no-rebase --no-edit`:
+
+```bash
+mkdir -p ~/3kdb-temp
+cp chars/byron/vars.tin ~/3kdb-temp/my-vars.tin
+git update-index --no-skip-worktree chars/byron/vars.tin
+git checkout HEAD -- chars/byron/vars.tin
+git pull --no-rebase --no-edit
+cp ~/3kdb-temp/my-vars.tin chars/byron/vars.tin
+git update-index --skip-worktree chars/byron/vars.tin
+```
+
+If it refuses again, the game saved at that moment, so start over from the second line.
 
 [Back to top](#3kdb-git-and-github-guide)
 

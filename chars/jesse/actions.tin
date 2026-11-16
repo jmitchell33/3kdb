@@ -69,6 +69,24 @@
     };
 } {1};
 
+#nop -- glyph done: chain cdonate1 into cdonate2;
+#nop -- this beats the priority 2 action in common/actions.tin on the same line, so it sets mask[active] too;
+#action {^As you look through the mask, the eyes flash briefly with a dim, blue light.} {
+    #var mask[active] 1;
+    #if {"$cdonate_glyph" == "1"} {
+        #var cdonate_glyph 0;
+        cdonate2;
+    };
+} {1};
+
+#nop -- the total from lookup after cdonate3, sent to party chat;
+#action {^Duncan says: You've donated %* more corpses than you have borrowed.} {
+    #if {"$cdonate_lookup" == "1"} {
+        #var cdonate_lookup 0;
+        ptell Donated to Duncan: %1 more corpses than borrowed;
+    };
+} {1};
+
 #nop -- mask drop;
 #action {The mask clatters to the ground.} {
     #if {!$idle_flag} {

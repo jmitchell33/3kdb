@@ -181,6 +181,12 @@
 #alias update_coins {
     #NOP -- If the coins don't increase, we know we're down or there's another change making a measurement unreliable;
     #var fight_coins 0;
+    #NOP -- toggle kill_stats off: no coins check and the fight gave 0 coins. Mages still check,;
+    #NOP -- since their familiar fetches (common/guilds/mage/heartbeat.tin) need my[coins] to be right;
+    #if {"$toggles[kill_stats]" == "0" && "$guild" != "mage"}
+    {
+        #return;
+    };
     #action {^You are carrying %d coins in loose change.$} {
         #var temp_coins %%1;
         #if {$my[coins] > 0 && "$temp_coins" != "$my[coins]"} {
