@@ -91,8 +91,14 @@
                 #if $vaf[numbers] {
                     bloodarc $enemy[name_numbers];
                 } {
-                    #if {"$enemy[target]" != "" && "$bot[active]" != "1"} {
-                        #local arc_words {$enemy[target]};
+                    #NOP -- Tags like (undead) or [wounded] come off first, or the last word is the tag (bloodarc (undead), jesse log 2026-11-16 14:09).;
+                    #NOP -- Only this copy is changed, enemy[target] keeps the full name for everything else;
+                    #local arc_name {$enemy[target]};
+                    #replace arc_name {\(%*\)} {};
+                    #replace arc_name {\[%*\]} {};
+                    #format arc_name {%p} {$arc_name};
+                    #if {"$arc_name" != "" && "$bot[active]" != "1"} {
+                        #local arc_words {$arc_name};
                         #list arc_words {explode} { };
                         bloodarc $arc_words[&arc_words[]];
                     } {
