@@ -137,7 +137,11 @@
     };
 };
 
+#NOP -- Their delays go too, or they'd fire after the aliases are gone and send them to the game;
 #alias .kill_dmg_trackers {
+    #undelay {dmg_round_reset};
+    #undelay {dmgtracker_mage_clear};
+    #undelay {dmgtracker_jugger_clear};
     #class dmgtracker kill;
     #class dmgtracker_mage kill;
     #class dmgtracker_jugger kill;

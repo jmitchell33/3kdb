@@ -181,33 +181,98 @@
 };
 
 #nop -- donate corpses to duncan;
+#NOP -- cdonate_glyph lets the mask action in actions.tin run cdonate2 once the glyph is done;
 #alias {cdonate1} {
+    #var cdonate_glyph 1;
     wrap all;
     maskon;
     #send {!trace glyph};
     unkeep all preservation;drop all;
     #if {$corpses[freezer] > 0} {#send {!deslab all}};
     #if {$corpses[cooler] > 0} {#$corpses[cooler] uncooler corpse};
-    #delay 10 {#send {!lookup}};
+    #delay {cdonate_lookup1} {#send {!lookup}} {10};
 };
 
 #alias {cdonate2} {
     #send {!trace glyph};
-    #delay 10 {cdonate3};
+    #delay {cdonate_next} {cdonate3} {10};
 };
+
+#NOP -- each pass preserves and picks up 50 (the carry limit), then stores them. The Duncan actions in;
+#NOP -- actions.tin send the next pass only after his reply to the last store, and stop once the floor;
+#NOP -- is empty or after cdonate_max passes (10 x 50 = 500 corpses);
+#var cdonate_max 10;
 
 #alias {cdonate3} {
     maskoff;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    pg;unkeep all preservation;store all;
-    #delay 10 {#send {!lookup}};
+    #var cdonate_pass 0;
+    #var cdonate_storing 1;
+    .cdonate_pass;
+};
+
+#alias {.cdonate_pass} {
+    #math cdonate_pass {$cdonate_pass + 1};
+    #var cdonate_nocorpse 0;
+    #var cdonate_nopres 0;
+    pg;
+    unkeep all preservation;
+    store all;
+    #NOP -- if Duncan never answers, stop instead of waiting forever;
+    #delay {cdonate_watch} {
+        .cdonate_done {no reply from Duncan};
+    } {10};
+};
+
+#NOP -- called by the Duncan ledger action after each store;
+#alias {.cdonate_pass_end} {
+    #if {$cdonate_nocorpse && $cdonate_nopres} {
+        .cdonate_done {floor clear after $cdonate_pass passes};
+    };
+    #elseif {$cdonate_pass >= $cdonate_max} {
+        .cdonate_done {stopped at the $cdonate_max pass limit};
+    };
+    #else {
+        .cdonate_pass;
+    };
+};
+
+#alias {.cdonate_done} {
+    #undelay {cdonate_watch};
+    #var cdonate_storing 0;
+    #echo {<ceb>cdonate3:<088> %1};
+    #NOP -- cdonate_lookup lets the Duncan action in actions.tin ptell the total;
+    #var cdonate_lookup 1;
+    #send {!lookup};
+};
+
+#NOP -- auto donate on/off, the run itself is in heartbeat.tin. Turning it off mid run stops it there, bot still paused;
+#alias {adonateon} {
+    #var jdonate[on] 1;
+    #echo {<ceb>Auto donate:<088> on};
+};
+
+#alias {adonateoff} {
+    #var jdonate[on] 0;
+    #if {"$jdonate[state]" != "idle"} {
+        .jdonate_abort {turned off};
+    } {
+        #echo {<ceb>Auto donate:<088> off};
+    };
+};
+
+#NOP -- stop everything: the donate run, the cdonate delays and the bot. Auto donate stays on;
+#alias {adonateabort} {
+    #echo {<ceb>Auto donate:<088> <faa>ABORT - stopping the donate run, the cdonate delays and the mask wait, then .stop on the bot.<088>};
+    #echo {<ceb>Auto donate:<088> <faa>The mask stays on and corpses already dropped stay on the ground. Auto donate is still on (adonateoff to turn it off).<088>};
+    #var jdonate[state] idle;
+    #var jdonate[wait] 0;
+    #var cdonate_glyph 0;
+    #var cdonate_lookup 0;
+    #var cdonate_storing 0;
+    #undelay {cdonate_lookup1};
+    #undelay {cdonate_next};
+    #undelay {cdonate_watch};
+    .stop;
 };
 
 #nop -- mask aliases;
@@ -519,9 +584,12 @@
 #list jesse3kdb add {{{name} {pr} {type} {corpses} {desc} {Preserve up to 50 remains}}};
 #list jesse3kdb add {{{name} {pg} {type} {corpses} {desc} {Preserve up to 50 remains and pick up the preservations}}};
 #list jesse3kdb add {{{name} {pg2} {type} {corpses} {desc} {pg, then store all the preservations}}};
-#list jesse3kdb add {{{name} {cdonate1} {type} {corpses} {desc} {Duncan donate 1: wrap all, mask on, trace glyph, drop all corpses}}};
+#list jesse3kdb add {{{name} {cdonate1} {type} {corpses} {desc} {Duncan donate 1: wrap all, mask on, trace glyph, drop all corpses, cdonate2 runs when the mask glows}}};
 #list jesse3kdb add {{{name} {cdonate2} {type} {corpses} {desc} {Duncan donate 2: trace glyph back, then cdonate3}}};
-#list jesse3kdb add {{{name} {cdonate3} {type} {corpses} {desc} {Duncan donate 3: mask off, preserve and store everything}}};
+#list jesse3kdb add {{{name} {cdonate3} {type} {corpses} {desc} {Duncan donate 3: mask off, store 50 at a time until the floor is clear (up to 500)}}};
+#list jesse3kdb add {{{name} {adonateon} {type} {corpses} {desc} {Auto donate on: bot pauses and donates when coffin, freezer and cooler are full}}};
+#list jesse3kdb add {{{name} {adonateoff} {type} {corpses} {desc} {Auto donate off, stops a run in progress}}};
+#list jesse3kdb add {{{name} {adonateabort} {type} {corpses} {desc} {Abort auto donate: stop the run, cdonate delays and the bot (.stop)}}};
 
 #NOP -- boosts;
 #list jesse3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};

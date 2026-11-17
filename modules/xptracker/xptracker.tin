@@ -35,6 +35,14 @@
             #math bot[stats][mobs] {$bot[stats][mobs] + 1};
         };
 
+        #NOP -- toggle kill_stats off: the kill still counts, but no xp is sent and the fight gave 0 xp;
+        #if {"$toggles[kill_stats]" == "0"}
+        {
+            #var fight_xp 0;
+            #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
+            #return;
+        };
+
         #line oneshot #action {^You have %* total xp.$} {
             #format temp_xp {%d} {%%1};
             #if {$my[xp] > 0 && "$temp_xp" != "$my[xp]"} {
@@ -62,6 +70,16 @@
     #line oneshot #action {^At this rate you will level in %*} {
         #line gag;
     } {2};
+};
+
+#NOP -- Turning kill_stats back on: take the current xp as the new start, so xp gained while it was off isn't counted;
+#alias {.kill_stats_resync}
+{
+    #line oneshot #action {^You have %* total xp.$}
+    {
+        #format my[xp] {%d} {%%1};
+    };
+    xp;
 };
 
 #NOP -- .xp_rate <xp> <start time>: sets xp_rate_str (xp per hour) and xp_time_str (time since start);

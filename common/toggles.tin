@@ -27,9 +27,11 @@
     {fracture_notify} {0}
     {go_echo} {1}
     {hidemap} {0}
+    {kill_stats} {1}
     {map_follow} {1}
     {map_vnum} {0}
     {mission} {0}
+    {numbers} {1}
     {portal_ctell} {0}
     {portal_notify} {0}
     {rounds} {0}
@@ -59,6 +61,11 @@
     #unvar toggles[bothportals_notify];
     #unvar toggles[bothportals_ctell];
     #var discordPost $toggles[discord_post];
+    #NOP -- Some character files set vaf[numbers] by hand, toggle numbers off wins over that;
+    #if {"$toggles[numbers]" == "0"}
+    {
+        #var vaf[numbers] 0;
+    };
 };
 
 
@@ -89,9 +96,11 @@
     {fracture_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a fracture (grimoire) hour}
     {go_echo} {Says 'here we go!' when go finds the room}
     {hidemap} {Hides the map to give its space to the side panel. go and bots still work}
+    {kill_stats} {After each kill, checks xp, coins and (cstats (Eternals with 3kreport) for the xp tracker, bot stats and 3kReport. Off: kills still count, xp and coins earned show 0. Mages still check coins for their familiar}
     {map_vnum} {Shows the room number in the bottom right corner of the map}
     {map_follow} {While you follow someone, moves your map with you each time they lead you to another room}
     {mission} {Asks for a mission when you find a mission giver}
+    {numbers} {Numbers vaf perk: 3kdb checks for it at login (or from your first damage line), then loads dstats and aims at mobs by the name in that line. Off: sends numbers off to the game and 3kdb acts like you don't have the perk. Typing numbers on/off in the game flips it too. See numbers-info}
     {portal_ctell} {Zodiacs: portal_notify, and ctells your clan too}
     {portal_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a portal (tome) hour}
     {recover_parser_off} {Necros: recover also sends parser off}
@@ -150,6 +159,23 @@
     #if {"%1" == "artifacts"} {.artifacts_watch};
     #if {"%1" == "circle_tracker" && "$guild" == "necromancer"} {.circle_tracker_toggled};
     #if {"%1" == "rounds"} {.roundlog_toggle};
+    #if {"%1" == "numbers"}
+    {
+        #unvar numbersAutoOff;
+        #if {$toggles[numbers]}
+        {
+            .numbers_on;
+        };
+        #else
+        {
+            .numbers_off;
+        };
+    };
+    #if {"%1" == "kill_stats" && $toggles[kill_stats]}
+    {
+        .kill_stats_resync;
+        _status_coins;
+    };
 };
 
 #NOP -- toggle-reset lists what would change and asks first. toggle-reset confirm does it, within 30 seconds;

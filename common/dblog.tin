@@ -1,0 +1,141 @@
+#class {dblog} {kill};
+#class {dblog} {open};
+
+#NOP -- dblog: recent 3kdb changes, read from the upstream master history by scripts/dblog.py;
+#NOP -- Only merged or pushed work shows, reverts hide with the change they undo, chars/ is ignored;
+#NOP -- Seen marker is saved in vars/dblog_seen.txt;
+#NOP -- dblog.py runs in the background and writes to a file, so tt++ never waits on git or GitHub;
+
+#var dblog_more 0;
+#var dblog_shown 0;
+#var dblog_skip 0;
+#var dblog_query {};
+#var dblog_job 0;
+#var dblog_login_pending 0;
+#NOP Each session and each job get their own output file, so a login notice and a;
+#NOP dblog new can run at the same time, and several characters can use dblog at once;
+#format dblog_id {%U};
+
+#NOP Usage: dblog [more|all|<count>|<words>|file <part>|by <name>|since <when>|show <hash>|new|help];
+#alias {dblog}
+{
+    #if {"%1" == "more"}
+    {
+        #if {$dblog_more}
+        {
+            #var dblog_skip {$dblog_shown};
+            dblog_run {$dblog_query};
+        };
+        #else
+        {
+            #echo {<ccf>  No more changes to show. <eaf>dblog help<088>};
+        };
+    };
+    #elseif {"%1" == "help" || "%1" == "show" || "%1" == "new"}
+    {
+        #NOP Not a list, so 'dblog more' keeps paging the last one;
+        #var dblog_skip 0;
+        dblog_run {%0};
+    };
+    #else
+    {
+        #var dblog_query {%0};
+        #var dblog_skip 0;
+        dblog_run {%0};
+    };
+}
+
+#NOP Start dblog.py on query %1 (passed in braces); dblog_poll prints it when it's done;
+#alias {dblog_run}
+{
+    #screen get cols dblog_cols;
+    #if {&screen[width] && &split[right]}
+    {
+        #math dblog_cols {$screen[width] - $split[left] - $split[right]};
+    };
+    #var dblog_args {%1};
+    #replace dblog_args {'} {};
+    #if {"$dblog_args" == "new"}
+    {
+        #echo {<ccf>  Checking GitHub for changes, keep playing...<088>};
+    };
+    dblog_start {--cols $dblog_cols --skip $dblog_skip -- '$dblog_args'};
+}
+
+#NOP Run dblog.py with arguments %1 in the background. It writes to a .part file and renames it;
+#NOP when finished, so dblog_poll never reads half an answer;
+#alias {dblog_start}
+{
+    #math dblog_job {$dblog_job + 1};
+    #var dblog_file {vars/dblog_out_${dblog_id}_$dblog_job.txt};
+    #system {(python3 scripts/dblog.py %1 > $dblog_file.part 2>&1; mv -f $dblog_file.part $dblog_file) > /dev/null 2>&1 &};
+    dblog_poll {$dblog_file} 0;
+}
+
+#NOP Look for output file %1 (try %2), then every 0.25 seconds for up to 40 seconds;
+#NOP The file name goes in as %1 because a #delay reads variables when it fires, not when it's set;
+#alias {dblog_poll}
+{
+    #script {dblog_out} {test -f %1 && echo DBLOG_DONE && cat %1 && rm -f %1};
+    #if {"$dblog_out[1]" == "DBLOG_DONE"}
+    {
+        dblog_print;
+    };
+    #elseif {%2 < 160}
+    {
+        #math dblog_try {%2 + 1};
+        #delay {0.25} {dblog_poll {%1} $dblog_try};
+    };
+    #else
+    {
+        #echo {<eed>  dblog gave up waiting for scripts/dblog.py. Is python3 installed?<088>};
+    };
+}
+
+#NOP Print what dblog.py wrote. Its last line, #DBLOG_MORE <more> <shown>, is kept for 'dblog more';
+#alias {dblog_print}
+{
+    #loop 2 &dblog_out[] dblog_i
+    {
+        #var dblog_line {$dblog_out[$dblog_i]};
+        #if {"$dblog_line" == "#DBLOG_MORE %*"}
+        {
+            #regex {$dblog_line} {^#DBLOG_MORE {\d+} {\d+}$}
+            {
+                #var dblog_more {&1};
+                #var dblog_shown {&2};
+            };
+        };
+        #else
+        {
+            #echo {%s} {$dblog_line};
+        };
+    };
+}
+
+#NOP One line at login when upstream changes have come in that dblog hasn't shown yet;
+#alias {dblog_login_notice}
+{
+    dblog_start {--login};
+}
+
+#NOP postload (common/config.tin) sets dblog_login_pending, and the end of its who2 list calls this;
+#NOP Necromancers wait 3 seconds more, for the repower postload sends 2 seconds after who2;
+#NOP A later who2, like whitelist-room's, finds it already cleared;
+#alias {dblog_after_who2}
+{
+    #if {$dblog_login_pending}
+    {
+        #var dblog_login_pending 0;
+        #if {"$guild" == "necromancer"}
+        {
+            #delay {3} {dblog_login_notice};
+        };
+        #else
+        {
+            dblog_login_notice;
+        };
+    };
+}
+
+#class {dblog} {close};

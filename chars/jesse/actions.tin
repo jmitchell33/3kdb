@@ -69,6 +69,50 @@
     };
 } {1};
 
+#nop -- glyph done: chain cdonate1 into cdonate2;
+#nop -- this beats the priority 2 action in common/actions.tin on the same line, so it sets mask[active] too;
+#action {^As you look through the mask, the eyes flash briefly with a dim, blue light.} {
+    #var mask[active] 1;
+    #if {"$cdonate_glyph" == "1"} {
+        #var cdonate_glyph 0;
+        cdonate2;
+    };
+} {1};
+
+#nop -- cdonate3 passes: note when preserve finds no corpse left and when get finds no preservation left;
+#action {There is no corpse in this room master.} {
+    #if {"$cdonate_storing" == "1"} {
+        #var cdonate_nocorpse 1;
+    };
+} {1};
+
+#action {^There is no preservation here.$} {
+    #if {"$cdonate_storing" == "1"} {
+        #var cdonate_nopres 1;
+    };
+} {1};
+
+#nop -- Duncan's reply to a cdonate3 store: send the next pass, or stop when nothing was stored;
+#action {^Duncan makes a small note in his ledger.$} {
+    #if {"$cdonate_storing" == "1"} {
+        .cdonate_pass_end;
+    };
+} {1};
+
+#action {^Duncan says: But you don't have any corpses!$} {
+    #if {"$cdonate_storing" == "1"} {
+        .cdonate_done {nothing left to store after $cdonate_pass passes};
+    };
+} {1};
+
+#nop -- the total from lookup after cdonate3, sent to party chat;
+#action {^Duncan says: You've donated %* more corpses than you have borrowed.} {
+    #if {"$cdonate_lookup" == "1"} {
+        #var cdonate_lookup 0;
+        ptell Donated to Duncan: %1 more corpses than borrowed;
+    };
+} {1};
+
 #nop -- mask drop;
 #action {The mask clatters to the ground.} {
     #if {!$idle_flag} {

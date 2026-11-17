@@ -4,7 +4,7 @@ Short answers to common questions and problems. For the full explanation of how 
 
 Anything in a grey box is something to type or paste. `byron` is an example, so use your own character's name.
 
-**Other guides:** [manual.md](manual.md), [setup.md](setup.md), [github.md](github.md)
+**Other guides:** [manual.md](manual.md), [setup.md](setup.md), [github.md](github.md), [tmux.md](tmux.md)
 
 ## Contents
 
@@ -44,6 +44,7 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [I can't select text in the menu](#i-cant-select-text-in-the-menu)
 - [Playing](#playing)
   - [How do I find a command?](#how-do-i-find-a-command)
+  - [How do I see what's changed in 3kdb?](#how-do-i-see-whats-changed-in-3kdb)
   - [How do I walk somewhere?](#how-do-i-walk-somewhere)
   - [The map is showing the wrong place](#the-map-is-showing-the-wrong-place)
   - [How do I log out?](#how-do-i-log-out)
@@ -87,6 +88,14 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [Should I edit common/ or modules/?](#should-i-edit-common-or-modules)
   - [Which files shouldn't I edit?](#which-files-shouldnt-i-edit)
   - [What does #NOP do?](#what-does-nop-do)
+- [Playing on a server (tmux)](#playing-on-a-server-tmux)
+  - [What is tmux, and do I need it?](#what-is-tmux-and-do-i-need-it)
+  - [How do I start 3kdb in tmux?](#how-do-i-start-3kdb-in-tmux)
+  - [How do I leave it running and come back?](#how-do-i-leave-it-running-and-come-back)
+  - [How do I switch from my PC to my phone?](#how-do-i-switch-from-my-pc-to-my-phone)
+  - [My PC screen went small after I used my phone](#my-pc-screen-went-small-after-i-used-my-phone)
+  - [My other device says detached, or joining seems to hang](#my-other-device-says-detached-or-joining-seems-to-hang)
+  - [Can I scroll back in tmux?](#can-i-scroll-back-in-tmux)
 - [Updating and git](#updating-and-git)
   - [How do I get updates?](#how-do-i-get-updates)
   - [Clone or fork?](#clone-or-fork)
@@ -150,7 +159,7 @@ Yes, through Ubuntu, a Linux terminal that runs inside Windows. [setup.md Step 1
 
 ### Can I play on a phone?
 
-3kdb has a phone layout, which switches on when your terminal is 75 columns wide or less. You still need a terminal on your phone that's connected to a machine with 3kdb installed.
+3kdb has a phone layout, which switches on when your terminal is 75 columns wide or less. You still need a terminal on your phone that's connected to a machine with 3kdb installed. To carry on a game you started on your PC, use tmux. See [How do I switch from my PC to my phone?](#how-do-i-switch-from-my-pc-to-my-phone)
 
 ### How do I start the game each time?
 
@@ -308,6 +317,18 @@ dblib bard
 dbinfo go
 ```
 
+### How do I see what's changed in 3kdb?
+
+Type `dblog`. It shows the 10 newest changes, with a `*` on ones you haven't seen yet, and 3kdb tells you at login when new ones have come in. `dblog more` shows the next 10 and `dblog all` shows them all.
+
+```text
+dblog hell bot
+dblog file westersea
+dblog show 558f098
+```
+
+Add words to search, or use `file`, `by <name>` or `since 2w`. `show` gives the full write-up of one change. `dblog new` checks GitHub for changes you haven't pulled yet, and `dblog help` lists everything. See [Finding commands](manual.md#finding-commands).
+
 ### How do I walk somewhere?
 
 `speedruns` lists the places, and `go` walks you there:
@@ -389,6 +410,10 @@ gag+ combat_generic
 ### How do I turn a feature on or off?
 
 `toggle-list` shows them all, and `toggle <name>` flips one. `toggle-list <word>` finds one, and `toggle-reset` puts them all back to how they started, after asking first.
+
+### How do I stop xp and coins showing after every kill?
+
+Type `toggle kill_stats`. 3kdb stops checking `xp`, `coins` and `(cstats` after kills. Kills still count, but xp and coins earned show 0 in the XP tracker, bot stats and `3kReport`. Mages still check `coins` for their familiar. Type it again to turn them back on.
 
 ### How do I change guild?
 
@@ -563,6 +588,66 @@ Nothing. It marks a line as a comment, so you can leave notes for yourself. End 
 
 ---
 
+## Playing on a server (tmux)
+
+### What is tmux, and do I need it?
+
+tmux holds your terminal for you. 3kdb runs inside it, so it keeps running and stays connected to the game when you close the window or your connection drops. You can then pick it up again from the same device or another one.
+
+It's optional. It's worth it if 3kdb runs on a server you SSH into, or if you want to switch between your PC and your phone. If you only play in a terminal on your own PC, you don't need it. [tmux.md](tmux.md) has the full guide.
+
+### How do I start 3kdb in tmux?
+
+Install it once on the machine that runs 3kdb, then start or rejoin the session named `3k`:
+
+```bash
+sudo apt install -y tmux
+```
+
+```bash
+tmux new -A -s 3k
+```
+
+The first time, start 3kdb inside it with `cd ~/3kdb` and `tt++ startmenu.tin`. The same `tmux new -A -s 3k` starts the session if it isn't running, or joins it if it is. See [Settings for 3kdb](tmux.md#settings-for-3kdb) for the one setting worth adding.
+
+### How do I leave it running and come back?
+
+Press `Ctrl+b`, let go, then press `d`. Closing the window, or losing your connection, does the same. 3kdb keeps running and your character stays logged in, not linkdead. To come back, SSH in and run `tmux new -A -s 3k` again.
+
+To stop for good, use `ld` or `quit` in the game, close 3kdb, then type `exit`. See [Stop playing for good](tmux.md#stop-playing-for-good).
+
+### How do I switch from my PC to my phone?
+
+SSH into the same machine from your phone, with an app such as Termius, and run `tmux new -A -s 3k`. You're in the same game. 3kdb redraws for the phone's size about 3 seconds later.
+
+Back on the PC, run the same command, or click in the PC window if it's still open. Then type a letter and delete it with Backspace. The screen grows back to PC size. Don't press Enter on an empty line, as that repeats your last command. See [Switch from your PC to your phone and back](tmux.md#switch-from-your-pc-to-your-phone-and-back).
+
+### My PC screen went small after I used my phone
+
+When two devices are attached, tmux sizes the game to the one you typed on last. Type a letter and Backspace on the PC to put it back in charge.
+
+If it stays small, your tmux is older than 3.1, which always uses the smallest device, or your phone is still attached while asleep. Take the phone off by joining with this:
+
+```bash
+tmux new -A -D -s 3k
+```
+
+Or press `Ctrl+b` then `D` (Shift+d), pick the phone and press Enter. Adding `set -g window-size latest` to `~/.tmux.conf` stops it happening again. See [Why the screen changes size](tmux.md#why-the-screen-changes-size).
+
+### My other device says detached, or joining seems to hang
+
+`-D`, and `tmux attach -d`, take every other device off. The other device shows `[detached (from session 3k)]` and goes back to its prompt, or its SSH app closes. That's expected, and the game keeps running. Leave out `-D` to share the game between both devices instead.
+
+If a device looks frozen, its own connection has died, for example a phone that went to sleep. Its screen stays stuck until its SSH app notices, but tmux and the game aren't waiting on it. Close that old screen or reconnect it. See [Take another device off](tmux.md#take-another-device-off).
+
+### Can I scroll back in tmux?
+
+Yes. Use 3kdb's **Page Up** and **Page Down** as normal. tmux's own scroll mode (`Ctrl+b` then `[`) doesn't hold 3kdb's scrollback properly. If you end up in it, press `q`.
+
+[Back to top](#3kdb-faq)
+
+---
+
 ## Updating and git
 
 ### How do I get updates?
@@ -582,6 +667,8 @@ git-sync
 ```
 
 Then run `.reload`, or log back in. If only one file changed, you can `#read` that file instead.
+
+`dblog new` shows what an update would bring in before you pull, and `dblog` shows what's changed lately.
 
 ### Clone or fork?
 

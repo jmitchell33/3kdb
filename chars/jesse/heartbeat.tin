@@ -4,6 +4,194 @@
 #var corpse_delay 1;
 #var corpse_use 200;
 
+#NOP -- Auto donate: once the coffin, freezer and cooler are all full while a bot is running,;
+#NOP -- pause the bot, wait out the fight, go to the corpse crypt, run cdonate1 (the mask action in;
+#NOP -- actions.tin runs cdonate2, which runs cdonate3), check no corpses are left, then go_back and resume.;
+#NOP -- The coffin is never emptied. On by default, adonateoff and adonateon in aliases.tin turn it off and on;
+#var jdonate[on] 1;
+#var jdonate[state] idle;
+#var jdonate[wait] 0;
+#var jdonate[timer] 0;
+#var jdonate[calm] 0;
+#var jdonate[tries] 0;
+#NOP -- the necro_corpse speedrun room (common/map/speedruns.tin);
+#var jdonate[crypt] 7548;
+#NOP -- heartbeats (2 seconds each) to wait for a walk or the mask before giving up;
+#var jdonate[timeout] 45;
+#NOP -- heartbeats between looks while waiting for corpses on the crypt floor to go (about 30 seconds);
+#var jdonate[recheck] 15;
+
+#NOP -- the coffin max is learned from "The coffin is full!" (modules/corpsemanager), the freezer and cooler hold 50;
+#alias {.jdonate_check_full} {
+    #var jdonate[full] 0;
+    #if {"$inventory[cooler]" == "1" && "$inventory[freezer]" == "1"} {
+        #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] >= 50} {
+            #var jdonate[full] 1;
+        };
+    };
+};
+
+#alias {.jdonate_echo} {
+    #echo {<ceb>Auto donate:<088> %1};
+};
+
+#NOP -- stop the run and leave the bot paused where it is;
+#alias {.jdonate_abort} {
+    .jdonate_echo {<faa>%1 - stopped, the bot is still paused.<088>};
+    #var jdonate[state] idle;
+    #var cdonate_glyph 0;
+};
+
+#alias {.jdonate_start} {
+    .pause;
+    #var jdonate[state] wait_fight;
+    #var jdonate[calm] 0;
+    #var jdonate[tries] 0;
+    .jdonate_echo {coffin, freezer and cooler are full. Bot paused, going to donate once the fight is over.};
+};
+
+#alias {.jdonate_room_has_corpse} {
+    #var jdonate[corpse_left] 0;
+    #foreach {$room[items][%*]} {jdonate_item} {
+        #if {"$jdonate_item" == "%*corpse%*"} {
+            #var jdonate[corpse_left] 1;
+        };
+    };
+};
+
+#alias {.jdonate_tick} {
+    #if {"$jdonate[state]" == "idle"} {
+        #if {$jdonate[on] && "$bot[active]" == "1" && "$bot[paused]" != "1"} {
+            .jdonate_check_full;
+            #if {$jdonate[full]} {
+                .jdonate_start;
+            };
+        };
+    };
+    #elseif {"$bot[active]" != "1"} {
+        .jdonate_abort {the bot was stopped};
+    };
+    #elseif {$jdonate[wait] > 0} {
+        #math jdonate[wait] {$jdonate[wait] - 1};
+    };
+    #else {
+        #NOP -- keep the bot paused until it is back where it stopped (a corpsetrig delay can unpause it);
+        #if {"$jdonate[state]" != "to_back" && "$bot[paused]" != "1"} {
+            .pause;
+        };
+        #map get roomvnum jdonate[vnum];
+        #switch {"$jdonate[state]"} {
+            #case {"wait_fight"} {
+                #NOP -- two quiet heartbeats in a row so the corpsetrig after the kill can finish;
+                #if {"$incombat" == "1" || "$bloodarc_active" == "1"} {
+                    #var jdonate[calm] 0;
+                } {
+                    #math jdonate[calm] {$jdonate[calm] + 1};
+                };
+                #if {$jdonate[calm] >= 2} {
+                    #var jdonate[state] to_crypt;
+                    #var jdonate[timer] 0;
+                    go necro_corpse;
+                };
+            };
+            #case {"to_crypt"} {
+                #if {"$jdonate[vnum]" == "$jdonate[crypt]"} {
+                    #var jdonate[state] crypt_check;
+                    #var jdonate[wait] 1;
+                    look;
+                } {
+                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #if {$jdonate[timer] > $jdonate[timeout]} {
+                        .jdonate_abort {never reached the corpse crypt};
+                    };
+                };
+            };
+            #case {"crypt_check"} {
+                #NOP -- only start once the floor is clear, so nobody else's corpses get mixed in;
+                .jdonate_room_has_corpse;
+                #if {$jdonate[corpse_left]} {
+                    #if {&room[players][] > 0} {
+                        #var jdonate_who {};
+                        #foreach {$room[players][%*]} {jdonate_item} {
+                            #var jdonate_who {$jdonate_who $jdonate_item};
+                        };
+                        .jdonate_echo {corpses on the crypt floor and players here:$jdonate_who. Waiting for it to clear, looking again in 30s.};
+                    } {
+                        .jdonate_echo {corpses on the crypt floor, nobody here. Waiting for them to go, looking again in 30s.};
+                    };
+                    #var jdonate[state] crypt_wait;
+                    #var jdonate[wait] $jdonate[recheck];
+                } {
+                    #var jdonate[state] glyph;
+                    #var jdonate[timer] 0;
+                    cdonate1;
+                };
+            };
+            #case {"crypt_wait"} {
+                #var jdonate[state] crypt_check;
+                #var jdonate[wait] 1;
+                look;
+            };
+            #case {"glyph"} {
+                #NOP -- the mask action in actions.tin clears cdonate_glyph when it runs cdonate2;
+                #if {"$cdonate_glyph" != "1"} {
+                    #NOP -- cdonate2 waits 10s for cdonate3, which takes another 10s;
+                    #var jdonate[state] storing;
+                    #var jdonate[wait] 12;
+                } {
+                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #if {$jdonate[timer] > $jdonate[timeout]} {
+                        .jdonate_echo {<faa>the mask never glowed, storing the corpses without the glyph.<088>};
+                        #var cdonate_glyph 0;
+                        cdonate3;
+                        #var jdonate[state] storing;
+                        #var jdonate[wait] 6;
+                    };
+                };
+            };
+            #case {"storing"} {
+                #NOP -- cdonate3 clears cdonate_storing when its last pass is done;
+                #if {"$cdonate_storing" != "1"} {
+                    #var jdonate[state] check;
+                    #var jdonate[wait] 1;
+                    look;
+                };
+            };
+            #case {"check"} {
+                .jdonate_room_has_corpse;
+                #if {$jdonate[corpse_left] && $jdonate[tries] < 3} {
+                    #math jdonate[tries] {$jdonate[tries] + 1};
+                    .jdonate_echo {corpses still on the ground, storing them (try $jdonate[tries] of 3).};
+                    pg;
+                    unkeep all preservation;
+                    store all;
+                    #var jdonate[state] storing;
+                    #var jdonate[wait] 3;
+                } {
+                    #if {$jdonate[corpse_left]} {
+                        .jdonate_echo {<faa>corpses are still on the ground after 3 tries, going back anyway.<088>};
+                    };
+                    #var jdonate[state] to_back;
+                    #var jdonate[timer] 0;
+                    go_back;
+                };
+            };
+            #case {"to_back"} {
+                #if {"$jdonate[vnum]" == "$go_back"} {
+                    #var jdonate[state] idle;
+                    .jdonate_echo {done, back where the bot paused. Resuming.};
+                    ..;
+                } {
+                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #if {$jdonate[timer] > $jdonate[timeout]} {
+                        .jdonate_abort {never got back to room $go_back};
+                    };
+                };
+            };
+        };
+    };
+};
+
 #NOP -- These actions are called every round (every 2 seconds);
 #NOP -- Make sure all actions are INSIDE the !$idle_flag {} section or the deadman will not apply to those actions;
 #NOP -- An example of how to use this to drink a potion when your health is below 500;
@@ -14,14 +202,14 @@
 #alias {_player_heartbeat} {
     #if !$idle_flag {
         #NOP -- Actions that timing does not matter;
-
+        .jdonate_tick;
 
         #NOP -- Actions to only attempt once/round go in this section;
         #if {$action_round < $mip[round]} {
             #NOP;
         };
 
-    
+
     #NOP -- All actions above this line;
     } {#NOP};
 };
