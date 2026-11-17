@@ -1,0 +1,31 @@
+#class {bot} {kill}
+#class {bot} {open}
+
+#var {area} {The City of Westersea};
+#var check_room 0;
+
+#var bot_message_1 '---- WESTERSEA GUARD REPORTS ----';
+#var bot_message_2 '---- grab report at every desk on the walls ----';
+#echo $bot_message_1;#echo $bot_message_2;
+
+#NOP -- The whole wall circuit from the eastern wall above Mayne, both bartizans included (same walk as wsea-box);
+#var {bot[path]} {n;n;n;ne;n;nw;w;sw;w;w;w;w;w;w;w;nw;w;w;sw;w;w;w;w;w;w;w;nw;w;sw;nw;se;s;se;s;s;s;s;s;s;s;s;sw;s;sw;ne;se;e;ne;e;e;e;e;e;e;e;se;e;e;ne;e;e;e;e;e;e;e;se;e;ne;n;nw;n;n;n;n;n};
+
+#NOP -- No botmobs, the guards are friendly.  The spy that jumps you is fought as an aggro mob;
+#list botmobs clear;
+
+#NOP -- Each desk is grabbed once, so a re-glance after a failed grab walks on;
+#var wsea_desks {};
+#act {^-i-A small desk.$} {
+    #map get roomvnum tmpVnum;
+    #if {!&wsea_desks[$tmpVnum]} {
+        #var wsea_desks[$tmpVnum] 1;
+        #var bot[foundobject] 1;
+        #var object_action {grab report};
+    };
+} {1};
+
+#act {^You finish copying the details of the report to your journal.$} {#var bot[walk] 1;.botStep} {1};
+
+#class {bot} {close}
+#read common/bot/generic.tin;
