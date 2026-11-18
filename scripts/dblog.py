@@ -39,6 +39,7 @@ CACHE_JSON = os.path.join(REPO, "vars", "dblog_cache.json")
 CACHE_MAX_AGE = 30 * 60
 API_PAGES = 3
 API_DETAIL_CALLS = 20
+API_MIN_REFETCH = 60
 BRANCHES = ("master", "main")
 IGNORED_DIRS = ("chars/", "vars/", "logs/")
 TRAILER = re.compile(
@@ -79,17 +80,43 @@ GIT_TARGET = ["-c", f"safe.directory={REPO}", "-C", REPO]
 INSTALLED = True
 
 
+def git_env():
+    """Never let git or ssh ask anything: a question would land on the tt++ screen."""
+    ssh = os.environ.get("GIT_SSH_COMMAND") or os.environ.get("GIT_SSH") or "ssh"
+    return dict(os.environ, GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="never",
+                GIT_ASKPASS="", SSH_ASKPASS="", SSH_ASKPASS_REQUIRE="never",
+                GIT_SSH_COMMAND=f"{ssh} -o BatchMode=yes -o ConnectTimeout=15")
+
+
 def git(*args, timeout=30):
-    env = dict(os.environ, GIT_TERMINAL_PROMPT="0")
+    """Run git with no terminal (own session, no stdin) and kill all of it on timeout."""
     try:
-        result = subprocess.run(
+        proc = subprocess.Popen(
             ["git", *GIT_TARGET, *args],
-            capture_output=True, text=True, timeout=timeout,
-            encoding="utf-8", errors="replace", env=env,
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding="utf-8", errors="replace", env=git_env(),
+            start_new_session=True,
         )
-    except (OSError, subprocess.TimeoutExpired):
+    except OSError:
         return 1, ""
-    return result.returncode, result.stdout
+    try:
+        out, _ = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        kill_group(proc)
+        return 1, ""
+    return proc.returncode, out
+
+
+def kill_group(proc):
+    """Kill git and everything it started (ssh, credential helpers) so none hold the pipe."""
+    try:
+        os.killpg(proc.pid, 9)
+    except (OSError, AttributeError):
+        proc.kill()
+    try:
+        proc.communicate(timeout=5)
+    except subprocess.TimeoutExpired:
+        pass
 
 
 def have_git():
@@ -235,8 +262,9 @@ def api_files(cache, full, budget):
     return files.get(full)
 
 
-def read_api_commits(fetch=False, need=None):
-    """Commits from the GitHub website. need: how many from the top must have file lists."""
+def read_api_commits(fetch=False, need=None, skip=frozenset()):
+    """Commits from the GitHub website. need: how many from the top must have file lists.
+    skip: hashes to leave out, like the ones already pulled."""
     cache = read_api_cache()
     raw = api_list(cache, fetch)
     if raw is None:
@@ -244,7 +272,7 @@ def read_api_commits(fetch=False, need=None):
     budget = [API_DETAIL_CALLS]
     commits = []
     for entry in raw:
-        if entry["parents"] > 1:
+        if entry["parents"] > 1 or entry["full"] in skip:
             continue
         wanted = need is None or len(commits) < need
         files = api_files(cache, entry["full"], budget) if wanted else None
@@ -536,17 +564,20 @@ def list_changes(commits, query, args, ref):
 
 
 def show_new(cols):
-    if git("rev-parse", "--git-dir")[0] != 0:
+    """What git pull would bring in: GitHub's master commits that HEAD doesn't have yet.
+    Asks the GitHub website, never git fetch, so ssh and passwords never come into it."""
+    code, out = git("rev-list", "HEAD")
+    if code != 0:
         show_new_uninstalled(cols)
         return
-    remote, branch, ref = find_upstream_ref()
-    if not remote:
-        print_lines([f"  {C_WARN}No GitHub remote found for this folder.{C_END}"])
+    before = read_api_cache().get("fetched", 0)
+    fetch = time.time() - before > API_MIN_REFETCH
+    commits = read_api_commits(fetch=fetch, skip=set(out.split()))
+    if commits is None:
+        print_lines([f"  {C_WARN}Couldn't reach GitHub.{C_END}"])
         return
-    code, _ = git("fetch", "--quiet", remote, branch, timeout=25)
-    if code != 0:
-        print_lines([f"  {C_WARN}Couldn't reach GitHub, showing what was last fetched.{C_END}"])
-    commits = read_commits(f"HEAD..{ref}") or []
+    if fetch and read_api_cache().get("fetched", 0) == before:
+        print_lines([f"  {C_WARN}Couldn't reach GitHub, showing what was last checked.{C_END}"])
     lines = header("CHANGES TO PULL")
     if not commits:
         lines.append(f"  {C_TEXT}You're up to date.{C_END}")
