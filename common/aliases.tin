@@ -435,4 +435,16 @@
     };
 };
 
+#NOP -- The word you target a mob by, from its name or long, in mobKw;
+#alias .mobKeyword {
+    #unvar mobKw;
+    #var mobKwName {%1};
+    #replace mobKwName { \[%*\]%*} {};
+    #replace mobKwName { \(%*\)%*} {};
+    #replace mobKwName { -\x7B%*} {};
+    #var mobKw {$mobKwName};
+    #NOP -- The last word that starts with a letter;
+    #regexp {$mobKwName} {{(^|\s)(\w\S*)(\s+\W\S*)*\s*$}} {#format mobKw {%l} {&3}};
+};
+
 #class {default_aliases} {close};

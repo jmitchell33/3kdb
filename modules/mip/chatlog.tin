@@ -566,7 +566,7 @@
 	_testSayPattern;
 	#var tmpText @sanitizePayload{$tmpText};		
 	#if $logSay {update_chat <178>$saySpeaker says<088>: $tmpText};
-	#unaction {         %*};
+	#unaction {^{ {9}\S.*}$};
 	#var saySpeaker {};
 };
 
@@ -580,7 +580,7 @@
 	#if $captureSays {
 		#if $toggles[chatlog_says] {
 			#format tmpText1 {%p} {%1};
-			#action {         %*} {
+			#action {^{ {9}\S.*}$} {
 				#format tmpTextHolder {%p} {%%1};
 				#cat tmpText2 { $tmpTextHolder};
 			} {1};
@@ -605,7 +605,7 @@
 			#list players find {%i$tmpPlayer} tmpItem;
 			#if {$tmpItem} {
 				#format tmpText1 {%p} {%2};
-				#action {         %*} {
+				#action {^{ {9}\S.*}$} {
 					#format tmpTextHolder {%p} {%%1};
 					#cat tmpText2 { $tmpTextHolder};
 				} {1};

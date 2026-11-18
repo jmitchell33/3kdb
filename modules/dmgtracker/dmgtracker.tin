@@ -477,20 +477,6 @@ dreset;
     #echo {<efb>[TOTAL]:<088> You hit $tmpMobs monsters $tmpTotalTimes times for $tmpTotalDmg damage.};
 };
 
-#NOP -- The word you target a mob by;
-#alias .dmgMobKeyword {
-    #unvar dmgMobKw;
-    #unvar dmgMobKwWords;
-    #var dmgMobKwName {%1};
-    #replace dmgMobKwName { \[%*\]%*} {};
-    #replace dmgMobKwName { \(%*\)%*} {};
-    #var dmgMobKw {$dmgMobKwName};
-    #NOP -- The last word that starts with a letter, so trailing tags like the ones on Lucifer (empowered) (hellfire) in braces are skipped;
-    #NOP -- A braced keyword ends up as a variable key and TinTin warns about it;
-    #NOP -- The outer braces are capture group 1, so the word is in group 3;
-    #regexp {$dmgMobKwName} {{(^|\s)(\w\S*)(\s+\W\S*)*\s*$}} {#format dmgMobKw {%l} {&3}};
-};
-
 #alias .dmg_round_reset {
     #delay {dmg_round_reset} {
         .dmg_round_flush;
@@ -595,8 +581,8 @@ dreset;
                 .dmgRoundAdd total;
                 #math cmbt[round][dmg] {$cmbt[round][dmg] + $dmgAmount};
                 #math cmbt[round][mobs] {$cmbt[round][mobs] + 1};
-                .dmgMobKeyword {%2};
-                #math cmbt[round][kw][$dmgMobKw] {$cmbt[round][kw][$dmgMobKw] + 1};
+                .mobKeyword {%2};
+                #math cmbt[round][kw][$mobKw] {$cmbt[round][kw][$mobKw] + 1};
                 #if {"$guild" == "necromancer" && $my[necromancer][glamors][furious]} {
                     .dmgRoundAdd fury;
                 };
@@ -688,7 +674,7 @@ dreset;
                 #NOP -- Kept for .dmgLateLines;
                 #format dmgLineName {%l} {%2};
                 #format dmgLineTime {%U};
-                #list cmbt[round][lines] add {{{name}{$dmgLineName}{kw}{$dmgMobKw}{seq}{$cmbt[lineseq]}{time}{$dmgLineTime}{dmg}{$dmgAmount}{times}{$dmgTimes}{cats}{$dmgLineCats}}};
+                #list cmbt[round][lines] add {{{name}{$dmgLineName}{kw}{$mobKw}{seq}{$cmbt[lineseq]}{time}{$dmgLineTime}{dmg}{$dmgAmount}{times}{$dmgTimes}{cats}{$dmgLineCats}}};
             };
         };
         .dmg_round_reset;
