@@ -113,6 +113,8 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [fatal: destination path '3kdb' already exists](#fatal-destination-path-3kdb-already-exists)
   - [More git problems](#more-git-problems)
 - [Errors and problems](#errors-and-problems)
+  - [Something's broken that works for everyone else](#somethings-broken-that-works-for-everyone-else)
+  - [How do I update TinTin++?](#how-do-i-update-tintin)
   - [tt++: command not found](#tt-command-not-found)
   - [#NO SESSION ACTIVE](#no-session-active)
   - [#ERROR: #LINE LOG {logs/...}: COULDN'T OPEN FILE](#error-line-log-logs-couldnt-open-file)
@@ -120,6 +122,13 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [The screen looks broken or squashed](#the-screen-looks-broken-or-squashed)
   - [I see $eternal_string on the screen](#i-see-eternal_string-on-the-screen)
   - [Permission denied when saving files](#permission-denied-when-saving-files)
+- [dblog problems](#dblog-problems)
+  - [dblog couldn't get the list of changes](#dblog-couldnt-get-the-list-of-changes)
+  - [dblog says the list is saved, from github.com's feed, or from git history](#dblog-says-the-list-is-saved-from-githubcoms-feed-or-from-git-history)
+  - [dblog can't save its files](#dblog-cant-save-its-files)
+  - [GitHub didn't answer in time](#github-didnt-answer-in-time)
+  - [dblog new says to download 3kdb again](#dblog-new-says-to-download-3kdb-again)
+  - [Does dblog need Python or git?](#does-dblog-need-python-or-git)
   - [Where do I get more help?](#where-do-i-get-more-help)
 
 ---
@@ -151,7 +160,7 @@ tt++ startmenu.tin
 
 ### Can I install TinTin++ with apt-get?
 
-No. That version is very far behind. Use https://tintin.mudhalla.net/install.php instead.
+No. That version is very far behind. Use https://tintin.mudhalla.net/install.php instead. If you already did, see [How do I update TinTin++?](#how-do-i-update-tintin)
 
 ### Does it work on Windows?
 
@@ -751,6 +760,38 @@ See [Part 11 of github.md](github.md#part-11-problems-and-fixes).
 
 ## Errors and problems
 
+### Something's broken that works for everyone else
+
+The most common cause is an old TinTin++. Check your version:
+
+```bash
+tt++ -V
+```
+
+3kdb is tested on **2.02.61**. Anything older, especially the 2.02.20 that `apt-get` installs, can show errors, draw the screen wrong, or quietly skip some 3kdb code. [Update TinTin++](#how-do-i-update-tintin) and try again before anything else.
+
+### How do I update TinTin++?
+
+Log out of the game and close tt++ first. Then install the latest version from the website, the same way as a first install:
+
+https://tintin.mudhalla.net/install.php
+
+Check it worked:
+
+```bash
+tt++ -V
+```
+
+If it still shows the old number, you have the old `apt-get` copy too, and it's being used instead. Remove it, then check again:
+
+```bash
+sudo apt remove -y tintin++
+hash -r
+tt++ -V
+```
+
+Your 3kdb folder and characters aren't touched by updating TinTin++.
+
 ### `tt++: command not found`
 
 TinTin++ isn't installed, or it didn't finish installing. See [setup.md Step 1](setup.md#step-1-install-tintin-and-git).
@@ -799,5 +840,51 @@ You don't need `sudo` for files inside `3kdb`, including with `nano`.
 - Run `help` in the game for game questions.
 - Use the 3kdb Discord channel, or ask Byron in the game.
 - Run `dbinfo <command>` to see which file a command is in.
+
+[Back to top](#3kdb-faq)
+
+---
+
+## dblog problems
+
+### dblog couldn't get the list of changes
+
+dblog asks GitHub for the list, and the rest of the message says why it couldn't. Most of them are about the internet connection, not 3kdb:
+
+| The message says | What to do |
+|---|---|
+| curl isn't installed | `sudo apt install curl` |
+| can't look up, or has no route to the internet | Your internet connection is down, or DNS isn't working. Check you can open a website. |
+| was refused, or didn't answer within 10 seconds | A firewall is probably blocking GitHub. On a work or school network, ask whoever runs it. |
+| was too slow, or was cut off before it answered | The connection is struggling. Try again in a few minutes. |
+| The proxy in your https_proxy setting isn't working | Fix or remove the `https_proxy` setting in your terminal. |
+| This computer's clock says | Set your computer's clock to the right date and time. |
+| The secure connection failed | Something on your network, such as antivirus or a work firewall, is getting in the way. Try another network. |
+| Something on the network answered instead | Usually a Wi-Fi login page. Open a website in your browser and log in to the Wi-Fi. |
+| GitHub's API allows 60 requests an hour | Everyone on your internet address shares that limit. Wait until the time it gives. |
+| GitHub is having problems right now | Try again later. |
+| the repository doesn't exist or isn't public | The project has moved. Ask in the 3kdb Discord channel. |
+
+dblog only asks GitHub every 10 minutes at most, so it won't use the hourly limit up by itself.
+
+### dblog says the list is saved, from github.com's feed, or from git history
+
+GitHub couldn't be reached, so dblog showed the best list it had instead, and says why on the same line. The saved list is from the last time it worked. github.com's feed only has the newest 20 changes. Your git history is missing anything since your last `git pull`. When GitHub can be reached again, the next `dblog` gets the full list.
+
+### dblog can't save its files
+
+The message names the file or folder, and the command that fixes it. Quit tt++ and run that command. It usually happens when tt++ or git was run with `sudo`, which made those files belong to the admin account. See [Permission denied when saving files](#permission-denied-when-saving-files).
+
+### GitHub didn't answer in time
+
+GitHub was slow. Type `dblog` again in a minute. You can keep playing while it fetches.
+
+### dblog new says to download 3kdb again
+
+Your 3kdb folder was downloaded or copied, not made with `git clone`, so `git pull` can't update it. dblog compared your files with GitHub's instead and lists the ones that are new or changed. To update, download 3kdb again and copy it over your folder. Your `chars` and `vars` folders aren't in the download, so they stay as they are. To make updating easier next time, see [How do I get updates?](#how-do-i-get-updates)
+
+### Does dblog need Python or git?
+
+No. It uses `curl`, which comes with Ubuntu. Without git, it still works, and `dblog new` compares your files with GitHub's instead.
 
 [Back to top](#3kdb-faq)

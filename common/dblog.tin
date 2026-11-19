@@ -1,18 +1,19 @@
 #class {dblog} {kill};
 #class {dblog} {open};
 
-#NOP -- dblog: recent 3kdb changes, read from the upstream master history by scripts/dblog.py;
+#NOP -- dblog: recent 3kdb changes, read from the upstream master history on GitHub;
+#NOP -- scripts/dblog.sh asks GitHub with curl in the background, so tt++ never waits on it;
 #NOP -- Only merged or pushed work shows, reverts hide with the change they undo, chars/ is ignored;
-#NOP -- Seen marker is saved in vars/dblog_seen.txt;
-#NOP -- dblog.py runs in the background and writes to a file, so tt++ never waits on git or GitHub;
+#NOP -- Seen marker is saved in vars/dblog_seen.txt, and GitHub's answers are kept in vars/dblog_data/;
 
 #var dblog_more 0;
 #var dblog_shown 0;
-#var dblog_skip 0;
 #var dblog_query {};
 #var dblog_job 0;
+#var dblog_jobs {};
 #var dblog_login_pending 0;
-#NOP Each session and each job get their own output file, so a login notice and a;
+#var dblog_scan {};
+#NOP Each session and each job get their own files, so a login notice and a;
 #NOP dblog new can run at the same time, and several characters can use dblog at once;
 #format dblog_id {%U};
 
@@ -23,100 +24,1133 @@
     {
         #if {$dblog_more}
         {
-            #var dblog_skip {$dblog_shown};
-            dblog_run {$dblog_query};
+            dblog_run {$dblog_query} {$dblog_shown};
         };
         #else
         {
             #echo {<ccf>  No more changes to show. <eaf>dblog help<088>};
         };
     };
-    #elseif {"%1" == "help" || "%1" == "show" || "%1" == "new"}
+    #elseif {"%1" == "help" || "%1" == "?" || "%1" == "show" || "%1" == "new"}
     {
         #NOP Not a list, so 'dblog more' keeps paging the last one;
-        #var dblog_skip 0;
-        dblog_run {%0};
+        dblog_run {%0} {0};
     };
     #else
     {
         #var dblog_query {%0};
-        #var dblog_skip 0;
-        dblog_run {%0};
+        dblog_run {%0} {0};
     };
 }
 
-#NOP Start dblog.py on query %1 (passed in braces), dblog_poll prints it when it's done;
+#NOP Run query %1 from change %2 on. Help prints now, the rest starts dblog.sh first;
 #alias {dblog_run}
 {
-    #screen get cols dblog_cols;
-    #if {&screen[width] && &split[right]}
+    dblog_parse {%1};
+    #if {"$dblog_q[mode]" == "help"}
     {
-        #math dblog_cols {$screen[width] - $split[left] - $split[right]};
+        dblog_help;
     };
-    #var dblog_args {%1};
-    #replace dblog_args {'} {};
-    #if {"$dblog_args" == "new"}
+    #elseif {"$dblog_q[mode]" == "missing"}
     {
-        #echo {<ccf>  Checking GitHub for changes, keep playing...<088>};
+        #switch {"$dblog_q[target]"}
+        {
+            #case {"show"}
+            {
+                #echo {<eed>  dblog show needs the hash of a change, like: dblog show 558f098<088>};
+            };
+            #case {"by"}
+            {
+                #echo {<eed>  dblog by needs a name, like: dblog by karvec<088>};
+            };
+            #case {"file"}
+            {
+                #echo {<eed>  dblog file needs part of a file name, like: dblog file westersea<088>};
+            };
+            #case {"since"}
+            {
+                #echo {<eed>  dblog since needs a time: 7d 2w 3m 1y, week, month or 2026-11-01.<088>};
+            };
+        };
     };
-    dblog_start {--cols $dblog_cols --skip $dblog_skip -- '$dblog_args'};
+    #elseif {"$dblog_q[since]" == "bad"}
+    {
+        #echo {<eed>  dblog since takes 7d 2w 3m 1y, today, yesterday, week, month, year or a date like 2026-11-01.<088>};
+    };
+    #else
+    {
+        #var dblog_args {list};
+        #if {"$dblog_q[mode]" == "new"}
+        {
+            #var dblog_args {new};
+        };
+        #elseif {"$dblog_q[mode]" == "show"}
+        {
+            #var dblog_args {show '$dblog_q[target]'};
+        };
+        #elseif {&dblog_q[file][] > 0}
+        {
+            #var dblog_args {file};
+            #foreach {*dblog_q[file][]} {dblog_part}
+            {
+                #var dblog_args {$dblog_args '$dblog_part'};
+            };
+        };
+        #screen get cols dblog_cols;
+        #if {&screen[width] && &split[right]}
+        {
+            #math dblog_cols {$screen[width] - $split[left] - $split[right]};
+        };
+        dblog_start {$dblog_args} {{query}{%1}{skip}{%2}{cols}{$dblog_cols}{login}{0}};
+    };
 }
 
-#NOP Run dblog.py with arguments %1 in the background. It writes to a .part file and renames it;
-#NOP when finished, so dblog_poll never reads half an answer;
+#NOP Start dblog.sh with arguments %1 in the background. %2 is what the job is for, kept until it ends;
 #alias {dblog_start}
 {
+    #NOP dblog.sh checks it can write everything it saves, which fails when tt++ was once run with sudo;
+    #script {dblog_out} {sh scripts/dblog.sh - check 2>&1};
+    #if {"$dblog_out[1]" != "ok"}
+    {
+        dblog_perm_problem {$dblog_out[1]};
+        #return;
+    };
     #math dblog_job {$dblog_job + 1};
-    #var dblog_file {vars/dblog_out_${dblog_id}_$dblog_job.txt};
-    #system {mkdir -p vars > /dev/null 2>&1; (python3 scripts/dblog.py %1 > $dblog_file.part 2>&1; mv -f $dblog_file.part $dblog_file) > /dev/null 2>&1 &};
-    dblog_poll {$dblog_file} 0;
+    #var dblog_name {${dblog_id}_$dblog_job};
+    #var dblog_jobs[$dblog_name] {%2};
+    #system {sh scripts/dblog.sh $dblog_name %1 > /dev/null 2>&1 &};
+    dblog_poll {$dblog_name} 0;
 }
 
-#NOP Look for output file %1 (try %2), then every 0.25 seconds for up to 40 seconds;
-#NOP The file name goes in as %1 because a #delay reads variables when it fires, not when it's set;
+#NOP Explain what dblog.sh check found, %1 is perm|path|owner|you|3kdb folder or an error from sh;
+#alias {dblog_perm_problem}
+{
+    #var dblog_perm {%1};
+    #var dblog_perm_said 0;
+    #regex {$dblog_perm} {^perm|{[^|]*}|{[^|]*}|{[^|]*}|{[^|]*}$}
+    {
+        #var dblog_p {&1};
+        #var dblog_owner {&2};
+        #var dblog_me {&3};
+        #var dblog_top {&4};
+        #if {"$dblog_p" == "."}
+        {
+            #var dblog_p {$dblog_top};
+            #var dblog_where {your 3kdb folder ($dblog_top)};
+        };
+        #else
+        {
+            #var dblog_where {$dblog_p in your 3kdb folder};
+            #var dblog_p {$dblog_top/$dblog_p};
+        };
+        #if {"$dblog_owner" != "$dblog_me" && "$dblog_owner" != ""}
+        {
+            #echo {<eed>  dblog can't save its files, because $dblog_where belongs to $dblog_owner and tt++ is running as $dblog_me. This happens after running tt++ or git with sudo. To fix it, quit tt++ and run: <ffa>sudo chown -R $dblog_me "$dblog_top"<088>};
+        };
+        #else
+        {
+            #echo {<eed>  dblog can't save its files, because $dblog_where can't be read or written. To fix it, quit tt++ and run: <ffa>chmod -R u+rwX "$dblog_top/vars"<088>};
+        };
+        #var dblog_perm_said 1;
+    };
+    #if {!$dblog_perm_said}
+    {
+        #if {"$dblog_perm" == ""}
+        {
+            #var dblog_perm {no answer};
+        };
+        #echo {<eed>  dblog couldn't run scripts/dblog.sh (%s). Check that the file is in your 3kdb folder and can be read.<088>} {$dblog_perm};
+    };
+}
+
+#NOP Wait for job %1 (try %2). Every 0.25 seconds for up to 2 minutes, which is longer than;
+#NOP dblog.sh can take, since every curl it runs gives up after 25 seconds;
+#NOP The job name goes in as %1 because a #delay reads variables when it fires, not when it's set;
 #alias {dblog_poll}
 {
-    #script {dblog_out} {test -f %1 && echo DBLOG_DONE && cat %1 && rm -f %1};
+    #script {dblog_out} {test -f vars/dblog_data/done_%1.tsv && echo DBLOG_DONE};
     #if {"$dblog_out[1]" == "DBLOG_DONE"}
     {
-        dblog_print;
+        dblog_finish {%1};
     };
-    #elseif {%2 < 160}
+    #elseif {%2 < 480}
     {
+        #if {%2 == 8 && $dblog_jobs[%1][login] == 0}
+        {
+            #echo {<ccf>  Getting the latest changes from GitHub. You can keep playing.<088>};
+        };
         #math dblog_try {%2 + 1};
         #delay {0.25} {dblog_poll {%1} $dblog_try};
     };
     #else
     {
-        #echo {<eed>  dblog gave up waiting for scripts/dblog.py. Is python3 installed?<088>};
+        #if {$dblog_jobs[%1][login] == 0}
+        {
+            #echo {<eed>  GitHub didn't answer in time. Try dblog again in a minute.<088>};
+        };
+        #unvar dblog_jobs[%1];
     };
 }
 
-#NOP Print what dblog.py wrote. Its last line, #DBLOG_MORE <more> <shown>, is kept for 'dblog more';
-#alias {dblog_print}
+#NOP Read everything job %1 wrote, clean its files up and print the answer;
+#alias {dblog_finish}
 {
-    #loop 2 &dblog_out[] dblog_i
+    #var dblog_dir {vars/dblog_data};
+    #var dblog_seen {};
+    #var dblog_clone 0;
+    #var dblog_source {none};
+    #var dblog_reason {};
+    #var dblog_host {};
+    #var dblog_detail {};
+    #var dblog_age 0;
+    #var dblog_scan {done};
+    #scan tsv $dblog_dir/done_%1.tsv;
+    #var dblog_c {};
+    #var dblog_n 0;
+    #if {"$dblog_source" != "none"}
     {
-        #var dblog_line {$dblog_out[$dblog_i]};
-        #if {"$dblog_line" == "#DBLOG_MORE %*"}
+        #var dblog_scan {commits};
+        #scan tsv $dblog_dir/commits.tsv;
+    };
+    #var dblog_head {};
+    #if {$dblog_clone == 1}
+    {
+        #var dblog_scan {head};
+        #scan tsv $dblog_dir/head_%1.tsv;
+    };
+    #var dblog_job_q {$dblog_jobs[%1][query]};
+    #var dblog_skip {$dblog_jobs[%1][skip]};
+    #var dblog_cols {$dblog_jobs[%1][cols]};
+    #var dblog_login {$dblog_jobs[%1][login]};
+    #unvar dblog_jobs[%1];
+    dblog_parse {$dblog_job_q};
+    #var dblog_hits_file {};
+    #if {&dblog_q[file][] > 0 && $dblog_n > 0}
+    {
+        #var dblog_scan {match};
+        #scan tsv $dblog_dir/match_%1.tsv;
+    };
+    #var dblog_show {};
+    #var dblog_show_n 0;
+    #if {"$dblog_q[mode]" == "show" && $dblog_n > 0}
+    {
+        #var dblog_scan {show};
+        #scan tsv $dblog_dir/show_%1.tsv;
+    };
+    #var dblog_diff {};
+    #var dblog_diff_n 0;
+    #var dblog_diff_total 0;
+    #var dblog_diff_failed 0;
+    #if {"$dblog_q[mode]" == "new" && $dblog_clone != 1 && $dblog_n > 0}
+    {
+        #var dblog_scan {diff};
+        #scan tsv $dblog_dir/diff_%1.tsv;
+    };
+    #var dblog_scan {};
+    #system {rm -f $dblog_dir/done_%1.tsv $dblog_dir/why_%1.tsv $dblog_dir/head_%1.tsv $dblog_dir/match_%1.tsv $dblog_dir/show_%1.tsv $dblog_dir/diff_%1.tsv};
+    dblog_why;
+
+    #if {$dblog_login}
+    {
+        dblog_login_result;
+    };
+    #elseif {$dblog_n == 0}
+    {
+        #echo {<eed>  dblog couldn't get the list of changes. %s<088>} {$dblog_why_text};
+    };
+    #else
+    {
+        #if {"$dblog_q[mode]" == "new"}
         {
-            #regex {$dblog_line} {^#DBLOG_MORE {\d+} {\d+}$}
+            dblog_new_result;
+        };
+        #elseif {"$dblog_q[mode]" == "show"}
+        {
+            dblog_show_result;
+        };
+        #else
+        {
+            dblog_list;
+        };
+        dblog_source_note;
+    };
+}
+
+#NOP One line under the answer that says where the list came from, when it wasn't GitHub's API;
+#alias {dblog_source_note}
+{
+    #if {"$dblog_source" == "saved"}
+    {
+        dblog_age_text;
+        #echo {<ccc>  Couldn't check GitHub for newer changes, so this is the list saved %s. %s<088>} {$dblog_age_text} {$dblog_why_text};
+    };
+    #elseif {"$dblog_source" == "feed"}
+    {
+        #echo {<ccc>  The newest changes came from github.com's feed, because GitHub's API couldn't be used. %s<088>} {$dblog_why_text};
+    };
+    #elseif {"$dblog_source" == "local"}
+    {
+        #echo {<ccc>  These are the changes in your 3kdb folder's own git history, so changes made on GitHub since your last git pull aren't listed. %s<088>} {$dblog_why_text};
+    };
+}
+
+#NOP dblog_age_text: how long ago the saved list was made, like 5 minutes ago or 2 days ago;
+#alias {dblog_age_text}
+{
+    #if {$dblog_age < 2}
+    {
+        #var dblog_age_text {a minute ago};
+    };
+    #elseif {$dblog_age < 120}
+    {
+        #var dblog_age_text {$dblog_age minutes ago};
+    };
+    #elseif {$dblog_age < 2880}
+    {
+        #math dblog_hours {$dblog_age / 60};
+        #var dblog_age_text {$dblog_hours hours ago};
+    };
+    #else
+    {
+        #math dblog_days {$dblog_age / 1440};
+        #var dblog_age_text {$dblog_days days ago};
+    };
+}
+
+#NOP dblog_why_text: exactly why GitHub couldn't be used, from what dblog.sh found, and what to do;
+#alias {dblog_why}
+{
+    #var dblog_h {$dblog_host};
+    #if {"$dblog_h" == ""}
+    {
+        #var dblog_h {GitHub};
+    };
+    #switch {"$dblog_reason"}
+    {
+        #case {"nocurl"}
+        {
+            #var dblog_why_text {curl isn't installed, so dblog can't ask GitHub. Install it with: sudo apt install curl};
+        };
+        #case {"dns"}
+        {
+            #var dblog_why_text {This computer can't look up $dblog_h, so either the internet connection is down or DNS isn't working.};
+        };
+        #case {"refused"}
+        {
+            #var dblog_why_text {The connection to $dblog_h was refused, so a firewall is probably blocking it.};
+        };
+        #case {"unreachable"}
+        {
+            #var dblog_why_text {This computer has no route to the internet (network unreachable).};
+        };
+        #case {"timeout"}
+        {
+            #var dblog_why_text {$dblog_h didn't answer within 10 seconds, so a firewall is probably blocking it or the internet connection is down.};
+        };
+        #case {"slow"}
+        {
+            #var dblog_why_text {$dblog_h was too slow, it didn't finish answering within 25 seconds.};
+        };
+        #case {"proxy"}
+        {
+            #var dblog_why_text {The proxy in your https_proxy setting ($dblog_detail) isn't working.};
+        };
+        #case {"clock"}
+        {
+            #var dblog_why_text {This computer's clock says $dblog_detail, so GitHub's security certificate looks invalid. Set the clock to the right date.};
+        };
+        #case {"tls"}
+        {
+            #var dblog_why_text {The secure connection to $dblog_h failed ($dblog_detail). Something on the network may be intercepting it.};
+        };
+        #case {"cutoff"}
+        {
+            #var dblog_why_text {The connection to $dblog_h was cut off before it answered.};
+        };
+        #case {"notgithub"}
+        {
+            #var dblog_why_text {Something on the network answered instead of $dblog_h, usually a Wi-Fi login page or a firewall's block page.};
+        };
+        #case {"limit"}
+        {
+            #format dblog_now {%T};
+            #math dblog_mins {($dblog_detail - $dblog_now + 59) / 60};
+            #format dblog_at {%t} {{%H:%M}{$dblog_detail}};
+            #var dblog_why_text {GitHub's API allows 60 requests an hour from your internet address, and they're used up until $dblog_at (in $dblog_mins minutes).};
+        };
+        #case {"denied"}
+        {
+            #var dblog_why_text {GitHub refused the request (HTTP $dblog_detail).};
+        };
+        #case {"missing"}
+        {
+            #var dblog_why_text {GitHub says the jmitchell33/3kdb repository doesn't exist or isn't public (HTTP 404). It may have been renamed or made private.};
+        };
+        #case {"githubdown"}
+        {
+            #var dblog_why_text {GitHub is having problems right now (HTTP $dblog_detail). Try again later.};
+        };
+        #case {"http"}
+        {
+            #var dblog_why_text {GitHub answered with an error (HTTP $dblog_detail).};
+        };
+        #case {"other"}
+        {
+            #var dblog_why_text {curl couldn't reach $dblog_h: $dblog_detail};
+        };
+        #default
+        {
+            #var dblog_why_text {};
+        };
+    };
+}
+
+#NOP dblog.sh's files are read with #scan tsv, and dblog_scan says which one this is;
+#NOP A field's text stays plain text here, so a $ or a semicolon in a commit message can't run anything;
+#event {SCAN TSV LINE}
+{
+    #switch {"$dblog_scan"}
+    {
+        #case {"commits"}
+        {
+            #math dblog_n {$dblog_n + 1};
+            #var dblog_c[$dblog_n][sha] {%1};
+            #format dblog_c[$dblog_n][short] {%.7s} {%1};
+            #var dblog_c[$dblog_n][date] {%2};
+            #var dblog_c[$dblog_n][author] {%3};
+            #var dblog_c[$dblog_n][subject] {%4};
+            #var dblog_c[$dblog_n][body] {%5};
+            #var dblog_c[$dblog_n][files] {%6};
+            #var dblog_day {%2};
+            #replace dblog_day {-} {};
+            #var dblog_c[$dblog_n][day] {$dblog_day};
+        };
+        #case {"done"}
+        {
+            #var dblog_seen {%1};
+            #var dblog_clone {%2};
+            #var dblog_source {%3};
+            #var dblog_reason {%4};
+            #var dblog_host {%5};
+            #var dblog_detail {%6};
+            #var dblog_age {%7};
+        };
+        #case {"diff"}
+        {
+            #if {"%1" == "total"}
             {
-                #var dblog_more {&1};
-                #var dblog_shown {&2};
+                #var dblog_diff_total {%2};
+            };
+            #elseif {"%1" == "failed"}
+            {
+                #var dblog_diff_failed 1;
+            };
+            #else
+            {
+                #math dblog_diff_n {$dblog_diff_n + 1};
+                #var dblog_diff[$dblog_diff_n] {{kind}{%1}{path}{%2}};
+            };
+        };
+        #case {"head"}
+        {
+            #var dblog_head[%1] {1};
+        };
+        #case {"match"}
+        {
+            #var dblog_hits_file[%1][%2] {1};
+        };
+        #case {"show"}
+        {
+            #math dblog_show_n {$dblog_show_n + 1};
+            #var dblog_show[$dblog_show_n] {{kind}{%1}{text}{%2}};
+        };
+    };
+}
+
+#NOP Turn query %1 into dblog_q: mode, limit, all, since (YYYYMMDD, or bad), target, and;
+#NOP the by, file and words lists. Words keep only letters, digits and . _ / # : + - ( ), and no quote;
+#NOP is kept, so the file parts and the show hash can go to dblog.sh inside single quotes;
+#alias {dblog_parse}
+{
+    #var dblog_q {{mode}{list}{limit}{0}{all}{0}{since}{}{target}{}{by}{}{file}{}{words}{}};
+    #NOP Copied into a variable first, as #format would read a % in the query as its own;
+    #var dblog_qs {%1};
+    #format dblog_qs {%l} {$dblog_qs};
+    #replace dblog_qs {{[^a-z0-9._/#:+() -]}} {};
+    #replace dblog_qs { } {;};
+    #var dblog_want {};
+    #foreach {$dblog_qs} {dblog_w}
+    {
+        #if {"$dblog_w" == ""}
+        {
+            #continue;
+        };
+        #if {"$dblog_want" != ""}
+        {
+            #if {"$dblog_want" == "show"}
+            {
+                #var dblog_q[mode] {show};
+                #var dblog_q[target] {$dblog_w};
+            };
+            #elseif {"$dblog_want" == "since"}
+            {
+                dblog_since {$dblog_w};
+            };
+            #else
+            {
+                #var dblog_q[$dblog_want][$dblog_w] {1};
+            };
+            #var dblog_want {};
+            #continue;
+        };
+        #var dblog_digits 0;
+        #regex {$dblog_w} {^{[0-9]+}$}
+        {
+            #var dblog_digits 1;
+        };
+        #switch {"$dblog_w"}
+        {
+            #case {"help"}
+            {
+                #var dblog_q[mode] {help};
+            };
+            #case {"?"}
+            {
+                #var dblog_q[mode] {help};
+            };
+            #case {"new"}
+            {
+                #var dblog_q[mode] {new};
+            };
+            #case {"all"}
+            {
+                #var dblog_q[all] {1};
+            };
+            #case {"show"}
+            {
+                #var dblog_want {show};
+            };
+            #case {"by"}
+            {
+                #var dblog_want {by};
+            };
+            #case {"file"}
+            {
+                #var dblog_want {file};
+            };
+            #case {"since"}
+            {
+                #var dblog_want {since};
+            };
+            #default
+            {
+                #if {$dblog_digits}
+                {
+                    #var dblog_q[limit] {$dblog_w};
+                };
+                #else
+                {
+                    #var dblog_q[words][$dblog_w] {1};
+                };
+            };
+        };
+    };
+    #NOP A keyword left at the end with nothing after it, like dblog show, is a mistake;
+    #if {"$dblog_want" != ""}
+    {
+        #var dblog_q[mode] {missing};
+        #var dblog_q[target] {$dblog_want};
+    };
+}
+
+#NOP Set dblog_q[since] from %1: 7d 2w 3m 1y, today, yesterday, week, month, year or 2026-11-01;
+#alias {dblog_since}
+{
+    #var dblog_days -1;
+    #regex {%1} {^{[0-9]+}{[dwmy]}$}
+    {
+        #switch {"&2"}
+        {
+            #case {"d"}
+            {
+                #math dblog_days {&1};
+            };
+            #case {"w"}
+            {
+                #math dblog_days {&1 * 7};
+            };
+            #case {"m"}
+            {
+                #math dblog_days {&1 * 30};
+            };
+            #case {"y"}
+            {
+                #math dblog_days {&1 * 365};
+            };
+        };
+    };
+    #switch {"%1"}
+    {
+        #case {"today"}
+        {
+            #var dblog_days 0;
+        };
+        #case {"yesterday"}
+        {
+            #var dblog_days 1;
+        };
+        #case {"week"}
+        {
+            #var dblog_days 7;
+        };
+        #case {"month"}
+        {
+            #var dblog_days 30;
+        };
+        #case {"year"}
+        {
+            #var dblog_days 365;
+        };
+    };
+    #var dblog_q[since] {bad};
+    #if {$dblog_days >= 0}
+    {
+        #format dblog_now {%T};
+        #math dblog_then {$dblog_now - $dblog_days * 86400};
+        #format dblog_q[since] {%t} {{%Y%m%d}{$dblog_then}};
+    };
+    #regex {%1} {^{[0-9][0-9][0-9][0-9]}-{[0-9][0-9]}-{[0-9][0-9]}$}
+    {
+        #var dblog_q[since] {&1&2&3};
+    };
+}
+
+#NOP Sets dblog_ok to 1 when change %1 matches every part of dblog_q;
+#alias {dblog_matches}
+{
+    #var dblog_ok 1;
+    #if {"$dblog_q[since]" != "" && $dblog_c[%1][day] < $dblog_q[since]}
+    {
+        #var dblog_ok 0;
+    };
+    #format dblog_low {%l} {$dblog_c[%1][author]};
+    #foreach {*dblog_q[by][]} {dblog_w}
+    {
+        #var dblog_found 0;
+        #regex {$dblog_low} {$dblog_w}
+        {
+            #var dblog_found 1;
+        };
+        #if {!$dblog_found}
+        {
+            #var dblog_ok 0;
+        };
+    };
+    #format dblog_low {%l} {$dblog_c[%1][files]};
+    #foreach {*dblog_q[file][]} {dblog_w}
+    {
+        #var dblog_found 0;
+        #if {&dblog_hits_file[$dblog_w][$dblog_c[%1][sha]]}
+        {
+            #var dblog_found 1;
+        };
+        #regex {$dblog_low} {$dblog_w}
+        {
+            #var dblog_found 1;
+        };
+        #if {!$dblog_found}
+        {
+            #var dblog_ok 0;
+        };
+    };
+    #format dblog_low {%l} {$dblog_c[%1][subject] $dblog_c[%1][body] $dblog_c[%1][author] $dblog_c[%1][files] $dblog_c[%1][short]};
+    #foreach {*dblog_q[words][]} {dblog_w}
+    {
+        #var dblog_found 0;
+        #regex {$dblog_low} {$dblog_w}
+        {
+            #var dblog_found 1;
+        };
+        #if {!$dblog_found}
+        {
+            #var dblog_ok 0;
+        };
+    };
+}
+
+#NOP dblog_fresh is how many changes sit above the last one dblog showed, 0 when it's gone;
+#alias {dblog_count_fresh}
+{
+    #var dblog_fresh 0;
+    #if {"$dblog_seen" != ""}
+    {
+        #loop 1 $dblog_n dblog_i
+        {
+            #if {"$dblog_c[$dblog_i][sha]" == "$dblog_seen"}
+            {
+                #math dblog_fresh {$dblog_i - 1};
+                #break;
+            };
+        };
+    };
+}
+
+#NOP Save change %1's hash as the last one seen. Hashes are only 0-9 and a-f, so the shell is safe;
+#alias {dblog_write_seen}
+{
+    #regex {%1} {^{[0-9a-f]+}$}
+    {
+        #system {mkdir -p vars > /dev/null 2>&1; echo &1 > vars/dblog_seen.txt};
+    };
+}
+
+#NOP The list: dblog, dblog more, dblog 25, dblog all and any search;
+#alias {dblog_list}
+{
+    dblog_count_fresh;
+    #var dblog_filtered 0;
+    #if {&dblog_q[words][] || &dblog_q[by][] || &dblog_q[file][] || "$dblog_q[since]" != ""}
+    {
+        #var dblog_filtered 1;
+    };
+    #var dblog_hits {};
+    #var dblog_hit_n 0;
+    #loop 1 $dblog_n dblog_i
+    {
+        dblog_matches {$dblog_i};
+        #if {$dblog_ok}
+        {
+            #math dblog_hit_n {$dblog_hit_n + 1};
+            #var dblog_hits[$dblog_hit_n] {$dblog_i};
+        };
+    };
+    #var dblog_limit 10;
+    #if {$dblog_q[limit] > 0}
+    {
+        #var dblog_limit {$dblog_q[limit]};
+    };
+    #math dblog_from {$dblog_skip + 1};
+    #math dblog_to {$dblog_skip + $dblog_limit};
+    #if {$dblog_q[all] || $dblog_to > $dblog_hit_n}
+    {
+        #var dblog_to {$dblog_hit_n};
+    };
+
+    #if {$dblog_filtered}
+    {
+        dblog_header {CHANGES FOUND};
+    };
+    #else
+    {
+        dblog_header {RECENT CHANGES};
+    };
+    #if {$dblog_fresh && !$dblog_filtered && $dblog_skip == 0}
+    {
+        #if {$dblog_fresh == 1}
+        {
+            #echo {<ffa>  1 new change since you last looked.<088>};
+        };
+        #else
+        {
+            #echo {<ffa>  $dblog_fresh new changes since you last looked.<088>};
+        };
+    };
+    #echo {};
+    #if {$dblog_from > $dblog_to}
+    {
+        #echo {<eed>  No changes found.<088>};
+    };
+    #else
+    {
+        #loop $dblog_from $dblog_to dblog_k
+        {
+            #var dblog_i {$dblog_hits[$dblog_k]};
+            #var dblog_new 0;
+            #if {$dblog_i <= $dblog_fresh}
+            {
+                #var dblog_new 1;
+            };
+            dblog_entry {$dblog_i} {$dblog_new} {0};
+        };
+    };
+    #echo {};
+    #if {$dblog_from <= $dblog_to}
+    {
+        #echo {<ccf>  Showing $dblog_from-$dblog_to of $dblog_hit_n.<088>};
+    };
+    #var dblog_more 0;
+    #var dblog_shown {$dblog_to};
+    #var dblog_hint {<eaf>dblog show <hash><ccf>  |  <eaf>dblog help<088>};
+    #if {$dblog_to < $dblog_hit_n}
+    {
+        #var dblog_more 1;
+        #var dblog_hint {<eaf>dblog more<ccf>  |  $dblog_hint};
+    };
+    #echo {  %s} {$dblog_hint};
+    #foreach {*dblog_q[file][]} {dblog_w}
+    {
+        #if {&dblog_hits_file[$dblog_w][too many]}
+        {
+            #echo {<ccc>  "file %s" matches too many files, so only recent changes were searched. Use more of the file name.<088>} {$dblog_w};
+        };
+    };
+    #if {!$dblog_filtered && $dblog_skip == 0}
+    {
+        dblog_write_seen {$dblog_c[1][sha]};
+    };
+}
+
+#NOP dblog show <hash>: the full write-up and the files of one change;
+#alias {dblog_show_result}
+{
+    #var dblog_i 0;
+    #if {$dblog_show_n > 0 && "$dblog_show[1][kind]" == "sha"}
+    {
+        #loop 1 $dblog_n dblog_k
+        {
+            #if {"$dblog_c[$dblog_k][sha]" == "$dblog_show[1][text]"}
+            {
+                #var dblog_i {$dblog_k};
+                #break;
+            };
+        };
+    };
+    #if {$dblog_i == 0}
+    {
+        #echo {<eed>  No change has a hash starting with %s.<088>} {$dblog_q[target]};
+    };
+    #else
+    {
+        dblog_header {CHANGE $dblog_c[$dblog_i][short]};
+        #echo {};
+        dblog_entry {$dblog_i} {0} {1};
+        #var dblog_files {};
+        #var dblog_file_n 0;
+        #var dblog_files_known 1;
+        #loop 1 $dblog_show_n dblog_k
+        {
+            #if {"$dblog_show[$dblog_k][kind]" == "file"}
+            {
+                #math dblog_file_n {$dblog_file_n + 1};
+                #var dblog_files[$dblog_file_n] {$dblog_show[$dblog_k][text]};
+            };
+            #elseif {"$dblog_show[$dblog_k][kind]" == "nofiles"}
+            {
+                #var dblog_files_known 0;
+            };
+        };
+        #echo {};
+        #if {$dblog_files_known}
+        {
+            #echo {<ccf>    Files ($dblog_file_n):<088>};
+            #loop 1 $dblog_file_n dblog_k
+            {
+                #echo {<ccc>      %s<088>} {$dblog_files[$dblog_k]};
             };
         };
         #else
         {
-            #echo {%s} {$dblog_line};
+            #echo {<ccc>    Couldn't get the list of files from GitHub. Try again in a minute.<088>};
         };
     };
+}
+
+#NOP dblog new: in a git clone, the GitHub changes this checkout doesn't have yet;
+#NOP Anywhere else, the changes that came in since dblog last showed the list;
+#alias {dblog_new_result}
+{
+    #if {$dblog_clone == 1}
+    {
+        dblog_header {CHANGES TO PULL};
+        #echo {};
+        #var dblog_get 0;
+        #loop 1 $dblog_n dblog_i
+        {
+            #if {!&dblog_head[$dblog_c[$dblog_i][sha]]}
+            {
+                #math dblog_get {$dblog_get + 1};
+                dblog_entry {$dblog_i} {0} {0};
+            };
+        };
+        #if {$dblog_get == 0 && ("$dblog_source" == "github" || "$dblog_source" == "feed")}
+        {
+            #echo {<fff>  You're up to date.<088>};
+        };
+        #elseif {$dblog_get == 0 && "$dblog_source" == "local"}
+        {
+            #echo {<fff>  You have every change your git history knows about.<088>};
+        };
+        #elseif {$dblog_get == 0}
+        {
+            #echo {<fff>  You have all the changes dblog saved earlier.<088>};
+        };
+        #else
+        {
+            #echo {};
+            #if {$dblog_get == 1}
+            {
+                #echo {<ccf>  1 change to get. To update, quit tt++ and run <ffa>git pull<ccf> in your 3kdb folder.<088>};
+            };
+            #else
+            {
+                #echo {<ccf>  $dblog_get changes to get. To update, quit tt++ and run <ffa>git pull<ccf> in your 3kdb folder.<088>};
+            };
+        };
+    };
+    #else
+    {
+        dblog_diff_result;
+    };
+}
+
+#NOP dblog new without git: dblog.sh compared this folder's files with GitHub's, one by one;
+#alias {dblog_diff_result}
+{
+    dblog_header {YOUR FILES AND GITHUB};
+    #echo {};
+    #if {$dblog_clone == 2}
+    {
+        #echo {<ccc>  This folder is a git clone, but git isn't installed, so dblog compared the files instead.<088>};
+        #echo {};
+    };
+    #if {$dblog_diff_failed}
+    {
+        #echo {<eed>  dblog couldn't download GitHub's files to compare with yours. %s<088>} {$dblog_why_text};
+        #return;
+    };
+    #if {$dblog_diff_n == 0}
+    {
+        #echo {<fff>  All $dblog_diff_total of your 3kdb files match GitHub's latest version. You're up to date.<088>};
+        #return;
+    };
+    #if {$dblog_diff_n == 1}
+    {
+        #echo {<fff>  1 of your $dblog_diff_total 3kdb files is different from GitHub's latest version:<088>};
+    };
+    #else
+    {
+        #echo {<fff>  $dblog_diff_n of your $dblog_diff_total 3kdb files are different from GitHub's latest version:<088>};
+    };
+    #var dblog_to $dblog_diff_n;
+    #if {$dblog_to > 15}
+    {
+        #var dblog_to 15;
+    };
+    #loop 1 $dblog_to dblog_k
+    {
+        #if {"$dblog_diff[$dblog_k][kind]" == "missing"}
+        {
+            #echo {    <ffa>new     <ccc>%s<088>} {$dblog_diff[$dblog_k][path]};
+        };
+        #else
+        {
+            #echo {    <eaf>changed <ccc>%s<088>} {$dblog_diff[$dblog_k][path]};
+        };
+    };
+    #if {$dblog_diff_n > 15}
+    {
+        #math dblog_more_files {$dblog_diff_n - 15};
+        #echo {<ccc>    and $dblog_more_files more.<088>};
+    };
+    #NOP The changes that touched those files, from the ones whose file lists are known;
+    #var dblog_touched 0;
+    #loop 1 $dblog_n dblog_i
+    {
+        #if {$dblog_touched >= 10 || "$dblog_c[$dblog_i][files]" == "?"}
+        {
+            #continue;
+        };
+        #var dblog_files_of {|$dblog_c[$dblog_i][files]|};
+        #var dblog_hit 0;
+        #loop 1 $dblog_diff_n dblog_k
+        {
+            #if {"$dblog_files_of" == "%*|$dblog_diff[$dblog_k][path]|%*"}
+            {
+                #var dblog_hit 1;
+                #break;
+            };
+        };
+        #if {$dblog_hit}
+        {
+            #if {$dblog_touched == 0}
+            {
+                #echo {};
+                #echo {<ccf>  Changes on GitHub that touched them:<088>};
+            };
+            #math dblog_touched {$dblog_touched + 1};
+            dblog_entry {$dblog_i} {0} {0};
+        };
+    };
+    #echo {};
+    #echo {<ccf>  new<ccc> files are on GitHub but not in your folder. Files you changed yourself show up as changed too.<088>};
+    #echo {<ccf>  To update, download 3kdb from GitHub again and copy it over this folder. Your chars and vars folders aren't in the download, so they stay as they are.<088>};
+}
+
+#NOP Login: one line when changes have come in since dblog last showed the list. The first;
+#NOP time, or when the last one seen is gone from the history, it just remembers the newest;
+#alias {dblog_login_result}
+{
+    #NOP With no list at all, say why once at login. With a saved list, stay quiet;
+    #if {$dblog_n == 0}
+    {
+        #if {"$dblog_why_text" != ""}
+        {
+            #echo {<ffa>3kdb:<fff> dblog couldn't get the list of changes. %s<088>} {$dblog_why_text};
+        };
+        #return;
+    };
+    dblog_count_fresh;
+    #if {"$dblog_seen" == "" || ($dblog_fresh == 0 && "$dblog_seen" != "$dblog_c[1][sha]")}
+    {
+        dblog_write_seen {$dblog_c[1][sha]};
+    };
+    #elseif {$dblog_fresh == 1}
+    {
+        #echo {<ffa>3kdb:<fff> 1 new change since you last looked. Type <ceb>dblog<fff> to see it.<088>};
+    };
+    #elseif {$dblog_fresh > 1}
+    {
+        #echo {<ffa>3kdb:<fff> $dblog_fresh new changes since you last looked. Type <ceb>dblog<fff> to see them.<088>};
+    };
+}
+
+#NOP Print change %1 of dblog_c. %2 is 1 for the new mark, %3 is 1 to add its write-up;
+#NOP In a git clone, a change this checkout doesn't have yet says (not pulled);
+#alias {dblog_entry}
+{
+    #var dblog_mark { };
+    #if {%2}
+    {
+        #var dblog_mark {<ffa>*<088>};
+    };
+    #var dblog_lead { $dblog_mark <eaf>$dblog_c[%1][date]<088> <bca>$dblog_c[%1][short]<088> };
+    #var dblog_tail { <ccc>- $dblog_c[%1][author]<088>};
+    #format dblog_len {%L} {$dblog_c[%1][author]};
+    #math dblog_width {$dblog_cols - $dblog_len - 3 - 22};
+    #if {$dblog_clone == 1 && !&dblog_head[$dblog_c[%1][sha]] && "$dblog_q[mode]" != "new"}
+    {
+        #var dblog_tail {$dblog_tail <eed>(not pulled)<088>};
+        #math dblog_width {$dblog_width - 13};
+    };
+    #var dblog_wrap_in {$dblog_c[%1][subject]};
+    dblog_wrap {$dblog_width};
+    #loop 1 $dblog_wrap_n dblog_j
+    {
+        #if {$dblog_j == 1}
+        {
+            #var dblog_line {$dblog_lead<fff>$dblog_wrapped[1]<088>};
+        };
+        #else
+        {
+            #var dblog_line {                      <fff>$dblog_wrapped[$dblog_j]<088>};
+        };
+        #if {$dblog_j == $dblog_wrap_n}
+        {
+            #var dblog_line {$dblog_line$dblog_tail};
+        };
+        #echo {%s} {$dblog_line};
+    };
+    #if {%3}
+    {
+        #loop 1 $dblog_show_n dblog_k
+        {
+            #if {"$dblog_show[$dblog_k][kind]" == "body"}
+            {
+                #var dblog_wrap_in {$dblog_show[$dblog_k][text]};
+                #math dblog_width {$dblog_cols - 4};
+                dblog_wrap {$dblog_width};
+                #loop 1 $dblog_wrap_n dblog_j
+                {
+                    #echo {    <ceb>%s<088>} {$dblog_wrapped[$dblog_j]};
+                };
+            };
+        };
+    };
+}
+
+#NOP Word wrap dblog_wrap_in to width %1 (at least 20) into dblog_wrapped[1..dblog_wrap_n];
+#NOP A word longer than the width is cut. The text comes in a variable, so it's never run;
+#alias {dblog_wrap}
+{
+    #var dblog_wrapped {};
+    #var dblog_wrap_n 0;
+    #var dblog_w_max {%1};
+    #if {$dblog_w_max < 20}
+    {
+        #var dblog_w_max 20;
+    };
+    #var dblog_rest {$dblog_wrap_in};
+    #loop 1 200 dblog_guard
+    {
+        #format dblog_len {%L} {$dblog_rest};
+        #math dblog_wrap_n {$dblog_wrap_n + 1};
+        #if {$dblog_len <= $dblog_w_max}
+        {
+            #var dblog_wrapped[$dblog_wrap_n] {$dblog_rest};
+            #break;
+        };
+        #math dblog_cut_n {$dblog_w_max + 1};
+        #format dblog_cut {%.${dblog_cut_n}s} {$dblog_rest};
+        #format dblog_rev {%r} {$dblog_cut};
+        #var dblog_after -1;
+        #regex {$dblog_rev} {^{[^ ]*} }
+        {
+            #format dblog_after {%L} {&1};
+        };
+        #NOP dblog_take is how much goes on this line, dblog_drop how much leaves the rest;
+        #if {$dblog_after < 0 || $dblog_after >= $dblog_w_max}
+        {
+            #var dblog_take {$dblog_w_max};
+            #var dblog_drop {$dblog_w_max};
+        };
+        #else
+        {
+            #math dblog_take {$dblog_cut_n - $dblog_after - 1};
+            #math dblog_drop {$dblog_take + 1};
+        };
+        #format dblog_wrapped[$dblog_wrap_n] {%.${dblog_take}s} {$dblog_rest};
+        #math dblog_keep {$dblog_len - $dblog_drop};
+        #format dblog_rev {%r} {$dblog_rest};
+        #format dblog_rev {%.${dblog_keep}s} {$dblog_rev};
+        #format dblog_rest {%r} {$dblog_rev};
+        #format dblog_rest {%p} {$dblog_rest};
+    };
+}
+
+#alias {dblog_header}
+{
+    #echo {<ccf>  -------    <ffa>3kdb %1<ccf>    -------<088>};
+}
+
+#alias {dblog_help}
+{
+    dblog_header {CHANGE LOG HELP};
+    #echo {};
+    dblog_help_row {dblog} {the latest 10 changes};
+    dblog_help_row {dblog more} {the next page of the last search};
+    dblog_help_row {dblog 25} {the latest 25};
+    dblog_help_row {dblog all} {every change};
+    dblog_help_row {dblog <words>} {changes mentioning all the words: dblog map hell};
+    dblog_help_row {dblog file <part>} {changes to matching files: dblog file westersea};
+    dblog_help_row {dblog by <name>} {changes by an author: dblog by karvec};
+    dblog_help_row {dblog since <when>} {7d 2w 3m 1y, week, month or 2026-11-01};
+    dblog_help_row {dblog show <hash>} {the full write-up and files of one change};
+    dblog_help_row {dblog new} {check GitHub for changes you haven't pulled yet};
+    #echo {};
+    #echo {<ccc>  Mix them: dblog by karvec file map 20 or dblog bot all<088>};
+    #echo {<ffa>  *<ccc> marks changes you haven't seen in dblog yet.<088>};
+}
+
+#alias {dblog_help_row}
+{
+    #format dblog_name {%-20s} {%1};
+    #echo {  <ceb>%s<088>  <fff>%s<088>} {$dblog_name} {%2};
 }
 
 #NOP One line at login when upstream changes have come in that dblog hasn't shown yet;
 #alias {dblog_login_notice}
 {
-    dblog_start {--login};
+    dblog_start {login} {{query}{}{skip}{0}{cols}{80}{login}{1}};
 }
 
 #NOP postload (common/config.tin) sets dblog_login_pending, and the end of its who2 list calls this;

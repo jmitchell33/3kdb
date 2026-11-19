@@ -52,6 +52,8 @@ When TinTin++ is installed, check that it works. You should see a version number
 tt++ -V
 ```
 
+3kdb is tested on 2.02.61. If yours is older, see [How do I update TinTin++?](faq.md#how-do-i-update-tintin)
+
 Then check for **git**:
 
 ```bash
@@ -355,6 +357,14 @@ Your password won't be sent upstream. Git ignores `private.tin`, so it stays on 
 **`tt++: command not found`**
 
 TinTin++ isn't installed, or it didn't finish installing. Go back to [Step 1](#step-1-install-tintin-and-git).
+
+**Something's broken that works for everyone else**
+
+Your TinTin++ is probably out of date, which is the most common cause. Run `tt++ -V`. If it's older than 2.02.61, [update TinTin++](faq.md#how-do-i-update-tintin) and try again.
+
+**dblog says it couldn't get the list of changes**
+
+The rest of the message says why, such as a firewall, Wi-Fi login page or GitHub's hourly limit. See [dblog problems](faq.md#dblog-problems) for what to do about each one.
 
 **I see the TinTin++ welcome screen instead of the menu**
 

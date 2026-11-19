@@ -360,6 +360,8 @@ dblog
 
 That shows the 10 newest changes, with a `*` on ones you haven't seen yet. At login, 3kdb tells you when new ones have come in. `dblog more` shows the next 10, and `dblog all` shows them all. To find one, add words (`dblog hell bot`), or use `dblog file <part of a file name>`, `dblog by <name>` or `dblog since 2w`. `dblog show <hash>` gives the full write-up and the files it changed. `dblog new` checks GitHub for changes you haven't pulled yet. `dblog help` lists it all.
 
+dblog asks GitHub in the background with `curl`, which comes with Ubuntu, so you can keep playing while it fetches. It saves the list in `vars/dblog_data/` and asks again at most every 10 minutes. If GitHub can't be reached, it shows the saved list and says exactly why, such as a firewall, a Wi-Fi login page or GitHub's hourly limit. It works without git too. In a downloaded folder, `dblog new` lists which of your files are different from GitHub's. See [dblog problems](faq.md#dblog-problems) for fixes.
+
 Only changes that made it into the main 3kdb project show, so unfinished or dropped work never does, and a change that was undone hides along with the undo.
 
 **The game has its own help** too:
@@ -1265,8 +1267,8 @@ Run `ld` and log back in, or run `.reload`, to load the new code. If only one fi
 - **`common/map/`:** the map, and the speedrun list
 - **`modules/`:** bigger features, like the map, crafting and trackers
 - **`logs/`:** your chat and session logs
-- **`vars/`:** the saved reboot times, door combos and Rastafan Hell's exit words, shared by all your characters
-- **`scripts/`:** Python helpers, such as the one that posts to Discord
+- **`vars/`:** the saved reboot times, door combos, Rastafan Hell's exit words and dblog's list of changes, shared by all your characters
+- **`scripts/`:** helper scripts, such as the Python one that posts to Discord and `dblog.sh`, which `dblog` uses to ask GitHub
 - **`docs/`:** these guides
 
 [Back to top](#3kdb-manual)
