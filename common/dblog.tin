@@ -68,7 +68,7 @@
 {
     #math dblog_job {$dblog_job + 1};
     #var dblog_file {vars/dblog_out_${dblog_id}_$dblog_job.txt};
-    #system {(python3 scripts/dblog.py %1 > $dblog_file.part 2>&1; mv -f $dblog_file.part $dblog_file) > /dev/null 2>&1 &};
+    #system {mkdir -p vars > /dev/null 2>&1; (python3 scripts/dblog.py %1 > $dblog_file.part 2>&1; mv -f $dblog_file.part $dblog_file) > /dev/null 2>&1 &};
     dblog_poll {$dblog_file} 0;
 }
 
