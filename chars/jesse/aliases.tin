@@ -198,10 +198,12 @@
     #delay {cdonate_next} {cdonate3} {10};
 };
 
-#NOP -- each pass preserves and picks up 50 (the carry limit), then stores them. The Duncan actions in;
-#NOP -- actions.tin send the next pass only after his reply to the last store, and stop once the floor;
-#NOP -- is empty or after cdonate_max passes (10 x 50 = 500 corpses);
-#var cdonate_max 10;
+#NOP -- each pass splits 25 corpses in two with preserve gemino, picks up the 50 halves (the carry limit);
+#NOP -- and stores them. Duncan counts each half as a full corpse. gemino needs remains, since plain gemino;
+#NOP -- only tries the first corpse and the halves land at the top. The Duncan actions in actions.tin send;
+#NOP -- the next pass only after his reply to the last store, and stop once the floor is empty or after;
+#NOP -- cdonate_max passes (20 x 25 = 500 corpses, donated as 1000);
+#var cdonate_max 20;
 
 #alias {cdonate3} {
     maskoff;
@@ -214,7 +216,8 @@
     #math cdonate_pass {$cdonate_pass + 1};
     #var cdonate_nocorpse 0;
     #var cdonate_nopres 0;
-    pg;
+    qtrance preserve gemino remains>25;
+    qtrance get preservation>50;
     unkeep all preservation;
     store all;
     #NOP -- if Duncan never answers, stop instead of waiting forever;
