@@ -279,14 +279,26 @@
 };
 
 #NOP -- cycle bags;
+#NOP -- Items that can't be dropped (the Section Z barrier shield and High Score Button) answer every;
+#NOP -- put all in bag with "You can not drop that.", once per item per bag. Hide that line for a few seconds;
+#NOP -- while bagging, it still shows any other time;
+#alias {.bag_gag} {
+    #class {bag_gag} {kill};
+    #class {bag_gag} {open};
+    #gag {^You can not drop that.$};
+    #class {bag_gag} {close};
+    #delay {bag_gag} {#class {bag_gag} {kill}} {4};
+};
+
 #alias {bag1} {
+    .bag_gag;
     #var bagsFull 1;
     #var bag1_active 1;
     #format tmpBagCount {%d} $bagcount;
     #loop $tmpBagCount 1 tmpBag {
         put all in bag $tmpBag;
     };
-    #line oneshot #action {You put %* in %*.} {#var bagsFull 0;#var bag1_active 0};
+    #NOP -- the "You put" line clears bagsFull and bag1_active in gypsyid.tin, one action per line;
 };
 
 #alias {bag2} {
@@ -636,6 +648,7 @@
     };
     #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
         get corpse;
+        get all from corpse;
         cooler corpse;
     };
 };
@@ -781,9 +794,9 @@
     corpsetrig+ .corpse_cooler;
     corpsetrig+ cBlast2;
     corpsetrig+ divvy;
-    corpsetrig+ getAll;
-    corpsetrig+ badgers_corpsegrab;
-    corpsetrig+ badgers_corpsegrab;
+    corpsetrig+ glance;
+    corpsetrig+ delay;
+    corpsetrig+ lootGrab;
     corpsetrig+ crafting;
     corpsetrig+ pPocket;
     corpsetrig+ bag1;
@@ -938,97 +951,40 @@
     #system {echo ROUND COUNT: $total_rounds >> chars/badger/badgerslog.log};
 };
 
-#NOP -- badgers priority ground loot table and grab alias after corpsetrig shows room;
-#list badgers_lootgrab_list clear;
-#list badgers_lootgrab_list add {{{long} {A hard iron lockbox} {target} {lockbox}}};
-#list badgers_lootgrab_list add {{{long} {A worn lockbox} {target} {lockbox}}};
-#list badgers_lootgrab_list add {{{long} {A shining trident} {target} {trident}}};
-#list badgers_lootgrab_list add {{{long} {A%* machete%*} {target} {machete}}};
-#list badgers_lootgrab_list add {{{long} {A%* mattock%*} {target} {mattock}}};
-#list badgers_lootgrab_list add {{{long} {A%* axe%*} {target} {axe}}};
-#list badgers_lootgrab_list add {{{long} {A%* pickaxe%*} {target} {pickaxe}}};
-#list badgers_lootgrab_list add {{{long} {A%* morningstar%*} {target} {morningstar}}};
-#list badgers_lootgrab_list add {{{long} {A%* club%*} {target} {club}}};
-#list badgers_lootgrab_list add {{{long} {A%* shortsword%*} {target} {shortsword}}};
-#list badgers_lootgrab_list add {{{long} {A%* knife%*} {target} {knife}}};
-#list badgers_lootgrab_list add {{{long} {A%* rapier%*} {target} {rapier}}};
-#list badgers_lootgrab_list add {{{long} {A%* no-dachi%*} {target} {no-dachi}}};
-#list badgers_lootgrab_list add {{{long} {A%* katana%*} {target} {katana}}};
-#list badgers_lootgrab_list add {{{long} {A%* claymore%*} {target} {claymore}}};
-#list badgers_lootgrab_list add {{{long} {A%* cutlass%*} {target} {cutlass}}};
-#list badgers_lootgrab_list add {{{long} {A%* sai%*} {target} {sai}}};
-#list badgers_lootgrab_list add {{{long} {A%* dagger%*} {target} {dagger}}};
-#list badgers_lootgrab_list add {{{long} {A%* falchion%*} {target} {falchion}}};
-#list badgers_lootgrab_list add {{{long} {A%* sledgehammer%*} {target} {hammer}}};
-#list badgers_lootgrab_list add {{{long} {A%* dirk%*} {target} {dirk}}};
-#list badgers_lootgrab_list add {{{long} {A%* handaxe%*} {target} {axe}}};
-#list badgers_lootgrab_list add {{{long} {A%* warhammer%*} {target} {hammer}}};
-#list badgers_lootgrab_list add {{{long} {A%* battleaxe%*} {target} {axe}}};
-#list badgers_lootgrab_list add {{{long} {A%* sabre%*} {target} {sabre}}};
-#list badgers_lootgrab_list add {{{long} {A%* war-axe%*} {target} {axe}}};
-#list badgers_lootgrab_list add {{{long} {A%* khopesh%*} {target} {khopesh}}};
-#list badgers_lootgrab_list add {{{long} {A%* mace%*} {target} {mace}}};
-#list badgers_lootgrab_list add {{{long} {A%* nunchaku%*} {target} {nunchaku}}};
-#list badgers_lootgrab_list add {{{long} {A%* flail%*} {target} {flail}}};
-#list badgers_lootgrab_list add {{{long} {A%* kynac%*} {target} {kynac}}};
-#list badgers_lootgrab_list add {{{long} {A%* blade%*} {target} {blade}}};
-#list badgers_lootgrab_list add {{{long} {A%* stiletto%*} {target} {stiletto}}};
-#list badgers_lootgrab_list add {{{long} {A%* sword%*} {target} {sword}}};
-#list badgers_lootgrab_list add {{{long} {A%* foil%*} {target} {foil}}};
-#list badgers_lootgrab_list add {{{long} {A%* hatchet%*} {target} {hatchet}}};
-#list badgers_lootgrab_list add {{{long} {A%* main gauche%*} {target} {gauche}}};
-#list badgers_lootgrab_list add {{{long} {A%* trident%*} {target} {trident}}};
-#list badgers_lootgrab_list add {{{long} {A blue stone necklace} {target} {necklace}}};
-#list badgers_lootgrab_list add {{{long} {Leather girdle} {target} {girdle}}};
-#list badgers_lootgrab_list add {{{long} {A magic scroll} {target} {scroll}}};
-#list badgers_lootgrab_list add {{{long} {Crystal ball} {target} {ball}}};
-#list badgers_lootgrab_list add {{{long} {%*Shield} {target} {shield}}};
-#list badgers_lootgrab_list add {{{long} {%*shield} {target} {shield}}};
-#list badgers_lootgrab_list add {{{long} {%*amulet%*} {target} {amulet}}};
-#list badgers_lootgrab_list add {{{long} {%*Amulet%*} {target} {amulet}}};
-#list badgers_lootgrab_list add {{{long} {%*bracers} {target} {bracers}}};
-#list badgers_lootgrab_list add {{{long} {%*ring} {target} {ring}}};
-#list badgers_lootgrab_list add {{{long} {%*Girdle} {target} {girdle}}};
-#list badgers_lootgrab_list add {{{long} {%*Cloak%*} {target} {cloak}}};
-#list badgers_lootgrab_list add {{{long} {%*cloak%*} {target} {cloak}}};
-#list badgers_lootgrab_list add {{{long} {%*Boots} {target} {boots}}};
-#list badgers_lootgrab_list add {{{long} {%*boots} {target} {boots}}};
-#list badgers_lootgrab_list add {{{long} {%*gloves} {target} {gloves}}};
-#list badgers_lootgrab_list add {{{long} {%*Gloves} {target} {gloves}}};
-#list badgers_lootgrab_list add {{{long} {%*Gauntlets} {target} {gauntlets}}};
-#list badgers_lootgrab_list add {{{long} {%*Armour} {target} {armour}}};
-#list badgers_lootgrab_list add {{{long} {%*Helmet} {target} {helmet}}};
-#list badgers_lootgrab_list add {{{long} {%*flask%*} {target} {flask}}};
-#list badgers_lootgrab_list add {{{long} {%*necklace} {target} {necklace}}};
-#list badgers_lootgrab_list add {{{long} {%*wand} {target} {wand}}};
-#list badgers_lootgrab_list add {{{long} {%*staff%*} {target} {staff}}};
-#list badgers_lootgrab_list add {{{long} {%*sword} {target} {sword}}};
-#list badgers_lootgrab_list add {{{long} {%*Codpiece} {target} {codpiece}}};
-#list badgers_lootgrab_list add {{{long} {%* gemstone} {target} {gemstone}}};
-#list badgers_lootgrab_list add {{{long} {%* gold coins} {target} {coins}}};
-#list badgers_lootgrab_list add {{{long} {Candle} {target} {candle}}};
-#list badgers_lootgrab_list add {{{long} {%*Chainmail%*} {target} {chainmail}}};
-#list badgers_lootgrab_list add {{{long} {A suit of armor} {target} {armor}}};
-#list badgers_lootgrab_list add {{{long} {%* fragment of %*} {target} {fragment}}};
-#list badgers_lootgrab_list add {{{long} {%* essence of %*} {target} {essence}}};
-#list badgers_lootgrab_list add {{{long} {%* heart of %*} {target} {heart}}};
-#alias {badgers_corpsegrab} {
-    #loop 1 &badgers_lootgrab_list[] _badger_cl_i {
-        #var _badger_lpat {$badgers_lootgrab_list[$_badger_cl_i][long]};
-        #replace {_badger_lpat} {%*} {.*};
-        #list _badger_cg_hits create;
-        #grep {$_badger_lpat} {_badger_cg_hits} {_badger_cg_cnt};
-        #if {&_badger_cg_hits[] > 0} {
-            #send {get $badgers_lootgrab_list[$_badger_cl_i][target]};
-        };
-    };
-};
-
 #NOP -- badgers 3kdb aliases;
+#NOP -- One alias per line: the name, then its description word wrapped at 70 characters. Lines after the;
+#NOP -- first start with spaces so they line up under the description, not at the left edge of the screen;
 #alias {format_badgersaliases} {
     #format {badgeralias_name} {%-25s} {<cff>%1<088>};
-    #format {badgeralias_desc} {%-30s} {<deb>%2<088>};
-    #showme $badgeralias_name $badgeralias_desc;
+    #format {badgeralias_pad} {%-25s} {};
+    #var badgeralias_text {%2};
+    #replace {badgeralias_text} { } {;};
+    #list badgeralias_words create {$badgeralias_text};
+    #var badgeralias_line {};
+    #var badgeralias_first 1;
+    #foreach {$badgeralias_words[%*]} {badgeralias_word} {
+        #format badgeralias_len {%L} {$badgeralias_line $badgeralias_word};
+        #if {"$badgeralias_line" != "" && $badgeralias_len > 70} {
+            #if {$badgeralias_first} {
+                #showme {$badgeralias_name <deb>$badgeralias_line<088>};
+                #var badgeralias_first 0;
+            } {
+                #showme {$badgeralias_pad <deb>$badgeralias_line<088>};
+            };
+            #var badgeralias_line {$badgeralias_word};
+        };
+        #elseif {"$badgeralias_line" == ""} {
+            #var badgeralias_line {$badgeralias_word};
+        };
+        #else {
+            #var badgeralias_line {$badgeralias_line $badgeralias_word};
+        };
+    };
+    #if {$badgeralias_first} {
+        #showme {$badgeralias_name <deb>$badgeralias_line<088>};
+    } {
+        #showme {$badgeralias_pad <deb>$badgeralias_line<088>};
+    };
 };
 
 #NOP -- filter types, listed in the help and matched by the first letters (corp finds corpses);
@@ -1141,6 +1097,11 @@
 #list badger3kdb add {{{name} {aug2} {type} {misc} {desc} {Augur: take off circlet, wear other helmet}}};
 #list badger3kdb add {{{name} {quit} {type} {misc} {desc} {Quit guard: use quit REALLY to really quit}}};
 #list badger3kdb add {{{name} {.startlog} {type} {misc} {desc} {Bot debug log: .startlog on/off/del}}};
+#list badger3kdb add {{{name} {gypsyid} {type} {misc} {desc} {Identify the bags at the town gypsy, keep potions of experience, bag them again}}};
+#list badger3kdb add {{{name} {gypsyid-stop} {type} {misc} {desc} {Stop gypsyid}}};
+#list badger3kdb add {{{name} {bagcount} {type} {misc} {desc} {Count your bags and bagset the total (drops, gets and keeps the satchel first)}}};
+#list badger3kdb add {{{name} {abagson} {type} {misc} {desc} {Bag count at login on}}};
+#list badger3kdb add {{{name} {abagsoff} {type} {misc} {desc} {Bag count at login off}}};
 
 #NOP -- areas;
 #list badger3kdb add {{{name} {pryout} {type} {areas} {desc} {attempt to get out of prysmia room}}};
@@ -1189,3 +1150,9 @@
 .add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
 
 #class {player_aliases} {close};
+
+#NOP -- gypsyid: identify the bags at the town gypsy, see gypsyid.tin;
+#read chars/$user/gypsyid.tin;
+
+#NOP -- bagcount: count the bags and bagset, see bagcount.tin;
+#read chars/$user/bagcount.tin;

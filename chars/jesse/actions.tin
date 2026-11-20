@@ -56,14 +56,16 @@
     };
 } {1};
 
-#nop -- the gp1 reflex sends drop pants when NP is low. Absorb up to 5 corpses, unless there are none;
-#nop -- qtrance is instant, so the lockout only has to last until the new NP shows;
+#nop -- the gp1 reflex sends drop pants when NP is low. .corpse_absorb fills NP in batches, unless there are no corpses;
+#nop -- corpse_lockout stays on until the batches are done, so the reflex can't start a second run;
+#nop -- corpse_lockout must exist before the first drop pants, an unset variable makes the #if false;
+#var corpse_lockout 0;
 #action {^You have no pants.$} {
     #if {!$idle_flag && !$corpse_lockout} {
         #math corpse_total {$corpses[coffin] + $corpses[freezer] + $corpses[cooler]};
         #if {$corpse_total > 0} {
             #var corpse_lockout 1;
-            #delay {corpse_lockout} {#var corpse_lockout 0} {4};
+            #var corpse_np_seen 0;
             .corpse_absorb;
         };
     };

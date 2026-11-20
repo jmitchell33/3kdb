@@ -1,0 +1,122 @@
+#class {bot_findstep} {kill};
+#class {bot_findstep} {open};
+
+#NOP -- Find where a stopped or paused bot is in its path, so it can carry on from the room you're in.;
+#NOP -- .bot_path_rooms walks bot[steps] through the map from bot[start_vnum] and keeps the room each step;
+#NOP -- lands in (bot_path_room[i]). A step that isn't an exit (a command like .sz_finish) stays put.;
+#NOP -- .bot_find_step then sets bot_found[step] to the next step to send from the room you're in, or 0;
+
+#NOP -- @bot_room_key{<room line>}: the room name and its exits sorted, e.g. "Section 40 ,n,ne,s". The game;
+#NOP -- and the map list the exits in different orders, so compare these instead of the lines;
+#function {bot_room_key} {
+    #var brk {%0};
+    #replace brk {-R-_} {};
+    #format brk {%p} {$brk};
+    #var result {$brk};
+    #regex {$brk} {{^(.*?) *\(([^()]*)\)$}} {
+        #var brk_name {&2};
+        #var brk_ex {&3};
+        #replace brk_ex {,} {;};
+        #list brk_list create {$brk_ex};
+        #list brk_list sort;
+        #var result {};
+        #foreach {$brk_list[%*]} {brk_one} {
+            #cat result {,$brk_one};
+        };
+        #var result {$brk_name $result};
+    };
+};
+
+#alias {.bot_path_rooms} {
+    #unvar bot_path_room;
+    #var bpr_v {$bot[start_vnum]};
+    #loop 1 &bot[steps][] bpr_i {
+        #var bpr_step {$bot[steps][$bpr_i]};
+        #map get roomexits bpr_ex {$bpr_v};
+        #if {"$bpr_ex[$bpr_step]" != ""} {
+            #var bpr_v {$bpr_ex[$bpr_step]};
+        };
+        #var bot_path_room[$bpr_i] {$bpr_v};
+    };
+};
+
+#NOP -- 1 when <vnum> is a room the path goes through (the start room counts);
+#function {bot_on_path} {
+    #var result 0;
+    #if {"%0" == "$bot[start_vnum]"} {
+        #var result 1;
+    };
+    #foreach {*bot_path_room[]} {bos_i} {
+        #if {"$bot_path_room[$bos_i]" == "%0"} {
+            #var result 1;
+        };
+    };
+};
+
+#NOP -- .bot_find_step: which room are you in? The map's room when its name and exits match the room line,;
+#NOP -- else a room on the path that matches (only if exactly one does). Then the step: the start room is;
+#NOP -- step 1, otherwise the step after one that lands here. The step the bot had reached when it was;
+#NOP -- stopped or paused (lastBot) wins when it fits, else the first one. bot_found[step] 0 means not found;
+#alias {.bot_find_step} {
+    #var bot_found {{step}{0}{vnum}{0}};
+    .bot_path_rooms;
+    #var bfs_here {@bot_room_key{$room_short}};
+    #map get roomvnum bfs_map;
+    #map get roomname bfs_name {$bfs_map};
+    #var bfs_vnum 0;
+    #if {"@bot_room_key{$bfs_name}" == "$bfs_here" && @bot_on_path{$bfs_map}} {
+        #var bfs_vnum $bfs_map;
+    } {
+        #var bfs_cands {};
+        #if {"@bot_room_key{@bot_vnum_name{$bot[start_vnum]}}" == "$bfs_here"} {
+            #var bfs_cands[$bot[start_vnum]] 1;
+        };
+        #foreach {*bot_path_room[]} {bfs_i} {
+            #var bfs_v {$bot_path_room[$bfs_i]};
+            #if {"@bot_room_key{@bot_vnum_name{$bfs_v}}" == "$bfs_here"} {
+                #var bfs_cands[$bfs_v] 1;
+            };
+        };
+        #if {&bfs_cands[] == 1} {
+            #foreach {*bfs_cands[]} {bfs_v} {
+                #var bfs_vnum $bfs_v;
+            };
+        };
+        #elseif {&bfs_cands[] > 1 && "$bfs_cands[$lastBot[curVnum]]" != ""} {
+            #var bfs_vnum $lastBot[curVnum];
+        };
+    };
+    #if {"$bfs_vnum" == "0"} {
+        #return;
+    };
+    #var bfs_step 0;
+    #if {"$bfs_vnum" == "$bot[start_vnum]"} {
+        #var bfs_step 1;
+    };
+    #var bfs_last 0;
+    #if {"$lastBot[alias]" == "$bot[alias]" && "$lastBot[step]" != ""} {
+        #var bfs_last $lastBot[step];
+    };
+    #loop 1 &bot[steps][] bfs_i {
+        #if {"$bot_path_room[$bfs_i]" == "$bfs_vnum"} {
+            #math bfs_next {$bfs_i + 1};
+            #if {$bfs_next == $bfs_last} {
+                #var bfs_step $bfs_next;
+            };
+            #elseif {$bfs_step == 0} {
+                #var bfs_step $bfs_next;
+            };
+        };
+    };
+    #if {$bfs_step > &bot[steps][]} {
+        #var bfs_step &bot[steps][];
+    };
+    #var bot_found[step] $bfs_step;
+    #var bot_found[vnum] $bfs_vnum;
+};
+
+#function {bot_vnum_name} {
+    #map get roomname result {%0};
+};
+
+#class {bot_findstep} {close};

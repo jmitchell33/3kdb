@@ -1,0 +1,531 @@
+#class {gypsyid} {kill};
+#class {gypsyid} {open};
+
+#NOP -- gypsyid: identify everything in your bags at the town gypsy, keep the potions of experience and put it;
+#NOP -- all back. Needs bagset. Steps: walk to the gypsy, clear any black stone or bag lying on her floor;
+#NOP -- (get, uncurse all, dispose), bag2 onto the floor, then get all, identify all, keep the potions and;
+#NOP -- bag them again until nothing of yours is left on the floor. Out of coins at the gypsy means a trip to;
+#NOP -- the bank. At the end you have at least gid[min_coins] on you.;
+#NOP -- A character can set gypsyid_after to an alias to run once everything is back in the bags. That alias;
+#NOP -- has to call .gid_after_done when it is finished. gypsyid_return, when set, runs at the very end;
+#var gid[state] idle;
+#var gid[gypsy] 17;
+#var gid[bank] 7;
+#var gid[min_coins] 50000;
+#NOP -- a bank trip at the end tops you up to this much;
+#var gid[withdraw_to] 100000;
+#NOP -- out of coins at the gypsy tops you up to this much, identifying full bags can cost over 100k;
+#var gid[id_withdraw_to] 300000;
+#NOP -- most get, identify and bag passes before giving up;
+#var gid[max_passes] 40;
+#var gid[bags_full] 0;
+#NOP -- things in the gypsy's room that are always there;
+#list gid_fixtures create {A Trashcan;%*Comment Board%*;A services offered sign};
+
+#alias {.gid_echo} {
+    #echo {<ceb>Gypsy id:<088> %1};
+};
+
+#alias {.gid_abort} {
+    #undelay {gid_wait};
+    #undelay {gid_out};
+    #var gid[out] 0;
+    #var gid[state] idle;
+    #var gid[bags_full] 0;
+    .gid_echo {<faa>%1 - stopped.<088>};
+};
+
+#NOP -- .gid_sync <alias>: glance, then run <alias> once the room comes back. The game answers in order, so;
+#NOP -- everything sent before the glance is done by then, and room[items] holds what is on the floor;
+#alias {.gid_sync} {
+    #var gid[next] {%1};
+    #var gid[ticks] 0;
+    #var room[updated] 0;
+    glance;
+    #delay {gid_wait} {.gid_sync_wait} {0.2};
+};
+
+#alias {.gid_sync_wait} {
+    #if {"$gid[state]" == "idle"} {
+        #return;
+    };
+    #if {$room[updated]} {
+        $gid[next];
+        #return;
+    };
+    #math gid[ticks] {$gid[ticks] + 1};
+    #if {$gid[ticks] > 75} {
+        .gid_abort {no reply from the game};
+    } {
+        #delay {gid_wait} {.gid_sync_wait} {0.2};
+    };
+};
+
+#NOP -- Room name without its exits and the -R-_ markers, e.g. "Home of the Gypsy";
+#function {gid_base} {
+    #var result {%0};
+    #replace result {-R-_} {};
+    #regex {$result} {{^(.*?) *\(([^()]*)\)$}} {#var result {&2}};
+};
+
+#NOP -- .gid_walk <vnum> <alias>: wait to reach <vnum> after .gid_go, then sync and run <alias>. The map moves;
+#NOP -- as soon as a speedwalk is sent, so the room title has to match the map's name for <vnum> too. If the;
+#NOP -- map says we're there and the title doesn't match for 10 seconds, the walk went wrong: findhere and go;
+#NOP -- again, up to 3 times;
+#alias {.gid_walk} {
+    #var gid[target] {%1};
+    #var gid[then] {%2};
+    #var gid[ticks] 0;
+    #var gid[mismatch] 0;
+    #var gid[tries] 0;
+    #var gid[refind] 0;
+    #map get roomname gid[target_name] {%1};
+    #delay {gid_wait} {.gid_walk_wait} {0.5};
+};
+
+#alias {.gid_walk_wait} {
+    #if {"$gid[state]" == "idle"} {
+        #return;
+    };
+    #if {"$finding_here" == "on" || "$gid[out]" == "1"} {
+        #delay {gid_wait} {.gid_walk_wait} {0.5};
+        #return;
+    };
+    #if {$gid[refind]} {
+        #var gid[refind] 0;
+        #var gid[mismatch] 0;
+        .gid_go $gid[dest];
+        #delay {gid_wait} {.gid_walk_wait} {0.5};
+        #return;
+    };
+    #map get roomvnum gid[vnum];
+    #if {"$gid[vnum]" == "$gid[target]"} {
+        #if {"@gid_base{$room_short}" == "@gid_base{$gid[target_name]}"} {
+            .gid_sync {$gid[then]};
+            #return;
+        };
+        #math gid[mismatch] {$gid[mismatch] + 1};
+        #if {$gid[mismatch] > 20} {
+            #math gid[tries] {$gid[tries] + 1};
+            #if {$gid[tries] > 3} {
+                .gid_abort {never reached $gid[target_name]};
+                #return;
+            };
+            .gid_echo {the map says $gid[target_name] but this isn't it, finding where we are.};
+            #var gid[refind] 1;
+            findhere;
+        };
+    };
+    #math gid[ticks] {$gid[ticks] + 1};
+    #if {$gid[ticks] > 240} {
+        .gid_abort {never reached room $gid[target]};
+    } {
+        #delay {gid_wait} {.gid_walk_wait} {0.5};
+    };
+};
+
+#NOP -- .gid_go <speedrun>: go there, keeping go_back as it was. A speedwalk out of the Chaos Sewers breaks;
+#NOP -- when you slip, so from there walk one step at a time to the Sewer Portal, go up, then go;
+#alias {.gid_go} {
+    #var gid[dest] {%1};
+    #map get roomarea gid[area];
+    #if {"$gid[area]" == "Chaotic Sewers"} {
+        #var gid[out] 1;
+        #var gid[out_steps] 0;
+        .gid_echo {walking out of the sewers to the portal first.};
+        .gid_out_step;
+    } {
+        .gid_go_now;
+    };
+};
+
+#alias {.gid_go_now} {
+    #var gid[keep_back] $go_back;
+    go $gid[dest];
+    #var go_back $gid[keep_back];
+};
+
+#NOP -- One step at a time to the Sewer Portal, waiting for each room (or 1 second when a slip or blocked move;
+#NOP -- runs mapUndo). Waits out fights. Then up, and the rest of the way is a normal go;
+#var gid[portal] 18878;
+#alias {.gid_out_step} {
+    #if {"$gid[out]" != "1"} {
+        #return;
+    };
+    #if {"$incombat" == "1"} {
+        #delay {gid_out} {.gid_out_step} {1};
+        #return;
+    };
+    #map get roomvnum gid[vnum];
+    #if {"$gid[vnum]" == "$gid[portal]"} {
+        #var room[updated] 0;
+        #var gid[step_wait] 0;
+        u;
+        #delay {gid_out} {.gid_out_up} {0.2};
+        #return;
+    };
+    #math gid[out_steps] {$gid[out_steps] + 1};
+    #if {$gid[out_steps] > 3000} {
+        #var gid[out] 0;
+        .gid_abort {never got out of the sewers};
+        #return;
+    };
+    #var room[updated] 0;
+    #var gid[step_wait] 0;
+    #map find {$gid[portal]};
+    #path walk;
+    #delay {gid_out} {.gid_out_wait} {0.1};
+};
+
+#alias {.gid_out_wait} {
+    #if {$room[updated] || $gid[step_wait] >= 10} {
+        .gid_out_step;
+    } {
+        #math gid[step_wait] {$gid[step_wait] + 1};
+        #delay {gid_out} {.gid_out_wait} {0.1};
+    };
+};
+
+#NOP -- Waiting for the room above the portal, then the normal go;
+#alias {.gid_out_up} {
+    #map get roomarea gid[area];
+    #if {$room[updated] && "$gid[area]" != "Chaotic Sewers"} {
+        #var gid[out] 0;
+        .gid_go_now;
+    };
+    #elseif {$gid[step_wait] >= 25} {
+        #var gid[out] 0;
+        .gid_abort {couldn't go up out of the sewers};
+    };
+    #else {
+        #math gid[step_wait] {$gid[step_wait] + 1};
+        #delay {gid_out} {.gid_out_up} {0.2};
+    };
+};
+
+#NOP -- .gid_here <name>: gid[here] is 1 when the room title is <name>. Nothing gets dropped, withdrawn or;
+#NOP -- donated anywhere else;
+#alias {.gid_here} {
+    #if {"@gid_base{$room_short}" == "%1"} {
+        #var gid[here] 1;
+    } {
+        #var gid[here] 0;
+    };
+};
+
+#alias {gypsyid} {
+    #if {"$gid[state]" != "idle"} {
+        .gid_echo {already running ($gid[state]).};
+        #return;
+    };
+    #if {"$bagcount" == "" || "$bagcount" == "0" || "$bagcount" == "\$bagcount"} {
+        .gid_echo {<faa>set your bag count first with bagset <number>.<088>};
+        #return;
+    };
+    #if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
+        .pause;
+    };
+    #map get roomvnum gid[back];
+    #var gid[passes] 0;
+    #var gid[left] -1;
+    #var gid[stuck] 0;
+    #var gid[state] to_gypsy;
+    .gid_echo {going to the gypsy.};
+    .gid_go town_gypsy;
+    .gid_walk $gid[gypsy] .gid_at_gypsy;
+};
+
+#NOP -- A black stone or bag already on the gypsy's floor would come back with get all, so take them first,;
+#NOP -- uncurse (the stone grafts to your hand) and throw them away. dispose never touches kept items;
+#alias {.gid_at_gypsy} {
+    #var gid[state] floor;
+    #var gid[n_bag] 0;
+    #var gid[n_stone] 0;
+    #loop 1 &room[items][] gid_i {
+        #var gid_item {$room[items][$gid_i]};
+        #var gid_n 1;
+        #regex {$gid_item} { \x7B{[0-9]+}\x7D} {#var gid_n &1};
+        #regex {$gid_item} {^%i%*bag%*$} {#math gid[n_bag] {$gid[n_bag] + $gid_n}};
+        #regex {$gid_item} {^%i%*{black stone|Stone of Grafting}%*$} {#math gid[n_stone] {$gid[n_stone] + $gid_n}};
+    };
+    #if {$gid[n_bag] || $gid[n_stone]} {
+        .gid_echo {clearing $gid[n_stone] stone(s) and $gid[n_bag] bag(s) off the floor first.};
+        #if {$gid[n_bag]} {
+            #$gid[n_bag] {get bag};
+        };
+        #if {$gid[n_stone]} {
+            #$gid[n_stone] {get stone};
+        };
+        uncurse all;
+        #if {$gid[n_bag]} {
+            #$gid[n_bag] {dispose bag};
+        };
+        #if {$gid[n_stone]} {
+            #$gid[n_stone] {dispose stone};
+        };
+        .gid_sync .gid_unbag;
+    } {
+        .gid_unbag;
+    };
+};
+
+#alias {.gid_unbag} {
+    .gid_here {Home of the Gypsy};
+    #if {!$gid[here]} {
+        .gid_abort {this isn't the gypsy's room, not emptying the bags};
+        #return;
+    };
+    #var gid[state] cycle;
+    .gid_echo {emptying $bagcount bags onto the floor.};
+    unbagall $bagcount;
+    .gid_sync .gid_pass;
+};
+
+#alias {.gid_pass} {
+    #if {"$gid[state]" != "cycle"} {
+        #return;
+    };
+    #math gid[passes] {$gid[passes] + 1};
+    #if {$gid[passes] > $gid[max_passes]} {
+        .gid_abort {still items on the floor after $gid[max_passes] passes};
+        #return;
+    };
+    get all;
+    identify all;
+    keep all potion of experience;
+    .bag_gag;
+    bagall $bagcount;
+    .gid_sync .gid_check;
+};
+
+#NOP -- Count what is still on the floor, leaving out the room's own things. Nothing left means done. Two;
+#NOP -- passes in a row that leave as much as before means the bags won't take it;
+#alias {.gid_check} {
+    #if {"$gid[state]" != "cycle"} {
+        #return;
+    };
+    #var gid[now] 0;
+    #loop 1 &room[items][] gid_i {
+        #var gid_item {$room[items][$gid_i]};
+        #var gid_fixed 0;
+        #foreach {$gid_fixtures[%*]} {gid_pat} {
+            #regex {$gid_item} {%*$gid_pat%*} {#var gid_fixed 1};
+        };
+        #if {!$gid_fixed} {
+            #math gid[now] {$gid[now] + 1};
+        };
+    };
+    #if {$gid[now] == 0} {
+        .gid_identified;
+        #return;
+    };
+    #if {$gid[left] >= 0 && $gid[now] >= $gid[left]} {
+        #math gid[stuck] {$gid[stuck] + 1};
+    } {
+        #var gid[stuck] 0;
+    };
+    #var gid[left] $gid[now];
+    #if {$gid[stuck] >= 2} {
+        .gid_abort {$gid[now] things on the floor won't go back in the bags};
+    } {
+        .gid_pass;
+    };
+};
+
+#alias {.gid_identified} {
+    #var gid[bags_full] 0;
+    .gid_echo {everything is identified and back in the bags.};
+    #if {&{gypsyid_after}} {
+        #var gid[state] after;
+        $gypsyid_after;
+    } {
+        .gid_after_done;
+    };
+};
+
+#NOP -- Called when the character's gypsyid_after step is done, or straight away without one. my[coins] is;
+#NOP -- only as fresh as the last coins command, so ask first;
+#alias {.gid_after_done} {
+    #if {"$gid[state]" == "idle"} {
+        #return;
+    };
+    _status_coins;
+    .gid_sync .gid_end_coins;
+};
+
+#alias {.gid_end_coins} {
+    #if {$my[coins] < $gid[min_coins]} {
+        #var gid[resume] .gid_finish;
+        #var gid[bank_to] $gid[withdraw_to];
+        .gid_bank;
+    } {
+        .gid_finish;
+    };
+};
+
+#NOP -- .gid_bank: go withdraw up to gid[withdraw_to], then run gid[resume];
+#alias {.gid_bank} {
+    #var gid[state_before] $gid[state];
+    #var gid[state] bank;
+    #math gid[amount] {$gid[bank_to] - $my[coins]};
+    .gid_echo {$my[coins] coins on you, going to the bank for $gid[amount].};
+    .gid_go bank;
+    .gid_walk $gid[bank] .gid_withdraw;
+};
+
+#alias {.gid_withdraw} {
+    #var gid[spill] 0;
+    .gid_here {Town Bank};
+    #if {!$gid[here]} {
+        .gid_abort {this isn't the bank};
+        #return;
+    };
+    withdraw $gid[amount];
+    _status_coins;
+    .gid_sync .gid_banked;
+};
+
+#alias {.gid_banked} {
+    #if {$gid[spill]} {
+        #var gid[spill_tries] 0;
+        .gid_spill_fix;
+        #return;
+    };
+    #var gid[state] $gid[state_before];
+    $gid[resume];
+};
+
+#NOP -- A withdraw too big to carry spills on the floor. Deposit down to min_coins, pick the coins up and;
+#NOP -- deposit again, until nothing spills and no coins are left on the floor. 100 more stays for the fee;
+#alias {.gid_spill_fix} {
+    #math gid[spill_tries] {$gid[spill_tries] + 1};
+    #if {$gid[spill_tries] > 6} {
+        .gid_abort {coins still on the bank floor after 6 tries};
+        #return;
+    };
+    #var gid[spill] 0;
+    .gid_echo {coins spilled on the floor, putting them back in the bank.};
+    _status_coins;
+    .gid_sync .gid_spill_deposit;
+};
+
+#alias {.gid_spill_deposit} {
+    #math gid[amount] {$my[coins] - $gid[min_coins] - 100};
+    #if {$gid[amount] > 0} {
+        deposit $gid[amount];
+    };
+    get coins;
+    _status_coins;
+    .gid_sync .gid_spill_check;
+};
+
+#alias {.gid_spill_check} {
+    #if {$gid[spill] || $room_coins} {
+        .gid_spill_fix;
+        #return;
+    };
+    #NOP -- a spill from a withdraw you typed: what was picked up goes in the bank too;
+    #if {"$gid[state_before]" == "idle"} {
+        #math gid[amount] {$my[coins] - $gid[min_coins] - 100};
+        #if {$gid[amount] > 0} {
+            deposit $gid[amount];
+            _status_coins;
+        };
+    };
+    #var gid[state] $gid[state_before];
+    $gid[resume];
+};
+
+#NOP -- Coins that don't fit spill on the floor. At the bank .gid_banked deals with it, anywhere else;
+#NOP -- coins_spilled tells the character (jesse's heartbeat takes them to the bank);
+#action {^Money spills over your arms onto the ground.} {
+    #if {"$gid[state]" == "bank"} {
+        #var gid[spill] 1;
+    };
+    #elseif {"$gid[state]" == "idle" && "@gid_base{$room_short}" == "Town Bank"} {
+        #NOP -- a withdraw you typed yourself: clean it up right here;
+        #var gid[state] bank;
+        #var gid[state_before] idle;
+        #var gid[resume] {.gid_echo {coins are back in the bank.}};
+        #var gid[spill_tries] 0;
+        #delay {gid_wait} {.gid_spill_fix} {1};
+    };
+    #else {
+        #var coins_spilled 1;
+    };
+} {2};
+
+#NOP -- Out of coins in the middle of the gypsy part: bank, come back and carry on;
+#alias {.gid_broke} {
+    #if {"$gid[state]" != "cycle"} {
+        #return;
+    };
+    #undelay {gid_wait};
+    #var gid[state] broke;
+    #var gid[resume] .gid_back_to_gypsy;
+    #var gid[bank_to] $gid[id_withdraw_to];
+    _status_coins;
+    .gid_sync .gid_bank;
+};
+
+#NOP -- The pass that ran out of coins still bagged what it had, unidentified, so empty the bags again;
+#alias {.gid_back_to_gypsy} {
+    #var gid[state] cycle;
+    #var gid[passes] 0;
+    #var gid[left] -1;
+    #var gid[stuck] 0;
+    .gid_go town_gypsy;
+    .gid_walk $gid[gypsy] .gid_unbag;
+};
+
+#alias {.gid_finish} {
+    #var gid[state] idle;
+    #var go_back $gid[back];
+    .gid_echo {done, $my[coins] coins on you.};
+    #if {&{gypsyid_return}} {
+        $gypsyid_return;
+    };
+};
+
+#alias {gypsyid-stop} {
+    .gid_abort {stopped by you};
+};
+
+#NOP -- The gypsy's answer when you can't pay;
+#action {^The Gypsy says: You do not possess the funds for such a service.} {.gid_broke} {2};
+
+#NOP -- Bags full: during a bag1, an item that is too heavy for every bag. Each line counts against the item's;
+#NOP -- name, and many of the same item (capsules) give many lines, so the item only counts when none of that;
+#NOP -- name went into a bag at all. Checked 3 seconds after the last of these lines, then the counts start over;
+#action {^%* is too heavy for %*.$} {
+    #if {"$gid[state]" != "idle"} {
+        #return;
+    };
+    #NOP -- a letter in front, a key that is only digits is taken as a list position;
+    #format gid_key {k%H} {%1};
+    #NOP -- one x per line, #cat makes the entry the first time and the length is the count;
+    #cat gid_heavy[$gid_key] {x};
+    #delay {gid_heavy} {.gid_heavy_check} {3};
+} {2};
+
+#NOP -- Every item that goes into a bag. This is the only action on this line (bag1 used to make a one-shot one,;
+#NOP -- only one action fires per line), so it also clears bagsFull and bag1_active like that one did;
+#action {^You put %* in %*.$} {
+    #var bagsFull 0;
+    #var bag1_active 0;
+    #format gid_key {k%H} {%1};
+    #var gid_put[$gid_key] 1;
+} {2};
+
+#alias {.gid_heavy_check} {
+    #foreach {*gid_heavy[]} {gid_key} {
+        #format gid_n {%L} {$gid_heavy[$gid_key]};
+        #if {$gid_n >= $bagcount && !&{gid_put[$gid_key]}} {
+            #var gid[bags_full] 1;
+        };
+    };
+    #unvar gid_heavy;
+    #unvar gid_put;
+};
+
+#class {gypsyid} {close};

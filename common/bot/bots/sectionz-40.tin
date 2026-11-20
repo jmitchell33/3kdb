@@ -10,7 +10,7 @@ touch angel rune;
 #var bot_message_1 '----  SECTION Z    ----';
 #showme $bot_message_1;
 
-#var {bot[path]} {s;w;d;s;se;ne;n;u;w;s;w;s;e;e;d;n;n;e;e;d;e;se;n;n;u;s;se;d;n;w;w;s;enter portal;w;nw;n;u;s;se;ne;n;d;n;w;n;d;w;n;d;w;n;n;e;d;w;s;s;w;u;w;w;enter portal;w;n;n;e;e;d;s;s;e;e;d;s;w;n;d;n;ne;e;e;e;se;se;e;e;ne;e}
+#var {bot[path]} {s;w;d;s;se;ne;n;u;w;s;w;s;e;e;d;n;n;e;e;d;e;se;n;n;u;s;se;d;n;w;w;s;enter portal;w;nw;n;u;s;se;ne;n;d;n;w;n;d;w;n;d;w;n;n;e;d;w;s;s;w;u;w;w;enter portal;w;n;n;e;e;d;s;s;e;e;d;s;w;n;d;n;ne;e;e;e;se;se;e;e;ne;e;.sz_finish}
 
 #list botmobs clear;
 #list botmobs add {{{long} {Galga} {target} {galga}}};
@@ -30,3 +30,7 @@ touch angel rune;
 
 #class {bot} {close}
 #read common/bot/generic.tin;
+
+#NOP -- .sz_bot_enter (common/areas/sectionz.tin) runs just after the bot starts, before it takes a step. In a;
+#NOP -- room on this path it carries on from there, anywhere else it gets you in first (section 40);
+#delay {0} {.sz_bot_enter 40};

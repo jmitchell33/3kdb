@@ -84,12 +84,24 @@
 	#echo {hidemap / showmap - hide the map for more side panel room, or bring it back};
 };
 
+#NOP -- Inside the Section Z game the walk out starts with pause game, which doesn't work in a fight, and the;
+#NOP -- rest of the walk would go from the wrong room. So in a fight there, go waits until it is over (the;
+#NOP -- arcade 24785 and title screen 24786 are outside the game);
 #alias {go} {
     #if {$bloodarc_active} {
         #echo {<cfb>   BLOODARC IS ACTIVE!    <088>};
         #var bloodarc_active 0;
     } {
         #if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
+        #map get roomarea go_area;
+        #map get roomvnum go_vnum;
+        #if {"$go_area" == "Section Z" && "$go_vnum" != "24785" && "$go_vnum" != "24786" && "$incombat" == "1"} {
+            #echo {<cfb>In a fight inside Section Z, go %1 runs once it is over.<088>};
+            #var go_wait {%1};
+            #var go_wait_ticks 0;
+            #delay {go_szwait} {.go_szwait} {1};
+            #return;
+        };
         #map get roomvnum go_back;
         #var roomfound 0;
 		#loop 1 &speedruns_name[] tmpItem {
@@ -101,6 +113,20 @@
 		};
         #if !$roomfound {#echo {Unable to find %1}};
     };
+};
+
+#NOP -- go waiting out a fight inside Section Z, gives up after 3 minutes;
+#alias {.go_szwait} {
+    #if {"$incombat" != "1"} {
+        go $go_wait;
+        #return;
+    };
+    #math go_wait_ticks {$go_wait_ticks + 1};
+    #if {$go_wait_ticks > 180} {
+        #echo {<faa>Still fighting after 3 minutes, go $go_wait cancelled.<088>};
+        #return;
+    };
+    #delay {go_szwait} {.go_szwait} {1};
 };
 
 #NOP -- Slowwalks based on getting new rooms;
@@ -348,7 +374,7 @@
 #action {^You touch the beacon, and a friendly ship belonging to The Vigilant swings by.} {#map goto 10278} {2};
 
 #NOP Chaos Sewers;
-#action {You lose your footing and wind up flat on your butt!} {mapUndo} {2};
+#action {You lose your footing and wind up flat on your butt!} {.mapSlip} {2};
 
 #NOP Catacombs;
 #action {The ancient statue comes to life and bars your path.} {mapUndo} {2};
@@ -383,6 +409,13 @@
 #action {^As you near the crystal matrix, the blue aura surrounding it} {mapUndo} {2};
 
 
+
+#NOP Land of the Ice People, carrying too much makes a move fail on the ice;
+#action {^Carrying all that stuff, you lose your balance and slip and fall on the ice.} {
+	#if {$bot[walk]} {
+		.mapSlip;
+	};
+} {2};
 
 #action {^You begin climbing up, but soon slip on a patch of ice and plummet} {
 	#map goto 37520;
@@ -511,6 +544,32 @@
 	};
 };
 
+
+#NOP -- A slip stops a move by chance, so unlike a blocked exit it shouldn't count towards BOT BLOCKED after;
+#NOP -- 5 tries. Step back, wait a second and try again, and only pause after 20 slips on the same step.;
+#NOP -- With the bot paused (a walk back or walk out) it is a plain mapUndo;
+#alias {.mapSlip} {
+	#if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
+		#map undo;
+		#math bot[step] {$bot[step] - 1};
+		#if {"$bot[slip][step]" == "$bot[step]"} {
+			#math bot[slip][count] {$bot[slip][count] + 1};
+		} {
+			#var bot[slip][step] $bot[step];
+			#var bot[slip][count] 1;
+		};
+		#if {$bot[slip][count] > 20} {
+			#echo {<faa>BOT SLIPPED 20 TIMES AT STEP $bot[step] - PAUSED<088>};
+			#var bot[slip][count] 0;
+			.pause;
+		} {
+			#var bot[walk] 0;
+			#delay {botSlip} {#if {!$incombat} {.bot}} {1};
+		};
+	} {
+		mapUndo;
+	};
+};
 
 /* Blocked Exits */
 #action {^You cannot go } {
