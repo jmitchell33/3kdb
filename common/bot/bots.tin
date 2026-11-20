@@ -2,6 +2,7 @@
 #class {botlist} {open}
 
 #read common/bot/bot_cycle.tin;
+#read common/bot/bot_findstep.tin;
 
 #alias {.resume} {
     #if {"$lastBot[area]" == "Section Z"} {
@@ -20,6 +21,22 @@
 
 
 
+#NOP -- Walk to the bot's start room. The map can't walk into the Chaos Sewers, and from outside the sewers;
+#NOP -- bot goes in through the bowl itself (common/areas/chaos_sewers.tin), so there's no walk to try.;
+#NOP -- The Section Z bots (but sectionz-arcade) get in themselves (common/areas/sectionz.tin): a map walk;
+#NOP -- from inside the game goes through pause game, which fails in a fight, and 20 and 40 need the code;
+#alias {.bot_run_start} {
+    #map get roomarea bot_start_area {$bot[start_vnum]};
+    #map get roomarea bot_here_area;
+    #if {"$bot_start_area" == "Chaotic Sewers" && "$bot_here_area" != "Chaotic Sewers"} {
+        #return;
+    };
+    #if {"$bot[alias]" == "sectionz" || "$bot[alias]" == "sectionz-fast" || "$bot[alias]" == "sectionz-20" || "$bot[alias]" == "sectionz-40"} {
+        #return;
+    };
+    #map run $bot[start_vnum];
+};
+
 #alias {+%1} {
     #NOP -- This assumes your 3k location and the map location are in sync;
     
@@ -31,7 +48,7 @@
             #var bot[playercheck] $botlist_playercheck[$index];
             #var bot[start_vnum] $botlist_start_vnum[$index];
             #var bot[file] $botlist_file[$index];
-            #map run $bot[start_vnum];
+            .bot_run_start;
         };
     };
     
@@ -48,7 +65,7 @@
     #var bot[alias] %1;
 
     #macro {1} {
-        #map run $bot[start_vnum];
+        .bot_run_start;
         #delay {bot_start} {
             #read common/bot/bots/$bot[file].tin;
             update_xp start;
@@ -105,7 +122,7 @@
         #unmacro {3};
     } {
         #if $cycle {
-            #map run $bot[start_vnum];
+            .bot_run_start;
             #delay {bot_start} {
                 #read common/bot/bots/$bot[file].tin;
                 update_xp start;

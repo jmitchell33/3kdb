@@ -24,7 +24,18 @@
     };
     #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
         get corpse;
+        get all from corpse;
         cooler corpse;
+    };
+};
+
+#NOP -- how many bags gypsyid empties and fills;
+#alias {bagset} {
+    #if {"%0" != ""} {
+        #var bagcount %0;
+        #echo {<ffa>BAG COUNT SET TO %0<088>};
+    } {
+        #echo {<faa>NO USER INPUT!<088>};
     };
 };
 
@@ -41,11 +52,55 @@
     corpsetrig-on;
 };
 
+#NOP -- corpsetrig for sewers: grabs only listed ground loot instead of getAll;
+#alias {mycorpsetrig-sewers} {
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ divvy;
+    corpsetrig+ glance;
+    corpsetrig+ delay;
+    corpsetrig+ lootGrab;
+    corpsetrig+ crafting;
+    corpsetrig-on;
+};
+
 #NOP -- fail's 3kdb aliases;
+#NOP -- One alias per line: the name, then its description word wrapped at 70 characters. Lines after the;
+#NOP -- first start with spaces so they line up under the description, not at the left edge of the screen;
 #alias {format_failsaliases} {
     #format {failalias_name} {%-25s} {<cff>%1<088>};
-    #format {failalias_desc} {%-30s} {<deb>%2<088>};
-    #showme $failalias_name $failalias_desc;
+    #format {failalias_pad} {%-25s} {};
+    #var failalias_text {%2};
+    #replace {failalias_text} { } {;};
+    #list failalias_words create {$failalias_text};
+    #var failalias_line {};
+    #var failalias_first 1;
+    #foreach {$failalias_words[%*]} {failalias_word} {
+        #format failalias_len {%L} {$failalias_line $failalias_word};
+        #if {"$failalias_line" != "" && $failalias_len > 70} {
+            #if {$failalias_first} {
+                #showme {$failalias_name <deb>$failalias_line<088>};
+                #var failalias_first 0;
+            } {
+                #showme {$failalias_pad <deb>$failalias_line<088>};
+            };
+            #var failalias_line {$failalias_word};
+        };
+        #elseif {"$failalias_line" == ""} {
+            #var failalias_line {$failalias_word};
+        };
+        #else {
+            #var failalias_line {$failalias_line $failalias_word};
+        };
+    };
+    #if {$failalias_first} {
+        #showme {$failalias_name <deb>$failalias_line<088>};
+    } {
+        #showme {$failalias_pad <deb>$failalias_line<088>};
+    };
 };
 
 #NOP -- filter types, listed in the help and matched by the first letters (ar finds areas);
@@ -109,7 +164,29 @@
 #list fail3kdb add {{{name} {wa} {type} {misc} {desc} {map run to vnum or name}}};
 #list fail3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
 #list fail3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
+#list fail3kdb add {{{name} {gypsyid} {type} {misc} {desc} {Identify the bags at the town gypsy, keep potions of experience, bag them again}}};
+#list fail3kdb add {{{name} {gypsyid-stop} {type} {misc} {desc} {Stop gypsyid}}};
+#list fail3kdb add {{{name} {bagcount} {type} {misc} {desc} {Count your bags and bagset the total (drops, gets and keeps the satchel first)}}};
+#list fail3kdb add {{{name} {abagson} {type} {misc} {desc} {Bag count at login on}}};
+#list fail3kdb add {{{name} {abagsoff} {type} {misc} {desc} {Bag count at login off}}};
 
 .add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
 
+#NOP -- Items that can't be dropped (the Section Z barrier shield and High Score Button) answer every;
+#NOP -- put all in bag with "You can not drop that.", once per item per bag. Hide that line for a few seconds;
+#NOP -- while bagging, it still shows any other time;
+#alias {.bag_gag} {
+    #class {bag_gag} {kill};
+    #class {bag_gag} {open};
+    #gag {^You can not drop that.$};
+    #class {bag_gag} {close};
+    #delay {bag_gag} {#class {bag_gag} {kill}} {4};
+};
+
 #class {player_aliases} {close};
+
+#NOP -- gypsyid: identify the bags at the town gypsy, see gypsyid.tin;
+#read chars/$user/gypsyid.tin;
+
+#NOP -- bagcount: count the bags and bagset, see bagcount.tin;
+#read chars/$user/bagcount.tin;

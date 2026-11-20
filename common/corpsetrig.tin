@@ -463,16 +463,18 @@
 #list corpseList add {{{name} {aoe} {guild} {all} {action} {immolate corpse} {active} {0} {description} {AOE Armor: Immolate Corpse}}};
 #list corpseList add {{{name} {divvy} {guild} {all} {action} {divvy gold} {active} {0} {description} {Gold: Divvy gold}}};
 #list corpseList add {{{name} {coins} {guild} {all} {action} {get coins from corpse;get coins} {active} {0} {description} {Gold: Get coins from corpse}}};
-#list corpseList add {{{name} {delay} {guild} {all} {action} {#NOP} {active} {0} {description} {2 Second Delay}}};
-#list corpseList add {{{name} {delay5} {guild} {all} {action} {#NOP} {active} {0} {description} {5 Second Delay - (offline)}}};
-#list corpseList add {{{name} {delay10} {guild} {all} {action} {#NOP} {active} {0} {description} {10 Second Delay (offline)}}};
+#list corpseList add {{{name} {delay} {guild} {all} {action} {#NOP} {active} {0} {description} {2 Second Delay: pauses the bot, the actions after it run 2 seconds later}}};
+#list corpseList add {{{name} {delay5} {guild} {all} {action} {#NOP} {active} {0} {description} {5 Second Delay: pauses the bot, the actions after it run 5 seconds later}}};
+#list corpseList add {{{name} {delay10} {guild} {all} {action} {#NOP} {active} {0} {description} {10 Second Delay: pauses the bot, the actions after it run 10 seconds later}}};
 #list corpseList add {{{name} {wrap} {guild} {all} {action} {wrap remains} {active} {0} {description} {Coffin: Wrap Corpse}}};
 #list corpseList add {{{name} {slab} {guild} {all} {action} {slab remains} {active} {0} {description} {Freezer: Slab Corpse}}};
-#list corpseList add {{{name} {cooler} {guild} {all} {action} {#if {$$corpses[cooler] < 50} {unwrap;get corpse;cooler corpse;wrap remains}} {active} {0} {description} {Cooler: Rotates to Cooler}}};
+#list corpseList add {{{name} {cooler} {guild} {all} {action} {#if {$$corpses[cooler] < 50} {unwrap;get corpse;.cooler_get_all;cooler corpse;wrap remains}} {active} {0} {description} {Cooler: Rotates to Cooler}}};
 #list corpseList add {{{name} {szCaps} {guild} {all} {action} {swallow blue capsule;swallow orange capsule} {active} {0} {description} {SZ: Eat Blue/Orange Capsules}}};
 #list corpseList add {{{name} {szGreenCap} {guild} {all} {action} {swallow green capsule} {active} {0} {description} {SZ: Eat Green Capsule}}};
 #list corpseList add {{{name} {crafting} {guild} {all} {action} {stash all;keep all component} {active} {0} {description} {Crafting: Stash All & Keep All Components}}};
 #list corpseList add {{{name} {getAll} {guild} {all} {action} {get all} {active} {0} {description} {Get all}}};
+#list corpseList add {{{name} {glance} {guild} {all} {action} {glance} {active} {0} {description} {Glance: show the room again so lootGrab sees what dropped}}};
+#list corpseList add {{{name} {lootGrab} {guild} {all} {action} {.lootgrab} {active} {0} {description} {Get listed ground loot (common/itemlist.tin), never bags or the black stone}}};
 #list corpseList add {{{name} {collector} {guild} {all} {action} {#loop 10 1 i {put all in bag $i}} {active} {0} {description} {Collector: Put all in bags (10 bags)}}};
 #list corpseList add {{{name} {hoarder} {guild} {all} {action} {#loop 20 1 i {put all in bag $i}} {active} {0} {description} {Hoarder: Put all in bags (20 bags)}}};
 #list corpseList add {{{name} {spoon} {guild} {all} {action} {eat corpse} {active} {0} {description} {Spoon: Eat Corpse}}};
@@ -549,34 +551,54 @@
 #list corpseList indexate name;
 
 
+#NOP -- delay, delay5 and delay10 pause the bot and run the rest of the list 2, 5 or 10 seconds later. A list can;
+#NOP -- have more than one. The wait is the named delay corpse_trig_delay, so a new kill starts its own list;
+#NOP -- over instead of stacking another one. A bot paused by someone else is left paused;
+#var corpseDelaySecs {{delay}{2}{delay5}{5}{delay10}{10}};
+#var pauseCorpseActionBot 0;
+#var corpseTrigDelayed 0;
+
 #alias corpse_trig {
     #if $corpsetrigStatus {
         #if {&corpseActions[] > 0} {
-            #loop 1 &corpseActions[] item {
-                #if {"$corpseActions[$item][name]" == "delay"} {
-                    #if {$bot[active]} {
-                        #NOP -- If the bot has already been paused, note that and don't unpause automatically after delay;
-                        #if !$bot[paused] {#var pauseCorpseActionBot 1;.pause};
-                    };
-                    #var pauseCorpseAction 1;
-                    #var lastItem $item;
-                    #math nextItem {$item + 1};
-                    #break;
-                } {
-                    $corpseActions[$item][action];
+            #undelay {corpse_trig_delay};
+            #var corpseTrigDelayed 0;
+            .corpse_trig_from 1;
+        };
+    };
+};
+
+#NOP -- .corpse_trig_from <n>: run the list from action n, stopping at the next delay;
+#alias {.corpse_trig_from} {
+    #var corpseTrigNext 0;
+    #if {%1 <= &corpseActions[]} {
+        #loop %1 &corpseActions[] item {
+            #var corpseTrigName {$corpseActions[$item][name]};
+            #if {"$corpseDelaySecs[$corpseTrigName]" != ""} {
+                #if {$bot[active] && !$bot[paused]} {
+                    #var pauseCorpseActionBot 1;
+                    .pause;
                 };
+                #var corpseTrigDelayed 1;
+                #math corpseTrigNext {$item + 1};
+                #var corpseTrigWait $corpseDelaySecs[$corpseTrigName];
+                #break;
             };
-            #if {$pauseCorpseAction} {
-                #delay 2 {
-                    #loop $nextItem &corpseActions[] item {
-                        $corpseActions[$item][action];
-                    };
-                    #if {$bot[active]} {
-                        #if $pauseCorpseActionBot {.unpause;#var pauseCorpseActionBot 0};
-                        .bot
-                    };
-                };
-            };
+            $corpseActions[$item][action];
+        };
+    };
+    #if {$corpseTrigNext} {
+        #delay {corpse_trig_delay} {.corpse_trig_from $corpseTrigNext} {$corpseTrigWait};
+    };
+    #elseif {$corpseTrigDelayed} {
+        #NOP -- the list is done after a delay, so hand the bot back;
+        #var corpseTrigDelayed 0;
+        #if {$pauseCorpseActionBot} {
+            #var pauseCorpseActionBot 0;
+            .unpause;
+        };
+        #if {$bot[active]} {
+            .bot;
         };
     };
 };

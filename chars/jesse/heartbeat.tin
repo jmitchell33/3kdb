@@ -20,6 +20,25 @@
 #var jdonate[timeout] 45;
 #NOP -- heartbeats between looks while waiting for corpses on the crypt floor to go (about 30 seconds);
 #var jdonate[recheck] 15;
+#NOP -- bags full trip to the gypsy and the necro box, agypsyon and agypsyoff in aliases.tin turn it on and off;
+#var jdonate[gypsy_on] 1;
+#NOP -- reagent trip: any reagent on the hpbar at 0 pauses the bot for topup at necro_reagent and back.;
+#NOP -- areagon and areagoff in aliases.tin turn it on and off. It waits reag_wait seconds before trying;
+#NOP -- again, so a topup that can't buy (no coins) doesn't loop;
+#var jdonate[reag_on] 1;
+#var jdonate[reag_wait] 600;
+#var jdonate[reag_last] 0;
+#NOP -- coin trip: carrying coin_max or more pauses the bot to deposit down to coin_keep at the bank and back.;
+#NOP -- acoinson and acoinsoff in aliases.tin turn it on and off. Waits coin_wait seconds between tries;
+#var jdonate[coin_on] 1;
+#var jdonate[coin_max] 1000000;
+#var jdonate[coin_keep] 50000;
+#var jdonate[coin_wait] 600;
+#var jdonate[coin_last] 0;
+#NOP -- what wait_fight leads to: empty for a corpse donate, gypsy for full bags;
+#var jdonate[next] {};
+#NOP -- 1 once the zodiac hold has said what is waiting;
+#var jdonate[zod_noted] 0;
 
 #NOP -- the coffin max is learned from "The coffin is full!" (modules/corpsemanager), the freezer and cooler hold 50;
 #alias {.jdonate_check_full} {
@@ -44,6 +63,8 @@
 
 #alias {.jdonate_start} {
     .pause;
+    #NOP -- a failed move on the way runs mapUndo, which also takes one off the bot step, so keep it;
+    #var jdonate[bot_step] $bot[step];
     #var jdonate[state] wait_fight;
     #var jdonate[calm] 0;
     #var jdonate[tries] 0;
@@ -59,12 +80,187 @@
     };
 };
 
+#NOP -- Head back to the room in go_back where the bot paused. The Chaos Sewers can't be walked into, so;
+#NOP -- that goes in through the bowl with .sewers_in (common/areas/chaos_sewers.tin). Used after donating;
+#NOP -- and after gypsyid;
+#alias {.jdonate_go_back} {
+    #var jdonate[back_area] {};
+    #map get roomarea jdonate[back_area] $go_back;
+    #var jdonate[timer] 0;
+    #if {"$jdonate[back_area]" == "Chaotic Sewers"} {
+        .jdonate_echo {going back into the Chaos Sewers through the bowl.};
+        #var jdonate[state] sewers_in;
+        .sewers_in {$go_back} {.jdonate_back_done};
+    };
+    #elseif {"$jdonate[back_area]" == "Section Z" && "$go_back" != "$gid[sz_arcade]" && "$go_back" != "$gid[sz_title]"} {
+        #NOP -- the bot paused inside the Section Z game, which .gid_go left with pause game, so go to the;
+        #NOP -- title screen and unpause game, which puts you back in that room;
+        .jdonate_echo {going back into Section Z to unpause the game.};
+        #var jdonate[state] to_sz;
+        #var jdonate[back] $go_back;
+        go sz;
+        #var go_back $jdonate[back];
+    };
+    #else {
+        #var jdonate[state] to_back;
+        go_back;
+    };
+};
+
+#NOP -- 1 while the room is the Section Z title screen;
+#function {jdonate_at_title} {
+    #var result 0;
+    #regex {$room_short} {title screen} {#var result 1};
+};
+
+#NOP -- Back in the room where the bot paused;
+#alias {.jdonate_back_done} {
+    #var jdonate[state] idle;
+    #var bot[step] $jdonate[bot_step];
+    .jdonate_pickup_spill;
+    .jdonate_echo {done, back where the bot paused. Resuming.};
+    ..;
+};
+
+#NOP -- gypsyid (gypsyid.tin) runs this at the end of a bags full trip;
+#alias {.jdonate_after_gypsy} {
+    #unvar gypsyid_return;
+    #unvar gypsyid_after;
+    #var jdonate[next] {};
+    .jdonate_go_back;
+};
+
+#NOP -- 1 when reag_wait seconds have passed since the last reagent trip started;
+#function {jdonate_reag_ready} {
+    #format jdonate_now {%T};
+    #if {$jdonate_now - $jdonate[reag_last] >= $jdonate[reag_wait]} {
+        #return 1;
+    };
+    #return 0;
+};
+
+#NOP -- Back in the bot's room after a coin trip started by a spill: the coins are still on the floor here;
+#alias {.jdonate_pickup_spill} {
+    #if {"$coins_spilled" == "1"} {
+        #var coins_spilled 0;
+        get coins;
+    };
+};
+
+#NOP -- 1 when coin_wait seconds have passed since the last coin trip started;
+#function {jdonate_coin_ready} {
+    #format jdonate_now {%T};
+    #if {$jdonate_now - $jdonate[coin_last] >= $jdonate[coin_wait]} {
+        #return 1;
+    };
+    #return 0;
+};
+
+#NOP -- At the bank: get a fresh coin count, then deposit everything above coin_keep;
+#alias {.jdonate_bank_at} {
+    _status_coins;
+    .gid_sync .jdonate_bank_deposit;
+};
+
+#alias {.jdonate_bank_deposit} {
+    #var gid[state] idle;
+    #NOP -- 100 more stays for the deposit fee, so you end at coin_keep or a little over;
+    #math jdonate[coin_amount] {$my[coins] - $jdonate[coin_keep] - 100};
+    #if {$jdonate[coin_amount] > 0} {
+        .jdonate_echo {depositing $jdonate[coin_amount], keeping $jdonate[coin_keep].};
+        deposit $jdonate[coin_amount];
+        _status_coins;
+    };
+    #var go_back $jdonate[coin_back];
+    #var jdonate[state] coin_done;
+    #var jdonate[wait] 2;
+};
+
+#NOP -- jdonate[reag_out] is 1 when any reagent on the hpbar is at 0;
+#alias {.jdonate_reag_check} {
+    #var jdonate[reag_out] 0;
+    #foreach {*my[necromancer][reagent][]} {jdonate_reag} {
+        #if {"$my[necromancer][reagent][$jdonate_reag]" == "0"} {
+            #var jdonate[reag_out] 1;
+        };
+    };
+};
+
+#NOP -- At the reagent room: topup buys what is missing once its list comes in, then head back to the bot;
+#alias {.jdonate_reag_shop} {
+    #var gid[state] idle;
+    topup;
+    #NOP -- topup walks with go too, which saves go_back, so put the bot's room back;
+    #var go_back $jdonate[reag_back];
+    #var jdonate[state] reag_buying;
+    #var jdonate[wait] 3;
+};
+
+#NOP -- No trips while a zodiac bot runs (common/bot/bots/czodiacs*.tin). The walks there fail: a level can't be;
+#NOP -- left while celestials are alive, the portal and rift rooms are only left with portal or fracture, and the;
+#NOP -- doors need keys. The stepper's portal and mimic delays would also unpause the bot while you're away. So;
+#NOP -- say once what is waiting, and the trip starts at the first heartbeat of the next bot;
+#alias {.jdonate_zodiac_hold} {
+    #var jdonate[zod_want] {};
+    #if {$jdonate[on] && $jdonate[full]} {
+        #var jdonate[zod_want] {$jdonate[zod_want] corpses};
+    };
+    #if {$jdonate[coin_on] && ("$coins_spilled" == "1" || $my[coins] >= $jdonate[coin_max])} {
+        #var jdonate[zod_want] {$jdonate[zod_want] coins};
+    };
+    #if {$jdonate[reag_on] && $jdonate[reag_out]} {
+        #var jdonate[zod_want] {$jdonate[zod_want] reagents};
+    };
+    #if {$jdonate[gypsy_on] && "$gid[bags_full]" == "1"} {
+        #var jdonate[zod_want] {$jdonate[zod_want] bags};
+    };
+    #if {"$jdonate[zod_want]" != "" && "$jdonate[zod_noted]" != "1"} {
+        #var jdonate[zod_noted] 1;
+        #format jdonate[zod_want] {%p} {$jdonate[zod_want]};
+        .jdonate_echo {in the Celestial Zodiacs, holding the trip ($jdonate[zod_want]) until the zodiac bot is done.};
+    };
+};
+
 #alias {.jdonate_tick} {
     #if {"$jdonate[state]" == "idle"} {
-        #if {$jdonate[on] && "$bot[active]" == "1" && "$bot[paused]" != "1"} {
+        #NOP -- one trip at a time: corpse donate, then reagents, then full bags. Each has its own on/off;
+        #if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
             .jdonate_check_full;
-            #if {$jdonate[full]} {
+            .jdonate_reag_check;
+            #if {"$area" == "Celestial Zodiacs"} {
+                .jdonate_zodiac_hold;
+                #return;
+            };
+            #var jdonate[zod_noted] 0;
+            #if {$jdonate[on] && $jdonate[full]} {
                 .jdonate_start;
+            };
+            #elseif {$jdonate[coin_on] && "$gid[state]" == "idle" && ("$coins_spilled" == "1" || ($my[coins] >= $jdonate[coin_max] && @jdonate_coin_ready{}))} {
+                .pause;
+                #var jdonate[bot_step] $bot[step];
+                #var jdonate[state] wait_fight;
+                #var jdonate[calm] 0;
+                #var jdonate[next] coins;
+                #format jdonate[coin_last] {%T};
+                .jdonate_echo {$my[coins] coins on you. Bot paused, going to the bank once the fight is over.};
+            };
+            #elseif {$jdonate[reag_on] && $jdonate[reag_out] && "$gid[state]" == "idle" && @jdonate_reag_ready{}} {
+                .pause;
+                #var jdonate[bot_step] $bot[step];
+                #var jdonate[state] wait_fight;
+                #var jdonate[calm] 0;
+                #var jdonate[next] reagent;
+                #format jdonate[reag_last] {%T};
+                .jdonate_echo {out of a reagent. Bot paused, going to topup once the fight is over.};
+            };
+            #elseif {$jdonate[gypsy_on] && "$gid[bags_full]" == "1" && "$gid[state]" == "idle"} {
+                #NOP -- bags full (gypsyid.tin spots it during bag1): pause, then gypsyid once the fight is over;
+                .pause;
+                #var jdonate[bot_step] $bot[step];
+                #var jdonate[state] wait_fight;
+                #var jdonate[calm] 0;
+                #var jdonate[next] gypsy;
+                .jdonate_echo {bags are full. Bot paused, going to the gypsy once the fight is over.};
             };
         };
     };
@@ -88,10 +284,71 @@
                 } {
                     #math jdonate[calm] {$jdonate[calm] + 1};
                 };
-                #if {$jdonate[calm] >= 2} {
+                #if {$jdonate[calm] >= 2 && "$jdonate[next]" == "gypsy"} {
+                    #var jdonate[state] gypsy;
+                    #var gypsyid_after {.jesse_box};
+                    #var gypsyid_return {.jdonate_after_gypsy};
+                    gypsyid;
+                };
+                #elseif {$jdonate[calm] >= 2 && "$jdonate[next]" == "coins"} {
+                    #var jdonate[state] coin_trip;
+                    #map get roomvnum jdonate[coin_back];
+                    #var go_back $jdonate[coin_back];
+                    #var gid[state] coins;
+                    .gid_go bank;
+                    .gid_walk $gid[bank] .jdonate_bank_at;
+                };
+                #elseif {$jdonate[calm] >= 2 && "$jdonate[next]" == "reagent"} {
+                    #var jdonate[state] reagent;
+                    #map get roomvnum jdonate[reag_back];
+                    #var go_back $jdonate[reag_back];
+                    #NOP -- .gid_go and .gid_walk (gypsyid.tin) walk out of the sewers safely and check the room;
+                    #var gid[state] reagent;
+                    .gid_go necro_reagent;
+                    .gid_walk 7621 .jdonate_reag_shop;
+                };
+                #elseif {$jdonate[calm] >= 2} {
                     #var jdonate[state] to_crypt;
                     #var jdonate[timer] 0;
-                    go necro_corpse;
+                    #NOP -- .gid_go (gypsyid.tin) walks out of the Chaos Sewers a step at a time first, a speedwalk;
+                    #NOP -- breaks there on a slip. It keeps go_back, so set it to the bot's room here;
+                    #map get roomvnum go_back;
+                    .gid_go necro_corpse;
+                };
+            };
+            #case {"coin_trip"} {
+                #NOP -- .gid_walk drives the walk, idle here before coin_done means it stopped;
+                #if {"$gid[state]" == "idle"} {
+                    #var jdonate[next] {};
+                    .jdonate_abort {never reached the bank};
+                };
+            };
+            #case {"coin_done"} {
+                #var jdonate[next] {};
+                .jdonate_echo {$my[coins] coins on you, going back.};
+                #var go_back $jdonate[coin_back];
+                .jdonate_go_back;
+            };
+            #case {"reagent"} {
+                #NOP -- the walk is driven by .gid_walk, idle here before reag_buying means it stopped;
+                #if {"$gid[state]" == "idle"} {
+                    #var jdonate[next] {};
+                    .jdonate_abort {never reached the reagent room};
+                };
+            };
+            #case {"reag_buying"} {
+                #var jdonate[next] {};
+                .jdonate_echo {reagents bought, going back.};
+                #var go_back $jdonate[reag_back];
+                .jdonate_go_back;
+            };
+            #case {"gypsy"} {
+                #NOP -- gypsyid ends by running .jdonate_after_gypsy, so idle here means it stopped part way;
+                #if {"$gid[state]" == "idle"} {
+                    #unvar gypsyid_return;
+                    #unvar gypsyid_after;
+                    #var jdonate[next] {};
+                    .jdonate_abort {gypsyid stopped};
                 };
             };
             #case {"to_crypt"} {
@@ -100,7 +357,10 @@
                     #var jdonate[wait] 1;
                     look;
                 } {
-                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #NOP -- the step walk out of the sewers doesn't count towards the timeout;
+                    #if {"$gid[out]" != "1"} {
+                        #math jdonate[timer] {$jdonate[timer] + 1};
+                    };
                     #if {$jdonate[timer] > $jdonate[timeout]} {
                         .jdonate_abort {never reached the corpse crypt};
                     };
@@ -171,16 +431,54 @@
                     #if {$jdonate[corpse_left]} {
                         .jdonate_echo {<faa>corpses are still on the ground after 3 tries, going back anyway.<088>};
                     };
-                    #var jdonate[state] to_back;
+                    .jdonate_go_back;
+                };
+            };
+            #case {"sewers_in"} {
+                #NOP -- .sewers_in runs .jdonate_back_done at the end, so idle here means it stopped part way;
+                #if {"$sewin[state]" == "idle"} {
+                    .jdonate_abort {could not get back into the sewers};
+                };
+            };
+            #case {"to_sz"} {
+                #NOP -- the map moves as soon as the speedwalk is sent, so the room title has to be there too;
+                #var jdonate[at_title] 0;
+                #if {"$jdonate[vnum]" == "$gid[sz_title]"} {
+                    #regex {$room_short} {title screen} {#var jdonate[at_title] 1};
+                };
+                #if {$jdonate[at_title]} {
+                    #var jdonate[state] sz_unpause;
                     #var jdonate[timer] 0;
-                    go_back;
+                    #var room[updated] 0;
+                    unpause game;
+                } {
+                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #if {$jdonate[timer] > $jdonate[timeout]} {
+                        .jdonate_abort {never reached the Section Z title screen};
+                    };
+                };
+            };
+            #case {"sz_unpause"} {
+                #NOP -- unpause game puts you back where you paused, the map doesn't follow, so check the room;
+                #NOP -- name before moving the map there;
+                #if {$room[updated] && "$room_short" != "" && !@jdonate_at_title{}} {
+                    #map get roomname jdonate[sz_name] {$go_back};
+                    #if {"@gid_base{$room_short}" == "@gid_base{$jdonate[sz_name]}"} {
+                        #map goto {$go_back};
+                        .jdonate_back_done;
+                    } {
+                        .jdonate_abort {unpaused into @gid_base{$room_short}, not @gid_base{$jdonate[sz_name]} where the bot paused};
+                    };
+                } {
+                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #if {$jdonate[timer] > 5} {
+                        .jdonate_abort {unpause game didn't put you back in Section Z};
+                    };
                 };
             };
             #case {"to_back"} {
                 #if {"$jdonate[vnum]" == "$go_back"} {
-                    #var jdonate[state] idle;
-                    .jdonate_echo {done, back where the bot paused. Resuming.};
-                    ..;
+                    .jdonate_back_done;
                 } {
                     #math jdonate[timer] {$jdonate[timer] + 1};
                     #if {$jdonate[timer] > $jdonate[timeout]} {

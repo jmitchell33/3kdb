@@ -71,7 +71,11 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [My bot stopped and I don't know why](#my-bot-stopped-and-i-dont-know-why)
   - [The bot wants me to press 1, 2 or 3](#the-bot-wants-me-to-press-1-2-or-3)
   - [The bot walked the wrong way](#the-bot-walked-the-wrong-way)
+  - [How do I choose what happens after a kill?](#how-do-i-choose-what-happens-after-a-kill)
+  - [The bot walks past mobs without fighting them](#the-bot-walks-past-mobs-without-fighting-them)
   - [Can I run several bots in a row?](#can-i-run-several-bots-in-a-row)
+  - [How do I bot the Chaos Sewers?](#how-do-i-bot-the-chaos-sewers)
+  - [The Section Z bot says I'm out of continues](#the-section-z-bot-says-im-out-of-continues)
   - [What's the deadman timer?](#whats-the-deadman-timer)
   - [My bot paused and it says DEADMAN TIMEOUT](#my-bot-paused-and-it-says-deadman-timeout)
   - [Can I make a timer that stops me going idle?](#can-i-make-a-timer-that-stops-me-going-idle)
@@ -498,9 +502,25 @@ You aren't in its start room. Press **1** to run there, **2** if you're in the r
 
 The map probably doesn't match where you are. Pause the bot, then run `findhere`.
 
+### How do I choose what happens after a kill?
+
+Corpse actions run after each kill, such as wrapping the corpse, picking up loot or bagging it. `corpsetrig-all` shows your list and every action you can add, and `corpsetrig+ <name>` adds one. See [Corpse actions](manual.md#corpse-actions).
+
+### The bot walks past mobs without fighting them
+
+There are a few reasons. The mob may not be on that bot's target list, or your map may not match where you are (run `findhere`). On a laggy connection the bot can also move on before the game has caught up after a kill. If lag is the cause, add a delay to your corpse actions, such as `corpsetrig+ delay` (2 seconds), `delay5` or `delay10`. See [Corpse actions](manual.md#corpse-actions).
+
 ### Can I run several bots in a row?
 
 Yes, with the bot cycler. See [Run several areas in a row](manual.md#run-several-areas-in-a-row).
+
+### How do I bot the Chaos Sewers?
+
+The map can't walk into the sewers, so `+sewers` takes you in through the bowl first, works out where you landed, walks to the start room and starts. It works from anywhere, and in the bot cycler. `sewers-in` does the same without starting the bot.
+
+### The Section Z bot says I'm out of continues
+
+`+sectionz-20` and `+sectionz-40` start with a continue code, and each new run uses one continue. `tagcheck` shows how many you have left. With none left the bot stops, or the cycler moves on to the next area. `+sectionz`, `+sectionz-fast` and `+sectionz-arcade` don't need continues. If a run stops partway, start the same bot again: it carries on from the room you're in, or unpauses back to where you last paused (even after a disconnect), without using a continue. It only uses one when you're somewhere off its path.
 
 ### What's the deadman timer?
 

@@ -26,3 +26,11 @@
 
 #class {bot} {close}
 #read common/bot/generic.tin;
+
+#NOP -- The map can't walk into the sewers, so started anywhere else the bot waits while .sewers_bot_enter;
+#NOP -- (common/areas/chaos_sewers.tin) goes in through the bowl and walks to the start room. It runs just;
+#NOP -- after the bot starts, so the bot never takes a step out here;
+#map get roomarea sewers_start_area;
+#if {"$sewers_start_area" != "Chaotic Sewers"} {
+    #delay {0} {.sewers_bot_enter};
+};

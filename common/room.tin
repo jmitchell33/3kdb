@@ -161,20 +161,7 @@
 
     #if {$bot[active] && !$bot[paused] && $bot[walk]} {
         #if {$collector[items]} {
-            #foreach $item_grab_list[%*] item {
-                #regexp {"$item_long"} {$item[long]} {
-                    #$item_number get $item[target];
-                    #if {"$guild" == "bard"} {
-                        identify $item[target];
-                    };
-                    #if {"$guild" == "priest"} {
-                        recognize $item[target];
-                    };
-                    #if {"$item[target]" == "bag"} {
-                        #loop 2 20 i {put bag in bag $i};
-                    };
-                };
-            };
+            .item_grab {$item_number} {$item_long};
         };
     };
 
