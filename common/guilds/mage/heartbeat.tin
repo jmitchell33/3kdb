@@ -70,32 +70,41 @@
         };
 
         #NOP -- Conditions to stop bot (low sps or low mental cognition (MC));
-        #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {
+        #NOP -- only a bot that is walking: one you (or a death) paused stays paused, see bot[autopause] in .pause;
+        #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active] && !$bot[paused]} {
             ptell Pausing to study spellbook.;
             #var bot_toggle 1;
             .pause;
+            #var bot[autopause] 1;
             #ticker mcBotResume {
                 #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
                 hp;
                 #if {$hpbar_mc > $mc_threshold} {
                     #var bot_toggle 0;
-                    #if {!$incombat} {..} {.unpause};
+                    #if {"$bot[autopause]" == "1"} {
+                        #var bot[autopause] 0;
+                        #if {!$incombat} {..} {.unpause};
+                    };
                     #unticker mcBotResume;
                 };
             } {2};
         };
 
-        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$my[immersion][count] && !$my[immersion][active]} {
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && !$my[immersion][count] && !$my[immersion][active]} {
             #if {!$my[hm][heal] && !$my[eternal][heal]} {
                 ptell Pausing to regenerate SPs.;
                 #var bot_toggle 1;
                 .pause;
+                #var bot[autopause] 1;
                 #ticker spBotResume {
                     #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
                     hp;
                     #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
                         #var bot_toggle 0;
-                        #if {!$incombat} {..} {.unpause};
+                        #if {"$bot[autopause]" == "1"} {
+                            #var bot[autopause] 0;
+                            #if {!$incombat} {..} {.unpause};
+                        };
                         #unticker spBotResume;
                     };
                 } {2};

@@ -578,6 +578,7 @@
                 #if {$bot[active] && !$bot[paused]} {
                     #var pauseCorpseActionBot 1;
                     .pause;
+                    #var bot[autopause] 1;
                 };
                 #var corpseTrigDelayed 1;
                 #math corpseTrigNext {$item + 1};
@@ -593,10 +594,12 @@
     #elseif {$corpseTrigDelayed} {
         #NOP -- the list is done after a delay, so hand the bot back;
         #var corpseTrigDelayed 0;
-        #if {$pauseCorpseActionBot} {
-            #var pauseCorpseActionBot 0;
+        #NOP -- only when nothing else paused the bot meanwhile (you, a death, go);
+        #if {$pauseCorpseActionBot && "$bot[autopause]" == "1"} {
+            #var bot[autopause] 0;
             .unpause;
         };
+        #var pauseCorpseActionBot 0;
         #if {$bot[active]} {
             .bot;
         };

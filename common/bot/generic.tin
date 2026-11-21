@@ -120,6 +120,8 @@
     #undelay {bot_kick};
     #undelay {bot_restart};
     #undelay {bot_resume};
+    #NOP -- A +name typed just before would still load its bot 4 seconds after it was typed;
+    #undelay {bot_start};
     #unvar bot;
     #unalias {..};
     #class {bot} {kill};
@@ -127,8 +129,15 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
 };
 
+#NOP -- Only the first pause saves where the bot is (lastBot, bot[pause_room]), so another pause while you're;
+#NOP -- away (deadman, a death, a player check) doesn't move it to wherever you walked;
+#NOP -- bot[autopause] 1 marks a pause made by a guild heartbeat (resting) or the corpse actions, which;
+#NOP -- resume the bot themselves. Any other pause (yours, a death, go) clears it, so they leave the bot paused;
 #alias .pause {
-    .backupBot;
+    #if {"$bot[paused]" != "1"} {
+        .backupBot;
+    };
+    #var bot[autopause] 0;
     #undelay bot_kick;
     #var bot[paused] 1;
     #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};

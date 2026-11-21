@@ -452,7 +452,7 @@ Walk back to where you ran `go` from:
 go_back
 ```
 
-If a bot is running, `go` pauses it first.
+If a bot is running, `go` pauses it first. With a bot loaded, `go_back` goes to the room the bot was paused in, even after more `go` trips or walking around in between.
 
 Inside the Section Z game, `go` leaves by pausing the game, which doesn't work in a fight, so in a fight it waits until the fight is over. `go_back` takes you back in through the title screen with `unpause game`.
 
@@ -515,7 +515,7 @@ If you're not in the right room, you get three choices for 5 seconds:
 
 The map can't walk into the Chaos Sewers. If you start `+sewers` from outside, or the cycler gets to it, it takes you in through the bowl to its start room first, then starts by itself.
 
-The Section Z bots can start from anywhere, even inside the game (it waits for a fight to end, then pauses the game). `+sectionz` and `+sectionz-fast` press start. `+sectionz-20` and `+sectionz-40` read your continues and code with `tagcheck` and run `set20` or `set40` for you, which uses a continue. With no continues left the bot stops (or the cycler moves on). If you stop a Section Z bot partway, starting it again carries on from the room you're in, as long as that room is on the bot's path. From outside the game, if your last `pause game` was on the path, it unpauses back there and carries on, even after `ld` or a lost connection. Neither uses a continue. That includes standing in the start room after `unpause game`. After Brain the Section Z bots pick up the barrier shield (`toggle sz_shield`), visit the Developer, and finish in the arcade, so they work in a bot cycle. With `toggle sz_dev` off they skip the Developer and finish in Brain's room.
+The Section Z bots can start from anywhere. `+sectionz` and `+sectionz-fast` press start. `+sectionz-20` and `+sectionz-40` read your continues and code with `tagcheck` and run `set20` or `set40` for you, which uses a continue, but only when you have no paused game. With no continues left the bot stops (or the cycler moves on). If you stop a Section Z bot partway, starting it again carries on from the room you're in, as long as that room is on the bot's path. From outside the game it always tries `unpause game` first: a paused game is never used up, it stays until your next `pause game`, even after `ld`, a winch, dying, or running other bots. If that room is on the path it carries on from there, otherwise `+sectionz-20` and `+sectionz-40` stop and tell you, instead of spending a continue. Inside the game, off the path, they also stop and tell you: walk back onto the path, or `pause game` and `set20`/`set40` to start over. A stop, a death or a winch while the bot is still getting in stops it before any continue is used. After Brain the Section Z bots pick up the barrier shield (`toggle sz_shield`), visit the Developer, and finish in the arcade, so they work in a bot cycle. With `toggle sz_dev` off they skip the Developer and finish in Brain's room.
 
 ### Control a running bot
 
@@ -1421,7 +1421,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `mapfind`: list rooms matching pattern in desc name and note. Usage: `mapfind pattern text`
 - `mappath`: map find path to pattern then path show. Usage: `mappath pattern text`
 - `mapicons`: echo unicode icon palette for map symbols.
-- `go_back`: map run back to vnum saved by go alias.
+- `go_back`: map run back to vnum saved by go alias (with a bot loaded, the room the bot was paused in).
 
 ### Bot commands
 

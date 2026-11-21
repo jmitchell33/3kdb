@@ -75,11 +75,20 @@
 		};
 	} {.5};
 	#if {$roomarea_len == 0} {
-		#map set roomarea {$area};
-		#map set roomcolor;
+		.map_set_area;
 	};
 	#if {$roomdesc_len == 0} {
 		#map set roomdesc {$room[long]};
+	};
+};
+
+#NOP -- .map_set_area: give the map room the area you're in. A bot file sets area inside its bot class, so;
+#NOP -- .stop deletes it until the next AREA NAME line, and $area would then be saved as that text. With no;
+#NOP -- area known the room stays without one, and gets it on a later visit;
+#alias {.map_set_area} {
+	#if {&{area} && "$area" != ""} {
+		#map set roomarea {$area};
+		#map set roomcolor;
 	};
 };
 
@@ -88,7 +97,7 @@
 	#echo {Area set to $area};
 	#echo {Room name is $room[name]};
 	#echo {Room long is $room[long]};
-	#map set roomarea {$area};
+	.map_set_area;
 	#map set roomname {$room[name]};
 	#map set roomdesc {$room[long]};
 };
@@ -102,8 +111,7 @@
 			#map set roomname {%1};
 		};
 		#if {$roomarea_len == 0} {
-			#map set roomarea {$area};
-			#map set roomcolor;
+			.map_set_area;
 		};
 		#if {$roomdesc_len == 0} {#var longcap on;};
 		#map get {roomvnum} {gonum};

@@ -255,25 +255,25 @@
         #var tempReportStart 1;
         #format tmpTotalKills {%g} {$tempReportSize};
 
-        #NOP -- Filter the list either by # or mob name;            ;
+        #NOP -- Filter the list either by # or mob name;
         #NOP #if {"%1" != ""} {         ;
-        #NOP     #NOP -- If a # is provided, show the last # of kills - otherwise show the entire list;         ;
-        #NOP     #NOP -- If a word is provided, filter based on that monster;           ;
-        #NOP     #NOP -- Since tintin matches numbers as the word pattern, we'll have to rely on no digits being provided;          ;
+        #NOP     #NOP -- If a # is provided, show the last # of kills - otherwise show the entire list;
+        #NOP     #NOP -- If a word is provided, filter based on that monster;
+        #NOP     #NOP -- Since tintin matches numbers as the word pattern, we'll have to rely on no digits being provided;
         #NOP     #regex {%1} {%+1..d} {         ;
         #NOP         #math tempReportStart {$tempReportSize - %1};          ;
         #NOP         #if {%1 > $tempReportSize} {           ;
         #NOP             #format tmpTotalKills {%g} {$tempReportSize}           ;
         #NOP         } {            ;
         #NOP             #format tmpTotalKills {%g} {%1}            ;
-        #NOP         };         ;
+        #NOP         };
         #NOP     } {            ;
         #NOP         #format tmpWord {%p} {%1};         ;
         #NOP         #list tmpList filter {%i%*{$tmpWord}%*};           ;
-        #NOP         #list tmpList size tempReportSize;         ;
+        #NOP         #list tmpList size tempReportSize;
         #NOP         #format tmpTotalKills {%g} {$tempReportSize};          ;
-        #NOP     };         ;
-        #NOP };         ;
+        #NOP     };
+        #NOP };
         
         _reportHeader;
         

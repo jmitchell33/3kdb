@@ -72,6 +72,9 @@
 #NOP -- set20 or set40. <command> runs once you're in the section's start room. The sectionz, sectionz-fast,;
 #NOP -- sectionz-20 and sectionz-40 bots use it when they start anywhere else (+name, the start room menu or;
 #NOP -- the bcy cycler). No continues left or no code stops there;
+#NOP -- A paused game is never used up: unpause game goes back to the last room you paused in every time,;
+#NOP -- even after press start, a winch out of the game or finishing it. Only a new pause replaces it. So a;
+#NOP -- bot always tries unpause game first, and only uses a code when there is no paused game at all;
 #var szin[state] idle;
 #var szin[title] 24786;
 #var szin[arcade] 24785;
@@ -98,6 +101,106 @@
     };
 };
 
+#NOP -- .sz_cancel <reason>: stop getting in, with the bot left as it is. Used when the bot is stopped, and by;
+#NOP -- the death and winch actions (modules/map/maphelper.tin, common/eq/rolm.tin). A set20/set40 already;
+#NOP -- running can't be stopped halfway, it has paused over your saved game by then;
+#alias {.sz_cancel} {
+    #if {"$szin[state]" != "idle" && "$szin[state]" != "setting"} {
+        #undelay {szin};
+        #var szin[state] idle;
+        #var szin[bot] 0;
+        .szin_echo {<faa>%1, not going in - no continue used.<088>};
+    };
+    #if {"$szfin[state]" != "idle"} {
+        #undelay {szfin};
+        #var szfin[state] idle;
+    };
+};
+
+#NOP -- @sz_in_game{}: 1 when the room line is a room inside the game (Section NN, or the Developer's room);
+#function {sz_in_game} {
+    #var result 0;
+    #regex {$room_short} {{^(-R-_)?(Section [0-9]+|a small square room) \(}} {#var result 1};
+};
+
+#NOP -- .sz_off_path_stop: in the game in a room .bot_find_step can't use, for the 20 and 40 bots. Using the;
+#NOP -- code would cost a continue and lose this game, so it stops and says what to do instead;
+#alias {.sz_off_path_stop} {
+    #var szin[bot] 1;
+    .sz_map_fix;
+    #var szin[mapnote] {};
+    #if {!$szin[mapok]} {
+        #var szin[mapnote] {. The map can't tell which room this is either, so check it after you move};
+    };
+    #if {@sz_on_path{$room_short}} {
+        .szin_abort {this room shows up more than once on the $bot[alias] path, so the bot can't tell where you are. Walk one room along the path and start the bot again$szin[mapnote]};
+    } {
+        .szin_abort {this room isn't on the $bot[alias] path. Walk back onto it and start the bot again, or to start over with a continue: pause game, then set$szin[sec]$szin[mapnote]};
+    };
+};
+
+#NOP -- @sz_room_vnum{<room line>}: the Section Z room with that name and exits. The map's own room when it;
+#NOP -- matches, else the only Section Z room that does. 0 when there is none, or more than one;
+#var szin[first] 24785;
+#var szin[last] 25240;
+#function {sz_room_vnum} {
+    #NOP -- result is shared with the functions called here, so it is only set at the end;
+    #var srv_key {@bot_room_key{%0}};
+    #var srv_found 0;
+    #var srv_n 0;
+    #map get roomvnum srv_v;
+    #if {"@bot_room_key{@bot_vnum_name{$srv_v}}" == "$srv_key"} {
+        #var srv_found $srv_v;
+        #var srv_n 1;
+    } {
+        #NOP -- every room in this vnum block is in Section Z, whatever area the map has on it;
+        #loop $szin[first] $szin[last] srv_i {
+            #if {"@bot_room_key{@bot_vnum_name{$srv_i}}" == "$srv_key"} {
+                #var srv_found $srv_i;
+                #math srv_n {$srv_n + 1};
+            };
+        };
+    };
+    #if {$srv_n != 1} {
+        #var srv_found 0;
+    };
+    #var result $srv_found;
+};
+
+#NOP -- .sz_map_fix: put the map in the room you're in. After unpause game the map follows the title's;
+#NOP -- unpause exit, which can point at another room. szin[mapok] is 0 when the map can't be sure;
+#alias {.sz_map_fix} {
+    #var szin[mapok] 1;
+    #var smf_v {@sz_room_vnum{$room_short}};
+    #if {$smf_v} {
+        #map goto {$smf_v};
+    } {
+        #var szin[mapok] 0;
+    };
+};
+
+#NOP -- .sz_relink: point the title screen's unpause game exit at your last pause (xsz_pause_vnum, saved by;
+#NOP -- the pause action in common/actions.tin), so map walks like go_back go the right way. Reading the map;
+#NOP -- resets it to the file's room, so it also runs when vars.tin is read at login (common/config.tin);
+#alias {.sz_relink} {
+    #if {"$xsz_pause_vnum" != "" && "$xsz_pause_vnum" != "0"} {
+        #line quiet {#map at {$szin[title]} {#map link {unpause game} {$xsz_pause_vnum}}};
+    };
+};
+
+#NOP -- .sz_paused: run by the pause action (common/actions.tin) once it has saved the room. Relinks the title;
+#NOP -- screen, and when the map is still on a room inside the game (pause game was typed with no map exit to;
+#NOP -- follow) moves it to the arcade. A walk like go has already moved the map on, so it is left alone;
+#alias {.sz_paused} {
+    .sz_relink;
+    #map get roomvnum szp_mv;
+    #if {"$szp_mv" != ""} {
+        #if {$szp_mv >= $szin[start00] && $szp_mv <= $szin[last]} {
+            #map goto {$szin[arcade]};
+        };
+    };
+};
+
 #alias {.sz_enter} {
     #if {"$szin[state]" != "idle"} {
         .szin_echo {already on the way to section $szin[sec] ($szin[state]).};
@@ -107,18 +210,27 @@
     #var szin[then] {%2};
     #var szin[ticks] 0;
     #var szin[tries] 0;
-    #map get roomvnum szin[vnum];
     #map get roomarea szin[area];
-    #if {"$szin[vnum]" == "$szin[title]"} {
+    #NOP -- the room line decides where you are, the map can be left behind by a death or a teleport;
+    #var szin[rs] 0;
+    #regex {$room_short} {title screen} {#var szin[rs] 1};
+    #regex {$room_short} {The Arcade} {#var szin[rs] 2};
+    #if {$szin[rs] == 1} {
+        #map goto {$szin[title]};
         #var szin[state] to_title;
     };
-    #elseif {"$szin[vnum]" == "$szin[arcade]"} {
+    #elseif {$szin[rs] == 2} {
+        #map goto {$szin[arcade]};
         #var szin[state] to_title;
         play;
     };
-    #elseif {"$szin[area]" == "Section Z"} {
+    #elseif {@sz_in_game{}} {
         .szin_echo {pausing the game to get to the title screen.};
         #var szin[state] pause;
+    };
+    #elseif {"$szin[area]" == "Section Z"} {
+        .szin_abort {the map is still in Section Z but you're not in the game. Walk to a room the map knows and start again};
+        #return;
     };
     #else {
         #var szin[state] to_title;
@@ -129,6 +241,12 @@
 
 #alias {.szin_tick} {
     #if {"$szin[state]" == "idle"} {
+        #return;
+    };
+    #NOP -- the bot was stopped while it was still getting in: stop here, before any code is used. A;
+    #NOP -- set20/set40 already running is left to finish;
+    #if {$szin[bot] && "$bot[active]" != "1" && "$szin[state]" != "setting"} {
+        .sz_cancel {the bot was stopped};
         #return;
     };
     #math szin[ticks] {$szin[ticks] + 1};
@@ -142,6 +260,10 @@
                 #var szin[state] to_title;
                 #var szin[ticks] 0;
                 play;
+            };
+            #elseif {!@sz_in_game{}} {
+                .szin_abort {you're not in the game any more};
+                #return;
             };
             #elseif {"$incombat" != "1" && $szin[ticks] % 4 == 1} {
                 #math szin[tries] {$szin[tries] + 1};
@@ -161,19 +283,9 @@
             #regex {$room_short} {title screen} {#var szin[at] 1};
             #if {$szin[at]} {
                 #map goto {$szin[title]};
-                #NOP -- your last pause is on this bot's path: unpause game goes back there, no code or new game;
-                #NOP -- only the saved pause room counts. The map's title unpause exit points at the sec 40 start;
-                #NOP -- room by default, so it would look like a pause even with no paused game;
-                #var szin[resume] 0;
-                #if {$szin[bot] && !$szin[no_unpause]} {
-                    .bot_path_rooms;
-                    #if {@sz_pause_on_path{}} {
-                        #var szin[resume] 1;
-                    };
-                };
             };
-            #if {$szin[at] && $szin[resume]} {
-                .szin_echo {your last pause is on this path, unpausing to carry on from there.};
+            #if {$szin[at] && $szin[bot] && !$szin[no_unpause]} {
+                .szin_echo {trying your paused game first, no continue used.};
                 #var szin[state] unpause;
                 #var szin[ticks] 0;
                 unpause game;
@@ -197,12 +309,14 @@
             };
         };
         #case {"unpause"} {
-            #NOP -- wait for the room after the title screen, then find the step for it;
+            #NOP -- wait for the room after the title screen, then find the step for it. The step you paused at;
+            #NOP -- tells apart rooms that show up more than once on the path;
             #var szin[at] 0;
             #regex {$room_short} {title screen} {#var szin[at] 1};
             #if {!$szin[at] && $szin[ticks] > 2} {
-                #NOP -- the paused game is used up now, a new pause saves the room again;
-                .sz_forget_pause;
+                #if {"$xsz_pause_bot" == "$bot[alias]"} {
+                    #var bot_find_hint {$xsz_pause_step};
+                };
                 .bot_find_step;
                 #if {$bot_found[step] > 0} {
                     #map goto {$bot_found[vnum]};
@@ -212,12 +326,17 @@
                     $szin[then];
                     #return;
                 };
-                #NOP -- unpaused somewhere off the path: pause again and get in the normal way;
-                .szin_echo {that pause wasn't on this path after all, getting in the normal way.};
-                #var szin[no_unpause] 1;
-                #var szin[state] pause;
-                #var szin[ticks] 0;
-                #var szin[tries] 0;
+                #if {"$szin[sec]" == "00"} {
+                    #NOP -- section 00 needs no code: pause again and press start;
+                    .szin_echo {your paused game isn't on this path, starting a new game.};
+                    #var szin[no_unpause] 1;
+                    #var szin[state] pause;
+                    #var szin[ticks] 0;
+                    #var szin[tries] 0;
+                } {
+                    .sz_off_path_stop;
+                    #return;
+                };
             };
             #elseif {$szin[ticks] > 20} {
                 .szin_abort {unpause game didn't take you back into the game};
@@ -248,7 +367,12 @@
                 };
             };
             #elseif {$szin[ticks] > $szin[tags_max]} {
-                .szin_abort {tagcheck shows no Section Z $szin[sec] code};
+                #NOP -- with no continues left tagcheck shows no continues line and no codes at all;
+                #if {$szin[cont] < 1} {
+                    .szin_abort {you're out of Section Z continues (tagcheck), so sectionz-$szin[sec] can't start};
+                } {
+                    .szin_abort {tagcheck shows no Section Z $szin[sec] code};
+                };
                 #return;
             };
         };
@@ -280,24 +404,28 @@
 #alias {.sz_forget_pause} {
     #class global open;
     #var xsz_pause_room {};
+    #var xsz_pause_bot {};
+    #var xsz_pause_step 0;
+    #var xsz_pause_vnum 0;
     #class global close;
 };
 
-#NOP -- unpause game with no paused game (it was used up, or the game ended). Forget the saved pause, and when;
-#NOP -- a bot was trying to carry on from it, get in the normal way with the code instead;
+#NOP -- unpause game with no paused game (you never paused). Forget the saved pause, and when a bot was;
+#NOP -- trying to carry on from it, get in the normal way with the code instead;
 #action {^You do not have a paused game.$} {
     .sz_forget_pause;
     #if {"$szin[state]" == "unpause"} {
-        .szin_echo {no paused game after all, using your section $szin[sec] code instead.};
+        .szin_echo {no paused game, using your section $szin[sec] code instead.};
         #var szin[no_unpause] 1;
         #var szin[state] to_title;
         #var szin[ticks] 0;
     };
 } {2};
 
-#NOP -- tagcheck lines: "Section Z           : 5 CONTINUES" and "Section Z - 40 code : <code>". The code is;
-#NOP -- kept in s20 or s40 for continue20 and continue40 whenever tagcheck shows it;
-#action {^Section Z%s: %d CONTINUES} {
+#NOP -- tagcheck lines: "Section Z           : 5 CONTINUES" (1 CONTINUE with one left) and;
+#NOP -- "Section Z - 40 code : <code>". The code is kept in s20 or s40 for continue20 and continue40 whenever;
+#NOP -- tagcheck shows it;
+#action {^Section Z%s: %d CONTINUE} {
     #if {"$szin[state]" == "tags"} {
         #var szin[cont] {%2};
     };
@@ -311,31 +439,30 @@
     };
 } {2};
 
-#NOP -- @sz_pause_on_path{}: 1 when your last pause (xsz_pause_room, saved by the pause action in common/actions.tin);
-#NOP -- was in a room on this bot's path, matched by name and exits. Needs .bot_path_rooms first;
-#function {sz_pause_on_path} {
+#NOP -- @sz_on_path{<room line>}: 1 when a room with that name and exits is on this bot's path (the start;
+#NOP -- room counts). Needs .bot_path_rooms first;
+#function {sz_on_path} {
     #NOP -- result is shared with the functions called here, so it is only set at the end;
     #var spp_found 0;
-    #if {"$xsz_pause_room" != ""} {
-        #var spp_key {@bot_room_key{$xsz_pause_room}};
-        #var spp_k {@bot_room_key{@bot_vnum_name{$bot[start_vnum]}}};
+    #var spp_key {@bot_room_key{%0}};
+    #var spp_k {@bot_room_key{@bot_vnum_name{$bot[start_vnum]}}};
+    #if {"$spp_k" == "$spp_key"} {
+        #var spp_found 1;
+    };
+    #foreach {*bot_path_room[]} {spp_i} {
+        #var spp_k {@bot_room_key{@bot_vnum_name{$bot_path_room[$spp_i]}}};
         #if {"$spp_k" == "$spp_key"} {
             #var spp_found 1;
-        };
-        #foreach {*bot_path_room[]} {spp_i} {
-            #var spp_k {@bot_room_key{@bot_vnum_name{$bot_path_room[$spp_i]}}};
-            #if {"$spp_k" == "$spp_key"} {
-                #var spp_found 1;
-            };
         };
     };
     #var result $spp_found;
 };
 
 #NOP -- The Section Z bots (but sectionz-arcade) run this as they start. Standing in a room on the bot's path;
-#NOP -- (the start room, or where you stopped or paused and unpaused back to), it carries on from there with no;
-#NOP -- code (.bot_find_step, common/bot/bot_findstep.tin). Anywhere else it pauses the bot and gets in with;
-#NOP -- .sz_enter, which first tries unpause game when your last pause was on this path;
+#NOP -- (the start room, or where you stopped), it carries on from there with no code (.bot_find_step,;
+#NOP -- common/bot/bot_findstep.tin). In the game anywhere else, the 20 and 40 bots stop and say why;
+#NOP -- (.sz_off_path_stop). Outside the game it pauses the bot and gets in with .sz_enter, which tries;
+#NOP -- unpause game first;
 #var szin[bot] 0;
 #alias {.sz_bot_enter} {
     #var szin[no_unpause] 0;
@@ -353,15 +480,59 @@
         };
         #return;
     };
+    #if {"%1" != "00" && @sz_in_game{}} {
+        #var szin[sec] {%1};
+        .sz_off_path_stop;
+        #return;
+    };
+    #NOP -- .pause saves this new bot over lastBot, which still holds where you stopped the last one;
+    #var szin_haslast 0;
+    #if {&{lastBot}} {
+        #var szin_haslast 1;
+        #var szin_lastbot {$lastBot};
+    };
     .pause;
+    #if {$szin_haslast} {
+        #var lastBot {$szin_lastbot};
+    };
     #var szin[bot] 1;
     #var szin[bot_step] $bot[step];
     .sz_enter {%1} {.sz_bot_resume};
 };
 
+#NOP -- .sz_resume: .resume for a Section Z bot (common/bot/bots.tin). With that bot still loaded (paused) it;
+#NOP -- keeps it and gets back in with .sz_bot_enter, otherwise it starts the bot again;
+#alias {.sz_resume} {
+    #switch {"$lastBot[alias]"} {
+        #case {"sectionz-20"} {
+            #var szin[rsec] 20;
+        };
+        #case {"sectionz-40"} {
+            #var szin[rsec] 40;
+        };
+        #default {
+            #var szin[rsec] 00;
+        };
+    };
+    #if {"$bot[active]" != "1" || "$bot[alias]" != "$lastBot[alias]"} {
+        +$lastBot[alias];
+        #return;
+    };
+    .sz_bot_enter {$szin[rsec]};
+    #NOP -- standing on the path already: .sz_bot_enter set the step (and glanced past step 1), so unpause it;
+    #if {"$bot[active]" == "1" && "$szin[state]" == "idle" && !$szin[bot]} {
+        #if {$bot_found[step] > 1} {
+            .unpause;
+        } {
+            ..;
+        };
+    };
+};
+
 #alias {.sz_bot_resume} {
     #var szin[bot] 0;
     #if {"$bot[active]" != "1"} {
+        .szin_echo {in section $szin[sec], but the bot was stopped so it stays off.};
         #return;
     };
     #var bot[step] $szin[bot_step];

@@ -27,10 +27,11 @@
 #class {bot} {close}
 #read common/bot/generic.tin;
 
-#NOP -- The map can't walk into the sewers, so started anywhere else the bot waits while .sewers_bot_enter;
-#NOP -- (common/areas/chaos_sewers.tin) goes in through the bowl and walks to the start room. It runs just;
-#NOP -- after the bot starts, so the bot never takes a step out here;
-#map get roomarea sewers_start_area;
-#if {"$sewers_start_area" != "Chaotic Sewers"} {
+#NOP -- Unless you're in the start room with the map sure of it, the bot waits while .sewers_bot_enter;
+#NOP -- (common/areas/chaos_sewers.tin) gets you there: in through the bowl from outside, findhere-auto when;
+#NOP -- you're in the sewers but the map isn't, then a walk one step at a time. It runs just after the bot;
+#NOP -- starts, so the bot never takes a step from the wrong room;
+#map get roomvnum sewers_start_here;
+#if {"$sewers_start_here" != "$bot[start_vnum]" || !@sewin_map_ok{}} {
     #delay {0} {.sewers_bot_enter};
 };

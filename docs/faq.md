@@ -516,11 +516,11 @@ Yes, with the bot cycler. See [Run several areas in a row](manual.md#run-several
 
 ### How do I bot the Chaos Sewers?
 
-The map can't walk into the sewers, so `+sewers` takes you in through the bowl first, works out where you landed, walks to the start room and starts. It works from anywhere, and in the bot cycler. `sewers-in` does the same without starting the bot.
+The map can't walk into the sewers, so `+sewers` takes you in through the bowl first, works out where you landed, walks to the start room and starts. It works from anywhere, and in the bot cycler. Already inside the sewers it skips the bowl: if you ran `findhere` it walks straight to the start room, and if you didn't it runs `findhere-auto` first. `sewers-in` does the same without starting the bot.
 
 ### The Section Z bot says I'm out of continues
 
-`+sectionz-20` and `+sectionz-40` start with a continue code, and each new run uses one continue. `tagcheck` shows how many you have left. With none left the bot stops, or the cycler moves on to the next area. `+sectionz`, `+sectionz-fast` and `+sectionz-arcade` don't need continues. If a run stops partway, start the same bot again: it carries on from the room you're in, or unpauses back to where you last paused (even after a disconnect), without using a continue. It only uses one when you're somewhere off its path.
+`+sectionz-20` and `+sectionz-40` start with a continue code when you have no paused game, and each of those runs uses one continue. `tagcheck` shows how many you have left. With none left the bot stops, or the cycler moves on to the next area. `+sectionz`, `+sectionz-fast` and `+sectionz-arcade` don't need continues. If a run stops partway, start the same bot again: it carries on from the room you're in, or unpauses back to where you last paused, without using a continue. Your paused game stays until you pause again, even after a disconnect, a winch, dying or other bots, so this works with no continues left too. If that room isn't on the bot's path, the bot stops and tells you what to do rather than use a continue.
 
 ### What's the deadman timer?
 

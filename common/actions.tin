@@ -233,10 +233,27 @@
 #NOP -- Also remembers the Section Z room you paused in. The pause line comes before the arcade's room line, so;
 #NOP -- room_short is still that room. Kept in xsz_pause_room (class global, saved in vars.tin) so it lasts;
 #NOP -- through ld or a lost connection. The Section Z bots use it to unpause and carry on (common/areas/sectionz.tin);
+#NOP -- The bot and the step it had reached are kept too (xsz_pause_bot, xsz_pause_step), so a room that shows up;
+#NOP -- more than once on the path can be told apart when it unpauses. The room's vnum (xsz_pause_vnum) is what;
+#NOP -- the title screen's unpause game exit should lead to, not every pause game exit on the map sets it;
 #action {^You press PAUSE on the game, saving the rest for later.} {
+    #NOP -- looked up before the class opens, so its working variables don't end up in vars.tin;
+    #var szp_vnum {@sz_room_vnum{$room_short}};
     #class global open;
     #var xsz_pause_room {$room_short};
+    #var xsz_pause_bot {};
+    #var xsz_pause_step 0;
+    #if {"$bot[active]" == "1"} {
+        #var xsz_pause_bot {$bot[alias]};
+        #var xsz_pause_step {$bot[step]};
+    };
+    #elseif {"$lastBot[alias]" != ""} {
+        #var xsz_pause_bot {$lastBot[alias]};
+        #var xsz_pause_step {$lastBot[step]};
+    };
+    #var xsz_pause_vnum {$szp_vnum};
     #class global close;
+    .sz_paused;
     #if {$mapFollow && "$following" != ""} {
         .followFindLeave;
         #if {"$follow_leave" == "leaves by pausing their game"} {.followLeaderMove {$follow_leave}};

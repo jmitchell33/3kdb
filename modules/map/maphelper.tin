@@ -93,6 +93,8 @@
         #var bloodarc_active 0;
     } {
         #if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
+        #NOP -- a heartbeat resting the bot mustn't start it again while you're off somewhere;
+        #if {"$bot[active]" == "1"} {#var bot[autopause] 0};
         #map get roomarea go_area;
         #map get roomvnum go_vnum;
         #if {"$go_area" == "Section Z" && "$go_vnum" != "24785" && "$go_vnum" != "24786" && "$incombat" == "1"} {
@@ -102,7 +104,13 @@
             #delay {go_szwait} {.go_szwait} {1};
             #return;
         };
-        #map get roomvnum go_back;
+        #NOP -- With a bot loaded, go_back is the room it was paused in (saved by .pause), so another go or;
+        #NOP -- walking around first still leads back to the bot. Without one it is the room go leaves;
+        #if {"$bot[active]" == "1" && "$bot[pause_room]" != ""} {
+            #var go_back {$bot[pause_room]};
+        } {
+            #map get roomvnum go_back;
+        };
         #var roomfound 0;
 		#loop 1 &speedruns_name[] tmpItem {
 			#if {"%1" == "$speedruns_name[$tmpItem]"} {
@@ -318,6 +326,12 @@
 	.notify You died in $roomvnum;
 	#var my[dead] 1;
 	.pause;
+	#NOP -- go_back leads back to the bot: where you died, or where it was already paused before that;
+	#if {"$bot[active]" == "1" && "$bot[pause_room]" != ""} {
+		#var go_back {$bot[pause_room]};
+	};
+	#NOP -- a Section Z bot still getting in stops there (common/areas/sectionz.tin);
+	.sz_cancel {you died};
 	#map goto 6247;
 } {2};
 
@@ -520,10 +534,11 @@
 #NOP -- .followMapMove themselves;
 #action {^Your legs run away with you %w.} {.followMapMove %1} {9};
 
-#NOP -- function to also take a step back on the mapper if we undo a map;
+#NOP -- function to also take a step back on the mapper if we undo a map. Only a walking bot sent the move,;
+#NOP -- so a paused bot (during a go or a walk by hand) keeps its step;
 #alias mapUndo {
 	#map undo;
-	#if {$bot[active]} {
+	#if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
 		#math bot[step] {$bot[step] - 1};
 		#NOP -- Count failures on the same step, a missing exit never clears so pause instead of looping;
 		#if {"$bot[retry][step]" == "$bot[step]"} {
