@@ -192,9 +192,19 @@
     reflex start;
 };
 
+#NOP -- out of corpses: say so once, then stay quiet until there is a corpse again;
+#var tmp_pants_warned 0;
 #action {You have no pants.} {
     #if {!$idle_flag} {
-        .corpse;
+        #math tmp_pants_corpses {$corpses[coffin] + $corpses[freezer] + $corpses[cooler]};
+        #if {$tmp_pants_corpses > 0} {
+            #var tmp_pants_warned 0;
+            .corpse;
+        };
+        #elseif {$tmp_pants_warned == 0} {
+            #var tmp_pants_warned 1;
+            #echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
+        };
     };
 } {1};
 

@@ -59,14 +59,21 @@
 #nop -- the gp1 reflex sends drop pants when NP is low. .corpse_absorb fills NP in batches, unless there are no corpses;
 #nop -- corpse_lockout stays on until the batches are done, so the reflex can't start a second run;
 #nop -- corpse_lockout must exist before the first drop pants, an unset variable makes the #if false;
+#nop -- out of corpses: say so once, then stay quiet until there is a corpse again;
 #var corpse_lockout 0;
+#var corpse_warned 0;
 #action {^You have no pants.$} {
     #if {!$idle_flag && !$corpse_lockout} {
         #math corpse_total {$corpses[coffin] + $corpses[freezer] + $corpses[cooler]};
         #if {$corpse_total > 0} {
+            #var corpse_warned 0;
             #var corpse_lockout 1;
             #var corpse_np_seen 0;
             .corpse_absorb;
+        };
+        #elseif {$corpse_warned == 0} {
+            #var corpse_warned 1;
+            #echo {<ccf>----<088> <fff>OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
         };
     };
 } {1};
