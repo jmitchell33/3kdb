@@ -45,13 +45,12 @@
 #list item_grab_list add {{{long} {A magic scroll} {target} {scroll}}};
 #list item_grab_list add {{{long} {Crystal ball} {target} {ball}}};
 
-#list item_grab_list add {{{long} {Bag} {target} {bag}}};
 #list item_grab_list add {{{long} {%*Shield} {target} {shield}}};
 #list item_grab_list add {{{long} {%*shield} {target} {shield}}};
 #list item_grab_list add {{{long} {%*amulet%*} {target} {amulet}}};
 #list item_grab_list add {{{long} {%*Amulet%*} {target} {amulet}}};
 #list item_grab_list add {{{long} {%*bracers} {target} {bracers}}};
-#list item_grab_list add {{{long} {%*ring} {target} {ring}}};
+#list item_grab_list add {{{long} {%* ring} {target} {ring}}};
 #list item_grab_list add {{{long} {%*bracers} {target} {bracers}}};
 #list item_grab_list add {{{long} {%*Girdle} {target} {girdle}}};
 #list item_grab_list add {{{long} {%*Cloak%*} {target} {cloak}}};
@@ -82,5 +81,50 @@
 #list item_grab_list add {{{long} {%* essence of %*} {target} {essence}}};
 #list item_grab_list add {{{long} {%* heart of %*} {target} {heart}}};
 
+#NOP -- Never picked up, even if a grab entry matches. Bags, since one could be a bag of devouring, the Chaos;
+#NOP -- Sewers black stone (named or not yet identified) that grafts to your hand, and the psionic rapier, a;
+#NOP -- necromancer guild power that shows in the room like an item. A%* rapier%* above would match it;
+#list item_skip_list create {%*bag%*;%*Stone of Grafting%*;%*black stone%*;%*psionic rapier%*};
 
+#NOP -- .item_grab {count} {name}: get an item lying in the room if item_grab_list has it and item_skip_list;
+#NOP -- doesn't. The whole name has to match, so %* ring isn't "A bag of devouring". Only the first entry that;
+#NOP -- matches gets it. #break doesn't leave the loop from inside #regex, so a flag does. Used by autocollect;
+#NOP -- (common/room.tin) and the lootGrab corpsetrig action;
+#alias {.item_grab} {
+    #var item_grab_name {%2};
+    #var item_grab_got 0;
+    #foreach {$item_skip_list[%*]} {item_grab_pat} {
+        #regex {$item_grab_name} {^%i$item_grab_pat$} {#var item_grab_got 1};
+    };
+    #foreach $item_grab_list[%*] item {
+        #if {$item_grab_got} {
+            #continue;
+        };
+        #regex {$item_grab_name} {^$item[long]$} {
+            #var item_grab_got 1;
+            #%1 {get $item[target]};
+            #if {"$guild" == "bard"} {
+                identify $item[target];
+            };
+            #if {"$guild" == "priest"} {
+                recognize $item[target];
+            };
+        };
+    };
+};
+
+#NOP -- .lootgrab: run .item_grab on each item in room[items], the items common/room.tin saw in the last room;
+#NOP -- shown. The lootGrab corpsetrig action runs it after glance and delay, so that is the room after the kill;
+#alias {.lootgrab} {
+    #loop 1 &room[items][] lootgrab_i {
+        #var lootgrab_item {$room[items][$lootgrab_i]};
+        #var lootgrab_count 1;
+        #replace {lootgrab_item} {^{-i-|-w-|-a-|-o-}} {};
+        #regex {$lootgrab_item} { \x7B{[0-9]+}\x7D} {#var lootgrab_count &1};
+        #replace {lootgrab_item} { \x7B%*} {};
+        #replace {lootgrab_item} { [%*]} {};
+        #replace {lootgrab_item} {.$} {};
+        .item_grab {$lootgrab_count} {$lootgrab_item};
+    };
+};
 #class item_grab_list close;

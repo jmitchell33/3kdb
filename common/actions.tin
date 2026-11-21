@@ -230,7 +230,13 @@
     };
 } {5};
 
+#NOP -- Also remembers the Section Z room you paused in. The pause line comes before the arcade's room line, so;
+#NOP -- room_short is still that room. Kept in xsz_pause_room (class global, saved in vars.tin) so it lasts;
+#NOP -- through ld or a lost connection. The Section Z bots use it to unpause and carry on (common/areas/sectionz.tin);
 #action {^You press PAUSE on the game, saving the rest for later.} {
+    #class global open;
+    #var xsz_pause_room {$room_short};
+    #class global close;
     #if {$mapFollow && "$following" != ""} {
         .followFindLeave;
         #if {"$follow_leave" == "leaves by pausing their game"} {.followLeaderMove {$follow_leave}};

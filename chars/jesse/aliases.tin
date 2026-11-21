@@ -28,13 +28,49 @@
 	qtrance preserve remains/get preservation/absorb;
 };
 
-#NOP -- absorb up to 5 corpses at once, from the coffin first, then freezer, then cooler;
+#NOP -- absorb corpses in batches, from the coffin first, then freezer, then cooler;
 #NOP -- qtrance does the whole chain instantly, and >n repeats it n times;
+#NOP -- The first batch is corpse_batch corpses. After each batch the NP gained shows what one corpse gave;
+#NOP -- since bigger corpses give more. The next batch is only as many as still fit under max NP, up to corpse_batch;
+#NOP -- It stops when less than one corpse fits, NP didn't go up, or there are no corpses left;
+#var corpse_batch 6;
 #alias {.corpse_absorb} {
-    #var corpse_left 5;
+    #math corpse_total {$corpses[coffin] + $corpses[freezer] + $corpses[cooler]};
+    #if {$corpse_total < 1} {
+        #var corpse_lockout 0;
+        #return;
+    };
+    #if {$corpse_np_seen > 0} {
+        #math corpse_left {($my[gp1][max] - $my[gp1][current]) / $corpse_np_seen};
+        #format corpse_left {%d} {$corpse_left};
+    } {
+        #var corpse_left $corpse_batch;
+    };
+    #if {$corpse_left > $corpse_batch} {
+        #var corpse_left $corpse_batch;
+    };
+    #if {$corpse_left < 1} {
+        #var corpse_lockout 0;
+        #return;
+    };
+    #var corpse_asked $corpse_left;
+    #var corpse_np_before $my[gp1][current];
     .corpse_absorb_from {unwrap 1} {coffin};
     .corpse_absorb_from {deslab} {freezer};
     .corpse_absorb_from {uncooler corpse} {cooler};
+    #math corpse_took {$corpse_asked - $corpse_left};
+    #delay {corpse_absorb} {.corpse_absorb_check} {3};
+};
+
+#NOP -- After a batch: work out the NP one corpse gave, then try the next batch;
+#alias {.corpse_absorb_check} {
+    #math corpse_gain {$my[gp1][current] - $corpse_np_before};
+    #if {$corpse_took < 1 || $corpse_gain <= 0} {
+        #var corpse_lockout 0;
+        #return;
+    };
+    #math corpse_np_seen {$corpse_gain / $corpse_took};
+    .corpse_absorb;
 };
 
 #NOP -- %1 command to get a corpse out, %2 where it is. Takes what is there, up to what is still needed;
@@ -132,15 +168,27 @@
     };
 };
 
+#NOP -- Items that can't be dropped (the Section Z barrier shield and High Score Button) answer every;
+#NOP -- put all in bag with "You can not drop that.", once per item per bag. Hide that line for a few seconds;
+#NOP -- while bagging, it still shows any other time;
+#alias {.bag_gag} {
+    #class {bag_gag} {kill};
+    #class {bag_gag} {open};
+    #gag {^You can not drop that.$};
+    #class {bag_gag} {close};
+    #delay {bag_gag} {#class {bag_gag} {kill}} {4};
+};
+
 #NOP -- cycle bags;
 #alias {bag1} {
+    .bag_gag;
     #var bagsFull 1;
     #var bag1_active 1;
     #format tmpBagCount {%d} $bagcount;
     #loop $tmpBagCount 1 tmpBag {
         put all in bag $tmpBag;
     };
-    #line oneshot #action {You put %* in %*.} {#var bagsFull 0;#var bag1_active 0};
+    #NOP -- the "You put" line clears bagsFull and bag1_active in gypsyid.tin, one action per line;
 };
 
 #alias {bag2} {
@@ -160,6 +208,20 @@
         donate all from bag $tmpBag;
     };
     #var bag1_active 0;
+};
+
+#NOP -- bagget <item>: get <item> out of every bag (bagset count) and keep it, so the bag1 corpsetrig doesn't;
+#NOP -- put it back after the next kill. A bag without one just says so. unkeep <item> to let it go again;
+#alias {bagget} {
+    #if {"%0" == ""} {
+        #echo {<faa>Usage: bagget <item>, e.g. bagget silver flask<088>};
+        #return;
+    };
+    #format tmpBagCount {%d} $bagcount;
+    #loop 1 $tmpBagCount tmpBag {
+        get %0 from bag $tmpBag;
+    };
+    keep %0;
 };
 
 
@@ -246,6 +308,71 @@
     #NOP -- cdonate_lookup lets the Duncan action in actions.tin ptell the total;
     #var cdonate_lookup 1;
     #send {!lookup};
+};
+
+#NOP -- coin trip on/off: while a bot runs, carrying 1M coins or more pauses it to deposit down to 50k at;
+#NOP -- the bank and back. The run itself is in heartbeat.tin. Turning it off mid trip stops it there;
+#alias {acoinson} {
+    #var jdonate[coin_on] 1;
+    #var jdonate[coin_last] 0;
+    #echo {<ceb>Auto coins:<088> on};
+};
+
+#alias {acoinsoff} {
+    #var jdonate[coin_on] 0;
+    #if {"$jdonate[next]" == "coins" || "$jdonate[state]" == "coin_trip" || "$jdonate[state]" == "coin_done"} {
+        #if {"$gid[state]" == "coins"} {
+            .gid_abort {turned off};
+        };
+        #var jdonate[next] {};
+        .jdonate_abort {auto coins turned off};
+    } {
+        #echo {<ceb>Auto coins:<088> off};
+    };
+};
+
+#NOP -- reagent trip on/off: while a bot runs, a reagent at 0 on the hpbar pauses it for topup at;
+#NOP -- necro_reagent and back. The run itself is in heartbeat.tin. Turning it off mid trip stops it there;
+#alias {areagon} {
+    #var jdonate[reag_on] 1;
+    #var jdonate[reag_last] 0;
+    #echo {<ceb>Auto reagents:<088> on};
+};
+
+#alias {areagoff} {
+    #var jdonate[reag_on] 0;
+    #if {"$jdonate[next]" == "reagent" || "$jdonate[state]" == "reagent" || "$jdonate[state]" == "reag_buying"} {
+        #if {"$gid[state]" == "reagent"} {
+            .gid_abort {turned off};
+        };
+        #var jdonate[next] {};
+        .jdonate_abort {auto reagents turned off};
+    } {
+        #echo {<ceb>Auto reagents:<088> off};
+    };
+};
+
+#NOP -- bags full trip on/off: while a bot runs, full bags pause it for gypsyid, the necro box and back.;
+#NOP -- The run itself is in heartbeat.tin. Turning it off mid trip stops it there, bot still paused;
+#alias {agypsyon} {
+    #var jdonate[gypsy_on] 1;
+    #echo {<ceb>Auto gypsy:<088> on};
+};
+
+#alias {agypsyoff} {
+    #var jdonate[gypsy_on] 0;
+    #var gid[bags_full] 0;
+    #if {"$jdonate[next]" == "gypsy" || "$jdonate[state]" == "gypsy"} {
+        #if {"$gid[state]" != "idle"} {
+            .gid_abort {turned off};
+        };
+        #unvar gypsyid_return;
+        #unvar gypsyid_after;
+        #var jdonate[next] {};
+        .jdonate_abort {auto gypsy turned off};
+    } {
+        #echo {<ceb>Auto gypsy:<088> off};
+    };
 };
 
 #NOP -- auto donate on/off, the run itself is in heartbeat.tin. Turning it off mid run stops it there, bot still paused;
@@ -342,7 +469,9 @@
 };
 
 #NOP -- aliases to setup strategies;
+#NOP -- jesse_strat says which strategy set is on (full, party, sewers or donate), .pre_bot_check (config.tin) reads it;
 #alias {mystrategy} {
+    #var jesse_strat full;
     strategy-clear;
     strategy call;
     strategy spark_prime;
@@ -353,6 +482,7 @@
 };
 
 #alias {mystrategy-party} {
+    #var jesse_strat party;
     strategy-clear;
     strategy call;
     strategy spark_prime;
@@ -374,12 +504,21 @@
     };
     #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
         get corpse;
+        .cooler_get_all;
         cooler corpse;
     };
 };
 
 #NOP -- aliases to setup corpsetrigs;
 #alias {mycorpsetrig} {
+    .mycorpsetrig_list;
+    mystrategy;
+};
+
+#NOP -- The mycorpsetrig actions without the strategy. .pre_bot_check (config.tin) uses it when a bot that;
+#NOP -- isn't the sewers starts, so the strategy stays as it is;
+#alias {.mycorpsetrig_list} {
+    #var jesse_trigset normal;
     corpsetrig-clear;
     corpsetrig+ wrap;
     corpsetrig+ slab;
@@ -390,12 +529,53 @@
     corpsetrig+ getAll;
     corpsetrig+ crafting;
     corpsetrig+ conworth;
+    corpsetrig+ ted;
     corpsetrig-on;
 };
 
 #alias {mycorpsetrig-party} {
+    #var jesse_trigset party;
     corpsetrig-clear;
     corpsetrig+ ted;
+    mystrategy-party;
+};
+
+#NOP -- corpsetrig for donate areas: the mycorpsetrig actions with ted, then bag1 bags the loot for the necro box.;
+#NOP -- Strategy call and spark_prime only;
+#alias {mycorpsetrig-donates} {
+    .mycorpsetrig_list;
+    #var jesse_trigset donate;
+    corpsetrig+ bag1;
+    corpsetrig+ bag1;
+    corpsetrig-on;
+    #var jesse_strat donate;
+    strategy-clear;
+    strategy call;
+    strategy spark_prime;
+};
+
+#NOP -- corpsetrig for sewers: grabs only listed ground loot instead of getAll;
+#alias {mycorpsetrig-sewers} {
+    #var jesse_trigset sewers;
+    corpsetrig-clear;
+    corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ preserve2;
+    corpsetrig+ divvy;
+    corpsetrig+ glance;
+    corpsetrig+ delay;
+    corpsetrig+ lootGrab;
+    corpsetrig+ crafting;
+    corpsetrig+ conworth;
+    corpsetrig+ bag1;
+    corpsetrig+ bag1;
+    corpsetrig-on;
+    #var jesse_strat sewers;
+    strategy-clear;
+    strategy call;
+    strategy spark_prime;
 };
 
 #alias {corpseoff} {
@@ -520,10 +700,39 @@
 
 #NOP -- jesse's 3kdb aliases;
 
-#alias format_jessesaliases {
+#NOP -- One alias per line: the name, then its description word wrapped at 70 characters. Lines after the;
+#NOP -- first start with spaces so they line up under the description, not at the left edge of the screen;
+#alias {format_jessesaliases} {
     #format {jessealias_name} {%-25s} {%1};
-    #format {jessealias_desc} {%-30s} {%2};
-    #showme $jessealias_name $jessealias_desc;
+    #format {jessealias_pad} {%-25s} {};
+    #var jessealias_text {%2};
+    #replace {jessealias_text} { } {;};
+    #list jessealias_words create {$jessealias_text};
+    #var jessealias_line {};
+    #var jessealias_first 1;
+    #foreach {$jessealias_words[%*]} {jessealias_word} {
+        #format jessealias_len {%L} {$jessealias_line $jessealias_word};
+        #if {"$jessealias_line" != "" && $jessealias_len > 70} {
+            #if {$jessealias_first} {
+                #showme {$jessealias_name $jessealias_line};
+                #var jessealias_first 0;
+            } {
+                #showme {$jessealias_pad $jessealias_line};
+            };
+            #var jessealias_line {$jessealias_word};
+        };
+        #elseif {"$jessealias_line" == ""} {
+            #var jessealias_line {$jessealias_word};
+        };
+        #else {
+            #var jessealias_line {$jessealias_line $jessealias_word};
+        };
+    };
+    #if {$jessealias_first} {
+        #showme {$jessealias_name $jessealias_line};
+    } {
+        #showme {$jessealias_pad $jessealias_line};
+    };
 };
 
 #NOP -- filter types, listed in the help and matched by the first letters (corp finds corpses);
@@ -580,6 +789,8 @@
 #NOP -- corpses;
 #list jesse3kdb add {{{name} {mycorpsetrig} {type} {corpses} {desc} {Default corpsetrig}}};
 #list jesse3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
+#list jesse3kdb add {{{name} {mycorpsetrig-donates} {type} {corpses} {desc} {Corpsetrig for donate areas: bags the loot, strategy call and spark_prime}}};
 #list jesse3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list jesse3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list jesse3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
@@ -593,6 +804,12 @@
 #list jesse3kdb add {{{name} {adonateon} {type} {corpses} {desc} {Auto donate on: bot pauses and donates when coffin, freezer and cooler are full}}};
 #list jesse3kdb add {{{name} {adonateoff} {type} {corpses} {desc} {Auto donate off, stops a run in progress}}};
 #list jesse3kdb add {{{name} {adonateabort} {type} {corpses} {desc} {Abort auto donate: stop the run, cdonate delays and the bot (.stop)}}};
+#list jesse3kdb add {{{name} {agypsyon} {type} {misc} {desc} {Auto gypsy on: when the bags are full during a bot, gypsyid, necro box, then back}}};
+#list jesse3kdb add {{{name} {agypsyoff} {type} {misc} {desc} {Auto gypsy off, stops a trip in progress}}};
+#list jesse3kdb add {{{name} {areagon} {type} {misc} {desc} {Auto reagents on: when a reagent runs out during a bot, topup at necro_reagent, then back}}};
+#list jesse3kdb add {{{name} {areagoff} {type} {misc} {desc} {Auto reagents off, stops a trip in progress}}};
+#list jesse3kdb add {{{name} {acoinson} {type} {misc} {desc} {Auto coins on: at 1M coins during a bot, deposit down to 50k at the bank, then back}}};
+#list jesse3kdb add {{{name} {acoinsoff} {type} {misc} {desc} {Auto coins off, stops a trip in progress}}};
 
 #NOP -- boosts;
 #list jesse3kdb add {{{name} {ein_brain} {type} {boosts} {desc} {Einsteins Brain: +3 INT}}};
@@ -622,10 +839,16 @@
 #list jesse3kdb add {{{name} {maskon} {type} {misc} {desc} {remove current helmet and wear mask}}};
 #list jesse3kdb add {{{name} {maskoff} {type} {misc} {desc} {remove mask and wear helmet}}};
 #list jesse3kdb add {{{name} {bag3} {type} {misc} {desc} {donate all from x amount of bags set with bagset}}};
+#list jesse3kdb add {{{name} {bagget} {type} {misc} {desc} {Get an item out of every bag and keep it: bagget <item>}}};
 #list jesse3kdb add {{{name} {refd} {type} {misc} {desc} {Reforge 12 daggers for pxp}}};
 #list jesse3kdb add {{{name} {gagson} {type} {misc} {desc} {Gag the hpbar}}};
 #list jesse3kdb add {{{name} {gagsoff} {type} {misc} {desc} {Clear all gags}}};
 #list jesse3kdb add {{{name} {quit} {type} {misc} {desc} {Quit guard: use quit REALLY to really quit}}};
+#list jesse3kdb add {{{name} {gypsyid} {type} {misc} {desc} {Identify the bags at the town gypsy, keep potions of experience, bag them again}}};
+#list jesse3kdb add {{{name} {gypsyid-stop} {type} {misc} {desc} {Stop gypsyid}}};
+#list jesse3kdb add {{{name} {bagcount} {type} {misc} {desc} {Count your bags and bagset the total (drops, gets and keeps the satchel first)}}};
+#list jesse3kdb add {{{name} {abagson} {type} {misc} {desc} {Bag count at login on}}};
+#list jesse3kdb add {{{name} {abagsoff} {type} {misc} {desc} {Bag count at login off}}};
 
 #NOP -- areas;
 #list jesse3kdb add {{{name} {pryout} {type} {areas} {desc} {Exit Prysmyia room}}};
@@ -647,3 +870,9 @@
 .add_speedrun {home} {misc} {13717} {Jesse's house (home 986)};
 
 #class {player_aliases} {close};
+
+#NOP -- gypsyid: identify the bags at the town gypsy, see gypsyid.tin;
+#read chars/$user/gypsyid.tin;
+
+#NOP -- bagcount: count the bags and bagset, see bagcount.tin;
+#read chars/$user/bagcount.tin;

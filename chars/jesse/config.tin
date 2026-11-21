@@ -3,7 +3,54 @@
 
 #NOP -- Bot Config;
 #alias {.pre_fight_check} {#NOP};
-#alias {.pre_bot_check} {#NOP};
+#NOP -- When a bot starts (+name or the bcy cycler) the corpsetrig and strategy follow the area:;
+#NOP --   sewers: mycorpsetrig-sewers (ground loot whitelist, bags, strategy call and spark_prime).;
+#NOP --   jesse_donate_bots (exact names): mycorpsetrig-donates (bags the loot, strategy call and spark_prime).;
+#NOP --   jesse_donate_full_bots (exact names): mycorpsetrig-donates with the full mystrategy.;
+#NOP --   jesse_xp_bots (names starting with these): the mycorpsetrig actions and the full mystrategy.;
+#NOP --   Any other bot: left as it is, so whatever you set last stays.;
+#NOP -- Each only switches when the set changes;
+#var jesse_donate_bots {catacombs|catacombs2|pol|pol2|pol3|land|land2|hippies|icyblue|chin1|chin2};
+#var jesse_donate_full_bots {banshees13};
+#var jesse_xp_bots {banshees|zodiacs|spitering|aegis|troopers|sectionz|mahjong};
+#alias {.pre_bot_check} {
+    #var jesse_bot_kind other;
+    #regex {$bot[alias]} {^{$jesse_xp_bots}} {#var jesse_bot_kind xp};
+    #regex {$bot[alias]} {^{$jesse_donate_bots}$} {#var jesse_bot_kind donate};
+    #regex {$bot[alias]} {^{$jesse_donate_full_bots}$} {#var jesse_bot_kind donate_full};
+    #if {"$bot[alias]" == "sewers"} {
+        #var jesse_bot_kind sewers;
+    };
+    #switch {"$jesse_bot_kind"} {
+        #case {"sewers"} {
+            #if {"$jesse_trigset" != "sewers"} {
+                mycorpsetrig-sewers;
+            };
+        };
+        #case {"donate"} {
+            #if {"$jesse_trigset" != "donate" || "$jesse_strat" != "donate"} {
+                mycorpsetrig-donates;
+            };
+        };
+        #case {"donate_full"} {
+            #if {"$jesse_trigset" != "donate"} {
+                mycorpsetrig-donates;
+            };
+            #if {"$jesse_strat" != "full"} {
+                mystrategy;
+            };
+        };
+        #case {"xp"} {
+            #if {"$jesse_trigset" != "normal"} {
+                .mycorpsetrig_list;
+            };
+            #if {"$jesse_strat" != "full"} {
+                mystrategy;
+            };
+        };
+    };
+};
+
 #alias {.check_death} {#NOP};
 
 #config {PACKET PATCH} {1.00};

@@ -11,6 +11,8 @@
 #var corpses[freezer] 0;
 #var corpses[servant] 0;
 #var corpses[golem] 0;
+#var cooler_emptied 0;
+#var cooler_bag_drop 0;
 
 
 #NOP -- Block certain things from picking up as "corpse";
@@ -494,10 +496,47 @@
 #act {^You activate the Ultra-Cooler to retrieve} {#math corpses[cooler] {$corpses[cooler] - 1}} {2};
 #act {^You place the %* into the Ultra-Cooler} {
 	#var inventory[cooler] 1;
+	#var cooler_emptied 0;
+	#var cooler_bag_drop 0;
 	#math corpses[cooler] {$corpses[cooler] + 1};
 	.corpses_inventory -1;
 } {2};
-#act {^There is no more room in the Ultra-Cooler} {#var corpses[cooler] 50} {2};
+#act {^There is no more room in the Ultra-Cooler} {
+	#var corpses[cooler] 50;
+	#var cooler_bag_drop 0;
+} {2};
+
+#NOP -- .cooler_get_all: empty the corpse before it goes in the cooler. A bag that comes out of it could be a;
+#NOP -- bag of devouring, so it gets emptied and dropped. Each item shows as "<item>: Ok." and the cooler's;
+#NOP -- reply comes after them, which ends the window (2 seconds at most). put prints "You put X in Y." so;
+#NOP -- bagging loot never sets it off, and your own bags are never dropped;
+#alias {.cooler_get_all} {
+	#var cooler_bag_drop 1;
+	get all from corpse;
+	#delay {cooler_bag_drop} {#var cooler_bag_drop 0} {2};
+};
+
+#NOP -- Also does what the general "Ok." action in common/actions.tin does, since only one action fires per line;
+#act {^%*{bag|Bag}%*: Ok.$} {
+	#var inventory[encumberance] 0;
+	#if {$cooler_bag_drop} {
+		get all from bag;
+		drop bag;
+	};
+} {2};
+
+#NOP -- A corpse that still holds the mob's things, even a few coins, won't go in the cooler.;
+#NOP -- The game says "<name> is too unwieldy to fit in the Ultra-Cooler with everything else it has on it.";
+#NOP -- Empty the corpse and try once more. A second refusal stops, so it can't loop.;
+#act {^%* is too unwieldy to fit in the Ultra-Cooler} {
+	#if {$cooler_emptied} {
+		#var cooler_emptied 0;
+		#return;
+	};
+	#var cooler_emptied 1;
+	.cooler_get_all;
+	cooler corpse;
+} {2};
 #act {^The cooler does not contain a corpse.$} {#var corpses[cooler] 0} {2};
 
 #NOP -- Track whether you own a cooler, so corpsetrig cooler steps don't pick up a corpse they can't store;

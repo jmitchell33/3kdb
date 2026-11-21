@@ -1,0 +1,66 @@
+#class {bagcount} {kill};
+#class {bagcount} {open};
+
+#NOP -- bagcount: count your bags and run bagset with the total. Bags are the Chaos Mall shopping bags,;
+#NOP -- the Bags of Honey Nut Clusters and the Celestial Satchel of Balance, which answers to bag too. With;
+#NOP -- the satchel it is dropped, picked up and kept again first. Runs on its own 10 seconds after login;
+#NOP -- (tickers.tin), abagsoff turns that off. Sends the game's own i, so the i alias extras don't run;
+#alias {bagcount} {
+    #if {"$incombat" == "1"} {
+        #delay {bags_count} {bagcount} {10};
+        #return;
+    };
+    #var bagc[total] 0;
+    #var bagc[satchel] 0;
+    #NOP -- Matches both inventory styles: " *Bag of Honey Nut Clusters" (necromancer) and;
+    #NOP -- " 1 *a Chaos Mall shopping bag." (everyone else, with how many). Only lives while the list comes in;
+    #class {bagcount_list} {kill};
+    #class {bagcount_list} {open};
+    #action {^{\s*}{\d+\s+|}{\*}{a Chaos Mall shopping bag|Bag of Honey Nut Clusters|Celestial Satchel of Balance}{\.|}$} {
+        #format bagc_n {%d} {%%2};
+        #if {$bagc_n < 1} {
+            #var bagc_n 1;
+        };
+        #math bagc[total] {$bagc[total] + $bagc_n};
+        #regex {%%4} {Satchel} {#var bagc[satchel] 1};
+    } {1};
+    #class {bagcount_list} {close};
+    #send {i};
+    #delay {bags_count} {.bagcount_done} {3};
+};
+
+#alias {.bagcount_done} {
+    #class {bagcount_list} {kill};
+    #if {$bagc[total] < 1} {
+        #echo {<ceb>Bag count:<088> no bags found, bagset left as it is.};
+        #return;
+    };
+    #if {$bagc[satchel]} {
+        #send {drop satchel};
+        #send {get satchel};
+        #send {keep satchel};
+    };
+    bagset $bagc[total];
+    #if {$bagc[satchel]} {
+        #echo {<ceb>Bag count:<088> $bagc[total] bags, the satchel included.};
+    } {
+        #echo {<ceb>Bag count:<088> $bagc[total] bags.};
+    };
+};
+
+#alias {abagson} {
+    #var bags_login_on 1;
+    #echo {<ceb>Bag count at login:<088> on};
+};
+
+#alias {abagsoff} {
+    #var bags_login_on 0;
+    #echo {<ceb>Bag count at login:<088> off};
+};
+
+#class {bagcount} {close};
+
+#NOP -- On by default. Set outside the class so vars.tin keeps it between sessions;
+#if {!&{bags_login_on}} {
+    #var bags_login_on 1;
+};

@@ -454,6 +454,8 @@ go_back
 
 If a bot is running, `go` pauses it first.
 
+Inside the Section Z game, `go` leaves by pausing the game, which doesn't work in a fight, so in a fight it waits until the fight is over. `go_back` takes you back in through the title screen with `unpause game`.
+
 ### Search the map
 
 - `mapfind <text>` lists rooms matching your text.
@@ -511,6 +513,10 @@ If you're not in the right room, you get three choices for 5 seconds:
 - **2:** you're in the right room, but the map needs moving
 - **3:** run the bot anyway
 
+The map can't walk into the Chaos Sewers. If you start `+sewers` from outside, or the cycler gets to it, it takes you in through the bowl to its start room first, then starts by itself.
+
+The Section Z bots can start from anywhere, even inside the game (it waits for a fight to end, then pauses the game). `+sectionz` and `+sectionz-fast` press start. `+sectionz-20` and `+sectionz-40` read your continues and code with `tagcheck` and run `set20` or `set40` for you, which uses a continue. With no continues left the bot stops (or the cycler moves on). If you stop a Section Z bot partway, starting it again carries on from the room you're in, as long as that room is on the bot's path. From outside the game, if your last `pause game` was on the path, it unpauses back there and carries on, even after `ld` or a lost connection. Neither uses a continue. That includes standing in the start room after `unpause game`. After Brain the Section Z bots pick up the barrier shield (`toggle sz_shield`), visit the Developer, and finish in the arcade, so they work in a bot cycle. With `toggle sz_dev` off they skip the Developer and finish in Brain's room.
+
 ### Control a running bot
 
 - `.pause` pauses it.
@@ -529,7 +535,7 @@ If you're not in the right room, you get three choices for 5 seconds:
 ### Bot settings
 
 - `playercheck` turns the check for other players on or off.
-- `autocollect` turns picking up all items on or off.
+- `autocollect` turns picking up items on or off. It only picks up items on the grab list in `common/itemlist.tin`, and never bags or the black stone from the Chaos Sewers.
 - `whitelist` shows your VIP list, the players `playercheck` ignores. `whitelist+ <name>` adds one, `whitelist- <name>` removes one, and `whitelist-party` adds your party.
 
 ### Run several areas in a row
@@ -623,6 +629,10 @@ These run after a kill, such as looting or using the corpse. They have their own
 - `corpsetrig-kb` switches between your killing blows only and all kills.
 - `corpsetrig-on` / `corpsetrig-off` turns them on or off.
 - `corpsetrig-clear` clears your list.
+
+`delay`, `delay5` and `delay10` pause the bot and run the actions after them 2, 5 or 10 seconds later, then the bot walks on. You can use more than one. If a laggy connection makes the bot walk past mobs it should fight, a delay in your list gives the game time to catch up after a kill. Lag isn't the only reason a bot skips mobs, so check the mob is one the bot targets and your map is right too.
+
+To loot without `getAll`, add `glance`, `delay` and `lootGrab` in that order. `lootGrab` only picks up items on the grab list in `common/itemlist.tin`, and never bags or the black stone from the Chaos Sewers, which grafts to your hand.
 
 [Back to top](#3kdb-manual)
 
@@ -1033,7 +1043,7 @@ nano ~/3kdb/chars/byron/actions.tin
 ```text
 #action {^You say: hello everyone}
 {
-    #showme {<ffa>--- MY ACTION WORKED ---<088>};
+    #echo {<ffa>--- MY ACTION WORKED ---<088>};
 };
 ```
 
@@ -1047,7 +1057,7 @@ nano ~/3kdb/chars/byron/actions.tin
 - The first `{ }` is the text to look for.
 - `^` means "at the very start of the line".
 - The second `{ }` is what to do.
-- `#showme` shows text to you only. Nobody else sees it.
+- `#echo` shows text to you only. Nobody else sees it, and it never sets off your actions. Use `#showme` only when you want the line to set off actions, such as testing one.
 - `<ffa>` sets a colour, and `<088>` puts it back to normal. Run `colors` to see your options.
 
 ### Actions that catch words
@@ -1058,7 +1068,7 @@ nano ~/3kdb/chars/byron/actions.tin
 #action {^You say: pick %*$}
 {
     #var last_pick {%1};
-    #showme {<afa>You picked: $last_pick<088>};
+    #echo {<afa>You picked: $last_pick<088>};
 };
 ```
 
@@ -1077,7 +1087,7 @@ Now `say pick gold ring` shows `You picked: gold ring`.
   ```text
   #action {^You say: first}
   {
-      #showme {<ffa>I go first<088>};
+      #echo {<ffa>I go first<088>};
   } {1};
   ```
 - **Follow the [game rules](#game-rules-you-must-know).** No anti-idle triggers or timers, and don't let an action take other players' kills or loot.
@@ -1092,7 +1102,7 @@ A variable stores something so you can use it later. `#var` sets it, and `$name`
 #alias {setkill}
 {
     #var my_target {%1};
-    #showme {<ffa>Target is now: $my_target<088>};
+    #echo {<ffa>Target is now: $my_target<088>};
 };
 ```
 
@@ -1109,11 +1119,11 @@ Now `setkill goblin` remembers `goblin` until your next reload or login.
 {
     #if {$my[hp][current] < 100}
     {
-        #showme {<faa>HP is low: $my[hp][current]<088>};
+        #echo {<faa>HP is low: $my[hp][current]<088>};
     };
     #else
     {
-        #showme {<afa>HP is fine: $my[hp][current]<088>};
+        #echo {<afa>HP is fine: $my[hp][current]<088>};
     };
 };
 ```
@@ -1125,7 +1135,7 @@ To compare words, use double quotes on both sides:
 {
     #if {"$guild" == "bard"}
     {
-        #showme {<afa>You are a bard<088>};
+        #echo {<afa>You are a bard<088>};
     };
 };
 ```
@@ -1163,13 +1173,13 @@ Your `heartbeat.tin` runs over and over during play, every couple of seconds or 
     {
         #if {$my[hp][current] < 500}
         {
-            #showme {<faa>Low health!<088>};
+            #echo {<faa>Low health!<088>};
         };
     };
 };
 ```
 
-This example shows its message again and again while your health is low, which is why anything in this file needs care. You could use your own command in place of `#showme`, such as drinking a potion, but check the file's notes first for how to run something only once per round. **Replace** the file's existing `_player_heartbeat` with your version instead of adding a second one, because only the last one counts.
+This example shows its message again and again while your health is low, which is why anything in this file needs care. You could use your own command in place of `#echo`, such as drinking a potion, but check the file's notes first for how to run something only once per round. **Replace** the file's existing `_player_heartbeat` with your version instead of adding a second one, because only the last one counts.
 
 ### Bot hooks
 
@@ -1179,7 +1189,7 @@ Your `config.tin` has two aliases you can fill in:
 #alias {.pre_bot_check}
 {
     #NOP -- Runs when a bot begins;
-    #showme {<ffa>Bot starting<088>};
+    #echo {<ffa>Bot starting<088>};
 };
 
 #alias {.pre_fight_check}
@@ -1196,7 +1206,7 @@ To run your own commands when the [deadman timer](#deadman-timer) fires, add thi
 ```text
 #alias {_player_deadmanActions}
 {
-    #showme {<faa>Deadman fired!<088>};
+    #echo {<faa>Deadman fired!<088>};
 };
 ```
 
@@ -1282,7 +1292,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 ### General
 
 - `findhere`: finds where you are on the mud to correct map.
-- `go`: map run to speedrun. Usage: `go <speedrun>`
+- `go`: map run to speedrun. Pauses a running bot first, and inside the Section Z game waits for a fight to end. Usage: `go <speedrun>`
 - `setup_3kdb`: Recommended mud prefs and first-run 3kdb client setup.
 - `dblog`: recent 3kdb changes from GitHub, 10 at a time. dblog more, dblog all, dblog <words>, file, by, since, show <hash>, new. dblog help explains. Usage: `dblog [more|all|<count>|<words>|file <part>|by <name>|since <when>|show <hash>|new|help]`
 - `dung_reset`: announce dungeon resets. Usage: `dung_reset <mj/sz/aegis/dungeonname>`
@@ -1423,7 +1433,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `whitelist-room`: add the players in this room to your VIP list.
 - `bot_report`: displays the progress and spoils of the current bot.
 - `playercheck`: toggles the playercheck.
-- `autocollect`: toggles picking up all items.
+- `autocollect`: toggles picking up items on the grab list (`common/itemlist.tin`).
 - `botlist`: displays all available bots to run.
 - `.stop`: stop and kill the bot.
 - `.pause`: pauses the bot.
@@ -1606,6 +1616,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `makering-white`: make a white ring - requires axe/2 white seeds/terras hammer.
 - `makering-green`: make a green ring - requires axe/2 green seeds/terras hammer.
 - `charmbracelet`: view charm bracelet options.
+- `sewers-in`: Chaos Sewers: go in through the bowl, find where you landed and walk to the sewers bot start room. Usage: `sewers-in / sewers-in stop`
 
 ### Fantasy areas
 

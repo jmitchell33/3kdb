@@ -1,0 +1,191 @@
+#class {chaos_sewers} {kill};
+#class {chaos_sewers} {open};
+
+#NOP -- Chaos Sewers: the map can't walk in from outside. The way in is the mouse trail entrance (go sewers),;
+#NOP -- enter puts you in a porcelain bowl, and killing the slugs there floods it and drops you in a random;
+#NOP -- sewer room. findhere-auto works out which room, then it walks one step at a time, since a slip;
+#NOP -- (You lose your footing) eats a move and a speedwalk would carry on from the wrong room.;
+#NOP --;
+#NOP -- sewers-in: go into the sewers and walk to the bot start room.;
+#NOP -- .sewers_in <vnum> <command>: go in, walk to <vnum>, then run <command>. The sewers bot uses it when;
+#NOP -- it starts outside the sewers (+sewers, the start room menu or the bcy cycler).;
+#NOP -- sewers-in stop: stop where you are;
+#var sewin[entrance] 18192;
+#var sewin[start] 18906;
+#var sewin[state] idle;
+#NOP -- findhere-auto runs to try before giving up (each stops at a fight or after 12 steps);
+#var sewin[find_max] 6;
+#NOP -- most steps for the walk to the room, then give up;
+#var sewin[walk_max] 3000;
+#NOP -- ticks (0.2 seconds each) to reach the entrance, or to get flushed out of the bowl;
+#var sewin[entrance_max] 900;
+#var sewin[bowl_max] 600;
+
+#alias {.sewin_echo} {
+    #echo {<ceb>Sewers:<088> %1};
+};
+
+#alias {.sewin_abort} {
+    #undelay {sewin};
+    #var sewin[state] idle;
+    .sewin_echo {<faa>%1 - stopped.<088>};
+};
+
+#alias {sewers-in} {
+    #if {"%1" == "stop"} {
+        #if {"$sewin[state]" != "idle"} {
+            .sewin_abort {stopped by you};
+        };
+        #return;
+    };
+    .sewers_in {$sewin[start]} {.sewin_echo {at the bot start room.}};
+};
+
+#alias {.sewers_in} {
+    #if {"$sewin[state]" != "idle"} {
+        .sewin_echo {already on the way in ($sewin[state]).};
+        #return;
+    };
+    #var sewin[target] {%1};
+    #var sewin[then] {%2};
+    #var sewin[ticks] 0;
+    #var sewin[steps] 0;
+    #var sewin[stepping] 0;
+    #var sewin[found] 0;
+    #var sewin[finds] 0;
+    #map get roomarea sewin[area];
+    #if {"$sewin[area]" == "Chaotic Sewers"} {
+        #var sewin[state] walk;
+    } {
+        .sewin_echo {going in through the bowl.};
+        #var sewin[state] to_entrance;
+        #NOP -- go saves the room it leaves in go_back, so keep what was there;
+        #var sewin[keep_back] {$go_back};
+        go sewers;
+        #var go_back {$sewin[keep_back]};
+    };
+    #delay {sewin} {.sewin_tick} {0.2};
+};
+
+#alias {.sewin_tick} {
+    #if {"$sewin[state]" == "idle"} {
+        #return;
+    };
+    #math sewin[ticks] {$sewin[ticks] + 1};
+    #switch {"$sewin[state]"} {
+        #case {"to_entrance"} {
+            #NOP -- the map can sit in the wrong mouse trail room at the end of the walk, so a mouse trail;
+            #NOP -- with an enter exit counts as the entrance too;
+            #map get roomvnum sewin[vnum];
+            #var sewin[at] 0;
+            #if {"$sewin[vnum]" == "$sewin[entrance]"} {
+                #var sewin[at] 1;
+            };
+            #regex {$room_short} {A mouse trail (%*enter%*)} {#var sewin[at] 1};
+            #if {$sewin[at] && "$incombat" != "1"} {
+                #var sewin[state] bowl;
+                #var sewin[ticks] 0;
+                enter;
+            };
+            #elseif {$sewin[ticks] > $sewin[entrance_max]} {
+                .sewin_abort {never reached the sewers entrance};
+                #return;
+            };
+        };
+        #case {"bowl"} {
+            #NOP -- the landing action below moves this on to find;
+            #if {$sewin[ticks] > $sewin[bowl_max]} {
+                .sewin_abort {never got flushed into the sewers};
+                #return;
+            };
+        };
+        #case {"find"} {
+            #if {$sewin[found]} {
+                #var sewin[state] walk;
+            };
+            #elseif {"$findauto" != "on" && "$incombat" != "1"} {
+                #NOP -- findhere-auto stopped (a fight, out of steps or no match), so run it again;
+                #if {$sewin[finds] >= $sewin[find_max]} {
+                    .sewin_abort {findhere-auto could not place you in the sewers};
+                    #return;
+                };
+                #math sewin[finds] {$sewin[finds] + 1};
+                findhere-auto;
+            };
+        };
+        #case {"walk"} {
+            .sewin_walk;
+            #if {"$sewin[state]" != "walk"} {
+                #return;
+            };
+        };
+    };
+    #delay {sewin} {.sewin_tick} {0.2};
+};
+
+#NOP -- One step toward the room, then wait for the new room (room[updated] is set at its prompt), or 1;
+#NOP -- second when a slip or blocked move runs mapUndo instead. Waits out fights;
+#alias {.sewin_walk} {
+    #if {"$incombat" == "1"} {
+        #return;
+    };
+    #if {$sewin[stepping]} {
+        #math sewin[step_wait] {$sewin[step_wait] + 1};
+        #if {$room[updated] || $sewin[step_wait] >= 5} {
+            #var sewin[stepping] 0;
+        } {
+            #return;
+        };
+    };
+    #map get roomvnum sewin[vnum];
+    #if {"$sewin[vnum]" == "$sewin[target]"} {
+        #var sewin[state] idle;
+        $sewin[then];
+        #return;
+    };
+    #math sewin[steps] {$sewin[steps] + 1};
+    #if {$sewin[steps] > $sewin[walk_max]} {
+        .sewin_abort {never walked to room $sewin[target]};
+        #return;
+    };
+    #var room[updated] 0;
+    #var sewin[step_wait] 0;
+    #var sewin[stepping] 1;
+    #map find {$sewin[target]};
+    #path walk;
+};
+
+#NOP -- The sewers bot started outside the sewers: pause it, go in and resume at its start room. A failed;
+#NOP -- move runs mapUndo, which also takes one off the bot step while the bot is on, so keep the step;
+#alias {.sewers_bot_enter} {
+    .pause;
+    #var sewin[bot_step] $bot[step];
+    .sewers_in {$bot[start_vnum]} {.sewers_bot_resume};
+};
+
+#alias {.sewers_bot_resume} {
+    #if {"$bot[active]" != "1"} {
+        #return;
+    };
+    #var bot[step] $sewin[bot_step];
+    .sewin_echo {at the bot start room, starting the bot.};
+    ..;
+};
+
+#NOP -- Landed in the sewers from the bowl, so work out where with findhere-auto;
+#action {^smack dab in the middle of a large sewer.} {
+    #if {"$sewin[state]" == "bowl"} {
+        #var sewin[state] find;
+        #var sewin[finds] 1;
+        findhere-auto;
+    };
+} {2};
+
+#NOP -- findhere found the room, so the walk can start;
+#action {YOU HAVE BEEN FOUND} {
+    #if {"$sewin[state]" == "find"} {
+        #var sewin[found] 1;
+    };
+} {2};
+
+#class {chaos_sewers} {close};

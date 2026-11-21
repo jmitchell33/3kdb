@@ -8,6 +8,13 @@
 #NOP -- only runs when the previous, stricter one finds nothing;
 #alias {findhere} {
 	#unvar findroom;
+	#NOP -- Save the player's own brief setting so it can be put back when the search ends. A findhere run;
+	#NOP -- while a search is already going keeps the first one, since brief is already off by then;
+	#if {"$finding_here" != "on"} {
+		#var findhere_brief {};
+		#var findhere_brief_ask 1;
+		#send !brief;
+	};
 	#var finding_here on;
 	#var findauto off;
 	#var findstep {};
@@ -19,6 +26,27 @@
 
 	look;
 	#delay {findhere_look} {.findhere_search} {2};
+};
+
+#NOP -- The reply to the bare brief sent by findhere, "Your brief setting is currently: [<brief>, mapping <map>]";
+#var findhere_brief {};
+#var findhere_brief_ask 0;
+#action {^Your brief setting is currently: [%w, mapping %w]} {
+	#if {$findhere_brief_ask} {
+		#var findhere_brief_ask 0;
+		#var findhere_brief {%1 %2};
+	};
+} {2};
+
+#NOP -- Put brief back the way the player had it. If the game never answered, use brief on with the map;
+#alias {.findhere_brief_restore} {
+	#var findhere_brief_ask 0;
+	#if {"$findhere_brief" == ""} {
+		#send !brief on yes;
+	} {
+		#send !brief $findhere_brief;
+	};
+	#var findhere_brief {};
 };
 
 #NOP -- The room name and exits come from MIP, which isn't resent for a look, so fall back to the room's;
@@ -170,7 +198,7 @@
 	.findhere_name;
 	#if {"$findname" == ""} {
 		#var finding_here off;
-		#send !brief on yes;
+		.findhere_brief_restore;
 		#showme <eaa>findhere: no room name was captured, so there's nothing to search for. Try again after moving.<088>;
 		#return;
 	};
@@ -219,7 +247,7 @@
 		#if {&{hell_area}} {.hell_from_map};
 		#var finding_here off;
 		#var findauto off;
-		#send !brief on yes;
+		.findhere_brief_restore;
 		#showme <dfa>----------------------------------------------------<088>;
 		#showme <dfa>              YOU HAVE BEEN FOUND                   <088>;
 		#showme <dfa>----------------------------------------------------<088>;
@@ -228,7 +256,7 @@
 	#if {&findroom[$find_count][] == 0} {
 		#var finding_here off;
 		#var findauto off;
-		#send !brief on yes;
+		.findhere_brief_restore;
 		#showme <eaa>----------------------------------------------------<088>;
 		#showme <eaa>      Sorry, we were not able to find your room.<088>;
 		#showme <eaa>       Start the process again with 'findhere'<088>;
@@ -446,13 +474,25 @@
 	findhere2 $findauto_best;
 };
 
+#NOP -- .findhere_plan_list <table>: that table's rooms in findplan_list, split by semicolons;
+#alias {.findhere_plan_list} {
+	#local fv {};
+	#var findplan_list {};
+	#foreach *%1[] fv {
+		#if {"$findplan_list" == ""} {#var findplan_list {$fv}} {#var findplan_list {$findplan_list;$fv}};
+	};
+};
+
 #alias {.findhere_auto_plan} {
 	#local fd {};
 	#local fv {};
 	#var findauto_plan {};
 	#var findplan_count &findroom[$find_count][];
 	#var findplan_q {};
-	#var findplan_q[1][s] {*findroom[$find_count][]};
+	#NOP -- Each room set is kept as a list split by semicolons. Stored as {a}{b}{c} it would be read back as;
+	#NOP -- key and value pairs, so an odd number of rooms got an empty extra room with no exits and no plan;
+	.findhere_plan_list findroom[$find_count];
+	#var findplan_q[1][s] {$findplan_list};
 	#var findplan_q[1][d] {};
 	#var findplan_seen {};
 	#format findplan_key {%H} {$findplan_q[1][s]};
@@ -484,11 +524,12 @@
 				#var findauto_plan $findplan_dir;
 				#return;
 			};
-			#format findplan_key {%H} {*findplan_next[]};
+			.findhere_plan_list findplan_next;
+			#format findplan_key {%H} {$findplan_list};
 			#if {&findplan_seen[$findplan_key]} {#continue};
 			#var findplan_seen[$findplan_key] 1;
 			#math findplan_tail {$findplan_tail + 1};
-			#var findplan_q[$findplan_tail][s] {*findplan_next[]};
+			#var findplan_q[$findplan_tail][s] {$findplan_list};
 			#var findplan_q[$findplan_tail][d] {$findplan_dir};
 		};
 	};

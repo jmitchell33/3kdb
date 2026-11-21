@@ -36,7 +36,12 @@
         #delay {4} {pause game};
         #delay {5} {play};
         #delay {6} {unpause};
-        #delay {7} {#map goto 25088;#var sectionz_busy 0};
+        #NOP -- the last pause above was in this start room, so the title screen's unpause game goes back here;
+        #delay {7} {
+            #map goto 25088;
+            #line quiet {#map at 24786 {#map link {unpause game} 25088}};
+            #var sectionz_busy 0;
+        };
     };
 };
 
@@ -52,9 +57,402 @@
         #delay {4} {pause game};
         #delay {5} {play};
         #delay {6} {unpause};
-        #delay {7} {#map goto 24948;#var sectionz_busy 0};
+        #NOP -- the last pause above was in this start room, so the title screen's unpause game goes back here;
+        #delay {7} {
+            #map goto 24948;
+            #line quiet {#map at 24786 {#map link {unpause game} 24948}};
+            #var sectionz_busy 0;
+        };
     };
 };
+
+#NOP -- SECTION Z BOT STARTS;
+#NOP -- .sz_enter <00|20|40> <command>: get to the title screen (pausing the game first if you're inside it),;
+#NOP -- then for 00 press start, and for 20 or 40 read your continues and the code with tagcheck and run;
+#NOP -- set20 or set40. <command> runs once you're in the section's start room. The sectionz, sectionz-fast,;
+#NOP -- sectionz-20 and sectionz-40 bots use it when they start anywhere else (+name, the start room menu or;
+#NOP -- the bcy cycler). No continues left or no code stops there;
+#var szin[state] idle;
+#var szin[title] 24786;
+#var szin[arcade] 24785;
+#var szin[start00] 24787;
+#NOP -- ticks (0.5 seconds each) to reach the title screen, and to wait for tagcheck;
+#var szin[title_max] 240;
+#var szin[tags_max] 12;
+
+#alias {.szin_echo} {
+    #echo {<ceb>Section Z:<088> %1};
+};
+
+#alias {.szin_abort} {
+    #undelay {szin};
+    #var szin[state] idle;
+    .szin_echo {<faa>%1 - stopped.<088>};
+    #if {$szin[bot]} {
+        #var szin[bot] 0;
+        #NOP -- the bot can't start, so with a bot cycle move on to the next area;
+        .stop;
+        #if {&{botcycle[]} > 0} {
+            nextarea;
+        };
+    };
+};
+
+#alias {.sz_enter} {
+    #if {"$szin[state]" != "idle"} {
+        .szin_echo {already on the way to section $szin[sec] ($szin[state]).};
+        #return;
+    };
+    #var szin[sec] {%1};
+    #var szin[then] {%2};
+    #var szin[ticks] 0;
+    #var szin[tries] 0;
+    #map get roomvnum szin[vnum];
+    #map get roomarea szin[area];
+    #if {"$szin[vnum]" == "$szin[title]"} {
+        #var szin[state] to_title;
+    };
+    #elseif {"$szin[vnum]" == "$szin[arcade]"} {
+        #var szin[state] to_title;
+        play;
+    };
+    #elseif {"$szin[area]" == "Section Z"} {
+        .szin_echo {pausing the game to get to the title screen.};
+        #var szin[state] pause;
+    };
+    #else {
+        #var szin[state] to_title;
+        #map run {$szin[title]};
+    };
+    #delay {szin} {.szin_tick} {0.5};
+};
+
+#alias {.szin_tick} {
+    #if {"$szin[state]" == "idle"} {
+        #return;
+    };
+    #math szin[ticks] {$szin[ticks] + 1};
+    #switch {"$szin[state]"} {
+        #case {"pause"} {
+            #NOP -- pause game doesn't work in a fight, it is sent again every 2 seconds until the arcade shows;
+            #var szin[at] 0;
+            #regex {$room_short} {The Arcade} {#var szin[at] 1};
+            #if {$szin[at]} {
+                #map goto {$szin[arcade]};
+                #var szin[state] to_title;
+                #var szin[ticks] 0;
+                play;
+            };
+            #elseif {"$incombat" != "1" && $szin[ticks] % 4 == 1} {
+                #math szin[tries] {$szin[tries] + 1};
+                #if {$szin[tries] > 10} {
+                    .szin_abort {couldn't pause the game};
+                    #return;
+                };
+                #NOP -- the title screen's unpause game exit goes where you paused, like the map's own pause exits;
+                #map get roomvnum szin[pvnum];
+                #line quiet {#map at {$szin[title]} {#map link {unpause game} {$szin[pvnum]}}};
+                pause game;
+            };
+        };
+        #case {"to_title"} {
+            #NOP -- the map moves as soon as a speedwalk is sent, so wait for the title screen itself;
+            #var szin[at] 0;
+            #regex {$room_short} {title screen} {#var szin[at] 1};
+            #if {$szin[at]} {
+                #map goto {$szin[title]};
+                #NOP -- your last pause is on this bot's path: unpause game goes back there, no code or new game;
+                #NOP -- only the saved pause room counts. The map's title unpause exit points at the sec 40 start;
+                #NOP -- room by default, so it would look like a pause even with no paused game;
+                #var szin[resume] 0;
+                #if {$szin[bot] && !$szin[no_unpause]} {
+                    .bot_path_rooms;
+                    #if {@sz_pause_on_path{}} {
+                        #var szin[resume] 1;
+                    };
+                };
+            };
+            #if {$szin[at] && $szin[resume]} {
+                .szin_echo {your last pause is on this path, unpausing to carry on from there.};
+                #var szin[state] unpause;
+                #var szin[ticks] 0;
+                unpause game;
+            };
+            #elseif {$szin[at] && "$szin[sec]" == "00"} {
+                #var szin[state] setting;
+                #var szin[ticks] 0;
+                press start;
+            };
+            #elseif {$szin[at]} {
+                #var szin[state] tags;
+                #var szin[ticks] 0;
+                #var szin[cont] 0;
+                #var szin[code] {};
+                #var szin[got] 0;
+                tagcheck;
+            };
+            #elseif {$szin[ticks] > $szin[title_max]} {
+                .szin_abort {never reached the Section Z title screen};
+                #return;
+            };
+        };
+        #case {"unpause"} {
+            #NOP -- wait for the room after the title screen, then find the step for it;
+            #var szin[at] 0;
+            #regex {$room_short} {title screen} {#var szin[at] 1};
+            #if {!$szin[at] && $szin[ticks] > 2} {
+                #NOP -- the paused game is used up now, a new pause saves the room again;
+                .sz_forget_pause;
+                .bot_find_step;
+                #if {$bot_found[step] > 0} {
+                    #map goto {$bot_found[vnum]};
+                    #var szin[bot_step] $bot_found[step];
+                    #var szin[state] idle;
+                    .szin_echo {back at step $bot_found[step] of &bot[steps][], no continue used.};
+                    $szin[then];
+                    #return;
+                };
+                #NOP -- unpaused somewhere off the path: pause again and get in the normal way;
+                .szin_echo {that pause wasn't on this path after all, getting in the normal way.};
+                #var szin[no_unpause] 1;
+                #var szin[state] pause;
+                #var szin[ticks] 0;
+                #var szin[tries] 0;
+            };
+            #elseif {$szin[ticks] > 20} {
+                .szin_abort {unpause game didn't take you back into the game};
+                #return;
+            };
+        };
+        #case {"tags"} {
+            #if {$szin[got]} {
+                #if {$szin[cont] < 1} {
+                    .szin_abort {you're out of Section Z continues (tagcheck), so sectionz-$szin[sec] can't start};
+                    #return;
+                };
+                #if {"$szin[code]" == ""} {
+                    .szin_abort {tagcheck shows no Section Z $szin[sec] code};
+                    #return;
+                };
+                #if {$sectionz_busy} {
+                    .szin_abort {set20/set40 is already running};
+                    #return;
+                };
+                .szin_echo {$szin[cont] continues left, going to section $szin[sec].};
+                #var szin[state] setting;
+                #var szin[ticks] 0;
+                #if {"$szin[sec]" == "20"} {
+                    set20;
+                } {
+                    set40;
+                };
+            };
+            #elseif {$szin[ticks] > $szin[tags_max]} {
+                .szin_abort {tagcheck shows no Section Z $szin[sec] code};
+                #return;
+            };
+        };
+        #case {"setting"} {
+            #NOP -- set20/set40 takes 7 seconds and moves the map to the start room at the end, press start;
+            #NOP -- needs the map moved to Section 00 here;
+            #if {!$sectionz_busy && $szin[ticks] > 2} {
+                #var szin[at] 0;
+                #regex {$room_short} {Section $szin[sec]} {#var szin[at] 1};
+                #if {$szin[at]} {
+                    #if {"$szin[sec]" == "00"} {
+                        #map goto {$szin[start00]};
+                    };
+                    #var szin[state] idle;
+                    $szin[then];
+                    #return;
+                };
+                #if {$szin[ticks] > 30} {
+                    .szin_abort {set$szin[sec] didn't put you in section $szin[sec]};
+                    #return;
+                };
+            };
+        };
+    };
+    #delay {szin} {.szin_tick} {0.5};
+};
+
+#NOP -- xsz_pause_room is class global (saved in vars.tin), so it is cleared the same way the pause action sets it;
+#alias {.sz_forget_pause} {
+    #class global open;
+    #var xsz_pause_room {};
+    #class global close;
+};
+
+#NOP -- unpause game with no paused game (it was used up, or the game ended). Forget the saved pause, and when;
+#NOP -- a bot was trying to carry on from it, get in the normal way with the code instead;
+#action {^You do not have a paused game.$} {
+    .sz_forget_pause;
+    #if {"$szin[state]" == "unpause"} {
+        .szin_echo {no paused game after all, using your section $szin[sec] code instead.};
+        #var szin[no_unpause] 1;
+        #var szin[state] to_title;
+        #var szin[ticks] 0;
+    };
+} {2};
+
+#NOP -- tagcheck lines: "Section Z           : 5 CONTINUES" and "Section Z - 40 code : <code>". The code is;
+#NOP -- kept in s20 or s40 for continue20 and continue40 whenever tagcheck shows it;
+#action {^Section Z%s: %d CONTINUES} {
+    #if {"$szin[state]" == "tags"} {
+        #var szin[cont] {%2};
+    };
+} {2};
+
+#action {^Section Z - %d code : %S} {
+    #var s%1 {%2};
+    #if {"$szin[state]" == "tags" && "%1" == "$szin[sec]"} {
+        #var szin[code] {%2};
+        #var szin[got] 1;
+    };
+} {2};
+
+#NOP -- @sz_pause_on_path{}: 1 when your last pause (xsz_pause_room, saved by the pause action in common/actions.tin);
+#NOP -- was in a room on this bot's path, matched by name and exits. Needs .bot_path_rooms first;
+#function {sz_pause_on_path} {
+    #NOP -- result is shared with the functions called here, so it is only set at the end;
+    #var spp_found 0;
+    #if {"$xsz_pause_room" != ""} {
+        #var spp_key {@bot_room_key{$xsz_pause_room}};
+        #var spp_k {@bot_room_key{@bot_vnum_name{$bot[start_vnum]}}};
+        #if {"$spp_k" == "$spp_key"} {
+            #var spp_found 1;
+        };
+        #foreach {*bot_path_room[]} {spp_i} {
+            #var spp_k {@bot_room_key{@bot_vnum_name{$bot_path_room[$spp_i]}}};
+            #if {"$spp_k" == "$spp_key"} {
+                #var spp_found 1;
+            };
+        };
+    };
+    #var result $spp_found;
+};
+
+#NOP -- The Section Z bots (but sectionz-arcade) run this as they start. Standing in a room on the bot's path;
+#NOP -- (the start room, or where you stopped or paused and unpaused back to), it carries on from there with no;
+#NOP -- code (.bot_find_step, common/bot/bot_findstep.tin). Anywhere else it pauses the bot and gets in with;
+#NOP -- .sz_enter, which first tries unpause game when your last pause was on this path;
+#var szin[bot] 0;
+#alias {.sz_bot_enter} {
+    #var szin[no_unpause] 0;
+    .bot_find_step;
+    #if {$bot_found[step] > 0} {
+        #map get roomvnum szin[vnum];
+        #if {"$szin[vnum]" != "$bot_found[vnum]"} {
+            #map goto {$bot_found[vnum]};
+        };
+        #var bot[step] $bot_found[step];
+        #if {$bot_found[step] > 1} {
+            .szin_echo {carrying on from step $bot_found[step] of &bot[steps][] here, no continue used.};
+            #NOP -- the room already showed before the step was set, so show it again for the bot to step on;
+            glance;
+        };
+        #return;
+    };
+    .pause;
+    #var szin[bot] 1;
+    #var szin[bot_step] $bot[step];
+    .sz_enter {%1} {.sz_bot_resume};
+};
+
+#alias {.sz_bot_resume} {
+    #var szin[bot] 0;
+    #if {"$bot[active]" != "1"} {
+        #return;
+    };
+    #var bot[step] $szin[bot_step];
+    #if {$bot[step] > 1} {
+        .szin_echo {starting the bot at step $bot[step].};
+    } {
+        .szin_echo {in the start room, starting the bot.};
+    };
+    ..;
+};
+
+#NOP -- SECTION Z BOT FINISH;
+#NOP -- .sz_finish is the last step of the sectionz, sectionz-fast, sectionz-20 and sectionz-40 paths, run once;
+#NOP -- Brain in Section 59 is dead. It picks up and keeps the barrier shield Brain drops (toggle sz_shield, on;
+#NOP -- by default, it binds on pickup). With toggle sz_dev off the bot then finishes in Brain's room. With it on;
+#NOP -- (the default) it pauses the bot and goes down to the Developer. He talks, the door opens (say hostage,;
+#NOP -- above), and he throws you into the arcade, the room sectionz-arcade ends in. Only then the bot finishes,;
+#NOP -- so a bot cycle moves on from there;
+#var szfin[state] idle;
+#var szfin[arcade] 24785;
+#NOP -- ticks (0.5 seconds each) to wait for the developer to throw you out, he takes about a minute;
+#var szfin[max] 300;
+
+#alias {.sz_finish} {
+    #if {"$bot[active]" != "1"} {
+        #return;
+    };
+    #if {"$toggles[sz_shield]" != "0"} {
+        get barrier shield;
+        keep barrier shield;
+    };
+    #NOP -- toggle sz_dev off: no Developer, the bot finishes right here in Brain's room (.botComplete runs;
+    #NOP -- straight after this last step), and a bot cycle moves on from here;
+    #if {"$toggles[sz_dev]" == "0"} {
+        .szin_echo {Brain is done, the bot finishes here (toggle sz_dev is off).};
+        #return;
+    };
+    .pause;
+    #var szfin[state] dev;
+    #var szfin[ticks] 0;
+    #var szfin[glanced] 0;
+    .szin_echo {Brain is done, going down to the Developer.};
+    d;
+    #delay {szfin} {.szfin_tick} {0.5};
+};
+
+#alias {.szfin_tick} {
+    #if {"$szfin[state]" == "idle"} {
+        #return;
+    };
+    #if {"$bot[active]" != "1"} {
+        #var szfin[state] idle;
+        #return;
+    };
+    #math szfin[ticks] {$szfin[ticks] + 1};
+    #NOP -- the throw shows no room. maphelper.tin's action on "The developer throws you against the wall" moves;
+    #NOP -- the map to the arcade (only one action fires per line). The map can also move on a command that;
+    #NOP -- failed, so when it says arcade, glance once and finish only when the room line says so too;
+    #var szfin[at] 0;
+    #regex {$room_short} {The Arcade} {#var szfin[at] 1};
+    #map get roomvnum szfin[vnum];
+    #if {!$szfin[at] && "$szfin[vnum]" == "$szfin[arcade]" && !$szfin[glanced]} {
+        #var szfin[glanced] 1;
+        glance;
+    };
+    #if {$szfin[at]} {
+        #var szfin[state] idle;
+        #map goto {$szfin[arcade]};
+        .szin_echo {in the arcade, the bot is done.};
+        #NOP -- .botComplete only finishes a bot that isn't paused, and .. would glance and step on;
+        #var bot[paused] 0;
+        .botComplete;
+        #return;
+    };
+    #if {$szfin[ticks] > $szfin[max]} {
+        #var szfin[state] idle;
+        .szin_echo {<faa>the Developer never threw you out - stopped, the bot is still paused.<088>};
+        #return;
+    };
+    #delay {szfin} {.szfin_tick} {0.5};
+};
+
+#NOP -- A game you already finished (you unpaused back into it): the Developer only whispers this and never;
+#NOP -- throws you out, and pause game doesn't work in his room. door goes to the title screen and exit from;
+#NOP -- there to the arcade;
+#action {^Developer whispers: You already have a nice high score button} {
+    #if {"$szfin[state]" == "dev"} {
+        door;
+        exit;
+    };
+} {2};
 
 #NOP -- MAKE BALANGOOL GEAR FROM SECTIONZ;
 #alias {gool} {
