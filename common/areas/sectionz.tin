@@ -162,16 +162,12 @@
             #if {$szin[at]} {
                 #map goto {$szin[title]};
                 #NOP -- your last pause is on this bot's path: unpause game goes back there, no code or new game;
-                #map get roomexits szin[title_ex] {$szin[title]};
-                #var szin[saved] {$szin[title_ex][unpause game]};
+                #NOP -- only the saved pause room counts. The map's title unpause exit points at the sec 40 start;
+                #NOP -- room by default, so it would look like a pause even with no paused game;
                 #var szin[resume] 0;
                 #if {$szin[bot] && !$szin[no_unpause]} {
                     .bot_path_rooms;
-                    #NOP -- the saved pause room (vars.tin, lasts through a reconnect) or the map's exit;
                     #if {@sz_pause_on_path{}} {
-                        #var szin[resume] 1;
-                    };
-                    #elseif {"$szin[saved]" != "" && @bot_on_path{$szin[saved]}} {
                         #var szin[resume] 1;
                     };
                 };
@@ -205,6 +201,8 @@
             #var szin[at] 0;
             #regex {$room_short} {title screen} {#var szin[at] 1};
             #if {!$szin[at] && $szin[ticks] > 2} {
+                #NOP -- the paused game is used up now, a new pause saves the room again;
+                .sz_forget_pause;
                 .bot_find_step;
                 #if {$bot_found[step] > 0} {
                     #map goto {$bot_found[vnum]};
@@ -277,6 +275,25 @@
     };
     #delay {szin} {.szin_tick} {0.5};
 };
+
+#NOP -- xsz_pause_room is class global (saved in vars.tin), so it is cleared the same way the pause action sets it;
+#alias {.sz_forget_pause} {
+    #class global open;
+    #var xsz_pause_room {};
+    #class global close;
+};
+
+#NOP -- unpause game with no paused game (it was used up, or the game ended). Forget the saved pause, and when;
+#NOP -- a bot was trying to carry on from it, get in the normal way with the code instead;
+#action {^You do not have a paused game.$} {
+    .sz_forget_pause;
+    #if {"$szin[state]" == "unpause"} {
+        .szin_echo {no paused game after all, using your section $szin[sec] code instead.};
+        #var szin[no_unpause] 1;
+        #var szin[state] to_title;
+        #var szin[ticks] 0;
+    };
+} {2};
 
 #NOP -- tagcheck lines: "Section Z           : 5 CONTINUES" and "Section Z - 40 code : <code>". The code is;
 #NOP -- kept in s20 or s40 for continue20 and continue40 whenever tagcheck shows it;
