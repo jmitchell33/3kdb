@@ -39,6 +39,9 @@
 #var jdonate[next] {};
 #NOP -- 1 once the zodiac hold has said what is waiting;
 #var jdonate[zod_noted] 0;
+#NOP -- stone trip: the black stone grafted to your hand (actions.tin sets it) pauses the bot to go to the gypsy,;
+#NOP -- uncurse all and dispose of it, then back. It comes first, the stone stops your hand working;
+#var jdonate[stone] 0;
 
 #NOP -- the coffin max is learned from "The coffin is full!" (modules/corpsemanager), the freezer and cooler hold 50;
 #alias {.jdonate_check_full} {
@@ -176,14 +179,29 @@
     #var jdonate[wait] 2;
 };
 
-#NOP -- jdonate[reag_out] is 1 when any reagent on the hpbar is at 0;
+#NOP -- jdonate[reag_out] is 1 when any reagent is at 0, from the hpbar or the familiar saying it needs more.;
+#NOP -- Bloodmoss doesn't count, topup never buys it;
 #alias {.jdonate_reag_check} {
     #var jdonate[reag_out] 0;
     #foreach {*my[necromancer][reagent][]} {jdonate_reag} {
+        #if {"$jdonate_reag" == "bloodmoss"} {
+            #continue;
+        };
         #if {"$my[necromancer][reagent][$jdonate_reag]" == "0"} {
             #var jdonate[reag_out] 1;
         };
     };
+};
+
+#NOP -- At the gypsy: uncurse all frees the stone (dispose says you're wearing it until then), then dispose.;
+#NOP -- The dispose action in actions.tin clears jdonate[stone], stone_done checks it;
+#alias {.jdonate_stone_at} {
+    #var gid[state] idle;
+    uncurse all;
+    dispose stone;
+    #var go_back $jdonate[stone_back];
+    #var jdonate[state] stone_done;
+    #var jdonate[wait] 2;
 };
 
 #NOP -- At the reagent room: topup buys what is missing once its list comes in, then head back to the bot;
@@ -194,6 +212,24 @@
     #var go_back $jdonate[reag_back];
     #var jdonate[state] reag_buying;
     #var jdonate[wait] 3;
+};
+
+#NOP -- Same, partway through a donate when preserve ran out (cdonate3 in aliases.tin);
+#alias {.jdonate_reag_mid_shop} {
+    #var gid[state] idle;
+    topup;
+    #var jdonate[state] reag_mid_buying;
+    #var jdonate[wait] 3;
+};
+
+#NOP -- topup fills each one to 999. The hpbar may not say so for a while, and a 0 left behind would send the;
+#NOP -- bot straight back. Bloodmoss is left alone, topup never buys it;
+#alias {.jdonate_reag_refill} {
+    #foreach {*my[necromancer][reagent][]} {jdonate_reag} {
+        #if {"$jdonate_reag" != "bloodmoss" && "$my[necromancer][reagent][$jdonate_reag]" == "0"} {
+            #var my[necromancer][reagent][$jdonate_reag] 999;
+        };
+    };
 };
 
 #NOP -- No trips while a zodiac bot runs (common/bot/bots/czodiacs*.tin). The walks there fail: a level can't be;
@@ -214,6 +250,9 @@
     #if {$jdonate[gypsy_on] && "$gid[bags_full]" == "1"} {
         #var jdonate[zod_want] {$jdonate[zod_want] bags};
     };
+    #if {"$jdonate[stone]" == "1"} {
+        #var jdonate[zod_want] {$jdonate[zod_want] stone};
+    };
     #if {"$jdonate[zod_want]" != "" && "$jdonate[zod_noted]" != "1"} {
         #var jdonate[zod_noted] 1;
         #format jdonate[zod_want] {%p} {$jdonate[zod_want]};
@@ -223,7 +262,8 @@
 
 #alias {.jdonate_tick} {
     #if {"$jdonate[state]" == "idle"} {
-        #NOP -- one trip at a time: corpse donate, then reagents, then full bags. Each has its own on/off;
+        #NOP -- one trip at a time: black stone, corpse donate, coins, reagents, then full bags. All but the stone;
+        #NOP -- have their own on/off;
         #if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
             .jdonate_check_full;
             .jdonate_reag_check;
@@ -232,7 +272,15 @@
                 #return;
             };
             #var jdonate[zod_noted] 0;
-            #if {$jdonate[on] && $jdonate[full]} {
+            #if {"$jdonate[stone]" == "1" && "$gid[state]" == "idle"} {
+                .pause;
+                #var jdonate[bot_step] $bot[step];
+                #var jdonate[state] wait_fight;
+                #var jdonate[calm] 0;
+                #var jdonate[next] stone;
+                .jdonate_echo {black stone on your hand. Bot paused, going to the gypsy once the fight is over.};
+            };
+            #elseif {$jdonate[on] && $jdonate[full]} {
                 .jdonate_start;
             };
             #elseif {$jdonate[coin_on] && "$gid[state]" == "idle" && ("$coins_spilled" == "1" || ($my[coins] >= $jdonate[coin_max] && @jdonate_coin_ready{}))} {
@@ -298,6 +346,14 @@
                     .gid_go bank;
                     .gid_walk $gid[bank] .jdonate_bank_at;
                 };
+                #elseif {$jdonate[calm] >= 2 && "$jdonate[next]" == "stone"} {
+                    #var jdonate[state] stone_trip;
+                    #map get roomvnum jdonate[stone_back];
+                    #var go_back $jdonate[stone_back];
+                    #var gid[state] stone;
+                    .gid_go town_gypsy;
+                    .gid_walk $gid[gypsy] .jdonate_stone_at;
+                };
                 #elseif {$jdonate[calm] >= 2 && "$jdonate[next]" == "reagent"} {
                     #var jdonate[state] reagent;
                     #map get roomvnum jdonate[reag_back];
@@ -329,6 +385,23 @@
                 #var go_back $jdonate[coin_back];
                 .jdonate_go_back;
             };
+            #case {"stone_trip"} {
+                #NOP -- the walk is driven by .gid_walk, idle here before stone_done means it stopped;
+                #if {"$gid[state]" == "idle"} {
+                    #var jdonate[next] {};
+                    .jdonate_abort {never reached the gypsy};
+                };
+            };
+            #case {"stone_done"} {
+                #var jdonate[next] {};
+                #if {"$jdonate[stone]" == "1"} {
+                    .jdonate_abort {the black stone is still on your hand};
+                } {
+                    .jdonate_echo {black stone gone, going back.};
+                    #var go_back $jdonate[stone_back];
+                    .jdonate_go_back;
+                };
+            };
             #case {"reagent"} {
                 #NOP -- the walk is driven by .gid_walk, idle here before reag_buying means it stopped;
                 #if {"$gid[state]" == "idle"} {
@@ -338,6 +411,7 @@
             };
             #case {"reag_buying"} {
                 #var jdonate[next] {};
+                .jdonate_reag_refill;
                 .jdonate_echo {reagents bought, going back.};
                 #var go_back $jdonate[reag_back];
                 .jdonate_go_back;
@@ -410,11 +484,52 @@
                 };
             };
             #case {"storing"} {
-                #NOP -- cdonate3 clears cdonate_storing when its last pass is done;
+                #NOP -- cdonate3 clears cdonate_storing when its last pass is done, or when preserve runs out;
+                #NOP -- of a reagent (cdonate_reag_stop). Then topup and come back to finish the corpses on the floor;
                 #if {"$cdonate_storing" != "1"} {
-                    #var jdonate[state] check;
-                    #var jdonate[wait] 1;
-                    look;
+                    #if {"$cdonate_reag_stop" == "1" && $jdonate[reag_on]} {
+                        #var cdonate_reag_stop 0;
+                        #var jdonate[donate_back] $go_back;
+                        .jdonate_echo {out of $cdonate_reag_name partway through, the corpses are on the crypt floor. Going to topup and back.};
+                        #var jdonate[state] reag_mid;
+                        #var gid[state] reagent;
+                        .gid_go necro_reagent;
+                        .gid_walk 7621 .jdonate_reag_mid_shop;
+                    } {
+                        #var cdonate_reag_stop 0;
+                        #var jdonate[state] check;
+                        #var jdonate[wait] 1;
+                        look;
+                    };
+                };
+            };
+            #case {"reag_mid"} {
+                #NOP -- the walk is driven by .gid_walk, idle here before reag_mid_buying means it stopped;
+                #if {"$gid[state]" == "idle"} {
+                    #var go_back $jdonate[donate_back];
+                    .jdonate_abort {never reached the reagent room, the corpses are still on the crypt floor};
+                };
+            };
+            #case {"reag_mid_buying"} {
+                .jdonate_reag_refill;
+                .jdonate_echo {reagents bought, going back to the crypt to finish.};
+                #var jdonate[state] to_crypt_mid;
+                #var jdonate[timer] 0;
+                .gid_go necro_corpse;
+            };
+            #case {"to_crypt_mid"} {
+                #if {"$jdonate[vnum]" == "$jdonate[crypt]"} {
+                    #NOP -- go saved this room as go_back on the way, put the bot's room back;
+                    #var go_back $jdonate[donate_back];
+                    cdonate3;
+                    #var jdonate[state] storing;
+                    #var jdonate[wait] 6;
+                } {
+                    #math jdonate[timer] {$jdonate[timer] + 1};
+                    #if {$jdonate[timer] > $jdonate[timeout]} {
+                        #var go_back $jdonate[donate_back];
+                        .jdonate_abort {never got back to the corpse crypt, the corpses are still on its floor};
+                    };
                 };
             };
             #case {"check"} {

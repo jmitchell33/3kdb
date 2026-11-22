@@ -57,10 +57,30 @@
 #NOP -- else a room on the path that matches (only if exactly one does). Then the step: the start room is;
 #NOP -- step 1, otherwise the step after one that lands here. The step the bot had reached when it was;
 #NOP -- stopped or paused (lastBot) wins when it fits, else the first one. bot_found[step] 0 means not found;
+#NOP -- bot_find_hint <step>: set just before .bot_find_step when the step is already known (the Section Z;
+#NOP -- bots keep the step you paused at). It wins when that step's room matches the room line, and is;
+#NOP -- cleared after each use;
+#var bot_find_hint 0;
+
 #alias {.bot_find_step} {
     #var bot_found {{step}{0}{vnum}{0}};
     .bot_path_rooms;
     #var bfs_here {@bot_room_key{$room_short}};
+    #var bfs_hint {$bot_find_hint};
+    #var bot_find_hint 0;
+    #if {$bfs_hint > 0 && $bfs_hint <= &bot[steps][]} {
+        #if {$bfs_hint == 1} {
+            #var bfs_hvnum {$bot[start_vnum]};
+        } {
+            #math bfs_hprev {$bfs_hint - 1};
+            #var bfs_hvnum {$bot_path_room[$bfs_hprev]};
+        };
+        #if {"@bot_room_key{@bot_vnum_name{$bfs_hvnum}}" == "$bfs_here"} {
+            #var bot_found[step] $bfs_hint;
+            #var bot_found[vnum] $bfs_hvnum;
+            #return;
+        };
+    };
     #map get roomvnum bfs_map;
     #map get roomname bfs_name {$bfs_map};
     #var bfs_vnum 0;

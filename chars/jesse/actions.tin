@@ -122,6 +122,17 @@
     };
 } {1};
 
+#nop -- black stone grafted to your hand: the heartbeat (heartbeat.tin) pauses the bot for a gypsy trip;
+#nop -- to uncurse and dispose of it. jdonate[stone] goes back to 0 once it is disposed of;
+#action {^Immediately upon placing your fingers on the large black stone,} {
+    #var jdonate[stone] 1;
+    #echo {<faa>Black stone grafted to your hand!<088>};
+} {1};
+
+#action {^You dispose of {black stone|Onyx Stone of Grafting}.$} {
+    #var jdonate[stone] 0;
+} {1};
+
 #nop -- mask drop;
 #action {The mask clatters to the ground.} {
     #if {!$idle_flag} {

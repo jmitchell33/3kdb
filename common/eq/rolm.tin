@@ -31,8 +31,13 @@
     #var rolm[anchor_point] $roomvnum;
 } {2};
 
+#NOP -- This line shows however the winch rune is touched (port or any other alias). A Section Z bot still;
+#NOP -- getting in stops there (common/areas/sectionz.tin). With no anchor point set the map can't follow;
 #action {A magical golden strand slithers into the room.  It gently encircles you} {
-    #map goto $rolm[anchor_point];
+    .sz_cancel {you winched away};
+    #if {"$rolm[anchor_point]" != ""} {
+        #map goto $rolm[anchor_point];
+    };
 } {2};
 
 #alias {setport} {

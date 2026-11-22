@@ -59,6 +59,8 @@ This is the full guide to 3kdb: what it is, how to use it, and how to add your o
   - [Colours](#colours)
   - [Data panel](#data-panel)
   - [Hide the map](#hide-the-map)
+  - [Bigger chat window](#bigger-chat-window)
+  - [Phones](#phones)
   - [Sounds](#sounds)
 - [Leaving the game](#leaving-the-game)
 - [Making your own commands](#making-your-own-commands)
@@ -257,12 +259,14 @@ Once you're logged in, the screen has these areas. Their exact size depends on y
 **Useful commands:**
 - `mapFull` switches the map to full screen. Run it again to switch back.
 - `hidemap` hides the map and gives its space to the data panel. `showmap` brings it back. See [Hide the map](#hide-the-map).
+- `hidecaption` hides the data panel and stretches the map down into its space. `showcaption` brings it back. With both hidden, chat and game text use the full width.
+- `toggle halfchat` makes the chat window take the top half of the screen. `toggle bigchat` stretches it down to the HP bars and hides game text. See [Bigger chat window](#bigger-chat-window).
 - `caption_view general` or `caption_view bot` switches data panel tabs.
 - `caption-help` explains the data panel.
 - `init_screen` redraws the whole screen if it looks wrong.
 - `draw_all` redraws the panels.
 
-**On a small screen or phone:** 3kdb switches to a phone layout when the window is 75 columns wide or less. It redraws when you resize the window.
+**On a small screen or phone:** 3kdb redraws when you resize the window. When the window is 75 columns wide or less, it switches to a phone layout. `toggle phone_layout` turns that off, and `toggle phone` hides the side panels on any phone screen. See [Phones](#phones).
 
 The start menu fits itself to your screen too. The logo shrinks to one line, and the character list scrolls, so the buttons always stay in view.
 
@@ -452,7 +456,7 @@ Walk back to where you ran `go` from:
 go_back
 ```
 
-If a bot is running, `go` pauses it first.
+If a bot is running, `go` pauses it first. With a bot loaded, `go_back` goes to the room the bot was paused in, even after more `go` trips or walking around in between.
 
 Inside the Section Z game, `go` leaves by pausing the game, which doesn't work in a fight, so in a fight it waits until the fight is over. `go_back` takes you back in through the title screen with `unpause game`.
 
@@ -515,7 +519,9 @@ If you're not in the right room, you get three choices for 5 seconds:
 
 The map can't walk into the Chaos Sewers. If you start `+sewers` from outside, or the cycler gets to it, it takes you in through the bowl to its start room first, then starts by itself.
 
-The Section Z bots can start from anywhere, even inside the game (it waits for a fight to end, then pauses the game). `+sectionz` and `+sectionz-fast` press start. `+sectionz-20` and `+sectionz-40` read your continues and code with `tagcheck` and run `set20` or `set40` for you, which uses a continue. With no continues left the bot stops (or the cycler moves on). If you stop a Section Z bot partway, starting it again carries on from the room you're in, as long as that room is on the bot's path. From outside the game, if your last `pause game` was on the path, it unpauses back there and carries on, even after `ld` or a lost connection. Neither uses a continue. That includes standing in the start room after `unpause game`. After Brain the Section Z bots pick up the barrier shield (`toggle sz_shield`), visit the Developer, and finish in the arcade, so they work in a bot cycle. With `toggle sz_dev` off they skip the Developer and finish in Brain's room.
+Bots that loop start their path again by themselves when they reach the end. They take one step per room, the same as the first time round, so they stop for the first mob after the loop, and a slip in the sewers can't send them the wrong way.
+
+The Section Z bots can start from anywhere. `+sectionz` and `+sectionz-fast` press start. `+sectionz-20` and `+sectionz-40` read your continues and code with `tagcheck` and run `set20` or `set40` for you, which uses a continue, but only when you have no paused game. With no continues left the bot stops (or the cycler moves on). If you stop a Section Z bot partway, starting it again carries on from the room you're in, as long as that room is on the bot's path. From outside the game it always tries `unpause game` first: a paused game is never used up, it stays until your next `pause game`, even after `ld`, a winch, dying, or running other bots. If that room is on the path it carries on from there, otherwise `+sectionz-20` and `+sectionz-40` stop and tell you, instead of spending a continue. Inside the game, off the path, they also stop and tell you: walk back onto the path, or `pause game` and `set20`/`set40` to start over. A stop, a death or a winch while the bot is still getting in stops it before any continue is used. After Brain the Section Z bots pick up the barrier shield (`toggle sz_shield`), visit the Developer, and finish in the arcade, so they work in a bot cycle. With `toggle sz_dev` off they skip the Developer and finish in Brain's room.
 
 ### Control a running bot
 
@@ -843,6 +849,46 @@ showmap
 ```
 
 `toggle hidemap` does the same thing, and `toggle-reset` shows the map again. `mapFull` still opens the full screen map while it's hidden.
+
+The data panel can be hidden the same way with `hidecaption` (or `toggle hidecaption`), and `showcaption` brings it back. With the map showing, the map stretches down the whole right side for a bigger view. Hide both, and the right side goes away: the chat window, the status bar and the game text use the full width of the screen.
+
+### Bigger chat window
+
+There are two sizes. For a chat window that still leaves room to play:
+
+```text
+toggle halfchat
+```
+
+The chat window and the status bar under it take the top half of the space above the HP bars, and game text gets the bottom half.
+
+For the biggest chat window:
+
+```text
+toggle bigchat
+```
+
+The chat window and the status bar under it stretch down to just above the HP bars, and game text is hidden while it's on, so this is for catching up on chat. Nothing is lost: game text still goes to your session log and scrollback, and triggers and bots work as normal. Type it again to go back to the normal size, and everything that came in shows up in the game text. Both work with the map and data panel hidden too, and then the chat window is full width. Turning one on turns the other off. Type either one again to go back to the normal size.
+
+### Phones
+
+3kdb checks the screen size every time it changes. 75 columns wide or less counts as a phone held upright, and 20 rows tall or less as a phone held sideways. Anything bigger is a PC, and on a PC these two toggles do nothing.
+
+`toggle phone_layout` (on by default):
+- **On:** a phone held upright gets the phone layout: a 5 row chat window and no map or data panel.
+- **Off:** a phone held upright gets the PC layout, just smaller.
+
+`toggle phone` (off by default):
+- **On:** a phone held either way hides the map and data panel, so chat and game text get the full width.
+- **Off:** a phone shows the map and data panel like a PC does, just narrower. A phone held upright still gets the phone layout while `phone_layout` is on.
+
+| Screen | Both at their defaults | `phone` on | Both off |
+|---|---|---|---|
+| PC | normal layout | normal layout | normal layout |
+| Phone held upright | phone layout | phone layout | PC layout, smaller |
+| Phone held sideways | PC layout, smaller | no map or data panel | PC layout, smaller |
+
+Neither one changes your settings. Back on a bigger screen, everything shows the way you had it, including a map or data panel you hid yourself. Switching between your PC and your phone with tmux is covered in [tmux.md](tmux.md).
 
 ### Sounds
 
@@ -1421,7 +1467,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `mapfind`: list rooms matching pattern in desc name and note. Usage: `mapfind pattern text`
 - `mappath`: map find path to pattern then path show. Usage: `mappath pattern text`
 - `mapicons`: echo unicode icon palette for map symbols.
-- `go_back`: map run back to vnum saved by go alias.
+- `go_back`: map run back to vnum saved by go alias (with a bot loaded, the room the bot was paused in).
 
 ### Bot commands
 
@@ -1860,7 +1906,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `teleport set`: set necromancer teleport anchor.
 - `teleport`: necromancer teleport to saved teleport anchor.
 - `preserve_remains`: preserve remains workflow.
-- `topup`: top up reagents or supplies run.
+- `topup`: top up reagents or supplies run. It buys everything but bloodmoss. When your familiar says it needs more of a reagent, 3kdb marks that reagent as out straight away, instead of waiting for the health bar.
 - `maskNP`: mask corpse NP quick macros. Usage: `maskNP width and digit suffixes see necro aliases`
 - `conjureUndead`: conjure undead.
 - `qtNP`: quick teleport necro preset.

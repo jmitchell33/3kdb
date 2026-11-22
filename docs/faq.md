@@ -56,6 +56,7 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [How do I use the mouse?](#how-do-i-use-the-mouse)
   - [How do I change colours?](#how-do-i-change-colours)
   - [How do I hide the map?](#how-do-i-hide-the-map)
+  - [How do I make the chat window bigger?](#how-do-i-make-the-chat-window-bigger)
   - [How do I hide combat spam?](#how-do-i-hide-combat-spam)
   - [How do I turn a feature on or off?](#how-do-i-turn-a-feature-on-or-off)
   - [How do I change guild?](#how-do-i-change-guild)
@@ -172,7 +173,7 @@ Yes, through Ubuntu, a Linux terminal that runs inside Windows. [setup.md Step 1
 
 ### Can I play on a phone?
 
-3kdb has a phone layout, which switches on when your terminal is 75 columns wide or less. You still need a terminal on your phone that's connected to a machine with 3kdb installed. To carry on a game you started on your PC, use tmux. See [How do I switch from my PC to my phone?](#how-do-i-switch-from-my-pc-to-my-phone)
+Yes. 3kdb has a phone layout (a small chat window and no side panels), which switches on when your terminal is 75 columns wide or less, like a phone held upright. `toggle phone_layout` turns it off, and then an upright phone gets the PC layout, just smaller. A phone held sideways gets the PC layout too, unless you turn on `toggle phone`, which hides the map and data panel on any phone. Back on your PC, the layout goes back to how you had it. See [Phones](manual.md#phones). You still need a terminal on your phone that's connected to a machine with 3kdb installed. To carry on a game you started on your PC, use tmux. See [How do I switch from my PC to my phone?](#how-do-i-switch-from-my-pc-to-my-phone)
 
 ### How do I start the game each time?
 
@@ -412,6 +413,12 @@ theme bright
 
 Type `hidemap`, and the data panel moves up into its space. `go`, `findhere` and bots still work. Type `showmap` to bring it back. It's saved for each character, and the map shows by default.
 
+`hidecaption` hides the data panel the same way and the map grows into its space, and `showcaption` brings it back. With both hidden, chat and game text use the full width.
+
+### How do I make the chat window bigger?
+
+Type `toggle halfchat` and the chat window takes the top half of the screen, with game text in the bottom half. For even more, `toggle bigchat` stretches it down to just above the HP bars and hides game text. That's still logged and kept in your scrollback, so type it again to go back and see what came in. See [Bigger chat window](manual.md#bigger-chat-window). See [Bigger chat window](manual.md#bigger-chat-window).
+
 ### How do I hide combat spam?
 
 `gags` lists what you can hide. To hide a group:
@@ -516,11 +523,11 @@ Yes, with the bot cycler. See [Run several areas in a row](manual.md#run-several
 
 ### How do I bot the Chaos Sewers?
 
-The map can't walk into the sewers, so `+sewers` takes you in through the bowl first, works out where you landed, walks to the start room and starts. It works from anywhere, and in the bot cycler. `sewers-in` does the same without starting the bot.
+The map can't walk into the sewers, so `+sewers` takes you in through the bowl first, works out where you landed, walks to the start room and starts. It works from anywhere, and in the bot cycler. Already inside the sewers it skips the bowl: if you ran `findhere` it walks straight to the start room, and if you didn't it runs `findhere-auto` first. `sewers-in` does the same without starting the bot.
 
 ### The Section Z bot says I'm out of continues
 
-`+sectionz-20` and `+sectionz-40` start with a continue code, and each new run uses one continue. `tagcheck` shows how many you have left. With none left the bot stops, or the cycler moves on to the next area. `+sectionz`, `+sectionz-fast` and `+sectionz-arcade` don't need continues. If a run stops partway, start the same bot again: it carries on from the room you're in, or unpauses back to where you last paused (even after a disconnect), without using a continue. It only uses one when you're somewhere off its path.
+`+sectionz-20` and `+sectionz-40` start with a continue code when you have no paused game, and each of those runs uses one continue. `tagcheck` shows how many you have left. With none left the bot stops, or the cycler moves on to the next area. `+sectionz`, `+sectionz-fast` and `+sectionz-arcade` don't need continues. If a run stops partway, start the same bot again: it carries on from the room you're in, or unpauses back to where you last paused, without using a continue. Your paused game stays until you pause again, even after a disconnect, a winch, dying or other bots, so this works with no continues left too. If that room isn't on the bot's path, the bot stops and tells you what to do rather than use a continue.
 
 ### What's the deadman timer?
 

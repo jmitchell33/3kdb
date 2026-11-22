@@ -12,10 +12,12 @@
 			dog feed;
 		};
 		#NOP -- Conditions to stop bot;
-		#if {$my[gp1][current] < $meditate_pause && !$bot_toggle && $bot[active] && !$meditating} {
+		#NOP -- only a bot that is walking: one you (or a death) paused stays paused, see bot[autopause] in .pause;
+		#if {$my[gp1][current] < $meditate_pause && !$bot_toggle && $bot[active] && !$bot[paused] && !$meditating} {
 			ptell Pausing to meditate.;
 			#var bot_toggle 1;
 			.pause;
+			#var bot[autopause] 1;
 			#ticker mcBotResume {
 				#NOP -- updated hpbar sometimes doesn't come through if out of combat;
 				#if {$incombat == 0} {
@@ -24,16 +26,20 @@
 					#if {$my[gp1][current] > 95} {
 						#var bot_toggle 0;
 						#var meditating 0;
-						#if {!$incombat} {..} {.unpause};
+						#if {"$bot[autopause]" == "1"} {
+							#var bot[autopause] 0;
+							#if {!$incombat} {..} {.unpause};
+						};
 						#unticker mcBotResume;
 					};
 				};
 			} {2};
 		};
-		#if {$my[gp2][current] > $hibernate_pause && !$bot_toggle && $bot[active] && !$hibernating} {
+		#if {$my[gp2][current] > $hibernate_pause && !$bot_toggle && $bot[active] && !$bot[paused] && !$hibernating} {
 			ptell Pausing to hibernate.;
 			#var bot_toggle 1;
 			.pause;
+			#var bot[autopause] 1;
 			#ticker mcBotResume {
 				#NOP -- updated hpbar sometimes doesn't come through if out of combat;
 				#if {$incombat == 0} {
@@ -42,7 +48,10 @@
 					#if {$my[gp2][current] < 5} {
 						#var bot_toggle 0;
 						#var hibernating 0;
-						#if {!$incombat} {..} {.unpause};
+						#if {"$bot[autopause]" == "1"} {
+							#var bot[autopause] 0;
+							#if {!$incombat} {..} {.unpause};
+						};
 						#unticker mcBotResume;
 					};
 				};

@@ -214,7 +214,8 @@
                 #if {!$shelter_defer} {
                     #NOP -- bot already paused by someone else (a zodiac stepper in its treasure room): leave its resume to it;
                     #var shelter_bot_foreign 0;
-                    #if {$bot[active] && (("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") || ($bot[paused] && "$bot_toggle" != "1" && "$pausedtoregen" == "1"))} {#var shelter_bot_foreign 1};
+                    #NOP -- bot_toggle 1 with bot[autopause] cleared: the guild rest had it, then a death or the player paused it;
+                    #if {$bot[active] && (("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") || ($bot[paused] && ("$bot_toggle" != "1" || ("$bot[autopause]" != "1" && !$shelter_bot_wait)) && "$pausedtoregen" == "1"))} {#var shelter_bot_foreign 1};
                     #NOP -- shelter's own pause is not someone else taking the bot from the MC regen pause;
                     #var regen_foreign_keep $regen_bot_foreign;
                     #if {$bot[active]} {.pause};
@@ -272,7 +273,8 @@
             #if {"$roomvnum" != "54572" || "$zodiac_riftVnum" || "$zodiac_portalVnum"} {
                 #NOP -- bot already paused by someone else (a zodiac stepper): the MC > 97 resume leaves it to them;
                 #var regen_bot_foreign 0;
-                #if {$bot[paused] && "$bot_toggle" != "1" && "$shelter_pause" == "1"} {#var regen_bot_foreign 1};
+                #NOP -- bot_toggle 1 with bot[autopause] cleared: the guild rest had it, then a death or the player paused it;
+                #if {$bot[paused] && ("$bot_toggle" != "1" || ("$bot[autopause]" != "1" && !$shelter_bot_wait)) && "$shelter_pause" == "1"} {#var regen_bot_foreign 1};
                 .pause;
                 #var pausedtoregen 0;
                 _regen_hold;

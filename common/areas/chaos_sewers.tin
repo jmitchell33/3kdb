@@ -20,6 +20,37 @@
 #NOP -- ticks (0.2 seconds each) to reach the entrance, or to get flushed out of the bowl;
 #var sewin[entrance_max] 900;
 #var sewin[bowl_max] 600;
+#NOP -- sewin[lost] 1 from landing in the sewers until a findhere finds the room, so the map isn't trusted;
+#NOP -- in between (it still sits where it was before the bowl);
+#var sewin[lost] 0;
+
+#NOP -- @sewin_where{}: where the room line says you are. 1 in the sewers, 2 in the bowl, 0 anywhere else.;
+#NOP -- Sewer Maze and Sewer Portal are only in the sewers. Dead End is in other areas too, so it counts only;
+#NOP -- while the map is in the sewers or on the mouse trail that leads there;
+#function {sewin_where} {
+    #var sww_where 0;
+    #map get roomarea sww_area;
+    #regex {$room_short} {{^(-R-_)?(Sewer Maze|Sewer Portal) \(}} {#var sww_where 1};
+    #if {"$sww_area" == "Chaotic Sewers" || "$sww_area" == "Mouse Trails Cottage"} {
+        #regex {$room_short} {{^(-R-_)?Dead End \(}} {#var sww_where 1};
+    };
+    #regex {$room_short} {{^(-R-_)?porcelain bowl \(}} {#var sww_where 2};
+    #var result $sww_where;
+};
+
+#NOP -- @sewin_map_ok{}: 1 when the map can be trusted for a walk in the sewers. It is in a sewer room with the;
+#NOP -- same name and exits as the room line, and no landing since the last findhere;
+#function {sewin_map_ok} {
+    #var swm_ok 0;
+    #map get roomarea swm_area;
+    #map get roomvnum swm_vnum;
+    #if {"$swm_area" == "Chaotic Sewers" && !$sewin[lost]} {
+        #if {"@bot_room_key{@bot_vnum_name{$swm_vnum}}" == "@bot_room_key{$room_short}"} {
+            #var swm_ok 1;
+        };
+    };
+    #var result $swm_ok;
+};
 
 #alias {.sewin_echo} {
     #echo {<ceb>Sewers:<088> %1};
@@ -54,9 +85,30 @@
     #var sewin[found] 0;
     #var sewin[finds] 0;
     #map get roomarea sewin[area];
-    #if {"$sewin[area]" == "Chaotic Sewers"} {
+    #NOP -- the room line decides where you are, the map can still be where it was before the bowl;
+    #var sewin[where] @sewin_where{};
+    #NOP -- the landing shows no room title, so right after it the room line still says porcelain bowl;
+    #if {$sewin[where] == 2 && $sewin[lost]} {
+        #var sewin[where] 1;
+    };
+    #if {$sewin[where] == 2} {
+        .sewin_echo {in the bowl, waiting to be flushed into the sewers.};
+        #var sewin[state] bowl;
+    };
+    #elseif {$sewin[where] == 1 && @sewin_map_ok{}} {
         #var sewin[state] walk;
-    } {
+    };
+    #elseif {$sewin[where] == 1} {
+        .sewin_echo {already in the sewers, finding the room with findhere-auto first.};
+        #var sewin[state] find;
+        #var sewin[finds] 1;
+        findhere-auto;
+    };
+    #elseif {"$sewin[area]" == "Chaotic Sewers"} {
+        .sewin_abort {the map is in the sewers but you're not. Walk to a room the map knows and start again};
+        #return;
+    };
+    #else {
         .sewin_echo {going in through the bowl.};
         #var sewin[state] to_entrance;
         #NOP -- go saves the room it leaves in go_back, so keep what was there;
@@ -174,6 +226,7 @@
 
 #NOP -- Landed in the sewers from the bowl, so work out where with findhere-auto;
 #action {^smack dab in the middle of a large sewer.} {
+    #var sewin[lost] 1;
     #if {"$sewin[state]" == "bowl"} {
         #var sewin[state] find;
         #var sewin[finds] 1;
@@ -183,6 +236,7 @@
 
 #NOP -- findhere found the room, so the walk can start;
 #action {YOU HAVE BEEN FOUND} {
+    #var sewin[lost] 0;
     #if {"$sewin[state]" == "find"} {
         #var sewin[found] 1;
     };

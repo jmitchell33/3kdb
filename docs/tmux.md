@@ -186,7 +186,7 @@ Then run `tt++ startmenu.tin` in `~/3kdb` and play.
 tmux new -A -s 3k
 ```
 
-You're in the same game. About 3 seconds later 3kdb redraws for the phone's size. When the screen is 75 columns wide or less, it switches to its phone layout.
+You're in the same game. About 3 seconds later 3kdb redraws for the phone's size. When the screen is 75 columns wide or less, it switches to its phone layout, and back on the PC it puts everything back. `toggle phone_layout` and `toggle phone` change this. See [Phones](manual.md#phones).
 
 **4. Back on your PC**, run the same command again. If the PC window was still open, click in it instead. Then **type a letter and delete it with Backspace**. The screen grows back to PC size, and 3kdb redraws for it 3 seconds later.
 

@@ -7,6 +7,7 @@
 #var toggleDefaults {
     {3kreport} {1}
     {artifacts} {0}
+    {bigchat} {0}
     {capsules} {0}
     {capsules_green} {0}
     {chatlog_says} {1}
@@ -26,12 +27,16 @@
     {fracture_ctell} {0}
     {fracture_notify} {0}
     {go_echo} {1}
+    {halfchat} {0}
+    {hidecaption} {0}
     {hidemap} {0}
     {kill_stats} {1}
     {map_follow} {1}
     {map_vnum} {0}
     {mission} {0}
     {numbers} {1}
+    {phone} {0}
+    {phone_layout} {1}
     {portal_ctell} {0}
     {portal_notify} {0}
     {rounds} {0}
@@ -74,6 +79,7 @@
 #NOP -- What each toggle does, shown in toggle-list;
 #var toggleDesc {
     {artifacts} {Grabs guild artifacts off the floor (not in Pinnacle) and puts them in your chat window and Discord}
+    {bigchat} {Turning it on turns halfchat off. Stretches the chat window and the Idle/Deadman box down to the hpbar and hides game text. It's still logged and in your scrollback, and turning bigchat off shows it. Good for catching up on chat}
     {3kreport} {Eternals: checks (cstats after a kill for the kill report}
     {capsules} {Section Z: swallows another blue or orange capsule when one wears off}
     {capsules_green} {Section Z: swallows another green capsule when one wears off}
@@ -97,12 +103,16 @@
     {fracture_ctell} {Zodiacs: fracture_notify, and ctells your clan too}
     {fracture_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a fracture (grimoire) hour}
     {go_echo} {Says 'here we go!' when go finds the room}
+    {halfchat} {Makes the chat window and the Idle/Deadman box take the top half of the space above the hpbar, so game text still gets the bottom half. Turning it on turns bigchat off}
+    {hidecaption} {Hides the caption panel under the map, and the map stretches down into its space. With hidemap on too, chat and game text get the full width}
     {hidemap} {Hides the map to give its space to the side panel. go and bots still work}
     {kill_stats} {After each kill, checks xp, coins and (cstats (Eternals with 3kreport) for the xp tracker, bot stats and 3kReport. Off: kills still count, xp and coins earned show 0. Mages still check coins for their familiar}
     {map_vnum} {Shows the room number in the bottom right corner of the map}
     {map_follow} {While you follow someone, moves your map with you each time they lead you to another room}
     {mission} {Asks for a mission when you find a mission giver}
     {numbers} {Numbers vaf perk: 3kdb checks for it at login (or from your first damage line), then loads dstats and aims at mobs by the name in that line. Off: sends numbers off to the game and 3kdb acts like you don't have the perk. Typing numbers on/off in the game flips it too. See numbers-info}
+    {phone} {On a phone, held upright or sideways, hides the map and caption panel so chat and game text get the full width. Off: a phone shows them like a PC does, just narrower (phone_layout still covers upright). Does nothing on a PC}
+    {phone_layout} {On a phone held upright, shrinks the chat window to 5 rows and hides the map and caption panel. Off: an upright phone gets the PC layout, just smaller. Does nothing on a PC}
     {portal_ctell} {Zodiacs: portal_notify, and ctells your clan too}
     {portal_notify} {Zodiacs: NOTE in your chat window (and Discord) when timecheck shows a portal (tome) hour}
     {recover_parser_off} {Necros: recover also sends parser off}
@@ -157,6 +167,25 @@
     #if {"%1" == "hidemap"}
     {
         .map_visibility;
+    };
+    #if {"%1" == "hidecaption"}
+    {
+        .caption_visibility;
+    };
+    #NOP -- bigchat and halfchat are two sizes of the same window, so turning one on turns the other off;
+    #if {"%1" == "bigchat" && "$toggles[bigchat]" == "1" && "$toggles[halfchat]" == "1"}
+    {
+        #var toggles[halfchat] 0;
+        #echo {<faa>   -----  halfchat has been turned off -----<088>};
+    };
+    #if {"%1" == "halfchat" && "$toggles[halfchat]" == "1" && "$toggles[bigchat]" == "1"}
+    {
+        #var toggles[bigchat] 0;
+        #echo {<faa>   -----  bigchat has been turned off -----<088>};
+    };
+    #if {"%1" == "bigchat" || "%1" == "halfchat" || "%1" == "phone" || "%1" == "phone_layout"}
+    {
+        init_screen;
     };
     #if {"%1" == "sessionlog"} {#if $toggles[sessionlog] {.sessionlog_start} {sessionlog off}};
     #if {"%1" == "worlddrops2"} {.worlddrops2_watch};

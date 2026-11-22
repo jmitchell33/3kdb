@@ -120,6 +120,9 @@
     #undelay {bot_kick};
     #undelay {bot_restart};
     #undelay {bot_resume};
+    #undelay {bot_loop};
+    #NOP -- A +name typed just before would still load its bot 4 seconds after it was typed;
+    #undelay {bot_start};
     #unvar bot;
     #unalias {..};
     #class {bot} {kill};
@@ -127,8 +130,15 @@
     #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
 };
 
+#NOP -- Only the first pause saves where the bot is (lastBot, bot[pause_room]), so another pause while you're;
+#NOP -- away (deadman, a death, a player check) doesn't move it to wherever you walked;
+#NOP -- bot[autopause] 1 marks a pause made by a guild heartbeat (resting) or the corpse actions, which;
+#NOP -- resume the bot themselves. Any other pause (yours, a death, go) clears it, so they leave the bot paused;
 #alias .pause {
-    .backupBot;
+    #if {"$bot[paused]" != "1"} {
+        .backupBot;
+    };
+    #var bot[autopause] 0;
     #undelay bot_kick;
     #var bot[paused] 1;
     #if {"$draw[status][active]" == "on"} {#delay 2 {_caption_data_bot}};
@@ -151,6 +161,8 @@
             #var bot[holding] 0;
             #var bot[skip] 0;
             #var bot_first_in_room_check 1;
+            #NOP -- The move is on its way, so .bot holds off until its room (or a slip or block) comes back;
+            #format bot[await] {%T};
             #if {$bot[reverse]} {
                 @oppositeDir{${bot[steps][${bot[step]}]}};
                 #math bot[step] {$bot[step] - 1};
@@ -174,6 +186,9 @@
 };
 
 #alias {.determineBotAction} {
+    #NOP -- A room came, so the loop restart in .botComplete doesn't need its kick;
+    #var bot[loop_wait] 0;
+    #var bot[await] 0;
     #if !$bot[paused] {
         .botStopWalking;
         #if {$bot[foundplayer]} {
@@ -244,7 +259,23 @@
 #NOP -- starts or continues the bot after it's loaded;
 #alias {..} {.unpause;glance};
 
-#alias {.bot} {#if {$bot[paused] == 0} {..}};
+#NOP -- .bot glances so the room line starts the next step. A glance while a move or another glance is;
+#NOP -- still waiting for its room gives two room lines, so the bot sends two moves and runs a step ahead.;
+#NOP -- Then a slip or a blocked move sends the next one from the wrong room. So it waits until that room;
+#NOP -- comes back (.determineBotAction, .mapSlip or mapUndo clear bot[await]), or 5 seconds in case it never does.;
+#NOP -- .. always glances, for when you need to kick it yourself;
+#alias {.bot} {
+    #if {$bot[paused] == 0} {
+        #format bot_now {%T};
+        #if {"$bot[await]" != "" && "$bot[await]" != "0"} {
+            #if {$bot_now - $bot[await] < 5} {
+                #return;
+            };
+        };
+        #var bot[await] $bot_now;
+        ..;
+    };
+};
 
 #action {----- BOT REGISTERED KILL -----} {
     #if {"$deathReport[mob_killed]" == "Fire Mite"} {
@@ -381,8 +412,19 @@
                 #var bot[stats][loop][xp] 0;
                 #var bot[stats][loop][coins] 0;
                 #echo {\nLooping bot.};
+                #NOP -- No .bot right away. The last step's move is still on its way, and its room starts step 1.;
+                #NOP -- A glance now would show a second room, so the bot would send two moves and stay one move;
+                #NOP -- ahead for the whole loop. Then a slip or a blocked move sends the next one from the wrong room.;
+                #NOP -- If no room came at all (the last step wasn't a move) kick it after 2 seconds.;
+                #NOP -- Any room clears bot[loop_wait] in .determineBotAction, and a fight there resumes the bot itself.;
                 #var bot[step] 1;
-                .bot;
+                #var bot[loop_wait] 1;
+                #delay {bot_loop} {
+                    #if {$bot[loop_wait]} {
+                        #var bot[loop_wait] 0;
+                        .bot;
+                    };
+                } {2};
             } {
                 #echo {\nBot finished.};
                 .xp_rate {$bot[stats][xp]} {$bot[start-time]};

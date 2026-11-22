@@ -139,10 +139,14 @@
             #send {ptell Litany mind luminous, continuing.};
             #var bot_toggle 1;
             #var suspend_toggle 1;
-            #if {!$incombat} {..};
             #unticker suspendResume;
             #undelay suspendTimeout;
-            .unpause;..;#var bot_toggle 1;
+            #NOP -- only when the heartbeat paused it, not you or a death, see bot[autopause] in .pause;
+            #if {"$bot[autopause]" == "1"} {
+                #var bot[autopause] 0;
+                .unpause;
+                ..;
+            };
         } {suspend};
     };
 } {2};
@@ -157,7 +161,12 @@
         #var suspend_toggle 1;
         #unticker suspendResume;
         #undelay suspendTimeout;
-        .unpause;..;#var bot_toggle 1;
+        #NOP -- only when the heartbeat paused it, not you or a death, see bot[autopause] in .pause;
+        #if {"$bot[autopause]" == "1"} {
+            #var bot[autopause] 0;
+            .unpause;
+            ..;
+        };
     };
 } {2};
 

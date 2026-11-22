@@ -4,8 +4,13 @@
 #read common/bot/bot_cycle.tin;
 #read common/bot/bot_findstep.tin;
 
+#NOP -- The Section Z bots (but sectionz-arcade) resume through .sz_resume (common/areas/sectionz.tin), which;
+#NOP -- unpauses and checks the room and step the same way starting the bot does;
 #alias {.resume} {
-    #if {"$lastBot[area]" == "Section Z"} {
+    #if {"$lastBot[alias]" == "{sectionz|sectionz-fast|sectionz-20|sectionz-40}"} {
+        .sz_resume;
+    };
+    #elseif {"$lastBot[area]" == "Section Z"} {
         #map run 24786;
         unpause game;
         #echo {10 seconds until $lastBot[rating] resumes...};
@@ -21,14 +26,13 @@
 
 
 
-#NOP -- Walk to the bot's start room. The map can't walk into the Chaos Sewers, and from outside the sewers;
-#NOP -- bot goes in through the bowl itself (common/areas/chaos_sewers.tin), so there's no walk to try.;
+#NOP -- Walk to the bot's start room. The sewers bot gets there itself (common/areas/chaos_sewers.tin): the;
+#NOP -- map can't walk into the Chaos Sewers, and inside them a slip breaks a speedwalk.;
 #NOP -- The Section Z bots (but sectionz-arcade) get in themselves (common/areas/sectionz.tin): a map walk;
 #NOP -- from inside the game goes through pause game, which fails in a fight, and 20 and 40 need the code;
 #alias {.bot_run_start} {
     #map get roomarea bot_start_area {$bot[start_vnum]};
-    #map get roomarea bot_here_area;
-    #if {"$bot_start_area" == "Chaotic Sewers" && "$bot_here_area" != "Chaotic Sewers"} {
+    #if {"$bot_start_area" == "Chaotic Sewers"} {
         #return;
     };
     #if {"$bot[alias]" == "sectionz" || "$bot[alias]" == "sectionz-fast" || "$bot[alias]" == "sectionz-20" || "$bot[alias]" == "sectionz-40"} {
@@ -52,6 +56,14 @@
         };
     };
     
+    #NOP -- .stop only exists once a bot is loaded, so until then it cancels this start instead;
+    #if {"$bot[active]" != "1"} {
+        #alias {.stop} {
+            #undelay {bot_start};
+            #unalias {.stop};
+            #echo {Bot start cancelled.};
+        };
+    };
     #delay {bot_start} {
         #read common/bot/bots/$bot[file].tin;
         update_xp start;
