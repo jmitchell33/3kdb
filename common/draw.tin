@@ -95,6 +95,17 @@
     init_screen;
 };
 
+#NOP -- @draw_ticker_rows{}: the ticker's lines, 3 at least. At login the ticker has no lines yet and;
+#NOP -- &ticker_data[] stays as text, which made halfchat and bigchat come back the normal size after ld;
+#function {draw_ticker_rows} {
+    #var result 3;
+    #if {&{ticker_data}} {
+        #if {&ticker_data[] > 3} {
+            #var result &ticker_data[];
+        };
+    };
+};
+
 #NOP Calculate various area dimensions, called on start and SCREEN RESIZE;
 #alias init_screen {
     #screen get rows screen[height];
@@ -215,11 +226,7 @@
         #math tmpHalfRows {($screen[height] - $tmpHalfBottom) / 2 - 1};
         #format tmpHalfRows {%d} {$tmpHalfRows};
         #if {"$draw[ticker][active]" == "on"} {
-            #var tmpHalfTicker &ticker_data[];
-            #if {$tmpHalfTicker < 3} {
-                #var tmpHalfTicker 3;
-            };
-            #math tmpHalfRows {$tmpHalfRows - $tmpHalfTicker - 1};
+            #math tmpHalfRows {$tmpHalfRows - @draw_ticker_rows{} - 1};
         };
         #if {$tmpHalfRows > $chat[rows]} {
             #var chat[rows] $tmpHalfRows;
@@ -238,11 +245,7 @@
         };
         #if {"$draw[ticker][active]" == "on"} {
             #math tmpBigRows {$screen[height] - $tmpBigBottom - 1};
-            #var tmpBigTicker &ticker_data[];
-            #if {$tmpBigTicker < 3} {
-                #var tmpBigTicker 3;
-            };
-            #math tmpBigRows {$tmpBigRows - $tmpBigTicker - 1};
+            #math tmpBigRows {$tmpBigRows - @draw_ticker_rows{} - 1};
         } {
             #math tmpBigRows {$screen[height] - $tmpBigBottom - 2};
         };
@@ -258,7 +261,7 @@
     #if {"$draw[chat][active]" == "on"} {
         #math chat[height] {$chat[rows] + 1};
         #math ticker[top] {$chat[height]};
-        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
+        #math ticker[bottom] {$ticker[top] + @draw_ticker_rows{} + 1};
         #NOP -- Hiding the map keeps this column for the caption, so chat stays out of it;
         #if {$draw[map][istop] && !$draw[side][hidden]} {
             #math {chat[right]} {-$map[width]-1};
@@ -269,7 +272,7 @@
         };
     } {
         #var ticker[top] 1;
-        #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
+        #math ticker[bottom] {$ticker[top] + @draw_ticker_rows{} + 1};
         #var chat[height] 0;
     };
 
@@ -295,7 +298,7 @@
     };
 
     #NOP -- If there is a ticker, then adjust the split;
-    #if {"$draw[ticker][active]" == "on"} {#math split[top] {$split[top] + @max{&ticker_data[];3} + 1}};
+    #if {"$draw[ticker][active]" == "on"} {#math split[top] {$split[top] + @draw_ticker_rows{} + 1}};
 
     #NOP -- bigchat's game text row is the box's bottom border row;
     #if {"$draw[bigchat][cover]" == "1"} {
