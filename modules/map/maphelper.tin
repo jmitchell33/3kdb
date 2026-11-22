@@ -539,6 +539,8 @@
 #alias mapUndo {
 	#map undo;
 	#if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
+		#NOP -- The move came back, so .bot can glance again;
+		#var bot[await] 0;
 		#math bot[step] {$bot[step] - 1};
 		#NOP -- Count failures on the same step, a missing exit never clears so pause instead of looping;
 		#if {"$bot[retry][step]" == "$bot[step]"} {
@@ -563,9 +565,14 @@
 #NOP -- A slip stops a move by chance, so unlike a blocked exit it shouldn't count towards BOT BLOCKED after;
 #NOP -- 5 tries. Step back, wait a second and try again, and only pause after 20 slips on the same step.;
 #NOP -- With the bot paused (a walk back or walk out) it is a plain mapUndo;
+#NOP -- bot[walk] stays 1 during the wait, so bot_ticker doesn't call it stuck and send its own glance;
+#NOP -- (and corpsetrig's) on top of the retry. Two glances would send two moves at once;
 #alias {.mapSlip} {
 	#if {"$bot[active]" == "1" && "$bot[paused]" != "1"} {
 		#map undo;
+		#var bot[await] 0;
+		#undelay {bot_kick};
+		#undelay {bot_restart};
 		#math bot[step] {$bot[step] - 1};
 		#if {"$bot[slip][step]" == "$bot[step]"} {
 			#math bot[slip][count] {$bot[slip][count] + 1};
@@ -578,8 +585,10 @@
 			#var bot[slip][count] 0;
 			.pause;
 		} {
-			#var bot[walk] 0;
-			#delay {botSlip} {#if {!$incombat} {.bot}} {1};
+			#delay {botSlip} {
+				#var bot[walk] 0;
+				#if {!$incombat} {.bot};
+			} {1};
 		};
 	} {
 		mapUndo;

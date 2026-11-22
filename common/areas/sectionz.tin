@@ -284,6 +284,17 @@
             #if {$szin[at]} {
                 #map goto {$szin[title]};
             };
+            #NOP -- a game another Section Z bot paused is on its own path. Its rooms can be on this path too (the;
+            #NOP -- 40 start room is on sectionz-fast), so this bot would carry on from there. Start a new game instead;
+            #if {$szin[at] && $szin[bot] && !$szin[no_unpause] && "$xsz_pause_bot" != "" && "$xsz_pause_bot" != "$bot[alias]"} {
+                .szin_echo {your paused game is from $xsz_pause_bot, not $bot[alias], so not going back into it.};
+                #var szin[no_unpause] 1;
+            };
+            #NOP -- the game still keeps its last pause after it is finished, so don't unpause back into it;
+            #if {$szin[at] && $szin[bot] && !$szin[no_unpause] && "$xsz_done" == "1"} {
+                .szin_echo {your last game is finished, starting a new one.};
+                #var szin[no_unpause] 1;
+            };
             #if {$szin[at] && $szin[bot] && !$szin[no_unpause]} {
                 .szin_echo {trying your paused game first, no continue used.};
                 #var szin[state] unpause;
@@ -386,6 +397,10 @@
                     #if {"$szin[sec]" == "00"} {
                         #map goto {$szin[start00]};
                     };
+                    #NOP -- a new game, so the finished one is gone;
+                    #class global open;
+                    #var xsz_done 0;
+                    #class global close;
                     #var szin[state] idle;
                     $szin[then];
                     #return;
@@ -466,6 +481,20 @@
 #var szin[bot] 0;
 #alias {.sz_bot_enter} {
     #var szin[no_unpause] 0;
+    #NOP -- still in a finished game (toggle sz_dev off ends in Brain's room, section 59): its rooms are on the;
+    #NOP -- path but cleared, so pause out of it and start a new game, whichever bot this is. Only section 59,;
+    #NOP -- so a game started again by hand (the flag is still set) isn't left by mistake;
+    #var szin[s59] 0;
+    #regex {$room_short} {{^(-R-_)?Section 59 \(}} {#var szin[s59] 1};
+    #if {"$xsz_done" == "1" && $szin[s59]} {
+        .szin_echo {this game is finished, pausing out to start a new one.};
+        .pause;
+        #var szin[bot] 1;
+        #var szin[bot_step] 1;
+        #var szin[no_unpause] 1;
+        .sz_enter {%1} {.sz_bot_resume};
+        #return;
+    };
     .bot_find_step;
     #if {$bot_found[step] > 0} {
         #map get roomvnum szin[vnum];
@@ -564,6 +593,13 @@
         get barrier shield;
         keep barrier shield;
     };
+    #NOP -- the game is finished, so unpause game would only go back into its cleared rooms. Forget the pause;
+    #NOP -- and mark it done (xsz_done, class global so it lasts through a logout). With toggle sz_dev off you;
+    #NOP -- are still in the game, and .sz_bot_enter won't carry on in it. A new game clears it;
+    .sz_forget_pause;
+    #class global open;
+    #var xsz_done 1;
+    #class global close;
     #NOP -- toggle sz_dev off: no Developer, the bot finishes right here in Brain's room (.botComplete runs;
     #NOP -- straight after this last step), and a bot cycle moves on from here;
     #if {"$toggles[sz_dev]" == "0"} {

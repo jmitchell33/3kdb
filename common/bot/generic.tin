@@ -161,6 +161,8 @@
             #var bot[holding] 0;
             #var bot[skip] 0;
             #var bot_first_in_room_check 1;
+            #NOP -- The move is on its way, so .bot holds off until its room (or a slip or block) comes back;
+            #format bot[await] {%T};
             #if {$bot[reverse]} {
                 @oppositeDir{${bot[steps][${bot[step]}]}};
                 #math bot[step] {$bot[step] - 1};
@@ -186,6 +188,7 @@
 #alias {.determineBotAction} {
     #NOP -- A room came, so the loop restart in .botComplete doesn't need its kick;
     #var bot[loop_wait] 0;
+    #var bot[await] 0;
     #if !$bot[paused] {
         .botStopWalking;
         #if {$bot[foundplayer]} {
@@ -256,7 +259,23 @@
 #NOP -- starts or continues the bot after it's loaded;
 #alias {..} {.unpause;glance};
 
-#alias {.bot} {#if {$bot[paused] == 0} {..}};
+#NOP -- .bot glances so the room line starts the next step. A glance while a move or another glance is;
+#NOP -- still waiting for its room gives two room lines, so the bot sends two moves and runs a step ahead.;
+#NOP -- Then a slip or a blocked move sends the next one from the wrong room. So it waits until that room;
+#NOP -- comes back (.determineBotAction, .mapSlip or mapUndo clear bot[await]), or 5 seconds in case it never does.;
+#NOP -- .. always glances, for when you need to kick it yourself;
+#alias {.bot} {
+    #if {$bot[paused] == 0} {
+        #format bot_now {%T};
+        #if {"$bot[await]" != "" && "$bot[await]" != "0"} {
+            #if {$bot_now - $bot[await] < 5} {
+                #return;
+            };
+        };
+        #var bot[await] $bot_now;
+        ..;
+    };
+};
 
 #action {----- BOT REGISTERED KILL -----} {
     #if {"$deathReport[mob_killed]" == "Fire Mite"} {
