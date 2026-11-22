@@ -849,7 +849,8 @@
 	};
 };
 
-#var chat[max] 30;
+#NOP -- bigchat can show more than 30 rows on a tall screen;
+#var chat[max] 100;
 #var chat[offset] 0;
 #var chat[page] 1;
 #var chat[scroll] page;
@@ -917,7 +918,7 @@
 	updateChatCategory;
 	#if {"$draw[chat][active]" == "on"} {
 		#line sub var #line sub esc #draw $theme[chatbox] left right side 2 1 $chat[height]-1 $chat[right] $chat[general][-$chat[start]..-$chat[end]];
-		#draw $theme[chatbox] calign jeweled line 1 1 1 $map[left]  {    $tellString    $partyString    $clanString    $guildString    $hmString    };
+		#draw $theme[chatbox] calign jeweled line 1 1 1 $chat[right]  {    $tellString    $partyString    $clanString    $guildString    $hmString    };
 	};
 };
 

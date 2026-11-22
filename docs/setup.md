@@ -418,7 +418,7 @@ nano ~/3kdb/chars/byron/private.tin
 
 **The screen looks broken or squashed**
 
-Make your terminal window bigger. 3kdb redraws when the window size changes, and it switches to a phone layout when the window is 75 columns wide or less.
+Make your terminal window bigger. 3kdb redraws when the window size changes, and it switches to a phone layout when the window is 75 columns wide or less. See [Phones](manual.md#phones).
 
 **I can't select text in the menu**
 

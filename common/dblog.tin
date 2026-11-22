@@ -696,11 +696,13 @@
 }
 
 #NOP Save change %1's hash as the last one seen. Hashes are only 0-9 and a-f, so the shell is safe;
+#NOP Inside #regex every &1 becomes the hash, so never write 2>&1 here. It would make an empty file;
+#NOP named after the hash in the 3kdb folder;
 #alias {dblog_write_seen}
 {
     #regex {%1} {^{[0-9a-f]+}$}
     {
-        #system {mkdir -p vars > /dev/null 2>&1; echo &1 > vars/dblog_seen.txt};
+        #system {mkdir -p vars 2>/dev/null; echo &1 > vars/dblog_seen.txt};
     };
 }
 

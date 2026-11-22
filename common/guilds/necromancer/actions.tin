@@ -35,6 +35,25 @@
     #var my[necromancer][altered] 1;
 } {2};
 
+#NOP -- The familiar says this the moment a reagent runs out, e.g. "You need more mandrake root, master.";
+#NOP -- The hpbar Reag count can take a long time to catch up, so set that reagent to 0 right away.;
+#NOP -- Names are matched on their first word, so "mandrake root" is mandrake and "black pearls" is black pearl;
+#action {^  You need more %1, master.$} {
+    #format necroReagNeed {%l} {%1};
+    #var necroReagKey {};
+    #foreach {ginseng;bloodmoss;spider web;goldenrod;mandrake;black pearl;pine needles;nightshade} {necroReagName} {
+        #var necroReagFirst {$necroReagName};
+        #replace necroReagFirst { %*} {};
+        #if {"$necroReagNeed" == "%*$necroReagFirst%*"} {
+            #var necroReagKey {$necroReagName};
+        };
+    };
+    #if {"$necroReagKey" == ""} {
+        #var necroReagKey {$necroReagNeed};
+    };
+    #var my[necromancer][reagent][$necroReagKey] 0;
+} {2};
+
 #NOP --------------------------------------- MOB STATUS TRACKING ACTIONS  ------------------------------------------;
 #act {^You charge forward and close your jaws on %*} {
     .circle_power {rabies};

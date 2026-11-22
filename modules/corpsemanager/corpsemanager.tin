@@ -510,10 +510,62 @@
 #NOP -- bag of devouring, so it gets emptied and dropped. Each item shows as "<item>: Ok." and the cooler's;
 #NOP -- reply comes after them, which ends the window (2 seconds at most). put prints "You put X in Y." so;
 #NOP -- bagging loot never sets it off, and your own bags are never dropped;
+#NOP -- In the Chaos Sewers a mob can carry the black stone, which grafts to your hand when taken. So there the;
+#NOP -- corpse goes to the cooler as it is, and only when the cooler refuses it does .cooler_stone_check look;
+#NOP -- inside before emptying it;
 #alias {.cooler_get_all} {
+	#if {"$area" == "Chaotic Sewers"} {
+		#return;
+	};
+	.cooler_empty;
+};
+
+#alias {.cooler_empty} {
 	#var cooler_bag_drop 1;
 	get all from corpse;
 	#delay {cooler_bag_drop} {#var cooler_bag_drop 0} {2};
+};
+
+#NOP -- .cooler_stone_check: look in the corpse you hold, then send coolerlookdone, a word the game doesn't know.;
+#NOP -- Its "There is no reason to" reply comes after every line of the look, so that ends the look. A black;
+#NOP -- stone in it means drop the corpse, otherwise empty it and try the cooler again. A glance can't end it,;
+#NOP -- since the corpsetrig's own glance can come back before the look does. The stone action only exists;
+#NOP -- during the look, so it can match anywhere in a line without taking channel lines the rest of the time;
+#var cooler_looking 0;
+#var cooler_stone 0;
+#alias {.cooler_stone_check} {
+	#var cooler_looking 1;
+	#var cooler_stone 0;
+	#line quiet #action {%i{black stone|stone of grafting}} {#var cooler_stone 1} {1};
+	look in corpse;
+	#send {coolerlookdone};
+	#delay {cooler_look} {
+		#if {$cooler_looking} {
+			#var cooler_stone 1;
+			.cooler_stone_done {no reply to look in corpse};
+		};
+	} {5};
+};
+
+#action {^There is no reason to 'coolerlookdone' here.$} {
+	#line gag;
+	#if {$cooler_looking} {
+		.cooler_stone_done {a black stone is in this corpse};
+	};
+} {1};
+
+#alias {.cooler_stone_done} {
+	#undelay {cooler_look};
+	#line quiet #unaction {%i{black stone|stone of grafting}};
+	#var cooler_looking 0;
+	#if {$cooler_stone} {
+		#var cooler_emptied 0;
+		#echo {<faa>Cooler: %1, dropping it instead of emptying it.<088>};
+		drop corpse;
+	} {
+		.cooler_empty;
+		cooler corpse;
+	};
 };
 
 #NOP -- Also does what the general "Ok." action in common/actions.tin does, since only one action fires per line;
@@ -534,7 +586,11 @@
 		#return;
 	};
 	#var cooler_emptied 1;
-	.cooler_get_all;
+	#if {"$area" == "Chaotic Sewers"} {
+		.cooler_stone_check;
+		#return;
+	};
+	.cooler_empty;
 	cooler corpse;
 } {2};
 #act {^The cooler does not contain a corpse.$} {#var corpses[cooler] 0} {2};

@@ -240,6 +240,11 @@
                     #if !$idle_flag {deadmanActions};
                 } {$deadmanIdleTimeout};
             };
+            #NOP -- enter jumps the scrollback back to the end after this event, so bigchat scrolls it up again;
+            #NOP -- a moment later (common/draw.tin);
+            #if {"$draw[bigchat][cover]" == "1"} {
+                #delay {bigchat_hold} {.bigchat_hold} {0.01};
+            };
             #if $sessionActive {
                 #if $chat_delay {
                     #var chat_delay 0;

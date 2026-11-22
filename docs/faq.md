@@ -56,6 +56,7 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [How do I use the mouse?](#how-do-i-use-the-mouse)
   - [How do I change colours?](#how-do-i-change-colours)
   - [How do I hide the map?](#how-do-i-hide-the-map)
+  - [How do I make the chat window bigger?](#how-do-i-make-the-chat-window-bigger)
   - [How do I hide combat spam?](#how-do-i-hide-combat-spam)
   - [How do I turn a feature on or off?](#how-do-i-turn-a-feature-on-or-off)
   - [How do I change guild?](#how-do-i-change-guild)
@@ -172,7 +173,7 @@ Yes, through Ubuntu, a Linux terminal that runs inside Windows. [setup.md Step 1
 
 ### Can I play on a phone?
 
-3kdb has a phone layout, which switches on when your terminal is 75 columns wide or less. You still need a terminal on your phone that's connected to a machine with 3kdb installed. To carry on a game you started on your PC, use tmux. See [How do I switch from my PC to my phone?](#how-do-i-switch-from-my-pc-to-my-phone)
+Yes. 3kdb has a phone layout (a small chat window and no side panels), which switches on when your terminal is 75 columns wide or less, like a phone held upright. `toggle phone_layout` turns it off, and then an upright phone gets the PC layout, just smaller. A phone held sideways gets the PC layout too, unless you turn on `toggle phone`, which hides the map and data panel on any phone. Back on your PC, the layout goes back to how you had it. See [Phones](manual.md#phones). You still need a terminal on your phone that's connected to a machine with 3kdb installed. To carry on a game you started on your PC, use tmux. See [How do I switch from my PC to my phone?](#how-do-i-switch-from-my-pc-to-my-phone)
 
 ### How do I start the game each time?
 
@@ -411,6 +412,12 @@ theme bright
 ### How do I hide the map?
 
 Type `hidemap`, and the data panel moves up into its space. `go`, `findhere` and bots still work. Type `showmap` to bring it back. It's saved for each character, and the map shows by default.
+
+`hidecaption` hides the data panel the same way and the map grows into its space, and `showcaption` brings it back. With both hidden, chat and game text use the full width.
+
+### How do I make the chat window bigger?
+
+Type `toggle halfchat` and the chat window takes the top half of the screen, with game text in the bottom half. For even more, `toggle bigchat` stretches it down to just above the HP bars and hides game text. That's still logged and kept in your scrollback, so type it again to go back and see what came in. See [Bigger chat window](manual.md#bigger-chat-window). See [Bigger chat window](manual.md#bigger-chat-window).
 
 ### How do I hide combat spam?
 

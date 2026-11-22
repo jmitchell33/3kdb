@@ -274,7 +274,31 @@
     .cdonate_pass;
 };
 
+#NOP -- preserve uses ginseng and goldenrod. Running out partway would leave the rest of the corpses on the;
+#NOP -- crypt floor, so each pass checks first. cdonate_reag_stop tells the auto donate run (heartbeat.tin);
+#NOP -- to go to topup and come back to finish. Run by hand, it says to topup and run cdonate3 again;
+#var cdonate_reag_stop 0;
+#alias {.cdonate_reag_check} {
+    #var cdonate_reag_name {};
+    #foreach {ginseng;goldenrod} {cdonate_reag} {
+        #if {"$my[necromancer][reagent][$cdonate_reag]" == "0"} {
+            #var cdonate_reag_name {$cdonate_reag};
+        };
+    };
+};
+
 #alias {.cdonate_pass} {
+    .cdonate_reag_check;
+    #if {"$cdonate_reag_name" != ""} {
+        #undelay {cdonate_watch};
+        #var cdonate_storing 0;
+        #var cdonate_reag_stop 1;
+        #echo {<ceb>cdonate3:<088> <faa>out of $cdonate_reag_name after $cdonate_pass passes, the rest of the corpses are on the floor.<088>};
+        #if {"$jdonate[state]" != "storing"} {
+            #echo {<ceb>cdonate3:<088> topup, come back and run cdonate3 again to finish.};
+        };
+        #return;
+    };
     #math cdonate_pass {$cdonate_pass + 1};
     #var cdonate_nocorpse 0;
     #var cdonate_nopres 0;

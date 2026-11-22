@@ -18,6 +18,11 @@
 #var draw[room][active] on;
 #var draw[ticker][active] on;
 #var draw[caption][active] on;
+#NOP -- hidecaption is saved the same way as hidemap;
+#if {"$toggles[hidecaption]" == "1"}
+{
+    #var draw[caption][active] off;
+};
 #var draw[mobile][active] 0;
 #var draw[status][active] on;
 #var draw[strategy][active] on;
@@ -95,50 +100,74 @@
     #screen get rows screen[height];
     #screen get cols screen[width];
 
-    #NOP -- Mobile goal: readable play and gauges on phones, targeting iPhone 17 Pro;
+    #NOP -- Phone detection: readable play and gauges on phones, targeting iPhone 17 Pro;
     #NOP -- in portrait/landscape terminals over SSH/tmux. Detect terminal cells,;
     #NOP -- not device identity or pixel size: font, keyboard and tmux affect these.;
     #NOP -- Width <= 75 selects portrait first, otherwise height <= 20 selects;
-    #NOP -- landscape, otherwise desktop. Landscape currently uses standard panes.;
+    #NOP -- landscape, otherwise desktop. Detection always runs, but nothing changes;
+    #NOP -- unless toggle phone or phone_layout is on. phone_layout is on by default.;
     #NOP -- Human/AI maintainers: keep detection here and reset both values on resize.;
     #NOP -- Extend using measured rows/cols and check 75/76 cols and 20/21 rows,;
     #NOP -- rotation, desktop reattach, pane toggles and mapFull entry/exit.;
-
-#if {$screen[width] <= 75} {
-    #var draw[mobile][active] 1;
-    #var draw[mobile][mode] portrait;
-} {
-    #if {$screen[height] <= 20} {
+    #if {$screen[width] <= 75} {
         #var draw[mobile][active] 1;
-        #var draw[mobile][mode] landscape;
+        #var draw[mobile][mode] portrait;
     } {
-        #var draw[mobile][active] 0;
-        #var draw[mobile][mode] desktop;
+        #if {$screen[height] <= 20} {
+            #var draw[mobile][active] 1;
+            #var draw[mobile][mode] landscape;
+        } {
+            #var draw[mobile][active] 0;
+            #var draw[mobile][mode] desktop;
+        };
     };
-};
 
+    #NOP -- phone_layout is the portrait phone layout: 5 chat rows and no side column. It's on by default, and;
+    #NOP -- the first draw at login comes before the saved defaults are filled in, so only a 0 turns it off;
+    #var draw[mobile][layout] 0;
+    #if {"$toggles[phone_layout]" != "0" && "$draw[mobile][mode]" == "portrait"} {
+        #var draw[mobile][layout] 1;
+    };
 
-    #NOP -- Reserve five chat rows in portrait. The enabled-chat block below;
-    #NOP -- recalculates height as rows + 1. Keep ticker and configured HP bars.;
-    #if {"$draw[mobile][mode]" == "portrait"} {
-    #var chat[rows] 5;
-    #math chat[height] {$chat[rows] + 2};
-} {
-    #format chat[rows] {%d} {$screen[height] * $draw[chat][size]};
-    #math chat[height] {$chat[rows] + 1};
-    #math chat[rows] {$chat[rows] - 1};
-};
-    
+    #NOP -- The side column (map and caption) goes when nothing should be in it. Toggle phone;
+    #NOP -- drops it on any phone screen, phone_layout in portrait, and hidemap with hidecaption;
+    #NOP -- drops it everywhere. The pane settings themselves never change here, so going back;
+    #NOP -- to a PC shows whatever panes were showing there before.;
+    #var draw[side][hidden] 0;
+    #if {$draw[mobile][layout]} {
+        #var draw[side][hidden] 1;
+    };
+    #if {"$toggles[phone]" == "1" && $draw[mobile][active]} {
+        #var draw[side][hidden] 1;
+    };
+    #if {"$draw[map][active]" == "off" && "$draw[caption][active]" == "off"} {
+        #var draw[side][hidden] 1;
+    };
+
+    #NOP -- bigchat and halfchat need the map in its top spot, there's no room for it under the chat;
+    #var draw[map][istop] 0;
+    #if {"$draw[map][position]" == "top" || "$toggles[bigchat]" == "1" || "$toggles[halfchat]" == "1"} {
+        #var draw[map][istop] 1;
+    };
+
+    #if {$draw[mobile][layout]} {
+        #var chat[rows] 5;
+        #math chat[height] {$chat[rows] + 2};
+    } {
+        #format chat[rows] {%d} {$screen[height] * $draw[chat][size]};
+        #math chat[height] {$chat[rows] + 1};
+        #math chat[rows] {$chat[rows] - 1};
+    };
+
     #NOP -- If map width isn't set, make it 33%;
     #if {$map[widthperc] > 0} {#NOP} {#var map[widthperc] .33};
     #format map[width] {%d} {$map[widthperc] * $screen[width]};
     #math map[left] {$screen[width] - $map[width]};
 
-   
     #format map[height] {%d} {$draw[map][size] * $screen[height]};
 
-    #if {"$draw[map][active]" == "on"} {
-        #if {"$draw[map][position]" == "top"} {
+    #if {"$draw[map][active]" == "on" && !$draw[side][hidden]} {
+        #if {$draw[map][istop]} {
             #var map[top] 2;
         } {
             #math map[top] {$chat[height] + 2};
@@ -148,22 +177,81 @@
         } {
             #math map[bottom] {$map[top] + $map[height]};
         };
-        
     } {
         #var map[top] 0;
         #var map[bottom] 0;
         #NOP -- caption[top] comes from map[bottom]. With the map on the side chat is full width, so stay under it;
-        #if {"$draw[map][position]" != "top"}
-        {
+        #if {!$draw[map][istop]} {
             #var map[bottom] $chat[height];
         };
     };
 
-    
     #if {"$draw[hpbar][active]" == "on"} {
         #list {hpbar[prompt]} {size} {hpbar[height]};
     } {
         #var hpbar[height] 0;
+    };
+
+    #NOP -- With the caption hidden, the map stretches down the whole right side. Its box ends on the row;
+    #NOP -- the caption panel would have ended on, just above the line over the hpbar;
+    #if {"$draw[map][active]" == "on" && "$draw[caption][active]" == "off" && !$draw[side][hidden] && $draw[map][istop]} {
+        #math tmpMapLast {$screen[height] - $hpbar[height] - 2};
+        #if {"$draw[room][active]" == "on"} {
+            #math tmpMapLast {$tmpMapLast - 1};
+        };
+        #if {$tmpMapLast > $map[bottom]} {
+            #var map[bottom] $tmpMapLast;
+        };
+    };
+
+    #NOP -- halfchat gives the chat and the Idle/Deadman box the top half of the space above the hpbar,;
+    #NOP -- and game text the bottom half. The toggles turn each other off, bigchat wins if both are set.;
+    #NOP -- A screen too short for it keeps the normal size;
+    #if {"$toggles[halfchat]" == "1" && "$draw[chat][active]" == "on"} {
+        #math tmpHalfBottom {$hpbar[height] + 1};
+        #if {$tmpHalfBottom < 2} {
+            #var tmpHalfBottom 2;
+        };
+        #math tmpHalfRows {($screen[height] - $tmpHalfBottom) / 2 - 1};
+        #format tmpHalfRows {%d} {$tmpHalfRows};
+        #if {"$draw[ticker][active]" == "on"} {
+            #var tmpHalfTicker &ticker_data[];
+            #if {$tmpHalfTicker < 3} {
+                #var tmpHalfTicker 3;
+            };
+            #math tmpHalfRows {$tmpHalfRows - $tmpHalfTicker - 1};
+        };
+        #if {$tmpHalfRows > $chat[rows]} {
+            #var chat[rows] $tmpHalfRows;
+        };
+    };
+
+    #NOP -- bigchat stretches the chat and the Idle/Deadman box down to the hpbar. tt++ always needs one;
+    #NOP -- row for game text, so the box's bottom border sits on that row, and .bigchat_hold keeps it;
+    #NOP -- hidden. Without the Idle/Deadman box there's no border to cover it, so it stays one row up;
+    #NOP -- with game text showing. A screen too short for any of it keeps the normal size;
+    #var draw[bigchat][cover] 0;
+    #if {"$toggles[bigchat]" == "1" && "$draw[chat][active]" == "on"} {
+        #math tmpBigBottom {$hpbar[height] + 1};
+        #if {$tmpBigBottom < 2} {
+            #var tmpBigBottom 2;
+        };
+        #if {"$draw[ticker][active]" == "on"} {
+            #math tmpBigRows {$screen[height] - $tmpBigBottom - 1};
+            #var tmpBigTicker &ticker_data[];
+            #if {$tmpBigTicker < 3} {
+                #var tmpBigTicker 3;
+            };
+            #math tmpBigRows {$tmpBigRows - $tmpBigTicker - 1};
+        } {
+            #math tmpBigRows {$screen[height] - $tmpBigBottom - 2};
+        };
+        #if {$tmpBigRows > $chat[rows]} {
+            #var chat[rows] $tmpBigRows;
+            #if {"$draw[ticker][active]" == "on"} {
+                #var draw[bigchat][cover] 1;
+            };
+        };
     };
 
     #NOP -- Ticker goes right under the chatlog;
@@ -172,21 +260,21 @@
         #math ticker[top] {$chat[height]};
         #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
         #NOP -- Hiding the map keeps this column for the caption, so chat stays out of it;
-        #if {"$draw[map][position]" == "top" && "$draw[mobile][mode]" != "portrait"} {
+        #if {$draw[map][istop] && !$draw[side][hidden]} {
             #math {chat[right]} {-$map[width]-1};
             #var ticker[right] $chat[right];
         } {
             #var chat[right] -1;
             #var ticker[right] -1;
-        }
+        };
     } {
         #var ticker[top] 1;
         #math ticker[bottom] {$ticker[top] + @max{&ticker_data[];3} + 1};
-        #var chat[height] 0
+        #var chat[height] 0;
     };
 
     #NOP -- The caption goes right below the map;
-    #if {"$draw[caption][active]" == "on"} {
+    #if {"$draw[caption][active]" == "on" && !$draw[side][hidden]} {
         #math caption[top] {$map[bottom] + 2};
         #math caption[bottom] {-3 - $hpbar[height]};
         #var caption[left] $map[left];
@@ -208,34 +296,52 @@
 
     #NOP -- If there is a ticker, then adjust the split;
     #if {"$draw[ticker][active]" == "on"} {#math split[top] {$split[top] + @max{&ticker_data[];3} + 1}};
-    
-    #math 	split[bottom]	{$hpbar[height] + 1};
+
+    #NOP -- bigchat's game text row is the box's bottom border row;
+    #if {"$draw[bigchat][cover]" == "1"} {
+        #math split[top] {$split[top] - 1};
+    };
+
+    #math split[bottom] {$hpbar[height] + 1};
     #var split[bottom] {@max{2;$split[bottom]}};
-    
-    #var    split[left]     0;
 
-    #NOP -- Portrait releases the sidebar for full-width game output and input.;
-    #NOP -- Suppress rendering without changing pane preferences, so resizing back;
-    #NOP -- restores the configured map, caption and room-detail regions.;
-#if {"$draw[mobile][mode]" == "portrait"} {
-    #var split[right] 0;
-} {
-    #math 	split[right]	{$map[width] + 1};
-};
+    #var split[left] 0;
 
+    #NOP -- With no side column, game output and input get the full width;
+    #if {$draw[side][hidden]} {
+        #var split[right] 0;
+    } {
+        #math split[right] {$map[width] + 1};
+    };
 
     #NOP -- The map room details goes right inside the map area;
     #math draw_room[top] {$map[bottom] - 1};
-    #var  draw_room[bottom] {$map[bottom]};
+    #var draw_room[bottom] {$map[bottom]};
     #math draw_room[left] {$map[left] + 2};
-    
-    
-    #split 	$split[top] $split[bottom] $split[left] $split[right];
+
+    #split $split[top] $split[bottom] $split[left] $split[right];
 
     init_map;
     init_hpbar;
     #var draw[initiated] 1;
     draw_all;
+    .bigchat_hold;
+};
+
+#NOP -- .bigchat_hold hides game text under bigchat's box. It scrolls the scrollback up one line, and tt++;
+#NOP -- doesn't draw new game text while it's scrolled up. The text still gets logged, saved to the;
+#NOP -- scrollback and seen by actions as normal. Pressing enter jumps back to the end, so the deadman;
+#NOP -- input event (modules/deadman/deadman.tin) runs this again right after. The jump redraws the game;
+#NOP -- text row and blanks the hpbar line under it, so both get drawn again. Turning bigchat off runs;
+#NOP -- init_screen, whose #buffer end shows everything that came in;
+#alias {.bigchat_hold} {
+    #if {"$draw[bigchat][cover]" == "1"} {
+        #buffer up 1;
+        draw_ticker;
+        #if {"$draw[hpbar][active]" == "on"} {
+            draw_hpbar;
+        };
+    };
 };
 
 #alias caption-help {
@@ -392,11 +498,11 @@
 };
 
 #alias draw_all {
-    #NOP -- Portrait retains enabled chat/HP gauges, but hides caption and room panes.;
+    #NOP -- Chat and HP gauges always draw, the side column only when it's showing;
     #if {"$draw[hpbar][active]" == "on"} { draw_hpbar };
     #if {"$draw[chat][active]" == "on"} { draw_chat };
 
-    #if {"$draw[mobile][mode]" != "portrait"} {
+    #if {!$draw[side][hidden]} {
         #if {"$draw[caption][active]" == "on"} { _update_caption_data;draw_caption};
         #if {"$draw[room][active]" == "on"} { draw_room };
     };
@@ -480,7 +586,13 @@
 #NOP -- CAPTION (Corpses, Eternal, Strategies, Bot Status, general data) --;
 #alias draw_caption {
     #NOP -- Data callbacks also call this directly, so draw_all alone cannot guard it.;
-    #if {"$draw[mobile][mode]" == "portrait"} {
+    #if {$draw[side][hidden] || "$draw[caption][active]" != "on"} {
+        #return;
+    };
+    #NOP -- A short screen, or one just resized, can leave no room for the box. Skip it instead of a draw error;
+    #screen get rows tmpCapRows;
+    #math tmpCapLast {$tmpCapRows + $caption[bottom] + 1};
+    #if {$caption[top] + 2 > $tmpCapLast} {
         #return;
     };
     #list caption_data clear;
@@ -741,9 +853,9 @@
 #NOP -- MAP --;
 #alias init_map {
     #NOP -- vtmap paints automatically: hiding the border alone leaves map output;
-    #NOP -- over portrait game text. Disable it here and restore it on wider layouts;
+    #NOP -- over game text. Disable it while the side column is hidden and restore it;
     #NOP -- only when the map preference is on. Keep mapFull's child session separate.;
-    #if {"$draw[map][active]" == "on" && "$draw[mobile][mode]" != "portrait"} {
+    #if {"$draw[map][active]" == "on" && !$draw[side][hidden]} {
         #draw {tile} $map[top]-1 -$map[width] $map[bottom]+1 -1 {};
         #map offset $map[top] -$map[width]+2 $map[bottom]-2 -2;
         #map flag vtmap on;
@@ -759,7 +871,7 @@
 };
 
 #alias {.map_vnum_draw} {
-    #if {"$toggles[map_vnum]" == "1" && "$draw[map][active]" == "on" && "$draw[mobile][mode]" != "portrait" && "$map[bottom]" != "0"} {
+    #if {"$toggles[map_vnum]" == "1" && "$draw[map][active]" == "on" && !$draw[side][hidden] && "$map[bottom]" != "0"} {
         #if {"$draw[room][active]" == "on"} {#math map_vnum_row {$map[bottom] + 1}} {#var map_vnum_row $map[bottom]};
         #draw <ccc> tubed box $map[top]-1 -$map[width] $map_vnum_row -1;
         #map get roomvnum map_vnum;
@@ -772,8 +884,8 @@
 
 #NOP -- ROOM --;
 #alias draw_room {
-    #NOP -- Direct room updates must obey the same portrait guard as draw_all.;
-    #if {"$draw[mobile][mode]" == "portrait"} {
+    #NOP -- Direct room updates must obey the same side column guard as draw_all.;
+    #if {$draw[side][hidden]} {
         #return;
     };
     #NOP -- The room strip sits inside the map box, so it goes when the map does;
@@ -831,6 +943,35 @@
     #var toggles[hidemap] 0;
     .toggleChanged {hidemap};
     #echo {<cfb>   -----  Map is showing again.  -----<088>};
+};
+
+#NOP -- hidecaption works like hidemap for the caption panel. With both hidden the side column goes;
+#NOP -- and chat and game text get the full width;
+#alias {.caption_visibility}
+{
+    #if {"$toggles[hidecaption]" == "1"}
+    {
+        #var draw[caption][active] off;
+    };
+    #else
+    {
+        #var draw[caption][active] on;
+    };
+    init_screen;
+};
+
+#alias {hidecaption}
+{
+    #var toggles[hidecaption] 1;
+    .toggleChanged {hidecaption};
+    #echo {<cfb>   -----  Caption panel hidden. Type showcaption to bring it back.  -----<088>};
+};
+
+#alias {showcaption}
+{
+    #var toggles[hidecaption] 0;
+    .toggleChanged {hidecaption};
+    #echo {<cfb>   -----  Caption panel is showing again.  -----<088>};
 };
 
 #NOP -- Rotation/SSH/tmux size changes reuse initialization after the existing delay.;
