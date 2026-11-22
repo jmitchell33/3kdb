@@ -120,6 +120,7 @@
     #undelay {bot_kick};
     #undelay {bot_restart};
     #undelay {bot_resume};
+    #undelay {bot_loop};
     #NOP -- A +name typed just before would still load its bot 4 seconds after it was typed;
     #undelay {bot_start};
     #unvar bot;
@@ -183,6 +184,8 @@
 };
 
 #alias {.determineBotAction} {
+    #NOP -- A room came, so the loop restart in .botComplete doesn't need its kick;
+    #var bot[loop_wait] 0;
     #if !$bot[paused] {
         .botStopWalking;
         #if {$bot[foundplayer]} {
@@ -390,8 +393,19 @@
                 #var bot[stats][loop][xp] 0;
                 #var bot[stats][loop][coins] 0;
                 #echo {\nLooping bot.};
+                #NOP -- No .bot right away. The last step's move is still on its way, and its room starts step 1.;
+                #NOP -- A glance now would show a second room, so the bot would send two moves and stay one move;
+                #NOP -- ahead for the whole loop. Then a slip or a blocked move sends the next one from the wrong room.;
+                #NOP -- If no room came at all (the last step wasn't a move) kick it after 2 seconds.;
+                #NOP -- Any room clears bot[loop_wait] in .determineBotAction, and a fight there resumes the bot itself.;
                 #var bot[step] 1;
-                .bot;
+                #var bot[loop_wait] 1;
+                #delay {bot_loop} {
+                    #if {$bot[loop_wait]} {
+                        #var bot[loop_wait] 0;
+                        .bot;
+                    };
+                } {2};
             } {
                 #echo {\nBot finished.};
                 .xp_rate {$bot[stats][xp]} {$bot[start-time]};
