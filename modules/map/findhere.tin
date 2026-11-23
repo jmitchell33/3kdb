@@ -187,6 +187,10 @@
 	#if {&findroom[$find_count][] > 0} {#var finddone 1};
 };
 
+#NOP -- Areas whose room descriptions change, so a description match can be a different room with the same;
+#NOP -- text. The Chaos Sewers maze builds each one from a few random sentences, so two rooms can match;
+#var findhere_desc_random {Chaotic Sewers};
+
 #NOP -- Search strictest first: area, name and description, then drop the area, then the description alone,;
 #NOP -- then the name without the description.;
 #NOP -- If no room's exits match (e.g. a hidden exit), fall back to the first rooms the name search found;
@@ -205,22 +209,25 @@
 	.findhere_exitsig;
 	#var finddone 0;
 	#var findfirst {};
-	#if {"$room[long]" != ""} {
+	#NOP -- An area that makes up its descriptions again is searched by name and exits only, see findhere_desc_random;
+	#var finddesc {$room[long]};
+	#if {"$area" != "" && ";$findhere_desc_random;" == "%*;$area;%*"} {#var finddesc {}};
+	#if {"$finddesc" != ""} {
 		#var findroom[$find_count] {};
-		#map list {roomarea} {$area} {roomname} {$findpattern} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		#map list {roomarea} {$area} {roomname} {$findpattern} {roomdesc} {%*$finddesc%*} {variable} {findroom[$find_count]};
 		.findhere_check;
 	};
-	#if {!$finddone && "$room[long]" != ""} {
+	#if {!$finddone && "$finddesc" != ""} {
 		#var findroom[$find_count] {};
-		#map list {roomname} {$findpattern} {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		#map list {roomname} {$findpattern} {roomdesc} {%*$finddesc%*} {variable} {findroom[$find_count]};
 		.findhere_check;
 	};
 	#NOP -- The description alone, before the name alone: some areas are mapped with no room names (the Celestial;
 	#NOP -- Zodiacs shadows side, e.g. Chamber of sickness), and a name-only match there finds the light side's;
 	#NOP -- room of the same name (Wedding hall 53729 instead of the unnamed 54371);
-	#if {!$finddone && "$room[long]" != ""} {
+	#if {!$finddone && "$finddesc" != ""} {
 		#var findroom[$find_count] {};
-		#map list {roomdesc} {%*$room[long]%*} {variable} {findroom[$find_count]};
+		#map list {roomdesc} {%*$finddesc%*} {variable} {findroom[$find_count]};
 		.findhere_check;
 	};
 	#if {!$finddone} {

@@ -58,6 +58,10 @@
 
 #alias {.sewin_abort} {
     #undelay {sewin};
+    #NOP -- a findhere-auto it started would keep walking, so stop that too;
+    #if {"$sewin[state]" == "find" && "$findauto" == "on"} {
+        findhere-auto stop;
+    };
     #var sewin[state] idle;
     .sewin_echo {<faa>%1 - stopped.<088>};
 };
@@ -176,18 +180,33 @@
 };
 
 #NOP -- One step toward the room, then wait for the new room (room[updated] is set at its prompt), or 1;
-#NOP -- second when a slip or blocked move runs mapUndo instead. Waits out fights;
+#NOP -- second when a slip or blocked move runs mapUndo instead. Waits out fights.;
+#NOP -- Before each step the room line has to match the map room (name and exits). When it doesn't, the map;
+#NOP -- is in the wrong room, so findhere-auto runs again instead of walking on from there;
 #alias {.sewin_walk} {
     #if {"$incombat" == "1"} {
         #return;
     };
     #if {$sewin[stepping]} {
         #math sewin[step_wait] {$sewin[step_wait] + 1};
-        #if {$room[updated] || $sewin[step_wait] >= 5} {
+        #if {$room[updated]} {
             #var sewin[stepping] 0;
-        } {
+        };
+        #elseif {$sewin[step_wait] >= 5 && @sewin_map_ok{}} {
+            #NOP -- no new room, but the map is back where the room line says (a slip or blocked move);
+            #var sewin[stepping] 0;
+        };
+        #elseif {$sewin[step_wait] >= 15} {
+            #NOP -- 3 seconds is long enough for a slow room line, so it really doesn't match;
+            #var sewin[stepping] 0;
+        };
+        #else {
             #return;
         };
+    };
+    #if {!@sewin_map_ok{}} {
+        .sewin_refind;
+        #return;
     };
     #map get roomvnum sewin[vnum];
     #if {"$sewin[vnum]" == "$sewin[target]"} {
@@ -205,6 +224,20 @@
     #var sewin[stepping] 1;
     #map find {$sewin[target]};
     #path walk;
+};
+
+#NOP -- The map lost track during the walk, so find the room again. Counts towards sewin[find_max];
+#alias {.sewin_refind} {
+    #if {$sewin[finds] >= $sewin[find_max]} {
+        .sewin_abort {the map keeps losing track of where you are};
+        #return;
+    };
+    .sewin_echo {<faa>the room doesn't match the map, finding it again with findhere-auto.<088>};
+    #math sewin[finds] {$sewin[finds] + 1};
+    #var sewin[lost] 1;
+    #var sewin[found] 0;
+    #var sewin[state] find;
+    findhere-auto;
 };
 
 #NOP -- The sewers bot started outside the sewers: pause it, go in and resume at its start room. A failed;
