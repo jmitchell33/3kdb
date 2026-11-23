@@ -123,6 +123,10 @@
     #undelay {bot_loop};
     #NOP -- A +name typed just before would still load its bot 4 seconds after it was typed;
     #undelay {bot_start};
+    #NOP -- The walk into the Chaos Sewers (common/areas/chaos_sewers.tin) runs on its own timer;
+    #if {&{sewin} && "$sewin[state]" != "idle"} {
+        sewers-in stop;
+    };
     #unvar bot;
     #unalias {..};
     #class {bot} {kill};
@@ -426,6 +430,8 @@
                 #delay {bot_loop} {
                     #if {$bot[loop_wait]} {
                         #var bot[loop_wait] 0;
+                        #NOP -- No room came, so the last step's bot[await] is stale and would make .bot return;
+                        #var bot[await] 0;
                         .bot;
                     };
                 } {2};
