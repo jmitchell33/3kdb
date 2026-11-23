@@ -278,6 +278,10 @@
 };
 
 #action {----- BOT REGISTERED KILL -----} {
+    #NOP -- If the bot is running in reverse mode, flip it after killing a monster;
+    #if {$bot[reverse]} {
+        #var bot[reverse] 0;
+    };
     #if {"$deathReport[mob_killed]" == "Fire Mite"} {
         #if {"$guild" == "mage"} {cast spell tap on corpse;cast corpse blast};
         #if {"$guild" == "bard"} {perform dirge};
