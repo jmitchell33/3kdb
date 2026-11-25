@@ -5,6 +5,8 @@
 #var iprime_round 1;
 #var subjugate_toggle 1;
 #var botTickler 1;
+#var tickler {};
+#var tickler_rate 0.0;
 
 
 #alias formatStrategy {
@@ -85,7 +87,7 @@
 #list strategyList add {{{guild} {all} {name} {rolm}    {active} {0} {description} {Automatically use owl & raven runes}}};
 #list strategyList add {{{guild} {all} {name} {rolm1}   {active} {0} {description} {ROLM Auto-Use Runes + Offhand Weapon}}};
 #list strategyList add {{{guild} {all} {name} {bplate}  {active} {0} {description} {Blood Plate: Automatically feed}}};
-#list strategyList add {{{guild} {all} {name} {tickler}  {active} {0} {description} {Bot: Leave mobs at 3%}}};
+#list strategyList add {{{guild} {all} {name} {tickler}  {active} {0} {description} {Bot: Leave mobs a round or two before they die}}};
 #list strategyList add {{{guild} {all} {name} {coffinDonate}  {active} {0} {description} {Bot: Donate Coffin When Full (after combat ends)}}};
 #list strategyList add {{{guild} {all} {name} {coffinSell}  {active} {0} {description} {Bot: Sell Coffin When Full (after combat ends)}}};
 #list strategyList indexate name;
@@ -111,6 +113,72 @@
     };
 };
 
+#alias {.ticklerRound} {
+    #if {"$enemy[hp]" == ""} {#return};
+    #format _tk_now {%U};
+    #math _tk_now {$_tk_now / 1000000.0};
+    #if {"$enemy[name]" != "$tickler[name]" || $enemy[hp] > $tickler[hp] + 10} {
+        #var tickler {{name}{$enemy[name]}{hp}{$enemy[hp]}{round}{$mip[round]}{time}{$_tk_now}{rate}{0.0}{n}{1}};
+    } {
+        #if {$enemy[hp] != $tickler[hp]} {
+            #math _tk_rounds {$mip[round] - $tickler[round]};
+            #if {$_tk_rounds < 1 || $_tk_rounds > 10} {
+                #math _tk_rounds {($_tk_now - $tickler[time] + 1.0) / 2.0};
+                #format _tk_rounds {%d} {$_tk_rounds};
+                #if {$_tk_rounds < 1} {#var _tk_rounds 1};
+            };
+            #math _tk_drop {1.00 * ($tickler[hp] - $enemy[hp]) / $_tk_rounds};
+            #if {$_tk_drop < 0} {#var _tk_drop 0.0};
+            #var _tk_ok 1;
+            #if {$tickler[n] > 2} {
+                #math _tk_cap {3 * $tickler[rate]};
+                #if {$_tk_cap < $tickler[rate] + 4} {#math _tk_cap {$tickler[rate] + 4}};
+                #if {$_tk_drop > $_tk_cap} {#var _tk_ok 0};
+            };
+            #if {$_tk_ok} {
+                #var _tk_k $tickler[n];
+                #if {$_tk_k > 4} {#var _tk_k 4};
+                #math tickler[rate] {$tickler[rate] + ($_tk_drop - $tickler[rate]) / $_tk_k};
+                #var tickler[hp] $enemy[hp];
+                #var tickler[round] $mip[round];
+                #var tickler[time] $_tk_now;
+                #math tickler[n] {$tickler[n] + 1};
+                #if {$tickler[n] > 2} {#var tickler_rate $tickler[rate]};
+            };
+        };
+    };
+    #var _tk_hp $tickler[hp];
+    #if {$tickler[n] > 2} {
+        #math _tk_leave {2 * $tickler[rate] + 1};
+        #math _tk_gone {($_tk_now - $tickler[time]) / 2.0};
+        #if {$_tk_gone >= 2} {#math _tk_hp {$tickler[hp] - $tickler[rate] * $_tk_gone}};
+    } {
+        #math _tk_leave {2 * $tickler_rate + 1};
+        #if {$_tk_leave < 3} {#var _tk_leave 3};
+    };
+    #if {$_tk_hp <= $_tk_leave && $botTickler} {
+        #format _tk_rate {%.1f} {$tickler[rate]};
+        #if {$_tk_hp == $tickler[hp]} {#var _tk_at $tickler[hp]} {#format _tk_at {about %d} {$_tk_hp}};
+        #showme <acf>----- TICKLED $enemy[name] at $_tk_at% (avg $_tk_rate% a round) -----<088>;
+        #var botTickler 0;
+        #var tickler {};
+        .botStep;
+        #delay {bot_tickler} {#var botTickler 1} {4};
+    };
+};
+
+#alias {.ticklerRoomCheck} {
+    #if {!$bot[active]} {#return};
+    #math _tk_leave {2 * $tickler_rate + 2};
+    #if {$_tk_leave < 4} {#var _tk_leave 4};
+    #if {$tickler_mobhp <= $_tk_leave} {
+        #showme <acf>----- TICKLER: $mob[long] is already at $tickler_mobhp%, walking on -----<088>;
+        #var bot[skip] 1;
+        #var botTickler 0;
+        #delay {bot_tickler} {#var botTickler 1} {4};
+    };
+};
+
 #alias {_strategy_heartbeat} {
     #if {!$idle_flag} {
         #NOP -- juggernaut;
@@ -118,18 +186,12 @@
             #var mech_toggle 0;
         };
 
-        #if {$action_round < $mip[round]} {
+        #NOP -- Mob Tickler, leave them a round or two before they die;
+        #if {$bot[active] && $incombat} {
+            checkStrategy {tickler} {.ticklerRound};
+        };
 
-            #NOP -- Mob Tickler/Leave them at 3%;
-            #if {$bot[active] && $incombat} {
-                checkStrategy {tickler} {
-                    #if {$enemy[hp] < 4 && $botTickler} {
-                        #var botTickler 0;
-                        .botStep;
-                        #delay 4 {#var botTickler 1};
-                    };
-                };
-            };
+        #if {$action_round < $mip[round]} {
 
             #NOP -- Actions to perform the first rounds of combat;
             #if {$mip[round] >= 1 && $mip[round] <= 3} {
