@@ -2,25 +2,14 @@
 
 #NOP ***** Combined Stats Data *****;
 #ALIAS {.mipProcessFFF} {
-	#VAR {mip[FFF][flag]} {0};
-	#VAR {mip[FFF][toggle]} {0};
-	#PARSE {%1} {i} {
-		#IF {"$mip[FFF][flag]" == "0"} {
-			#VAR {mip[FFF][flag]} {$i};
-			#VAR {mip[FFF][$i]} {};
-			#VAR {mip[FFF][$i][data]} {};
+	#VAR {mip[FFF][rest]} {%1};
+	#WHILE {"$mip[FFF][rest]" != ""} {
+		#REGEX {$mip[FFF][rest]} {{^([A-Z])~(.*?)~([A-Z]~.*)$}} {
+			.mipProcessFFFSub {&2} {&3};
+			#VAR {mip[FFF][rest]} {&4};
 		} {
-			#IF {"$i" == "~"} {
-				#IF {"$mip[FFF][toggle]" == "0"} {
-					#VAR {mip[FFF][toggle]} {1};
-				} {
-					.mipProcessFFFSub {$mip[FFF][flag]} {$mip[FFF][${mip[FFF][flag]}][data]};
-					#VAR {mip[FFF][flag]} {0};
-					#VAR {mip[FFF][toggle]} {0};
-				};
-			} {
-				#VAR {mip[FFF][${mip[FFF][flag]}][data]} {${mip[FFF][${mip[FFF][flag]}][data]}${i}};
-			};
+			#REGEX {$mip[FFF][rest]} {{^([A-Z])~(.+)$}} {.mipProcessFFFSub {&2} {&3}};
+			#VAR {mip[FFF][rest]} {};
 		};
 	};
 	#IF {"$mip[FFF][$mip[FFF][flag]][data]" != ""} {
