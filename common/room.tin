@@ -370,6 +370,11 @@
                 };
                 #undelay {bot_kick};
                 #undelay {bot_restart};
+                #if {$botTarget} {
+                    #var tickler_mobhp 100;
+                    #regex {%1} {[%d%]} {#var tickler_mobhp &1};
+                    checkStrategy {tickler} {.ticklerRoomCheck};
+                };
             } {
                 #var mob[target] $mob[autoName];
             };

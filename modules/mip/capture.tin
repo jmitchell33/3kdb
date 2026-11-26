@@ -15,6 +15,7 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 };
 #UNVAR {temp[digit]};
 #FORMAT {mip[backslash]} {%a} {92};
+#VAR {mip[refeed]} {0};
 
 #NOP ***** Tell MUD to send MIP *************;
 #DELAY {2} {
@@ -24,7 +25,17 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 };
 
 #NOP ***** Extract Raw Data *********;
+#ALIAS {.mipRefeed} {
+	#VAR {mip[refeed]} {1};
+	#VAR {mip[clean]} {%1};
+	#REPLACE {mip[clean]} {\e[0m\e[0m} {};
+	#SHOWME {$mip[clean]};
+	#LINE GAG;
+	#VAR {mip[refeed]} {0};
+};
+
 #ACTION {~{\#K\%$mip[id](.{3})(.{3})(.*)}} {
+    #if {"%0" == "%*\e[0m\e[0m%*" && !$mip[refeed]} {.mipRefeed {%0};#return};
     #if {$mipdebug} {
         #show MIP: %3: %4;
     };
@@ -80,6 +91,10 @@ Built by Balthus - heavily tweaked by Byron with a few donations from Inix
 		};
 	};
 } {1};
+
+#ACTION {{\#K\%$mip[id].*}} {
+	#if {!$mip[refeed]} {.mipRefeed {%1}};
+} {2};
 
 #NOP ***** Individual Data Sections *****
 #ALIAS {.mipProcessFlag} {
