@@ -161,4 +161,71 @@
     #5 throw axe;
 };
 
+#NOP -- Knight's tour solver - knight6/knight8 take the starting col and row;
+#alias {knight6} {#echo {calling knight6 solver};#script {python3 scripts/knight6.py %1 %2}};
+#alias {knight8} {#echo {calling knight8 solver};#script {python3 scripts/knight8.py %1 %2}};
+
+#NOP -- Set game version, then col then row;
+#alias {_setPosition %1 %2 %3} {
+    #var knightCol 0;
+    #var knightRow %2;
+    #math knightCol {%3 - 2};
+    #if {"%1" == "6"} {
+        #delay solveKnight {knight6 $knightCol $knightRow} 1;
+    };
+    #if {"%1" == "8"} {
+        #delay solveKnight {knight8 $knightCol $knightRow} 1;
+    };
+};
+
+#var knightSolve 1;
+#action {%*Round 1 of 35%*} {
+    #if $knightSolve {
+        #var knightSolve 0;
+        #line multishot 6 #action {^{[0-9]+}  %* %* %* %* %* %*} {
+            #var tmpList %%0;
+            #list tmpList explode { };
+            #loop 1 &tmpList[] i {
+                #if {"$tmpList[$i]" == "*"} {
+                    _setPosition 6 $tmpList[1] $i;
+                };
+            };
+        } {1};
+    };
+} {1};
+
+#action {%*Round 1 of 63%*} {
+    #if $knightSolve {
+        #var knightSolve 0;
+        #line multishot 8 #action {^{[0-9]+}  %* %* %* %* %* %* %* %*} {
+            #var tmpList %%0;
+            #list tmpList explode { };
+            #loop 1 &tmpList[] i {
+                #if {"$tmpList[$i]" == "*"} {
+                    _setPosition 8 $tmpList[1] $i;
+                };
+            };
+        } {1};
+    };
+} {1};
+
+#action {The game of the advanced knight's tour has ended.} {
+    #var knightSolve 1;
+} {1};
+
+#action {The game of the knight's tour has ended.} {
+    #var knightSolve 1;
+} {1};
+
+#NOP -- Replay the tour until the objective is complete (e.g. 1/5 plays 4 more);
+#action {Objective 'Win the %*Knight's Tour Challenge' of '%*' : %d/%d.} {
+    #if {%3 < %4} {
+        #echo {<cfa>Knight's tour objective %3/%4, starting another game<088>};
+        #delay {knightReplay} {play;start} {2};
+    };
+    #else {
+        #echo {<cfa>Knight's tour objective complete (%3/%4)<088>};
+    };
+} {1};
+
 #class {area_erah} {close}
