@@ -12,6 +12,10 @@
 			#VAR {mip[FFF][rest]} {};
 		};
 	};
+	#IF {"$mip[FFF][$mip[FFF][flag]][data]" != ""} {
+		.mipProcessFFFSub {$mip[FFF][flag]} {$mip[FFF][${mip[FFF][flag]}][data]};
+	};
+    #if {$bot[active] && $incombat} {checkStrategy {tickler} {.ticklerRound}};
     _update_status;
     #NOP -- Rebuild and draw the hpbar now instead of waiting for the 2 s heartbeat;
     #if !$idle_flag {
