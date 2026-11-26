@@ -154,6 +154,16 @@
     .bard_gift_echo {Item gift value <ddd>:} {%1} {$my[guild][donate_total]} {$bardGiftWidth};
 } {2};
 
+#NOP -- Junk drawer cashout;
+#action {^[JUNK DIVVY] Barnaby hauled off the contents of the junk drawer to the market and fetched %d coins, shared among %d bards} {
+    #local junk_total {};
+    #local junk_each {};
+    #math junk_each {%1 / %2};
+    #format junk_total {%g} {%1};
+    #format junk_each {%g} {$junk_each};
+    .notify <fcb>JUNK DIVVY<ddd> <acf>Barnaby<ddd> fetched <fda>$junk_total<ddd> coins, shared among <afa>%2<ddd> bards <g12>(<fda>$junk_each<ddd> each<g12>)<ddd>;
+} {2};
+
 #NOP -- Track wings;
 #action {^As you complete your invocation, you begin to feel a fiery heat consume} {
     #var my[fly] 1;

@@ -1,0 +1,306 @@
+#class {bard_boxclean} {kill}
+#class {bard_boxclean} {open}
+
+#NOP -- Toy chest cleaner for Bard Equipment Storage;
+#NOP -- boxclean <max> [per trip] [force] -- stand at the toy chest first;
+#NOP -- Borrows every chest item worth less than <max>, walks s w n to the junk drawer in the;
+#NOP -- General Store, does donate all, walks s e n back and lists again until nothing is left;
+#NOP -- per trip is how many items to carry each trip, 20 when left out;
+#NOP -- donate all gives away anything that is not kept, so it first checks the inventory and stops;
+#NOP -- if anything is unkept. Add force to skip that check. boxclean stop ends it at any time;
+#NOP -- Each borrow is checked against the name in the list, and it stops if a different item comes out;
+#NOP -- boxclean debug turns step by step debug lines on or off. boxclean dump shows the current state;
+
+#var bc_per_trip_default 20;
+#var bc_max_trips 200;
+#var bc[active] 0;
+#NOP -- bc_debug is kept outside bc so a new run does not reset it;
+#if {"$bc_debug" != "1"} {#var bc_debug 0};
+
+#alias {.bc_say} {
+    #echo {<ccf>boxclean:<088> %1};
+};
+
+#alias {.bc_dbg} {
+    #if {$bc_debug} {
+        #echo {<aaf>bc-debug:<088> %1};
+    };
+};
+
+#alias {.bc_dump} {
+    .bc_say {active=$bc[active] phase=$bc[phase] trip=$bc[trip] max=$bc[max] per_trip=$bc[per_trip] force=$bc[force] debug=$bc_debug};
+    .bc_say {rows=&bc[rows][] queue=&bc[queue][] qpos=$bc[qpos] left=$bc[left] expect=[$bc[expect]]};
+    .bc_say {trip_borrowed=$bc[trip_borrowed] total_borrowed=$bc[total_borrowed] trip_donated=$bc[trip_donated] total_donated=$bc[total_donated]};
+    #loop {1} {&bc[queue][]} {bc_d} {
+        #var bc_dr {$bc[queue][+$bc_d]};
+        .bc_say {  queue $bc_d: row $bc_dr idx=[$bc[rows][+$bc_dr][idx]] qty=[$bc[rows][+$bc_dr][qty]] worth=[$bc[rows][+$bc_dr][worth]] name=[$bc[rows][+$bc_dr][name]]};
+    };
+};
+
+#alias {boxclean} {
+    #if {"%1" == "stop"} {
+        .bc_done {stopped by hand};
+    };
+    #elseif {"%1" == "debug"} {
+        #if {$bc_debug} {#var bc_debug 0} {#var bc_debug 1};
+        .bc_say {debug is now $bc_debug};
+    };
+    #elseif {"%1" == "dump"} {
+        .bc_dump;
+    };
+    #elseif {"%1" == ""} {
+        .bc_say {usage: boxclean <max worth> [per trip] [force]   or   boxclean stop / debug / dump};
+        #if {$bc[active]} {
+            .bc_say {running: trip $bc[trip], $bc[total_borrowed] borrowed so far};
+        };
+    };
+    #else {
+        #regex {%1} {^{[0-9]+}$} {
+            #var bc {};
+            #var bc[active] 1;
+            #var bc[max] %1;
+            #var bc[per_trip] $bc_per_trip_default;
+            #var bc[force] 0;
+            #var bc[trip] 0;
+            #var bc[total_borrowed] 0;
+            #var bc[total_donated] 0;
+            #regex {%2} {^{[0-9]+}$} {#var bc[per_trip] %2} {#nop};
+            #if {"%2" == "force" || "%3" == "force"} {
+                #var bc[force] 1;
+            };
+            .bc_say {borrowing everything worth less than $bc[max], $bc[per_trip] items a trip};
+            #if {$bc[force]} {
+                .bc_trip;
+            };
+            #else {
+                .bc_invcheck;
+            };
+        } {
+            .bc_say {usage: boxclean <max worth> [per trip] [force]   or   boxclean stop};
+        };
+    };
+};
+
+#NOP -- Inventory check: any row without a * in front is not kept and donate all would give it away;
+#alias {.bc_invcheck} {
+    #var bc[phase] inv;
+    #var bc[unkept] {};
+    #var bc[ininv] 0;
+    i;
+    #delay {bc_inv} {.bc_invdone} {2};
+};
+
+#NOP -- Only rows between the -- ---- header and the coins line are read;
+#action {^-- ----} {
+    #if {$bc[active] && "$bc[phase]" == "inv"} {
+        #var bc[ininv] 1;
+    };
+} {5};
+
+#NOP -- Captures are leading spaces, count and item. An item starting with * is kept;
+#NOP -- The coins line matches this too and only one action fires per line, so it also ends the inventory here;
+#action {^{ *}{[0-9]+} {[^* ].*}$} {
+    #if {$bc[active] && "$bc[phase]" == "inv" && $bc[ininv]} {
+        #regex {%3} {^coins } {
+            #var bc[ininv] 0;
+            .bc_dbg {inventory ends at the coins line};
+        } {
+            #list bc[unkept] add {%3};
+            .bc_dbg {unkept: [%3]};
+        };
+    };
+} {5};
+
+#alias {.bc_invdone} {
+    #if {&bc[unkept][] > 0} {
+        .bc_say {<faa>these are not kept and donate all would give them away:<088>};
+        #foreach {$bc[unkept][%*]} {bc_item} {
+            .bc_say {   $bc_item};
+        };
+        .bc_done {keep or stash them, or run it again with force};
+    };
+    #else {
+        .bc_trip;
+    };
+};
+
+#NOP -- One trip: list the chest, then borrow, walk, donate and come back;
+#alias {.bc_trip} {
+    #math bc[trip] {$bc[trip] + 1};
+    #if {$bc[trip] > $bc_max_trips} {
+        .bc_done {hit the $bc_max_trips trip limit};
+    };
+    #else {
+        #var bc[phase] list;
+        #var bc[inlist] 0;
+        #var bc[rows] {};
+        .bc_dbg {trip $bc[trip]: sending list};
+        list;
+        #delay {bc_list} {.bc_done {no list came back - are you at the toy chest}} {6};
+    };
+};
+
+#action {^%!sINDEX QTY TYPE WORTH} {
+    #if {$bc[active] && "$bc[phase]" == "list"} {
+        #var bc[inlist] 1;
+        .bc_dbg {list header seen};
+    };
+} {5};
+
+#NOP -- Every piece is captured, spaces included, so index is 2, qty 4, worth 8 and the item name 10;
+#NOP -- Rows are hidden while it runs;
+#action {^{ *}{[0-9]+}{ +}{[0-9]+}{ +}{[A-Z]}{ +}{[0-9]+}{ +}{.+}$} {
+    #if {$bc[active] && "$bc[phase]" == "list" && $bc[inlist]} {
+        #format {bc_nm} {%l} {%10};
+        #list bc[rows] add {{{idx}{%2}{qty}{%4}{worth}{%8}{name}{$bc_nm}}};
+        #if {%8 < $bc[max]} {
+            .bc_dbg {row &bc[rows][]: idx=[%2] qty=[%4] type=[%6] worth=[%8] raw=[%10] stored=[$bc[rows][-1][name]]};
+        };
+        #line gag;
+    };
+} {5};
+
+#action {^{~+}$} {
+    #if {$bc[active] && "$bc[phase]" == "list" && $bc[inlist]} {
+        #var bc[inlist] 0;
+        #undelay {bc_list};
+        .bc_dbg {list ends with &bc[rows][] rows};
+        .bc_plan;
+    };
+} {5};
+
+#NOP -- Rows come in index order, so walking them backwards borrows the highest index first;
+#NOP -- and a row that empties out cannot shift the index of a row still waiting;
+#alias {.bc_plan} {
+    #var bc[queue] {};
+    #var bc[left] 0;
+    #loop {&bc[rows][]} {1} {bc_n} {
+        #if {$bc[rows][+$bc_n][worth] < $bc[max]} {
+            #math bc[left] {$bc[left] + $bc[rows][+$bc_n][qty]};
+            #loop {1} {$bc[rows][+$bc_n][qty]} {bc_q} {
+                #if {&bc[queue][] < $bc[per_trip]} {
+                    #list bc[queue] add {$bc_n};
+                };
+            };
+        };
+    };
+    #if {&bc[queue][] == 0} {
+        .bc_done {nothing left worth less than $bc[max]};
+    };
+    #else {
+        .bc_say {trip $bc[trip]: $bc[left] items left under $bc[max], taking &bc[queue][]};
+        #var bc[qpos] 1;
+        #var bc[trip_borrowed] 0;
+        .bc_borrow_next;
+    };
+};
+
+#alias {.bc_borrow_next} {
+    #if {$bc[qpos] > &bc[queue][]} {
+        .bc_walk;
+    };
+    #else {
+        #var bc_r {$bc[queue][+$bc[qpos]]};
+        #var bc[expect] {$bc[rows][+$bc_r][name]};
+        #var bc[phase] borrow;
+        .bc_dbg {borrow $bc[qpos] of &bc[queue][]: row $bc_r idx=[$bc[rows][+$bc_r][idx]] expect=[$bc[expect]]};
+        borrow $bc[rows][+$bc_r][idx];
+        #delay {bc_borrow} {.bc_borrow_timeout} {4};
+    };
+};
+
+#NOP -- Long names can wrap, so only the part on the first line is compared;
+#NOP -- Braces like {+5} are taken out of both names first;
+#NOP -- A brace in a game line is kept as the text \x7B or \x7D, so it never equals a typed brace and a cut can split it;
+#NOP -- The double backslash form removes that text and the class form removes a real brace;
+#NOP -- Lowercasing a name with %l turns \x7B into \x7b, so both cases are removed;
+#alias {.bc_unbrace} {
+    #replace {%1} {\\x7B} {};
+    #replace {%1} {\\x7D} {};
+    #replace {%1} {\\x7b} {};
+    #replace {%1} {\\x7d} {};
+    #replace {%1} {{[\x7B\x7D]}} {};
+};
+
+#action {^You borrow %*} {
+    #if {$bc[active] && "$bc[phase]" == "borrow"} {
+        #undelay {bc_borrow};
+        #format {bc_got} {%l} {%1};
+        #var bc_want {$bc[expect]};
+        .bc_unbrace bc_got;
+        .bc_unbrace bc_want;
+        #format {bc_glen} {%L} {$bc_got};
+        #format {bc_wlen} {%L} {$bc_want};
+        .bc_dbg {reply raw=[%1] got=[$bc_got] len $bc_glen want=[$bc_want] len $bc_wlen};
+        #if {$bc_glen < $bc_wlen} {
+            #format {bc_want} {%.${bc_glen}s} {$bc_want};
+        };
+        #else {
+            #format {bc_got} {%.${bc_wlen}s} {$bc_got};
+        };
+        .bc_dbg {compare got=[$bc_got] want=[$bc_want]};
+        #if {"$bc_got" === "$bc_want"} {
+            #math bc[trip_borrowed] {$bc[trip_borrowed] + 1};
+            #math bc[total_borrowed] {$bc[total_borrowed] + 1};
+            #math bc[qpos] {$bc[qpos] + 1};
+            .bc_borrow_next;
+        };
+        #else {
+            .bc_say {<faa>expected $bc[expect] but got %1<088>};
+            .bc_done {the chest list moved - you are still holding what was borrowed this trip};
+        };
+    };
+} {5};
+
+#NOP -- No reply to a borrow usually means you cannot carry more, so take what you have;
+#alias {.bc_borrow_timeout} {
+    #if {$bc[trip_borrowed] > 0} {
+        .bc_say {borrow $bc[qpos] got no reply, taking the $bc[trip_borrowed] already borrowed};
+        .bc_walk;
+    };
+    #else {
+        .bc_done {borrow got no reply and nothing was borrowed this trip};
+    };
+};
+
+#alias {.bc_walk} {
+    #var bc[phase] walk;
+    #var bc[trip_donated] 0;
+    .bc_dbg {walking to the drawer with $bc[trip_borrowed] items};
+    s;w;n;
+    donate all;
+    s;e;n;
+    #delay {bc_walk} {.bc_after_walk} {3};
+};
+
+#action {^You donate %* into the drawer.} {
+    #if {$bc[active] && "$bc[phase]" == "walk"} {
+        #math bc[trip_donated] {$bc[trip_donated] + 1};
+        #math bc[total_donated] {$bc[total_donated] + 1};
+        .bc_dbg {donated [%1]};
+    };
+} {5};
+
+#alias {.bc_after_walk} {
+    .bc_dbg {back from the drawer, $bc[trip_donated] donated this trip};
+    #if {$bc[trip_donated] == 0} {
+        .bc_done {nothing went into the drawer - is it full, or was the walk blocked};
+    };
+    #else {
+        .bc_trip;
+    };
+};
+
+#alias {.bc_done} {
+    #if {$bc[active]} {
+        #var bc[active] 0;
+        #var bc[phase] {};
+        #line quiet {#undelay {bc_inv}};
+        #line quiet {#undelay {bc_list}};
+        #line quiet {#undelay {bc_borrow}};
+        #line quiet {#undelay {bc_walk}};
+        .bc_say {done after $bc[trip] trips: $bc[total_borrowed] borrowed, $bc[total_donated] donated - %1};
+    };
+};
+
+#class {bard_boxclean} {close}
