@@ -27,6 +27,8 @@
     #math sp_threshold {$my[sp][max] * .90};
     #math sp_percent {$my[sp][current] * 100 / $my[sp][max]};
     #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
+    #var immersion_off 0;
+    checkStrategy {no_immersion} {#var immersion_off 1};
 
 	#if !$idle_flag {
 		#NOP -- One defensive spell per beat, at least 2s apart, or the MUD says You may not cast another;
@@ -90,7 +92,7 @@
             } {2};
         };
 
-        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && !$my[immersion][count] && !$my[immersion][active]} {
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && (!$my[immersion][count] || $immersion_off) && !$my[immersion][active]} {
             #if {!$my[hm][heal] && !$my[eternal][heal]} {
                 ptell Pausing to regenerate SPs.;
                 #var bot_toggle 1;
@@ -152,7 +154,7 @@
 			#var self_haste 1;
 		};
 
-        #if {$my[immersion][count] && !$my[immersion][rounds] && ($my[golem][reset] > 80 || $my[sp][current] < $sp_danger)} {
+        #if {!$immersion_off && $my[immersion][count] && !$my[immersion][rounds] && ($my[golem][reset] > 80 || $my[sp][current] < $sp_danger)} {
             #var my[immersion][active] 1;
             cast mystic immersion;
             checkStrategy {gstrength} {
