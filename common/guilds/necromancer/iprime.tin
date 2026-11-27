@@ -1,0 +1,193 @@
+#class {guild_iprime} {kill}
+#class {guild_iprime} {open}
+
+#NOP --- Invoke prime. iprime grabs a corpse (coffin, then freezer, then cooler, then inventory) and invokes;
+#NOP -- prime with your default damage type. ips.tin guesses the secret word. Type iprime-help.;
+#NOP -- The strategy calls ip1, which is iprime with your default type.;
+
+#var stats[invoke-prime][success] 0;
+#var stats[invoke-prime][failure] 0;
+#var stats[invoke-prime][total] 0;
+
+#NOP -- Words you can give for a damage type, mapped to the invoke name (same words as comt);
+#var ip_types {
+    {edged} {edged}
+    {crushing} {crushing} {blunt} {crushing}
+    {flame} {flame} {fire} {flame}
+    {cold} {cold} {ice} {cold}
+    {corrosion} {corrosion} {acid} {corrosion}
+    {lightning} {lightning} {electric} {lightning}
+    {psionic} {psionic} {mind} {psionic}
+    {power} {power} {energy} {power}
+    {virulence} {virulence} {poison} {virulence}
+    {light} {light} {radiation} {light}
+};
+
+#NOP -- Your default type, saved in vars.tin (class global). psionic until you set one;
+#if {!&{xiprime_type}} {
+    #class global open;
+    #var xiprime_type psionic;
+    #class global close;
+};
+
+#NOP --- Mob name for the word guess (ips.tin adds the mob's words to its list);
+#NOP -- Without the numbers perk: your pet's line, e.g. Mushroom attacks Jesse's foe! Any pet name, but only;
+#NOP -- attacks on your own foe, and a one word name at the start so chat lines don't match.;
+#format _ip_uname {%n} {$user};
+#action {^%w attacks ${_ip_uname}'s {adversary|attacker|foe|enemy}!$} {
+    #if {"$vaf[numbers]" != "1"} {
+        #var ip[mob_name] {$enemy[target]};
+        #replace ip[mob_name] {-} {_};
+    };
+} {5};
+
+#NOP -- With the numbers perk: rabies on a mob that already has it names the mob. Kept 60s so an old;
+#NOP -- mob's name isn't used for the next one.;
+#action {^%sThe %* is already infected with rabies.$} {
+    #if {"$vaf[numbers]" == "1"} {
+        #var ip[mob_name] {%2};
+        #replace ip[mob_name] {-} {_};
+        #format ip[mob_at] {%T};
+    };
+} {5};
+
+#NOP -- %1 = a damage type word. Sets ip_type_ok to the invoke name, or empty if it isn't one;
+#alias {_ip_type_word} {
+    #format _ip_w {%l} {%1};
+    #var ip_type_ok {};
+    #if {"$_ip_w" != "" && &ip_types[$_ip_w]} {
+        #var ip_type_ok {$ip_types[$_ip_w]};
+    };
+};
+
+#NOP -- iprime: invoke with your default type. iprime <type>: that type this once. iprime default <type>:;
+#NOP -- change your default. iprime help: the help.;
+#alias {iprime} {
+    #format _ip_arg {%l} {%1};
+    #if {"$_ip_arg" == "help"} {
+        iprime-help;
+    };
+    #elseif {"$_ip_arg" == "default"} {
+        _ip_type_word %2;
+        #if {"$ip_type_ok" == ""} {
+            #echo {<faa>  iprime: default is <fff>$xiprime_type<faa>. Give a type, e.g. <ffa>iprime default fire<faa>, see <ffa>iprime-help<faa>.<088>};
+        } {
+            #class global open;
+            #var xiprime_type $ip_type_ok;
+            #class global close;
+            #echo {<afa>  iprime: default damage type is now <fff>$xiprime_type<afa>.<088>};
+        };
+    };
+    #else {
+        #var ip_type_ok $xiprime_type;
+        #if {"%1" != ""} {
+            _ip_type_word %1;
+        };
+        #if {"$ip_type_ok" == ""} {
+            #echo {<faa>  iprime: <fff>%1<faa> is not a damage type, see <ffa>iprime-help<faa>.<088>};
+        } {
+            _ip_start $ip_type_ok;
+        };
+    };
+};
+
+#NOP -- A prime still waiting for its word has the invoke_prime class loaded (ips.tin kills it when the;
+#NOP -- prime ends). Another invoke prime then would be taken as the answer and blow the prime up.;
+#NOP -- Corpse counts come from corpsemanager and the hpbar, %d turns a missing one into 0.;
+#NOP -- Invoke prime needs circle 46. The circle is from score (my[score][guild_level]) or the circle;
+#NOP -- tracker. Not known yet = let it try, the game says no itself.;
+#var ip_circle_min 46;
+#alias {_ip_start} {
+    #var _ip_circle 0;
+    #regex {$my[score][guild_level]} {^{[0-9]+}$} {#var _ip_circle &1};
+    #if {$_ip_circle == 0} {
+        #regex {$circle_tracker[circle]} {^{[0-9]+}$} {#var _ip_circle &1};
+    };
+    #class invoke_prime size ip_busy;
+    #format _ip_coffin {%d} {$corpses[coffin]};
+    #format _ip_freezer {%d} {$corpses[freezer]};
+    #format _ip_cooler {%d} {$corpses[cooler]};
+    #format _ip_inv {%d} {$corpses[inventory]};
+    #if {$_ip_circle > 0 && $_ip_circle < $ip_circle_min} {
+        #echo {<ccf>----<088> <fff>IPRIME: needs circle $ip_circle_min, you are circle $_ip_circle<088> <ccf>----<088>};
+    };
+    #elseif {$ip_busy > 0} {
+        #echo {<ccf>----<088> <fff>IPRIME: a prime is still waiting for its word, not starting another<088> <ccf>----<088>};
+    };
+    #elseif {$_ip_coffin > 0} {
+        ipc %1;
+    };
+    #elseif {$_ip_freezer > 0} {
+        ipf %1;
+    };
+    #elseif {$_ip_cooler > 0} {
+        ipcl %1;
+    };
+    #elseif {$_ip_inv > 0} {
+        .iprime_cast %1;
+    };
+    #else {
+        #echo {<ccf>----<088> <fff>IPRIME: OUT OF CORPSES<088><faa>!!!!<088> <ccf>----<088>};
+    };
+};
+
+#alias {ip1} {iprime};
+
+#alias {ipf} {deslab;preserve remains;get preservation;.iprime_cast %1};
+#alias {ipc} {unwrap biggest;preserve remains;get preservation;.iprime_cast %1};
+#alias {ipcl} {uncooler corpse;preserve remains;get preservation;.iprime_cast %1};
+
+#NOP -- raw invoke, needs a corpse already in hand, use iprime;
+#alias {.iprime_cast} {
+    #if {"%1" == ""} {#var ip_type $xiprime_type} {#var ip_type %1};
+    #read common/guilds/necromancer/ips.tin;
+    #var ip_secret_word !!!;
+
+    #unvar scrabble;
+    #NOP -- pppappp is what we'll use to match 'a';
+    #list scrabble create {pppappp} {Seething} {venomous} {anger} {deaths} {head} {howls} {Diving}{around}{terrifying}{deeply}{Screaming} {in}{rage}{at}{skull} {room} {through}{growls}{Snarling} {gnashes} {its} {teeth} {The} {ghostly} {bobs} {and} {weaves} {growling} {fiercely} {races} {circling} {menacingly} {dives} {quickly} {towards} {but} {narrowly} {misses} {With} {a} {horrid} {grin} {of} {death} {leers}{pure} {hatred} {bares} {fangs} {hisses} {You} {call} {forth} {word} {great} {power} {invoking} {prime} {nature} {your} {magic} {Crumbling} {away} {from} {corpse} {soul} {creature} {is} {released} {form} {giant} {that} {flies} {freely} {into} {leaving} {behind} {it} {trail} {waves};
+
+    #if {"$vaf[numbers]" == "1"} {
+        #var temp $enemy[name_numbers];
+        #NOP -- plus the name from the rabies line, if it is from this fight;
+        #format _ip_now {%T};
+        #format _ip_at {%d} {$ip[mob_at]};
+        #if {$_ip_now - $_ip_at <= 60 && "$ip[mob_name]" != ""} {
+            #var temp {$temp $ip[mob_name]};
+        };
+    } {
+        #format tempLength {%L} {${ip[mob_name]}};
+        #if {$tempLength} {#var temp $ip[mob_name]} {#format {temp} {%n} {$enemy[target]}};
+    };
+    #replace temp {-} {_};
+    #replace temp { } {;};
+    #list scrabble add $temp;
+
+    #delay 1 {invoke prime $ip_type};
+    #math my[necromancer][invoke-prime] {$my[necromancer][invoke-prime] - 1};
+};
+
+#alias {iprime-help} {
+    #echo {};
+    #echo {<ccf>  ==================  IPRIME HELP  ==================<088>};
+    #echo {  <ffa>iprime                 <fff>invoke prime with your default damage type<088>};
+    #echo {  <ffa>iprime <type>          <fff>invoke prime with that type, this once<088>};
+    #echo {  <ffa>iprime default <type>  <fff>set your default (saved), now <afa>$xiprime_type<088>};
+    #echo {  <ffa>iprime help            <fff>this help<088>};
+    #echo {<ccf>  ---------------------------------------------------<088>};
+    #echo {  <fff>Types (either word works):<088>};
+    #echo {    <ffa>edged<ccc>            <ffa>blunt<ccc> / crushing     <ffa>fire<ccc> / flame<088>};
+    #echo {    <ffa>ice<ccc> / cold       <ffa>acid<ccc> / corrosion     <ffa>electric<ccc> / lightning<088>};
+    #echo {    <ffa>mind<ccc> / psionic   <ffa>energy<ccc> / power       <ffa>poison<ccc> / virulence<088>};
+    #echo {    <ffa>radiation<ccc> / light<088>};
+    #echo {<ccf>  ---------------------------------------------------<088>};
+    #echo {  <ccc>It takes a corpse from your coffin, then freezer, then cooler, then<088>};
+    #echo {  <ccc>inventory, preserves it and invokes. The secret word is guessed for you.<088>};
+    #echo {  <ccc>A second iprime while one is still waiting for its word is refused.<088>};
+    #echo {  <ccc>Invoke prime needs circle 46.<088>};
+    #echo {  <ccc>The strategies iprime and iprime1 use your default type.<088>};
+    #echo {<ccf>  ===================================================<088>};
+    #echo {};
+};
+
+#class {guild_iprime} {close}

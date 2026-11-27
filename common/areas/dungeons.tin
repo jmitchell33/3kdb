@@ -41,9 +41,63 @@
 #var dgUnset  {<ccc>};
 #var dgHint   {<dde>};
 
+#NOP -- toggle dungeons_clear checks dungeons first, before the scaler is set;
 #action {You have arrived at a dungeon entrance.} {
+    #if {"$toggles[dungeons_clear]" == "1"}
+    {
+        .dg_clear_check;
+    }
+    {
+        .dg_entrance_scaler;
+    };
+} {2};
+
+#alias {.dg_entrance_scaler}
+{
     #send {!rating};
     #delay .5 {.get_scaler $area};
+} {2};
+
+#NOP -- Reads the dungeons table. If any row's Can Reset says now, sends dungeons clear all;
+#NOP -- The table ends on the ==== line after its column header. With no answer in 3 seconds it carries on;
+#alias {.dg_clear_check}
+{
+    #var dgClearNow 0;
+    #var dgClearRows 0;
+    #class {dg_clear_watch} {open};
+    #action {^- -------%s: ----- ---------%s-------$}
+    {
+        #var dgClearRows 1;
+    } {2};
+    #action {^- %* :%s%d now%s\[%d\]}
+    {
+        #if {$dgClearRows}
+        {
+            #var dgClearNow 1;
+        };
+    } {2};
+    #action {^=====}
+    {
+        #if {$dgClearRows}
+        {
+            .dg_clear_done;
+        };
+    } {2};
+    #class {dg_clear_watch} {close};
+    #delay {dgClearTimeout} {.dg_clear_done} {3};
+    #send {!dungeons};
+} {2};
+
+#alias {.dg_clear_done}
+{
+    #undelay {dgClearTimeout};
+    #var dgClearRows 0;
+    #delay {dgClearKill} {#class {dg_clear_watch} {kill}} {0};
+    #if {$dgClearNow}
+    {
+        #send {!dungeons clear all};
+    };
+    .dg_entrance_scaler;
 } {2};
 
 #action {  Your current scaler is %d.} {

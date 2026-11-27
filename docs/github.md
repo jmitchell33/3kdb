@@ -941,6 +941,10 @@ git config --global user.email "you@example.com"
 
 You're on a plain clone, so you can't push to the main project. Switch to a fork with [Part 4](#part-4-switch-an-existing-clone-to-a-fork).
 
+**`Permission denied (publickey)`**
+
+Your folder is set to use GitHub over SSH, which needs an SSH key. 3kdb's guides use HTTPS instead. Switch to it with [Do I need an SSH key for GitHub?](ssh.md#do-i-need-an-ssh-key-for-github)
+
 **Git asks for a username and password, or says password authentication isn't supported**
 
 Log in with the GitHub tool, and answer **Yes** to "authenticate Git":

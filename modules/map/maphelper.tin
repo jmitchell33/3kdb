@@ -95,6 +95,8 @@
         #if {$bot[active] && !$bot[paused]} {#echo {Bot Paused!};.pause};
         #NOP -- a heartbeat resting the bot mustn't start it again while you're off somewhere;
         #if {"$bot[active]" == "1"} {#var bot[autopause] 0};
+        #NOP -- another go ends a walk back into the Catacombs;
+        #if {&{cata}} {.cata_stop};
         #map get roomarea go_area;
         #map get roomvnum go_vnum;
         #if {"$go_area" == "Section Z" && "$go_vnum" != "24785" && "$go_vnum" != "24786" && "$incombat" == "1"} {
@@ -146,7 +148,33 @@
 	#map run {{roomnote} {%0%*}};
 };
 
-#alias {go_back} {#map run $go_back};
+#NOP -- .run_to <vnum>: walk back to a room you were in. The map never paths into a room flagged avoid, so a;
+#NOP -- plain map run to one says no path found. That flag is lifted for this one walk and put back at once;
+#alias {.run_to} {
+    #var run_to_avoid 0;
+    #map get roomvnum run_to_vnum {%1};
+    #if {"$run_to_vnum" == "{[0-9]+}" && "$run_to_vnum" != "0"} {
+        #map at {%1} {#map roomflag avoid get run_to_avoid};
+    };
+    #if {"$run_to_avoid" == "1"} {
+        #map at {%1} {#map roomflag avoid off};
+        #map run {%1};
+        #map at {%1} {#map roomflag avoid on};
+    } {
+        #map run {%1};
+    };
+};
+
+#NOP -- A statue can block a speedwalk into the Catacombs, so that walk is in common/areas/catacombs.tin;
+#alias {go_back} {
+    #map get roomarea go_back_area {$go_back};
+    #if {"$go_back_area" != "" && &{cata_start[$go_back_area]}} {
+        .cata_back $go_back;
+    } {
+        #if {&{cata}} {.cata_stop};
+        .run_to $go_back;
+    };
+};
 
 #alias {mapgo} {
 	#var roomfound 0;
@@ -171,7 +199,19 @@
 };
 
 #alias {mapsave} { #map write common/map/3k_shared.map force;#echo {Map saved.};.map_restore_static_if_not_mapping;};
-#alias {mapload} { #map read common/map/3k_shared.map;#echo {Map loaded.};.map_restore_static_if_not_mapping;};
+#NOP -- #map read also reads the display flags and offset saved in the map file, so put back what;
+#NOP -- postload (common/config.tin) sets and redraw the map panel, or it draws plain symbols at the bottom;
+#alias {mapload}
+{
+    #map read common/map/3k_shared.map;
+    #echo {Map loaded.};
+    #map flag vtmap on;
+    #map flag unicodegraphics on;
+    #map flag terrain on;
+    #map flag direction on;
+    .map_restore_static_if_not_mapping;
+    init_map;
+};
 
 
 /* Modify/extend the map helpers: */
@@ -391,8 +431,8 @@
 #action {You lose your footing and wind up flat on your butt!} {.mapSlip} {2};
 
 #NOP Catacombs;
-#action {The ancient statue comes to life and bars your path.} {mapUndo} {2};
-#action {The statue moves to block your way.} {mapUndo} {2};
+#action {The ancient statue comes to life and bars your path.} {mapUndo;.cata_blocked} {2};
+#action {The statue moves to block your way.} {mapUndo;.cata_blocked} {2};
 
 #NOP Kyoto;
 #action {^-R-_A Poorly-lit Street} {

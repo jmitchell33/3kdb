@@ -14,10 +14,22 @@
 
 #var _mcast 0;
 #var _mlastcast 0;
+#NOP -- %1 = the hpbar prot code, %2 = the spell. A spell cast in the last 8s that is still not up is skipped,;
+#NOP -- so one the MUD keeps refusing (not learned yet, too low level, no SP) does not hold up the rest.;
+#var _mdtry {};
 #alias {_mage_defcast} {
-    cast %0;
-    #var _mcast 1;
-    #format _mlastcast {%T};
+    #format _mdt {%d} {$_mdtry[%1]};
+    #if {$_mnow - $_mdt >= 8} {
+        #NOP -- mantle_cmd (see maint-help) recasts a focused mantle the same way maint setup made its contingency;
+        #if {"%1" == "M" && "$mantle_cmd" != "" && "$mantle_cmd" != "\$mantle_cmd"} {
+            $mantle_cmd;
+        } {
+            cast %2;
+        };
+        #var _mcast 1;
+        #var _mlastcast $_mnow;
+        #var _mdtry[%1] $_mnow;
+    };
 };
 
 #alias {_guild_heartbeat} {
@@ -35,20 +47,20 @@
 		#NOP -- defensive spell so quickly. The next missing one goes on a later beat.;
 		#format _mnow {%T};
 		#if {$_mnow - $_mlastcast < 2} {#var _mcast 1} {#var _mcast 0};
-		#if !$_mcast {#if $defs[MB] {#if !$my[prots][MB] {_mage_defcast mindblank} {#nop}}};
-		#if !$_mcast {#if $defs[PA] {#if !$my[prots][PA] {_mage_defcast prismatic aura} {#nop}}};
-		#if !$_mcast {#if $defs[PS] {#if !$my[prots][PS] {_mage_defcast prismatic sphere} {#nop}}};
-		#if !$_mcast {#if $defs[A]  {#if !$my[prots][A]  {_mage_defcast armor} {#nop}}};
-		#if !$_mcast {#if $defs[MG] {#if !$my[prots][MG] {_mage_defcast major globe} {#nop}}};
-		#if !$_mcast {#if $defs[M]  {#if !$my[prots][M]  {_mage_defcast mantle} {#nop}}};
-		#if !$_mcast {#if $defs[mg] {#if !$my[prots][mg] {_mage_defcast minor globe} {#nop}}};
-		#if !$_mcast {#if $defs[ms] {#if !$my[prots][MS] {_mage_defcast magnificent shield} {#nop}}};
-		#if !$_mcast {#if $defs[SS] {#if !$my[prots][SS] {_mage_defcast stoneskin} {#nop}}};
-		#if !$_mcast {#if $defs[rs] {#if !$my[prots][RS] {_mage_defcast rhino skin} {#nop}}};
-		#if !$_mcast {#if $defs[pe] {#if !$my[prots][PE] {_mage_defcast protection from evil} {#nop}}};
-		#if !$_mcast {#if $defs[pg] {#if !$my[prots][PG] {_mage_defcast protection from good} {#nop}}};
-		#if !$_mcast {#if $defs[shield] {#if !$my[prots][S] {_mage_defcast shield} {#nop}}};
-		#if !$_mcast {#if $defs[blink] {#if !$my[prots][B] {_mage_defcast blink} {#nop}}};
+		#if !$_mcast {#if $defs[MB] {#if !$my[prots][MB] {_mage_defcast MB {mindblank}} {#nop}}};
+		#if !$_mcast {#if $defs[PA] {#if !$my[prots][PA] {_mage_defcast PA {prismatic aura}} {#nop}}};
+		#if !$_mcast {#if $defs[PS] {#if !$my[prots][PS] {_mage_defcast PS {prismatic sphere}} {#nop}}};
+		#if !$_mcast {#if $defs[A]  {#if !$my[prots][A]  {_mage_defcast A {armor}} {#nop}}};
+		#if !$_mcast {#if $defs[MG] {#if !$my[prots][MG] {_mage_defcast MG {major globe}} {#nop}}};
+		#if !$_mcast {#if $defs[M]  {#if !$my[prots][M]  {_mage_defcast M {mantle}} {#nop}}};
+		#if !$_mcast {#if $defs[mg] {#if !$my[prots][mg] {_mage_defcast mg {minor globe}} {#nop}}};
+		#if !$_mcast {#if $defs[ms] {#if !$my[prots][MS] {_mage_defcast MS {magnificent shield}} {#nop}}};
+		#if !$_mcast {#if $defs[SS] {#if !$my[prots][SS] {_mage_defcast SS {stoneskin}} {#nop}}};
+		#if !$_mcast {#if $defs[rs] {#if !$my[prots][RS] {_mage_defcast RS {rhino skin}} {#nop}}};
+		#if !$_mcast {#if $defs[pe] {#if !$my[prots][PE] {_mage_defcast PE {protection from evil}} {#nop}}};
+		#if !$_mcast {#if $defs[pg] {#if !$my[prots][PG] {_mage_defcast PG {protection from good}} {#nop}}};
+		#if !$_mcast {#if $defs[shield] {#if !$my[prots][S] {_mage_defcast S {shield}} {#nop}}};
+		#if !$_mcast {#if $defs[blink] {#if !$my[prots][B] {_mage_defcast B {blink}} {#nop}}};
 
 		#if !$deeppocket {#if {$my[sp][current] > 500} {cast extension 3;cast deeppockets}};
 	} {#NOP;};
@@ -92,8 +104,9 @@
             } {2};
         };
 
-        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && (!$my[immersion][count] || $immersion_off) && !$my[immersion][active]} {
-            #if {!$my[hm][heal] && !$my[eternal][heal]} {
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && (!$my[immersion][count] || $immersion_off) && "$my[immersion][active]" != "1"} {
+            #NOP -- quoted: a mage without eternal has no my[eternal][heal], and an unset one made the whole #if false;
+            #if {"$my[hm][heal]" != "1" && "$my[eternal][heal]" != "1"} {
                 ptell Pausing to regenerate SPs.;
                 #var bot_toggle 1;
                 .pause;
@@ -101,7 +114,7 @@
                 #ticker spBotResume {
                     #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
                     hp;
-                    #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
+                    #if {$my[sp][current] > $sp_threshold || "$my[immersion][active]" == "1"} {
                         #var bot_toggle 0;
                         #if {"$bot[autopause]" == "1"} {
                             #var bot[autopause] 0;
@@ -137,7 +150,7 @@
     };
 
     #NOP -- Cull the unhealthy summons during immersion - we'll do this every 20 rounds;
-    #if {!$idle_flag && $my[immersion][active]} {
+    #if {!$idle_flag && "$my[immersion][active]" == "1"} {
         #if $summoner {
             checkStrategy {summon_cull} {
                 #if {$my[immersion][rounds] == 70} {_summonTankSwap};

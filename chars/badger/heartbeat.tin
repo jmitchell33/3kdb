@@ -6,7 +6,8 @@
 #var pausedtoregen 1;
 #var shelter_pause 1;
 #var tmp_shelter_return 0;
-#var secure_shelter_switch 0;
+#NOP -- sat shelter on by default (shelter off turns it off, shelters off turns both off);
+#var secure_shelter_switch 1;
 #var tmp_shelter_vnum 0;
 #var tmp_shelter_exit 0;
 #var tmp_shelter_command 0;
@@ -116,7 +117,7 @@
     #if {$my[immersion][count]} {
         #var sp_low_unhealed 0;
     };
-    #if {$my[immersion][active]} {
+    #if {"$my[immersion][active]" == "1"} {
         #var sp_low_unhealed 0;
     };
     #if {$my[hm][heal]} {
@@ -171,7 +172,7 @@
                 } {
                     #NOP -- backup refresh of SPs/MC in case the hpbar is slow to update;
                     hp;
-                    #if {($my[sp][current] > $sp_threshold || $my[immersion][active]) && $hpbar_mc > $mc_threshold} {
+                    #if {($my[sp][current] > $sp_threshold || "$my[immersion][active]" == "1") && $hpbar_mc > $mc_threshold} {
                         #var shelter_bot_wait 0;
                         #unticker {shelterBotResume};
                         #if {"$pausedtoregen" == "1"} {
@@ -198,76 +199,1200 @@
     };
 };
 
-#alias {_player_heartbeat} {
-    #if {!$idle_flag} {
-        #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0} {
-            cast explosive release;
+#NOP -- SP shelter (on by default). When SPs drop under sp_danger the heals go in this order:;
+#NOP -- mystic immersion (the guild heartbeat casts it), your own hmheal, your own eternal (heal,;
+#NOP -- then other 3kdb players in sp_heal_friends via the jc (hmheal) and acp ((heal) souls.;
+#NOP -- With nothing left, cast secure shelter, even mid fight, and stay in until SPs are full.;
+#NOP -- The sat shelter (shelter on) and this one share one shelter, it is left once both are done.;
+#NOP -- percent of max SP to reach before leaving;
+#var sp_shelter_full 100;
+#NOP -- after SPs are full, also stay until sat is at or under this (percent), ash stops at saturation-stop;
+#var sp_shelter_sat 60;
+#var shelter_sat_last 101;
+#var shelter_sat_stuck 0;
+#NOP -- secure shelter costs 150 SP, under this many it isn't tried;
+#var sp_shelter_min 300;
+#NOP -- under this many SP, stop waiting on other players and go to the shelter while it can still be cast;
+#var sp_shelter_urgent 1500;
+#NOP -- seconds to wait for a heal to land before trying the next one;
+#var sp_heal_wait_own 6;
+#var sp_heal_wait_friend 10;
+#NOP -- seconds before asking the same player again, after a heal or after nothing came;
+#var sp_heal_again_ok 3600;
+#var sp_heal_again_fail 900;
+#NOP -- most players asked in one low SP spell before going to the shelter, offline ones never answer;
+#var sp_heal_friend_max 4;
+#var sp_heal_asks 0;
+#var sp_heal[type] {};
+#var sp_heal[until] 0;
+#var sp_heal[key] {};
+#var sp_heal_next {};
+#var shelter_want[sat] 0;
+#var shelter_want[sp] 0;
+#var shelter_reason[sat] 0;
+#var shelter_reason[sp] 0;
+#var shelter_in 0;
+#var shelter_failed 0;
+#var shelter_retry 0;
+#var shelter_nocast {};
+#var shelter_cast_from 0;
+#var shelter_sp_last 0;
+#var shelter_sp_stuck 0;
+#var sp_shelter_noted 0;
+
+#alias {spshelter}
+{
+    #switch {"%1"}
+    {
+        #case {"on"}
+        {
+            #var sp_shelter_switch 1;
+            #echo {<afa>SP shelter ON<088>};
         };
-        #if {"$secure_shelter_switch" == "1"} {
-            #if {$my[gp1][current] > 78 && "$my[super][current]" == "0" && "$shelter_pause" == "1"} {
-                #map get roomvnum tmp_shelter_vnum;
-                #NOP -- zodiac steppers (common/bot/bots/czodiacs*.tin): hold off where sheltering breaks their portal/rift run;
-                #NOP -- treasure room out of combat: the mimic is dead (or no chest opened yet) and the stepper takes you out, shelter once outside;
-                #NOP -- anywhere else _zodiac_hold holds the steppers' portal/rift entry and exit while sheltered, _zodiac_replay sends them once we're back;
-                #var shelter_defer 0;
-                #if {("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") && !$incombat} {#var shelter_defer 1};
-                #if {!$shelter_defer} {
-                    #NOP -- bot already paused by someone else (a zodiac stepper in its treasure room): leave its resume to it;
-                    #var shelter_bot_foreign 0;
-                    #NOP -- bot_toggle 1 with bot[autopause] cleared: the guild rest had it, then a death or the player paused it;
-                    #if {$bot[active] && (("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") || ($bot[paused] && ("$bot_toggle" != "1" || ("$bot[autopause]" != "1" && !$shelter_bot_wait)) && "$pausedtoregen" == "1"))} {#var shelter_bot_foreign 1};
-                    #NOP -- shelter's own pause is not someone else taking the bot from the MC regen pause;
-                    #var regen_foreign_keep $regen_bot_foreign;
-                    #if {$bot[active]} {.pause};
-                    #var regen_bot_foreign $regen_foreign_keep;
-                    _shelter_hold_bot;
-                    #var shelter_pause 0;
-                    #if {"$tmp_shelter_vnum" == "53914"} {
-                        #var tmp_shelter_exit 1;
-                        #var tmp_shelter_command {portal};
-                    } {
-                        #if {"$tmp_shelter_vnum" == "54572"} {
-                            #var tmp_shelter_exit 1;
-                            #var tmp_shelter_command {fracture};
-                        } {
-                            #var tmp_shelter_exit 0;
-                        };
-                    };
-                    #if {"$tmp_shelter_exit" == "1"} {
-                        #var tmp_shelter_exit 0;
-                        #var tmp_shelter_return 1;
-                        $tmp_shelter_command;
-                        #map get roomvnum tmp_shelter_vnum;
-                        cast secure shelter;
-                    } {
-                        cast secure shelter;
-                    };
-                    _zodiac_hold;
+        #case {"off"}
+        {
+            #var sp_shelter_switch 0;
+            #echo {<faa>SP shelter OFF<088>};
+        };
+        #default
+        {
+            #echo {SP shelter is $sp_shelter_switch (spshelter on or off). Sat shelter is $secure_shelter_switch (shelter on or off).};
+        };
+    };
+};
+
+#NOP -- healfriends lists who gets asked, healfriends add <name> or healfriends del <name> changes it;
+#alias {healfriends}
+{
+    #format {sphf_name} {%l} {%2};
+    #switch {"%1"}
+    {
+        #case {"add"}
+        {
+            #if {"$sphf_name" == ""}
+            {
+                #echo {healfriends add <name>};
+                #return;
+            };
+            #var sp_heal_friends[$sphf_name] 1;
+        };
+        #case {"del"}
+        {
+            #unvar sp_heal_friends[$sphf_name];
+        };
+    };
+    #var sphf_list {};
+    #foreach {*sp_heal_friends[]} {sphf_name}
+    {
+        #var sphf_list {$sphf_list $sphf_name};
+    };
+    #echo {<ffa>Heal friends:<088>$sphf_list};
+};
+
+#NOP -- emotes lists the souls that make other 3kdb players do something for you;
+#alias {emotes}
+{
+    #echo {<ffa>Souls other 3kdb players answer, if they have that toggle on:<088>};
+    #echo {  <afa>tap <name><088>      they follow and assist you      (emote_follow)};
+    #echo {  <afa>jc <name><088>       they hmheal you                 (emote_heal)};
+    #echo {  <afa>acp <name><088>      they eternal (heal you          (emote_eheal)};
+    #echo {  <afa>comrade <name><088>  they hand you corpses           (emote_corpse)};
+    #echo {  <afa>club <name><088>     necros aid you                  (emote_aid)};
+    #echo {  <afa>toke <name><088>     they rally you                  (emote_rally)};
+    #echo {  <afa>alien <name><088>    they run dungeons clear all     (emote_dungeon_clear)};
+    #echo {  jc and acp work from anywhere, the rest need you in the same room.};
+};
+
+#NOP -- Is a heal we tried still on its way. Sets sp_heal_busy, and once it's over marks how it went;
+#alias {_sp_heal_pending}
+{
+    #var sp_heal_busy 0;
+    #if {"$sp_heal[type]" == ""}
+    {
+        #return;
+    };
+    #format {sp_heal_now} {%T};
+    #if {$my[sp][current] >= $sp_danger}
+    {
+        #if {"$sp_heal[type]" == "friend"}
+        {
+            #math {sp_heal_next[$sp_heal[key]]} {$sp_heal_now + $sp_heal_again_ok};
+        };
+        #var sp_heal[type] {};
+        #return;
+    };
+    #if {$sp_heal_now < $sp_heal[until]}
+    {
+        #var sp_heal_busy 1;
+        #return;
+    };
+    #switch {"$sp_heal[type]"}
+    {
+        #case {"hm"}
+        {
+            #NOP -- no heal came, so hmheal isn't ready after all. Try it again in 10 minutes;
+            #var my[hm][heal] 0;
+            #undelay {hmheal};
+            #delay {hmheal} {#var my[hm][heal] 1} {600};
+        };
+        #case {"eternal"}
+        {
+            #var my[eternal][heal] 0;
+            _check_eternal_powers;
+        };
+        #case {"friend"}
+        {
+            #math {sp_heal_next[$sp_heal[key]]} {$sp_heal_now + $sp_heal_again_fail};
+        };
+    };
+    #var sp_heal[type] {};
+};
+
+#NOP -- the heal friend isn't online: give up on that ask now instead of waiting sp_heal_wait_friend;
+#action {^Perform {jc|acp} at whom?$} {
+    #if {"$sp_heal[type]" == "friend"} {
+        #format {sp_heal[until]} {%T};
+    };
+} {5};
+
+#alias {_sp_heal_start}
+{
+    #format {sp_heal_now} {%T};
+    #var sp_heal[type] {%1};
+    #var sp_heal[key] {%2};
+    #math {sp_heal[until]} {$sp_heal_now + %3};
+};
+
+#NOP -- Ask the next heal friend who hasn't been asked lately. Sets sp_heal_asked to 1 if someone was asked;
+#alias {_sp_heal_ask_friend}
+{
+    #var sp_heal_asked 0;
+    #if {$sp_heal_asks >= $sp_heal_friend_max}
+    {
+        #return;
+    };
+    #format {sp_heal_now} {%T};
+    #foreach {*sp_heal_friends[]} {sphf_name}
+    {
+        #if {$sp_heal_asked || "$sphf_name" == "$user"}
+        {
+            #continue;
+        };
+        #foreach {hm;eternal} {sphf_type}
+        {
+            #if {$sp_heal_asked}
+            {
+                #continue;
+            };
+            #var sphf_key {${sphf_name}_$sphf_type};
+            #var sphf_next 0;
+            #if {&sp_heal_next[$sphf_key]}
+            {
+                #var sphf_next $sp_heal_next[$sphf_key];
+            };
+            #if {$sp_heal_now < $sphf_next}
+            {
+                #continue;
+            };
+            #var sp_heal_asked 1;
+            #math {sp_heal_asks} {$sp_heal_asks + 1};
+            #if {"$sphf_type" == "hm"}
+            {
+                #echo {<ffa>SP low, nothing of mine left to heal it, asking $sphf_name for a hmheal.<088>};
+                jc $sphf_name;
+            };
+            #else
+            {
+                #echo {<ffa>SP low, nothing of mine left to heal it, asking $sphf_name for an eternal heal.<088>};
+                acp $sphf_name;
+            };
+            _sp_heal_start {friend} {$sphf_key} {$sp_heal_wait_friend};
+        };
+    };
+};
+
+#NOP -- Sets shelter_want[sp] when SPs are low and every heal is used up or already being tried;
+#alias {_sp_shelter_check}
+{
+    #var shelter_want[sp] 0;
+    #if {"$sp_shelter_switch" != "1"}
+    {
+        #return;
+    };
+    #if {!$bot[active] && "$incombat" != "1"}
+    {
+        #return;
+    };
+    #NOP -- the guild heartbeat sets sp_danger, right after loading it isn't there yet;
+    #if {!&{sp_danger}}
+    {
+        #return;
+    };
+    _sp_heal_pending;
+    #if {$my[sp][current] >= $sp_danger}
+    {
+        #var sp_shelter_noted 0;
+        #var sp_heal_asks 0;
+        #return;
+    };
+    #NOP -- SPs going fast: don't wait on other players any longer;
+    #var sp_urgent 0;
+    #if {$my[sp][current] < $sp_shelter_urgent}
+    {
+        #var sp_urgent 1;
+    };
+    #if {$sp_urgent && "$sp_heal[type]" == "friend"}
+    {
+        #var sp_heal_busy 0;
+    };
+    #if {"$my[immersion][active]" == "1" || $sp_heal_busy}
+    {
+        #return;
+    };
+    #NOP -- immersions left: the guild heartbeat casts one, unless strategy no_immersion is on;
+    #if {$my[immersion][count] && "$immersion_off" != "1"}
+    {
+        #return;
+    };
+    #NOP -- each check is its own #if, my[eternal][heal] can be undefined;
+    #if {$my[hm][heal]}
+    {
+        #echo {<ffa>SP low and no immersions left, using hmheal.<088>};
+        hmheal;
+        _sp_heal_start {hm} {} {$sp_heal_wait_own};
+        #return;
+    };
+    #if {$my[eternal][heal]}
+    {
+        #echo {<ffa>SP low and no immersions left, using eternal heal.<088>};
+        (heal $user;
+        _sp_heal_start {eternal} {} {$sp_heal_wait_own};
+        #return;
+    };
+    #var sp_heal_asked 0;
+    #if {!$sp_urgent}
+    {
+        _sp_heal_ask_friend;
+    };
+    #if {$sp_heal_asked}
+    {
+        #return;
+    };
+    #NOP -- last thing before the shelter: the golem tanks, so the prots stop being hit and SPs come back;
+    _golem_tank_try;
+    #if {$golem_tank_on}
+    {
+        #return;
+    };
+    #var shelter_want[sp] 1;
+};
+
+#NOP --- Golem tank: SP low with every heal used up. Before the SP shelter, say golem, defend me puts the;
+#NOP -- golem in front (golems are big tanks, info create golem). It stays until SPs are back to;
+#NOP -- golem_tank_until percent. The shelter still comes if the golem gets under golem_tank_min percent,;
+#NOP -- dies (summon config makes a new one, assisting) or SPs fall under golem_tank_floor anyway.;
+#NOP -- defend me can't be undone, the golem tanks until it dies, so each golem tank uses up one golem.;
+#NOP -- golemtank on or off.;
+#var golem_tank_min 25;
+#NOP -- golems left this reset (my[golem][current], G: on the hpbar) to keep, the tank isn't used at or under it;
+#var golem_tank_keep 1;
+#NOP -- under this many SP it's too late for the golem, straight to the shelter (it costs 150, needs 300);
+#var golem_tank_floor 600;
+#var golem_tank_until 60;
+#var golem_tank_on 0;
+#var golem_hp -1;
+#var golem_tanking 0;
+#var golem_tank_said 0;
+
+#NOP -- golem_hp = the golem's HP percent from the summon status line (Wood golem:~mf76%), -1 = no golem.;
+#NOP -- golem_tanking = 1 when it has the ~ (tanking) mark;
+#alias {_golem_hp}
+{
+    #var golem_hp -1;
+    #var golem_tanking 0;
+    #if {&{summonList}}
+    {
+        #NOP -- not nested: an outer #regex fills in its own &1 &2 in the inner one first;
+        #foreach {$summonList[%*]} {gt_item}
+        {
+            #var gt_is 0;
+            #regex {$gt_item} {olem:} {#var gt_is 1};
+            #if {$gt_is}
+            {
+                #regex {$gt_item} {:{[^0-9]*}{[0-9]+}} {#var golem_hp &2};
+                #regex {$gt_item} {~} {#var golem_tanking 1};
+            };
+        };
+    };
+};
+
+#alias {_golem_tank_try}
+{
+    _golem_hp;
+    #var golem_tank_ok 0;
+    #if {"$golem_tank_switch" == "1" && "$incombat" == "1" && $golem_hp >= $golem_tank_min && $my[sp][current] >= $golem_tank_floor && ($golem_tank_on || $my[golem][current] > $golem_tank_keep)}
+    {
+        #var golem_tank_ok 1;
+    };
+    #if {$golem_tank_ok && !$golem_tank_on}
+    {
+        #var golem_tank_on 1;
+        #format {golem_tank_said} {%T};
+        #echo {<ffa>SP low and no heals left: golem tanks (golem at $golem_hp) until SP is back to $golem_tank_until percent.<088>};
+        say golem, defend me;
+    };
+    #elseif {$golem_tank_ok && !$golem_tanking}
+    {
+        #NOP -- a new golem (the old one died) comes back assisting, tell it too, at most every 6s;
+        #format {golem_tank_now} {%T};
+        #if {$golem_tank_now - $golem_tank_said >= 6}
+        {
+            #var golem_tank_said $golem_tank_now;
+            say golem, defend me;
+        };
+    };
+    #elseif {!$golem_tank_ok && $golem_tank_on}
+    {
+        #var golem_tank_on 0;
+        #echo {<faa>Golem tank over (golem at $golem_hp, SP $my[sp][current]), going to the shelter.<088>};
+    };
+};
+
+#NOP -- every heartbeat: end the golem tank once SPs are back, or when the fight is over;
+#alias {_golem_tank_tick}
+{
+    #if {$golem_tank_on}
+    {
+        #math {golem_tank_sp} {$my[sp][current] * 100 / $my[sp][max]};
+        _golem_hp;
+        #if {$golem_tank_sp >= $golem_tank_until || "$incombat" != "1"}
+        {
+            #var golem_tank_on 0;
+            #echo {<afa>Golem tank done: SP at $golem_tank_sp percent. The golem (at $golem_hp) keeps tanking until it dies, defend me can't be undone.<088>};
+        };
+        #elseif {!$golem_tanking && $golem_hp >= $golem_tank_min}
+        {
+            #NOP -- a new golem (the old one died) comes back assisting, at most every 6s;
+            #format {golem_tank_now} {%T};
+            #if {$golem_tank_now - $golem_tank_said >= 6}
+            {
+                #var golem_tank_said $golem_tank_now;
+                say golem, defend me;
+            };
+        };
+    };
+};
+
+#alias {golemtank}
+{
+    #switch {"%1"}
+    {
+        #case {"on"}
+        {
+            #var golem_tank_switch 1;
+            #echo {<afa>Golem tank ON: with SP low and no heals left the golem tanks before the SP shelter.<088>};
+        };
+        #case {"off"}
+        {
+            #var golem_tank_switch 0;
+            #echo {<faa>Golem tank OFF: low SP goes straight to the shelter.<088>};
+        };
+        #default
+        {
+            _golem_hp;
+            #echo {Golem tank is $golem_tank_switch (golemtank on or off). Tanking for SP now: $golem_tank_on. Golem HP $golem_hp percent, tank mark $golem_tanking.};
+        };
+    };
+};
+
+#NOP -- both shelters at once: shelters on or off;
+#alias {shelters}
+{
+    #switch {"%1"}
+    {
+        #case {"on"}
+        {
+            #var sp_shelter_switch 1;
+            #var secure_shelter_switch 1;
+            #echo {<afa>SP shelter and sat shelter ON<088>};
+        };
+        #case {"off"}
+        {
+            #var sp_shelter_switch 0;
+            #var secure_shelter_switch 0;
+            #echo {<faa>SP shelter and sat shelter OFF<088>};
+        };
+        #default
+        {
+            #echo {SP shelter $sp_shelter_switch, sat shelter $secure_shelter_switch, golem tank $golem_tank_switch. shelters on or off sets both shelters.};
+        };
+    };
+};
+
+#NOP -- Sets shelter_want[sat] and shelter_want[sp] for this heartbeat;
+#NOP -- Sat order: explosive release while it has charges, then a corpse (spell tap on corpse and corpse blast,;
+#NOP -- like the guild heartbeat does over 89), then the shelter. The shelter still goes when there's no corpse,;
+#NOP -- a corpse didn't bring sat down within sat_corpse_wait seconds, or sat reaches sat_corpse_max;
+#var sat_corpse_wait 30;
+#var sat_corpse_max 95;
+#var sat_corpse[at] 0;
+#var sat_corpse[sat] 0;
+#alias {_shelter_check_want}
+{
+    #var shelter_want[sat] 0;
+    #if {"$secure_shelter_switch" == "1" && $my[gp1][current] > 78 && "$my[super][current]" == "0"}
+    {
+        #format {sat_corpse_now} {%T};
+        #math {sat_corpse_age} {$sat_corpse_now - $sat_corpse[at]};
+        #NOP -- unset corpses[total] (corpse manager not loaded) counts as none;
+        #format {sat_corpse_n} {%d} {$corpses[total]};
+        #NOP -- 10 seconds after a corpse sat should be lower than when it was used, or the corpse didn't work;
+        #var sat_corpse_failed 0;
+        #if {$sat_corpse_age >= 10 && $sat_corpse_age < $sat_corpse_wait && $my[gp1][current] >= $sat_corpse[sat]}
+        {
+            #var sat_corpse_failed 1;
+        };
+        #if {$my[gp1][current] >= $sat_corpse_max}
+        {
+            #var shelter_want[sat] 1;
+        };
+        #elseif {"$corpse_toggle" == "0" || $sat_corpse_age < 10}
+        {
+            #NOP -- a corpse is being used or was just used, see if it lowers sat first;
+        };
+        #elseif {$sat_corpse_n > 0 && !$sat_corpse_failed}
+        {
+            #var sat_corpse[at] $sat_corpse_now;
+            #var sat_corpse[sat] $my[gp1][current];
+            #echo {<ffa>Sat $my[gp1][current]: no explosive release left, using a corpse before the shelter.<088>};
+            #var corpse_toggle 0;
+            corpse_select;
+            #delay {sat_corpse_use} {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 1;i} {4};
+        };
+        #elseif {$sat_corpse_n == 0 || $sat_corpse_failed}
+        {
+            #var shelter_want[sat] 1;
+        };
+    };
+    _sp_shelter_check;
+};
+
+#NOP -- Cast secure shelter for whatever shelter_want asks for;
+#alias {_shelter_enter}
+{
+    #map get roomvnum tmp_shelter_vnum;
+    #NOP -- zodiac steppers (common/bot/bots/czodiacs*.tin): hold off where sheltering breaks their portal/rift run;
+    #NOP -- treasure room out of combat: the mimic is dead (or no chest opened yet) and the stepper takes you out, shelter once outside;
+    #NOP -- anywhere else _zodiac_hold holds the steppers' portal/rift entry and exit while sheltered, _zodiac_replay sends them once we're back;
+    #var shelter_defer 0;
+    #if {("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") && !$incombat}
+    {
+        #var shelter_defer 1;
+    };
+    #NOP -- the spell failed here before, or failed somewhere in the last 30 seconds;
+    #format {shelter_now} {%T};
+    #if {&shelter_nocast[$tmp_shelter_vnum] || $shelter_now < $shelter_retry}
+    {
+        #var shelter_defer 1;
+    };
+    #if {$my[sp][current] < $sp_shelter_min}
+    {
+        #var shelter_defer 1;
+    };
+    #NOP -- gypsyid or a walk into the sewers is moving us, an out from the shelter would break it;
+    #if {&{gid} && "$gid[state]" != "idle"}
+    {
+        #var shelter_defer 1;
+    };
+    #if {&{sewin} && "$sewin[state]" != "idle"}
+    {
+        #var shelter_defer 1;
+    };
+    #if {$shelter_defer}
+    {
+        #if {$shelter_want[sp] && !$sp_shelter_noted}
+        {
+            #var sp_shelter_noted 1;
+            #echo {<faa>SP low and nothing left to heal it, but it can't shelter right now (too few SPs, a walk is running, or the room won't allow it). The bot pauses to regen instead.<088>};
+        };
+        #return;
+    };
+    #var shelter_reason[sat] $shelter_want[sat];
+    #var shelter_reason[sp] $shelter_want[sp];
+    #var shelter_in 0;
+    #var shelter_failed 0;
+    #var shelter_cast_from $tmp_shelter_vnum;
+    #var shelter_sat_last 101;
+    #var shelter_sat_stuck 0;
+    #if {$shelter_reason[sp]}
+    {
+        #echo {<ffa>SP low and nothing left to heal it, going into secure shelter until SPs are full.<088>};
+    };
+    #NOP -- bot already paused by someone else (a zodiac stepper in its treasure room): leave its resume to it;
+    #var shelter_bot_foreign 0;
+    #NOP -- bot_toggle 1 with bot[autopause] cleared: the guild rest had it, then a death or the player paused it;
+    #if {$bot[active] && (("$tmp_shelter_vnum" == "53914" || "$tmp_shelter_vnum" == "54572") || ($bot[paused] && ("$bot_toggle" != "1" || ("$bot[autopause]" != "1" && !$shelter_bot_wait)) && "$pausedtoregen" == "1"))} {#var shelter_bot_foreign 1};
+    #NOP -- shelter's own pause is not someone else taking the bot from the MC regen pause;
+    #var regen_foreign_keep $regen_bot_foreign;
+    #if {$bot[active]} {.pause};
+    #var regen_bot_foreign $regen_foreign_keep;
+    _shelter_hold_bot;
+    #var shelter_pause 0;
+    #var tmp_shelter_return 0;
+    #if {"$tmp_shelter_vnum" == "53914"}
+    {
+        #var tmp_shelter_return 1;
+        #var tmp_shelter_command {portal};
+    };
+    #elseif {"$tmp_shelter_vnum" == "54572"}
+    {
+        #var tmp_shelter_return 1;
+        #var tmp_shelter_command {fracture};
+    };
+    #if {$tmp_shelter_return}
+    {
+        $tmp_shelter_command;
+    };
+    cast secure shelter;
+    _zodiac_hold;
+    #NOP -- if neither the fortress line nor the fail line shows up, _shelter_tick gives up after this;
+    #math {shelter_cast_until} {$shelter_now + 6};
+};
+
+#action {^You bring into being a shimmering Fortress of Power!$}
+{
+    #if {"$shelter_pause" == "0"}
+    {
+        #var shelter_in 1;
+        #var shelter_sp_last $my[sp][current];
+        #var shelter_sp_stuck 0;
+    };
+}
+{2};
+
+#action {^That spell fails here!$}
+{
+    #if {"$shelter_pause" == "0" && !$shelter_in}
+    {
+        #var shelter_failed 1;
+    };
+}
+{2};
+
+#NOP -- Hand everything back after the shelter, %1 is 1 when we have to walk out ourselves;
+#alias {_shelter_finish}
+{
+    #var shelter_pause 1;
+    #var shelter_in 0;
+    #var shelter_reason[sat] 0;
+    #var shelter_reason[sp] 0;
+    _zodiac_release;
+    #if {%1}
+    {
+        out;
+    };
+    #if {$tmp_shelter_return}
+    {
+        $tmp_shelter_command;
+    };
+    _shelter_release_bot;
+    _zodiac_replay;
+    #var tmp_shelter_vnum 0;
+    glance;
+    #if {$tmp_shelter_return}
+    {
+        kill mimic;
+    };
+    #var tmp_shelter_return 0;
+};
+
+#NOP -- The cast didn't take us in. Don't try that room again this session, and nowhere for 30 seconds;
+#alias {_shelter_cast_failed}
+{
+    #if {"$shelter_cast_from" != "" && "$shelter_cast_from" != "0"}
+    {
+        #var shelter_nocast[$shelter_cast_from] 1;
+    };
+    #format {shelter_now} {%T};
+    #math {shelter_retry} {$shelter_now + 30};
+    #echo {<faa>Secure shelter didn't work here, carrying on without it.<088>};
+    #if {$shelter_reason[sp]}
+    {
+        #var sp_shelter_noted 1;
+    };
+    _shelter_finish 0;
+};
+
+#NOP -- Every heartbeat while sheltered: check the cast went in, then leave once every reason is done;
+#alias {_shelter_tick}
+{
+    #if {!$shelter_in}
+    {
+        #format {shelter_now} {%T};
+        #if {$shelter_failed || $shelter_now >= $shelter_cast_until}
+        {
+            #NOP -- backup for a missed fortress line;
+            #var shelter_room 0;
+            #regex {$room_short} {Strong Fortress of Protection} {#var shelter_room 1};
+            #if {$shelter_room && !$shelter_failed}
+            {
+                #var shelter_in 1;
+                #var shelter_sp_last $my[sp][current];
+                #var shelter_sp_stuck 0;
+            };
+            #else
+            {
+                _shelter_cast_failed;
+            };
+        };
+        #return;
+    };
+    #NOP -- left some other way (typed out, died): hand the bot back paused and don't send out;
+    #var shelter_room 0;
+    #regex {$room_short} {Strong Fortress of Protection} {#var shelter_room 1};
+    #if {!$shelter_room}
+    {
+        #echo {<faa>Not in the shelter any more, the bot stays paused.<088>};
+        #var shelter_bot_foreign 1;
+        #var tmp_shelter_return 0;
+        _shelter_finish 0;
+        #return;
+    };
+    #NOP -- a reason can start while inside, both are then waited on. Switching one off drops it;
+    #if {"$secure_shelter_switch" == "1" && $my[gp1][current] > 78}
+    {
+        #var shelter_reason[sat] 1;
+    };
+    #if {"$secure_shelter_switch" != "1"}
+    {
+        #var shelter_reason[sat] 0;
+    };
+    #if {"$sp_shelter_switch" == "1" && $my[sp][current] < $sp_danger}
+    {
+        #var shelter_reason[sp] 1;
+    };
+    #if {"$sp_shelter_switch" != "1"}
+    {
+        #var shelter_reason[sp] 0;
+    };
+    #var shelter_done 1;
+    #if {$shelter_reason[sat] && "$my[gp1][current]" != "0"}
+    {
+        #var shelter_done 0;
+    };
+    #if {$shelter_reason[sp]}
+    {
+        #math {shelter_sp_goal} {$my[sp][max] * $sp_shelter_full / 100};
+        #if {$my[sp][current] < $shelter_sp_goal}
+        {
+            #NOP -- give up after about a minute with no SP gained, something is eating them;
+            #if {$my[sp][current] > $shelter_sp_last}
+            {
+                #var shelter_sp_stuck 0;
+                #var shelter_sp_last $my[sp][current];
+            };
+            #else
+            {
+                #math {shelter_sp_stuck} {$shelter_sp_stuck + 1};
+            };
+            #if {$shelter_sp_stuck < 30}
+            {
+                #var shelter_done 0;
+            };
+            #else
+            {
+                #echo {<faa>SPs stopped going up in the shelter, leaving at $my[sp][current].<088>};
+            };
+        };
+        #elseif {$my[gp1][current] > $sp_shelter_sat}
+        {
+            #NOP -- low SPs often come with high sat, which stops ash and corpse heals. Leaving with sat still;
+            #NOP -- high would only drain the SPs again, so stay until it is down too, unless it stops dropping;
+            #if {$my[gp1][current] < $shelter_sat_last}
+            {
+                #var shelter_sat_stuck 0;
+            };
+            #else
+            {
+                #math {shelter_sat_stuck} {$shelter_sat_stuck + 1};
+            };
+            #var shelter_sat_last $my[gp1][current];
+            #if {$shelter_sat_stuck < 30}
+            {
+                #var shelter_done 0;
+            };
+        };
+    };
+    #if {$shelter_done}
+    {
+        _shelter_finish 1;
+    };
+};
+
+#NOP -- Mage box trip: once the bags are full (gid[bags_full], set in gypsyid.tin during bag1) while a bot runs,;
+#NOP -- pause the bot, wait out the fight, go to the mage box, keep all worn, bag2, then get all and put all in;
+#NOP -- box until nothing is left on the floor, then go back and resume. Mages can't donate from a bag, so it;
+#NOP -- all comes out first. aboxon and aboxoff in aliases.tin turn it on and off, magebox runs it now;
+#var bbox[on] 1;
+#var bbox[state] idle;
+#var bbox[manual] 0;
+#var bbox[timer] 0;
+#var bbox[calm] 0;
+#var bbox[noted] 0;
+#NOP -- the mage_box speedrun room (common/map/speedruns.tin);
+#var bbox[room] 53386;
+#NOP -- heartbeats (2 seconds each) to wait for the walk back before giving up;
+#var bbox[timeout] 45;
+#NOP -- most get all and put all in box passes;
+#var bbox[max_passes] 30;
+
+#alias {.bbox_echo}
+{
+    #echo {<ceb>Mage box:<088> %1};
+};
+
+#NOP -- stop the trip. A bot trip leaves the bot paused where you are;
+#alias {.bbox_abort}
+{
+    #var bbox[state] idle;
+    #undelay {gid_wait};
+    #undelay {gid_out};
+    #var gid[out] 0;
+    #var gid[state] idle;
+    #NOP -- full bags show up again at the next bag1, so this doesn't start the trip over and over;
+    #var gid[bags_full] 0;
+    #if {$bbox[manual]}
+    {
+        .bbox_echo {<faa>%1 - stopped.<088>};
+    };
+    #else
+    {
+        .bbox_echo {<faa>%1 - stopped, the bot is still paused.<088>};
+    };
+    #var bbox[manual] 0;
+};
+
+#NOP -- bbox[hold] says why the trip can't start here. The zodiac steppers and the Section Z game can't be;
+#NOP -- walked out of, a walk into the sewers is already going, gypsyid is running, or shelter has the bot;
+#alias {.bbox_hold_check}
+{
+    #var bbox[hold] {};
+    #map get roomvnum bbox[vnum];
+    #if {"$area" == "Celestial Zodiacs"}
+    {
+        #var bbox[hold] {in the Celestial Zodiacs};
+    };
+    #elseif {"$area" == "Section Z" && "$bbox[vnum]" != "24785" && "$bbox[vnum]" != "24786"}
+    {
+        #var bbox[hold] {inside the Section Z game};
+    };
+    #elseif {&{sewin} && "$sewin[state]" != "idle"}
+    {
+        #var bbox[hold] {walking into the sewers};
+    };
+    #elseif {"$gid[state]" != "idle"}
+    {
+        #var bbox[hold] {gypsyid is running};
+    };
+    #elseif {"$shelter_pause" != "1" || $shelter_bot_wait}
+    {
+        #var bbox[hold] {sheltered};
+    };
+};
+
+#alias {.bbox_start}
+{
+    .pause;
+    #NOP -- a failed move on the way runs mapUndo, which also takes one off the bot step, so keep it;
+    #var bbox[bot_step] $bot[step];
+    #var bbox[state] wait_fight;
+    #var bbox[calm] 0;
+    .bbox_echo {bags are full. Bot paused, going to the mage box once the fight is over.};
+};
+
+#NOP -- .gid_go and .gid_walk (gypsyid.tin) walk out of the sewers a step at a time and check the room on;
+#NOP -- arrival. They stop when gid[state] is idle, so it says magebox for the whole trip;
+#alias {.bbox_go}
+{
+    #var bbox[state] to_box;
+    #map get roomvnum bbox[back];
+    #var gid[state] magebox;
+    .bbox_echo {going to the mage box.};
+    .gid_go mage_box;
+    .gid_walk $bbox[room] .bbox_at_box;
+};
+
+#NOP -- At the box. Nothing is dropped anywhere else, or with a black stone on the floor (get all would graft;
+#NOP -- it to your hand). keep all worn stops put all in box taking off worn gear. bag2 drops everything;
+#alias {.bbox_at_box}
+{
+    .gid_here {A Cosy Closet};
+    #if {!$gid[here]}
+    {
+        .bbox_abort {this isn't the mage box room, nothing was dropped};
+        #return;
+    };
+    #var bbox[stone] 0;
+    #foreach {$room[items][%*]} {bbox_item}
+    {
+        #regex {$bbox_item} {{black stone|Stone of Grafting}} {#var bbox[stone] 1};
+    };
+    #if {$bbox[stone]}
+    {
+        .bbox_abort {a black stone is on the floor here, nothing was dropped};
+        #return;
+    };
+    #var bbox[state] box;
+    #var bbox[passes] 0;
+    #var bbox[left] -1;
+    #var bbox[stuck] 0;
+    .bbox_echo {emptying $bagcount bags onto the floor.};
+    keep all worn;
+    bag2;
+    .gid_sync .bbox_pass;
+};
+
+#alias {.bbox_pass}
+{
+    #if {"$bbox[state]" != "box"}
+    {
+        #return;
+    };
+    #math bbox[passes] {$bbox[passes] + 1};
+    #if {$bbox[passes] > $bbox[max_passes]}
+    {
+        .bbox_done {<faa>still things on the floor after $bbox[max_passes] passes, leaving them.<088>};
+        #return;
+    };
+    get all;
+    put all in box;
+    .gid_sync .bbox_check;
+};
+
+#NOP -- Count what is still on the floor, leaving out the box itself. Nothing left means done. Two passes in;
+#NOP -- a row that leave as much as before means it won't go (too heavy to carry, or the box won't take it);
+#alias {.bbox_check}
+{
+    #if {"$bbox[state]" != "box"}
+    {
+        #return;
+    };
+    #var bbox[now] 0;
+    #foreach {$room[items][%*]} {bbox_item}
+    {
+        #var bbox[fixed] 0;
+        #regex {$bbox_item} {^The mages box} {#var bbox[fixed] 1};
+        #if {!$bbox[fixed]}
+        {
+            #math bbox[now] {$bbox[now] + 1};
+        };
+    };
+    #if {$bbox[now] == 0}
+    {
+        .bbox_done {};
+        #return;
+    };
+    #if {$bbox[left] >= 0 && $bbox[now] >= $bbox[left]}
+    {
+        #math bbox[stuck] {$bbox[stuck] + 1};
+    };
+    #else
+    {
+        #var bbox[stuck] 0;
+    };
+    #var bbox[left] $bbox[now];
+    #if {$bbox[stuck] >= 2}
+    {
+        .bbox_done {<faa>$bbox[now] things on the floor won't go in the box, leaving them.<088>};
+    };
+    #else
+    {
+        .bbox_pass;
+    };
+};
+
+#NOP -- Bags are empty now. %1 is a warning to show, if any. A bot trip goes back, magebox stays here;
+#alias {.bbox_done}
+{
+    #var gid[state] idle;
+    #var gid[bags_full] 0;
+    #if {"%1" != ""}
+    {
+        .bbox_echo {%1};
+    };
+    #if {$bbox[manual]}
+    {
+        #var bbox[state] idle;
+        #var bbox[manual] 0;
+        .bbox_echo {done, bags donated.};
+        #return;
+    };
+    .bbox_echo {bags donated, going back.};
+    .bbox_go_back;
+};
+
+#NOP -- Head back to the room where the bot paused. The Chaos Sewers can't be walked into, so that goes in;
+#NOP -- through the bowl with .sewers_in (common/areas/chaos_sewers.tin);
+#alias {.bbox_go_back}
+{
+    #var go_back $bbox[back];
+    #var bbox[timer] 0;
+    #var bbox[back_area] {};
+    #map get roomarea bbox[back_area] $bbox[back];
+    #if {"$bbox[back_area]" == "Chaotic Sewers"}
+    {
+        #var bbox[state] sewers_in;
+        .sewers_in {$bbox[back]} {.bbox_back_done};
+    };
+    #else
+    {
+        #var bbox[state] to_back;
+        go_back;
+    };
+};
+
+#alias {.bbox_back_done}
+{
+    #var bbox[state] idle;
+    #var bot[step] $bbox[bot_step];
+    .bbox_echo {done, back where the bot paused. Resuming.};
+    #NOP -- while the MC regen pause is waiting this .unpause lands in _regen_held_unpause, which resumes at MC > 97;
+    ..;
+};
+
+#alias {.bbox_tick}
+{
+    #if {"$bbox[state]" == "idle"}
+    {
+        #if {!$bbox[on] || "$bot[active]" != "1" || "$bot[paused]" == "1" || "$gid[bags_full]" != "1"}
+        {
+            #return;
+        };
+        .bbox_hold_check;
+        #if {"$bbox[hold]" != ""}
+        {
+            #if {!$bbox[noted]}
+            {
+                #var bbox[noted] 1;
+                .bbox_echo {bags are full but $bbox[hold], going to the mage box once that's over.};
+            };
+            #return;
+        };
+        #var bbox[noted] 0;
+        .bbox_start;
+        #return;
+    };
+    #if {$bbox[manual]}
+    {
+        #NOP -- magebox without a bot: the walk and the box passes run on their own, only watch for a stop;
+        #if {"$gid[state]" == "idle"}
+        {
+            .bbox_abort {the walk to the mage box stopped};
+        };
+        #return;
+    };
+    #if {"$bot[active]" != "1"}
+    {
+        .bbox_abort {the bot was stopped};
+        #return;
+    };
+    #NOP -- keep the bot paused until it is back where it stopped (a corpsetrig delay can unpause it);
+    #if {"$bbox[state]" != "to_back" && "$bot[paused]" != "1"}
+    {
+        .pause;
+    };
+    #switch {"$bbox[state]"}
+    {
+        #case {"wait_fight"}
+        {
+            #NOP -- two quiet heartbeats in a row so the corpsetrig after the kill can finish;
+            #if {"$incombat" == "1"}
+            {
+                #var bbox[calm] 0;
+            };
+            #else
+            {
+                #math bbox[calm] {$bbox[calm] + 1};
+            };
+            #if {$bbox[calm] >= 2}
+            {
+                .bbox_go;
+            };
+        };
+        #case {"to_box"}
+        {
+            #NOP -- .gid_walk drives the walk, idle here means it gave up;
+            #if {"$gid[state]" == "idle"}
+            {
+                .bbox_abort {never reached the mage box};
+            };
+        };
+        #case {"box"}
+        {
+            #if {"$gid[state]" == "idle"}
+            {
+                .bbox_abort {the game stopped answering at the mage box};
+            };
+        };
+        #case {"sewers_in"}
+        {
+            #NOP -- .sewers_in runs .bbox_back_done at the end, so idle here means it stopped part way;
+            #if {"$sewin[state]" == "idle"}
+            {
+                .bbox_abort {could not get back into the sewers};
+            };
+        };
+        #case {"to_back"}
+        {
+            #map get roomvnum bbox[vnum];
+            #if {"$bbox[vnum]" == "$bbox[back]"}
+            {
+                .bbox_back_done;
+            };
+            #else
+            {
+                #math bbox[timer] {$bbox[timer] + 1};
+                #if {$bbox[timer] > $bbox[timeout]}
+                {
+                    .bbox_abort {never got back to room $bbox[back]};
                 };
             };
         };
-        #NOP -- no secure_shelter_switch check here: 'shelter off' while sheltered must still come back out and hand the bot back;
-        #if {"$my[gp1][current]" == "0" && "$shelter_pause" == "0"} {
-            #if {"$tmp_shelter_return" == "1"} {
-                #var shelter_pause 1;
-                #var tmp_shelter_return 0;
-                _zodiac_release;
-                out;
-                $tmp_shelter_command;
-                _shelter_release_bot;
-                _zodiac_replay;
-                #var tmp_shelter_vnum 0;
-                glance;
-                kill mimic;
-            } {
-                #var shelter_pause 1;
-                _zodiac_release;
-                out;
-                _shelter_release_bot;
-                _zodiac_replay;
-                #var tmp_shelter_vnum 0;
-                glance;
+    };
+};
+
+#NOP -- Rolm strategy follows the rod. On while it's wielded, off when it isn't;
+#NOP -- rolm.tin sets wielded to rod for every rod form, so this works for all of them;
+#NOP -- The eq command shows it as The Rod of Lordly Might, so that name counts too;
+#alias {.brolm_strategy_check}
+{
+    #var brolm_on 0;
+    #var brolm_rod 0;
+    #if {"$wielded" == "rod" || "$wielded" == "The Rod of Lordly Might"}
+    {
+        #var brolm_rod 1;
+    };
+    #foreach {$strategyActive[%*]} {brolm_item}
+    {
+        #if {"$brolm_item[name]" == "rolm"}
+        {
+            #var brolm_on 1;
+        };
+    };
+    #if {$brolm_rod && !$brolm_on}
+    {
+        strategy rolm;
+    };
+    #elseif {!$brolm_rod && $brolm_on}
+    {
+        strategy rolm;
+    };
+};
+
+#NOP -- The wielded value saved in vars.tin can be from an old session. Clear it at login;
+#NOP -- and let the eq Wielded line set what is really wielded now;
+#var wielded {};
+eq;
+
+#NOP -- Party shelters: mycorpsetrig-party turns both shelters and the golem tank off while partying. Once you quit or get booted;
+#NOP -- the party list (party[member], common/party.tin) empties and the badger defaults come back:;
+#NOP -- spshelter on, shelter on, golemtank on. Two empty heartbeats in a row, so a members refresh mid-read doesn't count;
+#var party_shelter[seen] 0;
+#var party_shelter[empty] 0;
+
+#alias {_party_shelters_off}
+{
+    #var party_shelter_mode 1;
+    #var party_shelter[seen] 0;
+    #var party_shelter[empty] 0;
+    #var sp_shelter_switch 0;
+    #var secure_shelter_switch 0;
+    #var golem_tank_switch 0;
+    #echo {<faa>Party: SP shelter, sat shelter and golem tank OFF until you leave the party.<088>};
+    members;
+};
+
+#alias {_party_shelters_default}
+{
+    #var party_shelter_mode 0;
+    #var party_shelter[seen] 0;
+    #var party_shelter[empty] 0;
+    #var sp_shelter_switch 1;
+    #var secure_shelter_switch 1;
+    #var golem_tank_switch 1;
+    #echo {<afa>Party over: SP shelter, sat shelter and golem tank ON.<088>};
+};
+
+#NOP -- no #return here: it runs from the heartbeat ticker and a #return cut off the hpbar build after it;
+#alias {_party_shelter_tick}
+{
+    #if {"$party_shelter_mode" == "1"}
+    {
+        #if {&party[member][] > 0}
+        {
+            #var party_shelter[seen] 1;
+            #var party_shelter[empty] 0;
+        };
+        #elseif {$party_shelter[seen]}
+        {
+            #math {party_shelter[empty]} {$party_shelter[empty] + 1};
+            #if {$party_shelter[empty] >= 2}
+            {
+                _party_shelters_default;
             };
+        };
+    };
+};
+
+#NOP -- Kill report trim: at report_reset_kills kills clear the 3kReport, and at dstats_reset_rounds rounds;
+#NOP -- reset dstats, so neither grows all session. 3kReport-clear misses a few lists, those are cleared here.;
+#NOP -- No #return, this runs from the heartbeat;
+#var report_reset_kills 500;
+#var dstats_reset_rounds 3000;
+#alias {_report_trim_tick}
+{
+    #if {&deathSummary_mob[] >= $report_reset_kills}
+    {
+        3kReport-clear;
+        #list deathSummary_mob_attacks_total clear;
+        #list deathSummary_eternal_erad clear;
+        #list deathSummary_summons_killed clear;
+        #echo {<ffa>Kill report reset after $report_reset_kills kills.<088>};
+    };
+    #if {"$cmbt[category][total][rnd]" != "" && $cmbt[category][total][rnd] >= $dstats_reset_rounds}
+    {
+        dreset;
+        #echo {<ffa>dstats reset after $dstats_reset_rounds rounds.<088>};
+    };
+};
+
+#alias {_player_heartbeat} {
+    #NOP -- my[mfocus] comes back from vars.tin after aliases.tin set mantle_cmd, so keep it in step every tick;
+    _mantle_cmd;
+    #if {!$idle_flag} {
+        _report_trim_tick;
+        _party_shelter_tick;
+        _mfocus_tick;
+        _golem_tank_tick;
+        .bbox_tick;
+        .brolm_strategy_check;
+        #NOP -- at 100 the super reset refills the charges to full and any left over are lost, so spend them;
+        #NOP -- all just before (one every heartbeat while the reset is over 95). Until then they stay for the;
+        #NOP -- sat over 84 reflex;
+        #if {"$incombat" == "1" && $my[super][reset] > 95 && $my[super][current] > 0} {
+            cast explosive release;
+        };
+        #NOP -- one shelter for both reasons (sat with shelter on, low SP with spshelter on), see _shelter_enter;
+        #NOP -- no shelter during a mage box trip, it would cast and step out in the middle of the walk or the box;
+        #if {"$shelter_pause" == "1" && "$bbox[state]" == "idle"} {
+            _shelter_check_want;
+            #if {$shelter_want[sat] || $shelter_want[sp]} {
+                _shelter_enter;
+            };
+        };
+        #NOP -- no switch check here: 'shelter off' while sheltered must still come back out and hand the bot back;
+        #if {"$shelter_pause" == "0"} {
+            _shelter_tick;
         };
         #if {$bot[active] && $my[mental_cognition] < 85 && "$pausedtoregen" == "1"} {
             #if {"$roomvnum" != "54572" || "$zodiac_riftVnum" || "$zodiac_portalVnum"} {
@@ -319,3 +1444,43 @@
 
 
 #class {player_heartbeat} {close};
+
+#NOP -- SP shelter switch and heal friends, set outside the class so a reload of this file keeps them;
+#if {!&{sp_shelter_switch}}
+{
+    #var sp_shelter_switch 1;
+};
+#if {!&{golem_tank_switch}}
+{
+    #var golem_tank_switch 1;
+};
+#NOP -- party shelter mode is saved in vars.tin. After a relog check members, and with no party put the defaults back;
+#if {"$party_shelter_mode" == "1"}
+{
+    #delay {party_shelter_login}
+    {
+        members;
+        #delay {party_shelter_login2}
+        {
+            #if {&party[member][] > 0}
+            {
+                #var party_shelter[seen] 1;
+            };
+            #else
+            {
+                _party_shelters_default;
+            };
+        }
+        {4};
+    }
+    {6};
+};
+#NOP -- heal friends list version 2 adds these names once, names added or removed later are kept;
+#if {"$sp_heal_friends_ver" != "2"}
+{
+    #foreach {oscar;toren;byron;spyron;antiochus;boscar;martyr;maximon;pancho;psyron;untouchable;askum;getrdone;wannabe;brianna;star;treznor} {sphf_name}
+    {
+        #var sp_heal_friends[$sphf_name] 1;
+    };
+    #var sp_heal_friends_ver 2;
+};

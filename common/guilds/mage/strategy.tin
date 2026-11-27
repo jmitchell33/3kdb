@@ -79,11 +79,12 @@
     #nop disabling this until GS is fixed mudside on MIP;
     #nop checkStrategy {gstrength} {#if $my[prots][GS] {#NOP} {cast giant strength on $user;cast strength on $user}};
 
-    #if {$toggle_spelltap && $sp_percent > 70} {
+    #NOP -- During mystic immersion spells cost no SP and SP regen doubles, so spell tap would only raise sat;
+    #if {$toggle_spelltap && ($sp_percent > 70 || "$my[immersion][active]" == "1")} {
         checkStrategy {spelltap} {#var toggle_spelltap 0;cast spell tap never};
     };
 
-    #if {!$toggle_spelltap && $sp_percent < 30} {
+    #if {!$toggle_spelltap && $sp_percent < 30 && "$my[immersion][active]" != "1"} {
         checkStrategy {spelltap} {#var toggle_spelltap 1;cast spell tap always};
     };
 
@@ -98,7 +99,7 @@
     checkStrategy {super_sub} {
         #NOP -- We'll use this when we don't have MI available since we don't really care about conc;
         #NOP -- when we have MI available;
-        #if {$my[super][current] && !$my[immersion][count] && !$my[immersion][active] && $subjugate_toggle} {
+        #if {$my[super][current] && !$my[immersion][count] && "$my[immersion][active]" != "1" && $subjugate_toggle} {
             #var subjugate_toggle 0;
             cast subjugate;
             #delay 30 {#var subjugate_toggle 1};

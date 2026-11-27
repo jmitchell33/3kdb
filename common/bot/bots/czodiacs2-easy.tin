@@ -156,12 +156,11 @@ touch angel rune;
     #var bot[zodiac_aeonos_seen] 1;
 } {1};
 
-#action {A rift to forbidden treasures materializes before you!} {
-        #if {"$toggle_rift_room" == "1"} { 
+#NOP -- common/areas/celestial_zodiacs.tin announces the rift, then runs this while the bot is on;
+#var bot[zodiac_rift] {.zodiac_bot_rift};
+#alias {.zodiac_bot_rift} {
+    #if {"$toggle_rift_room" == "1"} {
         .pause;
-        #map get roomvnum zodiac_riftVnum;
-        #echo {<fff>RIFT ROOM OPEN!<088>};
-        ptell rift room open! roomvnum: $zodiac_riftVnum;
         #var toggle_rift_room 0;
         #ticker riftRoom {
             #if !$incombat {
@@ -184,7 +183,7 @@ touch angel rune;
             kill mimic;
         } {1};
     };
-} {1};
+};
 
 #action {As you land the final blow upon the mimic} {
     #delay 10 {

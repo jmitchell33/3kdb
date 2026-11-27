@@ -1,0 +1,189 @@
+#class {catacombs} {kill};
+#class {catacombs} {open};
+
+#NOP -- Catacombs: the dwarven statue in an archway only blocks the way down (The statue moves to block your;
+#NOP -- way). A speedwalk sends every move at once, so the ones after the block run from the wrong room and the;
+#NOP -- map ends up lost. So go_back to a Catacombs room (modules/map/maphelper.tin) speedwalks to the start;
+#NOP -- room, then walks one step at a time, kills a statue that blocks the way and goes on.;
+#NOP --;
+#NOP -- .cata_back <vnum>: walk to that Catacombs room. .cata_stop: stop where you are.;
+#NOP -- cata_start: the start room of each Catacombs area on the map;
+#var cata_start {{Catacombs}{7996}{Catacombs 2}{20967}};
+#var cata[area] {};
+#var cata[start] 0;
+#var cata[state] idle;
+#NOP -- ticks (0.2 seconds each) for the speedwalk to the start room, then for the whole walk;
+#var cata[start_max] 450;
+#var cata[walk_max] 3000;
+#NOP -- statue blocks to fight before giving up;
+#var cata[block_max] 10;
+
+#alias {.cata_echo} {
+    #echo {<ceb>Catacombs:<088> %1};
+};
+
+#alias {.cata_stop} {
+    #undelay {cata};
+    #var cata[state] idle;
+};
+
+#alias {.cata_abort} {
+    .cata_stop;
+    .cata_echo {<faa>%1 - stopped.<088>};
+};
+
+#NOP -- @cata_exits{<room line>}: the exits in the room line, sorted. The Catacombs shuffle their room names and;
+#NOP -- descriptions, so most differ from the map (findhere can pick the wrong room too), but the exits stay;
+#function {cata_exits} {
+    #var result {};
+    #regex {%0} {{\(([a-z,]+)\)}} {
+        #var cex_list {&2};
+        #replace cex_list {,} {;};
+        #list cex_list create {$cex_list};
+        #list cex_list sort;
+        #foreach {$cex_list[%*]} {cex_one} {
+            #cat result {,$cex_one};
+        };
+    };
+};
+
+#NOP -- @cata_map_ok{}: 1 when the map is in that Catacombs area and the room line has the same exits;
+#function {cata_map_ok} {
+    #var cmo_ok 0;
+    #map get roomarea cmo_area;
+    #map get roomname cmo_name;
+    #if {"$cmo_area" == "$cata[area]" && "@cata_exits{$cmo_name}" == "@cata_exits{$room_short}"} {
+        #var cmo_ok 1;
+    };
+    #var result $cmo_ok;
+};
+
+#alias {.cata_back} {
+    .cata_stop;
+    #var cata[target] {%1};
+    #map get roomarea cata[area] {%1};
+    #var cata[start] {$cata_start[$cata[area]]};
+    #var cata[ticks] 0;
+    #var cata[step_wait] 0;
+    #var cata[stepping] 0;
+    #var cata[blocked] 0;
+    #var cata[blocks] 0;
+    #var cata[calm] 0;
+    #NOP -- a bot that is started, resumed or stopped on the way ends the walk;
+    #var cata[bot] {$bot[active]};
+    #map get roomarea cata[here];
+    #if {"$cata[here]" == "$cata[area]"} {
+        #var cata[state] walk;
+    } {
+        #var cata[state] to_start;
+        #map run $cata[start];
+    };
+    #delay {cata} {.cata_tick} {0.2};
+};
+
+#alias {.cata_tick} {
+    #if {"$cata[state]" == "idle"} {
+        #return;
+    };
+    #if {"$bot[active]" != "$cata[bot]" || ("$bot[active]" == "1" && "$bot[paused]" != "1")} {
+        .cata_stop;
+        #return;
+    };
+    #math cata[ticks] {$cata[ticks] + 1};
+    #switch {"$cata[state]"} {
+        #case {"to_start"} {
+            #NOP -- the map is there as soon as the speedwalk is sent, so the room line has to be too;
+            #map get roomvnum cata[vnum];
+            #if {"$cata[vnum]" == "$cata[start]" && @cata_map_ok{}} {
+                #var cata[state] walk;
+                #var cata[ticks] 0;
+            };
+            #elseif {$cata[ticks] > $cata[start_max]} {
+                .cata_abort {never reached the start room};
+                #return;
+            };
+        };
+        #case {"walk"} {
+            .cata_walk;
+        };
+        #case {"fight"} {
+            .cata_fight;
+        };
+    };
+    #if {"$cata[state]" != "idle"} {
+        #delay {cata} {.cata_tick} {0.2};
+    };
+};
+
+#NOP -- One step, then wait for its room (room[updated] is set at the prompt), the block line or 3 seconds. Mobs;
+#NOP -- that attack on the way are walked past like a speedwalk does;
+#alias {.cata_walk} {
+    #if {$cata[blocked]} {
+        .cata_kill_statue;
+        #return;
+    };
+    #if {$cata[stepping]} {
+        #math cata[step_wait] {$cata[step_wait] + 1};
+        #if {!$room[updated] && $cata[step_wait] < 15} {
+            #return;
+        };
+        #var cata[stepping] 0;
+    };
+    #if {!@cata_map_ok{}} {
+        .cata_abort {the exits here don't match the map, so it has lost track. Set the map to the right room first};
+        #return;
+    };
+    #map get roomvnum cata[vnum];
+    #if {"$cata[vnum]" == "$cata[target]"} {
+        #var cata[state] idle;
+        #return;
+    };
+    #if {$cata[ticks] > $cata[walk_max]} {
+        .cata_abort {never walked to room $cata[target]};
+        #return;
+    };
+    #var room[updated] 0;
+    #var cata[step_wait] 0;
+    #var cata[stepping] 1;
+    #map find {$cata[target]};
+    #path walk;
+};
+
+#NOP -- Runs from the statue lines in modules/map/maphelper.tin, after mapUndo has put the map back;
+#alias {.cata_blocked} {
+    #if {"$cata[state]" == "walk"} {
+        #var cata[blocked] 1;
+    };
+};
+
+#alias {.cata_kill_statue} {
+    #var cata[blocked] 0;
+    #var cata[stepping] 0;
+    #math cata[blocks] {$cata[blocks] + 1};
+    #if {$cata[blocks] > $cata[block_max]} {
+        .cata_abort {a statue still blocks the way};
+        #return;
+    };
+    .cata_echo {a statue blocks the way, killing it first.};
+    #var cata[state] fight;
+    #var cata[calm] 0;
+    #if {"$mob_kill_action" == "1"} {
+        mka statue;
+    } {
+        kill statue;
+    };
+};
+
+#NOP -- 3 seconds out of combat before going on, which also covers the fight not having started yet;
+#alias {.cata_fight} {
+    #if {"$incombat" == "1"} {
+        #var cata[calm] 0;
+    } {
+        #math cata[calm] {$cata[calm] + 1};
+    };
+    #if {$cata[calm] >= 15} {
+        #var cata[state] walk;
+    };
+};
+
+#class {catacombs} {close};

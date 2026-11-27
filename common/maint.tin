@@ -25,7 +25,10 @@
         #var _msaved $xmaint[$guild][active];
     } {
         #var maint_sel {};
-        #foreach {$maint_default[%*]} {_mk} {#var maint_sel[$_mk] 1};
+        #NOP -- maint_cfg[fresh] empty = nothing picked until you pick (maint default or maint <name>);
+        #if {"$maint_cfg[fresh]" != "empty"} {
+            #foreach {$maint_default[%*]} {_mk} {#var maint_sel[$_mk] 1};
+        };
         #var _msaved $maint_cfg[start];
     };
     #var maint_active 0;
@@ -38,6 +41,10 @@
         #if {"$_msaved" == "1"} {#var maint_active 1};
     } {
         #if {"$_msaved" == "1" && "$login_linkdeath" == "1"} {#delay {maint_resume} {_maint_resume} {15}};
+        #NOP -- maint_cfg[login] = what a fresh login runs when maint was on at logout (mage: maint setup);
+        #if {"$_msaved" == "1" && "$login_linkdeath" != "1" && "$maint_cfg[login]" != ""} {
+            #delay {maint_resume} {$maint_cfg[login]} {15};
+        };
     };
     #class {guild_maintenance} {close};
 };
@@ -92,7 +99,7 @@
 #alias {_maint_apply} {
     #foreach {$maint_order[%*]} {_mk} {
         #if {"$maint_spells[$_mk][defs]" != ""} {
-            #if {"$maint_sel[$_mk]" == "1" && "$_mblock[$_mk]" != "1"} {
+            #if {"$maint_sel[$_mk]" == "1" && "$_mblock[$_mk]" != "1" && "$_mnoskill[$_mk]" != "1"} {
                 #var defs[$maint_spells[$_mk][defs]] 1;
             } {
                 #if {"$maint_spells[$_mk][bots]" != "1"} {#var defs[$maint_spells[$_mk][defs]] 0};
@@ -194,6 +201,8 @@
         #echo {<dea>---  MAINTENANCE ON  ---<088>};
         _maint_save;
         _maint_grid;
+        #NOP -- maint_cfg[known] = a guild alias that checks which picks you can cast, then reapplies;
+        #if {"$maint_cfg[known]" != ""} {$maint_cfg[known]};
     };
 };
 

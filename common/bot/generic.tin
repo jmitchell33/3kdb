@@ -12,6 +12,8 @@
 #var bot[foundmob] 0;
 #var bot[foundobject] 0;
 #var bot[foundplayer] 0;
+#NOP -- Room the bot last started a fight in, see the player check in room.tin;
+#var bot[fight_vnum] 0;
 #NOP -- .skip waiting to leave the room, cleared when .botStep takes the step;
 #var bot[skip] 0;
 
@@ -165,6 +167,8 @@
             #var bot[holding] 0;
             #var bot[skip] 0;
             #var bot_first_in_room_check 1;
+            #NOP -- Leaving the room, so its fight no longer counts for the player check in room.tin;
+            #var bot[fight_vnum] 0;
             #NOP -- The move is on its way, so .bot holds off until its room (or a slip or block) comes back;
             #format bot[await] {%T};
             #if {$bot[reverse]} {
@@ -216,6 +220,8 @@
                     .pre_fight_actions;
                 };
 
+                #NOP -- The room this fight started in, so a glance here later ignores players who came in after, see room.tin;
+                #map get roomvnum bot[fight_vnum];
                 #if {!$bot[aggro-mob]} {
                     #if {$mob_kill_action} {
                         mka $mob[target];

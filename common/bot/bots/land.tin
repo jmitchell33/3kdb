@@ -82,13 +82,47 @@
 #list botmobs add {{{long} {A Veteran Warhaft} {target} {warhaft}}};
 #list botmobs add {{{long} {First Mark Bardol} {target} {mark bardol}}};
 
-#action {As you begin to dig up the mound, you are suddenly aware that} {#delay 1 {..}};
-#action {As you begin to dig up the mound, you realize with a start that} {..};
-#action {You back up and take a running jump.} {..};
-#action {As you lie down you fall into a deep sleep.} {..};
-#action {As you study the copse more closely, you notice a small bole in} {..};
-#action {As you turn the bole, you are suddenly pulled through a sudden} {..};
-#action {You awake with a start and find yourself back in the meadow.} {..};
+#NOP -- These special exits need a glance to start the next step, but only while the bot is walking.;
+#NOP -- A go walk through the Land (the jump across the river) mustn't unpause a paused bot.;
+#alias {.land_kick}
+{
+    #if {"$bot[active]" == "1" && "$bot[paused]" == "0"}
+    {
+        ..;
+    };
+};
+
+#action {As you begin to dig up the mound, you are suddenly aware that}
+{
+    #delay 1
+    {
+        .land_kick;
+    };
+};
+#action {As you begin to dig up the mound, you realize with a start that}
+{
+    .land_kick;
+};
+#action {You back up and take a running jump.}
+{
+    .land_kick;
+};
+#action {As you lie down you fall into a deep sleep.}
+{
+    .land_kick;
+};
+#action {As you study the copse more closely, you notice a small bole in}
+{
+    .land_kick;
+};
+#action {As you turn the bole, you are suddenly pulled through a sudden}
+{
+    .land_kick;
+};
+#action {You awake with a start and find yourself back in the meadow.}
+{
+    .land_kick;
+};
 
 #class {bot} {close};
 #read common/bot/generic.tin;

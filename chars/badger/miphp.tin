@@ -1,7 +1,24 @@
 #class {miphp} {kill};
 #class {miphp} {open};
 
-#alias {_player_miphp} {#NOP};
+#NOP -- At login ash isn't set yet. The mage hpbar (_guild_miphp) would send only ash on, which is;
+#NOP -- local party (PLYRS). The extra ash makes it any source (ALL). _player_miphp always runs just;
+#NOP -- before _guild_miphp, so the hpbar sees ash already set and sends nothing;
+#NOP -- Find familiar goes out at login too. With one already out the game only says you already have one;
+#alias {_player_miphp}
+{
+    #if {!$idle_flag && "${ash}" == ""}
+    {
+        ash on;
+        ash;
+        #var ash 2;
+        #delay {badger_login_ff}
+        {
+            cast find familiar;
+        }
+        {3};
+    };
+};
 
 
 

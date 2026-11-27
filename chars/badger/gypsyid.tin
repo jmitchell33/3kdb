@@ -65,6 +65,8 @@
 #function {gid_base} {
     #var result {%0};
     #replace result {-R-_} {};
+    #NOP -- some room lines end in spaces after the exits, strip them or the exits stay on;
+    #format result {%p} {$result};
     #regex {$result} {{^(.*?) *\(([^()]*)\)$}} {#var result {&2}};
 };
 

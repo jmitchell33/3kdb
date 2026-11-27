@@ -4,7 +4,9 @@ tmux keeps 3kdb running when you close your terminal or lose your connection, an
 
 Anything in a grey box is something to type or paste.
 
-**Other guides:** [setup.md](setup.md), [manual.md](manual.md), [faq.md](faq.md), [github.md](github.md)
+**Other guides:** [setup.md](setup.md), [ssh.md](ssh.md), [manual.md](manual.md), [faq.md](faq.md), [github.md](github.md)
+
+**New to SSH?** [ssh.md](ssh.md) shows how to turn it on, find the address and connect from a PC or phone.
 
 ## Contents
 
@@ -49,7 +51,7 @@ The tmux "place" that 3kdb runs in is called a **session**. In this guide it's n
 
 ## Install tmux
 
-Install it on the machine that **runs 3kdb**. That's the server if you SSH into one. Your phone or laptop only needs an SSH app.
+Install it on the machine that **runs 3kdb**. That's the server if you SSH into one. Your phone or laptop only needs an SSH app. See [Connecting with SSH](ssh.md).
 
 **Ubuntu, Debian and Windows (Ubuntu in WSL):**
 

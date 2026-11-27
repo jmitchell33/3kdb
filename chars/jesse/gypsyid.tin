@@ -356,7 +356,8 @@
     .gid_sync .gid_check;
 };
 
-#NOP -- Count what is still on the floor, leaving out the room's own things. Nothing left means done. Two;
+#NOP -- Count what is still on the floor, leaving out the room's own things. A stack like Stag Antlers {46};
+#NOP -- counts as 46, so a pass that bags part of a stack is progress. Nothing left means done. Two;
 #NOP -- passes in a row that leave as much as before means the bags won't take it;
 #alias {.gid_check} {
     #if {"$gid[state]" != "cycle"} {
@@ -370,7 +371,9 @@
             #regex {$gid_item} {%*$gid_pat%*} {#var gid_fixed 1};
         };
         #if {!$gid_fixed} {
-            #math gid[now] {$gid[now] + 1};
+            #var gid_n 1;
+            #regex {$gid_item} { \x7B{[0-9]+}\x7D} {#var gid_n &1};
+            #math gid[now] {$gid[now] + $gid_n};
         };
     };
     #if {$gid[now] == 0} {
@@ -626,9 +629,13 @@
 };
 
 #NOP -- each item the box takes shows as "<item>   : for <n> coins.";
+#NOP -- A bag3 you type yourself frees the bags too, so a bags full left from a manual bag1 is cleared;
+#NOP -- and the heartbeat doesn't send you straight back to the gypsy;
 #action {^%* : for %d coins.$} {
     #if {"$gid[state]" == "after"} {
         #var gid[donated] 1;
+    } {
+        #var gid[bags_full] 0;
     };
 } {2};
 

@@ -6,7 +6,7 @@ This guide takes you from nothing to playing 3Kingdoms with 3kdb.
 
 Anything in a grey box is something to type or paste. On GitHub, a copy button appears in the corner of the box when you hover over it or tap it. If you don't see one, select the text and copy it.
 
-**Other guides:** [manual.md](manual.md) explains everything 3kdb can do, [faq.md](faq.md) has short answers, [github.md](github.md) covers git and GitHub, and [tmux.md](tmux.md) covers playing on a server.
+**Other guides:** [manual.md](manual.md) explains everything 3kdb can do, [faq.md](faq.md) has short answers, [github.md](github.md) covers git and GitHub, [tmux.md](tmux.md) covers playing on a server, and [ssh.md](ssh.md) shows how to connect to one.
 
 ## Contents
 
@@ -69,7 +69,7 @@ sudo apt install -y git
 
 **How to paste into a terminal:** right-click, or press `Ctrl+Shift+V`. Plain `Ctrl+V` usually doesn't work. Press Enter after each command.
 
-**Playing on a server you SSH into?** Install **tmux** on the server too. It's optional, and keeps the game running when your connection drops. See [Playing on a server (tmux)](#playing-on-a-server-tmux).
+**Playing on a server you SSH into?** Do all of this on the server, not on the device you connect from. [ssh.md](ssh.md) shows how to turn on SSH and connect, including to your own Windows PC from your phone. Install **tmux** on the server too. It's optional, and keeps the game running when your connection drops. See [Playing on a server (tmux)](#playing-on-a-server-tmux).
 
 ```bash
 sudo apt install -y tmux
@@ -251,7 +251,7 @@ If you play in tmux, run `tmux new -A -s 3k` first. If 3kdb is still running in 
 
 ## Playing on a server (tmux)
 
-This is optional. If 3kdb runs on a server you SSH into, run it inside **tmux**. Without it, closing the window or losing your connection closes 3kdb and leaves your character linkdead without saving. With it, 3kdb keeps running, and you can come back from any device.
+This is optional. If 3kdb runs on a server you SSH into, run it inside **tmux**. New to SSH? [ssh.md](ssh.md) shows how to set it up and connect from a PC or phone. Without it, closing the window or losing your connection closes 3kdb and leaves your character linkdead without saving. With it, 3kdb keeps running, and you can come back from any device.
 
 1. Install it once: `sudo apt install -y tmux`
 2. Start or rejoin it, every time:

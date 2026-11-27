@@ -37,14 +37,18 @@
      #var _clist {};
 } {2}
 
-#ACTION {^%d:You will cast %*} {
+#NOP -- Every line is kept (cast or not, e.g. You will look should your hit points ...) so the slot numbers;
+#NOP -- in gcLine / cLine match the MUD's. A cast line is stored without the cast in front.;
+#ACTION {^%d:You will %*} {
      #if {$_cgag} {#line gag};
+     #var _cl_text {%2};
+     #regex {%2} {^cast {.*}$} {#var _cl_text {&1}};
      #if {"$_clist" == "gc"} {
-         #list gcLine add {%2};
-         #regex {%2} {^{.*?} should your} {#list gcList add {&1}};
+         #list gcLine add {$_cl_text};
+         #regex {$_cl_text} {^{.*?} should your} {#list gcList add {&1}};
      };
      #elseif {"$_clist" == "c"} {
-         #list cLine add {%2};
+         #list cLine add {$_cl_text};
      };
 } {2};
 
@@ -103,7 +107,7 @@
     #var cKnown 0;
     #var _cgag 1;
     #class {align_gag} {open};
-    #action {^%*{fail|below [0-9]+}.$} {#if {"$_clist" != ""} {#line gag}} {9};
+    #action {^{.*fail|.*below [0-9]+|[0-9]+}.$} {#if {"$_clist" != ""} {#line gag}} {9};
     #class {align_gag} {close};
     #var _cont_next {%1};
     cast greater contingency;
@@ -178,6 +182,9 @@
             _maint_save;
         };
         deplete protection from $_aold;
+        #NOP -- The swap casts the new side itself, so the heartbeat waits (_mdtry, heartbeat.tin) instead of casting it twice;
+        #format _aprot {%u} {$_anew_def};
+        #format _mdtry[$_aprot] {%T};
         #switch {"$_akind"} {
             #case {"gc"} {
                 cast greater contingency as prot_$_anew#cast protection from $_anew;
@@ -203,7 +210,18 @@
 
 #alias gc_pfg {_align_swap good gc};
 #alias gc_pfe {_align_swap evil gc};
-#alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle};
+#NOP -- mantle_cmd (see maint-help) makes it a focused mantle, the same one maint setup and the heartbeat use;
+#alias {gc_mantle}
+{
+    #if {"$mantle_cmd" != "" && "$mantle_cmd" != "\$mantle_cmd"}
+    {
+        cast greater contingency as mantle#$mage[contingencies][mantle]#$mantle_cmd;
+    };
+    #else
+    {
+        cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+    };
+};
 #alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere};
 
 #alias c_rs {cast contingency as stoneskin#cast rhino skin};

@@ -38,6 +38,26 @@
     #delay hmheal {#var my[hm][heal] 1} {3600};
 } {2};
 
+#NOP -- A used hmheal (or heal another, blast) is saved with the character, but the delay that frees it;
+#NOP -- again is lost on a relog, so it stayed used until something ran hmcheck. Ask the game once the;
+#NOP -- login has settled. Only a used power asks, so a character without HM powers never sends it;
+#NOP -- Its table is gagged for 5 seconds. The actions above still read it, a gag only hides the line;
+#delay {hm_login_check}
+{
+    #if {"$my[hm][heal]" == "0" || "$my[hm][heal_other]" == "0" || "$my[hm][blast]" == "0"}
+    {
+        #class {hm_login_gag} {open};
+        #gag {^+-------%*-+$};
+        #gag {^%sHigh Mortal Check$};
+        #gag {^%sPower Name%sWhen$};
+        #gag {^%s{Sever|Charm|Flee|Uncurse|Rejuvenate|Summon|Blast|Heal|Shield}%s{You may|You must wait}%*};
+        #gag {^%s{You may heal another|You must wait %* to heal another}%*};
+        #class {hm_login_gag} {close};
+        #delay {hm_login_gag_end} {#class {hm_login_gag} {kill}} {5};
+        #send {!hmcheck};
+    };
+} {20};
+
 
 
 #class hm_status close;
