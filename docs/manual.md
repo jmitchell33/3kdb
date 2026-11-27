@@ -7,6 +7,7 @@ This is the full guide to 3kdb: what it is, how to use it, and how to add your o
 - [faq.md](faq.md): short answers to common questions and problems
 - [github.md](github.md): updates, forks and sending in changes
 - [tmux.md](tmux.md): optional, for playing on a server and switching between devices
+- [ssh.md](ssh.md): connecting to a server, or your own PC, from another PC or a phone
 
 **How to read this manual:**
 - Anything in a grey box is something to type, paste or put in a file.
@@ -150,7 +151,7 @@ tt++ startmenu.tin
 
 Don't install TinTin++ with `apt-get`, because that version is very far behind. Use the instructions at https://tintin.mudhalla.net/install.php instead.
 
-**Playing on a server you SSH into?** Run 3kdb inside **tmux**, so it keeps running when your connection drops and you can carry on from another device. It's optional. See [tmux.md](tmux.md).
+**Playing on a server you SSH into?** Run 3kdb inside **tmux**, so it keeps running when your connection drops and you can carry on from another device. It's optional. See [tmux.md](tmux.md). To set up SSH and connect, see [ssh.md](ssh.md).
 
 [Back to top](#3kdb-manual)
 
@@ -459,6 +460,8 @@ go_back
 If a bot is running, `go` pauses it first. With a bot loaded, `go_back` goes to the room the bot was paused in, even after more `go` trips or walking around in between.
 
 Inside the Section Z game, `go` leaves by pausing the game, which doesn't work in a fight, so in a fight it waits until the fight is over. `go_back` takes you back in through the title screen with `unpause game`.
+
+In the Catacombs, a statue can block the way down, which would break a speedwalk. So `go_back` to a Catacombs room walks to the area's start room, then goes one step at a time. If a statue blocks the way, it kills the statue and keeps going. It stops if the room's exits don't match the map, if a bot starts or stops, or if you `go` somewhere else.
 
 ### Search the map
 
@@ -1421,6 +1424,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `.set_scaler`: set your preferred scaler for one dungeon or all of them, 0 clears it. Usage: `.set_scaler <key|all> <scaler>`
 - `.clear_scalers`: clear every dungeon scaler preference back to 0.
 - `.reset_scalers`: rebuild the dungeon scaler list from scratch, clears all preferences.
+- `toggle dungeons_clear`: at a dungeon entrance, check `dungeons` and run `dungeons clear all` when one says it can reset `now`, before your preferred scaler is set. Off by default.
 - `3kdb_dungeon_data`: dungeon mob class sizes by scaler with filters. Usage: `3kdb_dungeon_data <dungeon|scaler n|class size|town name|jumps|fixed|help>`
 - `ddata`: short form of 3kdb_dungeon_data. Usage: `ddata help`
 
@@ -1467,7 +1471,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `mapfind`: list rooms matching pattern in desc name and note. Usage: `mapfind pattern text`
 - `mappath`: map find path to pattern then path show. Usage: `mappath pattern text`
 - `mapicons`: echo unicode icon palette for map symbols.
-- `go_back`: map run back to vnum saved by go alias (with a bot loaded, the room the bot was paused in).
+- `go_back`: map run back to vnum saved by go alias (with a bot loaded, the room the bot was paused in). In the Catacombs it walks one step at a time and kills statues that block the way.
 
 ### Bot commands
 
@@ -1687,6 +1691,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `banshee_fear`: fear guardians.
 - `banshee_dispel`: dispel magic.
 - `banshee_jar`: reads runes for code word.
+- `winaxe`: Throwing axe game - plays, starts and throws 5 axes.
 - `get-floaties`: Ganderei Cae: picks up floaties potion.
 - `startfishing`: start fishing.
 - `stopfishing`: stop fishing.

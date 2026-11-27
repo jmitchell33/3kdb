@@ -160,6 +160,8 @@
     #var cmbt[crit][round] 0;
     #var cmbt[crit][total] 0;
     #var ewell_round 0;
+    #var ewell_pending 0;
+    #var ewell_explosions 0;
     #var fry_round 0;
     #unvar cmbt[multi];
     #unvar cmbt[round][cat];
@@ -322,8 +324,13 @@ dreset;
 };
 
  
+#NOP -- The blast shows up in the first hit line after this one, often next round, so the round reset;
+#NOP -- can't clear it. The next hit line takes it in the hit action. It can explode 2 or 3 times in a row;
+#NOP -- and each one marks the round after it. Dropped if no hit line comes, the mob died to it;
 #action {^The brilliant sphere of energy explodes!} {
-    #var ewell_round 1;
+    #math ewell_explosions {$ewell_explosions + 1};
+    #var ewell_pending 1;
+    #delay {ewell_pending_clear} {#var ewell_pending 0} {5};
 } {2};
 
 #NOP -- Each mob hit in a round gets its own "You hit" line, so a category's damage is added up here;
@@ -534,6 +541,11 @@ dreset;
 #NOP -- If you've just conjured undeads with necromancer, ignore those;
 #act {{^You hit (.*) (\d+) (time|times) for (\d+) damage\.$}} {
     #var dmgTrackerNewRound 1;
+    #if {$ewell_pending} {
+        #var ewell_round 1;
+        #var ewell_pending 0;
+        #undelay {ewell_pending_clear};
+    };
     #if {"$guild" == "mage"} {
         #var summonDmgNewRound 1;
         #var tempHighSummonDmg 0;
@@ -676,6 +688,9 @@ dreset;
                 #format dmgLineTime {%U};
                 #list cmbt[round][lines] add {{{name}{$dmgLineName}{kw}{$mobKw}{seq}{$cmbt[lineseq]}{time}{$dmgLineTime}{dmg}{$dmgAmount}{times}{$dmgTimes}{cats}{$dmgLineCats}}};
             };
+        } {
+            #NOP -- energy well rounds get their own Ewell row in dstats and stay out of total and the rest;
+            .dmgRoundAdd Ewell;
         };
         .dmg_round_reset;
     }
@@ -796,7 +811,12 @@ dreset;
         #echo {\nAverage Summon damage : $tempAvgSummonDmg over $summon_dmg[rnd] rounds.  Total: $tempTotalSummonDmg damage.};
         #echo {\High Summon damage : $tempHighSummonDmg};
     };
-    
+
+    #NOP -- every energy well explosion, a chain of them can land in one Ewell round;
+    #if {$ewell_explosions > 0} {
+        #echo {\nEnergy well explosions : $ewell_explosions};
+    };
+
     #if {&cmbt[freq][] > 0} {
         .dmgEchoTitle {DAMAGE BY # OF HITS} gap;
         #foreach $cmbt[freq][%*] item {

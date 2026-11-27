@@ -651,6 +651,15 @@
         #foreach $caption_order[] key {
             #NOP -- A running bot shows its own xp, so the xp tracker steps aside;
             #if {"$key" == "xp" && "$bot[active]" == "1"} {#continue};
+            #NOP -- Not an eternal, or no eternal status yet, so there is no eternal line to show;
+            #if {"$key" == "eternal"} {
+                #if {"$eternal" != "1"} {#continue};
+                #if {&eternal_string} {
+                    #NOP -- has a status line, show it;
+                } {
+                    #continue;
+                };
+            };
             #if $caption_toggle[$key][active] {
                 #if $tmpFirst {
                     #list caption_data add {$caption_toggle[$key][string]};

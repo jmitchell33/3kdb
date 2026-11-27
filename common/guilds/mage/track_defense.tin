@@ -62,9 +62,11 @@ clear_defense_tracker;
     #math {cast_percent} {100.0*$cast_count/$defense_tracker[total][casts]};
     #math {block_per_cast} {1.0 * $block_count / $cast_count};
     
-    #format $block_percent {%f} {$block_percent};
-    #format $cast_percent {%f} {$cast_percent};
-    #format $block_per_cast {%f} {$block_per_cast};
+    #NOP -- name the variable, no $. With a $ each value made a global variable named after it (2.0, 15.4),;
+    #NOP -- and #list add then wrote list items 2 and up into those, which emptied the hpbar to one line;
+    #format {block_percent} {%.1f} {$block_percent};
+    #format {cast_percent} {%.1f} {$cast_percent};
+    #format {block_per_cast} {%.1f} {$block_per_cast};
 
     #list spell_costs indexate name;
     #list spell_costs find {%i$defense_name} tmpIndex;
@@ -158,7 +160,8 @@ clear_defense_tracker;
     defense_update_fail major-globe
 };
 
-#action {shimmering field of grey} {
+#NOP -- a focused mantle (cast mantle as focus blunt/edged) says dark grey or another shade of grey;
+#action {shimmering field of %*grey} {
     defense_update_cast mantle;
 };
 

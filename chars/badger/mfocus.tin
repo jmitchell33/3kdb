@@ -1,0 +1,277 @@
+#class {badger_mfocus} {kill};
+#class {badger_mfocus} {open};
+
+#NOP -- Mantle focus learner. Each mantle leak (a hit that gets through and makes it fade) is counted for the;
+#NOP -- mob being fought and the focus in use, and every heartbeat in combat counts a round. mfstat keeps;
+#NOP -- leaks and rounds per mob and focus (blunt, edged, none) between sessions. At bot start the focus with;
+#NOP -- the fewest expected leaks for that bot's mobs is picked, and a long fight against one mob can switch;
+#NOP -- it mid fight. A switch is one GC cast (mfocus in aliases.tin), so it only happens for a clear gain.;
+#NOP -- mfstats shows the table, mflearn on or off turns the picking on or off (the counting always runs);
+
+#NOP -- rounds needed under a focus before its rate for a mob is trusted;
+#var mfl[min_rounds] 20;
+#NOP -- percent fewer leaks needed before switching;
+#var mfl[gain] 15;
+#NOP -- rounds of data each focus needs over a bot's mobs before the picker stops trying the other one;
+#var mfl[explore] 60;
+#NOP -- rounds into one fight before checking a mid fight switch;
+#var mfl[boss_rounds] 30;
+#var mfl[fight_mob] {};
+#var mfl[fight_rounds] 0;
+#var mfl[boss_done] 0;
+
+#alias {_mfl_add}
+{
+    #if {&{my[mfstat][%1][%2][%3]}}
+    {
+        #math {my[mfstat][%1][%2][%3]} {$my[mfstat][%1][%2][%3] + %4};
+    };
+    #else
+    {
+        #var {my[mfstat][%1][%2][%3]} {%4};
+    };
+};
+
+#NOP -- mfl_rate = leaks per 100 rounds for mob %1 under focus %2, or -1 with too few rounds;
+#alias {_mfl_rate}
+{
+    #var mfl_rate -1;
+    #var mfl_r 0;
+    #var mfl_l 0;
+    #if {&{my[mfstat][%1][%2][rounds]}}
+    {
+        #var mfl_r $my[mfstat][%1][%2][rounds];
+    };
+    #if {&{my[mfstat][%1][%2][leaks]}}
+    {
+        #var mfl_l $my[mfstat][%1][%2][leaks];
+    };
+    #if {$mfl_r >= $mfl[min_rounds]}
+    {
+        #math {mfl_rate} {100.0 * $mfl_l / $mfl_r};
+    };
+};
+
+#action {^Your mantle shimmers and fades slightly!$}
+{
+    #if {"$enemy[name]" != ""}
+    {
+        #format {mfl_mob} {%l} {$enemy[name]};
+        _mfl_add {$mfl_mob} {$my[mfocus]} {leaks} {1};
+    };
+}
+{5};
+
+#NOP -- Heartbeat: count a round against the mob being fought, and check a long fight once;
+#alias {_mfocus_tick}
+{
+    #if {"$incombat" == "1" && "$enemy[name]" != ""}
+    {
+        #format {mfl_mob} {%l} {$enemy[name]};
+        _mfl_add {$mfl_mob} {$my[mfocus]} {rounds} {1};
+        #if {"$mfl_mob" != "$mfl[fight_mob]"}
+        {
+            #var mfl[fight_mob] {$mfl_mob};
+            #var mfl[fight_rounds] 0;
+            #var mfl[boss_done] 0;
+        };
+        #math {mfl[fight_rounds]} {$mfl[fight_rounds] + 1};
+        #if {$mfl[fight_rounds] >= $mfl[boss_rounds] && !$mfl[boss_done]}
+        {
+            #var mfl[boss_done] 1;
+            _mfl_best_for {$mfl_mob};
+            #if {"$my[mflearn]" == "1" && "$mfl_best" != "" && "$mfl_best" != "$my[mfocus]"}
+            {
+                #echo {<afa>Mantle focus: long fight with $mfl_mob, $mfl_best leaks less ($mfl_why).<088>};
+                mfocus $mfl_best;
+            };
+        };
+    };
+};
+
+#NOP -- mfl_best = the focus with clearly fewer leaks for one mob, empty when not clear or not known;
+#alias {_mfl_best_for}
+{
+    #var mfl_best {};
+    #var mfl_why {};
+    _mfl_rate {%1} {$my[mfocus]};
+    #var mfl_cur $mfl_rate;
+    #if {$mfl_cur >= 0}
+    {
+        #foreach {blunt;edged;none} {mfl_f}
+        {
+            #if {"$mfl_f" != "$my[mfocus]"}
+            {
+                _mfl_rate {%1} {$mfl_f};
+                #if {$mfl_rate >= 0 && $mfl_rate * 100 <= $mfl_cur * (100 - $mfl[gain])}
+                {
+                    #if {"$mfl_best" == ""}
+                    {
+                        #var mfl_best $mfl_f;
+                        #var mfl_bestrate $mfl_rate;
+                    };
+                    #elseif {$mfl_rate < $mfl_bestrate}
+                    {
+                        #var mfl_best $mfl_f;
+                        #var mfl_bestrate $mfl_rate;
+                    };
+                };
+            };
+        };
+    };
+    #if {"$mfl_best" != ""}
+    {
+        #format {mfl_why} {%.1f vs %.1f leaks per 100 rounds} {$mfl_bestrate} {$mfl_cur};
+    };
+};
+
+#NOP -- Bot start (.pre_bot_check in config.tin): weigh each focus over the bot's mobs by how often each mob;
+#NOP -- is fought. A focus with too little data over these mobs is tried first, then the lowest total wins;
+#alias {_mfocus_bot_pick}
+{
+    #var mfl_pick {};
+    #var mfl_why {};
+    #foreach {blunt;edged;none} {mfl_f}
+    {
+        #var mfl_sum[$mfl_f] 0;
+        #var mfl_w[$mfl_f] 0;
+        #var mfl_data[$mfl_f] 0;
+        #var mfl_avg[$mfl_f] 0;
+    };
+    #var mfl_n 0;
+    #foreach {$botmobs[%*]} {mfl_item}
+    {
+        #format {mfl_mob} {%l} {$mfl_item[long]};
+        #var mfl_weight 0;
+        #foreach {blunt;edged;none} {mfl_f}
+        {
+            #if {&{my[mfstat][$mfl_mob][$mfl_f][rounds]}}
+            {
+                #math {mfl_weight} {$mfl_weight + $my[mfstat][$mfl_mob][$mfl_f][rounds]};
+                #math {mfl_data[$mfl_f]} {$mfl_data[$mfl_f] + $my[mfstat][$mfl_mob][$mfl_f][rounds]};
+            };
+        };
+        #if {$mfl_weight > 0}
+        {
+            #math {mfl_n} {$mfl_n + 1};
+            #foreach {blunt;edged;none} {mfl_f}
+            {
+                _mfl_rate {$mfl_mob} {$mfl_f};
+                #if {$mfl_rate >= 0}
+                {
+                    #math {mfl_sum[$mfl_f]} {$mfl_sum[$mfl_f] + $mfl_rate * $mfl_weight};
+                    #math {mfl_w[$mfl_f]} {$mfl_w[$mfl_f] + $mfl_weight};
+                };
+            };
+        };
+    };
+    #if {$mfl_n == 0}
+    {
+        #var mfl_why {no data on these mobs yet};
+    };
+    #elseif {$mfl_data[blunt] < $mfl[explore]}
+    {
+        #var mfl_pick blunt;
+        #var mfl_why {trying blunt, $mfl_data[blunt] rounds of data};
+    };
+    #elseif {$mfl_data[edged] < $mfl[explore]}
+    {
+        #var mfl_pick edged;
+        #var mfl_why {trying edged, $mfl_data[edged] rounds of data};
+    };
+    #else
+    {
+        #NOP -- compare average leak rates, each over the mobs it has data for;
+        #var mfl_bestavg -1;
+        #foreach {blunt;edged;none} {mfl_f}
+        {
+            #if {$mfl_w[$mfl_f] > 0}
+            {
+                #math {mfl_avg[$mfl_f]} {1.0 * $mfl_sum[$mfl_f] / $mfl_w[$mfl_f]};
+                #if {$mfl_bestavg < 0 || $mfl_avg[$mfl_f] < $mfl_bestavg}
+                {
+                    #var mfl_bestavg $mfl_avg[$mfl_f];
+                    #var mfl_pick $mfl_f;
+                };
+            };
+        };
+        #NOP -- keep the current focus unless the best one is clearly better;
+        #if {"$mfl_pick" != "$my[mfocus]" && $mfl_w[$my[mfocus]] > 0}
+        {
+            #if {$mfl_bestavg * 100 > $mfl_avg[$my[mfocus]] * (100 - $mfl[gain])}
+            {
+                #var mfl_pick $my[mfocus];
+            };
+        };
+        #var mfl_why {};
+        #foreach {blunt;edged;none} {mfl_f}
+        {
+            #if {$mfl_w[$mfl_f] > 0}
+            {
+                #format {mfl_why} {%s %s %.1f,} {$mfl_why} {$mfl_f} {$mfl_avg[$mfl_f]};
+            };
+            #else
+            {
+                #format {mfl_why} {%s %s -,} {$mfl_why} {$mfl_f};
+            };
+        };
+        #var mfl_why {${mfl_why} leaks per 100 rounds};
+    };
+    #echo {<afa>Mantle focus for $bot[alias]: $mfl_why.<088>};
+    #if {"$my[mflearn]" == "1" && "$mfl_pick" != "" && "$mfl_pick" != "$my[mfocus]"}
+    {
+        mfocus $mfl_pick;
+    };
+};
+
+#alias {mflearn}
+{
+    #switch {"%1"}
+    {
+        #case {"on"} {#var my[mflearn] 1};
+        #case {"off"} {#var my[mflearn] 0};
+    };
+    #echo {<ffa>Mantle focus picking is $my[mflearn] (mflearn on or off). Focus now $my[mfocus].<088>};
+};
+
+#alias {mfstats}
+{
+    #echo {<ffa>Mantle leaks per 100 rounds (rounds) by mob and focus:<088>};
+    #foreach {*my[mfstat][]} {mfl_mob}
+    {
+        #var mfl_line {};
+        #foreach {blunt;edged;none} {mfl_f}
+        {
+            #var mfl_r 0;
+            #var mfl_l 0;
+            #if {&{my[mfstat][$mfl_mob][$mfl_f][rounds]}}
+            {
+                #var mfl_r $my[mfstat][$mfl_mob][$mfl_f][rounds];
+            };
+            #if {&{my[mfstat][$mfl_mob][$mfl_f][leaks]}}
+            {
+                #var mfl_l $my[mfstat][$mfl_mob][$mfl_f][leaks];
+            };
+            #if {$mfl_r > 0}
+            {
+                #math {mfl_pct} {100.0 * $mfl_l / $mfl_r};
+                #format {mfl_cell} {%s %.1f (%d)} {$mfl_f} {$mfl_pct} {$mfl_r};
+            };
+            #else
+            {
+                #format {mfl_cell} {%s -} {$mfl_f};
+            };
+            #format {mfl_line} {%s  %-18s} {$mfl_line} {$mfl_cell};
+        };
+        #format {mfl_name} {%-22s} {$mfl_mob};
+        #echo {  $mfl_name$mfl_line};
+    };
+};
+
+#class {badger_mfocus} {close};
+
+#NOP -- the table, focus and on switch live in my[], which vars.tin saves (xmy), so they last between sessions;
+#if {!&{my[mflearn]}}
+{
+    #var my[mflearn] 1;
+};

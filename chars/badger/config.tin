@@ -1,12 +1,177 @@
 #class {player_config} {kill};
 #class {player_config} {open};
 
+#NOP -- Greater contingency triggers for badger (setup_gc), the common defaults are in common/guilds/mage/aliases.tin.;
+#NOP -- The GC recasts when a shade falls below the number. At 799 prismatic sphere was recast after under 2;
+#NOP -- blocks, so it cost about 2.5 times the SP per block of mantle at 200;
+#var mage[contingencies][mantle] 200;
+#var mage[contingencies][sphere] 100;
+
 #NOP -- Bot Config;
 #alias {.pre_fight_check} {#NOP};
-#alias {.pre_bot_check} {#NOP};
+
+#NOP -- When a bot starts (+name or the bcy cycler) the corpsetrig and strategy follow the bot:;
+#NOP --   sewers: mycorpsetrig-sewers (ground loot whitelist, bags).;
+#NOP --   badger_donate_bots (exact names): mycorpsetrig-donates (bag1 bags the loot for the mage box).;
+#NOP --   A dungeon bot only gets bag1 when its area is in badger_bag1_areas, any other dungeon bot in;
+#NOP --   badger_donate_bots gets mycorpsetrig instead.;
+#NOP --   Bots whose start room is in badger_bag1_areas: mycorpsetrig-donates.;
+#NOP --   Celestial Zodiacs bots: mycorpsetrig-zodiacs (zsatchel puts the soul in the satchel before bag1).;
+#NOP --   Section Z bots (names starting with sectionz): mycorpsetrig-sz (cap eating).;
+#NOP --   Any other bot: mycorpsetrig.;
+#NOP -- The corpsetrig only switches when the set changes. Every bot runs mystrategy, which only runs again;
+#NOP -- when something else set the strategies since, so a strategy you toggle yourself stays. Then epowers;
+#NOP -- is on for a dungeon bot and off for any other, never on for badger_no_epower_bots;
+#var badger_donate_bots {catacombs|catacombs2|pol|pol2|pol3|land|land2|hippies|icyblue|chin1|chin2|banshees|banshees13};
+#var badger_no_epower_bots {inductor|crack};
+#NOP -- map areas whose bots bag the loot (mycorpsetrig-donates), dungeons included;
+#list badger_bag1_areas create {
+    {Aegis Global}
+    {Banshee's Lair}
+    {Care Bears}
+    {Carnegie Hall}
+    {Carnegie Hall 2.0}
+    {Chess Board}
+    {Halo}
+    {Land of the Ice People}
+    {Tree of Life}
+    {Tree of Life 2.0}
+};
+#NOP -- the dungeons in common/areas/dungeons.tin, as the map names their areas. A bot is a dungeon bot;
+#NOP -- when the map area of its start room is one of these;
+#list badger_dungeons create {
+    {Aegis Global}
+    {Alphabet Land}
+    {Android Showroom}
+    {Banshee's Lair}
+    {Care Bears}
+    {Carnegie Hall 2.0}
+    {Celestial Zodiacs}
+    {Chess Board}
+    {Death Taco}
+    {Halo}
+    {Hotel Transylvania}
+    {Kayos Wars}
+    {Mahjongg}
+    {Marble Plinths}
+    {Puppy Mill}
+    {Section Z}
+    {Smurfland}
+    {Terra's Terrific Treehouse}
+    {Zelligar's Castle}
+    {Anchorman}
+    {Knight Training Arena}
+    {Land of the Ice People}
+    {Summerset Warrens 2.0}
+    {Tree of Life 2.0}
+    {Bombfreaks' Abbey}
+    {Fachan Village}
+    {Rimalkins Cave 2.0}
+};
+
+#alias {.pre_bot_check}
+{
+    .badger_dungeon_check;
+    #var badger_bot_kind normal;
+    #regex {$bot[alias]} {^sectionz} {#var badger_bot_kind sz};
+    #regex {$bot[alias]} {^{$badger_donate_bots}$} {#var badger_bot_kind donate};
+    #if {"$badger_bot_kind" == "donate" && $badger_epw[dungeon]}
+    {
+        #var badger_bot_kind normal;
+    };
+    #foreach {$badger_bag1_areas[%*]} {badger_item}
+    {
+        #if {"$badger_item" == "$badger_epw[area]"}
+        {
+            #var badger_bot_kind donate;
+        };
+    };
+    #if {"$badger_epw[area]" == "Celestial Zodiacs"}
+    {
+        #var badger_bot_kind zodiacs;
+    };
+    #if {"$bot[alias]" == "sewers"}
+    {
+        #var badger_bot_kind sewers;
+    };
+    #if {"$badger_trigset" != "$badger_bot_kind"}
+    {
+        #switch {"$badger_bot_kind"}
+        {
+            #case {"sewers"}
+            {
+                mycorpsetrig-sewers;
+            };
+            #case {"donate"}
+            {
+                mycorpsetrig-donates;
+            };
+            #case {"sz"}
+            {
+                mycorpsetrig-sz;
+            };
+            #case {"zodiacs"}
+            {
+                mycorpsetrig-zodiacs;
+            };
+            #default
+            {
+                mycorpsetrig;
+            };
+        };
+    };
+    #if {"$badger_strat" != "full"}
+    {
+        mystrategy;
+    };
+    .badger_epowers_set;
+    #NOP -- mantle focus for this bot's mobs, see mfocus.tin;
+    _mfocus_bot_pick;
+};
+
+#NOP -- badger_epw[dungeon] is 1 when the map area of the bot's start room is in badger_dungeons;
+#alias {.badger_dungeon_check}
+{
+    #var badger_epw[dungeon] 0;
+    #var badger_epw[area] {};
+    #loop 1 &botlist_alias[] badger_i
+    {
+        #if {"$botlist_alias[$badger_i]" == "$bot[alias]"}
+        {
+            #map get roomarea badger_epw[area] {$botlist_start_vnum[$badger_i]};
+        };
+    };
+    #foreach {$badger_dungeons[%*]} {badger_item}
+    {
+        #if {"$badger_item" == "$badger_epw[area]"}
+        {
+            #var badger_epw[dungeon] 1;
+        };
+    };
+};
+
+#NOP -- epowers on for a dungeon bot, off for any other. strategy epowers flips it, so only send it when it;
+#NOP -- isn't already the way it should be;
+#alias {.badger_epowers_set}
+{
+    #var badger_epw[want] $badger_epw[dungeon];
+    #regex {$bot[alias]} {^{$badger_no_epower_bots}$} {#var badger_epw[want] 0};
+    #var badger_epw[on] 0;
+    #foreach {$strategyActive[%*]} {badger_item}
+    {
+        #if {"$badger_item[name]" == "epowers"}
+        {
+            #var badger_epw[on] 1;
+        };
+    };
+    #if {$badger_epw[want] != $badger_epw[on]}
+    {
+        strategy epowers;
+    };
+};
+
 #alias {.check_death} {#NOP};
 
-#config {PACKET PATCH} {1.00};
 gagson;
 
 #class {player_config} {close};

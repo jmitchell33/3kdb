@@ -66,7 +66,18 @@
 	#NOP -- A long exit list comes cut off with no closing bracket, e.g. "Swirling Mists (yonder,thatway,";
 	#regex {$findbase} {{^(.*?) *\([^()]*$}} {#var findbase {&2}};
 	#NOP -- Matches the bare name or the name followed by any (exits);
-	#var findpattern {$findbase{| \(.*\)}};
+	#var findpattern {@findhere_safe{$findbase}{| \(.*\)}};
+};
+
+#NOP -- @findhere_safe{text}: text that #map list can search for. A room name with braces in it keeps them as;
+#NOP -- backslash codes, which #map list reads as pattern code. It found nothing and once crashed tt++.;
+#NOP -- So when the text has a star or a backslash, each run of other symbols becomes a %* wildcard.;
+#NOP -- That matches a few more rooms, and the exit checks pick the right one;
+#function {findhere_safe} {
+	#var result {%0};
+	#regex {%0} {{[*\\\\]}} {
+		#replace result {{[^A-Za-z0-9 ,.'-]+}} {%*};
+	};
 };
 
 #NOP -- @findhere_sig{a;b;c}: just the standard directions in a list of exits, in a fixed order.;
@@ -210,7 +221,7 @@
 	#var finddone 0;
 	#var findfirst {};
 	#NOP -- An area that makes up its descriptions again is searched by name and exits only, see findhere_desc_random;
-	#var finddesc {$room[long]};
+	#var finddesc {@findhere_safe{$room[long]}};
 	#if {"$area" != "" && ";$findhere_desc_random;" == "%*;$area;%*"} {#var finddesc {}};
 	#if {"$finddesc" != ""} {
 		#var findroom[$find_count] {};
@@ -295,6 +306,10 @@
 	};
 	#list findpath add {%1};
 	#var findstep {%1};
+	#NOP -- Cleared so .findhere_narrow can tell when the new room has come back;
+	#var room[name] {};
+	#var room_short {};
+	#var findwait_tries 0;
 	#NOP -- The map is still in some old room, and with follow on TinTin sends that room's exit command;
 	#NOP -- instead (a w exit made with mapexit sends enter), so send the plain direction;
 	#map flag nofollow on;
@@ -346,14 +361,26 @@
 	.findhere_result;
 };
 
+#NOP -- findhere2 clears the room name before each step. Still empty means the room hasn't come back yet.;
+#NOP -- With lag it can take many seconds, so check again every 1.5 seconds, up to 8 times;
 #alias {.findhere_narrow} {
-	#var findstep {};
-	#var findblocked {};
-	#NOP -- findhere-auto clears the room name before each step, so still empty means the move didn't happen;
-	#if {"$findauto" == "on" && "$room[name]" == "" && "$room_short" == ""} {
-		.findhere_auto_stop {the step $findpath[-1] didn't reach a new room};
+	#if {"$room[name]" == "" && "$room_short" == ""} {
+		#math findwait_tries {$findwait_tries + 1};
+		#if {$findwait_tries < 8} {
+			#delay {findhere_wait} {.findhere_narrow} {1.5};
+			#return;
+		};
+		#var findstep {};
+		#var findblocked {};
+		#if {"$findauto" == "on"} {
+			.findhere_auto_stop {the step $findpath[-1] didn't reach a new room};
+		} {
+			#showme <eaa>findhere: the step $findpath[-1] didn't reach a new room. Look, then try findhere2 again.<088>;
+		};
 		#return;
 	};
+	#var findstep {};
+	#var findblocked {};
 	.findhere_name;
 	#math find_count {$find_count + 1};
 	#unvar findroom[$find_count];
@@ -476,8 +503,6 @@
 	#math findauto_left {$findauto_left - 1};
 	#var findauto_back {$findauto_rev[$findauto_best]};
 	#showme <dfa>findhere-auto: walking $findauto_best<088>;
-	#var room[name] {};
-	#var room_short {};
 	findhere2 $findauto_best;
 };
 

@@ -4,7 +4,7 @@ Short answers to common questions and problems. For the full explanation of how 
 
 Anything in a grey box is something to type or paste. `byron` is an example, so use your own character's name.
 
-**Other guides:** [manual.md](manual.md), [setup.md](setup.md), [github.md](github.md), [tmux.md](tmux.md)
+**Other guides:** [manual.md](manual.md), [setup.md](setup.md), [github.md](github.md), [tmux.md](tmux.md), [ssh.md](ssh.md)
 
 ## Contents
 
@@ -93,6 +93,13 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [Should I edit common/ or modules/?](#should-i-edit-common-or-modules)
   - [Which files shouldn't I edit?](#which-files-shouldnt-i-edit)
   - [What does #NOP do?](#what-does-nop-do)
+- [Connecting with SSH](#connecting-with-ssh)
+  - [What is SSH, and do I need it?](#what-is-ssh-and-do-i-need-it)
+  - [How do I SSH into my Windows PC?](#how-do-i-ssh-into-my-windows-pc)
+  - [How do I connect from my phone?](#how-do-i-connect-from-my-phone)
+  - [Can I connect when I'm away from home?](#can-i-connect-when-im-away-from-home)
+  - [Do I need an SSH key for GitHub?](#do-i-need-an-ssh-key-for-github)
+  - [SSH says connection refused or timed out](#ssh-says-connection-refused-or-timed-out)
 - [Playing on a server (tmux)](#playing-on-a-server-tmux)
   - [What is tmux, and do I need it?](#what-is-tmux-and-do-i-need-it)
   - [How do I start 3kdb in tmux?](#how-do-i-start-3kdb-in-tmux)
@@ -125,7 +132,6 @@ Anything in a grey box is something to type or paste. `byron` is an example, so 
   - [#ERROR: #LINE LOG {logs/...}: COULDN'T OPEN FILE](#error-line-log-logs-couldnt-open-file)
   - [There is no reason to '...' here](#there-is-no-reason-to--here)
   - [The screen looks broken or squashed](#the-screen-looks-broken-or-squashed)
-  - [I see $eternal_string on the screen](#i-see-eternal_string-on-the-screen)
   - [Permission denied when saving files](#permission-denied-when-saving-files)
 - [dblog problems](#dblog-problems)
   - [dblog couldn't get the list of changes](#dblog-couldnt-get-the-list-of-changes)
@@ -624,6 +630,36 @@ Nothing. It marks a line as a comment, so you can leave notes for yourself. End 
 
 ---
 
+## Connecting with SSH
+
+### What is SSH, and do I need it?
+
+SSH lets you type into another computer's terminal from your PC or phone. You need it to play on a rented server, or on your home PC from another device. You don't need it to play on your own PC in its own window. [ssh.md](ssh.md) has the full guide.
+
+### How do I SSH into my Windows PC?
+
+Turn on the **OpenSSH Server** in Windows, not in Ubuntu. Log in with your Windows username and password (not your PIN), then type `wsl` to get to Ubuntu. Keep the PC awake, and keep an Ubuntu window open on it while you're away, or WSL can shut Ubuntu and 3kdb down. See [A Windows PC](ssh.md#a-windows-pc-3kdb-in-ubuntu-on-wsl).
+
+### How do I connect from my phone?
+
+Install an SSH app such as Termius, and add a host with the server's address, port `22`, and your username and password on the server. Then run `tmux new -A -s 3k`. See [Step 3: Connect](ssh.md#step-3-connect).
+
+### Can I connect when I'm away from home?
+
+A home address like `192.168.1.50` only works on your own Wi-Fi. Install Tailscale on the server and your device, and connect to the server's `100.` address instead. See [Connecting from outside your home](ssh.md#connecting-from-outside-your-home).
+
+### Do I need an SSH key for GitHub?
+
+No. The guides log git in with `gh auth login` over HTTPS. If git says `Permission denied (publickey)`, see [Do I need an SSH key for GitHub?](ssh.md#do-i-need-an-ssh-key-for-github)
+
+### SSH says connection refused or timed out
+
+`Connection refused` means the SSH server isn't running on the server. `Connection timed out` means your device can't reach it: check the address, that both are on the same network (or Tailscale), and that the server isn't asleep. See [Problems and fixes](ssh.md#problems-and-fixes).
+
+[Back to top](#3kdb-faq)
+
+---
+
 ## Playing on a server (tmux)
 
 ### What is tmux, and do I need it?
@@ -847,10 +883,6 @@ Make your terminal window bigger, or redraw it:
 ```text
 init_screen
 ```
-
-### I see `$eternal_string` on the screen
-
-That spot on the data panel is for Eternal information, which needs level 111. Below that, it shows this raw name instead. It's harmless and doesn't affect anything.
 
 ### `Permission denied` when saving files
 

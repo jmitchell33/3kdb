@@ -642,19 +642,6 @@
     #map run %0;
 };
 
-#NOP -- knight tour games;
-#alias {knight6} {
-    play;
-    start;
-    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2}
-};
-
-#alias {knight8} {
-    play;
-    start;
-    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2}
-};
-
 #NOP -- challenge all mobs in arena;
 #alias {challenge_all} {
     challenge grundar;
@@ -721,6 +708,20 @@
 };
 
 #alias {amy5} {crack;u;n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
+
+#NOP -- Add catacombs, pol and the chaos bots to the bot cycle;
+#alias {jcycle}
+{
+    bcy+ catacombs;
+    bcy+ catacombs2;
+    bcy+ pol;
+    bcy+ pol2;
+    bcy+ pol3;
+    bcy+ sewers;
+    bcy+ land;
+    bcy+ land2;
+    nextarea;
+};
 
 #NOP -- jesse's 3kdb aliases;
 
@@ -850,8 +851,6 @@
 #list jesse3kdb add {{{name} {set3kreport} {type} {combat} {desc} {Set 3kReport columns: killer, rounds, class, xp, coins}}};
 
 #NOP -- misc;
-#list jesse3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
-#list jesse3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
 #list jesse3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
 #list jesse3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
 #list jesse3kdb add {{{name} {x} {type} {misc} {desc} {Examining & searching: x <thing>}}};
@@ -887,6 +886,7 @@
 #list jesse3kdb add {{{name} {amy3} {type} {areas} {desc} {Freeway bear (amy): walk part 3}}};
 #list jesse3kdb add {{{name} {amy4} {type} {areas} {desc} {Freeway bear (amy): smash the grate, squeeze through, pry the crack}}};
 #list jesse3kdb add {{{name} {amy5} {type} {areas} {desc} {Freeway bear (amy): go through the crack and walk the last part}}};
+#list jesse3kdb add {{{name} {jcycle} {type} {areas} {desc} {Bot cycle add: catacombs, catacombs2, pol, pol2, pol3, sewers, land, land2}}};
 
 #nop -- guild;
 #list jesse3kdb add {{{name} {reup} {type} {guild} {desc} {after dying you need to re envision your globes til tier 3}}};

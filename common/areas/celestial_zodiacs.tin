@@ -211,4 +211,29 @@
     #if {$zhour[ctell]} {ctell Zodiac hour %1: $zhour[label] time frame};
 };
 
+#nop - portal (light side) and rift (shadow side) opening. These fire with or without a bot and only;
+#nop - announce where it opened (echo, ptell and a NOTE in the chat window). A zodiac bot sets bot[zodiac_portal] or bot[zodiac_rift] to the alias;
+#nop - that goes in and opens the chests, and that only runs while the bot is on.;
+#nop - The light side sends one line after its THE STARS ALIGN banner, so one action is enough.;
+#action {Your celestial insight reveals the creation of a portal to the unknown.} {
+    .zodiac_room_open {portal} {zodiac_portalVnum};
+} {2};
+
+#action {A rift to forbidden treasures materializes before you!} {
+    .zodiac_room_open {rift} {zodiac_riftVnum};
+} {2};
+
+#nop - %1 is portal or rift, %2 the variable that keeps the room vnum (the bots and heartbeats use it);
+#alias {.zodiac_room_open} {
+    #map get roomvnum zroom[vnum];
+    #var {%2} {$zroom[vnum]};
+    #format zroom[label] {%u} {%1};
+    #echo {<fff>$zroom[label] ROOM OPEN!<088>};
+    ptell %1 room open! roomvnum: $zroom[vnum];
+    .notify <fcb>$zroom[label] ROOM OPEN<ddd> roomvnum: $zroom[vnum];
+    #if {"$bot[active]" == "1" && &bot[zodiac_%1]} {
+        $bot[zodiac_%1];
+    };
+};
+
 #class {area_celestial_zodiacs} {close};

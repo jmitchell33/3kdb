@@ -37,6 +37,11 @@
         #var bot[foundobject] 0;
         #var bot[foundplayer] 0;
         #var bot[aggro-mob] 0;
+        #NOP -- Any other room, by bot step or a walk away (rest, donate), ends the fight room for the player check;
+        #map get roomvnum bot_here_vnum;
+        #if {"$bot_here_vnum" != "$bot[fight_vnum]"} {
+            #var bot[fight_vnum] 0;
+        };
         #NOP -- Set a delay that if no new room is received for 10 seconds, assume bot is not walking;
         #delay botWalkCheck {#var bot[walking] 0} {10};
     };
@@ -52,8 +57,17 @@
 
 #NOP -- Update if there is a player in the room not in friends list;
 #act {{^-P-_(.*)}} {
+    #NOP -- A glance (bot start, resume, after a kill) has no step, so the player would count as coming in;
+    #NOP -- after us. That's only true in the room the bot started a fight in. Anywhere else, like a room;
+    #NOP -- it walks back to after resting or donating, the player was there first;
     #if $bot_first_in_room_check {
         #var first_in_room 0;
+    };
+    #elseif {$first_in_room && "$bot[active]" == "1"} {
+        #map get roomvnum bot_here_vnum;
+        #if {"$bot_here_vnum" != "$bot[fight_vnum]"} {
+            #var first_in_room 0;
+        };
     };
 
     #NOP -- If the player is in the room/players list, use that name.  Otherwise use the string from the room;

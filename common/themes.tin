@@ -172,7 +172,11 @@
 
 #NOP -- Room substitutions read the active theme each time they fire;
 #NOP Room Short;
-#SUBSTITUTE {^-R-_%1-R-_} {$theme[room][short]%1<088>};
+#NOP -- Only the two markers are swapped. Putting the name back through %1 lost any part of it in braces,;
+#NOP -- so a room named with braces around the words showed as just * (n). The start marker goes first;
+#NOP -- (priority 4), then the end one (6) is the only marker left. The minimap can follow it on the line;
+#SUBSTITUTE {^-R-_} {$theme[room][short]} {4};
+#SUBSTITUTE {-R-_} {<088>} {6};
 
 #NOP Room exits;
 #SUBSTITUTE {-X-_%1-X-_} {$theme[room][exits]%1<088>};

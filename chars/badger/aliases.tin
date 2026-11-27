@@ -311,6 +311,63 @@
     #var bag1_active 0;
 };
 
+#NOP -- mage box trip, see heartbeat.tin. aboxon and aboxoff turn the bot trip on and off;
+#alias {aboxon}
+{
+    #var bbox[on] 1;
+    #echo {<ceb>Mage box:<088> on, full bags during a bot go to the mage box.};
+};
+
+#alias {aboxoff}
+{
+    #var bbox[on] 0;
+    #echo {<ceb>Mage box:<088> off.};
+};
+
+#NOP -- magebox: donate the bags now. With a bot walking it is the bot trip (pause, donate, back, resume),;
+#NOP -- otherwise it walks there, donates and stays;
+#alias {magebox}
+{
+    #if {"$bbox[state]" != "idle"}
+    {
+        #echo {<ceb>Mage box:<088> already running ($bbox[state]).};
+        #return;
+    };
+    #if {"$gid[state]" != "idle"}
+    {
+        #echo {<ceb>Mage box:<088> <faa>gypsyid is running, try again after.<088>};
+        #return;
+    };
+    #if {"$bagcount" == "" || "$bagcount" == "0" || "$bagcount" == "\$bagcount"}
+    {
+        #echo {<ceb>Mage box:<088> <faa>set your bag count first with bagset <number>.<088>};
+        #return;
+    };
+    #if {"$bot[active]" == "1" && "$bot[paused]" != "1"}
+    {
+        #var bbox[manual] 0;
+        .bbox_start;
+        #return;
+    };
+    #if {"$incombat" == "1"}
+    {
+        #echo {<ceb>Mage box:<088> <faa>finish the fight first.<088>};
+        #return;
+    };
+    #var bbox[manual] 1;
+    .bbox_go;
+};
+
+#alias {magebox-stop}
+{
+    #if {"$bbox[state]" == "idle"}
+    {
+        #echo {<ceb>Mage box:<088> not running.};
+        #return;
+    };
+    .bbox_abort {stopped by you};
+};
+
 #NOP -- forest of charms;
 #alias {charm} {
     #switch {"%0"} {
@@ -372,73 +429,57 @@
     strategy phantasmal_mf;
 };
 
-#NOP -- aliases for setting up summon config & strategies;
-#alias {killmode} {
-    #switch {"%0"} {
-        #NOP -- view available options;
-        #case {"help"} {
-            #echo {<fff>Available killmodes:<088>};
-            #echo {<eaf>No argument <bec>(4 summons assisting & golem assisting)<088>};
-            #echo {<eaf>2 <bec>(2 summons defending & 2 summons assisting & golem assisting)<088>};
-            #echo {<eaf>3 <bec>(4 summons defending & golem assisting)<088>};
-            #echo {<eaf>4 <bec>(3 summons assisting & 1 summon defending & golem assisting)<088>};
-            #echo {<eaf>5 <bec>(1 summon defending & 3 summons assisting & golem defending)<088>};
+#NOP -- killmode: set up the summons. Shoo the summons and the golem, clear the summon configs and reset the;
+#NOP -- strategies with mystrategy, set castper mind, then make the configs (spell 11). The golem always assists.;
+#NOP -- killmode = 4 summons assisting, killmode 2 = 2 assisting and 2 defending, killmode 3 = 4 defending;
+#alias {killmode}
+{
+    #switch {"%0"}
+    {
+        #case {"help"}
+        {
+            #echo {<fff>Killmodes (the golem always assists):<088>};
+            #echo {<eaf>killmode   <bec>4 summons assisting<088>};
+            #echo {<eaf>killmode 2 <bec>2 summons assisting, 2 defending<088>};
+            #echo {<eaf>killmode 3 <bec>4 summons defending<088>};
         };
-        #NOP -- 2 summons defending and 2 summons assisting;
-        #case {"2"} {
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy;
-            ms 11##2#1500#70#defend#summons#always;
-            ms 11##2#1500#70#assist#summons#always;
-            ms golema;
-            castper mind;
-        };
-        #NOP -- 4 summons defending;
-        #case {"3"} {
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy;
-            ms 11##4#1500#70#defend#summons#always;
-            ms golema;
-        };
-        #NOP -- 3 summons assisting and 1 summon defending;
-        #case {"4"} {
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy;
-            ms 11##3#1500#70#assist#summons#always;
-            ms 11##1#1500#70#defend#summons#always;
-            ms golema;
-        };
-        #NOP -- 1 summon defending and 3 summons assisting and golem defending;
-        #case {"5"} {
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy-golem;
-            strategy shoosummons;
-            ms 11##1#1500#70#defend#summons#always;
-            ms 11##3#1500#70#assist#summons#always;
-            ms golemd;
-        };
-        #NOP -- default for summoner 2 summons defending and 2 summons assisting;
-        #case {""} {
-            #echo {<ffa>No argument provided - running default killmode<088>};
-            clear_sconfig;
-            shoo;
-            shoo golem;
-            mystrategy;
+        #case {""}
+        {
+            .killmode_reset;
             ms 11##4#1500#70#assist#summons#always;
             ms golema;
+            #echo {<ffa>Killmode: 4 summons assisting, golem assisting.<088>};
         };
-        #default {
-            #echo {<fff>Unknown killmode '%0'. Use 'killmode help' to see available modes.<088>};
+        #case {"2"}
+        {
+            .killmode_reset;
+            ms 11##2#1500#70#assist#summons#always;
+            ms 11##2#1500#70#defend#summons#always;
+            ms golema;
+            #echo {<ffa>Killmode 2: 2 summons assisting, 2 defending, golem assisting.<088>};
+        };
+        #case {"3"}
+        {
+            .killmode_reset;
+            ms 11##4#1500#70#defend#summons#always;
+            ms golema;
+            #echo {<ffa>Killmode 3: 4 summons defending, golem assisting.<088>};
+        };
+        #default
+        {
+            #echo {<fff>Unknown killmode '%0'. Use 'killmode help' to see the modes.<088>};
         };
     };
+};
+
+#NOP -- what every killmode does first. castper mind sets the perform spell to mind warp;
+#alias {.killmode_reset}
+{
+    clear_sconfig;
+    shoo;
+    shoo golem;
+    mystrategy;
+    castper mind;
 };
 
 #NOP -- setup summon configs with custom summons;
@@ -472,25 +513,6 @@
     deplete mantle;
 };
 
-#NOP -- setup defense;
-#alias {setup_defense} {
-    clear_gc;
-    clear_c;
-    setup_gc;
-    #NOP setup_c;
-    #delay 2 {prots_armor};
-    #delay 4 {prots_ms};
-    #delay 6 {prots_MG};
-    #delay 8 {prots_ss};
-    #delay 10 {prots_mb};
-    #NOP -- prots_pfg checks the contingency lists first and casts 2s later (14s), so the rest stay 2s apart;
-    #NOP -- or the MUD says You may not cast another defensive spell so quickly. maint picks up mantle (defs[M]).;
-    #delay 12 {prots_pfg};
-    #delay 16 {prots_ps};
-    #delay 18 {cast mantle};
-    #delay 20 {maint};
-};
-
 #NOP -- setup contingency with defenses;
 #alias {setup_c} {
     cast contingency as protection from evil#cast protection from evil;
@@ -501,9 +523,86 @@
     #10 {cast remove contingency as 1};
 };
 
+#NOP -- Mantle focus: cast mantle as focus blunt or edged puts the mantle on one damage type. A mob that hits;
+#NOP -- that way leaks through it about half as often. my[mfocus] is blunt, edged or none. The GC keeps;
+#NOP -- the text it was made with, so mfocus swaps the mantle GC (one GC cast). Plain cast mantle from the;
+#NOP -- guild heartbeat is turned into the focused one by the alias below;
+#alias {_mantle_cmd}
+{
+    #if {"$my[mfocus]" == "none"}
+    {
+        #var mantle_cmd {cast mantle};
+    };
+    #else
+    {
+        #var mantle_cmd {cast mantle as focus $my[mfocus]};
+    };
+};
+
+#NOP -- set mantle_cmd now, so maint setup (also run at login) makes the focused mantle GC;
+_mantle_cmd;
+
+#alias {^cast mantle$}
+{
+    _mantle_cmd;
+    #send {$mantle_cmd};
+}
+{4};
+
+#alias {mfocus}
+{
+    #switch {"%1"}
+    {
+        #case {"blunt"} {#var mfocus_want blunt};
+        #case {"edged"} {#var mfocus_want edged};
+        #case {"none"} {#var mfocus_want none};
+        #default
+        {
+            #echo {<ffa>Mantle focus is $my[mfocus]. mfocus blunt, edged or none swaps the mantle GC.<088>};
+            #var mfocus_want {};
+        };
+    };
+    #if {"$mfocus_want" != ""}
+    {
+        _cont_fetch _mfocus_swap;
+    };
+};
+
+#NOP -- runs once the contingency lists are in (_cont_fetch, common/guilds/mage/aliases.tin);
+#alias {_mfocus_swap}
+{
+    #NOP -- No list back = slots unknown. Adding then would leave the old mantle GC too (2 mantle GCs, a slot lost);
+    #if {!$gcKnown}
+    {
+        #echo {<faa>Mantle focus not changed, the greater contingency list did not come back. Try mfocus $mfocus_want again.<088>};
+    };
+    #else
+    {
+        #NOP -- Remove every mantle GC, highest slot first so the lower slot numbers do not move;
+        #if {&gcLine[] > 0}
+        {
+            #loop &gcLine[] 1 mfocus_i
+            {
+                #var mfocus_hit 0;
+                #regex {$gcLine[$mfocus_i]} {should your mantle} {#var mfocus_hit 1};
+                #if {$mfocus_hit}
+                {
+                    cast remove greater contingency as $mfocus_i;
+                    #list gcLine delete $mfocus_i;
+                };
+            };
+        };
+        #var my[mfocus] $mfocus_want;
+        _mantle_cmd;
+        cast greater contingency as mantle#$mage[contingencies][mantle]#$mantle_cmd;
+        #echo {<afa>Mantle focus now $my[mfocus].<088>};
+    };
+};
+
 #NOP -- greater contingency;
 #alias {setup_gc} {
-    cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+    _mantle_cmd;
+    cast greater contingency as mantle#$mage[contingencies][mantle]#$mantle_cmd;
     cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere;
     cast greater contingency as major globe#cast major globe;
     cast greater contingency as stoneskin#cast stoneskin;
@@ -513,7 +612,7 @@
 };
 
 #NOP -- The 7th GC in a row runs out of SP (2230 each). The hpbar SP is stale right after the other GCs, so the;
-#NOP -- good one starts at 22s (after setup_defense's casts), then waits until there is SP or immersion.;
+#NOP -- good one starts at 22s, then waits until there is SP or immersion.;
 #alias {_setup_gc_good} {
     #if {$my[sp][current] > 2300 || $my[immersion][active]} {
         #var _gcgood_try 1;
@@ -648,7 +747,8 @@
     };
     #if {$corpses[coffin] >= $corpses[coffin_max] && $corpses[freezer] >= 50 && $corpses[cooler] < 50} {
         get corpse;
-        get all from corpse;
+        #NOP -- .cooler_get_all (modules/corpsemanager) skips this in the Chaos Sewers, a corpse there can hold the black stone;
+        .cooler_get_all;
         cooler corpse;
     };
 };
@@ -657,7 +757,8 @@
     reflex clear;
     reflex add sp <10% eternal heal badger;
     reflex add sp <20% cast mystic immersion;
-    reflex add gp1 >84% drop pants;
+    #NOP -- sat over 100 can kill, explosive release brings it down;
+    reflex add gp1 >84% cast explosive release;
     reflex add gp2 >40% cast focus mind;
     reflex add gp2 >90% shoo summons;
     reflex combat on;
@@ -716,7 +817,9 @@
 };
 
 #NOP -- aliases to setup strategies;
+#NOP -- badger_strat full tells .pre_bot_check (config.tin) the default set is on;
 #alias {mystrategy} {
+    #var badger_strat full;
     strategy-clear;
     strategy slow;
     strategy golem_assist;
@@ -725,14 +828,16 @@
     strategy gstrength;
     #nop strategy shoosummons;
     strategy rolm;
-}:
+};
 
 #alias {stclear} {
+    #var badger_strat {};
     strategy-clear;
 };
 
-#NOP -- alias to setup corpsetrigs;
+#NOP -- alias to setup corpsetrigs. badger_trigset says which set is on, .pre_bot_check (config.tin) reads it;
 #alias {mycorpsetrig} {
+    #var badger_trigset normal;
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
@@ -749,6 +854,7 @@
 };
 
 #alias {mycorpsetrig-sz} {
+    #var badger_trigset sz;
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
@@ -767,6 +873,7 @@
 };
 
 #alias {mycorpsetrig-donates} {
+    #var badger_trigset donate;
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
@@ -785,7 +892,30 @@
     corpsetrig-on;
 };
 
+#NOP -- corpsetrig for the Celestial Zodiacs: the donates actions with zsatchel (put soul in satchel) before bag1;
+#alias {mycorpsetrig-zodiacs} {
+    #var badger_trigset zodiacs;
+    corpsetrig-clear;
+    corpsetrig+ spelltap;
+    corpsetrig+ wrap;
+    corpsetrig+ slab;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ .corpse_cooler;
+    corpsetrig+ cBlast2;
+    corpsetrig+ divvy;
+    corpsetrig+ getAll;
+    corpsetrig+ crafting;
+    corpsetrig+ pPocket;
+    corpsetrig+ zsatchel;
+    corpsetrig+ bag1;
+    corpsetrig+ bag1;
+    corpsetrig+ study spellbook;
+    corpsetrig+ study spellbook;
+    corpsetrig-on;
+};
+
 #alias {mycorpsetrig-sewers} {
+    #var badger_trigset sewers;
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ wrap;
@@ -807,6 +937,8 @@
 };
 
 #alias {mycorpsetrig-party} {
+    #var badger_trigset party;
+    _party_shelters_off;
     corpsetrig-clear;
     corpsetrig+ spelltap;
     corpsetrig+ study spellbook;
@@ -823,6 +955,7 @@
 };
 
 #alias {corpseclear} {
+    #var badger_trigset {};
     corpsetrig-clear;
 };
 
@@ -906,19 +1039,6 @@
     kill delundar;
 };
 
-#NOP -- knight tour games;
-#alias {knight6} {
-    play;
-    start;
-    #script {python3 common/bot/bots/knight-tour-solver-6.py %1 %2};
-};
-
-#alias {knight8} {
-    play;
-    start;
-    #script {python3 common/bot/bots/knight-tour-solver-8.py %1 %2};
-};
-
 #NOP -- amy: steps to get to freeway bear;
 #alias {amy1} {s;e;ne;n;n;n};
 #alias {amy2} {u;e;n;nw;ne;n;d;d;s};
@@ -936,6 +1056,20 @@
 };
 
 #alias {amy5} {crack;u;n;u;n;u;s;s;sw;se;s;w;d;s;s;s;sw;w;n};
+
+#NOP -- Add catacombs, pol and the chaos bots to the bot cycle;
+#alias {bcycle}
+{
+    bcy+ catacombs;
+    bcy+ catacombs2;
+    bcy+ pol;
+    bcy+ pol2;
+    bcy+ pol3;
+    bcy+ sewers;
+    bcy+ land;
+    bcy+ land2;
+    nextarea;
+};
 
 #NOP -- debug stuff;
 #alias {.startlog} {
@@ -1044,6 +1178,7 @@
 #list badger3kdb add {{{name} {mycorpsetrig-donates} {type} {corpses} {desc} {Corpsetrig for donates}}};
 #list badger3kdb add {{{name} {mycorpsetrig-party} {type} {corpses} {desc} {Corpsetrig for partying}}};
 #list badger3kdb add {{{name} {mycorpsetrig-sewers} {type} {corpses} {desc} {Corpsetrig for sewers}}};
+#list badger3kdb add {{{name} {mycorpsetrig-zodiacs} {type} {corpses} {desc} {Corpsetrig for the Celestial Zodiacs: zsatchel then bag1}}};
 #list badger3kdb add {{{name} {corpseoff} {type} {corpses} {desc} {Turn corpsetrig off}}};
 #list badger3kdb add {{{name} {corpseon} {type} {corpses} {desc} {Turn corpsetrig on}}};
 #list badger3kdb add {{{name} {corpseclear} {type} {corpses} {desc} {Clear corpsetrig settings}}};
@@ -1056,7 +1191,6 @@
 
 #NOP -- combat;
 #list badger3kdb add {{{name} {clear_defense} {type} {combat} {desc} {Clear defenses}}};
-#list badger3kdb add {{{name} {setup_defense} {type} {combat} {desc} {Setup defenses}}};
 #list badger3kdb add {{{name} {mystrategy} {type} {combat} {desc} {Mystrategy: default strategy setup}}};
 #list badger3kdb add {{{name} {stclear} {type} {combat} {desc} {Mystrategy: clear strategy}}};
 #list badger3kdb add {{{name} {sdmg1} {type} {combat} {desc} {summon damage report}}};
@@ -1068,8 +1202,6 @@
 #list badger3kdb add {{{name} {set3kreport} {type} {combat} {desc} {Set 3kReport columns: killer, rounds, class, xp, coins, damage}}};
 
 #NOP -- misc;
-#list badger3kdb add {{{name} {knight6} {type} {misc} {desc} {Knight tour game - 6x6: knight6 <row> <col>}}};
-#list badger3kdb add {{{name} {knight8} {type} {misc} {desc} {Knight tour game - 8x8: knight8 <row> <col>}}};
 #list badger3kdb add {{{name} {numoff} {type} {misc} {desc} {Turn numpad macros off}}};
 #list badger3kdb add {{{name} {numon} {type} {misc} {desc} {Turn numpad macros on}}};
 #list badger3kdb add {{{name} {mybrief} {type} {misc} {desc} {Set my brief settings back to default}}};
@@ -1099,6 +1231,10 @@
 #list badger3kdb add {{{name} {.startlog} {type} {misc} {desc} {Bot debug log: .startlog on/off/del}}};
 #list badger3kdb add {{{name} {gypsyid} {type} {misc} {desc} {Identify the bags at the town gypsy, keep potions of experience, bag them again}}};
 #list badger3kdb add {{{name} {gypsyid-stop} {type} {misc} {desc} {Stop gypsyid}}};
+#list badger3kdb add {{{name} {magebox} {type} {misc} {desc} {Donate the bags at the mage box now (keep all worn, bag2, put all in box)}}};
+#list badger3kdb add {{{name} {magebox-stop} {type} {misc} {desc} {Stop the mage box trip}}};
+#list badger3kdb add {{{name} {aboxon} {type} {misc} {desc} {Full bags during a bot go to the mage box: on}}};
+#list badger3kdb add {{{name} {aboxoff} {type} {misc} {desc} {Full bags during a bot go to the mage box: off}}};
 #list badger3kdb add {{{name} {bagcount} {type} {misc} {desc} {Count your bags and bagset the total (drops, gets and keeps the satchel first)}}};
 #list badger3kdb add {{{name} {abagson} {type} {misc} {desc} {Bag count at login on}}};
 #list badger3kdb add {{{name} {abagsoff} {type} {misc} {desc} {Bag count at login off}}};
@@ -1121,13 +1257,14 @@
 #list badger3kdb add {{{name} {amy3} {type} {areas} {desc} {Freeway bear (amy): walk part 3}}};
 #list badger3kdb add {{{name} {amy4} {type} {areas} {desc} {Freeway bear (amy): smash the grate, squeeze through, pry the crack}}};
 #list badger3kdb add {{{name} {amy5} {type} {areas} {desc} {Freeway bear (amy): go through the crack and walk the last part}}};
+#list badger3kdb add {{{name} {bcycle} {type} {areas} {desc} {Bot cycle add: catacombs, catacombs2, pol, pol2, pol3, sewers, land, land2}}};
 
 #nop -- guild;
 #list badger3kdb add {{{name} {setup_gc} {type} {guild} {desc} {Setup contingency}}};
 #list badger3kdb add {{{name} {setup_c} {type} {guild} {desc} {Setup greater contingency}}};
 #list badger3kdb add {{{name} {clear_c} {type} {guild} {desc} {Clear contingency}}};
 #list badger3kdb add {{{name} {clear_gc} {type} {guild} {desc} {Clear greater contingency}}};
-#list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Setup summon config & strategies}}};
+#list badger3kdb add {{{name} {killmode} {type} {guild} {desc} {Summons + golem assisting: killmode (4 assist), killmode 2 (2/2), killmode 3 (4 defend), killmode help}}};
 #list badger3kdb add {{{name} {ff} {type} {guild} {desc} {cast find familiar}}};
 #list badger3kdb add {{{name} {mm} {type} {guild} {desc} {study spellbook}}};
 
@@ -1136,6 +1273,12 @@
 #list badger3kdb add {{{name} {id} {type} {spells} {desc} {Informational: id <item> (Mage identify x30)}}};
 #list badger3kdb add {{{name} {cer} {type} {spells} {desc} {Explosive release: reduce sat}}};
 #list badger3kdb add {{{name} {cmi} {type} {spells} {desc} {Mystic immersion: sp regen at twice the rate for 3min}}};
+#list badger3kdb add {{{name} {shelter} {type} {spells} {desc} {Secure shelter: shelter casts it, shelter on or off for the auto sat shelter (on by default)}}};
+#list badger3kdb add {{{name} {shelters} {type} {spells} {desc} {Both shelters at once: shelters on or off (SP shelter and sat shelter)}}};
+#list badger3kdb add {{{name} {golemtank} {type} {spells} {desc} {Low SP with no heals left: golem tanks (defend me) before the SP shelter. golemtank on or off (on by default)}}};
+#list badger3kdb add {{{name} {spshelter} {type} {spells} {desc} {Low SP: hmheal, eternal heal, heal friends, then secure shelter until SP is full. spshelter on or off (on by default)}}};
+#list badger3kdb add {{{name} {healfriends} {type} {spells} {desc} {Players asked for a heal on low SP (jc, acp): healfriends, healfriends add <name>, healfriends del <name>}}};
+#list badger3kdb add {{{name} {emotes} {type} {misc} {desc} {List the souls other 3kdb players answer (jc, acp, tap, comrade, club, toke, alien)}}};
 #list badger3kdb add {{{name} {make-forge} {type} {spells} {desc} {Fabricate: make forge}}};
 #list badger3kdb add {{{name} {make-daggers} {type} {spells} {desc} {Fabricate: make daggers x12}}};
 #list badger3kdb add {{{name} {charm1} {type} {spells} {desc} {Charm monster: mob peace}}};
@@ -1156,3 +1299,12 @@
 
 #NOP -- bagcount: count the bags and bagset, see bagcount.tin;
 #read chars/$user/bagcount.tin;
+
+#NOP -- mantle focus learner, see mfocus.tin;
+#read chars/$user/mfocus.tin;
+
+#NOP -- mantle focus lives in my[], which vars.tin saves (xmy), so it matches the GC on the server after a relog;
+#if {!&{my[mfocus]}}
+{
+    #var my[mfocus] blunt;
+};

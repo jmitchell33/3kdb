@@ -1,0 +1,270 @@
+#class invoke_prime {kill}
+#class invoke_prime {open}
+
+#delay ipKill {#class invoke_prime kill} 10;
+
+#var send_word 1;
+#var ip_secret_word !!!;
+
+#NOP -- Solve one dashed token (e.g. th-, -enom-us, Bullet--idden): each dash is one hidden letter;
+#NOP -- find the only word in the scrabble list that fits, and add its letters at the dash spots;
+#function fnDashSearch
+{
+    #var ip_token {%0};
+
+    #NOP -- Skip damage numbers, prompts and other junk, only letters/underscores/dashes are words;
+    #regex {$ip_token} {^{[A-Za-z_-]+}$}
+    {
+        #NOP;
+    }
+    {
+        #return {};
+    };
+
+    #var tempIP {$scrabble};
+
+    #NOP -- Drop the look-alike short words that can't be in this line (see finddashes);
+    #if $filterMisses
+    {
+        #list tempIP filter {} {misses};
+    };
+    #if $filterHisses
+    {
+        #list tempIP filter {} {hisses};
+    };
+    #if $filterIt
+    {
+        #list tempIP filter {} {it};
+    };
+    #if $filterIn
+    {
+        #list tempIP filter {} {in};
+    };
+    #if $filterIs
+    {
+        #list tempIP filter {} {is};
+    };
+
+    #NOP -- Every dash matches exactly one character, filter is anchored so length must match too;
+    #var ip_pattern {$ip_token};
+    #replace ip_pattern {-} {%.};
+    #list tempIP filter {%i${ip_pattern}};
+
+    #NOP -- Two known words can fit one token (O- is of and Ox), which used to skip the letter;
+    #NOP -- The game capitalizes the mob name but not phrase words like of, so a capital picks;
+    #NOP -- the mob name word and a lowercase letter picks the phrase word;
+    #if {&tempIP[] > 1}
+    {
+        #var ip_mob_words {$ip[mob_name]};
+        #if {"$ip_mob_words" == ""}
+        {
+            #var ip_mob_words {$enemy[target]};
+        };
+        #replace ip_mob_words {-} {_};
+        #replace ip_mob_words {,} {};
+        #replace ip_mob_words {.} {};
+        #replace ip_mob_words { } {;};
+        #regex {$ip_token} {^{[A-Z]}}
+        {
+            #var ip_want_mob 1;
+        }
+        {
+            #var ip_want_mob 0;
+        };
+        #var ip_tie {};
+        #foreach {$tempIP[%*]} {ip_tie_word}
+        {
+            #regex {;$ip_mob_words;} {%i;$ip_tie_word;}
+            {
+                #var ip_is_mob 1;
+            }
+            {
+                #var ip_is_mob 0;
+            };
+            #if {$ip_is_mob == $ip_want_mob}
+            {
+                #list ip_tie add {$ip_tie_word};
+            };
+        };
+        #if {&ip_tie[] == 1}
+        {
+            #var tempIP {$ip_tie};
+        };
+    };
+
+    #if {&tempIP[] == 1}
+    {
+        #echo {word chosen is $tempIP};
+        #list ip_token_chars tokenize {$ip_token};
+        #list ip_word_chars tokenize {$tempIP[1]};
+        #loop 1 &ip_token_chars[] ip_char_index
+        {
+            #if {"$ip_token_chars[$ip_char_index]" == "-"}
+            {
+                #cat ip_secret_word {$ip_word_chars[$ip_char_index]};
+            };
+        };
+    };
+    #return {};
+};
+
+#NOP -- 1 if every word in the line belongs to the invoke phrase or the mob name, 0 otherwise;
+#NOP -- Keeps prompts (-31 <<<), drop-kicked, map lines and output from typed commands that come;
+#NOP -- in while the class is loaded from adding letters to the secret word;
+#NOP -- Dashed words must fit a known word, plain words must be known words;
+#function fnIpLineOk
+{
+    #var ip_vocab {$scrabble};
+    #list ip_vocab add {mental} {energy};
+    #replace ip_vocab {'} {};
+
+    #var ip_check {%0};
+    #replace ip_check {!} {};
+    #replace ip_check { } {;};
+
+    #foreach {$ip_check} {ip_check_word}
+    {
+        #if {"$ip_check_word" == ""}
+        {
+            #continue;
+        };
+        #regex {$ip_check_word} {^{[A-Za-z_-]*[A-Za-z][A-Za-z_-]*}$}
+        {
+            #NOP;
+        }
+        {
+            #return 0;
+        };
+        #var ip_check_pattern {$ip_check_word};
+        #replace ip_check_pattern {-} {%.};
+        #var ip_check_found {$ip_vocab};
+        #list ip_check_found filter {%i${ip_check_pattern}};
+        #if {&ip_check_found[] == 0}
+        {
+            #return 0;
+        };
+    };
+    #return 1;
+};
+
+
+#action {\~\(%*\) corpse: Taken.$} {#NOP} {1};
+#action {%*preserved, %* corpse%*} {#NOP} {1};
+
+#NOP #action {~\e[0;1;33m%S-%*-%*-%*-%*} {#echo {matched 4 dashes line is %0};finddashes %0;} {2};
+#NOP #action {~\e[0;1;33m%S-%*-%*-%*} {#echo {matched 3 dashes line is %0};finddashes %0;} {3};
+#NOP #action {~\e[0;1;33m%S-%*-%*} {#echo {matched 2 dashes line is %0};finddashes %0;} {4};
+#NOP #action {~\e[0;1;33m%S-%*} {#echo {matched 1 dashes  line is %0};finddashes %0;} {5};
+
+#NOP -- Leading %* so %0 is the whole line, not just from the first dashed word on;
+#NOP -- (the words before it, like Screaming, are what tell in/it/is and at/it apart);
+#action {%*%S-%*-%*-%*-%*} {#echo {matched 4 dashes line is %0};finddashes %0;} {2};
+#action {%*%S-%*-%*-%*} {#echo {matched 3 dashes line is %0};finddashes %0;} {3};
+#action {%*%S-%*-%*} {#echo {matched 2 dashes line is %0};finddashes %0;} {4};
+#action {%*%S-%*} {#echo {matched 1 dashes  line is %0};finddashes %0;} {5};
+
+#alias finddashes {
+    #local temp { %0};
+    #var logPhrase {%0};
+    #NOP -- one dash is 'a', which we have in the list of words as pppappp;
+    #replace temp { - } { ppp-ppp };
+
+    #NOP -- Short words and misses/hisses look alike once dashed (i- is in/is/it, -t is at/it);
+    #NOP -- each only shows up in one line, so use the plain words left in the line to rule them out;
+    #NOP -- it: only in '...leaving behind it a great trail...', which never has 'in';
+    #NOP -- is: only in '...the soul of the creature is', which never has 'in';
+    #NOP -- misses: only in the 'dives quickly towards' line, hisses: only in the 'pure hatred' line;
+    #var filterMisses 0;
+    #var filterHisses 0;
+    #var filterIt 1;
+    #var filterIn 0;
+    #var filterIs 1;
+    #regex {$temp} {%i{\b(leaving|behind|trail|mental|energy)\b}}
+    {
+        #var filterIt 0;
+        #var filterIn 1;
+    };
+    #regex {$temp} {%i{\b(crumbling|away|from|corpse|soul|creature)\b}}
+    {
+        #var filterIs 0;
+        #var filterIn 1;
+    };
+    #regex {$temp} {%i{\b(pure|hatred|bares|fangs)\b}}
+    {
+        #var filterMisses 1;
+    };
+    #regex {$temp} {%i{\b(dives|quickly|towards|but|narrowly)\b}}
+    {
+        #var filterHisses 1;
+    };
+    #replace temp {'} {};
+    #replace temp {,} {};
+    #replace temp {.} {};
+
+    #NOP -- The mob name goes into the word list as it is, e.g. Saltheart Foamfollower, Seareach Giant.;
+    #NOP -- The line above has its commas and periods taken out, so take them out of the list too.;
+    #NOP -- It is a list, which #replace can't change, so it is built again a word at a time;
+    #var ip_clean {};
+    #foreach {$scrabble[%*]} {ip_clean_word}
+    {
+        #replace ip_clean_word {,} {};
+        #replace ip_clean_word {.} {};
+        #list ip_clean add {$ip_clean_word};
+    };
+    #var scrabble {$ip_clean};
+
+    #NOP -- Not a line from the invoke, leave the secret word alone;
+    #if {!@fnIpLineOk{$temp}}
+    {
+        #return;
+    };
+
+    #replace temp {%S-%S} {@fnDashSearch{&1-&2}};
+    #replace ip_secret_word {!!!} {};
+
+    #NOP -- Only start the send timer once a real letter was found, so combat lines like;
+    #NOP -- 'drop-kicked Ripper' or '-14 <<<' don't send an empty 'invoke prime';
+    #var ip_letters_found {$ip_secret_word};
+    #replace ip_letters_found {_} {};
+    #if {$send_word && "$ip_letters_found" != ""} {
+        #var send_word 0;
+        #delay .3 {
+            #NOP -- The class can die during the wait. Setting these then would leave them behind for good;
+            #if {&{ip_secret_word}} {
+                #format ip_secret_word {%l} {$ip_secret_word};
+                #format ip_secret_word_log {%l} {$ip_secret_word};
+                #replace ip_secret_word {_} {};
+                #send {invoke prime $ip_secret_word};
+                #var ip_secret_word !!!;
+                #var send_word 1;
+            };
+        };
+    };
+};
+
+#action {With iron will, you finally guide the deadly spell toward its target!} {
+    #var cmbt[affects][iprime] 1;
+    #math stats[invoke-prime][success] {$stats[invoke-prime][success] + 1};
+    #if {&{iprime_tracker}}
+    {
+        .iprime_track success;
+    };
+    #math stats[invoke-prime][total] {$stats[invoke-prime][total] + 1};
+    #class invoke_prime kill;
+} {1};
+
+#action {The prime invocation flies out of control!} {
+    #math stats[invoke-prime][failure] {$stats[invoke-prime][failure] + 1};
+    #if {&{iprime_tracker}}
+    {
+        .iprime_track fail;
+    };
+    #line log {primestats.log} {Word failed was $logPhrase;};
+    #line log {primestats.log} {Phrase tried is $ip_secret_word_log;};
+    #math stats[invoke-prime][total] {$stats[invoke-prime][total] + 1};
+    #class invoke_prime kill;
+} {1};
+#action {%*You must wait until repower to invoke prime again %w.} {#var my[necromancer][invoke-prime] 0;#class invoke_prime kill};
+#action {%*You must have corpse to sacrifice for the prime invoke %w.} {#math my[necromancer][invoke-prime] {$my[necromancer][invoke-prime] + 1};#class invoke_prime kill};
+
+#class invoke_prime {close}

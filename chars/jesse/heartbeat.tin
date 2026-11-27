@@ -612,10 +612,61 @@
 #NOP -- Conditions can be combined like so - to cast heal if you have a certain amount of spell points.;
 #NOP --   #if {$my[hp][current] < 500 && $my[sp][current] > 1000} {cast heal};
 
+#NOP -- Rolm strategy follows the rod. On while it's wielded, off when it isn't;
+#NOP -- rolm.tin sets wielded to rod for every rod form, so this works for all of them;
+#NOP -- The eq command shows it as The Rod of Lordly Might, so that name counts too;
+#alias {.jrolm_strategy_check}
+{
+    #var jrolm_on 0;
+    #var jrolm_rod 0;
+    #if {"$wielded" == "rod" || "$wielded" == "The Rod of Lordly Might"}
+    {
+        #var jrolm_rod 1;
+    };
+    #foreach {$strategyActive[%*]} {jrolm_item}
+    {
+        #if {"$jrolm_item[name]" == "rolm"}
+        {
+            #var jrolm_on 1;
+        };
+    };
+    #if {$jrolm_rod && !$jrolm_on}
+    {
+        strategy rolm;
+    };
+    #elseif {!$jrolm_rod && $jrolm_on}
+    {
+        strategy rolm;
+    };
+};
+
+#NOP -- The wielded value saved in vars.tin can be from an old session. Clear it at login;
+#NOP -- and let the eq Wielded line set what is really wielded now;
+#var wielded {};
+eq;
+
+#NOP -- Kill report trim: at report_reset_kills kills, clear the 3kReport so it doesn't grow all session.;
+#NOP -- 3kReport-clear misses a few lists, so those are cleared here too. No #return, this runs from the heartbeat;
+#var report_reset_kills 500;
+#alias {_report_trim_tick}
+{
+    #if {&deathSummary_mob[] >= $report_reset_kills}
+    {
+        3kReport-clear;
+        #list deathSummary_mob_attacks_total clear;
+        #list deathSummary_eternal_erad clear;
+        #list deathSummary_summons_killed clear;
+        #list deathSummary_songs_lost clear;
+        #echo {<ffa>Kill report reset after $report_reset_kills kills.<088>};
+    };
+};
+
 #alias {_player_heartbeat} {
     #if !$idle_flag {
+        _report_trim_tick;
         #NOP -- Actions that timing does not matter;
         .jdonate_tick;
+        .jrolm_strategy_check;
 
         #NOP -- Actions to only attempt once/round go in this section;
         #if {$action_round < $mip[round]} {

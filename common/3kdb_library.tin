@@ -340,7 +340,7 @@
 .add_library {mappath} {mapping} {map find path to pattern then path show} {mappath pattern text} {modules/map/maphelper.tin};
 .add_library {mapicons} {mapping} {echo unicode icon palette for map symbols} {'mapicons'} {modules/map/maphelper.tin};
 .add_library {go} {misc} {map run to speedrun. Pauses a running bot first, and inside the Section Z game waits for a fight to end} {go <speedrun>} {modules/map/maphelper.tin};
-.add_library {go_back} {mapping} {map run back to vnum saved by go alias, or where the bot paused} {'go_back'} {modules/map/maphelper.tin};
+.add_library {go_back} {mapping} {map run back to vnum saved by go alias, or where the bot paused. In the Catacombs it walks one step at a time and kills statues that block the way} {'go_back'} {modules/map/maphelper.tin};
 
 #NOP -------------------------- Chaos Aliases ----------------------------------;
 
@@ -377,6 +377,7 @@
 .add_library {banshee_jar} {fantasy} {reads runes for code word} {'banshee_jar'} {common/areas/erah.tin};
 .add_library {knight6} {fantasy} {Knight's tour 6x6 solver - auto runs on round 1} {knight6 <col> <row>} {common/areas/erah.tin};
 .add_library {knight8} {fantasy} {Knight's tour 8x8 solver - auto runs on round 1} {knight8 <col> <row>} {common/areas/erah.tin};
+.add_library {winaxe} {fantasy} {Throwing axe game - plays, starts and throws 5 axes} {'winaxe'} {common/areas/erah.tin};
 .add_library {get-floaties} {fantasy} {Ganderei Cae: picks up floaties potion} {'get-floaties'} {common/areas/misc_common.tin};
 .add_library {startfishing} {fantasy} {start fishing} {'startfishing'} {common/areas/wsea_fishing.tin};
 .add_library {stopfishing} {fantasy} {stop fishing} {'stopfishing'} {common/areas/wsea_fishing.tin};
@@ -500,8 +501,8 @@
 .add_library {c_invis} {guild} {setup invisibility with contingency} {'c_invis'} {common/guilds/mage/aliases.tin};
 .add_library {clear_align} {guild} {clear prot-good and prot-evil flags in defs before recasting} {'clear_align'} {common/guilds/mage/aliases.tin};
 .add_library {clear_prots} {guild} {remove entire defs table used by mage defense tracking} {'clear_prots'} {common/guilds/mage/aliases.tin};
-.add_library {maint} {guild} {keep picked defenses up via the heartbeat, maint setup also sets their contingencies} {maint setup, maint, maint <spell>, maint default/off/all/clear/list} {common/guilds/mage/aliases.tin};
-.add_library {maint-help} {guild} {help for maint: commands, spell names and how it works} {'maint-help'} {common/guilds/mage/aliases.tin};
+.add_library {maint} {guild} {keep picked defenses up via the heartbeat, maint setup also sets their contingencies} {maint setup, maint, maint <spell>, maint default/off/all/clear/list} {common/guilds/mage/maintenance.tin};
+.add_library {maint-help} {guild} {help for maint: commands, spell names and how it works} {'maint-help'} {common/guilds/mage/maintenance.tin};
 .add_library {summon_types} {guild} {print summon roster by slot with scroll panels} {'summon_types'} {common/guilds/mage/summoner.tin};
 .add_library {summon_select} {guild} {pick summon for strategy list menu off clear or monster key} {summon_select key or off or clear or empty for menu} {common/guilds/mage/summoner.tin};
 .add_library {summon_str} {guild} {giant strength on each summon stack self and golem} {'summon_str'} {common/guilds/mage/summoner.tin};
@@ -530,6 +531,8 @@
 .add_library {circle_tracker} {guild} {next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker} {circle_tracker or circle_tracker reset} {common/guilds/necromancer/circle_tracker.tin};
 .add_library {recover} {misc} {recover, then a hidden score updates your saved score info and logs it if toggle rounds is on. Necros: also resets circle_tracker if on and sends parser off if toggle recover_parser_off is on} {recover} {common/aliases.tin};
 .add_library {comt} {guild} {switch invoke damage types with comtrance} {comt <damage type>} {common/guilds/necromancer/aliases.tin};
+.add_library {iprime} {guild} {invoke prime: takes a corpse (coffin, freezer, cooler, inventory) and guesses the word} {iprime, iprime <type>, iprime default <type>} {common/guilds/necromancer/iprime.tin};
+.add_library {iprime-help} {guild} {help for iprime: commands and damage types} {'iprime-help'} {common/guilds/necromancer/iprime.tin};
 };
 
 #NOP -------------------------- Bard Guild Aliases ----------------------------------;
