@@ -210,7 +210,18 @@
 
 #alias gc_pfg {_align_swap good gc};
 #alias gc_pfe {_align_swap evil gc};
-#alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle};
+#NOP -- mantle_cmd (see maint-help) makes it a focused mantle, the same one maint setup and the heartbeat use;
+#alias {gc_mantle}
+{
+    #if {"$mantle_cmd" != "" && "$mantle_cmd" != "\$mantle_cmd"}
+    {
+        cast greater contingency as mantle#$mage[contingencies][mantle]#$mantle_cmd;
+    };
+    #else
+    {
+        cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle;
+    };
+};
 #alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere};
 
 #alias c_rs {cast contingency as stoneskin#cast rhino skin};

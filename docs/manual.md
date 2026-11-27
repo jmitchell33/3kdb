@@ -1886,7 +1886,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `gc_armor`: setup armor with greater contingency.
 - `gc_pfg`: setup protection from good with greater contingency.
 - `gc_pfe`: setup protection from evil with greater contingency.
-- `gc_mantle`: setup mantle with greater contingency.
+- `gc_mantle`: setup mantle with greater contingency, with your mantle_cmd focus if set (see `maint-help`).
 - `gc_ps`: setup prismatic sphere with greater contingency.
 - `c_rs`: setup rhino skin with contingency.
 - `c_mg`: setup minor globe with contingency.
@@ -1921,7 +1921,7 @@ These are the commands listed in `dblib`, as of when this manual was written. Ru
 - `check_chest`: necromancer chest check helper.
 - `power`: send mud power and parse levels into client tables.
 - `powers`: send mud powers and parse levels into client tables.
-- `dsave_report`: necromancer dsave mob report.
+- `dsave_report`: necromancer death save report: how many kills needed a death save and how many did not, then NP and death saves for each mob that needed one, most NP first.
 - `iprime_tracker`: invoke prime success/fail counts. Usage: `iprime_tracker or iprime_tracker reset`
 - `circle_tracker`: next circle % per round by attack, up to circle 59. Turn on with toggle circle_tracker. Usage: `circle_tracker or circle_tracker reset`
 - `comt`: switch invoke damage types with comtrance. Usage: `comt <damage type>`

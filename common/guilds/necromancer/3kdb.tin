@@ -25,7 +25,6 @@
 #var dsave[mob][count] 0;
 #var dsave[mob][np] 0;
 #var dsave[mob][avg] 0;
-#var dsave[log] {};
 #var dsave_round 1;
 
 #action {^Death tells you:} {
@@ -64,43 +63,100 @@
     };
 } {1};
 
+#NOP -- dsave[mobs][<name>]: per mob name, kills = how many died, saved = how many of those needed a death;
+#NOP -- save, count and np = the death saves and NP they cost. dsave[kills] and dsave[kills_saved] are the totals;
+#var dsave[mobs] {};
+#var dsave[kills] 0;
+#var dsave[kills_saved] 0;
+#var dsave[kept] 0;
+
+#NOP -- .dsaveKill <mob> <count> <np>: called by common/corpsetrig.tin for each kill, with the death saves taken;
+#NOP -- when the mob died. Saves that came after (the next mob, in the second before the counters reset) stay;
+#alias .dsaveKill {
+    #var dsk_name {%1};
+    #if {"$dsk_name" == ""} {#var dsk_name {unknown}};
+    #format dsk_count {%d} {%2};
+    #format dsk_np {%d} {%3};
+    #math dsave[kills] {$dsave[kills] + 1};
+    #if {!&dsave[mobs][$dsk_name]} {
+        #var {dsave[mobs][$dsk_name]} {{kills}{0}{saved}{0}{count}{0}{np}{0}};
+    };
+    #math {dsave[mobs][$dsk_name][kills]} {$dsave[mobs][$dsk_name][kills] + 1};
+    #if {$dsk_count > 0} {
+        #math dsave[kills_saved] {$dsave[kills_saved] + 1};
+        #math {dsave[mobs][$dsk_name][saved]} {$dsave[mobs][$dsk_name][saved] + 1};
+        #math {dsave[mobs][$dsk_name][count]} {$dsave[mobs][$dsk_name][count] + $dsk_count};
+        #math {dsave[mobs][$dsk_name][np]} {$dsave[mobs][$dsk_name][np] + $dsk_np};
+    };
+    #math dsave[mob][count] {$dsave[mob][count] - $dsk_count};
+    #math dsave[mob][np] {$dsave[mob][np] - $dsk_np};
+    #if {$dsave[mob][count] <= 0} {
+        #var dsave[mob][count] 0;
+        #var dsave[mob][np] 0;
+        #var dsave[mob][avg] 0;
+        #var dsave[mob][name] {};
+    } {
+        #math dsave[mob][avg] {$dsave[mob][np] / $dsave[mob][count]};
+        #var {dsave[mob][name]} {$enemy[name]};
+    };
+    #var dsave[kept] 1;
+};
+
+#NOP -- From _mob_status_clear (common/status.tin). After a kill .dsaveKill has already moved the dead mob's;
+#NOP -- saves, so whatever is left belongs to the next mob and stays. Anywhere else (login, reset) it starts over;
 #alias .dsaveMobSave {
-    #list dsave[log] add {{{mob} {$enemy[name]} {count} {$dsave[mob][count]} {np} {$dsave[mob][np]} {avg} {$dsave[mob][avg]}}};
+    #if {$dsave[kept]} {
+        #var dsave[kept] 0;
+        #return;
+    };
     #var dsave[mob][count] 0;
     #var dsave[mob][np] 0;
     #var dsave[mob][avg] 0;
     #var dsave[mob][name] {};
 };
 
-#function formatDsaveLine {
-    #format tmpString {%.30s} {%1};
-    #format result {%+30s %+10s %+10s %+10s} {$tmpString} {%2} {%3} {%4};
-    #echo {$result};
-    #return #NOP;
+#NOP -- .dsaveReportLine <color> <name> <np> <dsaves> <avg> <kills saved>: color goes around the whole line,;
+#NOP -- so the codes don't count toward the column widths;
+#alias .dsaveReportLine {
+    #format dsr_name {%.30s} {%2};
+    #format dsr_line {%+30s %+10s %+9s %+9s %+11s} {$dsr_name} {%3} {%4} {%5} {%6};
+    #echo {%1$dsr_line<088>};
 };
 
+#NOP -- dsave_report: totals, then one row per mob that needed a death save, most NP first;
 #alias dsave_report {
-    #format dsaveReportMax {%g} $dsave[max][np];
-    #echo {<eab>------------------         DSAVE REPORT       ------------------<088>};
-    #echo {             <eab>Largest single death save cost $dsaveReportMax NPs<088>};
-    #var dsaveReportMob Total;
-    #format dsaveReportNP {%g} $dsave[total][np];
-    #format dsaveReportCount {%g} $dsave[total][count];
-    #format dsaveReportAvg {%g} $dsave[total][avg];
-    @formatDsaveLine{<eab>$dsaveReportMob<088>;<eab>$dsaveReportNP<088>;<eab>$dsaveReportCount<088>;<eab>$dsaveReportAvg<088>};
-
+    #format dsr_max {%g} {$dsave[max][np]};
+    #echo {<eab>------------------------------  DSAVE REPORT  ------------------------------<088>};
+    #echo {<eab>  Largest single death save cost $dsr_max NPs<088>};
+    #format dsr_np {%g} {$dsave[total][np]};
+    #format dsr_count {%g} {$dsave[total][count]};
+    #format dsr_avg {%g} {$dsave[total][avg]};
+    #math dsr_free {$dsave[kills] - $dsave[kills_saved]};
+    #echo {<eab>  Mobs killed: $dsave[kills]   needed a death save: $dsave[kills_saved]   didn't: $dsr_free<088>};
     #echo {};
-    #var dsaveReportMob <bfa>MOB NAME<088>;
-    #var dsaveReportNP <bfa>Total NP<088>;
-    #var dsaveReportCount <bfa># Dsaves<088>;
-    #var dsaveReportAvg <bfa>Avg. NP<088>;
-    @formatDsaveLine{$dsaveReportMob;$dsaveReportNP;$dsaveReportCount;$dsaveReportAvg};
-    #foreach $dsave[log][%*] item {
-        #var dsaveReportMob $item[mob];
-        #format dsaveReportNP {%g} $item[np];
-        #format dsaveReportCount {%g} $item[count];
-        #format dsaveReportAvg {%g} $item[avg];
-        @formatDsaveLine{$dsaveReportMob;$dsaveReportNP;$dsaveReportCount;$dsaveReportAvg};
+    .dsaveReportLine {<bfa>} {MOB NAME} {Total NP} {# Dsaves} {Avg NP} {Kills saved};
+    .dsaveReportLine {<eab>} {Total} {$dsr_np} {$dsr_count} {$dsr_avg} {$dsave[kills_saved]/$dsave[kills]};
+    #NOP -- sort key: NP plus 10^12 (same width, tt++ #format has no zero padding), = and the name, so #list sort puts the most NP last;
+    #list dsr_order clear;
+    #foreach {*dsave[mobs][%*]} {dsr_mob} {
+        #if {$dsave[mobs][$dsr_mob][count] > 0} {
+            #math dsr_pad {1000000000000 + $dsave[mobs][$dsr_mob][np]};
+            #var dsr_key {$dsr_pad=$dsr_mob};
+            #list dsr_order add {$dsr_key};
+        };
+    };
+    #list dsr_order sort;
+    #if {&dsr_order[] == 0} {
+        #echo {<888>  No mob has needed a death save yet.<088>};
+        #return;
+    };
+    #loop &dsr_order[] 1 dsr_i {
+        #regex {$dsr_order[$dsr_i]} {^{[0-9]+}={.*}$} {#var dsr_mob {&2}};
+        #format dsr_np {%g} {$dsave[mobs][$dsr_mob][np]};
+        #format dsr_count {%g} {$dsave[mobs][$dsr_mob][count]};
+        #math dsr_avg {$dsave[mobs][$dsr_mob][np] / $dsave[mobs][$dsr_mob][count]};
+        #format dsr_avg {%g} {$dsr_avg};
+        .dsaveReportLine {<fff>} {$dsr_mob} {$dsr_np} {$dsr_count} {$dsr_avg} {$dsave[mobs][$dsr_mob][saved]/$dsave[mobs][$dsr_mob][kills]};
     };
 };
 

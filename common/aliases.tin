@@ -47,17 +47,18 @@
 #NOP -- Use hmheal if possible, eternal heal otherwise;
 #NOP -- If you're a mage, check if immersion is running;
 #alias {useHeal} {
-     #if {!$my[eternal][heal] && $my[hm][heal]} {
+     #NOP -- quoted: without eternal my[eternal][heal] is unset, which made the whole #if false;
+     #if {"$my[eternal][heal]" != "1" && "$my[hm][heal]" == "1"} {
          #if {"$guild" == "mage"} {
-            #if {!$my[immersion][active]} {hmheal};
+            #if {"$my[immersion][active]" != "1"} {hmheal};
          } {
             hmheal
          };
           
      };
-     #if {$my[eternal][heal]} {
+     #if {"$my[eternal][heal]" == "1"} {
         #if {"$guild" == "mage"} {
-            #if {!$my[immersion][active]} {(heal $user;};
+            #if {"$my[immersion][active]" != "1"} {(heal $user;};
          } {
             (heal $user;
          };

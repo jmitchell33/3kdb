@@ -527,15 +527,16 @@
 #NOP -- that way leaks through it about half as often. my[mfocus] is blunt, edged or none. The GC keeps;
 #NOP -- the text it was made with, so mfocus swaps the mantle GC (one GC cast). Plain cast mantle from the;
 #NOP -- guild heartbeat is turned into the focused one by the alias below;
+#NOP -- Only blunt and edged are focuses. Anything else (none, or not loaded yet) is a plain cast mantle;
 #alias {_mantle_cmd}
 {
-    #if {"$my[mfocus]" == "none"}
+    #if {"$my[mfocus]" == "blunt" || "$my[mfocus]" == "edged"}
     {
-        #var mantle_cmd {cast mantle};
+        #var mantle_cmd {cast mantle as focus $my[mfocus]};
     };
     #else
     {
-        #var mantle_cmd {cast mantle as focus $my[mfocus]};
+        #var mantle_cmd {cast mantle};
     };
 };
 
@@ -614,7 +615,7 @@ _mantle_cmd;
 #NOP -- The 7th GC in a row runs out of SP (2230 each). The hpbar SP is stale right after the other GCs, so the;
 #NOP -- good one starts at 22s, then waits until there is SP or immersion.;
 #alias {_setup_gc_good} {
-    #if {$my[sp][current] > 2300 || $my[immersion][active]} {
+    #if {$my[sp][current] > 2300 || "$my[immersion][active]" == "1"} {
         #var _gcgood_try 1;
         cast greater contingency as protection from good#cast protection from good;
     } {

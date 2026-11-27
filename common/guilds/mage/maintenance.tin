@@ -199,6 +199,14 @@
                         _maint_ccast $_mck;
                         #if {"cast $_mcraw" != "$_mscast"} {#var _msok 0};
                     };
+                    #NOP -- mantle and sphere trigger at an HP value (mage[contingencies]). One set at another value is;
+                    #NOP -- replaced. The MUD can wrap the number onto the next line, and then it can't be checked, so it stays;
+                    #var _mscv {$maint_spells[$_mck][cval]};
+                    #if {$_msok && "$_mscv" != ""} {
+                        #var _mshp {};
+                        #regex {$%2[$_msi]} {ever fall below {[0-9]+}} {#var _mshp &1};
+                        #if {"$_mshp" != "" && "$_mshp" != "$mage[contingencies][$_mscv]"} {#var _msok 0};
+                    };
                 };
                 #if {$_msok} {#var _ms_have[$_mck] %1} {#list _ms_rm%1 add {$_msi}};
             };
@@ -317,7 +325,7 @@
     } {
         #regex {$_ms_queue[1]} {^{gc|c}:{.+}$} {#var _msk &1;#var _msq &2};
         #if {"$_msk" == "gc"} {#var _msneed 2300} {#var _msneed 200};
-        #if {$my[sp][current] > $_msneed || $my[immersion][active]} {
+        #if {$my[sp][current] > $_msneed || "$my[immersion][active]" == "1"} {
             #var _mstrig $maint_spells[$_msq][ctrig];
             #var _mscv $maint_spells[$_msq][cval];
             #if {"$_mscv" != ""} {#var _msmid {$_mstrig#$mage[contingencies][$_mscv]}} {#var _msmid {$_mstrig}};
@@ -478,6 +486,23 @@
     #echo {  <ccc> they move your maint pick and heartbeat flag over, deplete the<088>};
     #echo {  <ccc> old spell and set up the new side. Takes about 2 seconds.<088>};
     #echo {  <ccc> (<ffa>maint pfe<ccc> / <ffa>maint pfg<ccc> only change the pick, nothing is cast.)<088>};
+    #echo {};
+    #echo {  <fff>A mantle with a focus<088>};
+    #echo {  <ccc> A mantle cast as focus blunt or edged still counts as maint's mantle,<088>};
+    #echo {  <ccc> so maint setup keeps that contingency. The focus puts the mantle on<088>};
+    #echo {  <ccc> one damage type, so hits of that type get through it less often.<088>};
+    #echo {  <ccc> To have maint setup and the heartbeat cast it with a focus, add this<088>};
+    #echo {  <ccc> line to your character's config.tin:<088>};
+    #echo {  <ffa>   #var mantle_cmd {cast mantle as focus blunt};<088>};
+    #echo {  <ccc> Without mantle_cmd it uses a plain cast mantle.<088>};
+    #echo {};
+    #echo {  <fff>When mantle and sphere recast<088>};
+    #echo {  <ccc> Their contingencies fire when the spell falls below an HP value:<088>};
+    #echo {  <ccc> mantle $mage[contingencies][mantle], sphere $mage[contingencies][sphere] (3kdb defaults 200 and 799). To change<088>};
+    #echo {  <ccc> them, add lines like these to your character's config.tin:<088>};
+    #echo {  <ffa>   #var mage[contingencies][sphere] 400;<088>};
+    #echo {  <ffa>   #var mage[contingencies][mantle] 200;<088>};
+    #echo {  <ccc> then run maint setup. It replaces one set at another value.<088>};
     #echo {};
     #echo {  <ccc>Needs the mage hpbar (<ffa>setup_3kdb_hpbar<ccc>) so it can see which<088>};
     #echo {  <ccc>prots are up. Nothing is recast while you are idle (deadman).<088>};

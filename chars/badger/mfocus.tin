@@ -103,7 +103,8 @@
             #if {"$mfl_f" != "$my[mfocus]"}
             {
                 _mfl_rate {%1} {$mfl_f};
-                #if {$mfl_rate >= 0 && $mfl_rate * 100 <= $mfl_cur * (100 - $mfl[gain])}
+                #NOP -- strictly fewer: a tie (0.0 vs 0.0) once swapped the GC for nothing;
+                #if {$mfl_rate >= 0 && $mfl_rate * 100 < $mfl_cur * (100 - $mfl[gain])}
                 {
                     #if {"$mfl_best" == ""}
                     {
@@ -198,7 +199,8 @@
         #NOP -- keep the current focus unless the best one is clearly better;
         #if {"$mfl_pick" != "$my[mfocus]" && $mfl_w[$my[mfocus]] > 0}
         {
-            #if {$mfl_bestavg * 100 > $mfl_avg[$my[mfocus]] * (100 - $mfl[gain])}
+            #NOP -- a tie keeps the current focus, a swap is one GC cast;
+            #if {$mfl_bestavg * 100 >= $mfl_avg[$my[mfocus]] * (100 - $mfl[gain])}
             {
                 #var mfl_pick $my[mfocus];
             };

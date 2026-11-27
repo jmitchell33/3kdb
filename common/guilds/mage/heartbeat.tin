@@ -20,7 +20,12 @@
 #alias {_mage_defcast} {
     #format _mdt {%d} {$_mdtry[%1]};
     #if {$_mnow - $_mdt >= 8} {
-        cast %2;
+        #NOP -- mantle_cmd (see maint-help) recasts a focused mantle the same way maint setup made its contingency;
+        #if {"%1" == "M" && "$mantle_cmd" != "" && "$mantle_cmd" != "\$mantle_cmd"} {
+            $mantle_cmd;
+        } {
+            cast %2;
+        };
         #var _mcast 1;
         #var _mlastcast $_mnow;
         #var _mdtry[%1] $_mnow;
@@ -99,8 +104,9 @@
             } {2};
         };
 
-        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && (!$my[immersion][count] || $immersion_off) && !$my[immersion][active]} {
-            #if {!$my[hm][heal] && !$my[eternal][heal]} {
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$bot[paused] && (!$my[immersion][count] || $immersion_off) && "$my[immersion][active]" != "1"} {
+            #NOP -- quoted: a mage without eternal has no my[eternal][heal], and an unset one made the whole #if false;
+            #if {"$my[hm][heal]" != "1" && "$my[eternal][heal]" != "1"} {
                 ptell Pausing to regenerate SPs.;
                 #var bot_toggle 1;
                 .pause;
@@ -108,7 +114,7 @@
                 #ticker spBotResume {
                     #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
                     hp;
-                    #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
+                    #if {$my[sp][current] > $sp_threshold || "$my[immersion][active]" == "1"} {
                         #var bot_toggle 0;
                         #if {"$bot[autopause]" == "1"} {
                             #var bot[autopause] 0;
@@ -144,7 +150,7 @@
     };
 
     #NOP -- Cull the unhealthy summons during immersion - we'll do this every 20 rounds;
-    #if {!$idle_flag && $my[immersion][active]} {
+    #if {!$idle_flag && "$my[immersion][active]" == "1"} {
         #if $summoner {
             checkStrategy {summon_cull} {
                 #if {$my[immersion][rounds] == 70} {_summonTankSwap};

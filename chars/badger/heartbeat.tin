@@ -117,7 +117,7 @@
     #if {$my[immersion][count]} {
         #var sp_low_unhealed 0;
     };
-    #if {$my[immersion][active]} {
+    #if {"$my[immersion][active]" == "1"} {
         #var sp_low_unhealed 0;
     };
     #if {$my[hm][heal]} {
@@ -172,7 +172,7 @@
                 } {
                     #NOP -- backup refresh of SPs/MC in case the hpbar is slow to update;
                     hp;
-                    #if {($my[sp][current] > $sp_threshold || $my[immersion][active]) && $hpbar_mc > $mc_threshold} {
+                    #if {($my[sp][current] > $sp_threshold || "$my[immersion][active]" == "1") && $hpbar_mc > $mc_threshold} {
                         #var shelter_bot_wait 0;
                         #unticker {shelterBotResume};
                         #if {"$pausedtoregen" == "1"} {
@@ -445,7 +445,7 @@
     {
         #var sp_heal_busy 0;
     };
-    #if {$my[immersion][active] || $sp_heal_busy}
+    #if {"$my[immersion][active]" == "1" || $sp_heal_busy}
     {
         #return;
     };
@@ -630,12 +630,49 @@
 };
 
 #NOP -- Sets shelter_want[sat] and shelter_want[sp] for this heartbeat;
+#NOP -- Sat order: explosive release while it has charges, then a corpse (spell tap on corpse and corpse blast,;
+#NOP -- like the guild heartbeat does over 89), then the shelter. The shelter still goes when there's no corpse,;
+#NOP -- a corpse didn't bring sat down within sat_corpse_wait seconds, or sat reaches sat_corpse_max;
+#var sat_corpse_wait 30;
+#var sat_corpse_max 95;
+#var sat_corpse[at] 0;
+#var sat_corpse[sat] 0;
 #alias {_shelter_check_want}
 {
     #var shelter_want[sat] 0;
     #if {"$secure_shelter_switch" == "1" && $my[gp1][current] > 78 && "$my[super][current]" == "0"}
     {
-        #var shelter_want[sat] 1;
+        #format {sat_corpse_now} {%T};
+        #math {sat_corpse_age} {$sat_corpse_now - $sat_corpse[at]};
+        #NOP -- unset corpses[total] (corpse manager not loaded) counts as none;
+        #format {sat_corpse_n} {%d} {$corpses[total]};
+        #NOP -- 10 seconds after a corpse sat should be lower than when it was used, or the corpse didn't work;
+        #var sat_corpse_failed 0;
+        #if {$sat_corpse_age >= 10 && $sat_corpse_age < $sat_corpse_wait && $my[gp1][current] >= $sat_corpse[sat]}
+        {
+            #var sat_corpse_failed 1;
+        };
+        #if {$my[gp1][current] >= $sat_corpse_max}
+        {
+            #var shelter_want[sat] 1;
+        };
+        #elseif {"$corpse_toggle" == "0" || $sat_corpse_age < 10}
+        {
+            #NOP -- a corpse is being used or was just used, see if it lowers sat first;
+        };
+        #elseif {$sat_corpse_n > 0 && !$sat_corpse_failed}
+        {
+            #var sat_corpse[at] $sat_corpse_now;
+            #var sat_corpse[sat] $my[gp1][current];
+            #echo {<ffa>Sat $my[gp1][current]: no explosive release left, using a corpse before the shelter.<088>};
+            #var corpse_toggle 0;
+            corpse_select;
+            #delay {sat_corpse_use} {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 1;i} {4};
+        };
+        #elseif {$sat_corpse_n == 0 || $sat_corpse_failed}
+        {
+            #var shelter_want[sat] 1;
+        };
     };
     _sp_shelter_check;
 };
@@ -1330,6 +1367,8 @@ eq;
 };
 
 #alias {_player_heartbeat} {
+    #NOP -- my[mfocus] comes back from vars.tin after aliases.tin set mantle_cmd, so keep it in step every tick;
+    _mantle_cmd;
     #if {!$idle_flag} {
         _report_trim_tick;
         _party_shelter_tick;
