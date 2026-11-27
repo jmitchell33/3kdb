@@ -35,24 +35,6 @@
 
 
 #NOP -- This section manages the aliases and moving items in the actual MKA;
-#alias mka-all {
-    #echo {<ffb>   Current Mob Kill Actions   <088>\n};
-    #if {&mkaActions[] > 0} {
-        formatMKAItem {Priority:} {Name};
-        #loop 1 &mkaActions[] item {
-            formatMKAItem {<afc>$item:} {<efe>$mkaActions[$item][name]<088>};
-        };
-        #echo {\n <dfa>mka<088> will execute the mob kill actions.};
-        #echo { <dfa>mka-help <088> to see all available commands.};
-    } {
-        #echo { There are currently no actions added to mob kill actions};
-        #echo {\n <efa>mka+<088> <bcc>name<088> to add an action};
-        #echo { <efa>mka-<088> <bcc>name/number<088> to remove an action};
-        #echo { <efa>mka-all<088> to see available actions};
-        #echo { If the action doesn't exist, it will be added};
-    };
-};
-
 #alias mka-clear {
     #list mkaActions clear;
     #echo {<caa>----  <fff> Mob Kill Actions (mka) has been cleared <caa>  ----<088>};
