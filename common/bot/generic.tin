@@ -16,6 +16,8 @@
 #var bot[fight_vnum] 0;
 #NOP -- .skip waiting to leave the room, cleared when .botStep takes the step;
 #var bot[skip] 0;
+#var bot[tickled] 0;
+#var bot[tickled_n] {};
 
 #var bot[stats][mobs] 0;
 #var bot[stats][xp] 0;
@@ -222,7 +224,7 @@
 
                 #NOP -- The room this fight started in, so a glance here later ignores players who came in after, see room.tin;
                 #map get roomvnum bot[fight_vnum];
-                #if {!$bot[aggro-mob]} {
+                #if {!$bot[aggro-mob] || $bot[tickled]} {
                     #if {$mob_kill_action} {
                         mka $mob[target];
                     } {
