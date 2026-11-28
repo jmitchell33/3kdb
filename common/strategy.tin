@@ -7,7 +7,7 @@
 #var botTickler 1;
 #var tickler {};
 #var tickler_rate 0.0;
-#var tickler_left {};
+#var tickler_left {{name}{}{hp}{0}};
 
 
 #alias formatStrategy {
@@ -162,7 +162,7 @@
         #if {$_tk_hp == $tickler[hp]} {#var _tk_at $tickler[hp]} {#format _tk_at {about %d} {$_tk_hp}};
         #showme <acf>----- TICKLED $enemy[name] at $_tk_at% (avg $_tk_rate% a round) -----<088>;
         #var botTickler 0;
-        #var tickler_left $enemy[name];
+        #var tickler_left {{name}{$enemy[name]}{hp}{$tickler[hp]}};
         #var tickler {};
         .bot;
         #delay {bot_tickler} {#var botTickler 1} {4};
@@ -173,7 +173,7 @@
     #if {!$bot[active]} {#return};
     #math _tk_leave {2 * $tickler_rate + 2};
     #if {$_tk_leave < 4} {#var _tk_leave 4};
-    #if {$tickler_mobhp <= $_tk_leave || ($tickler_mobhp < 100 && "$tickler_left" == "$mob[long]%*")} {
+    #if {$tickler_mobhp <= $_tk_leave || ($tickler_mobhp <= $tickler_left[hp] + 2 && "$tickler_left[name]" == "$mob[long]%*")} {
         #showme <acf>----- TICKLER: $mob[long] is already at $tickler_mobhp%, leaving it -----<088>;
         #var tickler_low 1;
         #var bot[tickled] 1;
